@@ -75,7 +75,6 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 			case 1:
 				return "Haystack Explorer";
 			case 2:
-				//return "CcuLog";
 				return "Network Config";
 			case 3:
 				return "Alert Defs";

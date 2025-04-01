@@ -14,5 +14,8 @@ const val COOLING_CONFIG_ERROR = "Relay based SAT Cooling is mapped but <b>SAT C
 const val HEATING_CONFIG_ERROR = "Relay based SAT Heating is mapped but <b>SAT Heating configuration</b> is not mapped"
 const val NO_SAT_HEATING_SENSOR = "SAT Heating configuration is mapped but <b>Supply Air Temperature Sensor is not available</b>"
 const val NO_SAT_COOLING_SENSOR = "SAT Cooling configuration is mapped but <b>Supply Air Temperature Sensor is not available</b>"
+const val OAO_DAMPER_ERROR = "OAO Damper configuration is mapped but <b>Outside Air Optimization Damper </b> toggle is not enabled "
+const val OUTSIDE_AIR_OPTIMIZATION_ERROR = "Outside Air Optimization Damper toggle is enabled but <b>OAO Damper</b> is not mapped "
+const val RETURN_DAMPER_OAO_DAMPER_ERROR = "Return Damper configuration is mapped but <b> OAO Damper </b> is not mapped "
 
 fun duplicateError(domainName: String): Spanned = Html.fromHtml("Duplicate selection for <b>${domainName}</b> is not allowed.", Html.FROM_HTML_MODE_LEGACY)

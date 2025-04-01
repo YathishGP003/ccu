@@ -17,7 +17,7 @@ import a75f.io.domain.api.DomainName
 import a75f.io.logic.bo.building.hyperstatsplit.common.FanModeCacheStorage
 import a75f.io.logic.bo.building.hyperstatsplit.common.UserIntents
 import a75f.io.logic.bo.building.schedules.Occupancy
-import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler
+import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler
 
 
 

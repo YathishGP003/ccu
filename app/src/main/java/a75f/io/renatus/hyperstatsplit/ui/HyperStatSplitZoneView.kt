@@ -20,7 +20,7 @@ import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Compa
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getSelectedFanLevel
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.bo.util.UnitUtils
-import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler.Companion.updateHyperStatSplitUIPoints
+import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler.Companion.updateHyperStatSplitUIPoints
 import a75f.io.renatus.R
 import a75f.io.renatus.util.CCUUiUtil
 import a75f.io.renatus.util.HeartBeatUtil

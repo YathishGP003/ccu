@@ -14,7 +14,7 @@ public enum ProfileType
     MODBUS_UPS40K,MODBUS_UPSL,MODBUS_UPSV,MODBUS_UPSVL,MODBUS_VAV_BACnet, HYPERSTAT_SENSE, MODBUS_DEFAULT, OTN,
     HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT,HYPERSTAT_HEAT_PUMP_UNIT, HYPERSTAT_TWO_PIPE_FCU, HYPERSTAT_FOUR_PIPE_FCU,
     HYPERSTAT_VRV, HYPERSTAT_MONITORING, HYPERSTATSPLIT_CPU, VAV_ACB, dabExternalAHUController, vavExternalAHUController, BYPASS_DAMPER,
-    SYSTEM_VAV_ADVANCED_AHU, SYSTEM_DAB_ADVANCED_AHU, BACNET_DEFAULT;
+    SYSTEM_VAV_ADVANCED_AHU, SYSTEM_DAB_ADVANCED_AHU, BACNET_DEFAULT, MYSTAT_PIPE2,MYSTAT_CPU,MYSTAT_HPU;
 
 
     public static ProfileType getProfileTypeForName(String name){
@@ -73,6 +73,12 @@ public enum ProfileType
                 return "HeatPumpUnit";
             case HYPERSTAT_TWO_PIPE_FCU:
                 return "2PipeFCU";
+            case MYSTAT_CPU:
+                return "MyStat Conventional Package Unit";
+            case MYSTAT_HPU:
+                return "MyStat Heat Pump Unit";
+            case MYSTAT_PIPE2:
+                return "MyStat Pipe2 FCU";
             case OTN:
                 return "TemperatureInfluencing";
             default:

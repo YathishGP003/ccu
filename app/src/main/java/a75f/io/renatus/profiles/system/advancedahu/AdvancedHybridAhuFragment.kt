@@ -9,12 +9,15 @@ import a75f.io.renatus.R
 import a75f.io.renatus.composables.AOTHConfig
 import a75f.io.renatus.composables.AnalogOutConfig
 import a75f.io.renatus.composables.ConfigCompose
+import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.EnableCompose
 import a75f.io.renatus.composables.HumidityCompose
 import a75f.io.renatus.composables.MinMaxConfiguration
 import a75f.io.renatus.composables.RelayConfiguration
 import a75f.io.renatus.compose.BoldStyledTextView
 import a75f.io.renatus.compose.ComposeUtil
+import a75f.io.renatus.compose.ComposeUtil.Companion.myFontFamily
+import a75f.io.renatus.compose.HeaderTextView
 import a75f.io.renatus.compose.LabelTextView
 import a75f.io.renatus.compose.SaveTextViewNew
 import a75f.io.renatus.compose.SaveTextViewNewExtraBold
@@ -22,6 +25,7 @@ import a75f.io.renatus.compose.SearchSpinnerElement
 import a75f.io.renatus.compose.SpinnerElementOption
 import a75f.io.renatus.compose.StyledTextView
 import a75f.io.renatus.compose.SubTitle
+import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.profiles.system.ADDRESS_0
 import a75f.io.renatus.profiles.system.ADDRESS_1
 import a75f.io.renatus.profiles.system.ADDRESS_2
@@ -73,6 +77,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -81,12 +86,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 
@@ -1737,7 +1748,31 @@ open class AdvancedHybridAhuFragment : Fragment() {
         val occupancyEnum = viewModel.getAllowedValues(DomainName.occupancySensorBusAdd0, viewModel.connectModel)
         val co2Enum = viewModel.getAllowedValues(DomainName.co2SensorBusAdd0, viewModel.connectModel)
         val pressureEnum = viewModel.getAllowedValues(DomainName.pressureSensorBusAdd0, viewModel.connectModel)
+        Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.padding(10.dp)) {
+            Text(
+                modifier = Modifier
+                    .height(50.dp)
+                    .padding(start = 5.dp, top = 10.dp),
+                style = TextStyle(
+                    textAlign = TextAlign.Start,
+                    fontWeight = FontWeight.Normal,
+                    fontFamily = myFontFamily,
+                    fontSize =  19.5.sp,
+                    color = Color.Black
+                ),
+                text = "Outside Air Optimization Damper"
+            )
+            Spacer(modifier = Modifier.width(15.dp))
+            ToggleButtonStateful(
+                defaultSelection = viewModel.viewState.value.enableOutsideAirOptimization,
+                onEnabled = {
+                    viewModel.viewState.value.enableOutsideAirOptimization = it
+                    setStateChanged(viewModel)
+                }
+            )
+        }
 
+        Spacer(modifier = Modifier.height(15.dp))
         SubTitle(SENSOR_BUS, fontSizeCustom = 16.0, startPaddingValue = 18, topPaddingValue = 0)
         Row {
             EnableCompose(ADDRESS_0, viewModel.viewState.value.connectSensorAddress0.enabled) {
@@ -2171,7 +2206,13 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         },
                         testVal =  viewModel.getConnectPhysicalPointForAnalogIndex(index)?.readHisVal()?.div(10) ?: 0.0,
                         onTestSignalSelected = {viewModel.sendConnectAnalogTestCommand(index, it * 10)},
-                        disabledIndices = listOf(ConnectControlType.OAO_DAMPER.ordinal,ConnectControlType.RETURN_DAMPER.ordinal)
+                        disabledIndices = if (viewModel.isOaoPairedInSystemLevel || !viewModel.viewState.value.enableOutsideAirOptimization) {
+                            //if OAO is already paired in system level disabling the option in the drop down
+                            // for OAO Damper and return damper
+                          listOf(ConnectControlType.OAO_DAMPER.ordinal, ConnectControlType.RETURN_DAMPER.ordinal)
+                        } else {
+                            listOf()
+                        }
                     )
                 }
             }
@@ -2879,8 +2920,631 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 })
         }
     }
-    private fun setStateChanged(viewModel: AdvancedHybridAhuViewModel) {
+    fun setStateChanged(viewModel: AdvancedHybridAhuViewModel) {
         viewModel.viewState.value.isStateChanged = true
         viewModel.viewState.value.isSaveRequired = true
+    }
+    @Composable
+     fun OaoConfigScreen(viewModel: AdvancedHybridAhuViewModel) {
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        //Oao damper
+        if (viewModel.viewState.value.connectAnalogOut1Enabled && viewModel.viewState.value.connectAnalogOut1Association == ConnectControlType.OAO_DAMPER.ordinal) {
+            AnalogOutOaoDamper(0)
+        }
+        if (viewModel.viewState.value.connectAnalogOut2Enabled && viewModel.viewState.value.connectAnalogOut2Association == ConnectControlType.OAO_DAMPER.ordinal) {
+            AnalogOutOaoDamper(1)
+        }
+        if (viewModel.viewState.value.connectAnalogOut3Enabled && viewModel.viewState.value.connectAnalogOut3Association ==ConnectControlType.OAO_DAMPER.ordinal) {
+            AnalogOutOaoDamper(2)
+        }
+        if (viewModel.viewState.value.connectAnalogOut4Enabled && viewModel.viewState.value.connectAnalogOut4Association == ConnectControlType.OAO_DAMPER.ordinal) {
+            AnalogOutOaoDamper(3)
+        }
+
+        //return damper
+        if (viewModel.viewState.value.connectAnalogOut1Enabled && viewModel.viewState.value.connectAnalogOut1Association == ConnectControlType.RETURN_DAMPER.ordinal) {
+            AnalogOutReturnDamper(0)
+        }
+        if (viewModel.viewState.value.connectAnalogOut2Enabled && viewModel.viewState.value.connectAnalogOut2Association == ConnectControlType.RETURN_DAMPER.ordinal) {
+            AnalogOutReturnDamper(1)
+        }
+        if (viewModel.viewState.value.connectAnalogOut3Enabled && viewModel.viewState.value.connectAnalogOut3Association == ConnectControlType.RETURN_DAMPER.ordinal) {
+            AnalogOutReturnDamper(2)
+        }
+        if (viewModel.viewState.value.connectAnalogOut4Enabled && viewModel.viewState.value.connectAnalogOut4Association == ConnectControlType.RETURN_DAMPER.ordinal) {
+            AnalogOutReturnDamper(3)
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp, start = 20.dp, end = 10.dp),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            DropDownWithLabel(
+                label = "Outside Damper Min Open during\n" +
+                        "Recirculation (%)",
+                list = viewModel.outsideDamperMinOpenDuringRecirculationList,
+                previewWidth = 60,
+                expandedWidth = 60,
+                isHeader = false,
+                labelWidth = 350,
+                onSelected = { selectedIndex ->
+                    viewModel.viewState.value.outsideDamperMinOpenDuringRecirculationPos =
+                        selectedIndex.toDouble()
+                    setStateChanged(viewModel)
+                },
+                defaultSelection = viewModel.outsideDamperMinOpenDuringRecirculationList
+                    .indexOf(
+                        viewModel.viewState.value.outsideDamperMinOpenDuringRecirculationPos.toInt()
+                            .toString()
+                    ),
+                spacerLimit = 55,
+                heightValue = 270
+            )
+            Spacer(modifier = Modifier.width(64.dp))
+            DropDownWithLabel(
+                label = "Outside Damper Min Open during\n" +
+                        "Conditioning (%)",
+                list = viewModel.outsideDamperMinOpenDuringConditioningList,
+                previewWidth = 60,
+                expandedWidth = 60,
+                isHeader = false,
+                labelWidth = 350,
+                onSelected = { selectedIndex ->
+                    viewModel.viewState.value.outsideDamperMinOpenDuringConditioningPos =
+                        selectedIndex.toDouble()
+                    setStateChanged(viewModel)
+                },
+                defaultSelection = viewModel.outsideDamperMinOpenDuringConditioningList
+                    .indexOf(
+                        viewModel.viewState.value.outsideDamperMinOpenDuringConditioningPos.toInt()
+                            .toString()
+                    ),
+                spacerLimit = 55,
+                heightValue = 270
+            )
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 10.dp),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                DropDownWithLabel(
+                    label = "Outside Damper Min Open during\n" +
+                            "Fan Low (%)",
+                    list = viewModel.outsideDamperMinOpenDuringFanLowList,
+                    previewWidth = 60,
+                    expandedWidth = 60,
+                    isHeader = false,
+                    labelWidth = 350,
+                    onSelected = { selectedIndex ->
+                        viewModel.viewState.value.outsideDamperMinOpenDuringFanLowPos =
+                            selectedIndex.toDouble()
+                        setStateChanged(viewModel)
+                    },
+                    defaultSelection = viewModel.outsideDamperMinOpenDuringFanLowList
+                        .indexOf(
+                            viewModel.viewState.value.outsideDamperMinOpenDuringFanLowPos.toInt()
+                                .toString()
+                        ),
+                    spacerLimit = 55,
+                    heightValue = 270
+                )
+                Spacer(modifier = Modifier.width(64.dp))
+                DropDownWithLabel(
+                    label = "Outside Damper Min Open during\n" +
+                            "Fan Medium (%)",
+                    list = viewModel.outsideDamperMinOpenDuringFanMediumList,
+                    previewWidth = 60,
+                    expandedWidth = 60,
+                    isHeader = false,
+                    labelWidth = 350,
+                    onSelected = { selectedIndex ->
+                        viewModel.viewState.value.outsideDamperMinOpenDuringFanMediumPos =
+                            selectedIndex.toDouble()
+                        setStateChanged(viewModel)
+                    },
+                    defaultSelection = viewModel.outsideDamperMinOpenDuringFanMediumList
+                        .indexOf(
+                            viewModel.viewState.value.outsideDamperMinOpenDuringFanMediumPos.toInt()
+                                .toString()
+                        ),
+                    spacerLimit = 55,
+                    heightValue = 270
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 10.dp),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                DropDownWithLabel(
+                    label = "Outside Damper Min Open during\n" +
+                            "Fan High (%)",
+                    list = viewModel.outsideDamperMinOpenDuringFanHighList,
+                    previewWidth = 60,
+                    expandedWidth = 60,
+                    isHeader = false,
+                    labelWidth = 350,
+                    onSelected = { selectedIndex ->
+                        viewModel.viewState.value.outsideDamperMinOpenDuringFanHighPos =
+                            selectedIndex.toDouble()
+                        setStateChanged(viewModel)
+                    },
+                    defaultSelection = viewModel.outsideDamperMinOpenDuringFanHighList
+                        .indexOf(
+                            viewModel.viewState.value.outsideDamperMinOpenDuringFanHighPos.toInt()
+                                .toString()
+                        ),
+                    spacerLimit = 55,
+                    heightValue = 270
+                )
+                Spacer(modifier = Modifier.width(64.dp))
+                DropDownWithLabel(
+                    label = "Return Damper Min Open (%)",
+                    list = viewModel.returnDamperMinOpenPosList,
+                    previewWidth = 60,
+                    expandedWidth = 60,
+                    isHeader = false,
+                    labelWidth = 350,
+                    onSelected = { selectedIndex ->
+                        viewModel.viewState.value.returnDamperMinOpenPos =
+                            selectedIndex.toDouble()
+                        setStateChanged(viewModel)
+                    },
+                    defaultSelection = viewModel.returnDamperMinOpenPosList
+                        .indexOf(
+                            viewModel.viewState.value.returnDamperMinOpenPos.toInt().toString()
+                        ),
+                    spacerLimit = 55,
+                    heightValue = 270
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 10.dp),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                DropDownWithLabel(
+                    label = "Exhaust Fan Stage 1 Threshold (%)",
+                    list = viewModel.exhaustFanStage1ThresholdList,
+                    previewWidth = 60,
+                    expandedWidth = 60,
+                    isHeader = false,
+                    labelWidth = 350,
+                    onSelected = { selectedIndex ->
+                        viewModel.viewState.value.exhaustFanStage1ThresholdPos =
+                            selectedIndex.toDouble()
+                        setStateChanged(viewModel)
+                    },
+                    defaultSelection = viewModel.exhaustFanStage1ThresholdList
+                        .indexOf(
+                            viewModel.viewState.value.exhaustFanStage1ThresholdPos.toInt()
+                                .toString()
+                        ),
+                    spacerLimit = 55,
+                    heightValue = 270
+                )
+                Spacer(modifier = Modifier.width(63.dp))
+                DropDownWithLabel(
+                    label = "Exhaust Fan Stage 2 Threshold (%)",
+                    list = viewModel.exhaustFanStage2ThresholdList,
+                    previewWidth = 60,
+                    expandedWidth = 60,
+                    isHeader = false,
+                    labelWidth = 350,
+                    onSelected = { selectedIndex ->
+                        viewModel.viewState.value.exhaustFanStage2ThresholdPos =
+                            selectedIndex.toDouble()
+                        setStateChanged(viewModel)
+                    },
+                    defaultSelection = viewModel.exhaustFanStage2ThresholdList
+                        .indexOf(
+                            viewModel.viewState.value.exhaustFanStage2ThresholdPos.toInt()
+                                .toString()
+                        ),
+                    spacerLimit = 55,
+                    heightValue = 270
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 10.dp),
+                horizontalArrangement = Arrangement.Start
+            ) {
+               DropDownWithLabel(
+                    label = "Current Transformer Type",
+                    list = viewModel.currentTransformerTypeList,
+                    previewWidth = 120,
+                    expandedWidth = 120,
+                   isHeader = false,
+                   labelWidth = 275,
+                    onSelected = { selectedIndex ->
+                        viewModel.viewState.value.currentTransformerTypePos =
+                            selectedIndex.toDouble()
+                        setStateChanged(viewModel)
+                    },
+                    defaultSelection = viewModel.viewState.value.currentTransformerTypePos.toInt(),
+                    spacerLimit = 69,
+                    heightValue = 270
+                )
+                Spacer(modifier = Modifier.width(64.dp))
+                DropDownWithLabel(
+                    label = "CO2 Threshold (ppm)",
+                    list = viewModel.co2ThresholdList,
+                    previewWidth = 80,
+                    expandedWidth = 80,
+                    isHeader = false,
+                    labelWidth = 330,
+
+                    onSelected = { selectedIndex ->
+                        viewModel.viewState.value.oaoCo2ThresholdVal =
+                            viewModel.co2ThresholdList[selectedIndex].toDouble()
+                        setStateChanged(viewModel)
+                    },
+                    defaultSelection = viewModel.co2ThresholdList
+                        .indexOf(viewModel.viewState.value.oaoCo2ThresholdVal.toInt().toString()),
+                    spacerLimit = 55,
+                    heightValue = 270
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 10.dp),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                DropDownWithLabel(
+                    label = "Exhaust Fan Hysteresis (%)",
+                    list = viewModel.exhaustFanHysteresisList,
+                    previewWidth = 60,
+                    expandedWidth = 60,
+                    isHeader = false,
+                    labelWidth = 320,
+                    onSelected =
+                    { selectedIndex ->
+                        viewModel.viewState.value.exhaustFanHysteresisPos =
+                            selectedIndex.toDouble()
+                        setStateChanged(viewModel)
+                    },
+                    defaultSelection = viewModel.exhaustFanHysteresisList.indexOf(
+                        viewModel.viewState.value.exhaustFanHysteresisPos.toInt().toString()
+                    ),
+                    spacerLimit = 85,
+                    heightValue = 270
+                )
+                Spacer(modifier = Modifier.width(75.dp))
+                HeaderTextView(text = "Use Per Room CO2 Sensing", fontWeight = FontWeight.Medium)
+                Spacer(modifier = Modifier.width(144.dp))
+                ToggleButtonStateful(
+
+                    defaultSelection = viewModel.viewState.value.usePerRoomCO2SensingState,
+                    onEnabled = { viewModel.viewState.value.usePerRoomCO2SensingState = it
+                        setStateChanged(viewModel)}
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 10.dp),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                DropDownWithLabel(
+                    label = "Smart Purge Outside Damper Min \nOpen",
+                    list = viewModel.systemPurgeOutsideDamperMinPosList,
+                    previewWidth = 60,
+                    isHeader = false,
+                    labelWidth = 350,
+                    expandedWidth = 60,
+                    onSelected = { selectedIndex ->
+                        viewModel.viewState.value.systemPurgeOutsideDamperMinPos =
+                            selectedIndex.toDouble()
+                        setStateChanged(viewModel)
+                    },
+                    defaultSelection = viewModel.systemPurgeOutsideDamperMinPosList
+                        .indexOf(
+                            viewModel.viewState.value.systemPurgeOutsideDamperMinPos.toInt()
+                                .toString()
+                        ),
+                    spacerLimit = 48,
+                    heightValue = 270
+                )
+
+                Spacer(modifier = Modifier.width(67.dp))
+                DropDownWithLabel(
+                    label = "Enhanced Ventilation Outside \nDamper Min Open",
+                    list = viewModel.enhancedVentilationOutsideDamperMinOpenList,
+                    previewWidth = 60,
+                    isHeader = false,
+                    labelWidth = 350,
+                    expandedWidth = 60,
+                    onSelected = { selectedIndex ->
+                        viewModel.viewState.value.enhancedVentilationOutsideDamperMinOpenPos =
+                            selectedIndex.toDouble()
+                        setStateChanged(viewModel)
+                    },
+                    defaultSelection = viewModel.enhancedVentilationOutsideDamperMinOpenList
+                        .indexOf(
+                            viewModel.viewState.value.enhancedVentilationOutsideDamperMinOpenPos.toInt()
+                                .toString()
+                        ),
+                    spacerLimit = 58,
+                    heightValue = 270
+                )
+            }
+
+        }
+    @Composable
+   fun AnalogOutOaoDamper(index:Int){
+        val analogOutMin = "Analog-Out${index + 1} at Min OAO Damper Pos(V)"
+        val analogOutMax = "Analog-Out${index+ 1} at Max OAO Damper Pos(V)"
+        val minOaoDamperList: List<String> = when (index) {
+            0 -> viewModel.analog1MinOaoDamperList
+            1 -> viewModel.analog2MinOaoDamperList
+            2 -> viewModel.analog3MinOaoDamperList
+            3 -> viewModel.analog4MinOaoDamperList
+            else -> {
+                emptyList()
+            }
+        }
+        val maxOaoDamperList: List<String> = when (index) {
+            0 -> viewModel.analog1MaxOaoDamperList
+            1 -> viewModel.analog2MaxOaoDamperList
+            2 -> viewModel.analog3MaxOaoDamperList
+            3 -> viewModel.analog4MaxOaoDamperList
+            else -> {
+                emptyList()
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 10.dp),
+            horizontalArrangement = Arrangement.Start
+        ) {
+
+            DropDownWithLabel(
+                label = analogOutMin,
+                list = minOaoDamperList,
+                previewWidth = 60,
+                expandedWidth = 60,
+                isHeader = false,
+                labelWidth = 340,
+                onSelected = { selectedIndex ->
+                    when (index) {
+                        0 -> viewModel.viewState.value.analog1MinOaoDamper =
+                            selectedIndex.toDouble()
+
+                        1 -> viewModel.viewState.value.analog2MinOaoDamper =
+                            selectedIndex.toDouble()
+
+                        2 -> viewModel.viewState.value.analog3MinOaoDamper =
+                            selectedIndex.toDouble()
+
+                        3 -> viewModel.viewState.value.analog4MinOaoDamper =
+                            selectedIndex.toDouble()
+
+                    }
+                    setStateChanged(viewModel)
+                },
+                defaultSelection = when (index) {
+                    0 -> viewModel.analog1MinOaoDamperList.indexOf(
+                        viewModel.viewState.value.analog1MinOaoDamper.toInt().toString()
+                    )
+
+                    1 -> viewModel.analog2MinOaoDamperList.indexOf(
+                        viewModel.viewState.value.analog2MinOaoDamper.toInt().toString()
+                    )
+
+                    2 -> viewModel.analog3MinOaoDamperList.indexOf(
+                        viewModel.viewState.value
+                            .analog3MinOaoDamper.toInt().toString()
+                    )
+                    3-> viewModel.analog4MinOaoDamperList.indexOf(
+                        viewModel.viewState.value.analog4MinOaoDamper.toInt().toString()
+                    )
+                    else->{1}
+                },
+                spacerLimit = 64,
+                heightValue = 270
+            )
+            Spacer(modifier = Modifier.width(64.dp))
+            DropDownWithLabel(
+                label = analogOutMax,
+                list = maxOaoDamperList,
+                previewWidth = 60,
+                expandedWidth = 60,
+                isHeader = false,
+                labelWidth = 340,
+                onSelected = { selectedIndex ->
+                    when (index) {
+                        0 -> viewModel.viewState.value.analog1MaxOaoDamper =
+                            selectedIndex.toDouble()
+
+                        1 -> viewModel.viewState.value.analog2MaxOaoDamper =
+                            selectedIndex.toDouble()
+
+                        2 -> viewModel.viewState.value.analog3MaxOaoDamper =
+                            selectedIndex.toDouble()
+
+                        3 -> viewModel.viewState.value.analog4MaxOaoDamper =
+                            selectedIndex.toDouble()
+                    }
+                    setStateChanged(viewModel)
+                },
+
+                defaultSelection = when (index) {
+                    0 -> viewModel.analog1MaxOaoDamperList.indexOf(
+                        viewModel.viewState.value.analog1MaxOaoDamper.toInt().toString()
+                    )
+
+                    1 -> viewModel.analog2MaxOaoDamperList.indexOf(
+                        viewModel.viewState.value.analog2MaxOaoDamper.toInt().toString()
+                    )
+
+                    2 -> viewModel.analog3MaxOaoDamperList.indexOf(
+                        viewModel.viewState.value.analog3MaxOaoDamper.toInt().toString()
+                    )
+
+
+                    3-> viewModel.analog4MaxOaoDamperList.indexOf(
+                        viewModel.viewState.value.analog4MaxOaoDamper.toInt().toString()
+                    )
+                    else->{1}
+                },
+                spacerLimit = 64,
+                heightValue = 270
+            )
+
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+
+    }
+
+    @Composable
+    fun AnalogOutReturnDamper(index: Int){
+            val analogOutMin = "Analog-Out${index + 1} at Min Return Damper Pos(V)"
+            val analogOutMax = "Analog-Out${index + 1} at Max Return Damper Pos(V)"
+            val minReturnDamperList: List<String> = when (index) {
+                0 -> viewModel.analog1MinReturnDamperList
+                1 -> viewModel.analog2MinReturnDamperList
+                2 -> viewModel.analog3MinReturnDamperList
+                3 -> viewModel.analog4MinReturnDamperList
+                else -> {
+                    emptyList()
+                }
+            }
+            val maxReturnDamperList: List<String> = when (index) {
+                0 -> viewModel.analog1MaxReturnDamperList
+                1 -> viewModel.analog2MaxReturnDamperList
+                2 -> viewModel.analog3MaxReturnDamperList
+                3 -> viewModel.analog4MaxReturnDamperList
+                else -> {
+                    emptyList()
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 10.dp),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                DropDownWithLabel(
+                    label = analogOutMin,
+                    list = minReturnDamperList,
+                    previewWidth = 60,
+                    expandedWidth = 60,
+                    isHeader = false,
+                    labelWidth = 330,
+                    onSelected = { selectedIndex ->
+                        when (index) {
+                            0 -> viewModel.viewState.value.analog1MinReturnDamper =
+                                selectedIndex.toDouble()
+
+                            1 -> viewModel.viewState.value.analog2MinReturnDamper =
+                                selectedIndex.toDouble()
+
+                            2 -> viewModel.viewState.value.analog3MinReturnDamper =
+                                selectedIndex.toDouble()
+
+                            3 -> viewModel.viewState.value.analog4MinReturnDamper =
+                                selectedIndex.toDouble()
+                        }
+                        setStateChanged(viewModel)
+                    },
+                    defaultSelection = when (index) {
+                        0 -> viewModel.analog1MinReturnDamperList.indexOf(
+                            viewModel.viewState.value.analog1MinReturnDamper.toInt().toString()
+                        )
+
+                        1 -> viewModel.analog2MinReturnDamperList.indexOf(
+                            viewModel.viewState.value.analog2MinReturnDamper.toInt().toString()
+                        )
+
+                        2 -> viewModel.analog3MinReturnDamperList.indexOf(
+                            viewModel.viewState.value.analog3MinReturnDamper.toInt().toString()
+                        )
+
+
+                        3-> viewModel.analog4MinReturnDamperList.indexOf(
+                            viewModel.viewState.value.analog4MinReturnDamper.toInt().toString()
+                        )
+                        else->{1}
+                    },
+                    spacerLimit = 76,
+                    heightValue = 270
+                )
+                Spacer(modifier = Modifier.width(65.dp))
+                DropDownWithLabel(
+                    label = analogOutMax,
+                    list = maxReturnDamperList,
+                    previewWidth = 60,
+                    isHeader = false,
+                    labelWidth = 330,
+                    expandedWidth = 60,
+                    onSelected =  { selectedIndex ->
+                        when (index) {
+                            0 -> viewModel.viewState.value.analog1MaxReturnDamper =
+                                selectedIndex.toDouble()
+
+                            1 -> viewModel.viewState.value.analog2MaxReturnDamper =
+                                selectedIndex.toDouble()
+
+                            2 -> viewModel.viewState.value.analog3MaxReturnDamper =
+                                selectedIndex.toDouble()
+
+                            3 -> viewModel.viewState.value.analog4MaxReturnDamper =
+                                selectedIndex.toDouble()
+                        }
+                        setStateChanged(viewModel)
+                    },
+                    defaultSelection = when (index) {
+                        0 -> viewModel.analog1MaxReturnDamperList.indexOf(
+                            viewModel.viewState.value.analog1MaxReturnDamper.toInt().toString()
+                        )
+
+                        1 -> viewModel.analog2MaxReturnDamperList.indexOf(
+                            viewModel.viewState.value.analog2MaxReturnDamper.toInt().toString()
+                        )
+
+                        2 -> viewModel.analog3MaxReturnDamperList.indexOf(
+                            viewModel.viewState.value.analog3MaxReturnDamper.toInt().toString()
+                        )
+
+                        else -> viewModel.analog4MaxReturnDamperList.indexOf(
+                            viewModel.viewState.value.analog4MaxReturnDamper.toInt().toString()
+                        )
+
+                    },
+                    spacerLimit = 74,
+                    heightValue = 270
+                )
+            }
+            Spacer(modifier = Modifier.height(24.dp))
     }
 }

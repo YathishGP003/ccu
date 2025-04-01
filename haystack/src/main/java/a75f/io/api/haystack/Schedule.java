@@ -1982,18 +1982,6 @@ public class Schedule extends Entity
             HDict hDict = new HDictBuilder()
                                   .add("stdt", HDateTime.make(mStartDate.getMillis(), tz))
                                   .add("etdt", HDateTime.make(mEndDate.getMillis(), tz)).toDict();
-
-            Log.i("manju","Vacation tz "+tz);
-            Log.i("manju","Vacation mStartDate"+mStartDate + "milises: "+mStartDate.getMillis());
-            Log.i("manju","Vacation mEndDate"+mEndDate+ "milises: "+mEndDate.getMillis());
-            Log.i("manju","Vacation Schedule HDict: "+hDict);
-            Log.i("manju","Vacation Schedule without tz: "+HDateTime.make(mStartDate.getMillis()));
-            Log.i("manju","Vacation Schedule without tz: "+HDateTime.make(mEndDate.getMillis()));
-
-
-            Log.i("manju","Vacation Schedule with tz: "+HDateTime.make(mStartDate.getMillis(), tz));
-            Log.i("manju","Vacation Schedule with tz: "+HDateTime.make(mEndDate.getMillis(), tz));
-
             HDictBuilder vacationSchedule = new HDictBuilder()
                                             .add("id", HRef.copy(getId()))
                                             .add("temp")
@@ -2103,16 +2091,6 @@ public class Schedule extends Entity
             HDict hDict = new HDictBuilder()
                     .add("stdt", HDateTime.make(mStartDate.getMillis(), tz))
                     .add("etdt", HDateTime.make(mEndDate.getMillis(), tz)).toDict();
-            Log.i("manju","Vacation tz "+tz);
-            Log.i("manju","Vacation mStartDate"+mStartDate + "milises: "+mStartDate.getMillis());
-            Log.i("manju","Vacation mEndDate"+mEndDate+ "milises: "+mEndDate.getMillis());
-            Log.i("manju","Vacation Schedule HDict: "+hDict);
-            Log.i("manju","Vacation Schedule without tz: "+HDateTime.make(mStartDate.getMillis()));
-            Log.i("manju","Vacation Schedule without tz: "+HDateTime.make(mEndDate.getMillis()));
-
-
-            Log.i("manju","Vacation Schedule with tz: "+HDateTime.make(mStartDate.getMillis(), tz));
-            Log.i("manju","Vacation Schedule with tz: "+HDateTime.make(mEndDate.getMillis(), tz));
             HDictBuilder vacationSchedule = new HDictBuilder()
                                              .add("id", HRef.copy(getId()))
                                              .add("temp")

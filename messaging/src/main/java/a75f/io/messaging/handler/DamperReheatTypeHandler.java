@@ -37,8 +37,7 @@ public class DamperReheatTypeHandler {
         int typeVal = msgObject.get("val").getAsInt();
 
         if (configPoint.getMarkers().contains(Tags.DAMPER) && configPoint.getMarkers().contains(Tags.DAB)) {
-            HashMap<Object, Object> damperType =
-                    hayStack.readEntity("point and id == \"" + configPoint.getId() + "\"");
+            HashMap<Object, Object> damperType = hayStack.readMapById(configPoint.getId());
             if (damperType.containsKey("domainName") && damperType.get("domainName").equals("damper1Type")) {
                 SmartNode.updateDomainPhysicalPointType(address, "analog1Out",
                         DamperType.values()[typeVal].displayName);
@@ -46,7 +45,7 @@ public class DamperReheatTypeHandler {
                 double reheatType = hayStack.readDefaultVal("point and domainName == \"" + DomainName.reheatType + "\" and group == \"" + configPoint.getGroup() + "\"");
                 if (reheatType == 0 || (reheatType - 1) > ReheatType.Pulse.ordinal()) {
                     //When reheat is mapped to AO2 , we cant use it.
-                    SmartNode.updateDomainPhysicalPointType(address, "analog2Out", ReheatType.values()[typeVal].displayName);
+                    SmartNode.updateDomainPhysicalPointType(address, "analog2Out", DamperType.values()[typeVal].displayName);
                     SmartNode.setDomainPointEnabled(address, "analog2Out", false, hayStack);
 
                     if (typeVal < DamperType.MAT.ordinal()) {

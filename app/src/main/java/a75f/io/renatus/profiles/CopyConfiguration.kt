@@ -21,6 +21,13 @@ import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
 import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatV2MonitoringProfile
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
 import a75f.io.logic.bo.building.modbus.ModbusProfile
+import a75f.io.logic.bo.building.mystat.configs.MyStatCpuConfiguration
+import a75f.io.logic.bo.building.mystat.configs.MyStatHpuConfiguration
+import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2Configuration
+import a75f.io.logic.bo.building.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile
+import a75f.io.logic.bo.building.mystat.profiles.packageunit.cpu.MyStatCpuProfile
+import a75f.io.logic.bo.building.mystat.profiles.packageunit.hpu.MyStatHpuProfile
+import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.otn.OtnProfileConfiguration
 import a75f.io.logic.bo.building.plc.PlcProfileConfig
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration
@@ -99,7 +106,7 @@ class CopyConfiguration {
             floorPlanFragment: FloorPlanFragment
         ) {
             val equip =
-                ccuHsApiInstance.read("zone and equip and not equipRef and group == \"$address\"")
+                ccuHsApiInstance.readEntity("zone and equip and not equipRef and group == \"$address\"")
             moduleName = moduleType
 
             modbusModel = equip["modbus"]?.let { equip["model"].toString() }
@@ -114,7 +121,7 @@ class CopyConfiguration {
 
             if ((modbusModel == null && selectedBacNetModel == null)) {
                 val device =
-                    ccuHsApiInstance.read("device and equipRef ==\"${equip["id"]}\"and addr == \"$address\"")
+                    ccuHsApiInstance.readEntity("device and equipRef ==\"${equip["id"]}\"and addr == \"$address\"")
                 nodeType = getNodeType(device)
 
                 if (nodeType == null) {
@@ -178,6 +185,10 @@ class CopyConfiguration {
                 ProfileType.MODBUS_DEFAULT,
                 ProfileType.MODBUS_EMR -> loadActiveModbusOrEmrConfiguration(address.toShort())
                 ProfileType.BACNET_DEFAULT -> loadActiveBacNetConfiguration(address.toLong())
+
+                ProfileType.MYSTAT_HPU,
+                ProfileType.MYSTAT_CPU,
+                ProfileType.MYSTAT_PIPE2 -> loadActiveMStatProfilesConfiguration(address, equip)
 
                 else -> throw IllegalArgumentException("Unsupported Profile Type: $profileType")
             }
@@ -291,6 +302,21 @@ class CopyConfiguration {
                 }
             }
         }
+
+        private fun loadActiveMStatProfilesConfiguration(address: Int, equip: HashMap<Any, Any>) {
+            when (L.getProfile(address.toShort())) {
+                is MyStatCpuProfile -> {
+                    config = getMyStatConfiguration(equip["id"].toString()) as MyStatCpuConfiguration
+                }
+                is MyStatHpuProfile -> {
+                    config = getMyStatConfiguration(equip["id"].toString()) as MyStatHpuConfiguration
+                }
+                is MyStatPipe2Profile -> {
+                    config = getMyStatConfiguration(equip["id"].toString()) as MyStatPipe2Configuration
+                }
+            }
+        }
+
         private fun loadActiveModbusOrEmrConfiguration(address: Short) {
             profileType = null
             nodeType =null

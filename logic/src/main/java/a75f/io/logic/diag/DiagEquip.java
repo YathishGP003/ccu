@@ -34,6 +34,8 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.util.MigrationUtil;
 import a75f.io.logic.util.PreferenceUtil;
+import a75f.io.logic.util.bacnet.BacnetServerStatus;
+import a75f.io.logic.util.bacnet.BacnetUtilKt;
 
 public class DiagEquip
 {
@@ -236,6 +238,7 @@ public class DiagEquip
                 CcuLog.d(TAG, "Clearing out the version for " + appVersionPoint.getDomainName() + " since package not found.");
                 CCUHsApi.getInstance().clearPointArrayLevel(id, HayStackConstants.DEFAULT_POINT_LEVEL, false);
                 if (appVersionPoint.getDomainName().equals(DomainName.bacnetAppVersion)) {
+                    BacnetUtilKt.updateBacnetServerStatus(BacnetServerStatus.NOT_INITIALIZED.ordinal());
                     countOfBacnetAppVersionNotFound = 0; // we needs to reset the count
                 }
             }

@@ -1,5 +1,6 @@
 package a75f.io.renatus.schedules;
 
+import static a75f.io.logic.bo.util.CCUUtils.getTruncatedString;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
@@ -214,14 +215,14 @@ public class NamedSchedule extends DialogFragment {
         boolean isScheduledSet = getArguments().getBoolean(PARAM_SCHED_SET);
 
         if (!isScheduledSet) {
-            if (scheduledName != null && namedScheduleDis != null && !namedScheduleDis.isEmpty() && namedScheduleDis.length() > 20) {
-                title = scheduledName.substring(0, 20) + "...";
+            if (scheduledName != null && namedScheduleDis != null && !namedScheduleDis.isEmpty() && namedScheduleDis.length() > 25) {
+                title = getTruncatedString(scheduledName,25,0,25);
             } else {
                 title = scheduledName;
             }
         } else {
-            if (scheduledName != null && namedScheduleDis != null && namedScheduleDis.length() > 20) {
-                title = "Preview : " + scheduledName.substring(0, 20) + "...";
+            if (scheduledName != null && namedScheduleDis != null && namedScheduleDis.length() > 25) {
+                title = getTruncatedString("Preview : " + scheduledName,25,0,25);
             } else {
                 title = "Preview : " + scheduledName;
             }

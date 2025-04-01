@@ -345,6 +345,9 @@ public class OaoArc extends View {
         }
 
     }
+    public void disableHeartBeat(){
+        heartBeatSignal.setAlpha(0);
+    }
 
     private void callInit(Context context, AttributeSet attrs){
         try{

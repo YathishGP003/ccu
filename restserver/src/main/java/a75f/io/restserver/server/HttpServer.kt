@@ -14,6 +14,7 @@ import a75f.io.logic.util.bacnet.BacnetConfigConstants.HTTP_SERVER_STATUS
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED
 import a75f.io.logic.util.bacnet.readExternalBacnetJsonFile
 import a75f.io.logic.util.bacnet.updateBacnetHeartBeat
+import a75f.io.logic.util.bacnet.updateBacnetStackInitStatus
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
@@ -219,6 +220,15 @@ class HttpServer {
                         CcuLog.i(HTTP_SERVER, " response: $response")
                         call.respond(HttpStatusCode.OK, response)
                     }
+                }
+
+                get("/bacnet/stackInitStatus") {
+                    CcuLog.d(HTTP_SERVER,"called API: /bacnet/stackInitStatus ")
+                    val stackStatus = call.request.queryParameters["status"]
+                    if (stackStatus != null) {
+                        updateBacnetStackInitStatus(stackStatus.toBoolean())
+                    }
+                    call.respond(HttpStatusCode.OK)
                 }
 
                 get("/bacnet/heartbeat") {

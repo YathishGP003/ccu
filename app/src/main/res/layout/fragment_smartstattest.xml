@@ -87,48 +87,61 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
         <Switch
             android:id="@+id/relay1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Relay 1"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:text="Relay 1" />
 
         <Switch
             android:id="@+id/relay2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Relay 2"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:text="Relay 2" />
 
         <Switch
             android:id="@+id/relay3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Relay 3"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:text="Relay 3" />
+
         <Switch
             android:id="@+id/relay4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Relay 4"
-            android:layout_weight="1"/>
-        <Switch
-            android:id="@+id/relay5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Relay 5"
-            android:layout_weight="1"/>
-        <Switch
-            android:id="@+id/relay6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Relay 6"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:text="Relay 4" />
+
 
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="20dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Analog1Out"></TextView>
+        <Spinner
+            android:id="@+id/analog1Out"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+
+
+    </LinearLayout>
+
 
     <LinearLayout
         android:layout_width="wrap_content"

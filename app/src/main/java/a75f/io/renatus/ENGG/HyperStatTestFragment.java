@@ -23,12 +23,8 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import a75f.io.device.HyperStat.HyperStatAnalogOutputControl_t;
-import a75f.io.device.HyperStat.HyperStatCcuDatabaseSeedMessage_t;
-import a75f.io.device.HyperStat.HyperStatControlsMessage_t;
-import a75f.io.device.HyperStat.HyperStatSettingsMessage_t;
-import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
+import a75f.io.device.MyStat;
+import a75f.io.device.mesh.mystat.MyStatMsgSender;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -102,10 +98,10 @@ public class HyperStatTestFragment extends BaseDialogFragment
 	@BindView(R.id.setTempHeating)
 	EditText setTempHeating;
 
-	@BindViews({R.id.relay1, R.id.relay2, R.id.relay3, R.id.relay4, R.id.relay5, R.id.relay6})
+	@BindViews({R.id.relay1, R.id.relay2, R.id.relay3, R.id.relay4})
 	List<Switch> relayList;
 	
-	@BindViews({R.id.analog1Out, R.id.analog2Out, R.id.analog3Out})
+	@BindViews({R.id.analog1Out})
 	List<Spinner> analogOutList;
 
 	int channelSelection = 0;
@@ -134,8 +130,6 @@ public class HyperStatTestFragment extends BaseDialogFragment
 		initCondModeSpinner();
 		
 		analogOutList.get(0).setAdapter(getAnalogOutAdapter());
-		analogOutList.get(1).setAdapter(getAnalogOutAdapter());
-		analogOutList.get(2).setAdapter(getAnalogOutAdapter());
 	}
 
 	@Override
@@ -262,24 +256,24 @@ public class HyperStatTestFragment extends BaseDialogFragment
 
 	@OnClick(R.id.sendSeed)
 	public void sendSeed() {
-		
-		HyperStatCcuDatabaseSeedMessage_t seed = HyperStatCcuDatabaseSeedMessage_t.newBuilder()
-                                                                                .setEncryptionKey(
-                                                                                    ByteString.copyFrom(
-                                                                                    L.getEncryptionKey()))
-                                                                                .setSerializedSettingsData(getSettingMessage().toByteString())
-                                                                                .setSerializedControlsData(getControlMessage().toByteString())
-                                                                                .build();
-		
+
+		MyStat.MyStatCcuDatabaseSeedMessage_t seed = MyStat.MyStatCcuDatabaseSeedMessage_t.newBuilder()
+				.setEncryptionKey(
+						ByteString.copyFrom(
+								L.getEncryptionKey()))
+				.setSerializedSettingsData(getMyStatSettingMessage().toByteString())
+				.setSerializedControlsData(getMyStatControlMessage().toByteString())
+				.build();
+
 		CcuLog.i(L.TAG_CCU_SERIAL, "Send Test message " + seed.toString());
-		HyperStatMessageSender.writeSeedMessage(seed, getChannelAddress(), true);
+		MyStatMsgSender.INSTANCE.writeSeedMessage(seed, getChannelAddress(), true);
 	}
 
 	@OnClick(R.id.sendSettings)
 	public void sendSettings() {
-		
-		CcuLog.i(L.TAG_CCU_SERIAL, "Send Test message " + getSettingMessage().toString());
-		HyperStatMessageSender.writeSettingMessage(getSettingMessage(), getChannelAddress(), MessageType.HYPERSTAT_SETTINGS_MESSAGE,
+
+		CcuLog.i(L.TAG_CCU_SERIAL, "Send Test message " + getMyStatSettingMessage().toString());
+		MyStatMsgSender.INSTANCE.writeSettingMessage(getMyStatSettingMessage(), getChannelAddress(), MessageType.MYSTAT_SETTINGS_MESSAGE,
 		                                           false);
 	}
 	
@@ -291,52 +285,40 @@ public class HyperStatTestFragment extends BaseDialogFragment
 	@OnClick(R.id.sendControl)
 	public void sendControl() {
 		
-		CcuLog.i(L.TAG_CCU_SERIAL, "Send Test message " + getControlMessage().toString());
-		HyperStatMessageSender.writeControlMessage(getControlMessage(), getChannelAddress(), MessageType.HYPERSTAT_CONTROLS_MESSAGE,
+		CcuLog.i(L.TAG_CCU_SERIAL, "Send Test message " + getMyStatControlMessage().toString());
+		MyStatMsgSender.INSTANCE.writeControlMessage(getMyStatControlMessage(), getChannelAddress(), MessageType.MYSTAT_CONTROLS_MESSAGE,
 		                                           false);
 	}
-	
-	
-	private HyperStatControlsMessage_t getControlMessage() {
-		return HyperStatControlsMessage_t.newBuilder()
-					                          .setAnalogOut1(HyperStatAnalogOutputControl_t.newBuilder().setPercent(80))
-					                          .setRelay1(relayList.get(0).isChecked())
-					                          .setRelay2(relayList.get(1).isChecked())
-					                          .setRelay3(relayList.get(2).isChecked())
-					                          .setRelay4(relayList.get(3).isChecked())
-					                          .setRelay5(relayList.get(4).isChecked())
-					                          .setRelay6(relayList.get(5).isChecked())
-					                          .setAnalogOut1(HyperStatAnalogOutputControl_t
-						                                         .newBuilder().setPercent(Integer.parseInt(
-						                                         	analogOutList.get(0).getSelectedItem().toString())).build())
-						                     .setAnalogOut2(HyperStatAnalogOutputControl_t
-							                                    .newBuilder().setPercent(Integer.parseInt(
-							                                    	analogOutList.get(1).getSelectedItem().toString())).build())
-						                     .setAnalogOut3(HyperStatAnalogOutputControl_t
-							                                    .newBuilder().setPercent(Integer.parseInt(
-							                                    	analogOutList.get(2).getSelectedItem().toString())).build())
-			                                 .setSetTempCooling(10 * getSetTempCooling())
-			                                 .setSetTempHeating(10 * getSetTempHeating())
-					                         .build();
+
+	private MyStat.MyStatControlsMessage_t getMyStatControlMessage() {
+		return MyStat.MyStatControlsMessage_t.newBuilder()
+				.setAnalogOut1(MyStat.MyStatAnalogOutputControl_t.newBuilder().setPercent(80))
+				.setRelayBitmap(15)
+				.setAnalogOut1(MyStat.MyStatAnalogOutputControl_t.newBuilder().setPercent(Integer.parseInt(analogOutList.get(0).getSelectedItem().toString())).build())
+				.setSetTempCooling(10 * getSetTempCooling())
+				.setSetTempHeating(10 * getSetTempHeating())
+				.build();
 	}
-	
-	private HyperStatSettingsMessage_t getSettingMessage() {
-		return HyperStatSettingsMessage_t.newBuilder()
-		                                 .setRoomName(roomName.getText().toString())
-		                                 .setHeatingDeadBand(2)
-		                                 .setCoolingDeadBand(2)
-		                                 .setMinCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
-		                                                                                                    "and limit and min"))
-		                                 .setMaxCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
-		                                                                                                    "and limit and max"))
-		                                 .setMinHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user " +
-		                                                                                                    "and limit and min"))
-		                                 .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
-		                                                                                                    "and limit and max"))
-		                                 .setTemperatureOffset(0)
-		                                 .build();
+
+	private MyStat.MyStatSettingsMessage_t getMyStatSettingMessage() {
+		return MyStat.MyStatSettingsMessage_t.newBuilder()
+				.setRoomName(roomName.getText().toString())
+				.setHeatingDeadBand(2)
+				.setCoolingDeadBand(2)
+				.setMinCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
+						"and limit and min"))
+				.setMaxCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
+						"and limit and max"))
+				.setMinHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user " +
+						"and limit and min"))
+				.setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
+						"and limit and max"))
+				.setTemperatureOffset(0)
+				.build();
 	}
-	
+
+
+
 	private int getSetTempCooling() {
 		return setTempCooling.getText().toString().isEmpty() ? 74 :
 			                            Integer.parseInt(setTempCooling.getText().toString());

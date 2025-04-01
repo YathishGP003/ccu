@@ -14,4 +14,5 @@ public class SerialConsts
 	public static final String HYPERSTAT_NAME = "75F-HYPERSTAT";
 	public static final String HYPERSTATSPLIT_NAME = "75F-HYPERSTAT-SPLIT";
 	public static final String HELIONODE_NAME = "75F-HELIONODE";
+	public static final String MYSTAT_NAME = "75F-MYSTAT";
 }

@@ -9,6 +9,9 @@ import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH;
 import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
+import static a75f.io.logic.bo.util.CCUUtils.isCurrentTemperatureWithinLimits;
+import static a75f.io.logic.bo.util.CCUUtils.writeFirmwareVersionForConnectModule;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -41,6 +44,7 @@ import a75f.io.device.serial.CmToCcuOverUsbSmartStatLocalControlsOverrideMessage
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
+import a75f.io.device.serial.FirmwareDeviceType_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartNodeSensorReading_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
@@ -159,6 +163,7 @@ public class Pulse
 			double curTempVal = 0.0;
 			double th2TempVal = 0.0;
 			boolean isTh2Enabled = false;
+            HashMap<Object, Object> phyCurTempPoint = new HashMap<>();
 			for(HashMap phyPoint : phyPoints) {
 				CcuLog.d(L.TAG_CCU_DEVICE, "Physical point "+phyPoint);
 				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
@@ -190,10 +195,16 @@ public class Pulse
 					case SENSOR_RT:
 						val = smartNodeRegularUpdateMessage_t.update.roomTemperature.get();
 						curTempVal = getRoomTempConversion(val);
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						logicalCurTempPoint =  logPoint.get("id").toString();
-
-						CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : roomTemp " + curTempVal);
+						if(isCurrentTemperatureWithinLimits(curTempVal,phyPoint)) {
+							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+							logicalCurTempPoint = logPoint.get("id").toString();
+							phyCurTempPoint = phyPoint;
+							CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : roomTemp " + curTempVal);
+						}
+						else {
+							CcuLog.d(L.TAG_CCU_DEVICE, "Invalid roomTemp  :" + curTempVal);
+                            continue;
+						}
 						break;
 					case TH2_IN:
 						if (isMATDamperConfigured(logPoint, nodeAddr, DomainName.damper2Type, hayStack)) {
@@ -206,8 +217,17 @@ public class Pulse
 							if (isTh2Enabled && isSse) {
 								th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 								th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
-								hayStack.writeHisValById(logPoint.get("id").toString(), th2TempVal);
-							} else if (isTh2Enabled && isAcb) {
+								if (isCurrentTemperatureWithinLimits(val/100,phyPoint)) {
+									hayStack.writeHisValById(logPoint.get("id").toString(), th2TempVal);
+                                    hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
+                                    CcuLog.d(L.TAG_CCU_DEVICE,
+                                            "regularSmartNodeUpdate : Thermistor2 " + th2TempVal + "," + (val * 10) + "," +
+                                                    logicalCurTempPoint + "," + isTh2Enabled + "," + logPointInfo.getMarkers().toString());
+                                } else {
+									CcuLog.d(L.TAG_CCU_DEVICE, "Invalid current temperature : th2 " + th2TempVal);
+                                }
+                                continue;
+                            } else if (isTh2Enabled && isAcb) {
 								boolean curCondensateStatus = isCondensateNc ? ((val*10) >= 10000) : ((val*10) < 10000);
 								double curCondensateSensor = curCondensateStatus ? 1.0 : 0.0;
 								hayStack.writeHisValById(logPoint.get("id").toString(), curCondensateSensor);
@@ -298,12 +318,17 @@ public class Pulse
 			}
 
 			//Write Current temp point based on th2 enabled or not
-			if(isTh2Enabled && !logicalCurTempPoint.isEmpty() && isSse) {
-				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
-				if ((currentTempInterface != null)) {
+			if (isTh2Enabled && !logicalCurTempPoint.isEmpty() && isSse) {
+				if (isCurrentTemperatureWithinLimits(th2TempVal, phyCurTempPoint)) {
+					hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
+					if ((currentTempInterface != null)) {
+						CcuLog.i(L.TAG_CCU_DEVICE,
+								"Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
+						currentTempInterface.updateTemperature(th2TempVal, nodeAddr);
+					}
+				} else {
 					CcuLog.i(L.TAG_CCU_DEVICE,
-					    "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
-					currentTempInterface.updateTemperature(th2TempVal, nodeAddr);
+							"Invalid Current Temp :" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 				}
 			} else if(!logicalCurTempPoint.isEmpty()){
 				hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
@@ -751,6 +776,7 @@ public class Pulse
 			boolean isTh1Enabled = false;
 			boolean isTh1RoomTempInTI = false;
 			boolean isTh2RoomTempInTI = false;
+            HashMap<Object,Object> phyCurTempPoint = new HashMap<>();
 
 
 			for (HashMap phyPoint : phyPoints) {
@@ -778,12 +804,18 @@ public class Pulse
 					case SENSOR_RT:
 						val = cmRegularUpdateMessage_t.roomTemperature.get();
 						curTempVal = getCMRoomTempConversion(val, tempOffset);
-						hayStack.writeHisValById(phyPoint.get("id").toString(), curTempVal);
-						logicalCurTempPoint = logPoint.get("id").toString();
-						if (phyPoint.get("portEnabled").toString().equals("true") && device.containsKey("ti")) {
-							tiEquip.getRoomTemperature().writeHisVal(curTempVal);
+						if (isCurrentTemperatureWithinLimits(curTempVal, phyPoint)) {
+							hayStack.writeHisValById(phyPoint.get("id").toString(), curTempVal);
+							logicalCurTempPoint = logPoint.get("id").toString();
+							phyCurTempPoint = phyPoint;
+							if (phyPoint.get("portEnabled").toString().equals("true") && device.containsKey("ti")) {
+								tiEquip.getRoomTemperature().writeHisVal(curTempVal);
+							}
+							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : currentTemp " + curTempVal + "," + tempOffset + "," + val);
+						} else {
+							CcuLog.d(L.TAG_CCU_DEVICE, "Invalid  currentTemp " + curTempVal);
 						}
-						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : currentTemp " + curTempVal + "," + tempOffset + "," + val);
+
 						break;
 					case TH2_IN:
 						val = cmRegularUpdateMessage_t.thermistor2.get();
@@ -806,14 +838,17 @@ public class Pulse
 								curTempVal = curTh2TempVal;
 								isTh2RoomTempInTI = true;
 							}
-							hayStack.writeHisValById(phyPoint.get("id").toString(), val / 100);
 							if (oldTh2TempVal != curTh2TempVal)
-								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh2TempVal);
-							tiEquip.getCurrentTemp().writeHisVal(th2TempVal);
-							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : curtempvalth2 " + hayStack.readHisValById(logPoint.get("id").toString()));
+								if (isCurrentTemperatureWithinLimits(val / 100, phyPoint)) {
+									hayStack.writeHisValById(phyPoint.get("id").toString(), val / 100);
+									hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh2TempVal);
+									tiEquip.getCurrentTemp().writeHisVal(th2TempVal);
+									CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : cur temp :th2 " + hayStack.readHisValById(logPoint.get("id").toString()));
+								} else {
 
+									CcuLog.d(L.TAG_CCU_DEVICE, "Invalid currentTemp th2 " + curTempVal );
+								}
 						}
-						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor2 " + th2TempVal + "," + (val * 10) + "," + logicalCurTempPoint + "," + isTh2Enabled);
 						break;
 					case ANALOG_IN_ONE:
 						val = cmRegularUpdateMessage_t.analogSense1.get();
@@ -843,18 +878,22 @@ public class Pulse
 							double curTh1TempVal =
 									getCMRoomTempConversion(ThermistorUtil.getThermistorValueToTemp(val * 10) * 10, offSet);
 							th1TempVal = curTh1TempVal;
-							hayStack.writeHisValById(phyPoint.get("id").toString(), val / 100);
 							if (logPoint.containsKey(Tags.TI) && !isPortMappedToSAT) {
 								curTempVal = curTh1TempVal;
 								isTh1RoomTempInTI = true;
 							}
 							if (oldTh1TempVal != curTh1TempVal)
-								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh1TempVal);
-							tiEquip.getCurrentTemp().writeHisVal(th1TempVal);
-							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : curtempval " + hayStack.readHisValById(logPoint.get("id").toString()));
-							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor1 " + curTh1TempVal);
+								if (isCurrentTemperatureWithinLimits(val / 100, phyPoint)) {
+									hayStack.writeHisValById(phyPoint.get("id").toString(), val / 100);
+									hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh1TempVal);
+									tiEquip.getCurrentTemp().writeHisVal(th1TempVal);
+									CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : curtempval " + hayStack.readHisValById(logPoint.get("id").toString()));
+									CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor1 " + curTh1TempVal);
+									CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor1 " + th1TempVal + "," + (val * 10) + "," + logicalCurTempPoint + "," + isTh1Enabled);
+								} else {
+									CcuLog.d(L.TAG_CCU_DEVICE, " Invalid curtempval  : Thermistor1 " + th1TempVal + "," + (val * 10) + "," + logicalCurTempPoint + "," + isTh1Enabled);
+								}
 						}
-						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor1 " + th1TempVal + "," + (val * 10) + "," + logicalCurTempPoint + "," + isTh1Enabled);
 						break;
 					case SENSOR_RH:
 						val = cmRegularUpdateMessage_t.humidity.get();
@@ -869,17 +908,27 @@ public class Pulse
 			}
 
 			if (isTh1Enabled && !logicalCurTempPoint.isEmpty() && isTh1RoomTempInTI) {
-				hayStack.writeHisValById(logicalCurTempPoint, th1TempVal);
-				if (currentTempInterface != null) {
-					CcuLog.i(L.TAG_CCU_DEVICE, "Current Temp Refresh th1:" + logicalCurTempPoint + " Node Address:" + nodeAddress + " currentTempVal:" + curTempVal);
-					currentTempInterface.updateTemperature(th1TempVal, Short.parseShort(nodeAddress));
+				if (isCurrentTemperatureWithinLimits(th1TempVal, phyCurTempPoint)) {
+					hayStack.writeHisValById(logicalCurTempPoint, th1TempVal);
+					if (currentTempInterface != null) {
+						CcuLog.i(L.TAG_CCU_DEVICE, "Current Temp Refresh th1:" + logicalCurTempPoint + " Node Address:" + nodeAddress + " currentTempVal:" + curTempVal);
+						currentTempInterface.updateTemperature(th1TempVal, Short.parseShort(nodeAddress));
+					}
+				} else {
+					CcuLog.i(L.TAG_CCU_DEVICE, "Invalid Current Temp Refresh th1:" + logicalCurTempPoint + " Node Address:" + nodeAddress + " currentTempVal:" + curTempVal);
+
 				}
 			}//Write Current temp point based on th2 enabled or not,
 			else if (isTh2Enabled && !logicalCurTempPoint.isEmpty() && isTh2RoomTempInTI) {
-				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
-				if (currentTempInterface != null) {
-					CcuLog.d(L.TAG_CCU_DEVICE, "Current Temp Refresh th2:" + logicalCurTempPoint + " Node Address:" + nodeAddress+ " currentTempVal:" + curTempVal);
-					currentTempInterface.updateTemperature(th2TempVal, Short.parseShort(nodeAddress));
+				if (isCurrentTemperatureWithinLimits(th2TempVal, phyCurTempPoint)) {
+					hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
+					if (currentTempInterface != null) {
+						CcuLog.d(L.TAG_CCU_DEVICE, "Current Temp Refresh th2:" + logicalCurTempPoint + " Node Address:" + nodeAddress + " currentTempVal:" + curTempVal);
+						currentTempInterface.updateTemperature(th2TempVal, Short.parseShort(nodeAddress));
+					}
+				} else {
+					CcuLog.d(L.TAG_CCU_DEVICE, "Invalid Current Temp  th2:" + logicalCurTempPoint + " Node Address:" + nodeAddress + " currentTempVal:" + curTempVal);
+
 				}
 			} else if (!logicalCurTempPoint.isEmpty()) {
 				double oldCurTemp = hayStack.readHisValById(logicalCurTempPoint);
@@ -1169,9 +1218,15 @@ public class Pulse
 				", "+snRebootIndicationMsgs.rebootCause+ "Node Status ");
 		short address = (short)snRebootIndicationMsgs.smartNodeAddress.get();
 			LSerial.getInstance().setResetSeedMessage(true);
+		String connectModuleFirmwareVersion;
 		String firmwareVersion =
 				snRebootIndicationMsgs.smartNodeMajorFirmwareVersion + "." + snRebootIndicationMsgs.smartNodeMinorFirmwareVersion;
-		CCUUtils.writeFirmwareVersion(firmwareVersion, address, false);
+        CCUUtils.writeFirmwareVersion(firmwareVersion, address, false);
+		// updating the connectModule firmwareVersion  for hyperStatSplit : -> rts means slave device
+		if (snRebootIndicationMsgs.smartNodeDeviceType.toString().equals(FirmwareDeviceType_t.FIRMWARE_DEVICE_HYPERSTAT_SPLIT.toString())) {
+			connectModuleFirmwareVersion = snRebootIndicationMsgs.rtsMajorFirmwareVersion + "." + snRebootIndicationMsgs.rtsMinorFirmwareVersion;
+			writeFirmwareVersionForConnectModule(CCUHsApi.getInstance(), connectModuleFirmwareVersion, String.valueOf(address));
+		}
 			String str = "addr:"+address+ " Node status: ";
 			str+= ", master_fw_ver:" + firmwareVersion;
 			switch (snRebootIndicationMsgs.rebootCause.get()){

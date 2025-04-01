@@ -17,13 +17,18 @@ public enum FirmwareComponentType_t
 	DUMMY_DEVICE_TYPE(null,null,null),
 	HELIO_NODE_DEVICE_TYPE("HelioNode", "hn_fw/", 	"helionode"),
 	HYPERSTAT_SPLIT_DEVICE_TYPE("HyperStat", "hs_fw/", "hyperstatsplit"),
-	CONNECT_MODULE_DEVICE_TYPE("ConnectModule", "connect_fw/", "hyperstatsplit");
+	CONNECT_MODULE_DEVICE_TYPE("ConnectModule", "connect_fw/", "hyperstatsplit"),
+	Reserve1(null,null,null),
+	MY_STAT_DEVICE_TYPE("MyStat", "ms_fw/", "mystat"),
+	Reserve2(null,null,null),
+	SMART_NODE2_DEVICE_TYPE("SmartNode", "sn_fw/", "smartnode");
+
 
 	private final String updateFileName;
 	private final String updateUrlDirectory;
 	private final String hsMarkerName;
 
-	private FirmwareComponentType_t(String updateFileName, String updateUrlDirectory, String hsMarkerName) {
+	FirmwareComponentType_t(String updateFileName, String updateUrlDirectory, String hsMarkerName) {
 		this.updateFileName = updateFileName;
 		this.updateUrlDirectory = updateUrlDirectory;
 		this.hsMarkerName = hsMarkerName;

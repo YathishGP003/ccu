@@ -47,6 +47,7 @@ import a75f.io.logic.bo.building.ccu.RoomTempSensor;
 import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
+import a75f.io.logic.bo.building.definitions.UtilKt;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.migration.MigrationHandler;
@@ -468,8 +469,9 @@ public class MigrationUtil {
             HashMap<Object, Object> transformerPoint = ccuHsApi.readEntity("(transformer or" +
                     " transformer20 or transformer50) and equipRef == \"" + equip.get("id") + "\"");
             HashMap<Object, Object> dev = ccuHsApi.readEntity("device and equipRef == \"" + equip.get("id") + "\"");
+            String portName = UtilKt.getPortName(Port.ANALOG_IN_ONE.name());
             ArrayList<HashMap<Object, Object>> phyPoints = CCUHsApi.getInstance().readAllEntities("point and physical" +
-                    " and sensor and deviceRef == \"" + dev.get("id") + "\"" +" and port == \""+Port.ANALOG_IN_ONE+"\"");
+                    " and sensor and deviceRef == \"" + dev.get("id") + "\"" +" and (port == \""+Port.ANALOG_IN_ONE+"\" or port == \""+portName+"\")");
             for(HashMap<Object, Object> ha :phyPoints){
                 if(ha.get("port").toString().equals((Port.ANALOG_IN_ONE).toString()) && transformerPoint.size() > 0){
                     if(!ha.get("pointRef").toString().equals(transformerPoint.get("id").toString())){

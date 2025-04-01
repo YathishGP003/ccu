@@ -11,12 +11,15 @@ import a75f.io.domain.equips.BuildingEquip
 import a75f.io.domain.equips.CCUDiagEquip
 import a75f.io.domain.equips.CCUEquip
 import a75f.io.domain.equips.DomainEquip
+import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.PointBuilderConfig
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.logic.DomainManager.addDomainEquips
+import a75f.io.domain.logic.EntityMapper
 import a75f.io.logger.CcuLog
 import android.annotation.SuppressLint
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
@@ -354,6 +357,9 @@ object Domain {
     fun readEquip(modelId: String) : Map<Any,Any> {
         return hayStack.readEntity("equip and sourceModel==\"$modelId\" or modelId == \"$modelId\"")
     }
+    fun readPointById(id : String) : HashMap<Any,Any> {
+        return hayStack.readMapById(id)
+    }
 
     /* using new model version to fetch the device  which is not migrated to new model version
       specifically for bypass damper and DAB devices
@@ -455,6 +461,28 @@ object Domain {
                     tz,
                     equipDis
                 )
+            )
+        }
+    }
+
+    fun createDomainDevicePoint(
+        deviceModel: SeventyFiveFDeviceDirective,
+        equipModel: SeventyFiveFProfileDirective,
+        profileConfiguration: ProfileConfiguration,
+        device: a75f.io.api.haystack.Device,
+        deviceDis: String,
+        domainName: String,
+    ) {
+        val entityMapper = EntityMapper(equipModel)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+        val modelPointDef = deviceModel.points.find { it.domainName == domainName }
+        modelPointDef?.run {
+            CcuLog.d(LOG_TAG, "Creating point for domainName: $domainName ")
+            deviceBuilder.createPoint(
+                modelPointDef,
+                profileConfiguration,
+                device,
+                deviceDis
             )
         }
     }

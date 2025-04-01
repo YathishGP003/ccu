@@ -27,7 +27,7 @@ internal object HyperStatMonitoringConfigHandler {
         val hyperStatMonitoringEquip = hayStack.readEntity("equip and id == "+configPoint.equipRef)
 
         val profileModel = ModelLoader.getHyperStatMonitoringModel() as SeventyFiveFProfileDirective
-        val deviceModel = ModelLoader.getHyperStatDevice() as SeventyFiveFDeviceDirective
+        val deviceModel = ModelLoader.getHyperStatDeviceModel() as SeventyFiveFDeviceDirective
 
         val equipBuilder = ProfileEquipBuilder(hayStack)
         val entityMapper = EntityMapper(profileModel)

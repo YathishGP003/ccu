@@ -35,6 +35,9 @@ import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatCpuFragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatHpuFragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatPipe2Fragment;
 import a75f.io.renatus.profiles.ti.TIFragment;
 import a75f.io.renatus.profiles.oao.OAOProfileFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
@@ -414,6 +417,36 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
+
+        else if (mProfileType == ProfileType.MYSTAT_PIPE2) {
+            if (L.isSimulation()) {
+                showDialogFragment(
+                        MyStatPipe2Fragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType),MyStatPipe2Fragment.Companion.getID());
+            } else {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        } else if (mProfileType == ProfileType.MYSTAT_CPU) {
+            if (L.isSimulation()) {
+                showDialogFragment(
+                        MyStatCpuFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType),MyStatCpuFragment.Companion.getID());
+            } else {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+
+        } else if (mProfileType == ProfileType.MYSTAT_HPU) {
+            if (L.isSimulation()) {
+                showDialogFragment(
+                        MyStatHpuFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType),MyStatHpuFragment.Companion.getID());
+            } else {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+
+        }
+
+
         else if (mProfileType == ProfileType.HYPERSTATSPLIT_CPU) {
             if (L.isSimulation()) {
                 showDialogFragment(
@@ -519,8 +552,21 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 pairinginstruct.setImageResource(R.drawable.hyperstat_split_pairing_screen);
                 pairingInstructionMainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
+        } else if (mNodeType == NodeType.MYSTAT) {
+            title.setText(R.string.title_pair_mystat);
+            if (CCUUiUtil.isDaikinEnvironment(requireContext()))
+                pairinginstruct.setImageResource(R.drawable.daikenhsspairscreen);
+            else if (CCUUiUtil.isCarrierThemeEnabled(requireContext()))
+                pairinginstruct.setImageResource(R.drawable.carr_ms_paring);
+            else if(CCUUiUtil.isAiroverseThemeEnabled(requireContext()))
+                pairinginstruct.setImageResource(R.drawable.air_ms_paring);
+            else {
+                pairinginstruct.setImageResource(R.drawable.ms_paring_75);
+                pairingInstructionMainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
+            }
         }
     }
+
     
     
     @Override

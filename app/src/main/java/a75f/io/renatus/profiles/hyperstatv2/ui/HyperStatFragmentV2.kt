@@ -100,7 +100,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
         val valuesPickerState = rememberPickerState()
         Column(modifier = modifier.padding(start = 400.dp, end = 400.dp)) {
             val temperatureOffsetsList = viewModel.getListByDomainName(DomainName.temperatureOffset, viewModel.equipModel)
-            TempOffsetPicker(header = "TEMP OFFSET", state = valuesPickerState, items = temperatureOffsetsList, onChanged = { it: String -> viewModel.viewState.value.temperatureOffset = it.toDouble() }, startIndex = temperatureOffsetsList.indexOf(viewModel.viewState.value.temperatureOffset.toString()), visibleItemsCount = 3, textModifier = Modifier.padding(8.dp), textStyle = TextStyle(fontSize = 18.sp))
+            TempOffsetPicker(header = "Temperature Offset", state = valuesPickerState, items = temperatureOffsetsList, onChanged = { it: String -> viewModel.viewState.value.temperatureOffset = it.toDouble() }, startIndex = temperatureOffsetsList.indexOf(viewModel.viewState.value.temperatureOffset.toString()), visibleItemsCount = 3, textModifier = Modifier.padding(8.dp), textStyle = TextStyle(fontSize = 18.sp))
         }
     }
 
@@ -151,7 +151,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
      * if any profile specific changes required.
      */
     @Composable
-    open fun Configurations(modifier: Modifier = Modifier) {
+    open fun Configurations(modifier: Modifier) {
         Row(modifier = modifier.fillMaxWidth()) {
             Image(painter = painterResource(id = R.drawable.input_hyperstat_cpu), contentDescription = "Relays", modifier = Modifier
                     .weight(1.5f)

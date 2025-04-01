@@ -149,6 +149,44 @@ open class AdvancedHybridAhuState {
             0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10,0,10,0,10
         )
     )
+    //OAO state
+    var analog1MinOaoDamper by mutableStateOf(0.0)
+    var analog1MaxOaoDamper by mutableStateOf(0.0)
+    var analog2MinOaoDamper by mutableStateOf(0.0)
+    var analog2MaxOaoDamper by mutableStateOf(0.0)
+    var analog3MinOaoDamper by mutableStateOf(0.0)
+    var analog3MaxOaoDamper by mutableStateOf(0.0)
+    var analog4MinOaoDamper by mutableStateOf(0.0)
+    var analog4MaxOaoDamper by mutableStateOf(0.0)
+
+    var analog1MinReturnDamper by mutableStateOf(0.0)
+    var analog1MaxReturnDamper by mutableStateOf(0.0)
+    var analog2MinReturnDamper by mutableStateOf(0.0)
+    var analog2MaxReturnDamper by mutableStateOf(0.0)
+    var analog3MinReturnDamper by mutableStateOf(0.0)
+    var analog3MaxReturnDamper by mutableStateOf(0.0)
+    var analog4MinReturnDamper by mutableStateOf(0.0)
+    var analog4MaxReturnDamper by mutableStateOf(0.0)
+
+
+    var outsideDamperMinOpenDuringRecirculationPos by mutableStateOf (0.0)
+    var outsideDamperMinOpenDuringConditioningPos by mutableStateOf (0.0)
+    var outsideDamperMinOpenDuringFanLowPos by mutableStateOf (0.0)
+    var outsideDamperMinOpenDuringFanMediumPos by mutableStateOf (0.0)
+    var outsideDamperMinOpenDuringFanHighPos by mutableStateOf (0.0)
+    var returnDamperMinOpenPos by mutableStateOf (0.0)
+    var exhaustFanStage1ThresholdPos by mutableStateOf (0.0)
+    var exhaustFanStage2ThresholdPos by mutableStateOf (0.0)
+    var currentTransformerTypePos by mutableStateOf (0.0)
+    var oaoCo2ThresholdVal by mutableStateOf (0.0)
+    var exhaustFanHysteresisPos by mutableStateOf (0.0)
+    var usePerRoomCO2SensingState by mutableStateOf (false)
+    var systemPurgeOutsideDamperMinPos by mutableStateOf (0.0)
+    var enhancedVentilationOutsideDamperMinOpenPos by mutableStateOf (0.0)
+
+    var enableOutsideAirOptimization by mutableStateOf (false)
+
+
 
 }
 

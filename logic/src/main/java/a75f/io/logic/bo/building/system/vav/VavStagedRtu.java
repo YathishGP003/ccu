@@ -284,9 +284,16 @@ public class VavStagedRtu extends VavSystemProfile
         }
         systemFanLoopOp = Math.min(systemFanLoopOp, 100);
 
-
-        systemCo2LoopOp = VavSystemController.getInstance().getSystemState() == SystemController.State.OFF
-                                  ? 0 : (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200 ;
+        if (VavSystemController.getInstance().getSystemState() == COOLING) {
+            systemCo2LoopOp = (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200;
+        } else if (VavSystemController.getInstance().getSystemState() == HEATING){
+            double co2Val = VavSystemController.getInstance().getSystemCO2WA();
+            if (co2Val > 0) {
+                systemCo2LoopOp = (co2Val - SystemConstants.CO2_CONFIG_MIN) * 100 / 200;
+            }
+        }
+        systemCo2LoopOp = Math.min(systemCo2LoopOp, 100);
+        systemCo2LoopOp = Math.max(systemCo2LoopOp, 0);
 
         systemEquip.getCoolingLoopOutput().writePointValue(systemCoolingLoopOp);
         systemCoolingLoopOp = systemEquip.getCoolingLoopOutput().readHisVal();

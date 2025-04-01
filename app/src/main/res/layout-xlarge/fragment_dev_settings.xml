@@ -159,6 +159,7 @@
                 android:orientation="horizontal">
 
                 <TextView
+                    android:id="@+id/anrReportText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
@@ -169,6 +170,22 @@
 
                 <ToggleButton
                     android:id="@+id/anrReportBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:text="Trigger ANR"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+
+                <Button
+                    android:id="@+id/anrTriggerBtn"
+                    android:text="ANR"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp" />

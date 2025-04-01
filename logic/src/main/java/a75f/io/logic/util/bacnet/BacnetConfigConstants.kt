@@ -22,6 +22,7 @@ object  BacnetConfigConstants {
     const val BACNET_TYPE = "bacnetType"
     const val BACNET_FD_AUTO_STATE = "fdAutoState"
     const val IS_GLOBAL = "isGlobal"
+    const val IS_BACNET_STACK_INITIALIZED = "isBacnetStackInitialized"
 
 
 
@@ -68,4 +69,9 @@ object  BacnetConfigConstants {
     const val BROADCAST_BACNET_APP_GLOBAL_PARAM = "a75f.io.renatus.BROADCAST_BACNET_APP_GLOBAL_PARAM"
 
 
+}
+enum class BacnetServerStatus {
+    NOT_INITIALIZED,
+    INITIALIZED_ONLINE,
+    INITIALIZED_OFFLINE
 }

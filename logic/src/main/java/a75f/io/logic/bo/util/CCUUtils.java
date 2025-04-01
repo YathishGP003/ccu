@@ -111,10 +111,24 @@ public class CCUUtils
         }
         if (!device.isEmpty()) {
             Device deviceInfo = new Device.Builder().setHashMap(device).build();
-            HashMap<Object, Object> firmwarePoint =
-                    hayStack.readEntity("point and physical and firmware and version and deviceRef == \"" + deviceInfo.getId() + "\"");
+            HashMap<Object, Object> firmwarePoint;
+            //if it is hyperStatSplit device ,then query with domainName, not to get connectModule firmware point
+            if (device.get("hyperstatsplit") != null) {
+                firmwarePoint =
+                        hayStack.readEntity("point and physical  and firmware and domainName == \"" + DomainName.firmwareVersion + "\" and  deviceRef == \"" + deviceInfo.getId() + "\"");
+            } else {
+                firmwarePoint =
+                        hayStack.readEntity("point and physical and firmware and version and deviceRef == \"" + deviceInfo.getId() + "\"");
+            }
             hayStack.writeDefaultValById(firmwarePoint.get("id").toString(), firmwareVersion);
         }
+    }
+
+    public static void writeFirmwareVersionForConnectModule(CCUHsApi ccuHsApi, String firmwareVersion, String address) {
+        HashMap<Object, Object> device = ccuHsApi.readEntity("device and addr == \"" + address + "\"");
+        HashMap<Object, Object> connectModuleFirmwarePoint =
+                ccuHsApi.readEntity("domainName==\"" + DomainName.firmwareVersionConnectModule + "\" and deviceRef == \"" + device.get("id").toString() + "\"");
+        ccuHsApi.writeDefaultValById(connectModuleFirmwarePoint.get("id").toString(), firmwareVersion);
     }
 
     private static void writeFirmwareVersionForTiDevices(CCUHsApi ccuHsApi, String firmwareVersion) {
@@ -143,14 +157,18 @@ public class CCUUtils
     }
 
     public static void updateCcuSpecificEntitiesWithCcuRef(CCUHsApi ccuHsApi, Boolean isCcuReregistration){
+        // the total number of tasks using executorService and to be considered by latch
+        // update this TOTAL_TASKS value if any new task is added/removed
+        final int TOTAL_TASKS = 7;
         if(CCUHsApi.getInstance().readEntity("ccu").size() == 0){
             return;
         }
-        CountDownLatch latch = new CountDownLatch(8);
+        CountDownLatch latch = new CountDownLatch(TOTAL_TASKS);
         ExecutorService executorService = Executors.newFixedThreadPool(8);
 
         String ccuId = CCUHsApi.getInstance().readEntity("ccu").get("id").toString();
 
+        // Tasks using executor Service and requires latch for synchronization, currently 7
         executeTask(executorService, latch, () -> updateZoneWithUpdatedCcuRef(ccuHsApi, isCcuReregistration));
         executeTask(executorService, latch, () -> updateZoneOccupancyPointWithUpdatedCcuRef(ccuHsApi, isCcuReregistration));
         executeTask(executorService, latch, () -> updateNonTunerEquipAndPointsWithUpdatedCcuRef(ccuHsApi, isCcuReregistration));
@@ -216,7 +234,9 @@ public class CCUUtils
     public static void executeTask(ExecutorService executorService, CountDownLatch latch, Runnable task) {
         executorService.submit(() -> {
             task.run();
+            CcuLog.d(TAG_CCU_REF, "latchCount before = " + latch.getCount());
             latch.countDown();
+            CcuLog.d(TAG_CCU_REF, "latchCount after = " + latch.getCount());
         });
     }
 
@@ -387,6 +407,8 @@ public class CCUUtils
             return NodeType.HYPERSTATSPLIT;
         } else if (domainName.contains("hyperstat")) {
             return NodeType.HYPER_STAT;
+        } else if (domainName.contains("mystat")) {
+            return NodeType.MYSTAT;
         } else if (domainName.contains("otn")) {
             return NodeType.OTN;
         } else {
@@ -397,7 +419,16 @@ public class CCUUtils
         return L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU ||
                 L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU;
     }
+    public static String getTruncatedString(String stringValue, int stringLength, int startIndex, int endIndex) {
+        return stringValue.length() > stringLength ? stringValue.substring(startIndex, endIndex) + "..." : stringValue;
+    }
 
-
-
+    public static boolean isCurrentTemperatureWithinLimits(double curTemp, HashMap<Object, Object> point) {
+        if (point.get("minVal") != null && point.get("maxVal") != null && point.get("domainName") != null) {
+            double minVal = Double.parseDouble(point.get("minVal").toString());
+            double maxVal = Double.parseDouble(point.get("maxVal").toString());
+            return curTemp >= minVal && curTemp <= maxVal;
+        }
+        return true;
+    }
 }

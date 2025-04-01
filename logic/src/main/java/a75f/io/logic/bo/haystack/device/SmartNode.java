@@ -21,6 +21,7 @@ import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.definitions.UtilKt;
 import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.plc.PlcProfileConfig;
@@ -461,8 +462,10 @@ public class SmartNode
             return new RawPoint.Builder().setHDict(sensorPoint).build();
         }
 
+        String portName = UtilKt.getPortName(p.name());
+
         sensorPoint = CCUHsApi.getInstance().readHDict("point and sensor and physical and deviceRef == \""+deviceRef+"\""
-                +" and port == \""+p+"\"");
+                +" and (port == \""+p+"\" or port == \""+portName+"\")");
         return ((sensorPoint != null) && !sensorPoint.isEmpty()) ? new RawPoint.Builder().setHDict(sensorPoint).build() : null;
     }
 
@@ -489,8 +492,10 @@ public class SmartNode
         {
             return ;
         }
-        
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        String portName = UtilKt.getPortName(port);
+
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \""
+                + device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
         if (!point.get("analogType" ).equals(type))
         {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();
@@ -525,7 +530,9 @@ public class SmartNode
             CcuLog.d(L.TAG_CCU_DEVICE," Update Physical point "+port);
             return ;
         }
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        String portName = UtilKt.getPortName(port);
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \""
+                + device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
         RawPoint p = new RawPoint.Builder().setHashMap(point).build();
         p.setPointRef(pointRef);
         CCUHsApi.getInstance().updatePoint(p,p.getId());
@@ -556,7 +563,9 @@ public class SmartNode
             return ;
         }
 
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        String portName = UtilKt.getPortName(port.name());
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \""
+                + device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
 
         if (point.isEmpty()) {
             point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+getDomainNameFromPort(port)+"\"");
@@ -577,8 +586,9 @@ public class SmartNode
         {
             return ;
         }
-        
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        String portName = UtilKt.getPortName(port);
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \""
+                + device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
         if (point != null && !point.isEmpty())
         {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();
@@ -618,8 +628,9 @@ public class SmartNode
         {
             return null;
         }
-        
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        String portName = UtilKt.getPortName(port);
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" +
+                device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
         if (point != null && !point.isEmpty())
         {
             return new RawPoint.Builder().setHashMap(point).build();

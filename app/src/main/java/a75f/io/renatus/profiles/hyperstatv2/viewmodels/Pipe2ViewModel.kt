@@ -114,6 +114,8 @@ class Pipe2ViewModel(application: Application) : HyperStatViewModel(application)
             val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
             CcuLog.i(Domain.LOG_TAG, " updateDeviceAndPoints")
             deviceBuilder.updateDeviceAndPoints(profileConfiguration, deviceModel, equipId, hayStack.site!!.id, getDeviceDis())
+            val equip = Pipe2V2Equip(equipId)
+            updateFanMode(true, equip, getPipe2FanLevel(profileConfiguration as Pipe2Configuration))
         }
         profileConfiguration.apply { setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap()) }
     }

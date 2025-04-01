@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.system
 
+import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.AdvancedHybridSystemEquip
@@ -8,7 +9,7 @@ import a75f.io.domain.equips.DomainEquip
 import a75f.io.logic.bo.building.system.util.DuctPressureSensorSource
 
 enum class AdvancedAhuRelayAssociationType {
-    LOAD_COOLING, LOAD_HEATING, LOAD_FAN, HUMIDIFIER, DEHUMIDIFIER, SAT_COOLING, SAT_HEATING, FAN_PRESSURE, OCCUPIED_ENABLE, FAN_ENABLE, AHU_FRESH_AIR_FAN_COMMAND;
+    LOAD_COOLING, LOAD_HEATING, LOAD_FAN, HUMIDIFIER, DEHUMIDIFIER, SAT_COOLING, SAT_HEATING, FAN_PRESSURE, OCCUPIED_ENABLE, FAN_ENABLE, AHU_FRESH_AIR_FAN_COMMAND, EXHAUST_FAN;
 
     fun isConditioningStage() = this == LOAD_COOLING || this == SAT_COOLING || this == LOAD_HEATING || this == SAT_HEATING
     fun isSatStage() = this == SAT_COOLING || this == SAT_HEATING
@@ -16,7 +17,7 @@ enum class AdvancedAhuRelayAssociationType {
 }
 
 enum class AdvancedAhuAnalogOutAssociationType {
-    PRESSURE_FAN, SAT_COOLING, SAT_HEATING, LOAD_COOLING, LOAD_HEATING, LOAD_FAN, CO2_DAMPER, COMPOSITE_SIGNAL
+    PRESSURE_FAN, SAT_COOLING, SAT_HEATING, LOAD_COOLING, LOAD_HEATING, LOAD_FAN, CO2_DAMPER, COMPOSITE_SIGNAL, OAO_DAMPER, RETURN_DAMPER
 }
 
 fun getCMRelayAssociationMap(systemEquip: AdvancedHybridSystemEquip): Map<Point, Point> {
@@ -363,6 +364,8 @@ fun connectAnalogOutAssociationToDomainName(associationIndex: Int) : String {
         2 -> DomainName.loadBasedFanControl
         3 -> DomainName.compositeSignal
         4 -> DomainName.co2BasedDamperControl
+        5 -> DomainName.oaoDamper
+        6 -> DomainName.returnDamperCmd
         else -> throw IllegalArgumentException("Invalid association index $associationIndex")
     }
 }
@@ -392,6 +395,8 @@ fun relayAssociationDomainNameToType (domainName : String) : AdvancedAhuRelayAss
         DomainName.occupiedEnable -> return AdvancedAhuRelayAssociationType.OCCUPIED_ENABLE
         DomainName.fanEnable -> return AdvancedAhuRelayAssociationType.FAN_ENABLE
         DomainName.ahuFreshAirFanRunCommand -> return AdvancedAhuRelayAssociationType.AHU_FRESH_AIR_FAN_COMMAND
+
+        DomainName.exhaustFanStage1 , DomainName.exhaustFanStage2 -> return AdvancedAhuRelayAssociationType.EXHAUST_FAN
         else -> throw IllegalArgumentException("Invalid domain name $domainName")
 
 
@@ -545,6 +550,10 @@ fun getDomainPointForName(name: String, connectEquip: ConnectModuleEquip): Point
         DomainName.loadBasedFanControl -> connectEquip.loadBasedFanControl
         DomainName.co2BasedDamperControl -> connectEquip.co2BasedDamperControl
         DomainName.compositeSignal -> connectEquip.compositeSignal
+        DomainName.oaoDamper -> connectEquip.oaoDamper
+        DomainName.returnDamperCmd -> connectEquip.returnDamperCmd
+        DomainName.exhaustFanStage1 -> connectEquip.exhaustFanStage1
+        DomainName.exhaustFanStage2 -> connectEquip.exhaustFanStage2
         else -> throw IllegalArgumentException("Invalid point $name")
     }
 }
@@ -552,10 +561,12 @@ fun getDomainPointForName(name: String, connectEquip: ConnectModuleEquip): Point
 fun getStageIndex(point: Point) : Int {
     return when (point.domainName) {
         DomainName.loadCoolingStage1, DomainName.loadHeatingStage1, DomainName.loadFanStage1,
-        DomainName.satCoolingStage1, DomainName.satHeatingStage1, DomainName.fanPressureStage1 -> 0
+        DomainName.satCoolingStage1, DomainName.satHeatingStage1, DomainName.fanPressureStage1,
+        DomainName.exhaustFanStage1 -> 0
 
         DomainName.loadCoolingStage2, DomainName.loadHeatingStage2, DomainName.loadFanStage2,
-        DomainName.satCoolingStage2, DomainName.satHeatingStage2, DomainName.fanPressureStage2 -> 1
+        DomainName.satCoolingStage2, DomainName.satHeatingStage2, DomainName.fanPressureStage2,
+        DomainName.exhaustFanStage2 -> 1
 
         DomainName.loadCoolingStage3, DomainName.loadHeatingStage3, DomainName.loadFanStage3,
         DomainName.satCoolingStage3, DomainName.satHeatingStage3, DomainName.fanPressureStage3 -> 2

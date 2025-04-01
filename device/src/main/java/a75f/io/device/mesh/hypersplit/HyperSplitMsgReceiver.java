@@ -1,8 +1,8 @@
 package a75f.io.device.mesh.hypersplit;
 
-import static a75f.io.api.haystack.Tags.DOMAIN_NAME;
 import static a75f.io.api.haystack.Tags.HYPERSTATSPLIT;
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
+import static a75f.io.logic.bo.util.CCUUtils.isCurrentTemperatureWithinLimits;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -48,7 +47,7 @@ import a75f.io.logic.bo.haystack.device.HyperStatSplitDevice;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.interfaces.ZoneDataInterface;
-import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler;
+import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler;
 
 public class HyperSplitMsgReceiver {
 
@@ -453,13 +452,19 @@ public class HyperSplitMsgReceiver {
 
     private static void writeRoomTemp(RawPoint rawPoint, Point point,
                                       HyperSplit.HyperSplitRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack) {
-
-        hayStack.writeHisValById(rawPoint.getId(), (double) regularUpdateMessage.getRegularUpdateCommon().getRoomTemperature());
-        double curRoomTemp = hayStack.readHisValById(point.getId());
-            hayStack.writeHisValById(point.getId(), Pulse.getRoomTempConversion((double) regularUpdateMessage.getRegularUpdateCommon().getRoomTemperature()));
-            if (currentTempInterface != null) {
-                currentTempInterface.updateTemperature(curRoomTemp, Short.parseShort(point.getGroup()));
-            }
+        Double currentTemp = Pulse.getRoomTempConversion((double) regularUpdateMessage.getRegularUpdateCommon().getRoomTemperature());
+        HashMap<Object, Object> currentTempPoint = hayStack.readMapById(rawPoint.getId());
+      if(isCurrentTemperatureWithinLimits(currentTemp,currentTempPoint)) {
+          hayStack.writeHisValById(rawPoint.getId(), currentTemp);
+          double curRoomTemp = hayStack.readHisValById(point.getId());
+          hayStack.writeHisValById(point.getId(), currentTemp);
+          if (currentTempInterface != null) {
+              currentTempInterface.updateTemperature(curRoomTemp, Short.parseShort(point.getGroup()));
+          }
+      }
+      else {
+          CcuLog.d(L.TAG_CCU_DEVICE,"Invalid Current Temp "+ currentTemp);
+      }
     }
 
     private static void writeUniversalInVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, int val) {

@@ -6,16 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.PhysicalPoint;
 import a75f.io.domain.api.Point;
 import a75f.io.domain.equips.DabModulatingRtuSystemEquip;
-import a75f.io.domain.equips.VavModulatingRtuSystemEquip;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.BacnetIdKt;
-import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -24,23 +20,12 @@ import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemMode;
-import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.tuners.TunerUtil;
-import a75f.io.logic.util.SystemProfileUtil;
 
 import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
-import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.createAnalog4LoopConfigPoints;
-import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.createChilledWaterConfigPoints;
-import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.createConfigPoints;
-import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.createLoopPoints;
-import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.deleteAnalog4LoopConfigPoints;
-import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.deleteConfigPoints;
-import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.deleteLoopOutputPoints;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
-import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
 
 public class DabFullyModulatingRtu extends DabSystemProfile
 {
@@ -92,7 +77,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     
     public double systemDCWBValveLoopOutput;
     DcwbAlgoHandler dcwbAlgoHandler = null;
-    
+
     private synchronized void updateSystemPoints() {
 
         systemEquip = (DabModulatingRtuSystemEquip) Domain.systemEquip;
@@ -119,7 +104,11 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             
         } else {
             //Analog1 controls cooling when the DCWB is disabled
-            updateAnalog1DabOutput(dabSystem);
+            if(L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
+                updateAnalog1DabOutput(dabSystem, true);
+            } else {
+                updateAnalog1DabOutput(dabSystem, false);
+            }
         }
         
         //Analog2 controls Central Fan
@@ -203,10 +192,16 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     @Override
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();
+        Boolean economizingOn = systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable();
         status.append((systemFanLoopOp > 0 || Domain.cmBoardDevice.getRelay3().readPointValue() > 0) ? " Fan ON ": "");
-        status.append((systemCoolingLoopOp > 0 && !isCoolingLockoutActive()) ? " | Cooling ON ":"");
+        if(economizingOn) {
+            double economizingToMainCoolingLoopMap =  L.ccu().oaoProfile.getOAOEquip().getEconomizingToMainCoolingLoopMap().readPriorityVal();
+            status.append((systemCoolingLoopOp >= economizingToMainCoolingLoopMap && !isCoolingLockoutActive()) ? " | Cooling ON ":"");
+        } else {
+            status.append((systemCoolingLoopOp > 0 && !isCoolingLockoutActive()) ? " | Cooling ON ":"");
+        }
         status.append((systemHeatingLoopOp > 0 && !isHeatingLockoutActive()) ? " | Heating ON ":"");
-        if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
+        if (economizingOn) {
             status.insert(0, "Free Cooling Used |");
         }
         return status.toString().equals("")? "System OFF" + isDeHumidifierOn() + isHumidifierOn() : status.toString() + isDeHumidifierOn() + isHumidifierOn();
@@ -227,7 +222,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         deleteSystemConnectModule();
     }
     
-    private void updateAnalog1DabOutput(DabSystemController dabSystem) {
+    private void updateAnalog1DabOutput(DabSystemController dabSystem, Boolean economizingOn) {
         
         double signal = 0;
         if (dabSystem.getSystemState() == COOLING) {
@@ -249,7 +244,20 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             if (isCoolingLockoutActive()) {
                 signal = analogMin * ANALOG_SCALE;
             } else {
-                signal = getModulatedAnalogVal(analogMin, analogMax, systemCoolingLoopOp);
+                double economizingToMainCoolingLoopMap = 0;
+                if(L.ccu().oaoProfile != null) {
+                    economizingToMainCoolingLoopMap =  L.ccu().oaoProfile.getOAOEquip().getEconomizingToMainCoolingLoopMap().readPriorityVal();
+                }
+                if(!economizingOn) {
+                    /* OAT > Max Economizing Temp */
+                    signal = getModulatedAnalogVal(analogMin, analogMax, systemCoolingLoopOp);
+                } else if (economizingOn && systemCoolingLoopOp < economizingToMainCoolingLoopMap) {
+                    /* When only Economizing is active, (CLO < 30% (economizingToMainCoolingLoopMap) */
+                    signal = analogMin * ANALOG_SCALE;
+                } else if (economizingOn && systemCoolingLoopOp >= economizingToMainCoolingLoopMap) {
+                    /* Economizing + Analog Cooling */
+                    signal = getModulatedAnalogValDuringEcon(analogMin, analogMax, systemCoolingLoopOp, economizingToMainCoolingLoopMap);
+                }
             }
         }
         
@@ -488,7 +496,36 @@ public class DabFullyModulatingRtu extends DabSystemProfile
 
     
     }
-    
+
+    /**
+     * Calculates a modulated analog value during economizing based on the given range,
+     * the input percentage value, and the economizing threshold.
+     *
+     * @param analogMin                        The minimum value of the analog range.
+     * @param analogMax                        The maximum value of the analog range.
+     * @param val                              The current cooling loop percentage (expected between 0 and 100)
+     *                                         representing the position within the range.
+     * @param economizingToMainCoolingLoopMap  The threshold percentage value at which economizing ends
+     *                                         and modulation begins.
+     * @return                                 analogMin if loop output is less than economizingToMainCoolingLoopMap or return
+     *                                         the scaled value between analogMin and analogMax based on the input percentage.
+     */
+    private double getModulatedAnalogValDuringEcon(double analogMin, double analogMax, double val, double economizingToMainCoolingLoopMap) {
+        double modulatedVal;
+        if(val < economizingToMainCoolingLoopMap) {
+            return analogMin * ANALOG_SCALE;
+        }
+        if(economizingToMainCoolingLoopMap >= 100) {
+            return analogMax * ANALOG_SCALE;
+        }
+        if (analogMax > analogMin) {
+            modulatedVal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * ((val - economizingToMainCoolingLoopMap) / (100 - economizingToMainCoolingLoopMap))));
+        } else {
+            modulatedVal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * ((val - economizingToMainCoolingLoopMap) / (100 - economizingToMainCoolingLoopMap))));
+        }
+        return modulatedVal;
+    }
+
     private double getModulatedAnalogVal(double analogMin, double analogMax, double val) {
         double modulatedVal;
         if (analogMax > analogMin) {

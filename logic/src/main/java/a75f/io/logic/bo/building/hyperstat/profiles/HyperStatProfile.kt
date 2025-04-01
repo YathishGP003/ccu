@@ -22,8 +22,8 @@ import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
 import a75f.io.logic.bo.building.hyperstat.common.UserIntents
 import a75f.io.logic.bo.building.hyperstat.profiles.util.updateAllLoopOutput
 import a75f.io.logic.bo.building.schedules.Occupancy
-import a75f.io.logic.jobs.HyperStatUserIntentHandler
-import a75f.io.logic.jobs.HyperStatUserIntentHandler.Companion.hyperStatStatus
+import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler
+import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler.Companion.hyperStatStatus
 import org.projecthaystack.HDateTime
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef

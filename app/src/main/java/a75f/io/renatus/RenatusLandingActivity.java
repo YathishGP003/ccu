@@ -104,7 +104,8 @@ import a75f.io.renatus.util.remotecommand.bundle.BundleInstallManager;
 import a75f.io.usbserial.UsbServiceActions;
 import kotlin.Pair;
 
-public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface, BacnetConfigChange {
+public class
+RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface, BacnetConfigChange {
 
     private static final String TAG = "LandingActivityLog";
     private static CountDownTimer countDownTimer;
@@ -140,6 +141,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     public static TabLayout mTabLayout, btnTabs;
     private Prefs prefs;
     private boolean allowReselectTab = false;
+    private boolean anyPasswordDialogAlive = false;
+    private final int DASHBOARD_TAB_INDEX = 0;
+    private final int ZONES_TAB_INDEX = 1;
+    private final int SYSTEM_TAB_INDEX = 2;
+    private final int SCHEDULING_TAB_INDEX = 3;
+    private final int ALERTS_TAB_INDEX = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -217,12 +224,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                                 mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
                                 mViewPager.setAdapter(mStatusPagerAdapter);
                                 if (!isDashboardConfig(Globals.getInstance().getApplicationContext())) {
-                                    mViewPager.setCurrentItem(1);
+                                    mViewPager.setCurrentItem(ZONES_TAB_INDEX);
+                                    if (isZonePassWordRequired()) {
+                                        showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), ZONES_TAB_INDEX);
+                                    }
                                 }
                                 mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
-                                if (isZonePassWordRequired()) {
-                                    showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), 0);
-                                }
                             }
                             showFloorIcon();
                             btnTabs.setEnabled(true);
@@ -280,12 +287,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                             mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
                             mViewPager.setAdapter(mStatusPagerAdapter);
                             if (!isDashboardConfig(Globals.getInstance().getApplicationContext())) {
-                                mViewPager.setCurrentItem(1);
+                                mViewPager.setCurrentItem(ZONES_TAB_INDEX);
+                                if (isZonePassWordRequired()) {
+                                    showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), ZONES_TAB_INDEX);
+                                }
                             }
                             mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
-                            if (isZonePassWordRequired()) {
-                                showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), 0);
-                            }
                             floorMenu.setVisibility(View.VISIBLE);
                             menuToggle.setVisibility(View.GONE);
                         }
@@ -490,7 +497,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
             @Override
             public void onPageSelected(int i) {
-                if(i != 1 && !isBacnetConfigStateChanged){
+                if(btnTabs.getSelectedTabPosition() == 0 && i != 1 && !isBacnetConfigStateChanged){
                     FragmentManager fragmentManager = getSupportFragmentManager();
                     for (Fragment fragment : fragmentManager.getFragments()) {
                         if (fragment instanceof VavStagedRtuFragment) {
@@ -548,7 +555,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     }
                     return;
                 }
-                if (i!=2) {
+                if (btnTabs.getSelectedTabPosition() == 0 && i!=2) {
                     Fragment communicationFragment = checkCurrentFragmentIsCommunication();
                     if (communicationFragment != null) {
                         showBacnetTabChangeConfirmationDialog(1, communicationFragment, shouldChangeTab -> {
@@ -570,21 +577,20 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     menuToggle.setVisibility(View.VISIBLE);
                     floorMenu.setVisibility(View.GONE);
                     startCountDownTimer(INTERVAL);
-                } else if (i == 0 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof ZoneFragmentNew){
+                } else if (i == ZONES_TAB_INDEX && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof ZoneFragmentNew){
                     if (isZonePassWordRequired()) {
                         showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), i);
                     }
                     menuToggle.setVisibility(View.GONE);
                     floorMenu.setVisibility(View.VISIBLE);
-                }  else if (i == 1 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof SystemFragment){
+                }  else if (i == SYSTEM_TAB_INDEX && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof SystemFragment){
                     if (isSystemPassWordRequired()) {
                         showRequestPasswordAlert("System Settings Authentication", getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY), i);
                     }
                     menuToggle.setVisibility(View.GONE);
                     floorMenu.setVisibility(View.GONE);
                     startCountDownTimer(INTERVAL);
-                    mViewPager.getAdapter().notifyDataSetChanged();
-                }   else if (i == 2 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof ScheduleGroupFragment){
+                }   else if (i == SCHEDULING_TAB_INDEX && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof ScheduleGroupFragment){
                     if (isBuildingPassWordRequired()) {
                         showRequestPasswordAlert("Building Settings Authentication", getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY), i);
                     }
@@ -787,6 +793,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     }
     public void showRequestPasswordAlert(String title, String key, int position) {
 
+        if(anyPasswordDialogAlive) {
+            return;
+        }
+        anyPasswordDialogAlive = true;
         final int[] passwordAttempt = {0};
         String password = getSavedPassword(key);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -836,6 +846,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             posButton.setTextColor(getResources().getColor(R.color.black));
             posButton.setOnClickListener(view -> {
                 if (etPassword.getText().toString().equals(password)) {
+                    anyPasswordDialogAlive = false;
                     dialogInterface.dismiss();
                     mViewPager.setCurrentItem(position);
                     passwordAttempt[0] = 0;
@@ -851,6 +862,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             Button negButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
             negButton.setOnClickListener(view -> {
                 if (position == 0 && key.equals(getString(R.string.USE_SETUP_PASSWORD_KEY))) {
+                    anyPasswordDialogAlive = false;
                     btnTabs.getTabAt(1).setIcon(R.drawable.ic_dashboard_orange);
                     btnTabs.getTabAt(1).select();
                     updateStatusViewPagerAdapter();
@@ -860,12 +872,14 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     floorMenu.setVisibility(View.VISIBLE);
                     dialog.dismiss();
                     return;
-                } else if (position == 0 && key.equals(getString(R.string.ZONE_SETTINGS_PASSWORD_KEY))) {
-                    mViewPager.setCurrentItem(3);
+                }  else if (position == ZONES_TAB_INDEX && key.equals(getString(R.string.ZONE_SETTINGS_PASSWORD_KEY))) {
+                    anyPasswordDialogAlive = false;
+                    mViewPager.setCurrentItem(ALERTS_TAB_INDEX);
                     dialog.dismiss();
                     return;
                 }
-                mViewPager.setCurrentItem(0);
+                anyPasswordDialogAlive = false;
+                mViewPager.setCurrentItem(ZONES_TAB_INDEX);
                 dialog.dismiss();
             });
         });

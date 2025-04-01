@@ -2,7 +2,12 @@ package a75f.io.renatus.util
 
 import a75f.io.logic.Globals
 import a75f.io.renatus.R
+import a75f.io.renatus.modbus.util.ALERT
+import a75f.io.renatus.modbus.util.OK
+import android.content.Context
+import android.text.Spanned
 import android.widget.ImageView
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -88,4 +93,16 @@ fun AddProgressGif(){
             }
         }
     }
+}
+
+fun showErrorDialog(context: Context, message: Spanned) {
+    val builder = AlertDialog.Builder(context)
+    builder.setTitle(ALERT)
+    builder.setIcon(R.drawable.ic_warning)
+    builder.setMessage(message)
+    builder.setCancelable(false)
+    builder.setPositiveButton(OK) { dialog, _ ->
+        dialog.dismiss()
+    }
+    builder.create().show()
 }

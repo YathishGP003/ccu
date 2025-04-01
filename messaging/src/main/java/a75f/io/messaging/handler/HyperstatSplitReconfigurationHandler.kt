@@ -162,7 +162,13 @@ class HyperstatSplitReconfigurationHandler {
                     configPoint.domainName.equals(DomainName.universalIn5Association) ||
                     configPoint.domainName.equals(DomainName.universalIn6Association) ||
                     configPoint.domainName.equals(DomainName.universalIn7Association) ||
-                    configPoint.domainName.equals(DomainName.universalIn8Association)
+                    configPoint.domainName.equals(DomainName.universalIn8Association) ||
+                    isAnalogMinMaxConfig(configPoint.domainName)
+        }
+
+        private fun isAnalogMinMaxConfig(domainName : String) : Boolean {
+            val regex = Regex("analog\\d+(Min|Max)")
+            return regex.containsMatchIn(domainName)
         }
 
         private fun handleDynamicConfig (configPoint: Point, hayStack: CCUHsApi) {

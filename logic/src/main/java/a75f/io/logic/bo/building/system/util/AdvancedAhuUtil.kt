@@ -13,6 +13,7 @@ import a75f.io.domain.util.ModelLoader.getVavAdvancedAhuConnectModelV2
 import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.system.AdvAhuEconAlgoHandler
 import a75f.io.logic.bo.building.system.AdvancedAhuAlgoHandler
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
 import a75f.io.logic.bo.building.system.SystemMode
@@ -34,6 +35,37 @@ import kotlin.system.measureTimeMillis
 fun getModulatedOutput(loopOutput: Double, min: Double, max: Double) = (((max - min) * (loopOutput / 100.0)) + min)
 
 /**
+ * The function follows these rules:
+ * 1. If `loopOutput` is less than `economizingToMainCoolingLoopMap`, return `min`.
+ * 2. If `economizingToMainCoolingLoopMap` is 100.0 or greater, return 100.0.
+ * 3. Otherwise, calculate the output using the formula:
+ *    `(((max - min) * ((loopOutput - economizingToMainCoolingLoopMap) / (100.0 - economizingToMainCoolingLoopMap))) + min`
+ *
+ * @param loopOutput The current output value from the loop.
+ * @param min The minimum allowable output value.
+ * @param max The maximum allowable output value.
+ * @param economizingToMainCoolingLoopMap The threshold value used to determine the economizer behavior.
+ *                                        If `loopOutput` is below this threshold, the function returns `min`.
+ *                                        If this threshold is 100.0 or above, the function returns 100.0.
+ * @return The modulated output value, constrained between `min` and `max`.
+ *
+ */
+fun getModulatedOutputDuringEcon(
+    loopOutput: Double,
+    min: Double,
+    max: Double,
+    economizingToMainCoolingLoopMap: Double,
+): Double {
+    if(loopOutput < economizingToMainCoolingLoopMap) {
+        return min
+    }
+    if(economizingToMainCoolingLoopMap >= 100.0) {
+        return 100.0
+    }
+    return (((max - min) * ((loopOutput - economizingToMainCoolingLoopMap) / (100.0 - economizingToMainCoolingLoopMap))) + min)
+}
+
+/**
  * This function is get the mid point of min max
  */
 fun getComposeMidPoint(minMax: Pair<Double, Double>) = (((minMax.first + minMax.second) / 2).coerceIn(0.0, 10.0))
@@ -41,12 +73,13 @@ fun getComposeMidPoint(minMax: Pair<Double, Double>) = (((minMax.first + minMax.
 data class AhuTuners(var relayAActivationHysteresis: Double, var relayDeactivationHysteresis: Double, var humidityHysteresis: Double)
 
 data class AhuSettings(
-        var systemEquip: AdvancedHybridSystemEquip,
-        var connectEquip1: ConnectModuleEquip,
-        var conditioningMode: SystemMode,
-        var isMechanicalCoolingAvailable: Boolean,
-        var isMechanicalHeatingAvailable: Boolean,
-        var isEmergencyShutoffActive: Boolean,
+    var systemEquip: AdvancedHybridSystemEquip,
+    var connectEquip1: ConnectModuleEquip,
+    var conditioningMode: SystemMode,
+    var isMechanicalCoolingAvailable: Boolean,
+    var isMechanicalHeatingAvailable: Boolean,
+    var isEmergencyShutoffActive: Boolean,
+    var isEconomizationAvailable: Boolean,
 )
 
 enum class DuctPressureSensorSource {
@@ -182,7 +215,7 @@ fun isConnectModuleExist(): Boolean {
     return false
 }
 
- fun getConnectModuleSystemStatus(connectEquip: ConnectModuleEquip, advancedAhuImpl: AdvancedAhuAlgoHandler, coolingLoopOutput :Double, analogControlsEnabled : Set<AdvancedAhuAnalogOutAssociationType>): String {
+ fun getConnectModuleSystemStatus(connectEquip: ConnectModuleEquip, advancedAhuImpl: AdvancedAhuAlgoHandler, coolingLoopOutput :Double, analogControlsEnabled : Set<AdvancedAhuAnalogOutAssociationType>, ahuSettings: AhuSettings): String {
     val systemEquip = getAdvancedAhuSystemEquip()
     if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(
             connectEquip1 = connectEquip,
@@ -233,7 +266,7 @@ fun isConnectModuleExist(): Boolean {
         heatingStatus.append(" ON ")
     }
 
-    if (coolingLoopOutput > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable) {
+    if (AdvAhuEconAlgoHandler.isFreeCoolingOn()) {
         connectModuleSystemStatus.insert(0, "Free Cooling Used | ")
     }
 
@@ -244,12 +277,16 @@ fun isConnectModuleExist(): Boolean {
     if ((analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_FAN)) && connectEquip.fanLoopOutput.readHisVal() > 0) {
         analogStatus.append("| Fan ON ")
     }
+
+    var economizingToMainCoolingLoopMap = 0.0
+     economizingToMainCoolingLoopMap = ahuSettings.connectEquip1.economizingToMainCoolingLoopMap.readPriorityVal()
     if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((analogControlsEnabled.contains(
             AdvancedAhuAnalogOutAssociationType.LOAD_COOLING
-        ))) && connectEquip.coolingLoopOutput.readHisVal() > 0
+        ))) && connectEquip.coolingLoopOutput.readHisVal() > 0 && coolingLoopOutput >= economizingToMainCoolingLoopMap
     ) {
         analogStatus.append("| Cooling ON ")
     }
+
     if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((analogControlsEnabled.contains(
             AdvancedAhuAnalogOutAssociationType.LOAD_HEATING
         )) && connectEquip.heatingLoopOutput.readHisVal() > 0)

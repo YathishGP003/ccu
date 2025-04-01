@@ -6,7 +6,7 @@ import a75f.io.logic.L
 /**
  * Created by Manjunath K on 16-08-2021.
  */
-class HyperStatLoopController {
+open class HyperStatLoopController {
 
     private var coolingControlLoop = ControlLoop()
     private var heatingControlLoop = ControlLoop()

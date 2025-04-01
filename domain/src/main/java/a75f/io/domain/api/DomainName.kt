@@ -6,6 +6,20 @@ package a75f.io.domain.api
  */
 
 object DomainName {
+
+
+    // Added all the profile names
+    const val mystat2PFCU = "mystat2PFCU"
+    const val myStatHPU = "myStatHPU"
+    const val myStatCPU = "myStatCPU"
+    const val vavStagedRtu = "vavStagedRtu"
+    const val vavAdvancedHybridAhuV2 = "vavAdvancedHybridAhuV2"
+    const val hyperstatSplitCpu = "hyperstatSplitCpu"
+    const val helionodeDevice = "helionodeDevice"
+    const val smartnodeDevice = "smartnodeDevice"
+    const val cmBoardDevice = "cmBoardDevice"
+    const val ccuTemperatureInfluence = "ccuTemperatureInfluence"
+
     //Tuners
     const val userLimitSpread = "userLimitSpread"
     const val heatingPreconditioningRate = "heatingPreconditioningRate"
@@ -993,6 +1007,9 @@ object DomainName {
     const val staticPressureTRSp = "staticPressureTRSp"
     const val vavFullyModulatingAhu = "vavFullyModulatingAhu"
     const val dabFullyModulatingAhu = "dabFullyModulatingAhu"
+    const val dabStagedRtuVfdFan = "dabStagedRtuVfdFan"
+    const val dabStagedRtu = "dabStagedRtu"
+
     const val humidifier = "humidifier"
     const val dehumidifier = "dehumidifier"
 
@@ -1351,11 +1368,23 @@ object DomainName {
     const val processVariable = "processVariable"
     const val smartnodePID = "smartnodePID"
     const val helionodePID = "helionodePID"
-
     const val bundleVersion = "bundleVersion"
     const val otaStatusBundle = "otaStatusBundle"
+    const val bacnetServerStatus = "bacnetServerStatus"
+    const val mystatDevice = "mystatDevice"
+
+    const val mystatAuxHeating1Activate = "mystatAuxHeating1Activate"
+    const val mystatPipe2FancoilHeatingThreshold = "mystatPipe2FancoilHeatingThreshold"
+    const val mystatPipe2FancoilCoolingThreshold = "mystatPipe2FancoilCoolingThreshold"
+    const val mystatWaterValveSamplingOnTime = "mystatWaterValveSamplingOnTime"
+    const val mystatWaterValveSamplingWaitTime = "mystatWaterValveSamplingWaitTime"
+    const val mystatWaterValveSamplingLoopDeadbandOnTime = "mystatWaterValveSamplingLoopDeadbandOnTime"
+    const val mystatWaterValveSamplingLoopDeadbandWaitTime = "mystatWaterValveSamplingLoopDeadbandWaitTime"
+
+    const val firmwareVersionConnectModule = "firmwareVersionConnectModule"
 
     const val disableTouch = "disableTouch"
     const val enableBrightness = "enableBrightness"
+    const val enableCo2Display = "enableCo2Display"
 }
 

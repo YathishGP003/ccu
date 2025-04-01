@@ -11,6 +11,7 @@ import org.projecthaystack.client.HClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +52,8 @@ import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
 import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatV2MonitoringProfile;
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
+import a75f.io.logic.bo.building.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile;
+import a75f.io.logic.bo.building.mystat.profiles.packageunit.cpu.MyStatCpuProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.otn.OTNProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
@@ -290,10 +293,6 @@ public class Globals {
                 CcuLog.i(L.TAG_CCU_INIT, "Schedule Jobs");
                 //TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
 
-                CcuLog.i(L.TAG_CCU_INIT, "Init Watchdog");
-                Watchdog.getInstance().addMonitor(mProcessJob);
-                Watchdog.getInstance().addMonitor(mScheduleProcessJob);
-                Watchdog.getInstance().start();
                 modelMigration(migrationHandler);
                 migrationHandler.doPostModelMigrationTasks();
 
@@ -303,6 +302,12 @@ public class Globals {
                  of system Equip, This will affect DM TO DM migration*/
                 migrationHandler.checkBacnetIdMigrationRequired();
                 migrationHandler.removeRedundantDevicePoints();
+
+                CcuLog.i(L.TAG_CCU_INIT, "Init Watchdog");
+                Watchdog.getInstance().addMonitor(mProcessJob);
+                Watchdog.getInstance().addMonitor(mScheduleProcessJob);
+                Watchdog.getInstance().start();
+
                 migrationHandler.initAddressBand();
             } catch (Exception e) {
                 //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
@@ -568,6 +573,12 @@ public class Globals {
                             L.ccu().zoneProfiles.add(cpuEcon);
                             break;
 
+                        case MYSTAT_PIPE2:
+                            MyStatPipe2Profile mystatPipe2Profile = new MyStatPipe2Profile();
+                            mystatPipe2Profile.addEquip(eq.getId());
+                            L.ccu().zoneProfiles.add(mystatPipe2Profile);
+                            break;
+
                         case MODBUS_PAC:
                         case MODBUS_RRS:
                         case MODBUS_VRF:
@@ -677,6 +688,11 @@ public class Globals {
             HashMap<Object, Object> addressBand = (HashMap<Object, Object>) Domain.readPoint(DomainName.addressBand);
             CcuLog.i(Domain.LOG_TAG, "AddressBand fetching from point" + addressBand);
             if (addressBand != null && addressBand.size() > 0) {
+
+                if (addressBand.get("val") != null) {
+                    return String.valueOf(addressBand.get("val"));
+                }
+
                 return String.valueOf((int) CCUHsApi.getInstance().
                         readDefaultValById(addressBand.get("id").toString()).doubleValue());
             }

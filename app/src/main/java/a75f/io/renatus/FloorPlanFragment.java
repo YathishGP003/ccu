@@ -79,6 +79,9 @@ import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatCpuFragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatHpuFragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatPipe2Fragment;
 import a75f.io.renatus.profiles.ti.TIFragment;
 import a75f.io.renatus.profiles.otn.OtnProfileConfigFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
@@ -1172,6 +1175,22 @@ public class FloorPlanFragment extends Fragment {
                                     , zone.getId(), floor.getId(),NodeType.HYPERSTATSPLIT, profile.getProfileType()),
                             HyperStatSplitCpuFragment.Companion.getID());
                     break;
+                case MYSTAT_PIPE2:
+                    showDialogFragment(MyStatPipe2Fragment.Companion.newInstance(Short.parseShort(nodeAddress)
+                                    , zone.getId(), floor.getId(),NodeType.MYSTAT, profile.getProfileType()),
+                            MyStatPipe2Fragment.Companion.getID());
+                    break;
+                case MYSTAT_CPU:
+                    showDialogFragment(MyStatCpuFragment.Companion.newInstance(Short.parseShort(nodeAddress)
+                                    , zone.getId(), floor.getId(),NodeType.MYSTAT, profile.getProfileType()),
+                            MyStatCpuFragment.Companion.getID());
+                    break;
+                case MYSTAT_HPU:
+                    showDialogFragment(MyStatHpuFragment.Companion.newInstance(Short.parseShort(nodeAddress)
+                                    , zone.getId(), floor.getId(),NodeType.MYSTAT, profile.getProfileType()),
+                            MyStatHpuFragment.Companion.getID());
+                    break;
+
                 case MODBUS_UPS30:
                 case MODBUS_UPS80:
                 case MODBUS_UPS400:

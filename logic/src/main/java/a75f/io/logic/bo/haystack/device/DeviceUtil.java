@@ -10,6 +10,7 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.UtilKt;
 
 public class DeviceUtil {
 
@@ -21,8 +22,10 @@ public class DeviceUtil {
         {
             return ;
         }
+        String portName = UtilKt.getPortName(port);
 
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \""
+                + device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
         if (!point.get("analogType" ).equals(type))
         {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();
@@ -39,30 +42,14 @@ public class DeviceUtil {
         {
             return ;
         }
+        String portName = UtilKt.getPortName(port);
 
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \""
+                + device.get("id").toString() + "\"" + " and (port == \"" + port + "\" or port == \"" + portName + "\")");
         RawPoint p = new RawPoint.Builder().setHashMap(point).build();
         p.setPointRef(pointRef);
         CCUHsApi.getInstance().updatePoint(p,p.getId());
 
-    }
-
-    public static void updatePhysicalPointUnit(int addr, String port, String unit) {
-        CcuLog.d(L.TAG_CCU," Update Physical point "+port+" "+unit);
-
-        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
-        if (device == null)
-        {
-            return ;
-        }
-
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
-        if (!point.get("unit" ).equals(unit))
-        {
-            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
-            p.setUnit(unit);
-            CCUHsApi.getInstance().updatePoint(p,p.getId());
-        }
     }
 
     public static void setPointEnabled(int addr, String port, boolean enabled) {
@@ -72,8 +59,10 @@ public class DeviceUtil {
         {
             return ;
         }
+        String portName = UtilKt.getPortName(port);
 
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \""
+                + device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
         if (point != null && !point.isEmpty())
         {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();
@@ -91,7 +80,10 @@ public class DeviceUtil {
             return null;
         }
 
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        String portName = UtilKt.getPortName(port);
+
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \""
+                + device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
         if (point != null && !point.isEmpty())
         {
             return new RawPoint.Builder().setHashMap(point).build();

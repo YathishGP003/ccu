@@ -18,12 +18,14 @@ import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getConfigValue;
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getModbusPointValue;
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getOperatingMode;
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getSetPoint;
+import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.getConnectEquip;
 import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.getAdvancedAhuSystemEquip;
 import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.getConnectEquip;
 import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.isConnectModuleExist;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.renatus.modbus.util.UtilSourceKt.isOaoPairedInConnectModule;
 import static a75f.io.messaging.handler.AdvanceAhuReconfigHandlerKt.isAdvanceAhuV2Profile;
 
 import android.annotation.SuppressLint;
@@ -273,6 +275,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	TextView coolingSp;
 	TextView heatingSp;
 	TextView external_damper;
+	LinearLayout lastUpdatedStatusOao;
 
 	public SystemFragment()
 	{
@@ -872,6 +875,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		externalModbusStatus = view.findViewById(R.id.external_device_status);
 		externalModbusLastUpdated = view.findViewById(R.id.external_last_updated_status);
 		external_last_updated = view.findViewById(R.id.external_last_updated);
+		lastUpdatedStatusOao = view.findViewById(R.id.linear_layout_lastupdate);
 		showExternalModbusDevice();
 		setUpDRModeActivationLayout();
 
@@ -1016,7 +1020,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	}
 
 	private void checkForOao() {
-		if (L.ccu().oaoProfile != null) {
+		if (L.ccu().oaoProfile != null ||  isOaoPairedInConnectModule()) {
 			oaoArc.setVisibility(View.VISIBLE);
 			purgeLayout.setVisibility(View.VISIBLE);
 			if (isDMSupportProfile()) {
@@ -1030,17 +1034,25 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 			ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and oao and not hyperstatsplit");
 
-			if (equips != null && !equips.isEmpty()) {
-				ArrayList<OAOEquip> equipList = new ArrayList<>();
-				for (HashMap m : equips) {
-					String nodeAddress = m.get("group").toString();
-					equipList.add(new OAOEquip(m.get("id").toString()));
-					updatedTimeOao.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
-					oaoArc.updateStatus(HeartBeatUtil.isModuleAlive(nodeAddress));
+			if (equips != null && !equips.isEmpty() || isOaoPairedInConnectModule()) {
+				double returnAirCO2;
+				double co2Threshold;
+				if (isOaoPairedInConnectModule()) {
+					returnAirCO2 = getConnectEquip().getReturnAirCo2().readHisVal();
+					co2Threshold = getConnectEquip().getCo2Threshold().readDefaultVal();
+					oaoArc.disableHeartBeat();
+					lastUpdatedStatusOao.setVisibility(View.GONE);
+				} else {
+					ArrayList<OAOEquip> equipList = new ArrayList<>();
+					for (HashMap m : equips) {
+						String nodeAddress = m.get("group").toString();
+						equipList.add(new OAOEquip(m.get("id").toString()));
+						updatedTimeOao.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
+						oaoArc.updateStatus(HeartBeatUtil.isModuleAlive(nodeAddress));
+					}
+					returnAirCO2 = equipList.get(0).getReturnAirCo2().readHisVal();
+					co2Threshold = equipList.get(0).getCo2Threshold().readDefaultVal();
 				}
-
-				double returnAirCO2 = equipList.get(0).getReturnAirCo2().readHisVal();
-				double co2Threshold = equipList.get(0).getCo2Threshold().readDefaultVal();
 
 				int angel = (int)co2Threshold / 20;
 				if (angel < 0){

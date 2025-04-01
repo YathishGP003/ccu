@@ -1,7 +1,6 @@
 package a75f.io.logic.migration
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.CCUTagsDb.TAG_CCU_DOMAIN
 import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HayStackConstants
@@ -11,9 +10,11 @@ import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.Zone
 import a75f.io.api.haystack.sync.HttpUtil
+import a75f.io.api.haystack.util.BackfillUtil
 import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.OAOEquip
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.Domain.createDomainDevicePoint
 import a75f.io.domain.api.Domain.writeValAtLevelByDomain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.DefaultProfileConfiguration
@@ -152,11 +153,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     override fun doMigration() {
+        CCUBaseConfigurationMigrationHandler().doCCUBaseConfigurationMigration(hayStack)
         doVavTerminalDomainModelMigration()
         doDabTerminalDomainModelMigration()
         doVavSystemDomainModelMigration()
         doHyperStatSplitCpuDomainModelMigration()
-        CCUBaseConfigurationMigrationHandler().doCCUBaseConfigurationMigration(hayStack)
         DiagEquipMigrationHandler().doDiagEquipMigration(hayStack, not_external_model_query)
         doDabSystemDomainModelMigration()
         doOAOProfileMigration()
@@ -317,9 +318,13 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             PreferenceUtil.setProfileTypeCorrectedInCCUConfigEquip()
         }
 
-        if (!PreferenceUtil.getDabFullyModulatingPointsUpdate()) {
+        if (!PreferenceUtil.getDabEquipPointsUpdate()) {
             createDabMissingPoints()
-            PreferenceUtil.setDabFullyModulatingPointsUpdate()
+            PreferenceUtil.setDabEquipPointsUpdate()
+        }
+        if (!PreferenceUtil.getVocSensorPointAdded()) {
+            createVocSensorPointHyperStatEquip()
+            PreferenceUtil.setVocSensorPointAdded()
         }
 
         if(!PreferenceUtil.getUpdateBacnetNetworkInterface()) {
@@ -357,8 +362,43 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             remigrateCpuPoint()
             PreferenceUtil.setRecoverCpuFromCorrecption()
         }
-
+        if (!PreferenceUtil.isDuplicateBuildingAndSystemPointsAreRemoved()) {
+            // Handling exception in case of failure
+            try {
+                removeDuplicateBuildingAndSystemPoints()
+                PreferenceUtil.setDuplicateBuildingAndSystemPointsAreRemoved()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Error in removeDuplicateBuildingAndSystemPoints $e")
+            }
+        }
+        if (!PreferenceUtil.isBackFillValueUpdateRequired()) {
+            updateBackFillDefaultValue()
+            PreferenceUtil.setBackFillValueUpdateDone()
+        }
         hayStack.scheduleSync()
+    }
+
+    private fun removeDuplicateBuildingAndSystemPoints() {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Removing duplicate building and system points")
+
+        val systemEquip = hayStack.readEntity("equip and system and not modbus and not connectModule")
+        val buildingEquip = Domain.hayStack.readEntityByDomainName("buildingEquip")
+
+        val vavDabAndDuplicatePointMigrationHandler = VavDabAndDuplicatePointMigrationHandler(systemEquip)
+        if (systemEquip.isNotEmpty()) {
+            vavDabAndDuplicatePointMigrationHandler.createSatSpResPoint()
+            vavDabAndDuplicatePointMigrationHandler.deleteSatSPMaxDuplicatePoints()
+        } else {
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "System Equip not found")
+        }
+
+        if (buildingEquip.isNotEmpty()) {
+            vavDabAndDuplicatePointMigrationHandler.deleteReheatZoneMaxDischargeTemp(buildingEquip)
+        } else {
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Building Equip not found")
+            return
+        }
     }
 
     private fun updateBacnetNetworkInterface() {
@@ -1442,7 +1482,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             pi = pm.getPackageInfo("a75f.io.renatus", 0)
             val currentAppVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_') + 1)
             val migrationVersion = Domain.readStrPointValueByDomainName(DomainName.migrationVersion)
-            CcuLog.d(TAG_CCU_DOMAIN, "currentAppVersion: $currentAppVersion, migrationVersion: $migrationVersion")
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "currentAppVersion: $currentAppVersion, migrationVersion: $migrationVersion")
             if (currentAppVersion != migrationVersion) {
                 Domain.writeDefaultValByDomain(DomainName.migrationVersion, currentAppVersion)
             }
@@ -2405,7 +2445,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                         hayStack.deleteEntity(redundantList[0]["id"].toString())
                     }
                 }
-                hayStack.readId("point and port == \"SENSOR_VOC\" and not domainName and deviceRef == \"${ sseDeviceId }\"")?.let { vocSensorId ->
+                hayStack.readId("point and (port == \"SENSOR_VOC\" or port == \"vocSensor\") and not domainName and deviceRef == \"${ sseDeviceId }\"")?.let { vocSensorId ->
                     CcuLog.d(TAG_CCU_MIGRATION_UTIL,"Found non dm sensorVOC point id: ${vocSensorId}")
                     hayStack.deleteEntity(vocSensorId)
                 }
@@ -2716,12 +2756,19 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     fun initAddressBand() {
         if(!PreferenceUtil.isAddressBandInitCompleted()) {
             CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Initialising addressBand point")
-            val addressBandVal = Globals.getInstance().smartNodeBand
+            var addressBandVal = L.ccu().addressBand.toString()
             val ccuEquip = hayStack.readEntityByDomainName(DomainName.ccuConfiguration)
             if(ccuEquip.isEmpty()) {
                 CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "CCU Equip not found")
                 return
             }
+            // if the device is not paired the addressBand is coming has 0 ,when we migrated from 2.20.X to 3.0.7
+            // added the fix to fetch the value from point val if point val is not there ,changing it ot 1000 by default
+            if (addressBandVal.toInt() == 0) {
+                addressBandVal = 1000.toString()
+                CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, " updated fallback address band value")
+            }
+
             val addressBandQuery = "point and domainName == \"${DomainName.addressBand}\" and equipRef == \"${ccuEquip["id"]}\""
 
             val addressBandQueryForDuplicatePointWithSameDomainName = "point and domainName == \"${DomainName.addressBand}\""
@@ -2757,6 +2804,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
             hayStack.writeDefaultVal(addressBandQuery, addressBandVal)
             PreferenceUtil.setAddressBandInitCompleted()
+            L.ccu().addressBand = if (addressBandVal == null) 1000 else addressBandVal.toShort()
             CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Initialising addressBand point completed")
         }
     }
@@ -2799,12 +2847,46 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
     }
 
+    private fun createVocSensorPointHyperStatEquip() {
+
+        val hyperStatEquip =
+            hayStack.readAllEntities("equip and (domainName==\"${DomainName.hyperstatCPU}\" or domainName==\"${DomainName.hyperstat2PFCU}\" or domainName==\"${DomainName.hyperstatHPU}\")")
+        hyperStatEquip.forEachIndexed { _, equip ->
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, " creating voc sensor point hyper stat equip: $equip")
+            val hyperStatDevice =
+                hayStack.readEntity("device and equipRef ==\"" + equip["id"].toString() + "\" and  domainName == \"" + DomainName.hyperstatDevice + "\"")
+
+            val deviceModel = ModelLoader.getHyperStatDeviceModel() as SeventyFiveFDeviceDirective
+            val equipModel = getModelForDomainName(equip["domainName"].toString()) as SeventyFiveFProfileDirective
+            val profileConfig: ProfileConfiguration = getConfiguration(equip["id"].toString()) as ProfileConfiguration
+            val vocSensorPoint = hayStack.readEntity("domainName == \"" + DomainName.vocSensor + "\" and  deviceRef == \"" + hyperStatDevice["id"].toString() + "\"")
+
+            if (vocSensorPoint.isEmpty()) {
+                val device = Device.Builder().setHashMap(hyperStatDevice).build()
+                createDomainDevicePoint(
+                    deviceModel,
+                    equipModel,
+                    profileConfig,
+                    device,
+                    device.displayName,
+                    DomainName.vocSensor
+                )
+            } else {
+                CcuLog.d(
+                    TAG_CCU_MIGRATION_UTIL,
+                    " Voc sensor point already exists for hyper stat equip: ${equip["dis"].toString()}"
+                )
+            }
+        }
+
+    }
+
     private fun createDabMissingPoints(){
         val site = hayStack.site
-        val dabFullyModulatingRtuEquip =
-            hayStack.readEntity("equip and system and domainName == \"" + DomainName.dabFullyModulatingAhu + "\"")
+        val dabSystemEquip =hayStack.readEntity(
+            "equip and system and domainName == \"${DomainName.dabFullyModulatingAhu}\" or domainName == \"${DomainName.dabStagedRtu}\" or domainName==\"${DomainName.dabStagedRtuVfdFan}\"")
 
-        if(dabFullyModulatingRtuEquip.isNotEmpty()) {
+        if(dabSystemEquip.isNotEmpty()) {
             val model = ModelLoader.getDabModulatingRtuModelDef()
             val equipDis = "${site?.displayName}-${model.name}"
             val profileConfig =
@@ -2813,11 +2895,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
             val relay7ToggleVal = hayStack.readDefaultVal(
                 "(config and relay7 and enabled) or (domainName == \"" + DomainName.relay7OutputEnable + "\"" +
-                        " and equipRef == \"" + dabFullyModulatingRtuEquip["id"].toString() + "\")"
+                        " and equipRef == \"" + dabSystemEquip["id"].toString() + "\")"
             )
 
             val humidifier = hayStack.readEntity(
-                "point and humidifier and equipRef == \"" + dabFullyModulatingRtuEquip["id"].toString() + "\""
+                "point and humidifier and equipRef == \"" + dabSystemEquip["id"].toString() + "\""
             )
 
             CcuLog.d(TAG_CCU_MIGRATION_UTIL, "humidifier map - $humidifier")
@@ -2832,7 +2914,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                         PointBuilderConfig(
                             modelPoint,
                             profileConfig,
-                            dabFullyModulatingRtuEquip["id"].toString(),
+                            dabSystemEquip["id"].toString(),
                             site!!.id,
                             site.tz,
                             equipDis
@@ -2841,16 +2923,16 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 }
             }
 
-            if(relay7ToggleVal == 0.0 && humidifier.isNotEmpty()){
+            if (relay7ToggleVal == 0.0 && humidifier.isNotEmpty()) {
                 CcuLog.d(TAG_CCU_MIGRATION_UTIL, "deleting humidifier point")
                 hayStack.deleteEntityTree(humidifier["id"].toString())
-            }else{
+            } else {
                 CcuLog.d(TAG_CCU_MIGRATION_UTIL, "humidifier point not found to delete")
             }
 
             val dabReheatRelayActivationHysteresis = hayStack.readEntity(
                 "domainName == \"" + DomainName.dabReheatRelayActivationHysteresis + "\"" +
-                        " and equipRef == \"" + dabFullyModulatingRtuEquip["id"].toString() + "\""
+                        " and equipRef == \"" + dabSystemEquip["id"].toString() + "\""
             )
 
             if (dabReheatRelayActivationHysteresis.isEmpty()) {
@@ -2860,32 +2942,34 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 Domain.createDomainPoint(
                     model,
                     profileConfig,
-                    dabFullyModulatingRtuEquip["id"].toString(),
+                    dabSystemEquip["id"].toString(),
                     CCUHsApi.getInstance().site!!.id,
                     CCUHsApi.getInstance().site!!.tz,
                     equipDis,
                     DomainName.dabReheatRelayActivationHysteresis
                 )
             }
+            if (dabSystemEquip["domainName"] == DomainName.dabFullyModulatingAhu) {
 
-            val chilledWaterIntegralKFactor = hayStack.readEntity(
-                "domainName == \"" + DomainName.chilledWaterIntegralKFactor + "\"" +
-                        " and equipRef == \"" + dabFullyModulatingRtuEquip["id"].toString() + "\""
-            )
+                val chilledWaterIntegralKFactor = hayStack.readEntity(
+                    "domainName == \"" + DomainName.chilledWaterIntegralKFactor + "\"" +
+                            " and equipRef == \"" + dabSystemEquip["id"].toString() + "\""
+                )
 
-            if (chilledWaterIntegralKFactor.isEmpty()) {
-                CcuLog.d(
-                    TAG_CCU_MIGRATION_UTIL, "Creating point - chilledWaterIntegralKFactor"
-                )
-                Domain.createDomainPoint(
-                    model,
-                    profileConfig,
-                    dabFullyModulatingRtuEquip["id"].toString(),
-                    CCUHsApi.getInstance().site!!.id,
-                    CCUHsApi.getInstance().site!!.tz,
-                    equipDis,
-                    DomainName.chilledWaterIntegralKFactor
-                )
+                if (chilledWaterIntegralKFactor.isEmpty()) {
+                    CcuLog.d(
+                        TAG_CCU_MIGRATION_UTIL, "Creating point - chilledWaterIntegralKFactor"
+                    )
+                    Domain.createDomainPoint(
+                        model,
+                        profileConfig,
+                        dabSystemEquip["id"].toString(),
+                        CCUHsApi.getInstance().site!!.id,
+                        CCUHsApi.getInstance().site!!.tz,
+                        equipDis,
+                        DomainName.chilledWaterIntegralKFactor
+                    )
+                }
             }
         }
     }
@@ -2931,7 +3015,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
             val points = hayStack.readAllEntities(
                 "point and not domainName and " +
-                        "(port == \"" + Port.SENSOR_PM10 + "\" or port == \""+Port.SENSOR_ENERGY_METER +
+                        "(port == \"" + Port.SENSOR_PM10 + "\"  or port == \"pm10Sensor\" or port == \""+Port.SENSOR_ENERGY_METER +
                         "\" or" + " port == \""+Port.SENSOR_NO +"\") and deviceRef == \"$deviceRef\"")
 
             points.forEach { point ->
@@ -2956,7 +3040,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         val hyperStatCPUEquip =
             hayStack.readAllEntities("equip and hyperstat and cpu and $not_external_model_query")
         val equipBuilder = ProfileEquipBuilder(hayStack)
-        val deviceModel = ModelLoader.getHyperStatDevice() as SeventyFiveFDeviceDirective
+        val deviceModel = ModelLoader.getHyperStatDeviceModel() as SeventyFiveFDeviceDirective
         val model = ModelLoader.getHyperStatCpuModel()
         val entityMapper = EntityMapper(model as SeventyFiveFProfileDirective)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
@@ -3085,5 +3169,18 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             updatePoints(CCUHsApi.getInstance(), hssPoints, it)
         }
         CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted HSS points ends")
+    }
+   private fun updateBackFillDefaultValue() {
+        val backFillPoint = hayStack.readEntity("domainName ==\"${DomainName.backfillDuration}\"")
+        if (backFillPoint.isNotEmpty()) {
+            val backFilDefaultValue = hayStack.readDefaultValById(backFillPoint["id"].toString())
+            if (backFilDefaultValue == 0.0) {
+                BackfillUtil.setBackFillDuration(Globals.getInstance().applicationContext)
+                CcuLog.i(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "Backfill duration default value updated to 24 hours"
+                )
+            }
+        }
     }
 }

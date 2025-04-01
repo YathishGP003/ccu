@@ -3,8 +3,6 @@ package a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
-import a75f.io.api.haystack.Tags
-import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
@@ -23,7 +21,6 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstatsplit.common.BasicSettings
 import a75f.io.logic.bo.building.hyperstatsplit.common.FanModeCacheStorage
-import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getActualFanMode
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitProfileTuners
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperstatSplitLoopController
@@ -32,8 +29,8 @@ import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitPackageUn
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.bo.util.CCUUtils
-import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler
-import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler.Companion.hyperStatSplitStatus
+import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler
+import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler.Companion.hyperStatSplitStatus
 import a75f.io.logic.util.PreferenceUtil
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective

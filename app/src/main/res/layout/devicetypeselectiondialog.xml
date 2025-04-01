@@ -285,6 +285,61 @@
                     android:layout_alignParentBottom="true"
                     android:background="@color/listview_divider_color" />
             </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/rl_mystat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp">
+
+                <ImageView
+                    android:id="@+id/mystatImageId"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginStart="60dp"
+                    android:src="@drawable/mystat75" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="114dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_hs"
+                        android:textAppearance="@style/title_bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_hyperstat"
+                        android:textAppearance="@style/text_label_secondary" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/next_arrow_button_enabled"
+                    app:tint="?orange_75f" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/listview_divider_color" />
+            </RelativeLayout>
             <RelativeLayout
                 android:id="@+id/rl_wirelesstemp"
                 android:layout_width="match_parent"

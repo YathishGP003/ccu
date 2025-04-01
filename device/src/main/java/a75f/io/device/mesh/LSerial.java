@@ -25,6 +25,8 @@ import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender;
 import a75f.io.device.mesh.hypersplit.HyperSplitMsgReceiver;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
+import a75f.io.device.mesh.mystat.MyStatMsgReceiverKt;
+import a75f.io.device.mesh.mystat.MyStatMsgSender;
 import a75f.io.device.modbus.ModbusPulse;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettings2Message_t;
@@ -175,12 +177,15 @@ public class LSerial
             else if (messageType == MessageType.HYPERSTAT_CM_TO_CCU_SERIALIZED_MESSAGE) {
                 HyperStatMsgReceiver.processMessage(data, CCUHsApi.getInstance());
                 HyperSplitMsgReceiver.processMessage(data, CCUHsApi.getInstance());
+                MyStatMsgReceiverKt.processMessage(data);
             }
 
             else if (isHyperStatMessage(messageType) ) {
                 HyperStatMsgReceiver.processMessage(data, CCUHsApi.getInstance());
             } else if (isHyperSplitMessage(messageType)) {
                 HyperSplitMsgReceiver.processMessage(data, CCUHsApi.getInstance());
+            } else if (isMyStatMessage(messageType)) {
+                MyStatMsgReceiverKt.processMessage(data);
             }
             else if (messageType == MessageType.CM_TO_CCU_OTA_STATUS) {
                 CmToCcuOtaStatus_t msg = new CmToCcuOtaStatus_t();
@@ -548,7 +553,20 @@ public class LSerial
             LSerial.getInstance().setNodeSeeding(false);
         }
     }
-    
+
+    public void sendMyStatSeedMessage(Short addr, String roomRef, String floorRef) {
+        if (isConnected()) {
+            isNodeSeeding = true;
+            CcuLog.d(L.TAG_CCU_DEVICE,
+                    "=================NOW SEEDING NEW PROFILE=====================" + addr + "," + roomRef);
+            Device d = HSUtil.getDevice(addr);
+            Zone zone = HSUtil.getZone(roomRef, floorRef);
+            MyStatMsgSender.INSTANCE.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
+                    d.getEquipRef(), false);
+            LSerial.getInstance().setNodeSeeding(false);
+        }
+    }
+
     public void sendHyperStatSeedMessage(Short addr, String roomRef, String floorRef, boolean isVRV) {
         if (isConnected()) {
             isNodeSeeding = true;
@@ -595,6 +613,11 @@ public class LSerial
     private static boolean isHyperSplitMessage(MessageType messageType) {
         return messageType == MessageType.HYPERSPLIT_REGULAR_UPDATE_MESSAGE ||
                 messageType == MessageType.HYPERSTAT_LOCAL_CONTROLS_OVERRIDE_MESSAGE;
+    }
+
+    private static boolean isMyStatMessage(MessageType messageType) {
+        return messageType == MessageType.MYSTAT_REGULAR_UPDATE_MESSAGE ||
+                messageType == MessageType.MYSTAT_LOCAL_CONTROLS_OVERRIDE_MESSAGE;
     }
 
     private static byte[] modifyByteArray(byte[] currentData) {

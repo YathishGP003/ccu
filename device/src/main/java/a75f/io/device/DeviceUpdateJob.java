@@ -2,6 +2,7 @@ package a75f.io.device;
 
 import static java.lang.Thread.sleep;
 import static a75f.io.device.serial.MessageType.HYPERSTAT_CM_TO_CCU_SERIALIZED_MESSAGE;
+import static a75f.io.device.serial.MessageType.MYSTAT_REGULAR_UPDATE_MESSAGE;
 import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.isConnectModuleAvailable;
 
 import android.content.Context;
@@ -66,7 +67,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                         .getInt("control_loop_frequency",60), 45, TimeUnit.SECONDS);
 
         //TODO - TEMP code for performance testing to simulate device load. Remove this code after performance issue resolved
-        //injectTestInputMessage();
+       //injectTestInputMessage(0);
     }
     
     public void doJob()
@@ -113,16 +114,16 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         }
     }
 
-    private void injectTestInputMessage() {
-
+    private void injectTestInputMessage(long initialDelaySeconds) {
+        try {
+            sleep(initialDelaySeconds * 40);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         new Thread(() -> {
-            while (true) {
-                try {
-                    sleep(30000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+            while (CCUHsApi.getInstance().isCcuReady()) {
                 List<HashMap<Object, Object>> hsDevices = CCUHsApi.getInstance().readAllEntities("device and hyperstat");
+                CcuLog.i(L.TAG_CCU_DEVICE, "Injecting test messages for " + hsDevices.size() + " hyperstat devices");
                 hsDevices.forEach(device -> {
                     injectTestRegularUpdateMessage(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
                     try {
@@ -133,6 +134,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                 });
 
                 List<HashMap<Object, Object>> snDevices = CCUHsApi.getInstance().readAllEntities("device and smartnode");
+                CcuLog.i(L.TAG_CCU_DEVICE, "Injecting test messages for " + snDevices.size() + " smartnode devices");
                 snDevices.forEach(device -> {
                     injectTestRegularUpdateMessageSmartNode(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
                     try {
@@ -141,6 +143,24 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                         CcuLog.e(L.TAG_CCU_DEVICE, "error ", e);
                     }
                 });
+
+                try {
+                    sleep(30000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+                List<HashMap<Object, Object>> msDevices = CCUHsApi.getInstance().readAllEntities("device and mystat");
+                CcuLog.i(L.TAG_CCU_DEVICE, "Injecting test messages for " + msDevices.size() + " mystat devices");
+                msDevices.forEach(device -> {
+                    injectTestMyStatRegularUpdateMessage(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
+                    try {
+                        sleep(500);
+                    } catch (InterruptedException e) {
+                        CcuLog.e(L.TAG_CCU_DEVICE, "error ", e);
+                    }
+                });
+
             }
         }).start();
     }
@@ -177,7 +197,46 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         SerialAction serialAction = SerialAction.MESSAGE_FROM_SERIAL_PORT;
         SerialEvent serialEvent = new SerialEvent(serialAction, msgBytes);
         LSerial.getInstance().handleSerialEvent(hayStack.getContext(), serialEvent);
+
     }
+
+
+    public static void injectTestMyStatRegularUpdateMessage(int address, CCUHsApi hayStack) {
+
+        Random randomNumGenerator = new Random();
+
+        MyStat.MyStatRegularUpdateCommon_t regularUpdateMessageCommand = MyStat.MyStatRegularUpdateCommon_t.newBuilder()
+                .setRoomTemperature(780)
+                .setHumidity(200 + randomNumGenerator.nextInt(400))
+                .setOccupantDetected(true)
+                .build();
+
+        MyStat.MyStatRegularUpdateMessage_t regularUpdateMessage = MyStat.MyStatRegularUpdateMessage_t.newBuilder()
+                .setRegularUpdateCommon(regularUpdateMessageCommand)
+                .setUniversalInput1Value(56000)
+                .setDoorWindowSensor(15000)
+                .build();
+
+        int FIXED_INT_BYTES_SIZE = 4;
+        byte[] dataBytes = regularUpdateMessage.toByteArray();
+        byte[] msgBytes = new byte[dataBytes.length + FIXED_INT_BYTES_SIZE * 4 + 1];
+        msgBytes[0] = (byte)MYSTAT_REGULAR_UPDATE_MESSAGE.ordinal();
+
+        //Network requires un-encoded node address occupying the first 4 bytes
+        System.arraycopy(getByteArrayFromInt(address), 0, msgBytes, 1, FIXED_INT_BYTES_SIZE);
+
+        //Network requires un-encoded message type occupying the next 4 bytes
+        System.arraycopy(getByteArrayFromInt(MYSTAT_REGULAR_UPDATE_MESSAGE.ordinal()),
+                0, msgBytes, FIXED_INT_BYTES_SIZE * 3 + 1, FIXED_INT_BYTES_SIZE);
+
+        //Now fill the serialized protobuf messages
+        System.arraycopy(dataBytes, 0, msgBytes,  4 * FIXED_INT_BYTES_SIZE + 1, dataBytes.length);
+
+        SerialAction serialAction = SerialAction.MESSAGE_FROM_SERIAL_PORT;
+        SerialEvent serialEvent = new SerialEvent(serialAction, msgBytes);
+        LSerial.getInstance().handleSerialEvent(hayStack.getContext(), serialEvent);
+    }
+
     private static byte[] getByteArrayFromInt(int integerVal) {
         return ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(integerVal).array();
     }

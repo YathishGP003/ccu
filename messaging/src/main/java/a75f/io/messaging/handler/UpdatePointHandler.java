@@ -50,6 +50,7 @@ import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_DURATION;
 import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_LEVEL;
 import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_VAL;
 import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_WHO;
+import static a75f.io.messaging.handler.MyStatReconfigurationKt.reconfigureMyStat;
 import static a75f.io.messaging.handler.TiReconfigKt.tiReconfiguration;
 
 public class UpdatePointHandler implements MessageHandler
@@ -133,6 +134,16 @@ public class UpdatePointHandler implements MessageHandler
         || HSUtil.isHSHpuEquip(pointUid, CCUHsApi.getInstance())){
             reconfigureHSV2(msgObject, localPoint);
             updatePoints(localPoint);
+            hayStack.scheduleSync();
+            return;
+        }
+
+        if (HSUtil.isMyStatCpuEquip(pointUid, CCUHsApi.getInstance())
+        || HSUtil.isMyStatHpuEquip(pointUid, CCUHsApi.getInstance())
+        || HSUtil.isMyStatPipe2Equip(pointUid, CCUHsApi.getInstance())){
+            reconfigureMyStat(msgObject, localPoint);
+            updatePoints(localPoint);
+            hayStack.scheduleSync();
             return;
         }
 

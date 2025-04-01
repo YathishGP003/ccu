@@ -47,4 +47,8 @@ object ModelNames {
     const val hyperStatHpu = "hyperstatHPU"
     const val ti = "ccuTemperatureInfluence"
 
+    const val myStatPipe2 = "mystat2PFCU"
+    const val myStatCpu = "mystatCPU"
+    const val myStatHpu = "mystatHPU"
+
 }

@@ -21,6 +21,7 @@ import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2Pipe2Fragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatPipe2Fragment;
 import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.oao.OAOProfileFragment;
@@ -108,21 +109,38 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                 manualPairingLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
         }
+        else if (mNodeType == NodeType.MYSTAT) {
+            title.setText(R.string.title_pair_ms_manual);
+            if (CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
+                imageView.setImageResource(R.drawable.carr_ms_alt_paring);
+            } else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
+                imageView.setImageResource(R.drawable.air_ms_alt_paring);
+            }
+            else {
+                imageView.setImageResource(R.drawable.ms_paring_75_alt);
+                manualPairingLayout.setBackgroundResource(R.drawable.bg_logoscreen);
+            }
+        }
 
-        if(CCUUiUtil.isCarrierThemeEnabled(requireContext()) || mNodeType == NodeType.HYPERSTATSPLIT){
+        if(CCUUiUtil.isCarrierThemeEnabled(requireContext())
+                || mNodeType == NodeType.HYPERSTATSPLIT || mNodeType == NodeType.MYSTAT || mNodeType == NodeType.HYPER_STAT)
+        {
             // To update pairing address in carrier themed UI we need to add some extra margin
             // For Hyperstat profile we have added some extra margins as the image res didnt fit for SN and HS
             int leftMargin;
             int topMargin;
 
-            if (mNodeType == NodeType.HYPER_STAT) {
+            if (mNodeType == NodeType.HYPER_STAT ) {
                 leftMargin = 507;
                 topMargin = 295;
+            } else if (mNodeType == NodeType.MYSTAT) {
+                leftMargin = 490;
+                topMargin = 255;
             }
             else if(mNodeType == NodeType.HYPERSTATSPLIT){
                 leftMargin = 490;
-                topMargin = 265;
-            } else{
+                topMargin = 255;
+            } else {
                 leftMargin = 490;
                 topMargin = 275;
             }
@@ -215,6 +233,10 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                 break;
             case BYPASS_DAMPER:
                 showDialogFragment(BypassConfigFragment.Companion.newInstance(mPairingAddress, mRoomName,
+                        mFloorName, mNodeType, mProfileType) , BypassConfigFragment.Companion.getID());
+                break;
+            case MYSTAT_PIPE2:
+                showDialogFragment(MyStatPipe2Fragment.Companion.newInstance(mPairingAddress, mRoomName,
                         mFloorName, mNodeType, mProfileType) , BypassConfigFragment.Companion.getID());
                 break;
         }

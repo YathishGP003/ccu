@@ -81,6 +81,40 @@ class ConnectConfiguration(open val model: SeventyFiveFProfileDirective, nodeAdd
     lateinit var analog3MinMaxVoltage: AnalogOutMinMaxVoltage
     lateinit var analog4MinMaxVoltage: AnalogOutMinMaxVoltage
 
+    // OAO configuration
+    lateinit var analog1MinOaoDamper:ValueConfig
+    lateinit var analog1MaxOaoDamper:ValueConfig
+    lateinit var analog2MinOaoDamper:ValueConfig
+    lateinit var analog2MaxOaoDamper:ValueConfig
+    lateinit var analog3MinOaoDamper:ValueConfig
+    lateinit var analog3MaxOaoDamper:ValueConfig
+    lateinit var analog4MinOaoDamper:ValueConfig
+    lateinit var analog4MaxOaoDamper:ValueConfig
+
+    lateinit var analog1MinReturnDamper:ValueConfig
+    lateinit var analog1MaxReturnDamper:ValueConfig
+    lateinit var analog2MinReturnDamper:ValueConfig
+    lateinit var analog2MaxReturnDamper:ValueConfig
+    lateinit var analog3MinReturnDamper:ValueConfig
+    lateinit var analog3MaxReturnDamper:ValueConfig
+    lateinit var analog4MinReturnDamper:ValueConfig
+    lateinit var analog4MaxReturnDamper:ValueConfig
+
+    lateinit var outsideDamperMinOpenDuringRecirculation: ValueConfig
+    lateinit var outsideDamperMinOpenDuringConditioning: ValueConfig
+    lateinit var outsideDamperMinOpenDuringFanLow: ValueConfig
+    lateinit var outsideDamperMinOpenDuringFanMedium: ValueConfig
+    lateinit var outsideDamperMinOpenDuringFanHigh: ValueConfig
+    lateinit var returnDamperMinOpen: ValueConfig
+    lateinit var exhaustFanStage1Threshold: ValueConfig
+    lateinit var exhaustFanStage2Threshold: ValueConfig
+    lateinit var currentTransformerType: ValueConfig
+    lateinit var exhaustFanHysteresis: ValueConfig
+    lateinit var usePerRoomCO2Sensing: EnableConfig
+    lateinit var enableOutsideAirOptimization: EnableConfig
+    lateinit var systemPurgeOutsideDamperMinPos: ValueConfig
+    lateinit var enhancedVentilationOutsideDamperMinOpen: ValueConfig
+
     /**
      * Get a list of domainNames of all base-configs
      * This need not have all base points.
@@ -117,6 +151,9 @@ class ConnectConfiguration(open val model: SeventyFiveFProfileDirective, nodeAdd
             add(analogOut2Enabled)
             add(analogOut3Enabled)
             add(analogOut4Enabled)
+           // OAO configuration
+            add(usePerRoomCO2Sensing)
+            add(enableOutsideAirOptimization)
         }
     }
 
@@ -167,6 +204,36 @@ class ConnectConfiguration(open val model: SeventyFiveFProfileDirective, nodeAdd
             addAll(addValueConfig(analog2MinMaxVoltage, this))
             addAll(addValueConfig(analog3MinMaxVoltage, this))
             addAll(addValueConfig(analog4MinMaxVoltage, this))
+            //OAO configurations
+            addValueConfig(analog1MinOaoDamper, this)
+            addValueConfig(analog1MaxOaoDamper, this)
+            addValueConfig(analog2MinOaoDamper, this)
+            addValueConfig(analog2MaxOaoDamper, this)
+            addValueConfig(analog3MinOaoDamper, this)
+            addValueConfig(analog3MaxOaoDamper, this)
+            addValueConfig(analog4MinOaoDamper, this)
+            addValueConfig(analog4MaxOaoDamper, this)
+            addValueConfig(analog1MinReturnDamper, this)
+            addValueConfig(analog1MaxReturnDamper, this)
+            addValueConfig(analog2MinReturnDamper, this)
+            addValueConfig(analog2MaxReturnDamper, this)
+            addValueConfig(analog3MinReturnDamper, this)
+            addValueConfig(analog3MaxReturnDamper, this)
+            addValueConfig(analog4MinReturnDamper, this)
+            addValueConfig(analog4MaxReturnDamper, this)
+            addValueConfig(outsideDamperMinOpenDuringRecirculation, this)
+            addValueConfig(outsideDamperMinOpenDuringConditioning, this)
+            addValueConfig(outsideDamperMinOpenDuringFanLow, this)
+            addValueConfig(outsideDamperMinOpenDuringFanMedium, this)
+            addValueConfig(outsideDamperMinOpenDuringFanHigh, this)
+            addValueConfig(returnDamperMinOpen, this)
+            addValueConfig(exhaustFanStage1Threshold, this)
+            addValueConfig(exhaustFanStage2Threshold, this)
+            addValueConfig(currentTransformerType, this)
+            addValueConfig(co2Threshold, this)
+            addValueConfig(exhaustFanHysteresis, this)
+            addValueConfig(systemPurgeOutsideDamperMinPos, this)
+            addValueConfig(enhancedVentilationOutsideDamperMinOpen, this)
         }
     }
 
@@ -199,6 +266,15 @@ class ConnectConfiguration(open val model: SeventyFiveFProfileDirective, nodeAdd
 
     }
 
+    private fun addValueConfig(
+        oaoConfiguration: ValueConfig, list: MutableList<ValueConfig>
+    ): MutableList<ValueConfig> {
+        return list.apply {
+            add(oaoConfiguration)
+        }
+    }
+
+
     /**
      * Add all sensor associations to the list
      */
@@ -230,7 +306,46 @@ class ConnectConfiguration(open val model: SeventyFiveFProfileDirective, nodeAdd
         getAnalogOut2MinMaxVoltage()
         getAnalogOut3MinMaxVoltage()
         getAnalogOut4MinMaxVoltage()
+        getOAOConfiguration()
         return this
+    }
+
+    private fun getOAOConfiguration() {
+
+        analog1MinOaoDamper = getDefaultValConfig(DomainName.analog1MinOAODamper, model)
+        analog1MaxOaoDamper = getDefaultValConfig(DomainName.analog1MaxOAODamper, model)
+        analog2MinOaoDamper = getDefaultValConfig(DomainName.analog2MinOAODamper, model)
+        analog2MaxOaoDamper = getDefaultValConfig(DomainName.analog2MaxOAODamper, model)
+        analog3MinOaoDamper = getDefaultValConfig(DomainName.analog3MinOAODamper, model)
+        analog3MaxOaoDamper = getDefaultValConfig(DomainName.analog3MaxOAODamper, model)
+        analog4MinOaoDamper = getDefaultValConfig(DomainName.analog4MinOAODamper, model)
+        analog4MaxOaoDamper = getDefaultValConfig(DomainName.analog4MaxOAODamper, model)
+
+        analog1MinReturnDamper = getDefaultValConfig(DomainName.analog1MinReturnDamper, model)
+        analog1MaxReturnDamper = getDefaultValConfig(DomainName.analog1MaxReturnDamper, model)
+        analog2MinReturnDamper = getDefaultValConfig(DomainName.analog2MinReturnDamper, model)
+        analog2MaxReturnDamper = getDefaultValConfig(DomainName.analog2MaxReturnDamper, model)
+        analog3MinReturnDamper = getDefaultValConfig(DomainName.analog3MinReturnDamper, model)
+        analog3MaxReturnDamper = getDefaultValConfig(DomainName.analog3MaxReturnDamper, model)
+        analog4MinReturnDamper = getDefaultValConfig(DomainName.analog4MinReturnDamper, model)
+        analog4MaxReturnDamper = getDefaultValConfig(DomainName.analog4MaxReturnDamper, model)
+
+        outsideDamperMinOpenDuringRecirculation = getDefaultValConfig(DomainName.outsideDamperMinOpenDuringRecirculation, model)
+        outsideDamperMinOpenDuringConditioning = getDefaultValConfig(DomainName.outsideDamperMinOpenDuringConditioning, model)
+        outsideDamperMinOpenDuringFanLow = getDefaultValConfig(DomainName.outsideDamperMinOpenDuringFanLow, model)
+        outsideDamperMinOpenDuringFanMedium = getDefaultValConfig(DomainName.outsideDamperMinOpenDuringFanMedium, model)
+        outsideDamperMinOpenDuringFanHigh = getDefaultValConfig(DomainName.outsideDamperMinOpenDuringFanHigh, model)
+        returnDamperMinOpen = getDefaultValConfig(DomainName.returnDamperMinOpen, model)
+        exhaustFanStage1Threshold = getDefaultValConfig(DomainName.exhaustFanStage1Threshold, model)
+        exhaustFanStage2Threshold = getDefaultValConfig(DomainName.exhaustFanStage2Threshold, model)
+        currentTransformerType = getDefaultValConfig(DomainName.currentTransformerType, model)
+        co2Threshold = getDefaultValConfig(DomainName.co2Threshold, model)
+        exhaustFanHysteresis = getDefaultValConfig(DomainName.exhaustFanHysteresis, model)
+        usePerRoomCO2Sensing = getDefaultEnableConfig(DomainName.usePerRoomCO2Sensing, model)
+        enableOutsideAirOptimization = getDefaultEnableConfig(DomainName.enableOutsideAirOptimization, model)
+
+        systemPurgeOutsideDamperMinPos = getDefaultValConfig(DomainName.systemPurgeOutsideDamperMinPos, model)
+        enhancedVentilationOutsideDamperMinOpen = getDefaultValConfig(DomainName.enhancedVentilationOutsideDamperMinOpen, model)
     }
 
     /**
@@ -547,7 +662,23 @@ class ConnectConfiguration(open val model: SeventyFiveFProfileDirective, nodeAdd
                 "\nanalogOut1Association=${analogOut1Association.associationVal}," + " " + "\nanalogOut2Association=${analogOut2Association.associationVal}," +
                 "" + "\nanalogOut3Association=${analogOut3Association.associationVal}," + "\nanalogOut4Association=${analogOut4Association.associationVal})"+
                 "damper association $damperControlAssociation"+
-                "\nco2Threshold=${co2Threshold.currentVal}, co2Target=${co2Target.currentVal}, damperOpeningRate=${damperOpeningRate.currentVal}"
+                "\nco2Threshold=${co2Threshold.currentVal}, co2Target=${co2Target.currentVal}, damperOpeningRate=${damperOpeningRate.currentVal}," +
+                "\nOAO enable = ${enableOutsideAirOptimization.enabled}"
+                "\n analog1MinOAODamper =  ${analog1MinOaoDamper.currentVal}, analog1MaxOAODamper = ${analog1MaxOaoDamper.currentVal},"+
+                "\n analog2MinOAODamper = ${analog2MinOaoDamper.currentVal}, analog2MaxOAODamper = ${analog2MaxOaoDamper.currentVal},"+
+                "\n analog3MinOAODamper = ${analog3MinOaoDamper.currentVal}, analog3MaxOAODamper = ${analog3MaxOaoDamper.currentVal},"+
+                "\n analog4MinOAODamper = ${analog4MinOaoDamper.currentVal}, analog4MaxOAODamper = ${analog4MaxOaoDamper.currentVal},"+
+                "\n analog1MinReturnDamper = ${analog1MinReturnDamper.currentVal}, analog1MaxReturnDamper = ${analog1MaxReturnDamper.currentVal},"+
+                "\n analog2MinReturnDamper = ${analog2MinReturnDamper.currentVal}, analog2MaxReturnDamper = ${analog2MaxReturnDamper.currentVal},"+
+                "\n analog3MinReturnDamper = ${analog3MinReturnDamper.currentVal}, analog3MaxReturnDamper = ${analog3MaxReturnDamper.currentVal},"+
+                "\n analog4MinReturnDamper = ${analog4MinReturnDamper.currentVal}, analog4MaxReturnDamper = ${analog4MaxReturnDamper.currentVal},"+
+                ""+"\n outsideDamperMinOpenDuringRecirculation = ${outsideDamperMinOpenDuringRecirculation.currentVal},"+"\noutsideDamperMinOpenDuringConditioning = ${outsideDamperMinOpenDuringConditioning.currentVal} "+
+                "\n outsideDamperMinOpenDuringFanLow = ${outsideDamperMinOpenDuringFanLow.currentVal}" + " \noutsideDamperMinOpenDuringFanMedium = ${outsideDamperMinOpenDuringFanMedium.currentVal}"+
+                " \n outsideDamperMinOpenDuringFanHigh = ${outsideDamperMinOpenDuringFanHigh.currentVal}"+"\n returnDamperMinOpen = ${returnDamperMinOpen.currentVal}"+
+                "\n exhaustFanStage1Threshold = ${exhaustFanStage1Threshold.currentVal}"+"\n exhaustFanStage2Threshold = ${exhaustFanStage2Threshold.currentVal}"+
+                "\n currentTransformerType = ${currentTransformerType.currentVal}"+"\n OAOCo2Threshold = ${co2Threshold.currentVal}"+
+                "\n exhaustFanHysteresis = ${exhaustFanHysteresis.currentVal}"+" \nusePerRoomCO2Sensing = ${usePerRoomCO2Sensing.enabled}"+
+                " \nsystemPurgeOutsideDamperMinPos = ${systemPurgeOutsideDamperMinPos.currentVal}"+"\n enhancedVentilationOutsideDamperMinOpen = ${enhancedVentilationOutsideDamperMinOpen.currentVal}"
     }
 
 }

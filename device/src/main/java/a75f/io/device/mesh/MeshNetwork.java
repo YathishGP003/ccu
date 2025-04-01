@@ -5,9 +5,8 @@ import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToCM;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
+import static a75f.io.device.mesh.mystat.MyStatMsgGeneratorKt.getMyStatControlMessage;
 import static a75f.io.logic.L.ccu;
-
-import android.util.Log;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +22,7 @@ import a75f.io.device.ControlMote;
 import a75f.io.device.DeviceNetwork;
 import a75f.io.device.HyperSplit;
 import a75f.io.device.HyperStat;
+import a75f.io.device.MyStat;
 import a75f.io.device.cm.ControlMoteMessageGeneratorKt;
 import a75f.io.device.cm.ControlMoteMessageSenderKt;
 import a75f.io.device.daikin.IEDeviceHandler;
@@ -31,6 +31,7 @@ import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageGenerator;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatSettingsUtil;
+import a75f.io.device.mesh.mystat.MyStatMsgSender;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
@@ -74,8 +75,9 @@ public class MeshNetwork extends DeviceNetwork
 
         MeshUtil.tSleep(1000);
         boolean sendControlMessage = (((System.currentTimeMillis() -  HyperStatSettingsUtil.Companion.getCcuControlMessageTimer())/ 1000) / 60)>20;
+        boolean myStatControlMsg = (((System.currentTimeMillis() -  MyStatMsgSender.INSTANCE.getCcuControlMessageTimer())/ 1000) / 60)>20;
         boolean bSeedMessage = LSerial.getInstance().isReseedMessage();
-        Log.i(L.TAG_CCU_DEVICE, "bSeedMessage: "+bSeedMessage);
+        CcuLog.i(L.TAG_CCU_DEVICE, "bSeedMessage: "+bSeedMessage);
 
         try
         {
@@ -97,6 +99,9 @@ public class MeshNetwork extends DeviceNetwork
                             deviceType = NodeType.CONTROL_MOTE;
                         else if (d.getMarkers().contains("hyperstat")) {
                             deviceType = NodeType.HYPER_STAT;
+                        }
+                        else if (d.getMarkers().contains("mystat")) {
+                            deviceType = NodeType.MYSTAT;
                         }
                         else if (d.getMarkers().contains("hyperstatsplit")) {
                             deviceType = NodeType.HYPERSTATSPLIT;
@@ -167,6 +172,21 @@ public class MeshNetwork extends DeviceNetwork
                                 }
                                 break;
 
+                            case MYSTAT:
+                                int nodeAddress = Integer.parseInt(d.getAddr());
+                                if (bSeedMessage) {
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING MyStat SEEDS ===================== " + nodeAddress);
+                                    MyStatMsgSender.INSTANCE.sendSeedMessage(zone.getDisplayName(), nodeAddress, d.getEquipRef(), false);
+                                } else {
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING MyStat Settings ===================== " + nodeAddress);
+                                    MyStatMsgSender.INSTANCE.sendSettingMessage(nodeAddress, d.getEquipRef(), zone.getDisplayName());
+                                    MyStatMsgSender.INSTANCE.sendSetting2Message(nodeAddress, d.getEquipRef());
+
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING MyStat Controls ===================== " + d.getAddr());
+                                    MyStat.MyStatControlsMessage_t controls = getMyStatControlMessage(nodeAddress).build();
+                                    MyStatMsgSender.INSTANCE.writeControlMessage(controls, nodeAddress, MessageType.MYSTAT_CONTROLS_MESSAGE, !myStatControlMsg);
+                                }
+                                break;
 
                             case HYPER_STAT:
                                 Equip equip = new Equip.Builder()
@@ -334,7 +354,6 @@ public class MeshNetwork extends DeviceNetwork
         Pulse.checkForDeviceDead();
 
         if (ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU) {
-            //DaikinIE.sendControl();
             VavIERtu systemProfile = (VavIERtu) L.ccu().systemProfile;
             IEDeviceHandler.getInstance().sendControl(systemProfile, CCUHsApi.getInstance());
         }

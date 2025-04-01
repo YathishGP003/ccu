@@ -29,6 +29,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -38,6 +39,7 @@ import androidx.fragment.app.FragmentActivity;
 import com.google.gson.JsonObject;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertsConstantsKt;
@@ -57,6 +59,7 @@ import a75f.io.device.mesh.LSmartStat;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
+import a75f.io.device.mesh.mystat.MyStatMsgSender;
 import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
@@ -172,7 +175,6 @@ public class RemoteCommandHandlerUtil {
                 break;
             case RESTART_MODULE:
 
-                //TODO Send commands to SmartNode
                 switch (cmdLevel) {
                     case "system":
                         for (Floor floor : HSUtil.getFloors()) {
@@ -187,6 +189,8 @@ public class RemoteCommandHandlerUtil {
                                         HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
                                     } else if (d.getMarkers().contains("hyperstatsplit")) {
                                         HyperSplitMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
+                                    } else if (d.getMarkers().contains("mystat")) {
+                                        MyStatMsgSender.INSTANCE.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
                                     }
                                 }
                             }
@@ -203,6 +207,8 @@ public class RemoteCommandHandlerUtil {
                                 HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
                             } else if (d.getMarkers().contains("hyperstatsplit")) {
                                 HyperSplitMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
+                            } else if (d.getMarkers().contains("mystat")) {
+                                MyStatMsgSender.INSTANCE.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
                             }
                         }
                         break;
@@ -217,6 +223,8 @@ public class RemoteCommandHandlerUtil {
                             HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(equip.getGroup()));
                         } else if (equip.getMarkers().contains("hyperstatsplit")) {
                             HyperSplitMessageSender.sendRestartModuleCommand(Integer.parseInt(equip.getGroup()));
+                        } else if (equip.getMarkers().contains("mystat")) {
+                            MyStatMsgSender.INSTANCE.sendRestartModuleCommand(Integer.parseInt(equip.getGroup()));
                         }
                         break;
                     default:
@@ -387,19 +395,38 @@ public class RemoteCommandHandlerUtil {
                         } else if (downloadId == bacAppDownloadId) {
                             String fileName = resolveApkFilename(bacAppApkName);
                             if (fileName != null) {
-                                String uninstallPackage = L.BAC_APP_PACKAGE_NAME_OBSOLETE;
-                                String launchPackage = L.BAC_APP_PACKAGE_NAME;
-                                final String BAC_APP_VERSION_OLD_PACKAGE = "3.2.12";
-                                if(bacAppApkName.contains(BAC_APP_VERSION_OLD_PACKAGE)) {
-                                    uninstallPackage = L.BAC_APP_PACKAGE_NAME;
-                                    launchPackage = L.BAC_APP_PACKAGE_NAME_OBSOLETE;
+                                boolean isBacAppDownloadVersionIsBelowValid = CCUUtils.isBacAppVersionNeedsToUninstall(bacAppApkName);
+                                CcuLog.d(TAG_CCU_DOWNLOAD, "Is BacApp version by remote command is below 3.2.18 : ---> " + isBacAppDownloadVersionIsBelowValid);
+
+                                if (!isBacAppDownloadVersionIsBelowValid) {
+                                    String uninstallPackage = L.BAC_APP_PACKAGE_NAME_OBSOLETE;
+                                    String launchPackage = L.BAC_APP_PACKAGE_NAME;
+                                    final Pair<String, String> pairOfInstalledBacAppVersionWithPackageName = CCUUtils.getInstalledBacAppVersion();
+                                    CcuLog.d(TAG_CCU_DOWNLOAD, "Installed BacApp version : " + pairOfInstalledBacAppVersionWithPackageName.first);
+                                    CcuLog.d(TAG_CCU_DOWNLOAD, "Installed BacApp package name : " + pairOfInstalledBacAppVersionWithPackageName.second);
+                                    if (CCUUtils.isBacAppVersionNeedsToUninstall(pairOfInstalledBacAppVersionWithPackageName.first)) {
+                                        uninstallPackage = pairOfInstalledBacAppVersionWithPackageName.second;
+                                    }
+
+                                    ArrayList<String> commandList = new ArrayList<>();
+
+                                    // This check is to uninstall the old BAC app package specifically if we have two apk's installed
+                                    if (!uninstallPackage.equals(L.BAC_APP_PACKAGE_NAME_OBSOLETE)) {
+                                       if (CCUUtils.getInstalledOlderPackageBacApp().second.equals(L.BAC_APP_PACKAGE_NAME_OBSOLETE)) {
+                                           CcuLog.d(TAG_CCU_DOWNLOAD, "Uninstalling old BAC app package " + L.BAC_APP_PACKAGE_NAME_OBSOLETE);
+                                           commandList.add(String.format(UNINSTALL_CMD, L.BAC_APP_PACKAGE_NAME_OBSOLETE));
+                                       }
+                                    }
+                                    commandList.add(String.format(UNINSTALL_CMD, uninstallPackage));
+                                    commandList.add(String.format(INSTALL_CMD, fileName));
+
+                                    String[] commands = commandList.toArray(new String[0]);
+
+                                    CcuLog.d(TAG_CCU_DOWNLOAD, "Updating bac app to version " + bacAppApkName);
+                                    RenatusApp.executeAsRoot(commands, launchPackage, false, false);
+                                } else {
+                                    CcuLog.d(TAG_CCU_DOWNLOAD, "Remote command BACapp version is below version (3.2.18). " + bacAppApkName + " not installed");
                                 }
-                                String[] commands = new String[]{
-                                        // uninstall the bacapp with older package name
-                                        String.format(UNINSTALL_CMD, uninstallPackage),
-                                        String.format(INSTALL_CMD, fileName)
-                                };
-                                RenatusApp.executeAsRoot(commands, launchPackage, false, false);
                             }
                         } else if (downloadId == remoteAccessAppDownloadId) {
                             String fileName = resolveApkFilename(remoteAccessApkName);

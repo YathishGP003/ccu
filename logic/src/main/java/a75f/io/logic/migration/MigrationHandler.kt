@@ -10,6 +10,7 @@ import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.Zone
 import a75f.io.api.haystack.sync.HttpUtil
+import a75f.io.api.haystack.util.BackfillUtil
 import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.OAOEquip
 import a75f.io.domain.api.Domain
@@ -152,11 +153,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     override fun doMigration() {
+        CCUBaseConfigurationMigrationHandler().doCCUBaseConfigurationMigration(hayStack)
         doVavTerminalDomainModelMigration()
         doDabTerminalDomainModelMigration()
         doVavSystemDomainModelMigration()
         doHyperStatSplitCpuDomainModelMigration()
-        CCUBaseConfigurationMigrationHandler().doCCUBaseConfigurationMigration(hayStack)
         DiagEquipMigrationHandler().doDiagEquipMigration(hayStack, not_external_model_query)
         doDabSystemDomainModelMigration()
         doOAOProfileMigration()
@@ -370,6 +371,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 e.printStackTrace()
                 CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Error in removeDuplicateBuildingAndSystemPoints $e")
             }
+        }
+        if (!PreferenceUtil.isBackFillValueUpdateRequired()) {
+            updateBackFillDefaultValue()
+            PreferenceUtil.setBackFillValueUpdateDone()
         }
         hayStack.scheduleSync()
     }
@@ -3164,5 +3169,18 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             updatePoints(CCUHsApi.getInstance(), hssPoints, it)
         }
         CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted HSS points ends")
+    }
+   private fun updateBackFillDefaultValue() {
+        val backFillPoint = hayStack.readEntity("domainName ==\"${DomainName.backfillDuration}\"")
+        if (backFillPoint.isNotEmpty()) {
+            val backFilDefaultValue = hayStack.readDefaultValById(backFillPoint["id"].toString())
+            if (backFilDefaultValue == 0.0) {
+                BackfillUtil.setBackFillDuration(Globals.getInstance().applicationContext)
+                CcuLog.i(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "Backfill duration default value updated to 24 hours"
+                )
+            }
+        }
     }
 }

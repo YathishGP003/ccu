@@ -75,7 +75,7 @@ public class PreferenceUtil {
     public static final String MIGRATE_HIS_INTERPOLATE_FOR_DEVICE_POINTS = "migrateHisInterpolateForDeviceEntities";
     public static final String MIGRATE_ANALOG_INPUT_TYPE_FOR_VAV_DEVICE_POINT = "migrateAnalogInputTypeForVavDevicePoint";
     public static final String DELETE_REDUNDANT_SETBACK_POINTS_FROM_HN_ACB_EQUIPS  = "deleteRedundantSetbackPointsFromHnAcbEquips";
-    public static final String BACKFILL_DEFAULT_VALUE_MIGRATION = "backFillDefaultValueMigration";
+    public static final String BACKFILL_DEFAULT_VALUE_MIGRATION = "backfillDefaultValueMigration";
     public static final String DAB_DAMPER_SIZE_MIGRATION = "dabDamperSizeMigration";
     public static final String BACNET_ID_MIGRATION = "bacnetIdAndTypeUpdateMigration";
     private static final String INSTALL_TYPE = "INSTALL_TYPE";

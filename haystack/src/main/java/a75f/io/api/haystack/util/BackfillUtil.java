@@ -8,12 +8,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 
 public class BackfillUtil {
 
     public static void setBackFillDuration(Context context) {
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
-        int equipCount = ccuHsApi.readAllEntities("equip and (gatewayRef or ahuRef) and not diag").size();
+        int equipCount = ccuHsApi.readAllEntities("equip and (gatewayRef or ahuRef) and not diag and not config ").size();
         boolean backFillTimeChange = false;
 
         Map<Integer, Double> thresholdMap = new HashMap<>();
@@ -23,6 +25,20 @@ public class BackfillUtil {
         thresholdMap.put(6, 24.0);
 
         double currentBackFillTime = ccuHsApi.readDefaultVal("backfill and duration");
+        // if the backfill value is zero
+        if (currentBackFillTime == 0) {
+            if (equipCount > 40) {
+                currentBackFillTime = 1.0;
+            } else if (equipCount > 30) {
+                currentBackFillTime = 6.0;
+            } else if (equipCount > 20) {
+                currentBackFillTime = 12.0;
+            } else if (equipCount > 6) {
+                currentBackFillTime = 24.0;
+            }
+            updateBackfillDuration(currentBackFillTime, context);
+            return;
+        }
 
         for (Map.Entry<Integer, Double> entry : thresholdMap.entrySet()) {
             int threshold = entry.getKey();
@@ -43,6 +59,7 @@ public class BackfillUtil {
         int[] backfillDurationArray = new int[]{0, 1, 2, 3, 6, 12, 24, 48, 72};
 
         ccuHsApi.writeDefaultVal(backfillQuery, currentBackFillTime);
+        CcuLog.d(Tags.BACKFILL,"Backfill duration updated to: " + currentBackFillTime);
         saveBackfillConfig((int) currentBackFillTime, Arrays.binarySearch(backfillDurationArray, (int) currentBackFillTime), context);
     }
     public static void saveBackfillConfig(int backfillTimeDuration, int backfillTimeSpSelected, Context context) {

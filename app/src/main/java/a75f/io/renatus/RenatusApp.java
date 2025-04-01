@@ -187,6 +187,7 @@ public class RenatusApp extends UtilityApplication
 	}
 
 	public static void closeApp() {
+		unRegisterEthernetListener();
 		CCUHsApi.getInstance().tagsDb.persistUnsyncedCachedItems();
 		boolean persistImmediate = true;
 		CCUHsApi.getInstance().saveTagsData(persistImmediate);

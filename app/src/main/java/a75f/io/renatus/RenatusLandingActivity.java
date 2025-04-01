@@ -14,6 +14,7 @@ import static a75f.io.logic.bo.util.CCUUtils.isRecommendedVersionCheckIsNotFalse
 import static a75f.io.renatus.CcuRefReceiver.REQUEST_CCU_REF_ACTION;
 import static a75f.io.renatus.Communication.isPortAvailable;
 import static a75f.io.renatus.UtilityApplication.context;
+import static a75f.io.renatus.UtilityApplication.unRegisterEthernetListener;
 import static a75f.io.renatus.bacnet.BacnetBackgroundTaskHandler.BACNET_FD_INTERVAL;
 import static a75f.io.renatus.bacnet.BacnetBackgroundTaskHandler.BACNET_FD_IS_AUTO_ENABLED;
 import static a75f.io.renatus.registration.UpdateCCUFragment.abortCCUDownloadProcess;
@@ -744,6 +745,7 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
         mCloudConnectionStatus.stopThread();
         L.saveCCUState();
         ccuLaunched();
+        unRegisterEthernetListener();
         AlertManager.getInstance().clearAlertsWhenAppClose();
         appRestarted();
         abortCCUDownloadProcess();

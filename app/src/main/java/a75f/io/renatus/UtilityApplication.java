@@ -12,7 +12,10 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.net.NetworkRequest;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -132,6 +135,7 @@ public abstract class UtilityApplication extends Application implements Globals.
     private DeviceUpdateJob deviceUpdateJob;
     private static Prefs prefs;
     protected static BackgroundServiceInitiator backgroundServiceInitiator;
+    private static ConnectivityManager.NetworkCallback ethernetCallback;
 
     @Override
     public void onCreate() {
@@ -194,7 +198,7 @@ public abstract class UtilityApplication extends Application implements Globals.
         OtaCache cache = new OtaCache();
         cache.restoreOtaRequests(context);
         CCUUtils.setCCUReadyProperty("false");
-        initNetworkConfig();
+        registerEthernetListener();
         if (ANRHandler.isAnrWatchdogEnabled()) {
             ANRHandler.configureANRWatchdog();
         }
@@ -627,6 +631,35 @@ public abstract class UtilityApplication extends Application implements Globals.
 
     public static void startRestServer() {
         HttpServer.Companion.getInstance(context).startServer();
+    }
+    private void registerEthernetListener() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkRequest ethernetRequest = new NetworkRequest.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_ETHERNET)
+                .build();
+        ethernetCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(Network network) {
+                CcuLog.d(L.TAG_CCU, "Ethernet network connected");
+                initNetworkConfig();
+            }
+            @Override
+            public void onLost(Network network) {
+                CcuLog.d(L.TAG_CCU, "Ethernet network lost");
+            }
+        };
+        connectivityManager.registerNetworkCallback(ethernetRequest, ethernetCallback);
+    }
+    public static void unRegisterEthernetListener() {
+        try {
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (ethernetCallback != null) {
+                connectivityManager.unregisterNetworkCallback(ethernetCallback);
+            }
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU, "Error unregistering ethernet listener: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void initNetworkConfig() {

@@ -845,6 +845,7 @@ public abstract class VavProfile extends ZoneProfile {
     }
 
     protected boolean isHeatingAvailable (SystemMode conditioningMode, boolean reheatAvailable) {
-        return (conditioningMode == SystemMode.HEATONLY || conditioningMode == SystemMode.AUTO || reheatAvailable);
+        return (conditioningMode != SystemMode.OFF)  &&
+                (conditioningMode == SystemMode.HEATONLY || conditioningMode == SystemMode.AUTO || reheatAvailable);
     }
 }

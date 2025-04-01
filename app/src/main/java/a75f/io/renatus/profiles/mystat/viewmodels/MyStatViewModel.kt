@@ -1,10 +1,13 @@
 package a75f.io.renatus.profiles.mystat.viewmodels
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.RawPoint
 import a75f.io.device.mesh.mystat.MyStatMsgSender
 import a75f.io.device.mesh.mystat.getMyStatControlMessage
 import a75f.io.device.mesh.mystat.getMyStatDomainDevice
 import a75f.io.device.serial.MessageType
+import a75f.io.domain.api.Domain
+import a75f.io.domain.devices.MyStatDevice
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
@@ -147,7 +150,8 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         val entityMapper = EntityMapper(equipModel)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
         val equipId = equipBuilder.buildEquipAndPoints(config, equipModel, hayStack.site!!.id, getEquipDis())
-        deviceBuilder.buildDeviceAndPoints(config, deviceModel, equipId, hayStack.site!!.id, getDeviceDis())
+        val deviceRef = deviceBuilder.buildDeviceAndPoints(config, deviceModel, equipId, hayStack.site!!.id, getDeviceDis())
+        universalInUnit(deviceRef = deviceRef)
         return equipId
     }
 
@@ -253,6 +257,17 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
     fun getUnit(domainName: String, model: SeventyFiveFProfileDirective): String {
         val point = getPointByDomainName(model, domainName) ?: return ""
         return if (point.defaultUnit != null) point.defaultUnit!! else ""
+    }
+
+    fun universalInUnit(deviceRef: String) {
+        val equip = MyStatDevice(deviceRef)
+        val point = equip.universal1In.readPoint()
+        if (point.unit == "kΩ") return
+        val rawPoint = RawPoint.Builder().setHDict(
+            Domain.hayStack.readHDictById(point.id)
+        ).setUnit("kΩ").build()
+        Domain.hayStack.updatePoint(rawPoint, rawPoint.id)
+        CcuLog.d(L.TAG_CCU_MSHST, "universal in unit updated to kΩ")
     }
 }
 

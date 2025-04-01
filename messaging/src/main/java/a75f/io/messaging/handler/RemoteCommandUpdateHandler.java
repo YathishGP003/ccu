@@ -172,6 +172,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                         case OTA_UPDATE_HS:
                         case OTA_UPDATE_HN:
                         case OTA_UPDATE_CONNECT:
+                        case OTA_UPDATE_MS:
                             Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
                             otaUpdateIntent.putExtra("id", id);
                             otaUpdateIntent.putExtra("firmwareVersion", msgObject.get("version").getAsString());

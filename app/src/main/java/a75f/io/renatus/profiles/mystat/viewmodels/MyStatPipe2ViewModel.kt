@@ -147,7 +147,7 @@ class MyStatPipe2ViewModel(application: Application) : MyStatViewModel(applicati
             val entityMapper = EntityMapper(equipModel)
             val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
             CcuLog.i(Domain.LOG_TAG, " updateDeviceAndPoints")
-            deviceBuilder.updateDeviceAndPoints(
+            val deviceRef = deviceBuilder.updateDeviceAndPoints(
                 profileConfiguration,
                 deviceModel,
                 equipId,
@@ -160,6 +160,7 @@ class MyStatPipe2ViewModel(application: Application) : MyStatViewModel(applicati
                 equip,
                 getMyStatPipe2FanLevel(profileConfiguration as MyStatPipe2Configuration)
             )
+            universalInUnit(deviceRef = deviceRef)
         }
 
         profileConfiguration.apply {

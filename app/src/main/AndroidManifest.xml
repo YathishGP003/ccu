@@ -98,6 +98,7 @@
                 android:name=".SplashActivity"
             android:exported="true"
             android:launchMode="singleTask"
+            android:resizeableActivity="false"
                 >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

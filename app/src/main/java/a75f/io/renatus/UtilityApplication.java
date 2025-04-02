@@ -598,7 +598,7 @@ public abstract class UtilityApplication extends Application implements Globals.
         return (networkInfo != null && networkInfo.isConnected());
     }
 
-    private void initMessaging() {
+    public void initMessaging() {
         if (CCUHsApi.getInstance().getSite() != null) {
             if (CCUHsApi.getInstance().siteSynced()) {
                 MessagingClient.getInstance().init();

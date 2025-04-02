@@ -111,12 +111,13 @@
                 android:screenOrientation="sensorLandscape"></activity>
 
         <activity
-                android:name=".RenatusLandingActivity"
-                android:alwaysRetainTaskState="true"
-                android:label="RenatusLandingActivity"
-                android:launchMode="singleTask"
-                android:screenOrientation="sensorLandscape"
-                >
+            android:name=".RenatusLandingActivity"
+            android:alwaysRetainTaskState="true"
+            android:label="RenatusLandingActivity"
+            android:launchMode="singleTask"
+            android:resizeableActivity="false"
+            android:screenOrientation="sensorLandscape"
+            >
 
 
         </activity>

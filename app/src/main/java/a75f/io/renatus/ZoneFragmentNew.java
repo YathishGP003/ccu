@@ -788,22 +788,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 gridPosition = 0;
                 Handler zoneLoadHandler = new Handler(Looper.getMainLooper());
                 for (int m = 0; m < roomList.size(); m++) {
-                    try {
-                        int zoneIndex = m;
-                        zoneLoadHandler.postDelayed(() -> {
+                    int zoneIndex = m;
+                    zoneLoadHandler.postDelayed(() -> {
+                        try {
                             CcuLog.d(TAG_CCU_INIT, "Loading Zone "+zoneIndex);
                             loadZone(rootView, tablerowLayout, roomList.get(zoneIndex));
                             if(zoneIndex == roomList.size() - 1) {
                                 CcuLog.d(TAG_CCU_INIT, "Loading Zone Completed");
                                 setCcuReady();
                             }
-                        }, DELAY_ZONE_LOAD_MS);
-                    } catch (Exception e) {
-                        CcuLog.e(TAG_CCU_INIT, "Loading Zone failed");
-                        e.printStackTrace();
-                    }
+                        } catch (Exception e) {
+                            CcuLog.e(TAG_CCU_INIT, "Loading Zone failed");
+                            e.printStackTrace();
+                        }
+                    }, DELAY_ZONE_LOAD_MS);
                 }
-
             } else {
                 setCcuReady();
             }

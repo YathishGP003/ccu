@@ -23,6 +23,7 @@ import a75f.io.logic.interfaces.SafeModeInterface;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
+import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
@@ -39,6 +40,8 @@ public class SafeModeActivity extends AppCompatActivity implements SafeModeInter
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        UtilityApplication utilityApplication = (UtilityApplication) getApplicationContext();
+        utilityApplication.initMessaging();
         RemoteCommandUpdateHandler.setSafeInterface(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.safe_mode);

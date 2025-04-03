@@ -3,9 +3,6 @@ package a75f.io.renatus.profiles.hyperstatv2.viewmodels
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
-import a75f.io.domain.api.DomainName
-import a75f.io.domain.config.AssociationConfig
-import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.equips.hyperstat.HpuV2Equip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
@@ -19,8 +16,6 @@ import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getHpuFanLevel
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuMinMaxConfig
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HsHpuAnalogOutMapping
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HsHpuRelayMapping
 import a75f.io.logic.bo.building.system.logIt
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
@@ -31,10 +26,12 @@ import a75f.io.renatus.profiles.hyperstatv2.viewstates.HpuViewState
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.HyperStatV2ViewState
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
+import a75f.io.renatus.util.showErrorDialog
 import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.Html
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
@@ -73,11 +70,19 @@ class HpuV2ViewModel(application: Application) : HyperStatViewModel(application)
         isCopiedConfigurationAvailable()
     }
 
+
+
     override fun saveConfiguration() {
         HyperStatViewStateUtil.hpuStateToConfig(viewState.value as HpuViewState, profileConfiguration as HpuConfiguration)
-        if ( !profileConfiguration.isAnyRelayEnabledAssociated(association = HsHpuRelayMapping.CHANGE_OVER_O_COOLING.ordinal) &&
-               !profileConfiguration.isAnyRelayEnabledAssociated(association = HsHpuRelayMapping.CHANGE_OVER_B_HEATING.ordinal)) {
-            showToast("Heatpump cannot be configured without enabling relay for ChangeOver valve", context)
+        if (profileConfiguration.isAnyRelayEnabledAssociated(association = HsHpuRelayMapping.CHANGE_OVER_B_HEATING.ordinal)
+            && profileConfiguration.isAnyRelayEnabledAssociated(association = HsHpuRelayMapping.CHANGE_OVER_O_COOLING.ordinal)) {
+            showErrorDialog(context, Html.fromHtml("<br>HPU Profile can only have either 'O-Energize in Cooling' or 'B-Energize in Heating' relays configured.", Html.FROM_HTML_MODE_LEGACY))
+            return
+        }
+
+        if (!profileConfiguration.isAnyRelayEnabledAssociated( association = HsHpuRelayMapping.CHANGE_OVER_B_HEATING.ordinal)
+            && !profileConfiguration.isAnyRelayEnabledAssociated(association = HsHpuRelayMapping.CHANGE_OVER_O_COOLING.ordinal)) {
+            showErrorDialog(context, Html.fromHtml("<br>HPU Profile should have either 'O-Energize in Cooling' or 'B-Energize in Heating' relays configured.", Html.FROM_HTML_MODE_LEGACY))
             return
         }
 

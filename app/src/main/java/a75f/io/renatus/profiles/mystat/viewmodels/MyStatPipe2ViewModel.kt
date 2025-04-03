@@ -65,25 +65,10 @@ class MyStatPipe2ViewModel(application: Application) : MyStatViewModel(applicati
         viewState.value =  MyStatViewStateUtil.pipe2ConfigToState(profileConfiguration as MyStatPipe2Configuration, MyStatPipe2ViewState())
     }
 
-    private fun isValidConfiguration(): Boolean {
-        if (viewState.value.co2Control) {
-            if (!viewState.value.isDcvMapped()) {
-                showErrorDialog(context, Html.fromHtml("<br>CO2 Control toggle is Enabled, but DCV Damper is not mapped.", Html.FROM_HTML_MODE_LEGACY))
-                return false
-            }
-            return true
 
-        } else {
-            if (viewState.value.isDcvMapped()) {
-                showErrorDialog(context, Html.fromHtml("<br>CO2 Control toggle is Disabled, but DCV Damper is mapped.", Html.FROM_HTML_MODE_LEGACY))
-                return false
-            }
-            return true
-        }
-    }
 
     override fun saveConfiguration() {
-        if (saveJob == null && isValidConfiguration()) {
+        if (saveJob == null && isValidConfiguration(viewState.value.isDcvMapped())) {
             ProgressDialogUtils.showProgressDialog(context, "Saving Configuration")
             saveJob = viewModelScope.launch(highPriorityDispatcher) {
                 CCUHsApi.getInstance().resetCcuReady()
@@ -160,7 +145,7 @@ class MyStatPipe2ViewModel(application: Application) : MyStatViewModel(applicati
                 equip,
                 getMyStatPipe2FanLevel(profileConfiguration as MyStatPipe2Configuration)
             )
-            universalInUnit(deviceRef = deviceRef)
+            universalInUnit(profileConfiguration, deviceRef)
         }
 
         profileConfiguration.apply {

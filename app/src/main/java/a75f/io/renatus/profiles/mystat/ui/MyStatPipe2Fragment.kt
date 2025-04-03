@@ -192,7 +192,8 @@ class MyStatPipe2Fragment : MyStatFragment() {
             if (analogOut1Enabled) ConfigMinMax(
                 analogOut1Association,
                 analogOut1MinMax.waterModulatingValue,
-                MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE
+                MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.displayName,
+                MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal
             )
         }
     }
@@ -203,7 +204,8 @@ class MyStatPipe2Fragment : MyStatFragment() {
             if (analogOut1Enabled) ConfigMinMax(
                 analogOut1Association,
                 analogOut1MinMax.dcvDamperConfig,
-                MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION
+                MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.displayName,
+                MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal
             )
         }
     }
@@ -214,7 +216,8 @@ class MyStatPipe2Fragment : MyStatFragment() {
             if (analogOut1Enabled) ConfigMinMax(
                 analogOut1Association,
                 analogOut1MinMax.fanSpeedConfig,
-                MyStatPipe2AnalogOutMapping.FAN_SPEED
+                MyStatPipe2AnalogOutMapping.FAN_SPEED.displayName,
+                MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal
             )
         }
     }

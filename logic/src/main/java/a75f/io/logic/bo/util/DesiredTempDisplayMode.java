@@ -132,6 +132,7 @@ public class DesiredTempDisplayMode {
                     mEquip.getProfile().equalsIgnoreCase(ProfileType.SMARTSTAT_TWO_PIPE_FCU.name()) ||
                     mEquip.getProfile().equalsIgnoreCase(ProfileType.SMARTSTAT_HEAT_PUMP_UNIT.name()) ||
                     mEquip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())||
+                    mEquip.getProfile().equalsIgnoreCase(ProfileType.MYSTAT_CPU.name()) ||
                     mEquip.getProfile().equalsIgnoreCase(ProfileType.MYSTAT_PIPE2.name()) ||
                     mEquip.getProfile().equalsIgnoreCase(ProfileType.MYSTAT_HPU.name())) {
                 return DUAL;

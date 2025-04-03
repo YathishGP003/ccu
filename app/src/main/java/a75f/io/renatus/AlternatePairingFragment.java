@@ -21,6 +21,8 @@ import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2Pipe2Fragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatCpuFragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatHpuFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatPipe2Fragment;
 import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
@@ -235,8 +237,16 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                 showDialogFragment(BypassConfigFragment.Companion.newInstance(mPairingAddress, mRoomName,
                         mFloorName, mNodeType, mProfileType) , BypassConfigFragment.Companion.getID());
                 break;
+            case MYSTAT_CPU:
+                showDialogFragment(MyStatCpuFragment.Companion.newInstance(mPairingAddress, mRoomName,
+                        mFloorName, mNodeType, mProfileType) , BypassConfigFragment.Companion.getID());
+                break;
             case MYSTAT_PIPE2:
                 showDialogFragment(MyStatPipe2Fragment.Companion.newInstance(mPairingAddress, mRoomName,
+                        mFloorName, mNodeType, mProfileType) , BypassConfigFragment.Companion.getID());
+                break;
+            case MYSTAT_HPU:
+                showDialogFragment(MyStatHpuFragment.Companion.newInstance(mPairingAddress, mRoomName,
                         mFloorName, mNodeType, mProfileType) , BypassConfigFragment.Companion.getID());
                 break;
         }

@@ -2,6 +2,8 @@ package a75f.io.renatus.compose
 
 import a75f.io.logic.Globals
 import a75f.io.renatus.R
+import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
+import a75f.io.renatus.profiles.system.advancedahu.Option
 import a75f.io.renatus.util.CCUUiUtil
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
@@ -17,6 +19,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.style.TextAlign
+
 /**
  * Created by Manjunath K on 16-08-2023.
  */
@@ -135,5 +139,96 @@ class ComposeUtil {
 fun Title(title: String,modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         TitleTextView(title)
+    }
+}
+
+
+@Composable
+fun singleOptionConfiguration(
+    minLabel: String,
+    itemList: List<Option>,
+    unit: String,
+    minDefault: String,
+    onMinSelected: (Option) -> Unit = {},
+    viewModel: AdvancedHybridAhuViewModel? = null
+) {
+    Row(
+        modifier = Modifier
+            .width(550.dp)
+            .padding(bottom = 10.dp)
+    ) {
+        Box(modifier = Modifier
+            .weight(1f)
+            .padding(top = 10.dp)) {
+            StyledTextView(
+                minLabel, fontSize = 20, textAlignment = TextAlign.Left
+            )
+        }
+        Box(modifier = Modifier
+            .weight(1f)
+            .padding(top = 5.dp)) {
+            SpinnerElementOption(defaultSelection = minDefault,
+                items = itemList,
+                unit = unit,
+                itemSelected = { onMinSelected(it) }, viewModel = viewModel)
+        }
+    }
+}
+
+
+@Composable
+fun StagedFanConfiguration(
+    label1: String,
+    label2: String,
+    itemList: List<Option>,
+    unit: String,
+    minDefault: String,
+    maxDefault: String,
+    onlabel1Selected: (Option) -> Unit = {},
+    onlabel2Selected: (Option) -> Unit = {},
+    stage1Enabled: Boolean,
+    stage2Enabled: Boolean,
+    viewModel: AdvancedHybridAhuViewModel? = null
+) {
+    val twoOptionSelected = stage1Enabled && stage2Enabled
+    Row(
+        modifier = Modifier
+            .then(if (twoOptionSelected) Modifier.fillMaxWidth() else Modifier.width(550.dp))
+            .padding(bottom = 10.dp)
+    ) {
+        if(stage1Enabled) {
+            Box(modifier = Modifier
+                .weight(1f)
+                .padding(top = 10.dp)) {
+                StyledTextView(
+                    label1, fontSize = 20, textAlignment = TextAlign.Left
+                )
+            }
+            Box(modifier = Modifier
+                .weight(1f)
+                .padding(top = 5.dp)) {
+                SpinnerElementOption(defaultSelection = minDefault,
+                    items = itemList,
+                    unit = unit,
+                    itemSelected = { onlabel1Selected(it) }, viewModel = viewModel)
+            }
+        }
+
+        if(stage2Enabled) {
+            Box(modifier = Modifier
+                .then(if (!twoOptionSelected) Modifier.weight(1f) else Modifier.width(550.dp))
+                .weight(1f)
+                .padding(top = 10.dp)) {
+                StyledTextView(
+                    label2, fontSize = 20, textAlignment = TextAlign.Left
+                )
+            }
+            Box(modifier = Modifier.weight(1f)) {
+                SpinnerElementOption(defaultSelection = maxDefault,
+                    items = itemList,
+                    unit = unit,
+                    itemSelected = { onlabel2Selected(it) }, viewModel = viewModel)
+            }
+        }
     }
 }

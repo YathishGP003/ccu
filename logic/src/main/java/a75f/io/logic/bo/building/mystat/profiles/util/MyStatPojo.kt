@@ -46,15 +46,27 @@ data class MyStatBasicSettings(
  */
 data class MyStatUserIntents(
     val currentTemp: Double,
-    val zoneCoolingTargetTemperature: Double,   // (affected by scheduling of desired temperatures)
+    val zoneCoolingTargetTemperature: Double,
     val zoneHeatingTargetTemperature: Double,
-    val targetMinInsideHumidity: Double,         // Same as system/ 25% [Available in the UI only if Humidifier/Dehumidifier Option has been configured]
+    val targetMinInsideHumidity: Double,
     val targetMaxInsideHumidity: Double
 )
-
 
 data class MyStatPipe2MinMaxConfig (
     val waterModulatingValue: MinMaxConfig,
     val fanSpeedConfig: MinMaxConfig,
+    val dcvDamperConfig: MinMaxConfig
+)
+
+data class MyStatHpuMinMaxConfig (
+    val compressorSpeed: MinMaxConfig,
+    val fanSpeedConfig: MinMaxConfig,
+    val dcvDamperConfig: MinMaxConfig
+)
+
+data class MyStatCpuMinMaxConfig (
+    val cooling: MinMaxConfig,
+    val linearFanSpeed: MinMaxConfig,
+    val heating: MinMaxConfig,
     val dcvDamperConfig: MinMaxConfig
 )

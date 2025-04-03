@@ -63,6 +63,12 @@ class HyperStatConfigurationTest {
     fun testAvailableFanStages() {
 
         val config = getCpuConfig()
+
+        config.relay1Association.associationVal = HsCpuRelayMapping.FAN_LOW_SPEED.ordinal
+        config.relay1Association.associationVal = HsCpuRelayMapping.FAN_HIGH_SPEED.ordinal
+
+        assert(config.getHighestFanSelected() == HsCpuRelayMapping.FAN_HIGH_SPEED)
+
         config.relay1Association.associationVal = HsCpuRelayMapping.FAN_LOW_SPEED.ordinal
         assert(config.getHighestFanSelected() == HsCpuRelayMapping.FAN_LOW_SPEED)
         assert(config.getLowestFanSelected() == HsCpuRelayMapping.FAN_LOW_SPEED)

@@ -43,9 +43,28 @@ open class MyStatViewState {
 
         return false
     }
+
+    fun isAnyRelayMapped(mapping: Int, ignoreSelection: ConfigState): Boolean {
+
+        fun checkSelection(config: ConfigState): Boolean {
+            config.apply { return (ignoreSelection != this && association == mapping) }
+        }
+
+        if (checkSelection(relay1Config)) return true
+        if (checkSelection(relay2Config)) return true
+        if (checkSelection(relay3Config)) return true
+        if (checkSelection(relay4Config)) return true
+
+        return false
+    }
 }
 
 class FanSpeedConfig(low: Int, high: Int) {
     var low by mutableStateOf(low)
     var high by mutableStateOf(high)
+}
+
+class MyStatStagedConfig(stage1: Int, stage2: Int) {
+    var stage1 by mutableStateOf(stage1)
+    var stage2 by mutableStateOf(stage2)
 }

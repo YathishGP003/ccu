@@ -12,6 +12,7 @@ import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hvac.AnalogOutput
 import a75f.io.logic.bo.building.hvac.MyStatFanStages
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
+import a75f.io.logic.bo.building.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.mystat.profiles.util.MyStatBasicSettings
 import a75f.io.logic.bo.building.mystat.profiles.util.MyStatLoopController
 import a75f.io.logic.bo.building.mystat.profiles.util.MyStatUserIntents
@@ -364,6 +365,28 @@ abstract class MyStatProfile: ZoneProfile() {
             else -> ZoneState.DEADBAND.ordinal
         }
         equip.operatingMode.writeHisVal(zoneOperatingMode.toDouble())
+    }
+
+    open fun isDoorOpenState(config: MyStatConfiguration, equip: MyStatEquip): Boolean {
+        var isDoorWindowMapped = 0.0
+        var doorWindowSensorValue =  0.0
+
+        if (config.universalIn1Enabled.enabled) {
+            val universalMapping = MyStatConfiguration.UniversalMapping.values().find { it.ordinal == config.universalIn1Association.associationVal }
+            when (universalMapping) {
+                MyStatConfiguration.UniversalMapping.DOOR_WINDOW_SENSOR_NC_TITLE24 -> {
+                    isDoorWindowMapped = 1.0
+                    doorWindowSensorValue = equip.doorWindowSensorNCTitle24.readHisVal()
+                }
+                MyStatConfiguration.UniversalMapping.DOOR_WINDOW_SENSOR_TITLE24 -> {
+                    isDoorWindowMapped = 1.0
+                    doorWindowSensorValue = equip.doorWindowSensorTitle24.readHisVal()
+                }
+                else -> { }
+            }
+        }
+        doorWindowIsOpen(isDoorWindowMapped, doorWindowSensorValue, equip)
+        return isDoorWindowMapped == 1.0 && doorWindowSensorValue > 0
     }
 
 

@@ -24,7 +24,7 @@ public class CCUApplication
     public BypassDamperProfile bypassDamperProfile = null;
 
     private String           mTitle        = "";
-    private ArrayList<Floor> mfloors       = new ArrayList<Floor>();
+    private ArrayList<Floor> mfloors       = new ArrayList<>();
     private short mAddressBand;
     private String mCCUName;
     

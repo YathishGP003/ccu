@@ -30,6 +30,8 @@ import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatSelectedCondition
 import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatSelectedFanMode
 import a75f.io.logic.util.uiutils.MyStatUserIntentHandler
 import a75f.io.renatus.R
+import a75f.io.renatus.profiles.mystat.CPU
+import a75f.io.renatus.profiles.mystat.HPU
 import a75f.io.renatus.profiles.mystat.PIPE2
 import a75f.io.renatus.profiles.mystat.getMyStatAdapterValue
 import a75f.io.renatus.profiles.mystat.setMyStatTitleStatusConfig
@@ -95,11 +97,9 @@ private fun setUpConditionFanConfig(
             }
             MyStatPossibleConditioningMode.COOL_ONLY -> {
                 conModeAdapter = getMyStatAdapterValue(context, R.array.smartstat_conditionmode_coolonly)
-                conditionMode = conModeAdapter.count - 1
             }
             MyStatPossibleConditioningMode.HEAT_ONLY -> {
                 conModeAdapter = getMyStatAdapterValue(context, R.array.smartstat_conditionmode_heatonly)
-                conditionMode = conModeAdapter.count - 1
             }
             else -> {}
         }
@@ -365,7 +365,7 @@ fun getMyStatEquipPoints(equipMap: Equip, profileType: ProfileType): HashMap<Str
         ProfileType.MYSTAT_CPU -> {
             equipPoints[HSZoneStatus.EQUIP.name] = equip as MyStatCpuEquip
             equipPoints[HSZoneStatus.CONFIG.name] = config as MyStatCpuConfiguration
-            equipPoints[HSZoneStatus.PROFILE_NAME.name] = PIPE2.uppercase(Locale.ROOT)
+            equipPoints[HSZoneStatus.PROFILE_NAME.name] = CPU.uppercase(Locale.ROOT)
             equipPoints[HSZoneStatus.PROFILE_TYPE.name] = ProfileType.MYSTAT_CPU
             fanLevel = getMyStatCpuFanLevel(config)
         }
@@ -373,7 +373,7 @@ fun getMyStatEquipPoints(equipMap: Equip, profileType: ProfileType): HashMap<Str
         ProfileType.MYSTAT_HPU -> {
             equipPoints[HSZoneStatus.EQUIP.name] = equip as MyStatHpuEquip
             equipPoints[HSZoneStatus.CONFIG.name] = config as MyStatHpuConfiguration
-            equipPoints[HSZoneStatus.PROFILE_NAME.name] = PIPE2.uppercase(Locale.ROOT)
+            equipPoints[HSZoneStatus.PROFILE_NAME.name] = HPU.uppercase(Locale.ROOT)
             equipPoints[HSZoneStatus.PROFILE_TYPE.name] = ProfileType.MYSTAT_HPU
             fanLevel = getMyStatHpuFanLevel(config)
         }

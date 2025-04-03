@@ -168,9 +168,10 @@ fun getMyStatSettings2Message(equipRef: String): MyStat.MyStatSettingsMessage2_t
 
         if (myStatEquip is MyStatPipe2Equip) {
             mystatUniversalInConfig = 1 // 2 pipe it is always mapped    
-        }
-        if (myStatEquip.universalIn1Enable.readDefaultVal() == 1.0) {
-            mystatUniversalInConfig = myStatEquip.universalIn1Association.readDefaultVal().toInt()
+        } else if (myStatEquip.universalIn1Enable.readDefaultVal() == 1.0) {
+            mystatUniversalInConfig = myStatEquip.universalIn1Association.readDefaultVal().toInt() + 1
+        } else {
+            mystatUniversalInConfig = 0 // NA
         }
         genericTuners = getCommonTuners(equipRef)
         when (myStatEquip) {
@@ -280,7 +281,7 @@ private fun setStagedFanSpeedDetails(equip: MyStatEquip): MyStat.MyStatStagedFan
         if (this is MyStatCpuEquip) {
             if (analog1OutputEnable.readDefaultVal() == 1.0
                 && analog1OutputAssociation.readDefaultVal()
-                    .toInt() == MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal
+                    .toInt() == MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal
             ) {
                 stagedFanSpeedBuilder.stagedFanLowSpeedLevel =
                     analog1FanLow.readPriorityVal().toInt()
@@ -304,18 +305,18 @@ private fun getRelayConfigs(
 
         when (equip) {
             is MyStatCpuEquip -> {
-                if (associationVal == MyStatCpuRelayMapping.EXTERNALLY_MAPPED.ordinal) {
-                    relayConfig.cpuRelay = MyStat.CpuRelayMappings_e.CPU_NONE
-                } else {
-                    relayConfig.cpuRelay = MyStat.CpuRelayMappings_e.values()[associationVal + 1]
+                relayConfig.cpuRelay =  when (associationVal) {
+                    MyStatCpuRelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.CpuRelayMappings_e.CPU_NONE
+                    MyStatCpuRelayMapping.DCV_DAMPER.ordinal -> MyStat.CpuRelayMappings_e.CPU_DCV_DAMPER
+                    else -> MyStat.CpuRelayMappings_e.values()[associationVal + 1]
                 }
             }
 
             is MyStatHpuEquip -> {
-                if (associationVal == MyStatHpuRelayMapping.EXTERNALLY_MAPPED.ordinal) {
-                    relayConfig.hpuRelay = MyStat.HpuRelayMappings_e.HPU_NONE
-                } else {
-                    relayConfig.hpuRelay = MyStat.HpuRelayMappings_e.values()[associationVal + 1]
+                relayConfig.hpuRelay =  when (associationVal) {
+                    MyStatHpuRelayMapping.EXTERNALLY_MAPPED.ordinal ->  MyStat.HpuRelayMappings_e.HPU_NONE
+                    MyStatHpuRelayMapping.DCV_DAMPER.ordinal -> MyStat.HpuRelayMappings_e.HPU_DCV_DAMPER
+                    else -> MyStat.HpuRelayMappings_e.values()[associationVal + 1]
                 }
             }
 
@@ -345,25 +346,29 @@ private fun getAnalogOutConfigs(equip: MyStatEquip, settings2: MyStat.MyStatSett
         val analogOutMappingValue = equip.analog1OutputAssociation.readDefaultVal().toInt()
         when(equip) {
             is MyStatCpuEquip -> {
-                cpuAoutMapping = if (analogOutMappingValue == MyStatCpuAnalogOutMapping.EXTERNALLY_MAPPED.ordinal) {
-                    MyStat.CpuAoutMappings_e.CPU_AOUT_NONE
-                } else {
-                    MyStat.CpuAoutMappings_e.values()[analogOutMappingValue + 1]
+                cpuAoutMapping = when(analogOutMappingValue) {
+                    MyStatCpuAnalogOutMapping.COOLING.ordinal -> MyStat.CpuAoutMappings_e.CPU_AOUT_COOLING
+                    MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal -> MyStat.CpuAoutMappings_e.CPU_AOUT_FANSPEED
+                    MyStatCpuAnalogOutMapping.HEATING.ordinal -> MyStat.CpuAoutMappings_e.CPU_AOUT_HEATING
+                    MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal -> MyStat.CpuAoutMappings_e.CPU_AOUT_FANSPEEDSTAGED
+                    MyStatCpuAnalogOutMapping.DCV_DAMPER.ordinal -> MyStat.CpuAoutMappings_e.CPU_AOUT_DCVDAMPER
+                    else -> MyStat.CpuAoutMappings_e.CPU_AOUT_NONE
                 }
-
             }
             is MyStatHpuEquip -> {
-                hpuAoutMapping = if (analogOutMappingValue == MyStatHpuAnalogOutMapping.EXTERNALLY_MAPPED.ordinal) {
-                    MyStat.HpuAoutMappings_e.HPU_AOUT_NONE
-                } else {
-                    MyStat.HpuAoutMappings_e.values()[analogOutMappingValue + 1]
+                hpuAoutMapping = when(analogOutMappingValue) {
+                    MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal -> MyStat.HpuAoutMappings_e.HPU_AOUT_COMPSPEED
+                    MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal -> MyStat.HpuAoutMappings_e.HPU_AOUT_FANSPEED
+                    MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal -> MyStat.HpuAoutMappings_e.HPU_AOUT_DCVDAMPER
+                    else -> MyStat.HpuAoutMappings_e.HPU_AOUT_NONE
                 }
             }
             is MyStatPipe2Equip -> {
                 twoPipeAoutMapping = when(analogOutMappingValue) {
-                    MyStatPipe2AnalogOutMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.TwoPipeAoutMappings_e.P2_AOUT_NONE
+                    MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal -> MyStat.TwoPipeAoutMappings_e.P2_AOUT_WATER_VALVE
+                    MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal -> MyStat.TwoPipeAoutMappings_e.P2_FAN_SPEED
                     MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal -> MyStat.TwoPipeAoutMappings_e.P2_AOUT_DCV_DAMPER
-                    else -> MyStat.TwoPipeAoutMappings_e.values()[analogOutMappingValue + 1]
+                    else -> MyStat.TwoPipeAoutMappings_e.P2_AOUT_NONE
                 }
             }
         }

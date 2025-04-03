@@ -1,5 +1,10 @@
 package a75f.io.renatus.profiles.mystat
 
+import a75f.io.api.haystack.RawPoint
+import a75f.io.domain.api.Domain
+import a75f.io.domain.devices.MyStatDevice
+import a75f.io.logger.CcuLog
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus
 import a75f.io.logic.bo.util.UnitUtils
@@ -111,3 +116,13 @@ fun showMyStatSupplyTemp(dischargeView: View, pointsList: HashMap<String,Any>, r
 }
 
 fun getMyStatAdapterValue(context : Context, itemArray : Int) = CustomSpinnerDropDownAdapter( context, R.layout.spinner_zone_item, context.resources.getStringArray(itemArray).toMutableList())
+
+fun universalInUnit(unit: String = "kΩ", deviceRef: String) {
+    val equip = MyStatDevice(deviceRef)
+    if (equip.universal1In.readPoint().unit == unit) return
+    val rawPoint = RawPoint.Builder().setHDict(
+        Domain.hayStack.readHDictById(equip.universal1In.id)
+    ).setUnit(unit).build()
+    Domain.hayStack.updatePoint(rawPoint, rawPoint.id)
+    CcuLog.d(L.TAG_CCU_MSHST, "universal in unit updated to $unit")
+}

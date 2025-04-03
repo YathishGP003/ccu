@@ -21,6 +21,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.MyStatFanStages
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.mystat.configs.MyStatConfiguration
+import a75f.io.logic.bo.building.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2Configuration
 import a75f.io.logic.bo.building.mystat.profiles.MyStatProfile
@@ -31,14 +32,17 @@ import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.formattedToastMessage
 import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.profiles.OnPairingCompleteListener
+import a75f.io.renatus.profiles.mystat.viewstates.MyStatCpuViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatHpuViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatPipe2ViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewStateUtil
 import a75f.io.renatus.profiles.system.advancedahu.Option
+import a75f.io.renatus.util.showErrorDialog
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
+import android.text.Html
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -114,7 +118,10 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
 
     fun applyCopiedConfiguration(updatedViewState: MyStatViewState) {
         if (CopyConfiguration.getSelectedProfileType() == ProfileType.MYSTAT_CPU) {
-            // Do it for CPU
+            viewState.value = MyStatViewStateUtil.cpuConfigToState(
+                CopyConfiguration.getCopiedConfiguration() as MyStatCpuConfiguration,
+                updatedViewState as MyStatCpuViewState
+            )
         } else if (CopyConfiguration.getSelectedProfileType() == ProfileType.MYSTAT_HPU) {
             viewState.value = MyStatViewStateUtil.hpuConfigToState(
                 CopyConfiguration.getCopiedConfiguration() as MyStatHpuConfiguration,
@@ -151,7 +158,7 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
         val equipId = equipBuilder.buildEquipAndPoints(config, equipModel, hayStack.site!!.id, getEquipDis())
         val deviceRef = deviceBuilder.buildDeviceAndPoints(config, deviceModel, equipId, hayStack.site!!.id, getDeviceDis())
-        universalInUnit(deviceRef = deviceRef)
+        universalInUnit(config, deviceRef)
         return equipId
     }
 
@@ -259,15 +266,42 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         return if (point.defaultUnit != null) point.defaultUnit!! else ""
     }
 
-    fun universalInUnit(deviceRef: String) {
+    fun isValidConfiguration(isDcvMapped: Boolean): Boolean {
+        var isValidConfig = true
+        if (viewState.value.co2Control) {
+            if (!isDcvMapped) {
+                showErrorDialog(context, Html.fromHtml("<br>CO2 Control toggle is Enabled, but DCV Damper is not mapped.", Html.FROM_HTML_MODE_LEGACY))
+                isValidConfig =  false
+            }
+
+        } else {
+            if (isDcvMapped) {
+                showErrorDialog(context, Html.fromHtml("<br>CO2 Control toggle is Disabled, but DCV Damper is mapped.", Html.FROM_HTML_MODE_LEGACY))
+                isValidConfig =  false
+            }
+        }
+        return isValidConfig
+    }
+
+    fun universalInUnit(config: MyStatConfiguration, deviceRef: String) {
+        val unit: String
+        if (config is MyStatPipe2Configuration) {
+            unit = "kΩ"
+        } else {
+            val association = config.universalIn1Association.associationVal
+            unit = when (MyStatConfiguration.UniversalMapping.values()[association]) {
+                MyStatConfiguration.UniversalMapping.KEY_CARD_SENSOR -> "mV"
+                MyStatConfiguration.UniversalMapping.DOOR_WINDOW_SENSOR_TITLE24 -> "mV"
+                else -> "kΩ"
+            }
+        }
         val equip = MyStatDevice(deviceRef)
-        val point = equip.universal1In.readPoint()
-        if (point.unit == "kΩ") return
+        if (equip.universal1In.readPoint().unit == unit) return
         val rawPoint = RawPoint.Builder().setHDict(
-            Domain.hayStack.readHDictById(point.id)
-        ).setUnit("kΩ").build()
+            Domain.hayStack.readHDictById(equip.universal1In.readPoint().id)
+        ).setUnit(unit).build()
         Domain.hayStack.updatePoint(rawPoint, rawPoint.id)
-        CcuLog.d(L.TAG_CCU_MSHST, "universal in unit updated to kΩ")
+        CcuLog.d(L.TAG_CCU_MSHST, "universal in unit updated to $unit")
     }
 }
 

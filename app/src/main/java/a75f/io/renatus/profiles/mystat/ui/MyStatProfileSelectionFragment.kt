@@ -59,7 +59,6 @@ class MyStatProfileSelectionFragment : BaseDialogFragment() {
 
     private fun setupOnClickListeners(view: View) {
 
-
         val goBack = view.findViewById<View>(R.id.goBackImage)
         val cpuCell = view.findViewById<View>(R.id.cpuCell)
         val hpuCell = view.findViewById<View>(R.id.hpuCell)

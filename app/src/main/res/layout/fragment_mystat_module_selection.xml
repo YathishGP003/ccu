@@ -51,7 +51,6 @@
 
 
          <RelativeLayout
-             android:visibility="gone"
             android:id="@+id/cpuCell"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -101,7 +100,7 @@
          </RelativeLayout>
 
          <RelativeLayout
-            android:visibility="gone"
+            android:visibility="visible"
             android:id="@+id/hpuCell"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -1,6 +1,11 @@
 package a75f.io.renatus.profiles.mystat.viewstates
 
+import a75f.io.logic.bo.building.mystat.configs.MyStatHpuAnalogOutMapping
+import a75f.io.logic.bo.building.mystat.configs.MyStatHpuRelayMapping
+import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2AnalogOutMapping
+import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2RelayMapping
 import a75f.io.renatus.profiles.hyperstatv2.util.MinMaxConfig
+import a75f.io.renatus.profiles.hyperstatv2.viewstates.HpuAnalogOutMinMaxConfig
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,12 +14,18 @@ import androidx.compose.runtime.setValue
  * Created by Manjunath K on 15-01-2025.
  */
 
-class MyStatHpuViewState: MyStatViewState() {
-    var analogOut1MinMax by mutableStateOf(HpuAnalogOutMinMaxConfig(MinMaxConfig(2, 10), MinMaxConfig(2, 10), MinMaxConfig(2, 10)))
-    var analogOut1FanConfig by mutableStateOf(FanSpeedConfig(70 ,100))
+class MyStatHpuViewState : MyStatViewState() {
+    var analogOut1MinMax by mutableStateOf(
+        HpuAnalogOutMinMaxConfig(
+            MinMaxConfig(2, 10),
+            MinMaxConfig(2, 10),
+            MinMaxConfig(2, 10)
+        )
+    )
+    var analogOut1FanConfig by mutableStateOf(FanSpeedConfig(70, 100))
+
+    override fun isDcvMapped(): Boolean {
+        return (isAnyRelayEnabledAndMapped(MyStatHpuRelayMapping.DCV_DAMPER.ordinal)
+                || (analogOut1Enabled && analogOut1Association == MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal))
+    }
 }
-data class HpuAnalogOutMinMaxConfig(
-    val compressorSpeed: MinMaxConfig,
-    val fanSpeedConfig: MinMaxConfig,
-    val dcvDamperConfig: MinMaxConfig
-)

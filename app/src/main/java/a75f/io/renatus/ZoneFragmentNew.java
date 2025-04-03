@@ -2150,7 +2150,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             scheduleImageButton.setVisibility(View.GONE);
             namedScheduleView.setVisibility(View.GONE);
         }
-        if(openZoneMap.size() > 0) {
+        if(!openZoneMap.isEmpty()) {
             avgTemp = (float)currentTemp / (openZoneMap.size() - noTempSensor);
         }
         if(heatingDesired != 0 && coolingDesired !=0)

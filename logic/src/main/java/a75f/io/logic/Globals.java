@@ -54,6 +54,7 @@ import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitC
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile;
 import a75f.io.logic.bo.building.mystat.profiles.packageunit.cpu.MyStatCpuProfile;
+import a75f.io.logic.bo.building.mystat.profiles.packageunit.hpu.MyStatHpuProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.otn.OTNProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
@@ -573,11 +574,22 @@ public class Globals {
                             L.ccu().zoneProfiles.add(cpuEcon);
                             break;
 
+                        case MYSTAT_CPU:
+                            MyStatCpuProfile mystatCpuProfile = new MyStatCpuProfile();
+                            mystatCpuProfile.addEquip(eq.getId());
+                            L.ccu().zoneProfiles.add(mystatCpuProfile);
+                            break;
                         case MYSTAT_PIPE2:
                             MyStatPipe2Profile mystatPipe2Profile = new MyStatPipe2Profile();
                             mystatPipe2Profile.addEquip(eq.getId());
                             L.ccu().zoneProfiles.add(mystatPipe2Profile);
                             break;
+                        case MYSTAT_HPU:
+                            MyStatHpuProfile mystatHpuProfile = new MyStatHpuProfile();
+                            mystatHpuProfile.addEquip(eq.getId());
+                            L.ccu().zoneProfiles.add(mystatHpuProfile);
+                            break;
+
 
                         case MODBUS_PAC:
                         case MODBUS_RRS:

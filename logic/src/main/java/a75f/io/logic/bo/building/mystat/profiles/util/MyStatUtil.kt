@@ -20,6 +20,7 @@ import a75f.io.logic.bo.building.hvac.MyStatFanStages
 import a75f.io.logic.bo.building.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.mystat.configs.MyStatCpuAnalogOutMapping
 import a75f.io.logic.bo.building.mystat.configs.MyStatCpuConfiguration
+import a75f.io.logic.bo.building.mystat.configs.MyStatCpuRelayMapping
 import a75f.io.logic.bo.building.mystat.configs.MyStatHpuAnalogOutMapping
 import a75f.io.logic.bo.building.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.mystat.configs.MyStatHpuRelayMapping
@@ -205,7 +206,7 @@ fun fetchMyStatTuners(equip: MyStatEquip): MyStatTuners {
 
         is MyStatHpuEquip -> {
             myStatTuners.auxHeating1Activate = TunerUtil.readTunerValByQuery(
-                "domainName ==\"${DomainName.auxHeating1Activate}\"",
+                "domainName ==\"${DomainName.mystatAuxHeating1Activate}\"",
                 equip.equipRef
             )
         }
@@ -317,20 +318,61 @@ fun getMyStatHpuFanLevel(config: MyStatHpuConfiguration): Int {
     return fanLevel
 }
 
+fun setConditioningMode(config: MyStatCpuConfiguration, equip: MyStatEquip) {
+
+    val possible = getMyStatPossibleConditionMode(config)
+    var newMode = StandaloneConditioningMode.OFF
+    if (possible == MyStatPossibleConditioningMode.BOTH) newMode = StandaloneConditioningMode.AUTO
+    if (possible == MyStatPossibleConditioningMode.HEAT_ONLY) newMode = StandaloneConditioningMode.HEAT_ONLY
+    if (possible == MyStatPossibleConditioningMode.COOL_ONLY) newMode = StandaloneConditioningMode.COOL_ONLY
+    equip.conditioningMode.writePointValue(newMode.ordinal.toDouble())
+}
+
+fun updateConditioningMode(config: MyStatCpuConfiguration, equip: MyStatEquip) {
+
+    val currentMode =
+        StandaloneConditioningMode.values()[equip.conditioningMode.readPriorityVal().toInt()]
+    val possibleMode = getMyStatPossibleConditionMode(config)
+
+    if (possibleMode == MyStatPossibleConditioningMode.OFF) {
+        equip.conditioningMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
+        return
+    }
+
+    if (currentMode == StandaloneConditioningMode.AUTO &&
+        (possibleMode == MyStatPossibleConditioningMode.HEAT_ONLY
+                || possibleMode == MyStatPossibleConditioningMode.COOL_ONLY)
+        ) {
+        equip.conditioningMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
+        return
+    }
+
+    if (currentMode == StandaloneConditioningMode.HEAT_ONLY && possibleMode == MyStatPossibleConditioningMode.COOL_ONLY) {
+        equip.conditioningMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
+        return
+    }
+
+    if (currentMode == StandaloneConditioningMode.COOL_ONLY && possibleMode == MyStatPossibleConditioningMode.HEAT_ONLY) {
+        equip.conditioningMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
+        return
+    }
+}
+
 fun getMyStatCpuFanLevel(config: MyStatCpuConfiguration): Int {
     var fanLevel = 0
     var fanEnabledStages: Pair<Boolean, Boolean> = Pair(first = false, second = false)
 
-    if (config.analogOut1Enabled.enabled && (config.analogOut1Association.associationVal == MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal || config.analogOut1Association.associationVal == MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
+    if (config.analogOut1Enabled.enabled && (config.analogOut1Association.associationVal == MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal ||
+                config.analogOut1Association.associationVal == MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
         return LOW_HIGH // All options are enabled due to analog fan speed
     }
 
     val relays = config.getRelayEnabledAssociations()
     for ((enabled, association) in relays) {
-        if (enabled && association == MyStatHpuRelayMapping.FAN_LOW_SPEED.ordinal) {
+        if (enabled && association == MyStatCpuRelayMapping.FAN_LOW_SPEED.ordinal) {
             fanEnabledStages = fanEnabledStages.copy(first = true)
         }
-        if (enabled && association == MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal) {
+        if (enabled && association == MyStatCpuRelayMapping.FAN_HIGH_SPEED.ordinal) {
             fanEnabledStages = fanEnabledStages.copy(second = true)
         }
     }

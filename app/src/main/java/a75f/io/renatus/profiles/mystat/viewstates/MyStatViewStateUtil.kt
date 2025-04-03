@@ -1,6 +1,7 @@
 package a75f.io.renatus.profiles.mystat.viewstates
 
 import a75f.io.logic.bo.building.mystat.configs.MyStatConfiguration
+import a75f.io.logic.bo.building.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2Configuration
 import a75f.io.renatus.profiles.hyperstatv2.util.ConfigState
@@ -41,7 +42,7 @@ class MyStatViewStateUtil {
                 analogOut1Association = config.analogOut1Association.associationVal
 
                 universalIn1 = ConfigState(
-                    config.universalIn1.enabled, config.universalIn1Association.associationVal
+                    config.universalIn1Enabled.enabled, config.universalIn1Association.associationVal
                 )
             }
         }
@@ -69,7 +70,7 @@ class MyStatViewStateUtil {
                 analogOut1Enabled.enabled = state.analogOut1Enabled
                 analogOut1Association.associationVal = state.analogOut1Association
 
-                universalIn1.enabled = state.universalIn1.enabled
+                universalIn1Enabled.enabled = state.universalIn1.enabled
                 universalIn1Association.associationVal = state.universalIn1.association
             }
         }
@@ -114,12 +115,50 @@ class MyStatViewStateUtil {
             }
         }
 
+        fun cpuConfigToState(config: MyStatCpuConfiguration, viewState: MyStatCpuViewState): MyStatCpuViewState {
+            configToState(config, viewState) as MyStatCpuViewState
+            viewState.analogOut1MinMax.apply {
+                coolingConfig.min =
+                    config.analogOut1MinMaxConfig.cooling.min.currentVal.toInt()
+                coolingConfig.max =
+                    config.analogOut1MinMaxConfig.cooling.max.currentVal.toInt()
+                linearFanSpeedConfig.min =
+                    config.analogOut1MinMaxConfig.linearFanSpeed.min.currentVal.toInt()
+                linearFanSpeedConfig.max =
+                    config.analogOut1MinMaxConfig.linearFanSpeed.max.currentVal.toInt()
+                heatingConfig.min =
+                    config.analogOut1MinMaxConfig.heating.min.currentVal.toInt()
+                heatingConfig.max =
+                    config.analogOut1MinMaxConfig.heating.max.currentVal.toInt()
+                dcvDamperConfig.min =
+                    config.analogOut1MinMaxConfig.dcvDamperConfig.min.currentVal.toInt()
+                dcvDamperConfig.max =
+                    config.analogOut1MinMaxConfig.dcvDamperConfig.max.currentVal.toInt()
+            }
+
+            viewState.coolingStageFanConfig.apply {
+                stage1 = config.coolingStageFanConfig.stage1.currentVal.toInt()
+                stage2 = config.coolingStageFanConfig.stage2.currentVal.toInt()
+            }
+            viewState.heatingStageFanConfig.apply {
+                stage1 = config.heatingStageFanConfig.stage1.currentVal.toInt()
+                stage2 = config.heatingStageFanConfig.stage2.currentVal.toInt()
+            }
+            viewState.recirculateFanConfig = config.recirculateFanConfig.currentVal.toInt()
+
+            viewState.analogOut1FanConfig.apply {
+                low = config.analogOut1FanSpeedConfig.low.currentVal.toInt()
+                high = config.analogOut1FanSpeedConfig.high.currentVal.toInt()
+            }
+            return viewState
+        }
+
         fun hpuConfigToState(config: MyStatHpuConfiguration, viewState: MyStatHpuViewState): MyStatHpuViewState {
             configToState(config, viewState) as MyStatHpuViewState
             viewState.analogOut1MinMax.apply {
-                compressorSpeed.min =
+                compressorConfig.min =
                     config.analogOut1MinMaxConfig.compressorSpeed.min.currentVal.toInt()
-                compressorSpeed.max =
+                compressorConfig.max =
                     config.analogOut1MinMaxConfig.compressorSpeed.max.currentVal.toInt()
                 fanSpeedConfig.min =
                     config.analogOut1MinMaxConfig.fanSpeedConfig.min.currentVal.toInt()
@@ -138,11 +177,11 @@ class MyStatViewStateUtil {
             return viewState
         }
 
-        fun hpuStatToConfig(state: MyStatHpuViewState, configuration: MyStatHpuConfiguration) {
+        fun hpuStateToConfig(state: MyStatHpuViewState, configuration: MyStatHpuConfiguration) {
             stateToConfig(state, configuration)
             configuration.analogOut1MinMaxConfig.apply {
-                compressorSpeed.min.currentVal = state.analogOut1MinMax.compressorSpeed.min.toDouble()
-                compressorSpeed.max.currentVal = state.analogOut1MinMax.compressorSpeed.max.toDouble()
+                compressorSpeed.min.currentVal = state.analogOut1MinMax.compressorConfig.min.toDouble()
+                compressorSpeed.max.currentVal = state.analogOut1MinMax.compressorConfig.max.toDouble()
                 fanSpeedConfig.min.currentVal = state.analogOut1MinMax.fanSpeedConfig.min.toDouble()
                 fanSpeedConfig.max.currentVal = state.analogOut1MinMax.fanSpeedConfig.max.toDouble()
                 dcvDamperConfig.min.currentVal = state.analogOut1MinMax.dcvDamperConfig.min.toDouble()
@@ -154,6 +193,32 @@ class MyStatViewStateUtil {
             }
         }
 
+        fun cpuStateToConfig(state: MyStatCpuViewState, configuration: MyStatCpuConfiguration) {
+            stateToConfig(state, configuration)
+            configuration.analogOut1MinMaxConfig.apply {
+                cooling.min.currentVal = state.analogOut1MinMax.coolingConfig.min.toDouble()
+                cooling.max.currentVal = state.analogOut1MinMax.coolingConfig.max.toDouble()
+                heating.min.currentVal = state.analogOut1MinMax.heatingConfig.min.toDouble()
+                heating.max.currentVal = state.analogOut1MinMax.heatingConfig.max.toDouble()
+                linearFanSpeed.min.currentVal = state.analogOut1MinMax.linearFanSpeedConfig.min.toDouble()
+                linearFanSpeed.max.currentVal = state.analogOut1MinMax.linearFanSpeedConfig.max.toDouble()
+                dcvDamperConfig.min.currentVal = state.analogOut1MinMax.dcvDamperConfig.min.toDouble()
+                dcvDamperConfig.max.currentVal = state.analogOut1MinMax.dcvDamperConfig.max.toDouble()
+            }
+            configuration.analogOut1FanSpeedConfig.apply {
+                low.currentVal = state.analogOut1FanConfig.low.toDouble()
+                high.currentVal = state.analogOut1FanConfig.high.toDouble()
+            }
+            configuration.coolingStageFanConfig.apply {
+                stage1.currentVal = state.coolingStageFanConfig.stage1.toDouble()
+                stage2.currentVal = state.coolingStageFanConfig.stage2.toDouble()
+            }
+            configuration.heatingStageFanConfig.apply {
+                stage1.currentVal = state.heatingStageFanConfig.stage1.toDouble()
+                stage2.currentVal = state.heatingStageFanConfig.stage2.toDouble()
+            }
+            configuration.recirculateFanConfig.currentVal = state.recirculateFanConfig.toDouble()
+        }
 
     }
 

@@ -431,7 +431,6 @@ fun MinMaxConfiguration(
     }
 }
 
-
 //This compose is used for the dependent point mapping view
 @Composable
 fun DependentPointMappingView(toggleName : String, toggleState :Boolean = false,

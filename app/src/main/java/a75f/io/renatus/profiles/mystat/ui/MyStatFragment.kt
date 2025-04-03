@@ -5,7 +5,6 @@ import a75f.io.domain.api.DomainName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2AnalogOutMapping
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.AnalogOutConfig
@@ -329,50 +328,48 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
 
     @Composable
     open fun UniversalInput() {
-
-        val universalOptions = getAllowedValues(DomainName.universal1In, viewModel.equipModel)
-        Row(
-            modifier = Modifier
-                .wrapContentWidth()
-                .padding(10.dp)
-        ) {
-            Box(
-                modifier = Modifier.wrapContentWidth()
-            ) {
-                ToggleButtonStateful(defaultSelection = viewModel.viewState.value.universalIn1.enabled) {
-                    viewModel.viewState.value.universalIn1.enabled = it
-                }
-            }
-            Box(
+        Row {
+            Image(
+                painter = painterResource(id = R.drawable.universal),
+                contentDescription = "UniversalInput",
                 modifier = Modifier
                     .weight(1.5f)
-                    .padding(start = 10.dp, top = 10.dp)
-            ) {
-                StyledTextView("Universal-In", fontSize = 20)
-            }
-            Box(
-                modifier = Modifier
-                    .weight(4f)
-                    .padding(end = 5.dp, top = 5.dp)
-            ) {
-                SearchSpinnerElement(
-                    default = universalOptions[viewModel.viewState.value.universalIn1.association],
-                    allItems = universalOptions,
-                    unit = "",
-                    onSelect = { viewModel.viewState.value.universalIn1.association = it.index },
-                    width = 400,
-                    isEnabled = viewModel.viewState.value.universalIn1.enabled
-                )
+                    .padding(top = 10.dp)
+                    .height(34.dp)
+            )
+            Column(modifier = Modifier.weight(4f)) {
+                val universalOptions = getAllowedValues(DomainName.universalIn1Association, viewModel.equipModel)
+                Row(modifier = Modifier.wrapContentWidth()) {
+                    Box(modifier = Modifier.wrapContentWidth().padding(start = 9.dp, top = 8.dp)) {
+                        ToggleButtonStateful(defaultSelection = viewModel.viewState.value.universalIn1.enabled) {
+                            viewModel.viewState.value.universalIn1.enabled = it
+                        }
+                    }
+
+                    Box(modifier = Modifier.weight(1.2f).padding(start = 10.dp, top = 20.dp)) {
+                        StyledTextView("Universal-In", fontSize = 20)
+                    }
+                    Box(modifier = Modifier.weight(4f).padding(end = 5.dp, top = 10.dp)) {
+                        SearchSpinnerElement(
+                            default = universalOptions[viewModel.viewState.value.universalIn1.association],
+                            allItems = universalOptions,
+                            unit = "",
+                            onSelect = { viewModel.viewState.value.universalIn1.association = it.index },
+                            width = 400,
+                            isEnabled = viewModel.viewState.value.universalIn1.enabled
+                        )
+                    }
+                }
             }
         }
     }
 
     @Composable
-    fun ConfigMinMax(association: Int, minMax: MinMaxConfig, mapping: MyStatPipe2AnalogOutMapping) {
-        if (association == mapping.ordinal) {
+    fun ConfigMinMax(association: Int, minMax: MinMaxConfig, displayName: String, mapping: Int) {
+        if (association == mapping) {
             MinMaxConfiguration(
-                minLabel = "Analog-out at Min \n${mapping.displayName}",
-                maxLabel = "Analog-out at Max \n${mapping.displayName}",
+                minLabel = "Analog-out at Min \n${displayName}",
+                maxLabel = "Analog-out at Max \n${displayName}",
                 itemList = minMaxVoltage,
                 unit = "V",
                 minDefault = minMax.min.toString(),

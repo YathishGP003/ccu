@@ -843,7 +843,7 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
         }
     }
     
-    private fun isDoorOpenState(config: MyStatConfiguration, equip: MyStatEquip): Boolean {
+    override fun isDoorOpenState(config: MyStatConfiguration, equip: MyStatEquip): Boolean {
        // TODO No door window as of now update if we configure it
         return false
     }

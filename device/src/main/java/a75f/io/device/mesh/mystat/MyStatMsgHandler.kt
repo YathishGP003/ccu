@@ -121,10 +121,10 @@ fun runProfileAlgo(nodeAddress: Short) {
             profile.processPipe2Profile(profile.getProfileDomainEquip(nodeAddress.toInt()))
         }
         is MyStatHpuProfile -> {
-            //profile.processHpuProfile(profile.getProfileDomainEquip(nodeAddress.toInt()))
+            profile.processHpuProfile(profile.getProfileDomainEquip(nodeAddress.toInt()))
         }
         is MyStatCpuProfile -> {
-            //profile.processCpuProfile(profile.getProfileDomainEquip(nodeAddress.toInt()))
+            profile.processCpuProfile(profile.getProfileDomainEquip(nodeAddress.toInt()))
         }
     }
 }
@@ -293,25 +293,26 @@ private fun updateUniversalInput(point: PhysicalPoint, value: Int) {
             )
             updatePhysicalInputs(isThermistor, rawData)
 
+            fun deriveValue(): Double {
+                return if (isThermistor) {
+                    if ((rawData * 10) <= 10000) 0.0 else 1.0
+                } else {
+                    val analogData = rawData / 1000
+                    if (analogData >= 2) 1.0 else 0.0
+                }
+            }
+
             val logicalValue = when (logicalDomainName) {
                 DomainName.leavingWaterTemperature,
                 DomainName.dischargeAirTemperature -> {
                     CCUUtils.roundToOneDecimal(ThermistorUtil.getThermistorValueToTemp(rawData * 10))
                 }
-
                 DomainName.doorWindowSensorNCTitle24,
-                DomainName.genericAlarmNC -> { if ((value * 10) >= 10000) 1.0 else 0.0 }
+                DomainName.genericAlarmNC -> { if ((rawData * 10) >= 10000) 1.0 else 0.0 }
 
-                DomainName.genericAlarmNO -> { if ((value * 10) <= 10000) 1.0 else 0.0 }
-
-                DomainName.keyCardSensor, DomainName.doorWindowSensorTitle24 -> {
-                    if (isThermistor) {
-                        if ((value * 10) <= 10000) 0.0 else 1.0
-                    } else {
-                        val analogData = rawData / 1000
-                        if (analogData >= 2) 1.0 else 0.0
-                    }
-                }
+                DomainName.genericAlarmNO -> { if ((rawData * 10) <= 10000) 1.0 else 0.0 }
+                DomainName.keyCardSensor,
+                DomainName.doorWindowSensorTitle24 -> { deriveValue() }
                 else -> {
                     if (isThermistor) {
                         CCUUtils.roundToOneDecimal(ThermistorUtil.getThermistorValueToTemp(rawData * 10))
@@ -328,6 +329,10 @@ private fun updateUniversalInput(point: PhysicalPoint, value: Int) {
     }
 }
 
+/**
+ * initial discussion is to have door window using bluetooth sensor for mystat pipe 2 profile
+ *
+ */
 private fun updateDoorWindowStatus(address: Int, value: Int) {
     val profile = L.getProfile(address.toShort())
     if (profile is MyStatPipe2Profile && value == 1) {
@@ -342,4 +347,5 @@ private fun getBit(n: Int, index: Int = 15) = ((n shr index) and 1)
 
 private fun getBits(n: Int, start: Int = 0, end: Int = 14) =
     n and (((1 shl (end - start + 1)) - 1) shl start)
+
 

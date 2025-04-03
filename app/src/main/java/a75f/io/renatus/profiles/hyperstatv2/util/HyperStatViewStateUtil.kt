@@ -189,8 +189,6 @@ class HyperStatViewStateUtil {
                 heatingConfig.max.currentVal = minMaxState.heatingConfig.max.toDouble()
                 dcvDamperConfig.min.currentVal = minMaxState.dcvDamperConfig.min.toDouble()
                 dcvDamperConfig.max.currentVal = minMaxState.dcvDamperConfig.max.toDouble()
-                stagedFanSpeedConfig.min.currentVal = minMaxState.stagedFanSpeedConfig.min.toDouble()
-                stagedFanSpeedConfig.max.currentVal = minMaxState.stagedFanSpeedConfig.max.toDouble()
             }
         }
 
@@ -248,8 +246,6 @@ class HyperStatViewStateUtil {
                 heatingConfig.max = minMaxConfig.heatingConfig.max.currentVal.toInt()
                 dcvDamperConfig.min = minMaxConfig.dcvDamperConfig.min.currentVal.toInt()
                 dcvDamperConfig.max = minMaxConfig.dcvDamperConfig.max.currentVal.toInt()
-                stagedFanSpeedConfig.min = minMaxConfig.stagedFanSpeedConfig.min.currentVal.toInt()
-                stagedFanSpeedConfig.max = minMaxConfig.stagedFanSpeedConfig.max.currentVal.toInt()
             }
 
         }

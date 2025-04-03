@@ -52,7 +52,7 @@ abstract class MyStatConfiguration(
     lateinit var analogOut1Enabled: EnableConfig
     lateinit var analogOut1Association: AssociationConfig
 
-    lateinit var universalIn1: EnableConfig
+    lateinit var universalIn1Enabled: EnableConfig
     lateinit var universalIn1Association: AssociationConfig
 
     lateinit var co2DamperOpeningRate: ValueConfig
@@ -73,6 +73,8 @@ abstract class MyStatConfiguration(
             add(relay4Enabled)
 
             add(analogOut1Enabled)
+            add(universalIn1Enabled)
+            add(enableCo2Display)
             add(enableCo2Display)
         }
     }
@@ -84,6 +86,7 @@ abstract class MyStatConfiguration(
             add(relay3Association)
             add(relay4Association)
             add(analogOut1Association)
+            add(universalIn1Association)
         }
     }
 
@@ -125,9 +128,9 @@ abstract class MyStatConfiguration(
         if (analogOut1Enabled.enabled) analogOut1Association.associationVal =
             equip.analog1OutputAssociation.readDefaultVal().toInt()
 
-        universalIn1.enabled = equip.relay1OutputEnable.readDefaultVal() == 1.0
-        if (universalIn1.enabled) universalIn1Association.associationVal =
-            equip.relay1OutputAssociation.readDefaultVal().toInt()
+        universalIn1Enabled.enabled = equip.universalIn1Enable.readDefaultVal() == 1.0
+        if (universalIn1Enabled.enabled) universalIn1Association.associationVal =
+            equip.universalIn1Association.readDefaultVal().toInt()
 
     }
 
@@ -161,7 +164,7 @@ abstract class MyStatConfiguration(
         analogOut1Enabled = getDefaultEnableConfig(DomainName.analog1OutputEnable, model)
         analogOut1Association = getDefaultAssociationConfig(DomainName.analog1OutputAssociation, model)
 
-        universalIn1 = getDefaultEnableConfig(DomainName.universalIn1Enable, model)
+        universalIn1Enabled = getDefaultEnableConfig(DomainName.universalIn1Enable, model)
         universalIn1Association = if (this is MyStatPipe2Configuration) {
             AssociationConfig(DomainName.universalIn1Association,  0)
         } else {
@@ -265,6 +268,15 @@ abstract class MyStatConfiguration(
         return if (availableStages.first) stage1
         else if (availableStages.second) stage2
         else -1
+    }
+
+    enum class UniversalMapping {
+        SUPPLY_AIR_TEMPERATURE,
+        GENERIC_ALARM_NO,
+        GENERIC_ALARM_NC,
+        KEY_CARD_SENSOR,
+        DOOR_WINDOW_SENSOR_NC_TITLE24,
+        DOOR_WINDOW_SENSOR_TITLE24,
     }
 }
 

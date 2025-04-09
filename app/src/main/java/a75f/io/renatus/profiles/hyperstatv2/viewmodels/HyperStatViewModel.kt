@@ -304,45 +304,46 @@ fun updateFanMode(isReconfigure: Boolean, equip: HyperStatEquip, fanLevel: Int) 
                 StandaloneFanStage.HIGH_OCC.ordinal,
                 StandaloneFanStage.HIGH_CUR_OCC.ordinal))
         }
-
-        when (possibleFanMode) {
-            PossibleFanMode.LOW -> {
-                if (!isWithinLow()) {
-                    resetFanToOff()
+        if (currentFanMode != StandaloneFanStage.AUTO) {
+            when (possibleFanMode) {
+                PossibleFanMode.LOW -> {
+                    if (!isWithinLow()) {
+                        resetFanToOff()
+                    }
                 }
-            }
 
-            PossibleFanMode.MED -> {
-                if (!isWithinMedium()) {
-                    resetFanToOff()
+                PossibleFanMode.MED -> {
+                    if (!isWithinMedium()) {
+                        resetFanToOff()
+                    }
                 }
-            }
 
-            PossibleFanMode.HIGH -> {
-                if (!isWithinHigh()) {
-                    resetFanToOff()
+                PossibleFanMode.HIGH -> {
+                    if (!isWithinHigh()) {
+                        resetFanToOff()
+                    }
                 }
-            }
 
-            PossibleFanMode.LOW_MED -> {
-                if (isWithinHigh()) {
-                    resetFanToOff()
+                PossibleFanMode.LOW_MED -> {
+                    if (isWithinHigh()) {
+                        resetFanToOff()
+                    }
                 }
-            }
 
-            PossibleFanMode.LOW_HIGH -> {
-                if (isWithinMedium()) {
-                    resetFanToOff()
+                PossibleFanMode.LOW_HIGH -> {
+                    if (isWithinMedium()) {
+                        resetFanToOff()
+                    }
                 }
-            }
 
-            PossibleFanMode.MED_HIGH -> {
-                if (!isWithinLow()) {
-                    resetFanToOff()
+                PossibleFanMode.MED_HIGH -> {
+                    if (isWithinLow()) {
+                        resetFanToOff()
+                    }
                 }
-            }
 
-            else -> {}
+                else -> {}
+            }
         }
     } else {
         equip.fanOpMode.writePointValue(StandaloneFanStage.AUTO.ordinal.toDouble())

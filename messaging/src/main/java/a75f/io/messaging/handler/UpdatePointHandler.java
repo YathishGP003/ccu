@@ -129,18 +129,20 @@ public class UpdatePointHandler implements MessageHandler
             return;
         }
 
-        if (HSUtil.isHsCPUEquip(pointUid, CCUHsApi.getInstance())
+        if ((HSUtil.isHsCPUEquip(pointUid, CCUHsApi.getInstance())
         || HSUtil.isHSPipe2Equip(pointUid, CCUHsApi.getInstance())
-        || HSUtil.isHSHpuEquip(pointUid, CCUHsApi.getInstance())){
+        || HSUtil.isHSHpuEquip(pointUid, CCUHsApi.getInstance()))
+        && !isReconfigurationPoint(localPoint)){
             reconfigureHSV2(msgObject, localPoint);
             updatePoints(localPoint);
             hayStack.scheduleSync();
             return;
         }
 
-        if (HSUtil.isMyStatCpuEquip(pointUid, CCUHsApi.getInstance())
+        if ((HSUtil.isMyStatCpuEquip(pointUid, CCUHsApi.getInstance())
         || HSUtil.isMyStatHpuEquip(pointUid, CCUHsApi.getInstance())
-        || HSUtil.isMyStatPipe2Equip(pointUid, CCUHsApi.getInstance())){
+        || HSUtil.isMyStatPipe2Equip(pointUid, CCUHsApi.getInstance()))
+        && !isReconfigurationPoint(localPoint)){
             reconfigureMyStat(msgObject, localPoint);
             updatePoints(localPoint);
             hayStack.scheduleSync();
@@ -500,5 +502,10 @@ public class UpdatePointHandler implements MessageHandler
         String src = jsonObject.get("who").getAsString();
         String pointUid = "@" + jsonObject.get("id").getAsString();
         return canIgnorePointUpdate(src, pointUid, CCUHsApi.getInstance());
+    }
+    private static boolean isReconfigurationPoint(Point localPoint) {
+        return  (localPoint.getMarkers().contains(Tags.DESIRED)
+                || localPoint.getMarkers().contains(Tags.SCHEDULE_TYPE)
+                || localPoint.getMarkers().contains(Tags.TUNER));
     }
 }

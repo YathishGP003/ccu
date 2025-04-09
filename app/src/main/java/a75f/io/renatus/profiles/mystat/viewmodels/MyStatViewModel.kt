@@ -30,6 +30,7 @@ import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleFanModeSe
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.formattedToastMessage
+import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatCpuViewState
@@ -172,12 +173,13 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
 
         if (isReconfigure) {
             val currentFanMode = MyStatFanStages.values()[equip.fanOpMode.readPriorityVal().toInt()]
-
-            if (possibleFanMode == MyStatPossibleFanMode.LOW && currentFanMode.ordinal > MyStatFanStages.LOW_ALL_TIME.ordinal) {
-                equip.fanOpMode.writePointValue(MyStatFanStages.OFF.ordinal.toDouble())
-            }
-            if (possibleFanMode == MyStatPossibleFanMode.HIGH && currentFanMode.ordinal < MyStatFanStages.HIGH_CUR_OCC.ordinal) {
-                equip.fanOpMode.writePointValue(MyStatFanStages.OFF.ordinal.toDouble())
+            if (currentFanMode != MyStatFanStages.AUTO) {
+                if (possibleFanMode == MyStatPossibleFanMode.LOW && currentFanMode.ordinal > MyStatFanStages.LOW_ALL_TIME.ordinal) {
+                    equip.fanOpMode.writePointValue(MyStatFanStages.OFF.ordinal.toDouble())
+                }
+                if (possibleFanMode == MyStatPossibleFanMode.HIGH && currentFanMode.ordinal < MyStatFanStages.HIGH_CUR_OCC.ordinal) {
+                    equip.fanOpMode.writePointValue(MyStatFanStages.OFF.ordinal.toDouble())
+                }
             }
         } else {
             equip.fanOpMode.writePointValue(StandaloneConditioningMode.AUTO.ordinal.toDouble())
@@ -222,7 +224,9 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
             if (analogValue != null) device.analog1Out.writePointValue(analogValue)
             CcuLog.d(L.TAG_CCU_MSHST, "R1 ${device.relay1.readPointValue()} R2 ${device.relay2.readPointValue()} R3 ${device.relay3.readPointValue()} R4 ${device.relay4.readPointValue()} A1 ${device.analog1Out.readPointValue()}")
         } else {
+            showToast("Please pair equip to send test command",context)
             CcuLog.d(L.TAG_CCU_MSHST, "Please pair equip to send test command")
+            return
         }
         CcuLog.d(L.TAG_CCU_MSHST, "Sending mystat test signal")
         if (!Globals.getInstance().isTestMode) Globals.getInstance().isTestMode = true

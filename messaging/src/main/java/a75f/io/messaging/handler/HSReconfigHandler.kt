@@ -56,7 +56,12 @@ fun reconfigureHSV2(msgObject: JsonObject, configPoint: Point) {
             updateFanModeCache(configPoint.equipRef, pointNewValue.asInt)
         }
         deviceBuilder.updateDeviceAndPoints(config, deviceModel, hyperStatEquip["id"].toString(), hayStack.site!!.id, deviceDis)
-        updateFanMode(configPoint.equipRef, config)
+        // Not need to check the fan mode when we updated the fan mode in portal
+        // we will received two message for level 8 clearing the value and level 10 for updating the value
+        // 1. clearing the value while getting the fan mode priority array we do not have any value ,so it will return 0 at this time our fan mode is off
+        if(configPoint.domainName != DomainName.fanOpMode) {
+            updateFanMode(configPoint.equipRef, config)
+        }
     }
     writePointFromJson(configPoint, msgObject, hayStack)
     config.apply { setPortConfiguration( nodeAddress, getRelayMap(), getAnalogMap()) }
@@ -119,45 +124,46 @@ fun updateFanMode(equipId: String, config: HyperStatConfiguration) {
             StandaloneFanStage.HIGH_OCC.ordinal,
             StandaloneFanStage.HIGH_CUR_OCC.ordinal))
     }
-
-    when (possibleFanMode) {
-        PossibleFanMode.LOW -> {
-            if (!isWithinLow()) {
-                resetFanToOff()
+    if  (currentFanMode != StandaloneFanStage.AUTO) {
+        when (possibleFanMode) {
+            PossibleFanMode.LOW -> {
+                if (!isWithinLow()) {
+                    resetFanToOff()
+                }
             }
-        }
 
-        PossibleFanMode.MED -> {
-            if (!isWithinMedium()) {
-                resetFanToOff()
+            PossibleFanMode.MED -> {
+                if (!isWithinMedium()) {
+                    resetFanToOff()
+                }
             }
-        }
 
-        PossibleFanMode.HIGH -> {
-            if (!isWithinHigh()) {
-                resetFanToOff()
+            PossibleFanMode.HIGH -> {
+                if (!isWithinHigh()) {
+                    resetFanToOff()
+                }
             }
-        }
 
-        PossibleFanMode.LOW_MED -> {
-            if (isWithinHigh()) {
-                resetFanToOff()
+            PossibleFanMode.LOW_MED -> {
+                if (isWithinHigh()) {
+                    resetFanToOff()
+                }
             }
-        }
 
-        PossibleFanMode.LOW_HIGH -> {
-            if (isWithinMedium()) {
-                resetFanToOff()
+            PossibleFanMode.LOW_HIGH -> {
+                if (isWithinMedium()) {
+                    resetFanToOff()
+                }
             }
-        }
 
-        PossibleFanMode.MED_HIGH -> {
-            if (!isWithinLow()) {
-                resetFanToOff()
+            PossibleFanMode.MED_HIGH -> {
+                if (isWithinLow()) {
+                    resetFanToOff()
+                }
             }
-        }
 
-        else -> {}
+            else -> {}
+        }
     }
 }
 

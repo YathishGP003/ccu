@@ -57,7 +57,9 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
         }
         deviceBuilder.updateDeviceAndPoints(config, deviceModel, hyperStatEquip["id"].toString(), hayStack.site!!.id, deviceDis)
         val equip = MyStatEquip(configPoint.equipRef)
-        updateMyStatFanMode(equip, getMyStatFanLevel(config))
+        if (configPoint.domainName != DomainName.fanOpMode) {
+            updateMyStatFanMode(equip, getMyStatFanLevel(config))
+        }
 
     }
     writePointFromJson(configPoint, msgObject, hayStack)
@@ -117,11 +119,13 @@ private fun updateMyStatFanMode(equip: MyStatEquip, fanLevel: Int) {
         return
     }
     val currentFanMode = MyStatFanStages.values()[equip.fanOpMode.readPriorityVal().toInt()]
+    if (currentFanMode != MyStatFanStages.AUTO) {
 
-    if (possibleFanMode == MyStatPossibleFanMode.LOW && currentFanMode.ordinal > MyStatFanStages.LOW_ALL_TIME.ordinal) {
-        equip.fanOpMode.writePointValue(MyStatFanStages.OFF.ordinal.toDouble())
-    }
-    if (possibleFanMode == MyStatPossibleFanMode.HIGH && currentFanMode.ordinal < MyStatFanStages.HIGH_CUR_OCC.ordinal) {
-        equip.fanOpMode.writePointValue(MyStatFanStages.OFF.ordinal.toDouble())
+        if (possibleFanMode == MyStatPossibleFanMode.LOW && currentFanMode.ordinal > MyStatFanStages.LOW_ALL_TIME.ordinal) {
+            equip.fanOpMode.writePointValue(MyStatFanStages.OFF.ordinal.toDouble())
+        }
+        if (possibleFanMode == MyStatPossibleFanMode.HIGH && currentFanMode.ordinal < MyStatFanStages.HIGH_CUR_OCC.ordinal) {
+            equip.fanOpMode.writePointValue(MyStatFanStages.OFF.ordinal.toDouble())
+        }
     }
 }

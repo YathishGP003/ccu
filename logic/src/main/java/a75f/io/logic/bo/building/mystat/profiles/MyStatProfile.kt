@@ -14,6 +14,7 @@ import a75f.io.logic.bo.building.hvac.MyStatFanStages
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.mystat.profiles.util.MyStatBasicSettings
+import a75f.io.logic.bo.building.mystat.profiles.util.MyStatFanModeCacheStorage
 import a75f.io.logic.bo.building.mystat.profiles.util.MyStatLoopController
 import a75f.io.logic.bo.building.mystat.profiles.util.MyStatUserIntents
 import a75f.io.logic.bo.building.mystat.profiles.util.updateAllLoopOutput
@@ -252,6 +253,11 @@ abstract class MyStatProfile: ZoneProfile() {
     ): MyStatFanStages {
         logIt("FanModeSaved in Shared Preference $fanModeSaved")
         val currentOccupancy = equip.occupancyMode.readHisVal().toInt()
+        // If occupancy is unoccupied and the fan mode is current occupied then remove the fan mode from cache
+        if ((occupancyStatus == Occupancy.UNOCCUPIED || occupancyStatus == Occupancy.DEMAND_RESPONSE_UNOCCUPIED ) && isFanModeCurrentOccupied(fanModeSaved)) {
+            MyStatFanModeCacheStorage().removeFanModeFromCache(equipRef)
+        }
+
         logIt("Fall back fan mode " + basicSettings.fanMode + " conditioning mode " + basicSettings.conditioningMode)
         logIt("Fan Details :$occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved")
         if (isEligibleToAuto(basicSettings,currentOccupancy)) {
@@ -268,7 +274,8 @@ abstract class MyStatProfile: ZoneProfile() {
         if ((occupancyStatus == Occupancy.OCCUPIED
                     || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED
                     || occupancyStatus == Occupancy.FORCEDOCCUPIED
-                    || Occupancy.values()[currentOccupancy] == Occupancy.PRECONDITIONING)
+                    || Occupancy.values()[currentOccupancy] == Occupancy.PRECONDITIONING
+                    || occupancyStatus == Occupancy.DEMAND_RESPONSE_OCCUPIED)
             && basicSettings.fanMode == MyStatFanStages.AUTO && fanModeSaved != 0) {
             logIt("Resetting the Fan status back to ${MyStatFanStages.values()[fanModeSaved]}")
             MyStatUserIntentHandler.updateMyStatUserIntentPoints(
@@ -281,11 +288,17 @@ abstract class MyStatProfile: ZoneProfile() {
         }
         return MyStatFanStages.values()[equip.fanOpMode.readPriorityVal().toInt()]
     }
-    
+
+    private fun isFanModeCurrentOccupied(value : Int): Boolean {
+        val basicSettings = MyStatFanStages.values()[value]
+        return (basicSettings == MyStatFanStages.LOW_CUR_OCC || basicSettings == MyStatFanStages.HIGH_CUR_OCC)
+    }
+
     private fun isEligibleToAuto(basicSettings: MyStatBasicSettings, currentOperatingMode: Int): Boolean {
         return (occupancyStatus != Occupancy.OCCUPIED
                 && occupancyStatus != Occupancy.AUTOFORCEOCCUPIED
                 && occupancyStatus != Occupancy.FORCEDOCCUPIED
+                && occupancyStatus != Occupancy.DEMAND_RESPONSE_OCCUPIED
                 && Occupancy.values()[currentOperatingMode] != Occupancy.PRECONDITIONING
                 && basicSettings.fanMode != MyStatFanStages.OFF
                 && basicSettings.fanMode != MyStatFanStages.AUTO

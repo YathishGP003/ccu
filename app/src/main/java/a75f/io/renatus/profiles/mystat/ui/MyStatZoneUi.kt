@@ -11,7 +11,9 @@ import a75f.io.domain.equips.mystat.MyStatPipe2Equip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hvac.MyStatFanStages
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus
 import a75f.io.logic.bo.building.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.mystat.configs.MyStatCpuConfiguration
@@ -221,9 +223,15 @@ private fun handleMyStatFanMode(
     fanMode: Point
 ) {
 
+
+    fun isFanModeCurrentOccupied(position : Int): Boolean {
+        val basicSettings = MyStatFanStages.values()[position]
+        return (basicSettings == MyStatFanStages.LOW_CUR_OCC || basicSettings == MyStatFanStages.HIGH_CUR_OCC)
+    }
+
     fun updateFanModeCache(actualFanMode: Int) {
         val cacheStorage = MyStatFanModeCacheStorage()
-        if (selectedPosition != 0 && selectedPosition % 3 == 0) cacheStorage.saveFanModeInCache(
+        if (selectedPosition != 0 && ( selectedPosition % 3 == 0 || isFanModeCurrentOccupied(selectedPosition))) cacheStorage.saveFanModeInCache(
             equipId, actualFanMode
         ) // while saving the fan mode, we need to save the actual fan mode instead of selected position
         else cacheStorage.removeFanModeFromCache(equipId)
@@ -265,7 +273,7 @@ private fun handleMyStatFanMode(
             MyStatUserIntentHandler.updateMyStatUserIntentPoints(
                 equipId, fanMode, actualFanMode.toDouble(), CCUHsApi.getInstance().ccuUserName
             )
-            if (selectedPosition != 0 && selectedPosition % 3 == 0) cacheStorage.saveFanModeInCache(
+            if (selectedPosition != 0 && ( selectedPosition % 3 == 0 || isFanModeCurrentOccupied(selectedPosition))) cacheStorage.saveFanModeInCache(
                 equipId, actualFanMode
             ) // while saving the fan mode, we need to save the actual fan mode instead of selected position
             else cacheStorage.removeFanModeFromCache(equipId)

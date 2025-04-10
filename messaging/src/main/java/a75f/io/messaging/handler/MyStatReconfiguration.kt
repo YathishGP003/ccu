@@ -84,12 +84,16 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
 fun myStatupdateFanMode(equipRef: String, fanMode: Int) {
     CcuLog.i(L.TAG_CCU_PUBNUB, "updateFanMode $fanMode")
     val cache = MyStatFanModeCacheStorage()
-    if (fanMode != 0  && fanMode % 3 == 0) {
+    if (fanMode != 0  && (fanMode % 3 == 0 || isFanModeCurrentOccupied(fanMode)) ) {
         cache.saveFanModeInCache(equipRef, fanMode)
-    }
-    else {
+    } else {
         cache.removeFanModeFromCache(equipRef)
     }
+}
+
+private fun isFanModeCurrentOccupied(value : Int): Boolean {
+    val basicSettings = MyStatFanStages.values()[value]
+    return (basicSettings == MyStatFanStages.LOW_CUR_OCC || basicSettings == MyStatFanStages.HIGH_CUR_OCC)
 }
 
 private fun writePointFromJson(configPoint: Point, msgObject: JsonObject, hayStack: CCUHsApi) {

@@ -11,6 +11,7 @@ import a75f.io.domain.api.DomainName.systemPostPurgeEnable
 import a75f.io.domain.api.DomainName.systemPrePurgeEnable
 import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.logger.CcuLog
+import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.EpidemicState
 import a75f.io.logic.bo.building.oao.OAOProfile
@@ -18,6 +19,7 @@ import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationTypeConnect.OAO_DAMPER
 import a75f.io.logic.tuners.TunerUtil
+import android.content.Context
 import java.lang.Double.max
 import kotlin.math.min
 
@@ -418,11 +420,24 @@ class AdvAhuEconAlgoHandler(private val connectEquip: ConnectModuleEquip) {
      */
     private fun doEconomizing(systemProfile: SystemProfile) {
         //TODO: This needs to changed with domainName
+        var externalTemp: Double
+        var externalHumidity: Double
 
-        val externalTemp =
-            CCUHsApi.getInstance().readHisValByQuery("system and outside and temp and not lockout")
-        val externalHumidity =
-            CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity")
+        val sharedPreferences = Globals.getInstance().applicationContext.getSharedPreferences(
+            "ccu_devsetting",
+            Context.MODE_PRIVATE
+        )
+        externalTemp = if (connectEquip.outsideTemperature.pointExists()) {
+            connectEquip.outsideTemperature.readHisVal()
+        } else {
+            sharedPreferences.getInt("outside_temp", 0).toDouble()
+        }
+        externalHumidity = if (connectEquip.outsideHumidity.pointExists()) {
+            connectEquip.outsideHumidity.readHisVal()
+        } else {
+            sharedPreferences.getInt("outside_humidity", 0).toDouble()
+        }
+
 
         val economizingToMainCoolingLoopMap: Double =
             connectEquip.economizingToMainCoolingLoopMap.readPriorityVal()

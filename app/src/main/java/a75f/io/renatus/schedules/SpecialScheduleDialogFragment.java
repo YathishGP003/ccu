@@ -489,11 +489,15 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
                     Toast.LENGTH_SHORT).show();
            return;
         }
-        if(!Pattern.matches("[ /^(?:[A-Za-z0-9\\s]|)+[A-Za-z0-9\\s\\-\\_]*/ ]+",scheduleName)){
-            Toast.makeText(SpecialScheduleDialogFragment.this.getContext(), "SpecialSchedule name contains special characters.Please Re-edit.",
-                    Toast.LENGTH_SHORT).show();
+        if (!Pattern.matches("^[A-Za-z0-9\\s\\-_]+$", scheduleName)) {
+            Toast.makeText(
+                    SpecialScheduleDialogFragment.this.getContext(),
+                    "Special Schedule name contains special characters. Please re-edit.",
+                    Toast.LENGTH_SHORT
+            ).show();
             return;
         }
+
 
         int startHour = (npStartTime.getValue() - (npStartTime.getValue() % 4)) / 4;
         int startMinutes = (npStartTime.getValue() % 4) * 15;

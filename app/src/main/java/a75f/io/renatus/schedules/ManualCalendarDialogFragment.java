@@ -21,6 +21,7 @@ import org.joda.time.Interval;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
@@ -192,7 +193,7 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
         {
             List<CalendarDay> selectedDates = mCalendarView.getSelectedDates();
 
-            mListener.onClickSave(mId, mVacationNameEditText.getText().toString(),
+            mListener.onClickSave(mId, mVacationNameEditText.getText().toString().trim(),
                                   new DateTime().withDate(selectedDates.get(0).getYear(), selectedDates.get(0).getMonth(),
                                                           selectedDates.get(0).getDay()).withTimeAtStartOfDay(),
                                   new DateTime().withDate(selectedDates.get(0).getYear(),
@@ -202,7 +203,7 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
         {
             List<CalendarDay> selectedDates = mCalendarView.getSelectedDates();
 
-            mListener.onClickSave(mId, mVacationNameEditText.getText().toString(),
+            mListener.onClickSave(mId, mVacationNameEditText.getText().toString().trim(),
                                   new DateTime().withDate(selectedDates.get(0).getYear(), selectedDates.get(0).getMonth(),
                                                           selectedDates.get(0).getDay()).withTimeAtStartOfDay(),
                                   new DateTime().withDate(selectedDates.get(selectedDates.size() - 1).getYear(), selectedDates.get(selectedDates.size() - 1).getMonth(),
@@ -235,9 +236,12 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
 
     private boolean validate()
     {
-        if (mVacationNameEditText.getText() == null || mVacationNameEditText.getText().toString().isEmpty())
-        {
+        if (mVacationNameEditText.getText() == null || mVacationNameEditText.getText().toString().isEmpty()) {
             Toast.makeText(this.getContext(), "Please enter a vacation name", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (mVacationNameEditText.getText() == null || !Pattern.matches("^[A-Za-z0-9\\s\\-_]+$", mVacationNameEditText.getText().toString())) {
+            Toast.makeText(this.getContext(), "vacation name contains special characters.Please Re-edit.", Toast.LENGTH_SHORT).show();
             return false;
         }
 

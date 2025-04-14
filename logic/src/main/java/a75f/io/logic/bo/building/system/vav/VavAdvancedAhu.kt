@@ -32,6 +32,7 @@ import a75f.io.logic.bo.building.system.analogOutAssociationToDomainName
 import a75f.io.logic.bo.building.system.co2DamperControlTypeToDomainPoint
 import a75f.io.logic.bo.building.system.connectAnalogOutAssociationToDomainName
 import a75f.io.logic.bo.building.system.connectRelayAssociationToDomainName
+import a75f.io.logic.bo.building.system.dab.DabSystemController
 import a75f.io.logic.bo.building.system.getCMAnalogAssociationMap
 import a75f.io.logic.bo.building.system.getCMRelayAssociationMap
 import a75f.io.logic.bo.building.system.getCMRelayLogicalPhysicalMap
@@ -438,7 +439,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 minOf(tempLoopOp, 100.0)
             }else if (VavSystemController.getInstance().getSystemState() == SystemController.State.HEATING
                 && (conditioningMode == SystemMode.HEATONLY || conditioningMode == SystemMode.AUTO)) {
-                maxOf((VavSystemController.getInstance().getHeatingSignal() * 100 / ahuSettings.connectEquip1.economizingToMainCoolingLoopMap.readDefaultVal()), smartPurgeConnectFanLoopOp)
+                (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier).toInt().toDouble().coerceAtLeast(smartPurgeConnectFanLoopOp)
             } else {
                 smartPurgeConnectFanLoopOp
             }
@@ -1090,12 +1091,8 @@ open class VavAdvancedAhu : VavSystemProfile() {
             getDomainPointForName(domainName, systemEquip.cmEquip).writePointValue(0.0)
             cmRelayPhysicalMap[relay]?.writePointValue(0.0)
         }
-        val cmAnalogOutMap = getAnalogOutLogicalPhysicalMap()
-        getCMAnalogAssociationMap(systemEquip.cmEquip).entries.forEach { (analogOut, association) ->
-            val domainName = analogOutAssociationToDomainName(association.readDefaultVal().toInt())
-            getDomainPointForName(domainName, systemEquip.cmEquip).writePointValue(0.0)
-            cmAnalogOutMap[analogOut]?.writePointValue(0.0)
-        }
+
+        updateAnalogOutputPorts(getCMAnalogAssociationMap(systemEquip.cmEquip), getAnalogOutLogicalPhysicalMap(), false)
 
         if (!systemEquip.connectEquip1.equipRef.contentEquals("null")) {
             val physicalMap = getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)
@@ -1104,13 +1101,11 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 getDomainPointForName(domainName, systemEquip.connectEquip1).writePointValue(0.0)
                 physicalMap[relay]?.writePointValue(0.0)
             }
-            val analogOutMap = getConnectAnalogOutLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)
-            getConnectAnalogAssociationMap(systemEquip.connectEquip1).entries.forEach { (analogOut, association) ->
-                val domainName = connectAnalogOutAssociationToDomainName(association.readDefaultVal().toInt())
-                getDomainPointForName(domainName, systemEquip.connectEquip1).writePointValue(0.0)
-                analogOutMap[analogOut]?.writePointValue(0.0)
-            }
 
+            updateAnalogOutputPorts(getConnectAnalogAssociationMap(systemEquip.connectEquip1), getConnectAnalogOutLogicalPhysicalMap(
+                systemEquip.connectEquip1,
+                Domain.connect1Device,
+            ), true)
         }
     }
 

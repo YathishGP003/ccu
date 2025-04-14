@@ -412,7 +412,7 @@ class DabAdvancedAhu : DabSystemProfile() {
                 maxOf(tempFanLoopOp, smartPurgeConnectFanLoopOp)
             }else if (DabSystemController.getInstance().getSystemState() == SystemController.State.HEATING
                 && (conditioningMode == SystemMode.HEATONLY || conditioningMode == SystemMode.AUTO)) {
-                maxOf((DabSystemController.getInstance().getHeatingSignal() * 100 / ahuSettings.connectEquip1.economizingToMainCoolingLoopMap.readDefaultVal()), smartPurgeConnectFanLoopOp)
+                (DabSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier).toInt().toDouble().coerceAtLeast(smartPurgeConnectFanLoopOp)
             } else {
                 smartPurgeConnectFanLoopOp
             }

@@ -55,6 +55,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.filesystem.FileSystemTools;
 import a75f.io.logic.logtasks.UploadLogs;
+import a75f.io.logic.migration.MigrationHandler;
 import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.util.RxTask;
 import a75f.io.messaging.client.MessagingClient;
@@ -168,6 +169,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     public @BindView(R.id.anrReportBtn) ToggleButton anrReporting;
 
     public @BindView(R.id.recreateBuildingPoints) Button recreateBuildingPoints;
+
+    public @BindView(R.id.recreateBacnetId) Button recreateBacnetIds;
 
     public @BindView(R.id.recreateAndSyncBuildingPointsToCloud) Button recreateAndSyncBuildingPointsToCloud;
 
@@ -600,6 +603,15 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 () -> new TunerEquipBuilder(hayStack).buildEquipAndPoints(hayStack.getSiteIdRef().toString()),
                 ProgressDialogUtils::hideProgressDialog
         ));
+        recreateBacnetIds.setOnClickListener(recreateButton -> {
+            ExecutorTask.executeAsync(
+                    () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Recovering BACnet Ids"),
+                    () -> {
+                        new MigrationHandler(hayStack).updateBacnetProperties(hayStack);
+                    },
+                    ProgressDialogUtils::hideProgressDialog
+            );
+        });
     }
     private boolean validateForReboot() {
         Calendar calendar = Calendar.getInstance();

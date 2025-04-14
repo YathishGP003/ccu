@@ -77,7 +77,7 @@ public class PreferenceUtil {
     public static final String DELETE_REDUNDANT_SETBACK_POINTS_FROM_HN_ACB_EQUIPS  = "deleteRedundantSetbackPointsFromHnAcbEquips";
     public static final String BACKFILL_DEFAULT_VALUE_MIGRATION = "backfillDefaultValueMigration";
     public static final String DAB_DAMPER_SIZE_MIGRATION = "dabDamperSizeMigration";
-    public static final String BACNET_ID_MIGRATION = "bacnetIdAndTypeUpdateMigration";
+    public static final String BACNET_ID_MIGRATION = "bacnetIdAndTypeUpdateMigrationNew";
     private static final String INSTALL_TYPE = "INSTALL_TYPE";
     private static final String RESTORE_BYPASS_DAMPER_AFTER_REPLACE = "restoreBypassDamperAfterReplace";
     private static final String TITLE_24_REDUNDANT_POINT_MIGRATION = "title24ReduntPointMigration";

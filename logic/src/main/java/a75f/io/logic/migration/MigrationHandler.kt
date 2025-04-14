@@ -1734,8 +1734,9 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         addDomainEquips(hayStack)
     }
 
-    private fun updateBacnetProperties(hayStack: CCUHsApi) {
+    fun updateBacnetProperties(hayStack: CCUHsApi) {
         // migration for system equip and points
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL,"updateBacnetProperties method started!!!")
         val hsSystemEquip = hayStack.readEntity("equip and system and not modbus and domainName")
         val site = hayStack.site
         val profileEquipBuilder = ProfileEquipBuilder(hayStack)
@@ -1824,6 +1825,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 }
             }
         }
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL,"updateBacnetProperties method completed!!!")
     }
 
     private fun updateMinCfmPointMaxVal(minMaxCfmDomainNames: Pair<String, String>) {
@@ -2135,6 +2137,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     fun checkBacnetIdMigrationRequired() {
         if(!PreferenceUtil.isBacnetIdMigrationDone()) {
             try {
+                CcuLog.i(TAG_CCU_MIGRATION_UTIL, "BacnetId migration is Started!!!")
                 updateBacnetProperties(CCUHsApi.getInstance())
                 PreferenceUtil.setBacnetIdMigrationDone()
             } catch (e : Exception) {

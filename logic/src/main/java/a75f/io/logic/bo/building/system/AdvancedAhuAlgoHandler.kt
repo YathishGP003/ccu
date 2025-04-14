@@ -21,12 +21,24 @@ import a75f.io.logic.bo.building.system.util.AhuTuners
 class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
 
     private fun getCoolingRelayState(stageIndex: Int, point: Point, systemCoolingLoop : Double,
-                                     oaoProfile : OAOProfile?, relayHysteresis : Double, coolingStagesAvailable : Int): Boolean {
-        val stageThreshold = if (oaoProfile != null && oaoProfile.isEconomizingAvailable) {
-            100 * (stageIndex + 1) / (coolingStagesAvailable + 1)
+                                     oaoProfile : OAOProfile?, relayHysteresis : Double, coolingStagesAvailable : Int, coolingStagesConnectAvailable: Int, isConnectEquip: Boolean): Boolean {
+        var stageThreshold = 0
+
+        // If the system is not connected to the equipment, we need to check if the OAO profile is mapped in the system level and add 1 to stage index to accommodate the economizing cooling
+        if(!isConnectEquip) {
+            if (oaoProfile != null && oaoProfile.isEconomizingAvailable) {
+                100 * (stageIndex + 1) / (coolingStagesAvailable + 1)
+            } else {
+                100 * stageIndex / coolingStagesAvailable
+            }
         } else {
-            100 * stageIndex / coolingStagesAvailable
+            stageThreshold = if(AdvAhuEconAlgoHandler.isFreeCoolingOn()) {
+                100 * (stageIndex + 1) / (coolingStagesConnectAvailable + 1)
+            } else {
+                100 * stageIndex / coolingStagesConnectAvailable
+            }
         }
+
         val currentState = point.readHisVal()
         CcuLog.i(
             L.TAG_CCU_SYSTEM, "getCoolingRelayState: currentState: " +
@@ -117,7 +129,7 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
 
     fun getAdvancedAhuRelayState(
             association: Point, coolingStages: Int,
-            heatingStages: Int, fanStages: Int, systemOccupied: Boolean,
+            heatingStages: Int, fanStages: Int, coolingStagesConnect: Int, systemOccupied: Boolean,
             isConnectEquip: Boolean, ahuSettings: AhuSettings,
             ahuTuners: AhuTuners, isStage1AllowToActive: Boolean
     ): Pair<Point, Boolean> {
@@ -138,7 +150,7 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
             AdvancedAhuRelayAssociationType.LOAD_COOLING -> if (!ahuSettings.isMechanicalCoolingAvailable) {
                 getCoolingRelayState(
                     stageIndex, associatedPoint, ahuSettings.systemEquip.coolingLoopOutput.readHisVal(),
-                    L.ccu().oaoProfile, ahuTuners.relayAActivationHysteresis, coolingStages
+                    L.ccu().oaoProfile, ahuTuners.relayAActivationHysteresis, coolingStages, coolingStagesConnect, isConnectEquip
                 )
             } else {
                 CcuLog.i(L.TAG_CCU_SYSTEM, "mechanicalCooling Not available")
@@ -179,7 +191,7 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
             AdvancedAhuRelayAssociationType.SAT_COOLING -> if (!ahuSettings.isMechanicalCoolingAvailable) {
                 getCoolingRelayState(
                     stageIndex, associatedPoint, ahuSettings.systemEquip.satCoolingLoopOutput.readHisVal(),
-                    L.ccu().oaoProfile, ahuTuners.relayDeactivationHysteresis, coolingStages
+                    L.ccu().oaoProfile, ahuTuners.relayDeactivationHysteresis, coolingStages, coolingStagesConnect, isConnectEquip
                 )
             } else {
                 CcuLog.i(L.TAG_CCU_SYSTEM, "mechanicalCooling Not available")

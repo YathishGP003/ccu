@@ -68,6 +68,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
     private var heatingStages = 0
     private var coolingStages = 0
     private var fanStages = 0
+    private var coolingStagesConnect = 0
     lateinit var systemEquip: VavAdvancedHybridSystemEquip
     private lateinit var advancedAhuImpl: AdvancedAhuAlgoHandler
     private lateinit var advAhuEconImpl: AdvAhuEconAlgoHandler
@@ -155,7 +156,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
 
     override fun isCoolingAvailable(): Boolean {
-        return coolingStages > 0 || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_COOLING)
+        return coolingStages > 0 || coolingStagesConnect > 0 || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_COOLING)
                 || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_COOLING)
                 || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.COMPOSITE_SIGNAL)
     }
@@ -717,9 +718,10 @@ open class VavAdvancedAhu : VavSystemProfile() {
         coolingStages = 0
         heatingStages = 0
         fanStages = 0
+        coolingStagesConnect = 0
 
         updateStagesForRelayMapping(getCMRelayAssociationMap(systemEquip.cmEquip))
-        updateStagesForRelayMapping(getConnectRelayAssociationMap(systemEquip.connectEquip1))
+        updateStagesForRelayMappingConnect(getConnectRelayAssociationMap(systemEquip.connectEquip1))
 
         if (heatingStages > 0) {
             heatingStages -= Stage.COOLING_5.ordinal
@@ -728,7 +730,8 @@ open class VavAdvancedAhu : VavSystemProfile() {
             fanStages -= Stage.HEATING_5.ordinal
         }
         analogControlsEnabled = advancedAhuImpl.getEnabledAnalogControls(systemEquip.cmEquip, systemEquip.connectEquip1)
-        CcuLog.d(L.TAG_CCU_SYSTEM, "Cooling stages : $coolingStages Heating stages : $heatingStages Fan stages : $fanStages")
+        CcuLog.d(L.TAG_CCU_SYSTEM, "Cooling stages : $coolingStages Heating stages : $heatingStages Fan stages : $fanStages" +
+                " Cooling stages connect : $coolingStagesConnect")
     }
 
     private fun updateStagesForRelayMapping(relayMapping : Map<Point, Point>) {
@@ -740,6 +743,22 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 }
                 if (coolIndexRange.contains(associationIndex) && associationIndex >= coolingStages) {
                     coolingStages = associationIndex + 1
+                } else if (heatIndexRange.contains(associationIndex) && associationIndex >= heatingStages) {
+                    heatingStages = associationIndex
+                } else if (fanIndexRange.contains(associationIndex) && associationIndex >= fanStages) {
+                    fanStages = associationIndex
+                }
+            }
+        }
+    }
+
+    private fun updateStagesForRelayMappingConnect(relayMapping: Map<Point, Point>) {
+        relayMapping.forEach { (relay: Point, association: Point) ->
+            if (relay.readDefaultVal() > 0) {
+                var associationIndex = association.readDefaultVal().toInt()
+                if (coolIndexRange.contains(associationIndex) && associationIndex >= coolingStagesConnect) {
+                    // Since the coolingStagesConnect is used in the getCoolingRelayState we need to update it separately
+                    coolingStagesConnect = associationIndex + 1
                 } else if (heatIndexRange.contains(associationIndex) && associationIndex >= heatingStages) {
                     heatingStages = associationIndex
                 } else if (fanIndexRange.contains(associationIndex) && associationIndex >= fanStages) {
@@ -800,7 +819,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             if (relay.readDefaultVal() > 0) {
                 try {
                     val (logicalPoint, relayOutput) = advancedAhuImpl.getAdvancedAhuRelayState(
-                        association, coolingStages, heatingStages, fanStages,
+                        association, coolingStages, heatingStages, fanStages, coolingStagesConnect,
                         isSystemOccupied, isConnectEquip, ahuSettings, ahuTuners, isAllowToActiveStage1Fan()
                     )
                     CcuLog.d(

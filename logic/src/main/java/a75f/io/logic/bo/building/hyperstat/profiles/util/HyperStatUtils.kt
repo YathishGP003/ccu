@@ -423,6 +423,20 @@ fun getSelectedFanMode(fanLevel: Int, selectedFan: Int): Int {
                     else -> StandaloneFanStage.OFF
                 }
             }
+            MED_HIGH -> {
+                when (selectedFan) {
+                    in listOf(2, 3, 4) -> StandaloneFanStage.values()[selectedFan + 6]
+                    in listOf(
+                        StandaloneFanStage.MEDIUM_CUR_OCC.ordinal,
+                        StandaloneFanStage.MEDIUM_OCC.ordinal,
+                        StandaloneFanStage.MEDIUM_ALL_TIME.ordinal,
+                        StandaloneFanStage.HIGH_CUR_OCC.ordinal,
+                        StandaloneFanStage.HIGH_OCC.ordinal,
+                        StandaloneFanStage.HIGH_ALL_TIME.ordinal
+                    ) -> StandaloneFanStage.values()[selectedFan - 3]
+                    else -> StandaloneFanStage.OFF
+                }
+            }
             HIGH -> {
                 when (selectedFan) {
                     in listOf(2, 3, 4) -> StandaloneFanStage.values()[selectedFan + 6]

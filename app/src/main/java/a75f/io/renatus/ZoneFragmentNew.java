@@ -816,7 +816,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         CcuLog.i("UI_PROFILING","zoneViewready set");
         isZoneViewReady = true;
         CCUHsApi.getInstance().setCcuReady();
-        setListeners();
         zoneLoadTextView.setVisibility(View.GONE);
         if(PreferenceUtil.getIsCcuLaunched()) {
             Toast.makeText(getContext(), "CCU Ready", Toast.LENGTH_SHORT).show();
@@ -4150,17 +4149,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         super.setUserVisibleHint(isVisibleToUser);
         CcuLog.i("UI_PROFILING","isVisibleToUser "+isVisibleToUser+" isZoneViewReady "+isZoneViewReady);
         if (isVisibleToUser && isZoneViewReady) {
-            ScheduleManager.getInstance().setZoneDataInterface(this);
-            Pulse.setCurrentTempInterface(this);
-            ScheduleManager.getInstance().setScheduleDataInterface(this);
-            ScheduleManager.getInstance().setZoneDataInterface(this);
-            StandaloneScheduler.setZoneDataInterface(this);
-            HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
-            MyStatUserIntentHandler.Companion.setZoneDataInterface(this);
-            HyperStatSplitUserIntentHandler.Companion.setZoneDataInterface(this);
-            HyperStatMsgReceiver.setCurrentTempInterface(this);
-            MyStatMsgReceiverKt.setCurrentTempInterface(this);
-            HyperSplitMsgReceiver.setCurrentTempInterface(this);
+            setListeners();
         } else {
 
             ScheduleManager.getInstance().setZoneDataInterface(null);
@@ -4174,6 +4163,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             HyperStatMsgReceiver.setCurrentTempInterface(null);
             MyStatMsgReceiverKt.setCurrentTempInterface(null);
             HyperSplitMsgReceiver.setCurrentTempInterface(null);
+            UpdatePointHandler.setZoneDataInterface(null);
+            UpdateEntityHandler.setZoneDataInterface(null);
         }
     }
     class FloorComparator implements Comparator<Floor> {

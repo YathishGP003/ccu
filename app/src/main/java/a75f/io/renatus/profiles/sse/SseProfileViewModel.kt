@@ -137,7 +137,13 @@ open class SseProfileViewModel : ViewModel() {
     }
 
     fun sendTestCommand(relayName: String, isOn: Boolean, viewModel: SseProfileViewModel) {
+        //if the user try to test the test signal before paring the devices
+        if (getDeviceRef() == null) {
+            showToast("Please pair equip to send test command", context)
+            CcuLog.d(Domain.LOG_TAG, "Please pair equip to send test command")
+            return
 
+        }
         if (relayName == DomainName.relay1) {
             relayHisWrite(DomainName.relay1, if (isOn) 1.0 else 0.0)
         } else {

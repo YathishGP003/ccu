@@ -454,7 +454,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.cmEquip.airTempCoolingSp.writeHisVal(coolingSatSp)
             systemEquip.cmEquip.airTempHeatingSp.writeHisVal(systemEquip.cmEquip.systemHeatingSatMin.readDefaultVal())
             CcuLog.d(L.TAG_CCU_SYSTEM, "coolingSatSpMax :$satSpMax coolingSatSpMin: $satSpMin satSensorVal $satControlPoint coolingSatSp: $coolingSatSp")
-            if (systemCoolingLoopOp > 0) {
+            //if (systemCoolingLoopOp > 0) {
                 var satCoolingPILoopLocal = satCoolingPILoop.getLoopOutput(satControlPoint, coolingSatSp)
                 // When econ is ON and less than economizingToMainCoolingLoopMap, write SpMax value since we need to prevent cooling
                 var economizingToMainCoolingLoopMap = 0.0
@@ -470,9 +470,9 @@ class DabAdvancedAhu : DabSystemProfile() {
                     systemEquip.cmEquip.airTempCoolingSp.writeHisVal(satSpMax)
                 }
                 satCoolingPILoopLocal
-            } else {
+            /*} else {
                 0.0
-            }
+            }*/
         } else {
             CcuLog.d(L.TAG_CCU_SYSTEM, "airTempCoolingSp : ${systemEquip.cmEquip.systemCoolingSatMax.readDefaultVal()}")
             systemEquip.cmEquip.airTempCoolingSp.writeHisVal(systemEquip.cmEquip.systemCoolingSatMax.readDefaultVal())
@@ -494,11 +494,12 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.cmEquip.airTempHeatingSp.writeHisVal(heatingSatSp)
             systemEquip.cmEquip.airTempCoolingSp.writeHisVal(systemEquip.cmEquip.systemCoolingSatMax.readDefaultVal())
             CcuLog.d(L.TAG_CCU_SYSTEM, "satSpMax :$satSpMax satSpMin: $satSpMin satSensorVal $satControlPoint heatingSatSp: $heatingSatSp")
-            if (systemHeatingLoopOp > 0) {
+            satHeatingPILoop.getLoopOutput(heatingSatSp, satControlPoint)
+            /*if (systemHeatingLoopOp > 0) {
                 satHeatingPILoop.getLoopOutput(heatingSatSp, satControlPoint)
             } else {
                 0.0
-            }
+            }*/
         } else {
             CcuLog.d(L.TAG_CCU_SYSTEM, "airTempHeatingSp : ${systemEquip.cmEquip.systemHeatingSatMin.readDefaultVal()}")
             systemEquip.cmEquip.airTempHeatingSp.writeHisVal(systemEquip.cmEquip.systemHeatingSatMin.readDefaultVal())

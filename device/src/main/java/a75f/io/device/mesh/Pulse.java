@@ -1209,7 +1209,7 @@ public class Pulse
 			str += ", serialnumber:"+ Arrays.toString(wrmOrCMReootMsgs.deviceSerial).replaceAll("[\\[\\]]","");
 
 			AlertGenerateHandler.handleDeviceMessage(DEVICE_REBOOT,"Device reboot info - "+str,
-					CCUHsApi.getInstance().readId("device and addr == \""+address+"\""));
+					CCUHsApi.getInstance().readId("device and ( domainName ==\"" + DomainName.cmBoardDevice + "\" or cm )"));
 		}
 	}
 	public static void smartDevicesRebootMessage(SnRebootIndicationMessage_t snRebootIndicationMsgs){

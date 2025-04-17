@@ -291,7 +291,8 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
     ) {
 
         fun isEligibleForAuxHeatingStage(): Boolean {
-            return heatingLoopOutput != 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO || basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY)
+            return heatingLoopOutput != 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
+                    || basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY)
         }
 
         if (isEligibleForAuxHeatingStage()) {
@@ -463,12 +464,13 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
         analogOutputPoints: HashMap<Int, String>
     ) {
         val aux1AvailableAndActive = isAuxAvailableAndActive(relayOutputPoints)
+        val isAnalogFanAvailable = analogOutputPoints.containsKey(MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal)
 
         CcuLog.i(
             L.TAG_CCU_HSHPU,
-            "Aux Based fan : aux1AvailableAndActive $aux1AvailableAndActive aux2AvailableAndActive "
+            "Aux Based fan : aux1AvailableAndActive $aux1AvailableAndActive isAnalogFanAvailable $isAnalogFanAvailable"
         )
-        if (aux1AvailableAndActive) operateAuxBasedOnFan(relayStages, relayOutputPoints)
+        if (aux1AvailableAndActive) operateAuxBasedOnFan(relayStages, relayOutputPoints, isAnalogFanAvailable)
 
         // Run the fan speed control if either aux1 or aux2 is available and active
         if ((aux1AvailableAndActive)) {
@@ -476,16 +478,14 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
                 config,
                 analogOutStages,
                 relayOutputPoints,
-                analogOutputPoints
+                analogOutputPoints,
             )
         }
     }
 
     private fun runSpecificAnalogFanSpeed(
-        config: MyStatHpuConfiguration,
-        analogOutStages: HashMap<String, Int>,
-        relayOutputPoints: HashMap<Int, String>,
-        analogOutputPoints: HashMap<Int, String>
+        config: MyStatHpuConfiguration, analogOutStages: HashMap<String, Int>,
+        relayOutputPoints: HashMap<Int, String>, analogOutputPoints: HashMap<Int, String>
     ) {
 
         fun getPercent(fanConfig: MyStatFanConfig, fanSpeed: MyStatFanSpeed): Double {
@@ -518,7 +518,7 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
 
     // New requirement for aux and fan operations If we do not have fan then no aux
     private fun operateAuxBasedOnFan(
-        relayStages: HashMap<String, Int>, relayOutputPoints: HashMap<Int, String>
+        relayStages: HashMap<String, Int>, relayOutputPoints: HashMap<Int, String>, isAnalogFanAvailable: Boolean
     ) {
 
         fun getFanStage(mapping: MyStatHpuRelayMapping): Stage? {
@@ -544,7 +544,7 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
             }
         }
 
-        if (!lowAvailable && !highAvailable) {
+        if (!lowAvailable && !highAvailable && !isAnalogFanAvailable) {
             resetAux(relayStages, relayOutputPoints) // non of the fans are available
         }
 
@@ -578,7 +578,7 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
             }
 
             else -> {
-                CcuLog.i(L.TAG_CCU_HSHPU, "operateAuxBasedOnFan: derived mode is invalid")
+                CcuLog.i(L.TAG_CCU_HSHPU, "operateAuxBasedOnFan: Relay fan mapping is not available")
             }
         }
     }

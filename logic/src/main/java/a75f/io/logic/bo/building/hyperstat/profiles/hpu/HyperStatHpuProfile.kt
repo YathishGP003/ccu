@@ -176,13 +176,15 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
             relayStages: HashMap<String, Int>, analogOutStages: HashMap<String, Int>,
             config: HpuConfiguration, relayOutputPoints: HashMap<Int, String>, analogOutputPoints: HashMap<Int, String>
     ) {
-        val (aux1AvailableAndActive, aux2AvailableAndActive) = Pair(
+        val (aux1AvailableAndActive, aux2AvailableAndActive, isAnalogFanAvailable) = Triple(
                 isAuxAvailableAndActive(HsHpuRelayMapping.AUX_HEATING_STAGE1, relayOutputPoints),
-                isAuxAvailableAndActive(HsHpuRelayMapping.AUX_HEATING_STAGE2, relayOutputPoints))
+                isAuxAvailableAndActive(HsHpuRelayMapping.AUX_HEATING_STAGE2, relayOutputPoints),
+                analogOutputPoints.containsKey(HsHpuAnalogOutMapping.FAN_SPEED.ordinal)
+        )
 
-        CcuLog.i(L.TAG_CCU_HSHPU, "Aux Based fan : aux1AvailableAndActive $aux1AvailableAndActive aux2AvailableAndActive $aux2AvailableAndActive")
-        if (aux2AvailableAndActive) operateAuxBasedOnFan(HsHpuRelayMapping.AUX_HEATING_STAGE2, relayStages, relayOutputPoints)
-        if (aux1AvailableAndActive) operateAuxBasedOnFan(HsHpuRelayMapping.AUX_HEATING_STAGE1, relayStages, relayOutputPoints)
+        CcuLog.i(L.TAG_CCU_HSHPU, "Aux Based fan : aux1AvailableAndActive $aux1AvailableAndActive aux2AvailableAndActive $aux2AvailableAndActive isAnalogFanAvailable $isAnalogFanAvailable")
+        if (aux2AvailableAndActive) operateAuxBasedOnFan(HsHpuRelayMapping.AUX_HEATING_STAGE2, relayStages, relayOutputPoints, isAnalogFanAvailable)
+        if (aux1AvailableAndActive) operateAuxBasedOnFan(HsHpuRelayMapping.AUX_HEATING_STAGE1, relayStages, relayOutputPoints, isAnalogFanAvailable)
 
         // Run the fan speed control if either aux1 or aux2 is available and active
         if ((aux1AvailableAndActive) || (aux2AvailableAndActive)) {
@@ -193,8 +195,8 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
 
     // New requirement for aux and fan operations If we do not have fan then no aux
     private fun operateAuxBasedOnFan(
-            association: HsHpuRelayMapping,
-            relayStages: HashMap<String, Int>, relayOutputPoints: HashMap<Int, String>
+            association: HsHpuRelayMapping, relayStages: HashMap<String, Int>,
+            relayOutputPoints: HashMap<Int, String>, isAnalogFanExist: Boolean
     ) {
 
         fun getFanStage(mapping: HsHpuRelayMapping): Stage? {
@@ -238,7 +240,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
             }
         }
 
-        if (!lowAvailable && !mediumAvailable && !highAvailable) {
+        if (!lowAvailable && !mediumAvailable && !highAvailable && !isAnalogFanExist) {
             resetAux(relayStages, relayOutputPoints) // non of the fans are available
         }
 
@@ -281,7 +283,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
             }
 
             else -> {
-                CcuLog.i(L.TAG_CCU_HSHPU, "operateAuxBasedOnFan: derived mode is invalid")
+                CcuLog.i(L.TAG_CCU_HSHPU, "operateAuxBasedOnFan: Relay fan mapping is not available")
             }
         }
     }

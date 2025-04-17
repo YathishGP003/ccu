@@ -376,6 +376,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             updateBackFillDefaultValue()
             PreferenceUtil.setBackFillValueUpdateDone()
         }
+        if (!PreferenceUtil.isConnectModuleOAOPointDeleted()) {
+            deleteConnectModuleOaoPoint()
+            PreferenceUtil.setConnectModuleOAOPointDeleted()
+        }
         hayStack.scheduleSync()
     }
 
@@ -3182,6 +3186,35 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 CcuLog.i(
                     TAG_CCU_MIGRATION_UTIL,
                     "Backfill duration default value updated to 24 hours"
+                )
+            }
+        }
+    }
+
+    private fun deleteConnectModuleOaoPoint() {
+        val connectModuleEquip =
+            hayStack.readEntity("equip and system and (domainName==\"" + DomainName.dabAdvancedHybridAhuV2_connectModule + "\" or domainName==\"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\")")
+        val domainNames = listOf(
+
+            DomainName.returnDamperMinOpen,
+            DomainName.exhaustFanStage1Threshold,
+            DomainName.exhaustFanStage2Threshold,
+            DomainName.currentTransformerType,
+            DomainName.exhaustFanHysteresis,
+            DomainName.systemPurgeOutsideDamperMinPos,
+            DomainName.enhancedVentilationOutsideDamperMinOpen,
+            DomainName.enableOutsideAirOptimization
+        )
+        if (connectModuleEquip.isNotEmpty()) {
+            val domainQuery = domainNames.joinToString(" or ") { "domainName==\"$it\"" }
+            val oaoPoints = hayStack.readAllEntities(
+                "equipRef==\"${connectModuleEquip["id"]}\" and ($domainQuery)"
+            )
+            oaoPoints.forEach {
+                hayStack.deleteEntity(it["id"].toString())
+                CcuLog.d(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "connect Module OAO Point deleted  : ${it["dis"].toString()} ,  id :  ${it["id"].toString()}"
                 )
             }
         }

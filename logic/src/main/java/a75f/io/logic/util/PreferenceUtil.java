@@ -109,6 +109,9 @@ public class PreferenceUtil {
     private static final String MIGRATE_HSCPU_DATA_CORREPTION = "MIGRATE_HSCPU_DATA_CORREPTION";
     private static final String REMOVE_BUILDING_AND_SYSTEM_EQUIP_POINTS = "removeBuildingAndSystemEquipPoints";
 
+    private static final String CONNECT_MODULE_OAO_POINTS = "connectModuleOaoPoints";
+
+
     public static void setContext(Context c) {
         context= c;
     }
@@ -883,5 +886,13 @@ public class PreferenceUtil {
     }
     public static void setDuplicateBuildingAndSystemPointsAreRemoved() {
         setBooleanPreference(REMOVE_BUILDING_AND_SYSTEM_EQUIP_POINTS, true);
+    }
+
+    public static boolean isConnectModuleOAOPointDeleted() {
+        return getBooleanPreference(CONNECT_MODULE_OAO_POINTS);
+    }
+
+    public static void setConnectModuleOAOPointDeleted() {
+        setBooleanPreference(CONNECT_MODULE_OAO_POINTS, true);
     }
 }

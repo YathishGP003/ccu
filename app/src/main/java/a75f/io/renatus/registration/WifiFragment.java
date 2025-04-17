@@ -26,6 +26,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -128,14 +129,19 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
         mTurnonwifi = rootView.findViewById(R.id.textView_turnon);
         rootView.findViewById(R.id.textConnectWifi).setEnabled(true);
         rootView.findViewById(R.id.textConnectWifi).setClickable(true);
+        if (isFreshRegister) {
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) progressbar.getLayoutParams();
+            params.setMargins(20, 0, 50, 50);
+            params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
+            params.startToStart = ConstraintLayout.LayoutParams.END;
+            progressbar.setLayoutParams(params);
 
+        }
         rootView.findViewById(R.id.textConnectWifi).setOnClickListener(v -> {
             CcuLog.i(TAG, "click connect wifi");
             switchFragment.Switch(3);
         });
-        progressbar.setVisibility(View.GONE);
-        mTurnonwifi.setVisibility(View.GONE);
-
+        progressbar.setVisibility(View.VISIBLE);
         imageRefresh.setOnLongClickListener(v ->
         {
             System.out.println("Image Refresh 2");
@@ -183,13 +189,17 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
         });
 
         mainWifiObj = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        if (mainWifiObj.isWifiEnabled()) {
+            progressbar.setVisibility(View.GONE);
+        }
 
         toggleWifi.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (getUserVisibleHint()) {
                 mainWifiObj = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
                 if (isChecked) {
                     progressbar.setVisibility(View.VISIBLE);
-                    if (!mainWifiObj.isWifiEnabled()) {
+                    if (!mainWifiObj.isWifiEnabled() || isFreshRegister) {
+                        mTurnonwifi.setVisibility(View.GONE);
                         imageRefresh.setEnabled(true);
                         imageRefresh.setImageResource(R.drawable.ic_refresh);
                         animation.setDuration(2000);
@@ -200,16 +210,16 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
                 } else {
                     mHandler.removeCallbacks(mRunable);
                     if (mainWifiObj.isWifiEnabled()) {
+
                         mainWifiObj = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
                         mainWifiObj.setWifiEnabled(false);
                     }
-                    progressbar.setVisibility(View.GONE);
                     mTurnonwifi.setVisibility(View.GONE);
                     imageRefresh.setEnabled(true);
                     imageRefresh.setImageResource(R.drawable.ic_refresh);
                 }
                 if (!mainWifiObj.isWifiEnabled()) {
-                    mTurnonwifi.setVisibility(View.VISIBLE);
+                    mTurnonwifi.setVisibility(View.GONE);
                     recyclerWifi.setAdapter(null);
                     imageRefresh.setEnabled(false);
                     imageRefresh.setImageResource(R.drawable.ic_refresh_disable);
@@ -224,7 +234,10 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
         }
         if (mainWifiObj.isWifiEnabled()) {
             mainWifiObj.startScan();
+            progressbar.setVisibility(View.GONE);
+            mTurnonwifi.setVisibility(View.GONE);
         } else {
+            progressbar.setVisibility(View.GONE);
             mTurnonwifi.setVisibility(View.VISIBLE);
         }
         return rootView;
@@ -279,13 +292,13 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
                         }
                     }
                 }
+                if (progressbar.isShown()) {
+                    progressbar.setVisibility(View.GONE);
+                }
             }
 
             wifiListAdapter.updateData(wifinetworks);
             recyclerWifi.setAdapter(wifiListAdapter);
-            if (progressbar.isShown()) {
-                progressbar.setVisibility(View.GONE);
-            }
         } catch (Exception e) {
 
         }
@@ -420,6 +433,7 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
                     } else {
                         toggleWifi.setChecked(false);
                         mTurnonwifi.setVisibility(View.VISIBLE);
+                        progressbar.setVisibility(View.GONE);
                         imageRefresh.setEnabled(false);
                         imageRefresh.setImageResource(R.drawable.ic_refresh_disable);
                         recyclerWifi.setVisibility(View.GONE);

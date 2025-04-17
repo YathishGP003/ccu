@@ -44,6 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
+            android:visibility="visible"
             android:layout_centerVertical="true"
             android:layout_marginRight="106dp"
             layout="@layout/custom_ccu_switch" />
@@ -81,8 +82,8 @@
         android:theme="?SwitchTheme"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/recyclerWifi"
-        app:layout_constraintStart_toStartOf="@+id/recyclerWifi"
+        app:layout_constraintEnd_toEndOf="@+id/textView_turnon"
+        app:layout_constraintStart_toStartOf="@+id/textView_turnon"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView

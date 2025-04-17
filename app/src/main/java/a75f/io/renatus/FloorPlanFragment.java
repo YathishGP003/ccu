@@ -30,6 +30,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -153,7 +154,6 @@ public class FloorPlanFragment extends Fragment {
     private FloorListActionMenuListener floorListActionMenuListener;
     private RoomListActionMenuListener roomListActionMenuListener;
     private ModuleListActionMenuListener moduleListActionMenuListener;
-
     private final BroadcastReceiver mPairingReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -177,7 +177,6 @@ public class FloorPlanFragment extends Fragment {
             }
         }
     };
-
 
 
     private void setScheduleType(String zoneId) {
@@ -574,6 +573,10 @@ public class FloorPlanFragment extends Fragment {
     private void addRenamedFloor(){
         if (floorToRename != null) {
             if (addFloorEdit.getText().toString().trim().length() > 0) {
+                if (addFloorEdit.getText().toString().length() > 24) {
+                    Toast.makeText(getActivity().getApplicationContext(), "Floor name should have less than 25 characters", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 floorList.remove(floorToRename);
                 siteFloorList = siteFloorList.stream().filter(floor -> !floor.getDisplayName().trim().
                         equals(floorToRename.getDisplayName().trim())).collect(Collectors.toList());
@@ -645,9 +648,13 @@ public class FloorPlanFragment extends Fragment {
                 }
 
                 floorList.add(hsFloor);
+
                 CCUHsApi.getInstance().updateFloor(hsFloor, floorToRename.getId());
-                refreshScreen();
+                updateFloors();
                 hideKeyboard();
+                floorList.sort(new FloorComparator());
+                refreshScreen();
+                selectFloor(floorList.indexOf(hsFloor));
                 floorToRename = null;
                 L.saveCCUState();
                 CCUHsApi.getInstance().syncEntityTree();
@@ -660,6 +667,10 @@ public class FloorPlanFragment extends Fragment {
 
     private void addNewFloor(){
         if ((addFloorEdit.getText().toString().trim().length() > 0)) {
+            if (addFloorEdit.getText().toString().length() > 24) {
+                Toast.makeText(getActivity().getApplicationContext(), "Floor name should have less than 25 characters", Toast.LENGTH_SHORT).show();
+                return;
+            }
             HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
             Floor hsFloor = new Floor.Builder()
                     .setDisplayName(addFloorEdit.getText().toString().trim())

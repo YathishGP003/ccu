@@ -210,7 +210,11 @@ class ScheduleGroupModel (application: Application) : AndroidViewModel(applicati
         requireContext: Context
     ) {
         viewModelScope.launch {
-            ProgressDialogUtils.showProgressDialog(requireContext, "Adding vacation...")
+            if (vacationId == null) {
+                ProgressDialogUtils.showProgressDialog(requireContext, "Adding vacation...")
+            } else {
+                ProgressDialogUtils.showProgressDialog(requireContext, "Editing vacation...")
+            }
             withContext(Dispatchers.IO) {
                 if (mRoomRef != "") {
                     DefaultSchedules.upsertZoneVacation(
@@ -296,7 +300,11 @@ class ScheduleGroupModel (application: Application) : AndroidViewModel(applicati
         context: Context
     ) {
         viewModelScope.launch {
-            ProgressDialogUtils.showProgressDialog(context, "Adding Special Schedule...")
+            if (specialScheduleId == null) {
+                ProgressDialogUtils.showProgressDialog(context, "Adding Special Schedule...")
+            } else {
+                ProgressDialogUtils.showProgressDialog(context, "Editing Special Schedule...")
+            }
             withContext(Dispatchers.IO) {
                 SpecialSchedule.createSpecialSchedule(
                     specialScheduleId, scheduleName, startDate, endDate, coolVal, heatVal,

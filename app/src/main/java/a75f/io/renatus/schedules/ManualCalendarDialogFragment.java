@@ -91,18 +91,20 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
             mCalendarView.selectRange(startDay, endDay);
             List<CalendarDay> dates = mCalendarView.getSelectedDates();
             mCalendarView.removeDecorators();
-            RangeDecorator rangeDecorator = new RangeDecorator(getActivity(),R.drawable.square_background,dates);
-            mCalendarView.addDecorator(rangeDecorator);
 
-            List<CalendarDay> startDate = new ArrayList<>();
-            startDate.add(dates.get(0));
-            RangeDecorator rangeDecorator1 = new RangeDecorator(getActivity(),R.drawable.left_circle_orange,startDate);
-            mCalendarView.addDecorator(rangeDecorator1);
+            if (dates.size() >= 2) {
+                RangeDecorator rangeDecorator = new RangeDecorator(getActivity(),R.drawable.square_background,dates);
+                mCalendarView.addDecorator(rangeDecorator);
+                List<CalendarDay> startDate = new ArrayList<>();
+                startDate.add(dates.get(0));
+                RangeDecorator rangeDecorator1 = new RangeDecorator(getActivity(), R.drawable.left_circle_orange, startDate);
+                mCalendarView.addDecorator(rangeDecorator1);
 
-            List<CalendarDay> endDate = new ArrayList<>();
-            endDate.add(dates.get(dates.size()-1));
-            RangeDecorator rangeDecorator2 = new RangeDecorator(getActivity(),R.drawable.right_circle_orange,endDate);
-            mCalendarView.addDecorator(rangeDecorator2);
+                List<CalendarDay> endDate = new ArrayList<>();
+                endDate.add(dates.get(dates.size() - 1));
+                RangeDecorator rangeDecorator2 = new RangeDecorator(getActivity(), R.drawable.right_circle_orange, endDate);
+                mCalendarView.addDecorator(rangeDecorator2);
+            }
 
             DateTime today = new DateTime();
             if (mStartDate.isBefore(today) && mEndDate.isBefore(today) ) {
@@ -118,6 +120,9 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
         } else
         {
             mCalendarView.state().edit().setMinimumDate(CalendarDay.today()).commit();
+            List<CalendarDay> dates = new ArrayList<>();
+            dates.add(CalendarDay.today());
+            mCalendarView.selectRange(CalendarDay.today(), CalendarDay.today());
         }
         
         mButtonSave.setOnClickListener(view1 ->

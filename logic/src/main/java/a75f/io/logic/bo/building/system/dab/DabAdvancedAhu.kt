@@ -645,15 +645,24 @@ class DabAdvancedAhu : DabSystemProfile() {
         if(economizerActive) {
             // Only if te systemCoolingLoopOp greater than economizingToMainCoolingLoopMap, update the analog cooling status
             val economizingToMainCoolingLoopMap = L.ccu().oaoProfile.oaoEquip.economizingToMainCoolingLoopMap.readPriorityVal()
-            if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) &&
-                checkCoolingCondition(economizingToMainCoolingLoopMap)
-                && systemEquip.cmEquip.coolingLoopOutputFeedback.readHisVal() > 0
+
+            if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((cmAnalogControlsEnabled.contains(
+                    AdvancedAhuAnalogOutAssociationType.LOAD_COOLING
+                ) && systemCoolingLoopOp >= economizingToMainCoolingLoopMap) ||
+                        (cmAnalogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_COOLING) && systemSatCoolingLoopOp >= economizingToMainCoolingLoopMap)) &&
+                (cmAnalogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_COOLING) ||
+                        systemEquip.cmEquip.coolingLoopOutputFeedback.readHisVal() > 0)
             ) {
                 analogStatus.append("| Cooling ON ")
             }
         } else {
-            if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && checkCoolingCondition(0.0)
-                        && systemEquip.cmEquip.coolingLoopOutputFeedback.readHisVal() > 0) {
+            if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((cmAnalogControlsEnabled.contains(
+                    AdvancedAhuAnalogOutAssociationType.LOAD_COOLING
+                ) && systemCoolingLoopOp > 0) ||
+                        (cmAnalogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_COOLING) && systemSatCoolingLoopOp > 0)) &&
+                (cmAnalogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_COOLING) ||
+                        systemEquip.cmEquip.coolingLoopOutputFeedback.readHisVal() > 0)
+            ) {
                 analogStatus.append("| Cooling ON ")
             }
         }

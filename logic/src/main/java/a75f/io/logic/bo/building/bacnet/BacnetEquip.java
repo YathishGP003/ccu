@@ -85,7 +85,7 @@ public class BacnetEquip {
             gatewayRef = systemEquip.get("id").toString();
         }
 
-        int bacnetIdForEquip = HSUtil.generateBacnetId(String.valueOf(slaveId));
+        int bacnetIdForEquip = HSUtil.generateBacnetId(String.valueOf(slaveId),false,false);
 
         Equip.Builder bacNetEquip = new Equip.Builder().setSiteRef(siteRef)
                     .setDisplayName(equipDis)

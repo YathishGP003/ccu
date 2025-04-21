@@ -93,7 +93,7 @@ open class DefaultEquipBuilder : EquipBuilder {
 
         equipConfig.modelDef.tags.filter { it.kind == TagType.NUMBER && it.name.lowercase() == "bacnetid" }.forEach{ tag ->
             tag.defaultValue?.let {
-                equipBuilder.setBacnetId(HSUtil.generateBacnetId(equipConfig.profileConfiguration?.nodeAddress.toString()))
+                equipBuilder.setBacnetId(HSUtil.generateBacnetId(equipConfig.profileConfiguration?.nodeAddress.toString(),false,false))
             }
         }
 

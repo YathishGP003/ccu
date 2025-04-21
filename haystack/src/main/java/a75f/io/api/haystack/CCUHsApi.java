@@ -409,14 +409,15 @@ public class CCUHsApi
         if(!isBuildingTunerEquip(q)) {
             if (q.getMarkers() != null && q.getMarkers().contains(SYSTEM)) {
                 if (q.getMarkers().contains(MODBUS)) {
-                    q.setBacnetId(HSUtil.generateBacnetId(q.getGroup()));
+                    q.setBacnetId(HSUtil.generateBacnetId(q.getGroup(),true,q.getEquipRef() != null && !q.getEquipRef().isEmpty()));
                     q.setBacnetType(DEVICE);
                 } else {
                     q.setBacnetId(0);
                     q.setBacnetType(DEVICE);
                 }
             } else if (q.getRoomRef() != null && q.getRoomRef() != "SYSTEM") {
-                q.setBacnetId(HSUtil.generateBacnetId(q.getGroup()));
+                boolean isSubEquip = q.getEquipRef() != null && !q.getEquipRef().isEmpty() && q.getMarkers().contains(MODBUS);
+                q.setBacnetId(HSUtil.generateBacnetId(q.getGroup(),q.getMarkers().contains(MODBUS),isSubEquip));
                 q.setBacnetType(DEVICE);
             }
         }

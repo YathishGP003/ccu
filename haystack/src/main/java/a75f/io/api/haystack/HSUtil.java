@@ -2,6 +2,7 @@ package a75f.io.api.haystack;
 
 import static a75f.io.api.haystack.Tags.BACNET_ID;
 import static a75f.io.api.haystack.Tags.EQUIPREF;
+import static a75f.io.api.haystack.Tags.MODBUS;
 
 import com.google.gson.internal.LinkedTreeMap;
 
@@ -798,15 +799,37 @@ public class HSUtil {
         return equipMap.containsKey("domainName") ? !equip.getDomainName().equals(null) : false;
     }
 
-    public static int generateBacnetId(String zoneID) {
+    public static int generateBacnetId(String group, boolean isModbus, boolean isSubEquipModbus) {
         int bacnetID = 1;
         boolean isBacnetIDUsed = true;
         try {
-            HashMap currentRoom = CCUHsApi.getInstance().readMapById(zoneID);
-            if (currentRoom != null && currentRoom.size() > 0 && currentRoom.containsKey(BACNET_ID) && (Integer.parseInt(currentRoom.get(BACNET_ID).toString())) != 0) {
-                double bacnetID2 = Double.parseDouble(currentRoom.get(BACNET_ID).toString() + "");
-                CcuLog.d(Tags.BACNET, "Already have bacnetID $bacnetID2");
-                return (int) bacnetID2;
+            HashMap currentRoom = CCUHsApi.getInstance().read("equip and group==\""+group+"\"");
+            if (currentRoom != null && !currentRoom.isEmpty() && currentRoom.containsKey(BACNET_ID) && (Integer.parseInt(currentRoom.get(BACNET_ID).toString())) != 0) {
+                if (currentRoom.containsKey(MODBUS)) { // Execute only if SubEquip slave Id is same as parent
+                    ArrayList<HashMap<Object,Object>> modbusEquip = CCUHsApi.getInstance().readAllEntities("equip and group==\""+group+"\"");
+                    CcuLog.d(Tags.BACNET, "Already have bacnetID for Modbus Equip. Updating Bacnet Id for Modbus subequip");
+                    int modifiedId = ( 2500 + Integer.parseInt(group) ) * 1000;
+                    CcuLog.d(Tags.BACNET, "Updating Id to -->  "+(modifiedId+modbusEquip.size()));
+                    return modifiedId + modbusEquip.size();
+                } else {
+                    double bacnetID2 = Double.parseDouble(currentRoom.get(BACNET_ID).toString());
+                    CcuLog.d(Tags.BACNET, "Already have bacnetID "+bacnetID2);
+                    return (int) bacnetID2;
+                }
+            }
+            if (isModbus && currentRoom != null && currentRoom.isEmpty()) {
+                CcuLog.d(Tags.BACNET, "Modbus Equip. Found!!!!!!!!");
+                if (isSubEquipModbus) { // Execute only if SubEquip slave Id not same as parent
+                    CcuLog.d(Tags.BACNET, "SubEquip Modbus. Found!!!!!!!!");
+                    bacnetID = (2500 + Integer.parseInt(group)) * 1000;
+                    CcuLog.d(Tags.BACNET, "Updating Id to -->  "+(bacnetID));
+                } else {
+                    CcuLog.d(Tags.BACNET, "SubEquip Modbus. Not Found!!!!!!!!");
+                    bacnetID = 2000 + Integer.parseInt(group);
+                    CcuLog.d(Tags.BACNET, "Updating Id to -->  "+(bacnetID));
+                }
+                return bacnetID;
+
             }
             ArrayList<HashMap<Object, Object>> rooms = CCUHsApi.getInstance().readAllEntities("room");
             ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip");
@@ -838,7 +861,7 @@ public class HSUtil {
             e.printStackTrace();
         }
 
-        return Integer.parseInt(zoneID + bacnetID);
+        return Integer.parseInt(group + bacnetID);
     }
 
     public static Object getKeyByValue(HashMap<String, String> map, String value) {

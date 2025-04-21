@@ -701,7 +701,8 @@ public class CCUTagsDb extends HServer {
                 equip.add(Tags.BACNET_ID, 0);
                 equip.add(Tags.BACNET_TYPE, DEVICE);
             }else if(q.getRoomRef() != null){
-                equip.add(Tags.BACNET_ID, HSUtil.generateBacnetId(q.getGroup()));
+                boolean isSubEquip = q.getEquipRef() != null && !q.getEquipRef().isEmpty() && q.getMarkers().contains(MODBUS);
+                equip.add(Tags.BACNET_ID, HSUtil.generateBacnetId(q.getGroup(),q.getMarkers().contains(MODBUS),isSubEquip));
                 equip.add(Tags.BACNET_TYPE, DEVICE);
             }
             Intent intent = new Intent(BROADCAST_BACNET_ZONE_ADDED);
@@ -787,11 +788,12 @@ public class CCUTagsDb extends HServer {
         q.getTags().entrySet().forEach( entry -> equip.add(entry.getKey(), entry.getValue()));
 
         if (q.getBacnetType() != null) {
-            if(q.getMarkers() != null && q.getMarkers().contains(SYSTEM)){
+            if(q.getMarkers() != null && q.getMarkers().contains(SYSTEM) && !q.getMarkers().contains(MODBUS)){
                 equip.add(Tags.BACNET_ID, 0);
                 equip.add(Tags.BACNET_TYPE, DEVICE);
             }else if(q.getRoomRef() != null){
-                equip.add(Tags.BACNET_ID, HSUtil.generateBacnetId(q.getGroup()));
+                boolean isSubEquip = q.getEquipRef() != null && !q.getEquipRef().isEmpty() && q.getMarkers().contains(MODBUS);
+                equip.add(Tags.BACNET_ID, HSUtil.generateBacnetId(q.getGroup(),q.getMarkers().contains(MODBUS),isSubEquip));
                 equip.add(Tags.BACNET_TYPE, DEVICE);
             }
         }

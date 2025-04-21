@@ -53,7 +53,7 @@ public class ModbusEquip {
     }
 
     public String createEntities(String floorRef, String roomRef, EquipmentDevice equipmentInfo,
-                               List<Parameter> configParams, String parentEquipId, boolean isSlaveIdSameAsParent,String modbusLevel,String modelVersion) {
+                               List<Parameter> configParams, String parentEquipId, boolean isSlaveIdSameAsParent,String modbusLevel,String modelVersion, boolean isSubEquip) {
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -133,7 +133,11 @@ public class ModbusEquip {
             try {
                 Point heartBeatPoint = HeartBeat.getHeartBeatPoint(equipDis, equipmentRef,
                         siteRef, roomRef, floorRef, equipmentInfo.getSlaveId(), "modbus", profileType, tz);
-                int uniqueBacnetId = 2000 + equipmentInfo.getSlaveId();
+                int band = 2000;
+                if(parentEquipId != null) { // Updating BacnetId for sub equipment
+                    band = 2500;
+                }
+                int uniqueBacnetId = band + equipmentInfo.getSlaveId();
                 String uniqueId = uniqueBacnetId + "029";
                 heartBeatPoint.setBacnetId(Integer.valueOf(uniqueId));
                 CCUHsApi.getInstance().addPoint(heartBeatPoint);
@@ -206,7 +210,11 @@ public class ModbusEquip {
             for(LogicalPointTags marker : configParam.getLogicalPointTags()) {
                 if(Objects.nonNull(marker.getTagValue())){
                     if(marker.getTagName().contains("bacnetId")) {
-                        int band = 2000 + equipmentInfo.getSlaveId();
+                        int band = 2000;
+                        if(isSubEquip) {
+                           band = 2500;
+                        }
+                         band = band + equipmentInfo.getSlaveId();
                         String uniqueId = band + formatNumber(Integer.parseInt(marker.getTagValue()));
                         CcuLog.d(TAG, "assign bacnet id to modbus point-->"+uniqueId);
                         logicalParamPoint.setBacnetId(Integer.parseInt(uniqueId));

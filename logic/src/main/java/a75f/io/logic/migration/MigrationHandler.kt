@@ -380,6 +380,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             deleteConnectModuleOaoPoint()
             PreferenceUtil.setConnectModuleOAOPointDeleted()
         }
+        if (!PreferenceUtil.isDuplicateDualDuctSensorPointsAreRemoved()) {
+            removingDuplicateDualDuctSensorPoints()
+            PreferenceUtil.SetDuplicateDualDuctSensorPointsAreRemoved()
+        }
+
         hayStack.scheduleSync()
     }
 
@@ -1829,7 +1834,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 }
             }
         }
-        CcuLog.d(TAG_CCU_MIGRATION_UTIL,"updateBacnetProperties method completed!!!")
     }
 
     private fun updateMinCfmPointMaxVal(minMaxCfmDomainNames: Pair<String, String>) {
@@ -2141,7 +2145,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     fun checkBacnetIdMigrationRequired() {
         if(!PreferenceUtil.isBacnetIdMigrationDone()) {
             try {
-                CcuLog.i(TAG_CCU_MIGRATION_UTIL, "BacnetId migration is Started!!!")
                 updateBacnetProperties(CCUHsApi.getInstance())
                 PreferenceUtil.setBacnetIdMigrationDone()
             } catch (e : Exception) {
@@ -3016,7 +3019,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     /*In v2.17.3 CCU has created non-DM sensor points, this script handles removing of those*/
     fun removeRedundantDevicePoints() {
-        val devices = hayStack.readAllEntities("device and node and (smartnode or helionode or hyperstat)")
+        val devices = hayStack.readAllEntities("device and domainName and node and (smartnode or helionode or hyperstat)")
         devices.forEach { device ->
             val deviceRef = device["id"].toString()
 
@@ -3217,6 +3220,44 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     "connect Module OAO Point deleted  : ${it["dis"].toString()} ,  id :  ${it["id"].toString()}"
                 )
             }
+        }
+    }
+
+    private fun removingDuplicateDualDuctSensorPoints() {
+        val dualDuctEquip = hayStack.readAllEntities("equip and dualDuct and zone")
+
+        dualDuctEquip.forEach { equip ->
+            val equipId = equip["id"].toString()
+            val equipName = equip["dis"].toString()
+
+            removeDuplicateSensorPoints("pm10", equipId, equipName)
+            removeDuplicateSensorPoints("emr", equipId, equipName)
+        }
+    }
+
+    private fun removeDuplicateSensorPoints(
+        sensorType: String,
+        equipId: String,
+        equipName: String
+    ) {
+        val sensorPoints =
+            hayStack.readAllEntities("$sensorType and sensor and equipRef==\"$equipId\"")
+
+        if (sensorPoints.size <= 1) {
+            CcuLog.d(
+                TAG_CCU_MIGRATION_UTIL,
+                "No duplicate points found for $sensorType sensor $equipName"
+            )
+            return
+        }
+
+        val toDelete = sensorPoints.drop(1)
+        toDelete.forEach { point ->
+            hayStack.deleteEntity(point["id"].toString())
+            CcuLog.d(
+                TAG_CCU_MIGRATION_UTIL,
+                "Duplicate $sensorType sensor point deleted for $equipName"
+            )
         }
     }
 }

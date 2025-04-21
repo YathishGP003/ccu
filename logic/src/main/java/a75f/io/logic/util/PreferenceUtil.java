@@ -108,6 +108,7 @@ public class PreferenceUtil {
     private static final String MIGRATE_UPDATE_HSS_POINTS = "migrateUpdateHssPoints";
     private static final String MIGRATE_HSCPU_DATA_CORREPTION = "MIGRATE_HSCPU_DATA_CORREPTION";
     private static final String REMOVE_BUILDING_AND_SYSTEM_EQUIP_POINTS = "removeBuildingAndSystemEquipPoints";
+    private static final String  DUAL_DUCT_SENSOR_POINT_REMOVE = "dualDuctSensorPointRemove";
 
     private static final String CONNECT_MODULE_OAO_POINTS = "connectModuleOaoPoints";
 
@@ -886,6 +887,12 @@ public class PreferenceUtil {
     }
     public static void setDuplicateBuildingAndSystemPointsAreRemoved() {
         setBooleanPreference(REMOVE_BUILDING_AND_SYSTEM_EQUIP_POINTS, true);
+    }
+    public static boolean isDuplicateDualDuctSensorPointsAreRemoved() {
+        return getBooleanPreference(DUAL_DUCT_SENSOR_POINT_REMOVE);
+    }
+    public static void SetDuplicateDualDuctSensorPointsAreRemoved() {
+        setBooleanPreference(DUAL_DUCT_SENSOR_POINT_REMOVE, true);
     }
 
     public static boolean isConnectModuleOAOPointDeleted() {

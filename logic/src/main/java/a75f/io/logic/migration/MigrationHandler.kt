@@ -391,6 +391,25 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             PreferenceUtil.setNonDmPointRemoveStatus()
         }
 
+
+        if (!PreferenceUtil.getFloorRefUpdateStatus()) {
+            try {
+                CcuLog.i(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "floor ref update migration stated"
+                )
+                updateFloorRefToRoomPoints()
+                PreferenceUtil.setFloorRefUpdateStatus()
+                CcuLog.i(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "floor ref update migration ended"
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Error during Floor Ref Update  ${e.message}")
+            }
+        }
+
         hayStack.scheduleSync()
     }
 
@@ -3276,6 +3295,49 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             points.forEach { point ->
                 hayStack.deleteEntity(point["id"].toString())
                 CcuLog.d(TAG_CCU_MIGRATION_UTIL, "removed non dm sensor point $point")
+            }
+        }
+    }
+
+    private fun updateFloorRefToRoomPoints() {
+        val roomEntities = hayStack.readAllEntities("room")
+        val siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE)
+        if (roomEntities.isNotEmpty()) {
+            for (room in roomEntities) {
+                CcuLog.i(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "room:>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> {${room["dis"].toString()}}"
+                )
+                val roomId = room["id"].toString()
+                val floorRef = room["floorRef"].toString()
+                val floor = hayStack.readEntity("id == $floorRef")
+                val dis =
+                    siteMap["dis"].toString() + "-" + floor["dis"].toString() + "-" + room["dis"].toString()
+                val roomPointList = CCUHsApi.getInstance()
+                    .readAllHDictByQuery("not domainName and point and roomRef == \"$roomId\"")
+                for (pointDict in roomPointList) {
+                    val point = Point.Builder().setHDict(pointDict).build()
+                    CcuLog.i(
+                        TAG_CCU_MIGRATION_UTIL,
+                        "Updating point: ${pointDict.dis()} with floorRef: ${point.floorRef}" +
+                                " and displayName: ${point.displayName}"
+                    )
+                    var pointDisName = point.displayName
+                    if (pointDisName != null) {
+                        val splitStr =
+                            pointDisName.split("-".toRegex()).dropLastWhile { it.isEmpty() }
+                                .toTypedArray()
+                        pointDisName = splitStr[splitStr.size - 1]
+                    }
+                    point.displayName = "$dis-$pointDisName"
+                    point.floorRef = floor["id"].toString()
+                    CCUHsApi.getInstance().updatePoint(point, point.getId())
+                    CcuLog.i(
+                        TAG_CCU_MIGRATION_UTIL,
+                        "Updated point: ${point.displayName} with floorRef: ${point.floorRef} " +
+                                "and displayName: ${point.displayName}"
+                    )
+                }
             }
         }
     }

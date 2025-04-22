@@ -76,6 +76,7 @@ import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.api.haystack.util.JwtValidationException;
 import a75f.io.api.haystack.util.JwtValidator;
 import a75f.io.api.haystack.util.Migrations;
+import a75f.io.api.haystack.util.StringUtil;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.data.entities.EntityDBUtilKt;
@@ -581,8 +582,10 @@ public class CCUHsApi
 
     //TODO - Replace CCU support
     public void addZoneOccupancyPoint(String zoneRef, Zone zone) {
+        HashMap<Object, Object> roomMap = readMapById(zoneRef);
+        String disName = StringUtil.getDis(roomMap, CCUHsApi.getInstance());
         Point occupancy = new Point.Builder()
-                              .setDisplayName("occupancyState")
+                              .setDisplayName(disName+"-occupancyState")
                               //.setEquipRef(equipRef)
                               .setSiteRef(zone.getSiteRef())
                               .setRoomRef(zoneRef)
@@ -610,8 +613,10 @@ public class CCUHsApi
     }
 
     public void addZoneTemperatureModePoint(String zoneId, Zone zone) {
+        HashMap<Object, Object> roomMap = readMapById(zoneId);
+        String disName = StringUtil.getDis(roomMap, CCUHsApi.getInstance());
         Point ZoneTemperatureMode = new Point.Builder()
-                .setDisplayName(Tags.ZONE_HVAC_MODE)
+                .setDisplayName(disName +"-"+Tags.ZONE_HVAC_MODE)
                 .setSiteRef(zone.getSiteRef())
                 .setRoomRef(zoneId)
                 .setFloorRef(zone.getFloorRef()).setHisInterpolate("cov")

@@ -1,7 +1,11 @@
 package a75f.io.api.haystack.util;
 
 
+import java.util.HashMap;
 import java.util.Locale;
+
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
 
 public class StringUtil {
 
@@ -56,5 +60,12 @@ public class StringUtil {
         } else {
             return "@" + input;
         }
+    }
+
+    public static String getDis(HashMap<Object, Object> roomMap, CCUHsApi ccuHsApi) {
+        HashMap<Object, Object> floor = ccuHsApi.readMapById(roomMap.get("floorRef").toString());
+        HashMap<Object, Object> siteMap = ccuHsApi.readEntity(Tags.SITE);
+        String siteDis = siteMap.get("dis").toString();
+        return siteDis + "-" + floor.get("dis").toString() + "-" + roomMap.get("dis");
     }
 }

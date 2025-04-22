@@ -590,6 +590,7 @@ public class FloorPlanFragment extends Fragment {
                 hsFloor.setCreatedDateTime(floorToRename.getCreatedDateTime());
                 hsFloor.setLastModifiedBy(floorToRename.getLastModifiedBy());
                 hsFloor.setLastModifiedDateTime(floorToRename.getLastModifiedDateTime());
+                HashMap<Object, Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
                 for (Floor floor : siteFloorList) {
                     if (floor.getDisplayName().equals(addFloorEdit.getText().toString().trim())) {
                         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
@@ -605,6 +606,19 @@ public class FloorPlanFragment extends Fragment {
                             for (Zone zone : HSUtil.getZones(floorToRename.getId())) {
                                 zone.setFloorRef(floor.getId());
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
+                                List<HDict> roomPointList = CCUHsApi.getInstance().readAllHDictByQuery("not domainName and point and roomRef == \"" + zone.getId() + "\"");
+                                String dis = siteMap.get("dis").toString() + "-" + hsFloor.getDisplayName()+ "-" + zone.getDisplayName();
+                                for (HDict pointDict : roomPointList) {
+                                    Point point = new Point.Builder().setHDict(pointDict).build();
+                                    String pointDisName = point.getDisplayName();
+                                    if(pointDisName != null){
+                                        String[] splitStr = pointDisName.split("-");
+                                        pointDisName = splitStr[splitStr.length-1];
+                                    }
+                                    point.setDisplayName(dis + "-" + pointDisName);
+                                    point.setFloorRef(floor.getId());
+                                    CCUHsApi.getInstance().updatePoint(point, point.getId());
+                                }
                                 for (Equip equipDetails : HSUtil.getEquips(zone.getId())) {
                                     equipDetails.setFloorRef(floor.getId());
                                     CCUHsApi.getInstance().updateEquip(equipDetails, equipDetails.getId());

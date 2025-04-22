@@ -385,6 +385,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             PreferenceUtil.SetDuplicateDualDuctSensorPointsAreRemoved()
         }
 
+
+        if (!PreferenceUtil.nonDmPointRemoveStatus()) {
+            removeNonDmSensorPoints()
+            PreferenceUtil.setNonDmPointRemoveStatus()
+        }
+
         hayStack.scheduleSync()
     }
 
@@ -3258,6 +3264,19 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 TAG_CCU_MIGRATION_UTIL,
                 "Duplicate $sensorType sensor point deleted for $equipName"
             )
+        }
+    }
+
+    private fun removeNonDmSensorPoints() {
+        val equips = hayStack.readAllEntities("(equip and (vav or dab or pid or sse) and domainName and zone) or (equip and (oao or bypassDamper) and domainName)")
+        equips.forEach { equip ->
+            val equipRef = equip["id"].toString()
+            val points = hayStack.readAllEntities(
+                "point and not domainName and sensor and equipRef == \"$equipRef\"")
+            points.forEach { point ->
+                hayStack.deleteEntity(point["id"].toString())
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "removed non dm sensor point $point")
+            }
         }
     }
 }

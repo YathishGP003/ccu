@@ -112,6 +112,7 @@ public class PreferenceUtil {
 
     private static final String CONNECT_MODULE_OAO_POINTS = "connectModuleOaoPoints";
 
+    private static final String NON_DM_POINTS_REMOVE_STATUS = "nonDmPointsRemoveStatus";
 
     public static void setContext(Context c) {
         context= c;
@@ -901,5 +902,13 @@ public class PreferenceUtil {
 
     public static void setConnectModuleOAOPointDeleted() {
         setBooleanPreference(CONNECT_MODULE_OAO_POINTS, true);
+    }
+
+    public static boolean nonDmPointRemoveStatus() {
+        return getBooleanPreference(NON_DM_POINTS_REMOVE_STATUS);
+    }
+
+    public static void setNonDmPointRemoveStatus() {
+        setBooleanPreference(NON_DM_POINTS_REMOVE_STATUS, true);
     }
 }

@@ -130,7 +130,10 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
         runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(userIntents)
         if (occupancyStatus == Occupancy.WINDOW_OPEN) resetLoops()
         runForKeyCardSensor(config, equip)
-        updateLoopOutputs(equip, coolingLoopOutput, heatingLoopOutput, fanLoopOutput, dcvLoopOutput,true)
+        updateLoopOutputs(
+            equip, coolingLoopOutput, heatingLoopOutput,
+            fanLoopOutput, dcvLoopOutput,true, compressorLoopOutput
+        )
 
         CcuLog.i(
             L.TAG_CCU_MSHPU,

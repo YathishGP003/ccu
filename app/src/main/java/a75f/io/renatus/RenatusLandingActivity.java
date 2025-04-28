@@ -391,10 +391,11 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
     }
 
     @Override
-    public void onUserInteraction() {
-        super.onUserInteraction();
-        CcuLog.i(TAG,"in user interaction");
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        super.dispatchTouchEvent(ev);
+        CcuLog.i(TAG,"dispatchTouchEvent");
         resetCountDownTimer();
+        return super.dispatchTouchEvent(ev);
     }
 
     private void resetCountDownTimer(){

@@ -556,9 +556,9 @@ fun isValidateConfiguration(
             )
         }
         //MAT, SAT AND OAT MAPPING VALIDATION
-        if (analogOutMappedToOaoDamper && (!(isAnyUniversalMapped(profileConfiguration.connectConfiguration,UniversalInputAssociationType.MIXED_AIR_TEMPERATURE) || isAnySensorBusMappedTempSensor(profileConfiguration.connectConfiguration,TemperatureSensorBusMapping.mixedAirTemperature))) ||
+        if (analogOutMappedToOaoDamper && ((!(isAnyUniversalMapped(profileConfiguration.connectConfiguration,UniversalInputAssociationType.MIXED_AIR_TEMPERATURE) || isAnySensorBusMappedTempSensor(profileConfiguration.connectConfiguration,TemperatureSensorBusMapping.mixedAirTemperature))) ||
             (!(isSupplyAirTemperatureMappedInSensorBusOrUniversal(profileConfiguration).first || isSupplyAirTemperatureMappedInSensorBusOrUniversal(profileConfiguration).second)) ||
-            (!isAnyUniversalMapped(profileConfiguration.connectConfiguration,UniversalInputAssociationType.OUTSIDE_TEMPERATURE))
+            (!isAnyUniversalMapped(profileConfiguration.connectConfiguration,UniversalInputAssociationType.OUTSIDE_TEMPERATURE)))
         ) {
             return Pair(false, Html.fromHtml(MAT_OAT_SAT_NOT_MAPPED, Html.FROM_HTML_MODE_LEGACY))
         }

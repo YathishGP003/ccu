@@ -52,10 +52,10 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
 
     override fun saveConfiguration() {
         ((viewState.value) as DabAdvancedAhuState).fromStateToProfileConfig(profileConfiguration as DabAdvancedHybridAhuConfig)
+        val isAnalogOutMappedToOaoDamper = isAnalogOutMappedToOaoDamper()
         val validConfig = isValidateConfiguration(
             profileConfiguration,
-            isAnalogOutMappedToOaoDamper() ,
-            isAnalogOutMappedToReturnDamper()
+            isAnalogOutMappedToOaoDamper
         )
         if (!validConfig.first) {
             showErrorDialog(context,validConfig.second)

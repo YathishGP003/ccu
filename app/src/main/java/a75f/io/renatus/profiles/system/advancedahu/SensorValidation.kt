@@ -3,6 +3,7 @@ package a75f.io.renatus.profiles.system.advancedahu
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
+import a75f.io.device.cm.TemperatureSensorBusMapping
 import a75f.io.device.cm.getAdvancedAhuAnalogInputMappings
 import a75f.io.device.cm.getAdvancedAhuThermistorMappings
 import a75f.io.device.cm.getCo2DomainName
@@ -16,6 +17,7 @@ import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.equips.TIEquip
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
 import a75f.io.logic.bo.building.system.AdvancedAhuRelayAssociationType
+import a75f.io.logic.bo.building.system.UniversalInputAssociationType
 import a75f.io.logic.bo.building.system.getDomainPressure
 import a75f.io.logic.bo.building.system.getPressureDomainForAnalogOut
 import a75f.io.logic.bo.building.system.relayAssociationDomainNameToType
@@ -23,6 +25,7 @@ import a75f.io.logic.bo.building.system.relayAssociationToDomainName
 import a75f.io.logic.bo.building.system.util.AdvancedHybridAhuConfig
 import a75f.io.logic.bo.building.system.util.CmConfiguration
 import a75f.io.logic.bo.building.system.util.ConnectConfiguration
+import a75f.io.logic.bo.building.system.util.SensorAssociationConfig
 import android.text.Html
 import android.text.Spanned
 
@@ -40,6 +43,15 @@ data class Sensors(
 private fun isAnalogOutMapped(enabled: EnableConfig, association: AssociationConfig, mappedTo: AdvancedAhuAnalogOutAssociationType) =
         enabled.enabled && association.associationVal == mappedTo.ordinal
 
+private fun isAnalogOutMappedConnectModule(enabled: EnableConfig, association: AssociationConfig, mappedTo: ConnectControlType) =
+    enabled.enabled && association.associationVal == mappedTo.ordinal
+
+private fun isUniversalMappedConnectModule(enabled: EnableConfig, association: AssociationConfig, mappedTo: UniversalInputAssociationType) =
+    enabled.enabled && association.associationVal == mappedTo.ordinal
+
+private fun isSensorBusMappedConnectModule(enabled: EnableConfig, association:SensorAssociationConfig, mappedTo: TemperatureSensorBusMapping) =
+    enabled.enabled && association.temperatureAssociation.associationVal == mappedTo.ordinal
+
 private fun isRelayMapped(enabled: EnableConfig, association: AssociationConfig, mappedTo: AdvancedAhuRelayAssociationType) =
         enabled.enabled && relayAssociationDomainNameToType(relayAssociationToDomainName(association.associationVal)).ordinal == mappedTo.ordinal
 
@@ -50,6 +62,36 @@ private fun isAnyAnalogOutMapped(config: CmConfiguration, mappedTo: AdvancedAhuA
             config.analogOut3Enabled to config.analogOut3Association,
             config.analogOut4Enabled to config.analogOut4Association
     ).any { (enabled, association) -> isAnalogOutMapped(enabled, association, mappedTo) }
+}
+
+private fun isAnyAnalogOutMappedConnectModule(config:ConnectConfiguration, mappedTo: ConnectControlType): Boolean {
+    return listOf(
+        config.analogOut1Enabled to config.analogOut1Association,
+        config.analogOut2Enabled to config.analogOut2Association,
+        config.analogOut3Enabled to config.analogOut3Association,
+        config.analogOut4Enabled to config.analogOut4Association
+    ).any { (enabled, association) -> isAnalogOutMappedConnectModule(enabled, association, mappedTo) }
+}
+
+private fun isAnyUniversalMapped(config:ConnectConfiguration , mappedTo: UniversalInputAssociationType): Boolean {
+    return listOf(
+        config.universal1InEnabled to config.universal1InAssociation,
+        config.universal2InEnabled to config.universal2InAssociation,
+        config.universal3InEnabled to config.universal3InAssociation,
+        config.universal4InEnabled to config.universal4InAssociation,
+        config.universal5InEnabled to config.universal5InAssociation,
+        config.universal6InEnabled to config.universal6InAssociation,
+        config.universal7InEnabled to config.universal7InAssociation,
+        config.universal8InEnabled to config.universal8InAssociation
+    ).any { (enabled, association) -> isUniversalMappedConnectModule(enabled, association, mappedTo) }
+}
+private fun isAnySensorBusMappedTempSensor(config:ConnectConfiguration, mappedTo: TemperatureSensorBusMapping): Boolean {
+    return listOf(
+        config.address0Enabled to config.address1SensorAssociation,
+        config.address1Enabled to config.address1SensorAssociation,
+        config.address2Enabled to config.address1SensorAssociation,
+        config.address3Enabled to config.address1SensorAssociation
+    ).any { (enabled, association) -> isSensorBusMappedConnectModule(enabled,association, mappedTo) }
 }
 
 private fun isAnyRelayMapped(config: CmConfiguration, mappedTo: AdvancedAhuRelayAssociationType): Boolean {
@@ -434,7 +476,7 @@ fun checkTIValidation(profileConfiguration: AdvancedHybridAhuConfig): Pair<Boole
 
 fun isValidateConfiguration(
     profileConfiguration: AdvancedHybridAhuConfig,
-    analogOutMappedToOaoDamper: Boolean, analogOutMappedToReturnDamper: Boolean): Pair<Boolean, Spanned> {
+    analogOutMappedToOaoDamper: Boolean): Pair<Boolean, Spanned> {
 
     var isPressureAvailable = false
     if (isRelayPressureFanAvailable(profileConfiguration.cmConfiguration)) {
@@ -507,11 +549,18 @@ fun isValidateConfiguration(
             )
         }
 
-        if (analogOutMappedToReturnDamper && !analogOutMappedToOaoDamper) {
+        if (isAnyAnalogOutMappedConnectModule(profileConfiguration.connectConfiguration,ConnectControlType.RETURN_DAMPER) && !analogOutMappedToOaoDamper) {
             return Pair(
                 false,
                 Html.fromHtml(RETURN_DAMPER_OAO_DAMPER_ERROR, Html.FROM_HTML_MODE_LEGACY)
             )
+        }
+        //MAT, SAT AND OAT MAPPING VALIDATION
+        if (analogOutMappedToOaoDamper && (!(isAnyUniversalMapped(profileConfiguration.connectConfiguration,UniversalInputAssociationType.MIXED_AIR_TEMPERATURE) || isAnySensorBusMappedTempSensor(profileConfiguration.connectConfiguration,TemperatureSensorBusMapping.mixedAirTemperature))) ||
+            (!(isSupplyAirTemperatureMappedInSensorBusOrUniversal(profileConfiguration).first || isSupplyAirTemperatureMappedInSensorBusOrUniversal(profileConfiguration).second)) ||
+            (!isAnyUniversalMapped(profileConfiguration.connectConfiguration,UniversalInputAssociationType.OUTSIDE_TEMPERATURE))
+        ) {
+            return Pair(false, Html.fromHtml(MAT_OAT_SAT_NOT_MAPPED, Html.FROM_HTML_MODE_LEGACY))
         }
     }
     return Pair(true, Html.fromHtml("Success", Html.FROM_HTML_MODE_LEGACY))
@@ -532,4 +581,41 @@ fun validateConnectModule(profileConfiguration: AdvancedHybridAhuConfig): Pair<B
         return Pair(false, duplicateError(duplicateSensor))
     }
     return Pair(true, Html.fromHtml("Success", Html.FROM_HTML_MODE_LEGACY))
+}
+
+fun isSupplyAirTemperatureMappedInSensorBusOrUniversal(profileConfiguration: AdvancedHybridAhuConfig): Pair<Boolean, Boolean> {
+    val connectConfig = profileConfiguration.connectConfiguration
+    val universalInputOrdinal1 = UniversalInputAssociationType.SUPPLY_AIR_TEMPERATURE1.ordinal
+    val supplyAirTemperature1 = TemperatureSensorBusMapping.supplyAirTemperature1.ordinal
+    val universalInputOrdinal2 = UniversalInputAssociationType.SUPPLY_AIR_TEMPERATURE2.ordinal
+    val supplyAirTemperature2 = TemperatureSensorBusMapping.supplyAirTemperature2.ordinal
+    val universalInputOrdinal3 = UniversalInputAssociationType.SUPPLY_AIR_TEMPERATURE3.ordinal
+    val supplyAirTemperature3 = TemperatureSensorBusMapping.supplyAirTemperature3.ordinal
+
+    val sensorBus = listOf(
+        connectConfig.address0Enabled to connectConfig.address0SensorAssociation.temperatureAssociation,
+        connectConfig.address1Enabled to connectConfig.address1SensorAssociation.temperatureAssociation,
+        connectConfig.address2Enabled to connectConfig.address2SensorAssociation.temperatureAssociation,
+        connectConfig.address3Enabled to connectConfig.address3SensorAssociation.temperatureAssociation
+    )
+
+    val universalInputs = listOf(
+        connectConfig.universal1InEnabled to connectConfig.universal1InAssociation,
+        connectConfig.universal2InEnabled to connectConfig.universal2InAssociation,
+        connectConfig.universal3InEnabled to connectConfig.universal3InAssociation,
+        connectConfig.universal4InEnabled to connectConfig.universal4InAssociation,
+        connectConfig.universal5InEnabled to connectConfig.universal5InAssociation,
+        connectConfig.universal6InEnabled to connectConfig.universal6InAssociation,
+        connectConfig.universal7InEnabled to connectConfig.universal7InAssociation,
+        connectConfig.universal8InEnabled to connectConfig.universal8InAssociation
+    )
+
+
+    val satUniversalInput = universalInputs.any { (enabled, association) ->
+        enabled.enabled && (association.associationVal == universalInputOrdinal1 || association.associationVal == universalInputOrdinal2 || association.associationVal == universalInputOrdinal3)
+    }
+    val satSensorBus = sensorBus.any { (enabled, association) ->
+        enabled.enabled && (association.associationVal == supplyAirTemperature1 || association.associationVal == supplyAirTemperature2 || association.associationVal == supplyAirTemperature3)
+    }
+    return Pair(satSensorBus, satUniversalInput)
 }

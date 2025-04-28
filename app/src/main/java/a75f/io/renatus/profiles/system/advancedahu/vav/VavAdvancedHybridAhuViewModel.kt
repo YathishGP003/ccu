@@ -14,7 +14,6 @@ import a75f.io.logic.bo.building.system.util.getCurrentSystemEquip
 import a75f.io.logic.bo.building.system.util.getVavConnectEquip
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
-import a75f.io.renatus.modbus.util.isOaoPairedInConnectModule
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.oao.updateOaoPoints
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
@@ -53,7 +52,8 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
 
     override fun saveConfiguration() {
         ((viewState.value) as VavAdvancedAhuState).fromStateToProfileConfig(profileConfiguration as VavAdvancedHybridAhuConfig)
-        val validConfig = isValidateConfiguration(profileConfiguration,isAnalogOutMappedToOaoDamper(),isAnalogOutMappedToReturnDamper())
+        val isAnalogOutMappedToOaoDamper = isAnalogOutMappedToOaoDamper()
+        val validConfig = isValidateConfiguration(profileConfiguration,isAnalogOutMappedToOaoDamper)
         if (!validConfig.first) {
             showErrorDialog(context,validConfig.second)
             viewState.value.isSaveRequired = true

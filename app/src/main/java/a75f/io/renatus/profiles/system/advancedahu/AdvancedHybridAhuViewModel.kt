@@ -2,6 +2,7 @@ package a75f.io.renatus.profiles.system.advancedahu
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.device.cm.TemperatureSensorBusMapping
 import a75f.io.device.cm.sendTestModeMessage
 import a75f.io.device.connect.ConnectModbusSerialComm
 import a75f.io.domain.api.Domain
@@ -192,12 +193,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
             (viewState.value.connectAnalogOut3Association == ConnectControlType.OAO_DAMPER.ordinal && viewState.value.connectAnalogOut3Enabled) ||
             (viewState.value.connectAnalogOut4Association == ConnectControlType.OAO_DAMPER.ordinal && viewState.value.connectAnalogOut4Enabled)
     }
-    fun isAnalogOutMappedToReturnDamper(): Boolean {
-        return (viewState.value.connectAnalogOut1Association == ConnectControlType.RETURN_DAMPER.ordinal && viewState.value.connectAnalogOut1Enabled) ||
-            (viewState.value.connectAnalogOut2Association == ConnectControlType.RETURN_DAMPER.ordinal && viewState.value.connectAnalogOut2Enabled) ||
-            (viewState.value.connectAnalogOut3Association == ConnectControlType.RETURN_DAMPER.ordinal && viewState.value.connectAnalogOut3Enabled) ||
-            (viewState.value.connectAnalogOut4Association == ConnectControlType.RETURN_DAMPER.ordinal && viewState.value.connectAnalogOut4Enabled)
-    }
+
 
 
     fun addAdvanceAHUEquip(): String {

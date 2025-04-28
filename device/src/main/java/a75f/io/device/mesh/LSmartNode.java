@@ -101,15 +101,15 @@ public class LSmartNode
         return settingsMessage;
     }
     private static void fillSmartNodeSettings(SmartNodeSettings_t settings,Zone zone, short address, String equipRef,String profile) {
-
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         try
         {
             double coolingDeadband =
-                    CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and deadband and schedulable and roomRef == \""+zone.getId()+"\"");
+                    ccuHsApi.readPointPriorityValByQuery("cooling and deadband and schedulable and roomRef == \""+zone.getId()+"\"");
             settings.maxUserTem.set(DeviceUtil.getMaxUserTempLimits(coolingDeadband,zone.getId()));
     
             double heatingDeadband =
-                    CCUHsApi.getInstance().readPointPriorityValByQuery("heating and deadband and schedulable and roomRef == \""+zone.getId()+"\"");
+                    ccuHsApi.readPointPriorityValByQuery("heating and deadband and schedulable and roomRef == \""+zone.getId()+"\"");
             
             settings.minUserTemp.set(DeviceUtil.getMinUserTempLimits(heatingDeadband, zone.getId()));
         } catch (Exception e) {
@@ -118,17 +118,17 @@ public class LSmartNode
             settings.minUserTemp.set((short) 69);
         }
 
-        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
+        HashMap<Object, Object> equipMap = ccuHsApi.readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 
         if (profile.equals("bypass")) {
-            settings.minDamperOpen.set(Short.parseShort(String.valueOf(CCUHsApi.getInstance().readDefaultVal("point and domainName == \"" + DomainName.damperMinPosition + "\" and equipRef == \"" + equip.getId() + "\"").intValue())));
-            settings.maxDamperOpen.set(Short.parseShort(String.valueOf(CCUHsApi.getInstance().readDefaultVal("point and domainName == \"" + DomainName.damperMaxPosition + "\" and equipRef == \"" + equip.getId() + "\"").intValue())));
+            settings.minDamperOpen.set(Short.parseShort(String.valueOf(ccuHsApi.readDefaultVal("point and domainName == \"" + DomainName.damperMinPosition + "\" and equipRef == \"" + equip.getId() + "\"").intValue())));
+            settings.maxDamperOpen.set(Short.parseShort(String.valueOf(ccuHsApi.readDefaultVal("point and domainName == \"" + DomainName.damperMaxPosition + "\" and equipRef == \"" + equip.getId() + "\"").intValue())));
         } else if (equip.getProfile().equals("PLC")) {
             //PC Analog min/max are send over damper min/max
-            settings.minDamperOpen.set( (short) (10 * CCUHsApi.getInstance().readDefaultVal("point and domainName == \""
+            settings.minDamperOpen.set( (short) (10 * ccuHsApi.readDefaultVal("point and domainName == \""
                                                     + DomainName.analog1MinOutput + "\" and equipRef == \"" + equip.getId() + "\"")));
-            settings.maxDamperOpen.set( (short) (10 * CCUHsApi.getInstance().readDefaultVal("point and domainName == \""
+            settings.maxDamperOpen.set( (short) (10 * ccuHsApi.readDefaultVal("point and domainName == \""
                     + DomainName.analog1MaxOutput + "\" and equipRef == \"" + equip.getId() + "\"")));
         } else if (isEquipType("vav", address) && TrueCFMUtil.isTrueCfmEnabled(CCUHsApi.getInstance(), equipRef)) {
             // VAVs with TrueCFM enabled only have heating min/max damper positions
@@ -220,10 +220,9 @@ public class LSmartNode
                 settings.integrationTime.set((short)30);
             }
         }
-        
-        settings.airflowHeatingTemperature.set((short)105);
-        settings.airflowCoolingTemperature.set((short)60);
-    
+
+        settings.airflowHeatingTemperature.set(ccuHsApi.readPointPriorityValByQuery("zone and ( domainName==\"" + DomainName.vavHeatingAirflowTemp + "\" or domainName == \"" + DomainName.dabHeatingAirflowTemp + "\") and equipRef==\"" + equipRef + "\"").shortValue());
+        settings.airflowCoolingTemperature.set(ccuHsApi.readPointPriorityValByQuery("zone and ( domainName==\"" + DomainName.vavCoolingAirflowTemp + "\" or domainName == \"" + DomainName.dabCoolingAirflowTemp + "\") and equipRef==\"" + equipRef + "\"").shortValue());
         settings.showCentigrade.set((short)(DeviceConfigurationUtil.Companion.getUserConfiguration()));
         settings.displayHold.set((short)0);
         settings.militaryTime.set((short)0);

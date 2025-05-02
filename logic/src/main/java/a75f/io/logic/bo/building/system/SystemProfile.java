@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.system;
 
 import static a75f.io.logic.L.ccu;
+import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.getConnectEquip;
 
 import android.content.Context;
 
@@ -710,10 +711,17 @@ public abstract class SystemProfile
                 hayStack.writeHisValByQuery("outsideWeather and air and humidity and equipRef == \"" + equipId + "\"", externalHumidity);
             }
         }
-
-        hayStack.writeHisValByQuery("system and outside and temp and not lockout", externalTemp);
-        hayStack.writeHisValByQuery("system and outside and humidity", externalHumidity);
-
+        if (getConnectEquip() != null && getConnectEquip().getEnableOutsideAirOptimization().readDefaultVal() == 1.0) {
+            // Update weather points on connect Module equips
+            if (!getConnectEquip().getOutsideHumidity().pointExists()) {
+                getConnectEquip().getOutsideHumidity().writeHisVal(externalHumidity);
+            }
+            if (!getConnectEquip().getOutsideTemperature().pointExists()) {
+                getConnectEquip().getOutsideTemperature().writeHisVal(externalTemp);
+            }
+        }
+        hayStack.writeHisValByQuery("system and not connectModule and outside and temp and not lockout", externalTemp);
+        hayStack.writeHisValByQuery("system and not connectModule and outside and humidity", externalHumidity);
     }
     
     /**

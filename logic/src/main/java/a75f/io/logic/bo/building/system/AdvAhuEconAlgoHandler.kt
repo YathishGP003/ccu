@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.system
 //import a75f.io.logic.bo.building.oao.OAOProfile
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HSUtil
+import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.DomainName.epidemicModeSystemState
@@ -427,17 +428,23 @@ class AdvAhuEconAlgoHandler(private val connectEquip: ConnectModuleEquip) {
             "ccu_devsetting",
             Context.MODE_PRIVATE
         )
+        val isTestModeEnabled = Globals.getInstance().isWeatherTest()
+
         externalTemp = if (connectEquip.outsideTemperature.pointExists()) {
             connectEquip.outsideTemperature.readHisVal()
-        } else {
+        } else if (isTestModeEnabled) {
             sharedPreferences.getInt("outside_temp", 0).toDouble()
-        }
-        externalHumidity = if (connectEquip.outsideHumidity.pointExists()) {
-            connectEquip.outsideHumidity.readHisVal()
         } else {
-            sharedPreferences.getInt("outside_humidity", 0).toDouble()
+            hayStack.externalTemp
         }
 
+        externalHumidity = if (connectEquip.outsideHumidity.pointExists()) {
+            connectEquip.outsideHumidity.readHisVal()
+        } else if (isTestModeEnabled) {
+            sharedPreferences.getInt("outside_humidity", 0).toDouble()
+        } else {
+            hayStack.externalHumidity
+        }
 
         val economizingToMainCoolingLoopMap: Double =
             connectEquip.economizingToMainCoolingLoopMap.readPriorityVal()

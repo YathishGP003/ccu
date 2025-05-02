@@ -129,7 +129,7 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
             val dabAdvancedAhuProfile = L.ccu().systemProfile as DabAdvancedAhu
             dabAdvancedAhuProfile.updateStagesSelected()
             launch { L.ccu().systemProfile.removeSystemEquipModbus() }
-            enableDisableCoolingLockOut(false)
+            enableDisableCoolingLockOut(false,profileConfiguration)
         }
         newEquipJob.join()
     }

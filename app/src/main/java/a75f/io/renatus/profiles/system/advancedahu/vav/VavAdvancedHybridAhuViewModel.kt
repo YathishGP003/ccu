@@ -126,7 +126,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
             val vavAdvancedAhuProfile = L.ccu().systemProfile as VavAdvancedAhu
             vavAdvancedAhuProfile.updateStagesSelected()
             launch { L.ccu().systemProfile.removeSystemEquipModbus() }
-            enableDisableCoolingLockOut(false)
+            enableDisableCoolingLockOut(false,profileConfiguration)
         }
         newEquipJob.join()
     }

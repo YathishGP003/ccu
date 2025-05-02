@@ -1125,6 +1125,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					targetMinInsideHumidity.setSelection(humidityAdapter
 							.getPosition(0.0), false);
 					setPointConfig.setVisibility(View.GONE);
+					textViewCn1.setVisibility(View.GONE);
+					linearLayoutCn.setVisibility(View.GONE);
 
 				} else {
 					if (isDMSupportProfile()) {

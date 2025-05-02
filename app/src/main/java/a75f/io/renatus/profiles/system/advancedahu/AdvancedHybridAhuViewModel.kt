@@ -347,60 +347,53 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         }
     }
 
-    fun enableDisableCoolingLockOut(isReconfiguration: Boolean) {
-        val ccuHsApi = CCUHsApi.getInstance()
-        val systemProfile = L.ccu().systemProfile
-        // if OAO damper is mapped  for (first time) to analog output then enable outside temp cooling lockout
-        //else oao damper is not mapped disable the outside temp cooling lockout
-        if (isReconfiguration) {
-            if (profileConfiguration.connectConfiguration.enableOutsideAirOptimization.enabled && !isOaoPairedInConnectModule()) {
-                if (!systemProfile.isOutsideTempCoolingLockoutEnabled(ccuHsApi)) {
-                    L.ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(
-                        CCUHsApi.getInstance(),
-                        true
-                    )
-                    CcuLog.i(
-                        Domain.LOG_TAG,
-                        "OAO paired for first time , enabled the Cooling lockout "
-                    )
-                }
-            } else if (!profileConfiguration.connectConfiguration.enableOutsideAirOptimization.enabled) {
-                if (systemProfile.isOutsideTempCoolingLockoutEnabled(ccuHsApi)) {
-                    L.ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(
-                        CCUHsApi.getInstance(),
-                        false
-                    )
-                    CcuLog.i(Domain.LOG_TAG, "OAO is not mapped , disabled the Cooling lockout")
-                }
-            }
-        } else {
-            if (isAnalogOutMappedToOaoDamper()) {
-                if (!systemProfile.isOutsideTempCoolingLockoutEnabled(ccuHsApi)) {
-                    systemProfile.setOutsideTempCoolingLockoutEnabled(
-                        CCUHsApi.getInstance(),
-                        true
-                    )
-                    CcuLog.i(
-                        Domain.LOG_TAG,
-                        "OAO paired for  first time,  enabled the Cooling lockout "
-                    )
+    fun enableDisableCoolingLockOut(isReconfiguration: Boolean, profileConfiguration: AdvancedHybridAhuConfig) {
+        if (profileConfiguration.connectConfiguration.connectEnabled && !isOaoPairedInSystemLevel) {
+            val ccuHsApi = CCUHsApi.getInstance()
+            val systemProfile = L.ccu().systemProfile
+            // if OAO damper is mapped  for (first time) to analog output then enable outside temp cooling lockout
+            //else oao damper is not mapped disable the outside temp cooling lockout
+            if (isReconfiguration) {
+                if (profileConfiguration.connectConfiguration.enableOutsideAirOptimization.enabled && !isOaoPairedInConnectModule()) {
+                    if (!systemProfile.isOutsideTempCoolingLockoutEnabled(ccuHsApi)) {
+                        L.ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(
+                            CCUHsApi.getInstance(),
+                            true
+                        )
+                        CcuLog.i(
+                            Domain.LOG_TAG,
+                            "OAO paired for first time , enabled the Cooling lockout "
+                        )
+                    }
+                } else if (!profileConfiguration.connectConfiguration.enableOutsideAirOptimization.enabled && isOaoPairedInConnectModule()) {
+                    if (systemProfile.isOutsideTempCoolingLockoutEnabled(ccuHsApi)) {
+                        L.ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(
+                            CCUHsApi.getInstance(),
+                            false
+                        )
+                        CcuLog.i(Domain.LOG_TAG, "OAO is not mapped , disabled the Cooling lockout")
+                    }
                 }
             } else {
-                if (systemProfile.isOutsideTempCoolingLockoutEnabled(ccuHsApi)) {
-                    systemProfile.setOutsideTempCoolingLockoutEnabled(
-                        CCUHsApi.getInstance(),
-                        false
-                    )
-                    CcuLog.i(Domain.LOG_TAG, "OAO is not mapped, disabled the Cooling lockout")
+                if (isAnalogOutMappedToOaoDamper()) {
+                    if (!systemProfile.isOutsideTempCoolingLockoutEnabled(ccuHsApi)) {
+                        systemProfile.setOutsideTempCoolingLockoutEnabled(
+                            CCUHsApi.getInstance(),
+                            true
+                        )
+                        CcuLog.i(
+                            Domain.LOG_TAG,
+                            "OAO paired for  first time,  enabled the Cooling lockout "
+                        )
+                    }
                 }
-
             }
         }
     }
 
 
      fun updateConfiguration(existingConnectEquip: HashMap<Any,Any>, connectModelName: String) {
-         enableDisableCoolingLockOut(true)
+         enableDisableCoolingLockOut(true,profileConfiguration)
          cmEquipBuilder.updateEquipAndPoints(
                  configuration = profileConfiguration.cmConfiguration,
                  modelDef = cmModel,

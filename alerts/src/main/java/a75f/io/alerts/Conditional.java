@@ -199,11 +199,14 @@ public class Conditional
                                                 sb.append(" (").append(pv.id.substring(0,6)).append(", ").append(pv.val).append(")");
                                         }
         } else if (grpOperation.contains("oao")){
-            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and oao and not hyperstatsplit");
-                                        sb.append("\nEvaluating for ").append(equips.size()).append("OAO equips");
+            equipToPoint.clear();
+            equipToStatus.clear();
+            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("(equip and (oao or economizer))");
+                                        sb.append("\nEvaluating for ").append(equips.size()).append(" OAO equips");
             if (!equips.isEmpty()) {
                 for (Map q : equips) {
-                                                sb.append("\nEquip: ").append(q.get("dis")).append("  -- expecting just one.");
+                    String equipRef = q.get("id").toString();
+                                                sb.append("\nEquip: ").append(q.get("dis")).append("  --  ");
 
                     HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \""+q.get("id")+"\"");
                     if (point.isEmpty()) {
@@ -212,6 +215,7 @@ public class Conditional
                         continue;
                     }
                                                 sb.append("\nFound point").append(point.get("id")).append(" -- reading his val");
+                    String pointRef = point.get("id").toString();
                     val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \""+q.get("id")+"\""));
                                                 sb.append("\n   val (RHS): ").append(val).append("   --re-evaluated for this zone.");
 
@@ -221,6 +225,8 @@ public class Conditional
                     Expression expression = new Expression(resVal + " " + condition + " " + val);
                     status = expression.eval().intValue() > 0;
                                                 sb.append("\n").append(expression).append(": ").append(status);
+                    equipToPoint.put(equipRef, pointRef);
+                    equipToStatus.put(equipRef, status);
                 }
             } else {
                                             sb.append(":  None.");

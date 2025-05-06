@@ -131,7 +131,9 @@ public class AlertProcessor {
                 } else {
                     def.evaluate(defaultSharedPrefs);
 
-                    if (alertDefType.equals(Conditional.GrpOperator.EQUIP) || alertDefType.equals(Conditional.GrpOperator.DELTA)) {
+                    if (alertDefType.equals(Conditional.GrpOperator.EQUIP)
+                            || alertDefType.equals(Conditional.GrpOperator.DELTA)
+                            || alertDefType.equals(Conditional.GrpOperator.OAO)) {
                         List<AlertDefOccurrence> retunredList = processForEquips(def);
                         occurrences.addAll(retunredList);
                     } else {

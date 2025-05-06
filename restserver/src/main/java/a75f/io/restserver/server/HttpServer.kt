@@ -15,6 +15,7 @@ import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED
 import a75f.io.logic.util.bacnet.readExternalBacnetJsonFile
 import a75f.io.logic.util.bacnet.updateBacnetHeartBeat
 import a75f.io.logic.util.bacnet.updateBacnetStackInitStatus
+import a75f.io.util.query_parser.modifyKVPairFromFilter
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
@@ -418,6 +419,7 @@ class HttpServer {
                      {"dab":"marker","tz":"Kolkata","roomRef":"SYSTEM","createdDateTime":"2025-01-03T12:08:06.232+00:00 UTC","point":"marker"}]
                 */
 
+                // NOTE: This endpoint is only used by CCU Dashboard
                 post("/query") {
                     val query = call.receive<String>()
                     CcuLog.i(HTTP_SERVER, " /query  : $query")
@@ -586,45 +588,9 @@ class HttpServer {
 
     private fun getModifiedQuery(query: String) : String {
         var modifiedQuery = query.replace("\\", "")
-        modifiedQuery = fixInvertedCommas(addDomainNameSupport(modifiedQuery))
+        modifiedQuery = modifyKVPairFromFilter(modifiedQuery)
         CcuLog.i(HTTP_SERVER, " /modifiedQuery  : $modifiedQuery")
         return modifiedQuery
-    }
-
-
-    // remove @ for domain name checks
-    private fun addDomainNameSupport(input: String): String {
-        val output = input.replace(Regex("(domainName\\s*=+\\s*)@"), "$1")
-        return output
-    }
-
-    private fun fixInvertedCommas(input: String): String {
-        // Define the pattern
-        val pattern = Pattern.compile("==\\s*([@\\w-]+)")
-
-        // Match the pattern against the input
-        val matcher = pattern.matcher(input)
-
-        // StringBuffer to build the modified string
-        val result = StringBuffer()
-
-        // Find and replace the pattern
-        while (matcher.find()) {
-            // Extract the value after "=="
-            val extractedValue = matcher.group(1)
-
-            // Add inverted commas around the extracted value
-            val replacement = "==\"$extractedValue\""
-
-            // Replace the matched part with the modified value
-            matcher.appendReplacement(result, replacement)
-        }
-
-        // Append the remaining part of the input
-        matcher.appendTail(result)
-        val finalResult = result.toString()
-        // Print the modified string
-        return finalResult
     }
 
     private fun readWritablePointValue(id: String): String {

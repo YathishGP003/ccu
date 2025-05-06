@@ -15,8 +15,10 @@ import a75f.io.sitesequencer.log.SequencerLogsCallback
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.eclipsesource.v8.JavaCallback
 import com.eclipsesource.v8.V8
 import com.eclipsesource.v8.V8Object
+import com.eclipsesource.v8.V8Value
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
@@ -397,12 +399,58 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
     @Throws(Exception::class)
     fun registerAllMethods(javaObject: Any, v8Object: V8Object) {
         val clazz: Class<*> = javaObject.javaClass
+
         for (method in clazz.methods) {
             val methodName = method.name
             val parameterTypes = method.parameterTypes
+            val paramCount = parameterTypes.size
 
-            // Use reflection to get method parameter types and register it
-            v8Object.registerJavaMethod(javaObject, methodName, methodName, parameterTypes)
+            val callback = JavaCallback { _, parameters ->
+                for (i in 0 until parameters.length()) {
+                    if (parameters.getType(i) == V8Value.UNDEFINED) {
+                        sequencerLogsCallback.logError(
+                            LogLevel.ERROR,
+                            LogOperation.SEQUENCER_LOG,
+                            "Skipped call to '$methodName': parameter at index $i is undefined",
+                            "error"
+                        )
+                        CcuLog.d(TAG, "🚫 Skipped call to '$methodName': parameter at index $i is undefined")
+                        return@JavaCallback null
+                    }
+                }
+
+                val v8ValuesToRelease = mutableListOf<Any?>()
+
+                try {
+                    return@JavaCallback method.invoke(javaObject, *Array(paramCount) { i ->
+                        val v8Value = parameters.get(i)
+                        v8ValuesToRelease.add(v8Value)
+                        v8Value
+                    })
+
+                } catch (e: Exception) {
+                    sequencerLogsCallback.logError(
+                        LogLevel.ERROR,
+                        LogOperation.SEQUENCER_LOG,
+                        "Error calling method '$methodName': ${e.message}",
+                        "error"
+                    )
+                    CcuLog.e(TAG, "❌ Error calling method '$methodName': ${e.message}")
+                    return@JavaCallback null
+                } finally {
+                    CcuLog.i(TAG, "Releasing V8 values for method '$methodName'")
+                    for (v8 in v8ValuesToRelease) {
+                        try {
+                            v8 as V8Value
+                            v8.close()
+                        } catch (_: Exception) {
+                            // Ignore release failures
+                        }
+                    }
+                }
+            }
+
+            v8Object.registerJavaMethod(callback, methodName)
         }
     }
 

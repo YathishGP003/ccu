@@ -120,6 +120,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3'
 
     implementation project(':haystack')
+    implementation project(':util')
     implementation 'info.guardianproject.netcipher:netcipher:1.2'
     implementation("com.eclipsesource.j2v8:j2v8:6.2.1@aar")
 }

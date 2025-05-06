@@ -1,7 +1,7 @@
 package a75f.io.sitesequencer;
 
 
-import android.webkit.HttpAuthHandler;
+import static a75f.io.util.query_parser.QueryParserKt.modifyKVPairFromFilter;
 
 import com.eclipsesource.v8.V8;
 import com.eclipsesource.v8.V8Array;
@@ -33,11 +33,9 @@ import java.util.stream.Collectors;
 import a75f.io.alerts.log.LogLevel;
 import a75f.io.alerts.log.LogOperation;
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.sitesequencer.log.SequencerLogsCallback;
 
@@ -300,63 +298,13 @@ public class HaystackService {
         }
     }
 
-    /**
-     * This method will remove unwanted characters and clean the filter, then it can be used by ccu
-     * there are some limitations why it is not generic
-     * for -> domainName ==@buildingLimitMax | we need to remove @ before querying in CCU
-     * same goes for port, dis and group
-     * But
-     * if filter contains id like shown below
-     * id == @80dfaab5-9252-4c14-9bf0-1a6af67fc7bd
-     * @ should not be removed from id or else query doesnt work
-     *
-     * @param filter
-     * @param contextHelper
-     * @return
-     */
     private List<HashMap> findByFilterCustom(String filter, Object contextHelper) {
         CcuLog.d(TAG, "---findByFilterCustom##--original filter-"+filter);
-        filter = removeFirstAndLastParentheses(filter);
-
-          // below code need to be fixed
-        if(filter.contains("port")){
-            filter = filter.replaceAll("port==@", "port==");
-        }
-        if(filter.contains("dis")){
-            filter = filter.replaceAll("dis==@", "dis==");
-        }
-        if(filter.contains("group")){
-            filter = filter.replaceAll("group==@", "group==");
-        }
-        if(filter.contains("domainName")){
-            filter = filter.replaceAll("domainName==@", "domainName==");
-        }
-        filter = fixInvertedCommas(filter);
-        filter = removeQuotesFromIdValue(filter);
-
+        filter = modifyKVPairFromFilter(filter);
         CcuLog.d(TAG, "---findByFilter##--final filter for  readGrid->"+filter);
         HGrid hGrid = CCUHsApi.getInstance().readGrid(filter);
         List<HashMap> list = CCUHsApi.getInstance().HGridToListPlainString(hGrid);
         return list;
-    }
-
-    private static String removeQuotesFromIdValue(String input) {
-        // Define the pattern to find "id==" followed by a quoted string
-        String pattern = "id==\"([^\"]*)\"";
-
-        // Use regex to find and replace the quoted id value
-        input = input.replaceAll(pattern, "id==$1");
-
-        return input;
-    }
-
-    private static String removeFirstAndLastParentheses(String input) {
-        input = input.replaceAll("@@","@");
-        if (input.startsWith("(") && input.endsWith(")")) {
-            return input.substring(1, input.length() - 1);
-        } else {
-            return input;
-        }
     }
 
     public void hisWrite(String id, Double val, Object contextHelper) {
@@ -624,35 +572,6 @@ public class HaystackService {
             return formattedString;
         }
         return inputString;
-    }
-
-    private static String fixInvertedCommas(String input) {
-        // Define the pattern
-        Pattern pattern = Pattern.compile("==\\s*([@\\w-]+)");
-
-        // Match the pattern against the input
-        Matcher matcher = pattern.matcher(input);
-
-        // StringBuffer to build the modified string
-        StringBuffer result = new StringBuffer();
-
-        // Find and replace the pattern
-        while (matcher.find()) {
-            // Extract the value after "=="
-            String extractedValue = matcher.group(1);
-
-            // Add inverted commas around the extracted value
-            String replacement = "==\"" + extractedValue + "\"";
-
-            // Replace the matched part with the modified value
-            matcher.appendReplacement(result, replacement);
-        }
-
-        // Append the remaining part of the input
-        matcher.appendTail(result);
-        String finalResult = result.toString();
-        // Print the modified string
-        return finalResult;
     }
 
     private String getCustomMessage(int size){

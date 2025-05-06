@@ -61,7 +61,7 @@ public class Tags
     public static final String RELAY6 = "relay6";
     public static final String RELAY7 = "relay7";
     public static final String RELAY8 = "relay8";
-    
+
     public static final String ANALOG1 = "analog1";
     public static final String ANALOG2 = "analog2";
     public static final String ANALOG3 = "analog3";

@@ -2,6 +2,7 @@ package a75f.io.alerts;
 
 
 import static a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS;
+import static a75f.io.util.query_parser.QueryParserKt.modifyKVPairFromFilter;
 
 import com.eclipsesource.v8.V8;
 import com.eclipsesource.v8.V8Array;
@@ -296,47 +297,12 @@ public class HaystackService {
      */
     private List<HashMap> findByFilterCustom(String filter, Object contextHelper) {
         CcuLog.d(TAG, "---findByFilterCustom##--original filter-"+filter);
-        filter = removeFirstAndLastParentheses(filter);
-
-        // below code need to be fixed
-        if(filter.contains("port")){
-            filter = filter.replaceAll("port==@", "port==");
-        }
-        if(filter.contains("dis")){
-            filter = filter.replaceAll("dis==@", "dis==");
-        }
-        if(filter.contains("group")){
-            filter = filter.replaceAll("group==@", "group==");
-        }
-        if(filter.contains("domainName")){
-            filter = filter.replaceAll("domainName==@", "domainName==");
-        }
-        filter = fixInvertedCommas(filter);
-        filter = removeQuotesFromIdValue(filter);
+        filter = modifyKVPairFromFilter(filter);
 
         CcuLog.d(TAG, "---findByFilter##--final filter for  readGrid->"+filter);
         HGrid hGrid = CCUHsApi.getInstance().readGrid(filter);
         List<HashMap> list = CCUHsApi.getInstance().HGridToListPlainString(hGrid);
         return list;
-    }
-
-    private static String removeQuotesFromIdValue(String input) {
-        // Define the pattern to find "id==" followed by a quoted string
-        String pattern = "id==\"([^\"]*)\"";
-
-        // Use regex to find and replace the quoted id value
-        input = input.replaceAll(pattern, "id==$1");
-
-        return input;
-    }
-
-    private static String removeFirstAndLastParentheses(String input) {
-        input = input.replaceAll("@@","@");
-        if (input.startsWith("(") && input.endsWith(")")) {
-            return input.substring(1, input.length() - 1);
-        } else {
-            return input;
-        }
     }
 
     public void hisWrite(String id, Double val, Object contextHelper) {
@@ -604,35 +570,6 @@ public class HaystackService {
             return formattedString;
         }
         return inputString;
-    }
-
-    private static String fixInvertedCommas(String input) {
-        // Define the pattern
-        Pattern pattern = Pattern.compile("==\\s*([@\\w-]+)");
-
-        // Match the pattern against the input
-        Matcher matcher = pattern.matcher(input);
-
-        // StringBuffer to build the modified string
-        StringBuffer result = new StringBuffer();
-
-        // Find and replace the pattern
-        while (matcher.find()) {
-            // Extract the value after "=="
-            String extractedValue = matcher.group(1);
-
-            // Add inverted commas around the extracted value
-            String replacement = "==\"" + extractedValue + "\"";
-
-            // Replace the matched part with the modified value
-            matcher.appendReplacement(result, replacement);
-        }
-
-        // Append the remaining part of the input
-        matcher.appendTail(result);
-        String finalResult = result.toString();
-        // Print the modified string
-        return finalResult;
     }
 
     private String getCustomMessage(int size){

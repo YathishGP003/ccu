@@ -132,6 +132,7 @@ dependencies {
     //Room
     implementation("androidx.room:room-runtime:2.5.0")
     implementation 'androidx.lifecycle:lifecycle-process:2.6.0'
+    implementation project(':util')
     annotationProcessor("androidx.room:room-compiler:2.5.0")
     implementation("androidx.room:room-ktx:2.5.0")
     kapt "androidx.room:room-compiler:2.5.0"

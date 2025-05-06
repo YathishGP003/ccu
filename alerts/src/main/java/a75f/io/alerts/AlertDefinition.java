@@ -5,8 +5,10 @@ import static a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.eclipsesource.v8.JavaCallback;
 import com.eclipsesource.v8.V8;
 import com.eclipsesource.v8.V8Object;
+import com.eclipsesource.v8.V8Value;
 import com.google.gson.annotations.SerializedName;
 
 import org.jetbrains.annotations.Nullable;
@@ -16,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import a75f.io.alerts.log.LogLevel;
+import a75f.io.alerts.log.LogOperation;
 import a75f.io.alerts.log.SequencerLogsCallback;
 import a75f.io.alerts.model.AlertScope;
 import a75f.io.alerts.model.AlertScopeEquip;
@@ -237,22 +241,22 @@ public class AlertDefinition
             HaystackService haystackService = new HaystackService(sequenceLogUtil);
             V8Object haystackServiceObject = new V8Object(runtime);
 
-            registerAllMethods(haystackService, haystackServiceObject);
+            registerAllMethods(haystackService, haystackServiceObject, sequenceLogUtil);
             haystackServiceObject.add("fetchValueById", haystackService.fetchValueById(runtime));
             runtime.add("haystack", haystackServiceObject);
 
             PersistBlockService persistBlockService = PersistBlockService.getInstance(def._id);
             V8Object persistBlockServiceObject = new V8Object(runtime);
-            registerAllMethods(persistBlockService, persistBlockServiceObject);
+            registerAllMethods(persistBlockService, persistBlockServiceObject, sequenceLogUtil);
             runtime.add("persistBlock", persistBlockServiceObject);
 
             V8Object alertJsUtilJsObject = new V8Object(runtime);
-            registerAllMethods(alertJsUtil, alertJsUtilJsObject);
+            registerAllMethods(alertJsUtil, alertJsUtilJsObject, sequenceLogUtil);
             runtime.add("alerts", alertJsUtilJsObject);
 
             V8Object contextJsObject = new V8Object(runtime);
             CustomContext customContext = new CustomContext(sequenceLogUtil);
-            registerAllMethods(customContext, contextJsObject);
+            registerAllMethods(customContext, contextJsObject, sequenceLogUtil);
             runtime.add("ctx", contextJsObject);
 
             // Execute the JavaScript snippet
@@ -284,14 +288,63 @@ public class AlertDefinition
         }
     }
 
-    public void registerAllMethods(Object javaObject, V8Object v8Object){
+    public void registerAllMethods(Object javaObject, V8Object v8Object, SequencerLogsCallback sequenceLogsUtil){
         Class<?> clazz = javaObject.getClass();
-        for (Method method : clazz.getMethods()) {
-            String methodName = method.getName();
-            Class<?>[] parameterTypes = method.getParameterTypes();
 
-            // Register the method with V8, mapping method name and parameter types
-            v8Object.registerJavaMethod(javaObject, methodName, methodName, parameterTypes);
+        for (final Method method : clazz.getMethods()) {
+            final String methodName = method.getName();
+            final Class<?>[] parameterTypes = method.getParameterTypes();
+            final int paramCount = parameterTypes.length;
+
+            JavaCallback callback = (receiver, parameters) -> {
+                for (int i = 0; i < parameters.length(); i++) {
+                    if (parameters.getType(i) == V8Value.UNDEFINED) {
+                        sequenceLogsUtil.logError(
+                                LogLevel.ERROR,
+                                LogOperation.SEQUENCER_LOG,
+                                "Skipped call to '$methodName': parameter at index $i is undefined",
+                                "error"
+                        );
+                        CcuLog.d(TAG_CCU_ALERTS, "🚫 Skipped call to '" + methodName + "': parameter at index " + i + " is undefined");
+                        return null;
+                    }
+                }
+
+                List<Object> v8ValuesToRelease = new ArrayList<>();
+
+                try {
+                    Object[] args = new Object[paramCount];
+                    for (int i = 0; i < paramCount; i++) {
+                        Object v8Value = parameters.get(i);
+                        v8ValuesToRelease.add(v8Value);
+                        args[i] = v8Value;
+                    }
+
+                    return method.invoke(javaObject, args);
+
+                } catch (Exception e) {
+                    sequenceLogsUtil.logError(
+                            LogLevel.ERROR,
+                            LogOperation.SEQUENCER_LOG,
+                            "Error calling method '$methodName': ${e.message}",
+                            "error"
+                    );
+                    CcuLog.e(TAG_CCU_ALERTS, "❌ Error calling method '" + methodName + "': " + e.getMessage());
+                    return null;
+
+                } finally {
+                    CcuLog.i(TAG_CCU_ALERTS, "Releasing V8 values for method '" + methodName + "'");
+                    for (Object v8 : v8ValuesToRelease) {
+                        try {
+                            ((V8Value) v8).close();
+                        } catch (Exception ignore) {
+                            // Ignore release failures
+                        }
+                    }
+                }
+            };
+
+            v8Object.registerJavaMethod(callback, methodName);
         }
     }
 }

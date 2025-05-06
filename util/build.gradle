@@ -65,6 +65,13 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    sourceSets {
+        main.java.srcDirs += "$buildDir/generated-src"
+    }
+}
+
+configurations {
+    antlr
 }
 
 dependencies {
@@ -76,4 +83,28 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+
+    implementation "org.antlr:antlr4-runtime:4.13.1"
+    antlr "org.antlr:antlr4:4.13.1"
 }
+
+task generateGrammarSource(type: JavaExec) {
+    def outputDir = "$buildDir/generated-src"
+    inputs.files fileTree(dir: "src/main/antlr", include: "**/*.g4")
+    outputs.dir outputDir
+
+    doFirst {
+        file(outputDir).mkdirs()
+    }
+
+    classpath = configurations.antlr
+    main = 'org.antlr.v4.Tool'
+    args = [
+            "-visitor",
+            "-long-messages",
+            "-o", outputDir,
+            "src/main/antlr/CcuQuery.g4"
+    ]
+}
+
+preBuild.dependsOn generateGrammarSource

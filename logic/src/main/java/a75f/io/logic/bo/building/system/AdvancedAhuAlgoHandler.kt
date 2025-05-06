@@ -12,6 +12,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.oao.OAOProfile
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.ScheduleManager
+import a75f.io.logic.bo.building.system.SystemController.State
 import a75f.io.logic.bo.building.system.util.AhuSettings
 import a75f.io.logic.bo.building.system.util.AhuTuners
 
@@ -167,9 +168,16 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
                 false
             }
 
-            AdvancedAhuRelayAssociationType.LOAD_FAN -> getFanRelayState(stageIndex, associatedPoint,
-                    ahuSettings.systemEquip.fanLoopOutput.readHisVal(),
-                    ahuTuners.relayDeactivationHysteresis, fanStages, systemOccupied, isStage1AllowToActive)
+            AdvancedAhuRelayAssociationType.LOAD_FAN -> if (!systemOccupied && isLockoutActiveDuringUnoccupied(ahuSettings)) {
+                CcuLog.i(L.TAG_CCU_SYSTEM, "mechanical lockout is not enabled, hence fan stages are OFF")
+                false
+            } else {
+                getFanRelayState(
+                    stageIndex, associatedPoint, ahuSettings.systemEquip.fanLoopOutput.readHisVal(),
+                    ahuTuners.relayDeactivationHysteresis, fanStages, systemOccupied, isStage1AllowToActive
+                )
+            }
+
 
             AdvancedAhuRelayAssociationType.HUMIDIFIER -> {
                 if (systemOccupied && ahuSettings.systemEquip.conditioningMode.readPriorityVal() > 0) {
@@ -206,9 +214,14 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
                 false
             }
 
-            AdvancedAhuRelayAssociationType.FAN_PRESSURE -> getFanRelayState(
+            AdvancedAhuRelayAssociationType.FAN_PRESSURE -> if (!systemOccupied && isLockoutActiveDuringUnoccupied(ahuSettings)) {
+                CcuLog.i(L.TAG_CCU_SYSTEM, "mechanical lockout is not enabled, hence pressure fan is OFF")
+                false
+            } else {
+                getFanRelayState(
                     stageIndex, associatedPoint, ahuSettings.systemEquip.fanPressureLoopOutput.readHisVal(),
                     ahuTuners.relayDeactivationHysteresis, fanStages, systemOccupied, isStage1AllowToActive)
+            }
 
             AdvancedAhuRelayAssociationType.FAN_ENABLE -> getFanEnableRelayState(
                 ahuSettings.systemEquip.fanLoopOutput.readHisVal()
@@ -217,7 +230,6 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
             AdvancedAhuRelayAssociationType.AHU_FRESH_AIR_FAN_COMMAND -> getAhuFreshAirFanRunCommandRelayState(
                     systemOccupied, ahuSettings.systemEquip.co2LoopOutput.readHisVal())
             AdvancedAhuRelayAssociationType.EXHAUST_FAN -> getExhaustFan1CommandRelayState(ahuSettings, stageIndex)
-            else -> false
         }
         return Pair(associatedPoint, pointVal)
     }
@@ -233,7 +245,7 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
                 val analogOutAssociationType = AdvancedAhuAnalogOutAssociationType.values()[association.readDefaultVal().toInt()]
                     CcuLog.i(L.TAG_CCU_SYSTEM, "getAnalogOutValue- association: ${association.domainName}, analogOutAssociationType: $analogOutAssociationType")
                 Pair (
-                        getAnalogOutValueForLoopType(enable, analogOutAssociationType, ahuSettings),
+                        getAnalogOutValueForLoopType(enable, analogOutAssociationType, ahuSettings, isLockoutActiveDuringUnoccupied(ahuSettings)),
                         getLogicalOutput(analogOutAssociationType, enable, ahuSettings)
                 )
 
@@ -242,7 +254,7 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
                 val analogOutAssociationType = AdvancedAhuAnalogOutAssociationTypeConnect.values()[association.readDefaultVal().toInt()]
                 CcuLog.i(L.TAG_CCU_SYSTEM, "getAnalogOutValue- association: ${association.domainName}, analogOutAssociationType: $analogOutAssociationType")
                 Pair (
-                        getConnectAnalogOutValueForLoopType(enable, analogOutAssociationType, ahuSettings),
+                        getConnectAnalogOutValueForLoopType(enable, analogOutAssociationType, ahuSettings, isLockoutActiveDuringUnoccupied(ahuSettings)),
                         getConnectLogicalOutput(analogOutAssociationType, enable, ahuSettings)
                 )
             }
@@ -315,5 +327,10 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
             }
         }
         return false
+    }
+
+    fun isLockoutActiveDuringUnoccupied(ahuSettings: AhuSettings): Boolean {
+        return ((ahuSettings.isMechanicalCoolingAvailable && ahuSettings.systemState == State.COOLING) ||
+                (ahuSettings.isMechanicalHeatingAvailable && ahuSettings.systemState == State.HEATING))
     }
 }

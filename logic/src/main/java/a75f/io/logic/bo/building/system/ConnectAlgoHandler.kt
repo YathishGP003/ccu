@@ -63,21 +63,22 @@ fun isConnectLowFanStageEnabled(connectEquip: ConnectModuleEquip) : Boolean{
  fun getConnectAnalogOutValueForLoopType(
          enable: Point,
          controlType: AdvancedAhuAnalogOutAssociationTypeConnect,
-         ahuSettings: AhuSettings
+         ahuSettings: AhuSettings,
+         isLockoutActiveDuringUnoccupied: Boolean
  ) : Double {
     val loopOutput = getConnectLoopOutput (ahuSettings.connectEquip1, controlType, enable, ahuSettings)
     return when (enable.domainName) {
         DomainName.analog1OutputEnable -> {
-            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut1MinMax(controlType, ahuSettings.connectEquip1,ahuSettings), ahuSettings)
+            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut1MinMax(controlType, ahuSettings.connectEquip1,ahuSettings), ahuSettings, isLockoutActiveDuringUnoccupied)
         }
         DomainName.analog2OutputEnable -> {
-            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut2MinMax(controlType, ahuSettings.connectEquip1,ahuSettings), ahuSettings)
+            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut2MinMax(controlType, ahuSettings.connectEquip1,ahuSettings), ahuSettings, isLockoutActiveDuringUnoccupied)
         }
         DomainName.analog3OutputEnable -> {
-            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut3MinMax(controlType, ahuSettings.connectEquip1,ahuSettings), ahuSettings)
+            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut3MinMax(controlType, ahuSettings.connectEquip1,ahuSettings), ahuSettings, isLockoutActiveDuringUnoccupied)
         }
         DomainName.analog4OutputEnable -> {
-            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut4MinMax(controlType, ahuSettings.connectEquip1,ahuSettings), ahuSettings)
+            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut4MinMax(controlType, ahuSettings.connectEquip1,ahuSettings), ahuSettings, isLockoutActiveDuringUnoccupied)
         }
         else -> 0.0
     }
@@ -411,7 +412,8 @@ fun getConnectAnalogModulation(
         loopOutput: Double,
         controlType: AdvancedAhuAnalogOutAssociationTypeConnect,
         minMax: Pair<Double, Double>,
-        ahuSettings: AhuSettings
+        ahuSettings: AhuSettings,
+        isLockoutActiveDuringUnoccupied: Boolean
 ) : Double {
     var econFlag : Boolean = false
     val finalLoop = when (controlType) {
@@ -457,6 +459,13 @@ fun getConnectAnalogModulation(
         }
         AdvancedAhuAnalogOutAssociationTypeConnect.RETURN_DAMPER -> {
             ahuSettings.connectEquip1.returnDamperCmd.readHisVal()
+        }
+        AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_FAN -> {
+            if (isLockoutActiveDuringUnoccupied) {
+                0.0
+            } else {
+                loopOutput
+            }
         }
         else -> {
             loopOutput

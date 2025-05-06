@@ -16,7 +16,6 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
-import a75f.io.logic.tuners.TunerUtil;
 
 /**
  * Created by samjithsadasivan on 2/18/19.
@@ -125,8 +124,13 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
             signal = ANALOG_SCALE * signal;
         }
 
-        vfdSystemEquip.getFanSignal().writePointValue(signal);
-        signal = vfdSystemEquip.getFanSignal().readHisVal();
+        if(!isSystemOccupied() && isLockoutActiveDuringUnoccupied()){
+            signal = 0;
+            vfdSystemEquip.getFanSignal().writePointValue(signal);
+        } else{
+            vfdSystemEquip.getFanSignal().writePointValue(signal);
+            signal = vfdSystemEquip.getFanSignal().readHisVal();
+        }
         //ControlMote.setAnalogOut("analog2", signal);
         Domain.cmBoardDevice.getAnalog2Out().writePointValue(signal);
         signal = Domain.cmBoardDevice.getAnalog2Out().readHisVal();

@@ -308,9 +308,12 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             double analogMax = systemEquip.getAnalog2MaxFan().readPriorityVal();
 
             CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" systemFanLoopOp: "+systemFanLoopOp);
-    
-            signal = getModulatedAnalogVal(analogMin, analogMax, systemFanLoopOp);
-        
+
+            if (!isSystemOccupied() && isLockoutActiveDuringUnoccupied()) {
+                signal = (int) (analogMin * ANALOG_SCALE);
+            } else {
+                signal = getModulatedAnalogVal(analogMin, analogMax, systemFanLoopOp);
+            }
         }
         
         if (signal != systemEquip.getFanSignal().readHisVal()) {
@@ -397,7 +400,11 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         double signal = 0;
         SystemMode systemMode = SystemMode.values()[(int)systemEquip.getConditioningMode().readPriorityVal()];
         if (systemEquip.getRelay3OutputEnable().readPriorityVal() > 0 && systemMode != SystemMode.OFF) {
-            signal = (isSystemOccupied() || systemFanLoopOp > 0) ? 1 : 0;
+            if (!isSystemOccupied() && isLockoutActiveDuringUnoccupied()) {
+                signal = 0;
+            } else{
+                signal = (isSystemOccupied() || systemFanLoopOp > 0) ? 1 : 0;
+            }
         }
         if(signal != systemEquip.getOccupancySignal().readHisVal()) {
             systemEquip.getOccupancySignal().writeHisVal(signal);

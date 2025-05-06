@@ -3,20 +3,14 @@ package a75f.io.logic.bo.building.system.dab;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.equips.DabStagedVfdSystemEquip;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.BacnetIdKt;
-import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
-import a75f.io.logic.tuners.SystemTuners;
-import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
@@ -113,6 +107,9 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
             signal = ANALOG_SCALE * signal;
         }
 
+        if(!isSystemOccupied() && isLockoutActiveDuringUnoccupied()){
+            signal = 0;
+        }
         vfdSystemEquip.getFanSignal().writeHisVal(signal);
         Domain.cmBoardDevice.getAnalog2Out().writeHisVal(signal);
         CcuLog.d(L.TAG_CCU_SYSTEM, " analog2 Signal : "+signal);

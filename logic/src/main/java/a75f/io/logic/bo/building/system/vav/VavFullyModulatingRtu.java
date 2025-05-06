@@ -26,15 +26,12 @@ import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemConstants;
-import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
-import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
 
 /**
@@ -313,14 +310,15 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             analogMax = systemEquip.getAnalog2MaxStaticPressure().readPriorityVal();
     
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog2Min: "+analogMin+" analog2Max: "+analogMax+" systemFanLoopOp: "+systemFanLoopOp);
-    
-            if (analogMax > analogMin)
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemFanLoopOp/100)));
-            }
-            else
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
+
+            if (!isSystemOccupied() && isLockoutActiveDuringUnoccupied()) {
+                signal = (int) (analogMin * ANALOG_SCALE);
+            } else {
+                if (analogMax > analogMin) {
+                    signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemFanLoopOp / 100)));
+                } else {
+                    signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp / 100)));
+                }
             }
         } else {
             signal = 0;
@@ -367,7 +365,9 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         if (systemEquip.getRelay3OutputEnable().readPriorityVal() > 0)
         {
             signal = 0;
-            if(systemMode != SystemMode.OFF  && (isSystemOccupied() || isReheatActive(CCUHsApi.getInstance())))
+            if (!isSystemOccupied() && isLockoutActiveDuringUnoccupied()) {
+                signal = 0;
+            } else if(systemMode != SystemMode.OFF  && (isSystemOccupied() || isReheatActive(CCUHsApi.getInstance())))
                 signal = 1;
             // all the below cases are for what happens in Unoccupied Mode (run only if enabled by Epidemic Mode or an active heating/cooling loop)
             else if((VavSystemController.getInstance().getSystemState() == COOLING) && (systemCoolingLoopOp > 0 || systemFanLoopOp > 0) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))

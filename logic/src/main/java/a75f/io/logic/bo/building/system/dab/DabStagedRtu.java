@@ -39,7 +39,6 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.equips.DabStagedSystemEquip;
-import a75f.io.domain.equips.SystemEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -54,8 +53,6 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
-import a75f.io.logic.bo.haystack.device.ControlMote;
-import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.SystemProfileUtil;
 
 /**
@@ -445,7 +442,9 @@ public class DabStagedRtu extends DabSystemProfile
                     }
                     break;
                 case FAN_1:
-                    if ((systemMode != SystemMode.OFF && (isSystemOccupied())) ||
+                    if (!isSystemOccupied() && isLockoutActiveDuringUnoccupied()) {
+                        relayState = 0;
+                    } else if ((systemMode != SystemMode.OFF && (isSystemOccupied())) ||
                         ((L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) &&
                          (systemFanLoopOp > 0))) {
                         relayState = 1;
@@ -459,7 +458,9 @@ public class DabStagedRtu extends DabSystemProfile
                     }
                     break;
                 case FAN_2:
-                    if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) {
+                    if (!isSystemOccupied() && isLockoutActiveDuringUnoccupied()) {
+                        relayState = 0;
+                    } else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) {
                         relayState = (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0) ? 1 : 0;
                     } else {
                         relayState = systemFanLoopOp > 0 ? 1 : 0;
@@ -469,7 +470,9 @@ public class DabStagedRtu extends DabSystemProfile
                 case FAN_4:
                 case FAN_5:
                     stageThreshold = 100 * (stage.ordinal() - FAN_2.ordinal()) / (fanStages - 1);
-                    if (currState == 0) {
+                    if (!isSystemOccupied() && isLockoutActiveDuringUnoccupied()) {
+                        relayState = 0;
+                    } else if (currState == 0) {
                         relayState = systemFanLoopOp >= stageThreshold ? 1 : 0;
                     } else {
                         relayState = systemFanLoopOp > (stageThreshold - relayDeactHysteresis) ? 1 : 0;

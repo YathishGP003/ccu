@@ -16,6 +16,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.AdvAhuEconAlgoHandler
 import a75f.io.logic.bo.building.system.AdvancedAhuAlgoHandler
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
+import a75f.io.logic.bo.building.system.SystemController
 import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
@@ -80,6 +81,7 @@ data class AhuSettings(
     var isMechanicalHeatingAvailable: Boolean,
     var isEmergencyShutoffActive: Boolean,
     var isEconomizationAvailable: Boolean,
+    var systemState: SystemController.State
 )
 
 enum class DuctPressureSensorSource {

@@ -45,7 +45,6 @@ import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
@@ -542,22 +541,26 @@ public class VavStagedRtu extends VavSystemProfile
                     }
                     break;
                 case FAN_1:
-                    if ((systemMode != SystemMode.OFF && (isSystemOccupied() || isReheatActive(CCUHsApi.getInstance())))
+                    if (!isSystemOccupied() && isLockoutActiveDuringUnoccupied()) {
+                        relayState = 0;
+                    } else if ((systemMode != SystemMode.OFF && (isSystemOccupied() || isReheatActive(CCUHsApi.getInstance())))
                             || ((L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_VAV_STAGED_VFD_RTU)
-                                    && (systemFanLoopOp > 0))) {
+                            && (systemFanLoopOp > 0))) {
                         relayState = 1;
-                    }else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
-                        if(epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE)
+                    } else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
+                        if (epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE)
                             relayState = systemFanLoopOp > 0 ? 1 : 0;
                         else
-                            relayState =  (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0 || systemFanLoopOp > 0) ? 1 :0;
+                            relayState = (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0 || systemFanLoopOp > 0) ? 1 : 0;
                     } else {
                         relayState = 0;
                     }
                     break;
                 case FAN_2:
-                    if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
-                        relayState =  (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0 || systemFanLoopOp > 0) ? 1 :0;
+                    if (!isSystemOccupied() && isLockoutActiveDuringUnoccupied()) {
+                        relayState = 0;
+                    } else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
+                        relayState = (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0 || systemFanLoopOp > 0) ? 1 : 0;
                     } else {
                         relayState = systemFanLoopOp > 0 ? 1 : 0;
                     }
@@ -566,8 +569,10 @@ public class VavStagedRtu extends VavSystemProfile
                 case FAN_4:
                 case FAN_5:
                     stageThreshold = 100 * (stage.ordinal() - FAN_2.ordinal()) / (fanStages - 1);
-                    if (currState == 0) {
-                        relayState = systemFanLoopOp >= stageThreshold ? 1: 0;
+                    if (!isSystemOccupied() && isLockoutActiveDuringUnoccupied()) {
+                        relayState = 0;
+                    } else if (currState == 0) {
+                        relayState = systemFanLoopOp >= stageThreshold ? 1 : 0;
                     } else {
                         relayState = systemFanLoopOp > (stageThreshold - relayDeactHysteresis) ? 1 : 0;
                     }

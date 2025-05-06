@@ -2,6 +2,8 @@ package a75f.io.logic.bo.building.system;
 
 import static a75f.io.logic.L.ccu;
 import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.getConnectEquip;
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
 import android.content.Context;
 
@@ -1009,5 +1011,10 @@ public abstract class SystemProfile
             return true;
         }
         return false;
+    }
+
+    public boolean isLockoutActiveDuringUnoccupied() {
+        return ((isCoolingLockoutActive() && getSystemController().getSystemState() == COOLING) ||
+                (isHeatingLockoutActive() && getSystemController().getSystemState() == HEATING));
     }
 }

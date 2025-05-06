@@ -340,14 +340,15 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
             analogMax = getConfigVal("analog2 and fan and max");
     
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog2Min: "+analogMin+" analog2Max: "+analogMax+" systemFanLoopOp: "+systemFanLoopOp);
-    
-            if (analogMax > analogMin)
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemFanLoopOp/100)));
-            }
-            else
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
+
+            if (!isSystemOccupied() && isLockoutActiveDuringUnoccupied()) {
+                signal = (int) (analogMin * ANALOG_SCALE);
+            } else {
+                if (analogMax > analogMin) {
+                    signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemFanLoopOp / 100)));
+                } else {
+                    signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp / 100)));
+                }
             }
             
         } else {

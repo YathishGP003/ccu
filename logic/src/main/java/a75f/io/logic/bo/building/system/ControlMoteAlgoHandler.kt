@@ -35,23 +35,24 @@ fun getAnalogOutLogicalPhysicalMap(systemEquip: AdvancedHybridSystemEquip) : Map
 }
 
 fun getAnalogOutValueForLoopType(
-        enable: Point,
-        controlType: AdvancedAhuAnalogOutAssociationType,
-        ahuSettings: AhuSettings
+    enable: Point,
+    controlType: AdvancedAhuAnalogOutAssociationType,
+    ahuSettings: AhuSettings,
+    isLockoutActiveDuringUnoccupied: Boolean
 ) : Double {
     val loopOutput = getCmLoopOutput(ahuSettings.systemEquip, controlType, enable)
     return when (enable.domainName) {
         DomainName.analog1OutputEnable -> {
-            getAnalogModulation(loopOutput, controlType, getAnalogOut1MinMax(controlType, ahuSettings.systemEquip), ahuSettings)
+            getAnalogModulation(loopOutput, controlType, getAnalogOut1MinMax(controlType, ahuSettings.systemEquip), ahuSettings, isLockoutActiveDuringUnoccupied)
         }
         DomainName.analog2OutputEnable -> {
-            getAnalogModulation(loopOutput, controlType, getAnalogOut2MinMax(controlType, ahuSettings.systemEquip), ahuSettings)
+            getAnalogModulation(loopOutput, controlType, getAnalogOut2MinMax(controlType, ahuSettings.systemEquip), ahuSettings, isLockoutActiveDuringUnoccupied)
         }
         DomainName.analog3OutputEnable -> {
-            getAnalogModulation(loopOutput, controlType, getAnalogOut3MinMax(controlType, ahuSettings.systemEquip), ahuSettings)
+            getAnalogModulation(loopOutput, controlType, getAnalogOut3MinMax(controlType, ahuSettings.systemEquip), ahuSettings, isLockoutActiveDuringUnoccupied)
         }
         DomainName.analog4OutputEnable -> {
-            getAnalogModulation(loopOutput, controlType, getAnalogOut4MinMax(controlType, ahuSettings.systemEquip), ahuSettings)
+            getAnalogModulation(loopOutput, controlType, getAnalogOut4MinMax(controlType, ahuSettings.systemEquip), ahuSettings, isLockoutActiveDuringUnoccupied)
         }
         else -> 0.0
     }
@@ -392,7 +393,8 @@ fun getAnalogModulation(
         loopOutput: Double,
         controlType: AdvancedAhuAnalogOutAssociationType,
         minMax: Pair<Double, Double>,
-        ahuSettings: AhuSettings
+        ahuSettings: AhuSettings,
+        isLockoutActiveDuringUnoccupied: Boolean
 ) : Double {
     var econFlag : Boolean = false
     val finalLoop = when (controlType) {
@@ -428,6 +430,14 @@ fun getAnalogModulation(
         }
         AdvancedAhuAnalogOutAssociationType.LOAD_HEATING ,AdvancedAhuAnalogOutAssociationType.SAT_HEATING -> {
             if (ahuSettings.isMechanicalHeatingAvailable) {
+                0.0
+            } else {
+                loopOutput
+            }
+        }
+
+        AdvancedAhuAnalogOutAssociationType.LOAD_FAN ,AdvancedAhuAnalogOutAssociationType.PRESSURE_FAN -> {
+            if (isLockoutActiveDuringUnoccupied) {
                 0.0
             } else {
                 loopOutput

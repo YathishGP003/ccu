@@ -690,23 +690,19 @@ public class Pulse
 
 		HashMap<Object, Object> coolingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and cooling and sp and equipRef == \""+equip.getId()+"\"");
 		HashMap<Object, Object> heatinDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
-		if(temperatureMode == TemperatureMode.COOLING){
-			coolingDesiredTemp = dt;
-		}else if(temperatureMode == TemperatureMode.HEATING){
-			heatingDesiredTemp = dt;
-		}else {
-			coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
-					dt, coolingDeadband, DeviceUtil.getMaxCoolingUserLimit(zoneId),
-					DeviceUtil.getMinCoolingUserLimit(zoneId)
-			);
 
-			heatingDesiredTemp = DeviceUtil.getValidDesiredHeatingTemp(
-					dt, heatingDeadband, DeviceUtil.getMaxHeatingUserLimit(zoneId),
-					DeviceUtil.getMinHeatingUserLimit(zoneId)
-			);
-		}
+		coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
+				dt, coolingDeadband, DeviceUtil.getMaxCoolingUserLimit(zoneId),
+				DeviceUtil.getMinCoolingUserLimit(zoneId)
+		);
 
-        if (coolingDtPoint == null || coolingDtPoint.isEmpty()) {
+		heatingDesiredTemp = DeviceUtil.getValidDesiredHeatingTemp(
+				dt, heatingDeadband, DeviceUtil.getMaxHeatingUserLimit(zoneId),
+				DeviceUtil.getMinHeatingUserLimit(zoneId)
+		);
+
+
+		if (coolingDtPoint == null || coolingDtPoint.isEmpty()) {
             throw new IllegalArgumentException();
         }
         try{

@@ -19,4 +19,29 @@ public enum DamperType
             if(v.displayName.equalsIgnoreCase(value)) return v;
         throw new IllegalArgumentException();
     }
+
+    // only for bypass damper ,because for vav and bypass damper enum position is mismatching
+    public static String getBypassDamperDamperTypeString(int typeVal) {
+        switch (typeVal) {
+            case 1: {
+                return "2-10v";
+            }
+            case 2: {
+                return "10-0v";
+            }
+            case 3: {
+                return "10-2v";
+            }
+            case 4: {
+                return "Smart Damper";
+            }
+            case 5: {
+                return "0-5v";
+            }
+            case 0:
+            default: {
+                return "0-10v";
+            }
+        }
+    }
 }

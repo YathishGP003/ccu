@@ -115,7 +115,8 @@ public class PreferenceUtil {
     private static final String NON_DM_POINTS_REMOVE_STATUS = "nonDmPointsRemoveStatus";
     private static final String FLOOR_REF_UPDATE_STATUS = "floorRefUpdateStatus";
 
-
+    private static final String MIGRATE_UPDATE_DAB_AND_VAV_POINTS = "migrateUpdateVavAndDabPoints";
+    private static final String MIGRATE_UPDATE_BYPASS_DAMPER_POINTS = "migrateUpdateBypassDamperPoints";
     public static void setContext(Context c) {
         context= c;
     }
@@ -890,6 +891,20 @@ public class PreferenceUtil {
     }
     public static void setDuplicateBuildingAndSystemPointsAreRemoved() {
         setBooleanPreference(REMOVE_BUILDING_AND_SYSTEM_EQUIP_POINTS, true);
+    }
+    public static void setVavAndDabEquipAnalog1InPointsMigrated() {
+        setBooleanPreference(MIGRATE_UPDATE_DAB_AND_VAV_POINTS, true);
+    }
+    public static boolean isVavAndDabEquipAnalog1InPointsMigrationRequired() {
+        return getBooleanPreference(MIGRATE_UPDATE_DAB_AND_VAV_POINTS);
+
+    }
+    public static void setBypassDamperEquipPointsMigrated() {
+        setBooleanPreference(MIGRATE_UPDATE_BYPASS_DAMPER_POINTS, true);
+    }
+    public static boolean isBypassDamperEquipPointsMigrationRequired() {
+        return getBooleanPreference(MIGRATE_UPDATE_BYPASS_DAMPER_POINTS);
+
     }
     public static boolean isDuplicateDualDuctSensorPointsAreRemoved() {
         return getBooleanPreference(DUAL_DUCT_SENSOR_POINT_REMOVE);

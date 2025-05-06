@@ -41,6 +41,8 @@ public class DamperReheatTypeHandler {
             if (damperType.containsKey("domainName") && damperType.get("domainName").equals("damper1Type")) {
                 SmartNode.updateDomainPhysicalPointType(address, "analog1Out",
                         DamperType.values()[typeVal].displayName);
+                SmartNode.updateDomainPhysicalPointType(address, DomainName.analog1In,
+                        DamperType.values()[typeVal].displayName);
             } else if (damperType.containsKey("domainName") && damperType.get("domainName").equals("damper2Type")) {
                 double reheatType = hayStack.readDefaultVal("point and domainName == \"" + DomainName.reheatType + "\" and group == \"" + configPoint.getGroup() + "\"");
                 if (reheatType == 0 || (reheatType - 1) > ReheatType.Pulse.ordinal()) {
@@ -68,6 +70,8 @@ public class DamperReheatTypeHandler {
             }
         } else if (configPoint.getMarkers().contains(Tags.DAMPER) && configPoint.getMarkers().contains(Tags.VAV)) {
             SmartNode.updateDomainPhysicalPointType(address, "analog1Out",
+                    DamperType.values()[typeVal].displayName);
+            SmartNode.updateDomainPhysicalPointType(address, DomainName.analog1In,
                     DamperType.values()[typeVal].displayName);
         } else if (configPoint.getMarkers().contains(Tags.REHEAT) && configPoint.getMarkers().contains(Tags.VAV)) {
 
@@ -105,6 +109,11 @@ public class DamperReheatTypeHandler {
                     }
                 }
             }
+        } else if (configPoint.getMarkers().contains(Tags.DAMPER) && configPoint.getMarkers().contains(Tags.BYPASSDAMPER)) {
+            SmartNode.updateDomainPhysicalPointType(address, DomainName.analog1Out,
+                    DamperType.getBypassDamperDamperTypeString(typeVal));
+            SmartNode.updateDomainPhysicalPointType(address, DomainName.analog2In,
+                    DamperType.getBypassDamperDamperTypeString(typeVal));
         }
 
         String who = msgObject.get("who").getAsString();
@@ -132,4 +141,5 @@ public class DamperReheatTypeHandler {
         Equip vavEquip = HSUtil.getEquip(hayStack, configPoint.getEquipRef());
         return !vavEquip.getMarkers().contains(Tags.SERIES) && !vavEquip.getMarkers().contains(Tags.PARALLEL);
     }
+
 }

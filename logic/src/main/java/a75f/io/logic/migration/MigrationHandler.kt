@@ -67,6 +67,7 @@ import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfileConfiguration
 import a75f.io.logic.bo.building.caz.configs.TIConfiguration
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration
 import a75f.io.logic.bo.building.dab.getDevicePointDict
+import a75f.io.logic.bo.building.definitions.DamperType
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -90,6 +91,7 @@ import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.bo.haystack.device.DeviceUtil
+import a75f.io.logic.bo.haystack.device.SmartNode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
 import a75f.io.logic.migration.VavAndAcbProfileMigration.Companion.cleanACBDuplicatePoints
@@ -375,6 +377,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if (!PreferenceUtil.isBackFillValueUpdateRequired()) {
             updateBackFillDefaultValue()
             PreferenceUtil.setBackFillValueUpdateDone()
+        }
+        if (!PreferenceUtil.isBypassDamperEquipPointsMigrationRequired()) {
+            updateBypassDamperEquipPoints()
+            PreferenceUtil.setBypassDamperEquipPointsMigrated()
+        }
+        if (!PreferenceUtil.isVavAndDabEquipAnalog1InPointsMigrationRequired()) {
+            updateVavAndDabEquipPoints()
+            PreferenceUtil.setVavAndDabEquipAnalog1InPointsMigrated()
         }
         if (!PreferenceUtil.isConnectModuleOAOPointDeleted()) {
             deleteConnectModuleOaoPoint()
@@ -3205,7 +3215,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
         CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted HSS points ends")
     }
-   private fun updateBackFillDefaultValue() {
+    private fun updateBackFillDefaultValue() {
         val backFillPoint = hayStack.readEntity("domainName ==\"${DomainName.backfillDuration}\"")
         if (backFillPoint.isNotEmpty()) {
             val backFilDefaultValue = hayStack.readDefaultValById(backFillPoint["id"].toString())
@@ -3216,6 +3226,94 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     "Backfill duration default value updated to 24 hours"
                 )
             }
+        }
+    }
+    private fun updateBypassDamperEquipPoints() {
+
+        val bypassDamperEquip =
+            hayStack.readEntity("equip and domainName==\"${DomainName.smartnodeBypassDamper}\"")
+        bypassDamperEquip?.let {
+            val bypassDamperDevice =
+                hayStack.readEntity("device and domainName==\"${DomainName.smartnodeDevice}\" and equipRef==\"${bypassDamperEquip["id"].toString()}\"")
+            val physicalAnalog1outPoint =
+                hayStack.readHDict(" point and domainName==\"${DomainName.analog1Out}\" and deviceRef == \"${bypassDamperDevice["id"].toString()}\"")
+            val logicalPointDamperType =
+                hayStack.readEntity("point and domainName==\"${DomainName.damperType}\" and equipRef == \"${bypassDamperEquip["id"].toString()}\"")
+            val damperTypeValue =
+                hayStack.readDefaultValById(logicalPointDamperType["id"].toString())
+            CcuLog.i(
+                TAG_CCU_MIGRATION_UTIL,
+                "Damper Type Value: $damperTypeValue ,physicalAnalog1outPoint :  ${physicalAnalog1outPoint["analogType"]}"
+            )
+
+            if (physicalAnalog1outPoint["analogType"].toString() != DamperType.getBypassDamperDamperTypeString(
+                    damperTypeValue.toInt()
+                )
+            ) {
+
+                //analog 1 Out point
+                SmartNode.updateDomainPhysicalPointType(
+                    bypassDamperDevice["addr"].toString().toInt(),
+                    DomainName.analog1Out,
+                    DamperType.values()[damperTypeValue.toInt()].displayName
+                )
+                // analog 2 In point
+                SmartNode.updateDomainPhysicalPointType(
+                    bypassDamperDevice["addr"].toString().toInt(),
+                    DomainName.analog2In,
+                    DamperType.values()[damperTypeValue.toInt()].displayName
+                )
+
+                CcuLog.d(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "Updated analog1In point type for ${bypassDamperEquip["dis"].toString()}"
+                )
+            } else {
+                CcuLog.d(
+                    TAG_CCU_MIGRATION_UTIL,
+                    " Already Updated analog1In point type for ${bypassDamperEquip["dis"].toString()}"
+                )
+
+            }
+        }
+
+    }
+
+    private fun updateVavAndDabEquipPoints() {
+        val vavAndDabEquip = hayStack.readAllEntities("equip and zone  and (vav or dab) and domainName")
+
+        vavAndDabEquip.forEach { equip ->
+            CcuLog.i(TAG_CCU_MIGRATION_UTIL, "physical point analog type update for ${equip["dis"].toString()}")
+            val device =
+                hayStack.readEntity("device and (domainName==\"${DomainName.smartnodeDevice}\" or domainName==\"${DomainName.helionodeDevice}\") and  equipRef == \"${equip["id"].toString()}\"")
+            val physicalAnalog1inPoint =
+                hayStack.readHDict(" point and domainName==\"${DomainName.analog1In}\" and deviceRef == \"${device["id"].toString()}\"")
+            val logicalPointDamperType =
+                hayStack.readEntity("point and domainName==\"${DomainName.damperType}\" and equipRef == \"${equip["id"].toString()}\"")
+            val damperTypeValue =
+                hayStack.readDefaultValById(logicalPointDamperType["id"].toString())
+            CcuLog.i(
+                TAG_CCU_MIGRATION_UTIL,
+                "Damper Type Value: $damperTypeValue ,physicalAnalog1inPoint :  ${physicalAnalog1inPoint["analogType"].toString()}"
+            )
+            if (physicalAnalog1inPoint["analogType"].toString() != DamperType.values()[damperTypeValue.toInt()].displayName) {
+                SmartNode.updateDomainPhysicalPointType(
+                    device["addr"].toString().toInt(),
+                    DomainName.analog1In,
+                    DamperType.values()[damperTypeValue.toInt()].displayName
+                )
+                CcuLog.d(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "Updated analog1In point type for ${equip["dis"].toString()}"
+                )
+            } else {
+                CcuLog.d(
+                    TAG_CCU_MIGRATION_UTIL,
+                    " Already Updated analog1In point type for ${equip["dis"].toString()}"
+                )
+
+            }
+
         }
     }
 

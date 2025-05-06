@@ -445,12 +445,30 @@
                 android:id="@+id/activateSession"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.40"
+                android:layout_weight="0.37"
                 android:layout_marginEnd="-130dp"
-                app:srcCompat="@drawable/icon_arrowright"
+                app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
                 app:tint="?orange_75f"/>
-
         </LinearLayout>
+        <TextView
+            android:id="@+id/tvCloudStatus"
+            style="@style/title_normal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:layout_marginStart="8dp"
+            android:text="@string/title_cloud_status"
+            android:visibility="gone"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/cloudStatusRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="360dp"
+            android:layout_marginTop="18dp"
+            tools:itemCount="6"
+            android:nestedScrollingEnabled="false"
+            android:clipToPadding="false"
+            />
 
     </LinearLayout>
     </ScrollView>

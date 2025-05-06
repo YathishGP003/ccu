@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:gravity="center_vertical">
+
+    <View
+        android:id="@+id/statusIndicator"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:background="@drawable/circle_green"
+        android:layout_marginEnd="20dp" />
+
+    <TextView
+        android:id="@+id/serviceName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="6dp"
+        android:text="Alerts"
+        android:textSize="20sp"
+        android:fontFamily="@font/lato_regular"
+        android:textColor="#000000" />
+
+    <TextView
+        android:id="@+id/serviceVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="(0.0.259)"
+        android:textSize="20sp"
+        android:fontFamily="@font/lato_regular"
+        android:textColor= "@color/text_disabled" />
+</LinearLayout>

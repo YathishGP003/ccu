@@ -1062,6 +1062,7 @@
     <string name="title_save">SAVE</string>
     <string name="title_unregister">UNREGISTER</string>
     <string name="title_generate_passcode">Generate Passcode</string>
+    <string name="title_cloud_status">Cloud Status</string>
 
     <!--Temperature override Screen-->
     <string name="title_io_parameters">I/O \nParameters</string>

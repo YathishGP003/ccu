@@ -37,6 +37,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
@@ -67,6 +69,8 @@ import a75f.io.logic.cloud.OtpManager;
 import a75f.io.logic.cloud.ResponseCallback;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.ENGG.AppInstaller;
+import a75f.io.renatus.util.CloudStatus;
+import a75f.io.renatus.util.CloudStatusAdapter;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.remotecommand.bundle.BundleInstallListener;
@@ -153,6 +157,10 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
     TextView tvmessage;
     private boolean isPopupVisible = false;
     private PopupWindow popupWindow;
+    @BindView(R.id.cloudStatusRecyclerView)
+    RecyclerView cloudStatusRecyclerView;
+    @BindView(R.id.tvCloudStatus)
+    TextView tvCloudStatus;
 
     public AboutFragment() {
 
@@ -236,6 +244,7 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
         String ccuUID = CCUHsApi.getInstance().getCcuRef().toString();
         tvSerialNumber.setText(ccuUID == null ? CCUHsApi.getInstance().getCcuRef().toString() :ccuUID);
         setOTPOnAboutPage();
+        updateCloudStatusView();
         if(PreferenceUtil.getUpdateCCUStatusInAboutScreen()){
             getRecommendedCCUDataFromPreference();
             startDownloadingApk();
@@ -246,6 +255,23 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
         }
         imBundleHint.setOnClickListener(imBundleHintListener);
        return rootView;
+    }
+
+    private void updateCloudStatusView() {
+        CcuLog.d(L.TAG_CCU_CLOUD_STATUS, "Checking all services");
+        CloudStatus.INSTANCE.checkAllServices(serviceStatuses -> {
+            for (CloudStatus.ServiceStatus status : serviceStatuses) {
+                CcuLog.d(L.TAG_CCU_CLOUD_STATUS,  "Health check URL " + status.getHealthCheckUrl()
+                        + " " + status.getServiceName() + " is " + (status.isUp()? "UP" : "DOWN") + "\n"+
+                        "Version check URL "+ status.getInfoUrl()+ " Version: " + status.getServiceVersion());
+            }
+
+            tvCloudStatus.setVisibility(View.VISIBLE);
+            cloudStatusRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+            cloudStatusRecyclerView.setAdapter(new CloudStatusAdapter(serviceStatuses));
+            ProgressDialogUtils.hideProgressDialog();
+            return null;
+        });
     }
 
     private void getRecommendedCCUDataFromPreference() {
@@ -272,7 +298,7 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
 
     public void checkIsCCUHasRecommendedVersion(FragmentActivity activity) {
         ExecutorTask.executeAsync(
-                () -> ProgressDialogUtils.showProgressDialog(activity, "Checking for recommended version"),
+                () -> ProgressDialogUtils.showProgressDialog(activity, "Checking for recommended version and fetching cloud status"),
                 () -> {
                     // Retrieve the recommended upgrade bundle
                     BundleInstallManager bundleInstallManager = BundleInstallManager.Companion.getInstance();
@@ -302,8 +328,8 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
                     }
                 },
                 ()->{
-                    ProgressDialogUtils.hideProgressDialog();
-                    CcuLog.d(L.TAG_CCU_UI, "Checking for recommended version completed, Hiding progress dialog");
+                    // Progress bar will be hidden when CCU successfully fetched cloud status
+                    CcuLog.d(L.TAG_CCU_UI, "Checking for recommended version and cloud status completed, Hiding progress dialog");
                 }
         );
     }

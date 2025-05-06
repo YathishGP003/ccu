@@ -81,7 +81,32 @@ class RenatusServicesEnvironment(
             BuildConfig.CCU_VERSION_API_BASE,
             BuildConfig.CCU_FILE_SIZE_API_BASE,
             BuildConfig.SEQUENCER_API_BASE,
-            BuildConfig.VERSION_MANAGEMENT_API_BASE
+            BuildConfig.VERSION_MANAGEMENT_API_BASE,
+
+            BuildConfig.ALERTS_HEALTH,
+            BuildConfig.AUTHORIZATION,
+            BuildConfig.FILE_STORAGE_HEALTH,
+            BuildConfig.GATEWAY_API_HEALTH,
+            BuildConfig.HAYLOFT_HEALTH,
+            BuildConfig.HAYSTACK_HEALTH,
+            BuildConfig.MESSAGING_HEALTH,
+            BuildConfig.SITE_MANAGER_HEALTH,
+            BuildConfig.SEQUENCE_RUNNER_HEALTH,
+            BuildConfig.WEATHER,
+            BuildConfig.TUNERS_HEALTH,
+            BuildConfig.VERSION_MANAGEMENT_HEALTH,
+
+            BuildConfig.ALERTS_INFO,
+            BuildConfig.FILE_STORAGE_INFO,
+            BuildConfig.GATEWAY_API_INFO,
+            BuildConfig.HAYLOFT_INFO,
+            BuildConfig.HAYSTACK_INFO,
+            BuildConfig.MESSAGING_INFO,
+            BuildConfig.SITE_MANAGER_INFO,
+            BuildConfig.SEQUENCE_RUNNER_INFO,
+            BuildConfig.TUNERS_INFO,
+            BuildConfig.VERSION_MANAGEMENT_INFO
+
          )
       }
 
@@ -95,11 +120,33 @@ class RenatusServicesEnvironment(
             HTTP + baseIp + FILESTORAGE_EXT,
             HTTP + baseIp + MESSAGING_EXT,
             HTTP + baseIp + WEATHER_EXT,
-            HTTP + baseIp ,
+            HTTP + baseIp,
             HTTP + baseIp + CCU_VERSION_EXT,
             HTTP + baseIp +CCU_VERSION_EXT,
             HTTP + baseIp +CCU_VERSION_EXT,
-            HTTP + baseIp                    // version-management
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
+            HTTP + baseIp,
          )
       }
 
@@ -163,7 +210,30 @@ data class RenatusServicesUrls(
    val recommendedCCUVersion : String,
    val getCCUFileSize : String,
    val sequencerUrl: String,
-   val versionManagementUrl: String
+   val versionManagementUrl: String,
+
+   val alertsHealth: String,
+   val authorization: String,
+   val fileStorageHealth: String,
+   val gatewayApiHealth: String,
+   val hayloftHealth: String,
+   val haystackHealth: String,
+   val messagingHealth: String,
+   val siteManagerHealth: String,
+   val sequenceRunnerHealth: String,
+   val weather: String,
+   val tunersHealth: String,
+   val versionManagementHealth: String,
+   val alertsInfo: String,
+   val fileStorageInfo: String,
+   val gatewayApiInfo: String,
+   val hayloftInfo: String,
+   val haystackInfo: String,
+   val messagingInfo: String,
+   val siteManagerInfo: String,
+   val sequenceRunnerInfo: String,
+   val tunersInfo: String,
+   val versionManagementInfo: String,
 ) {
    // useful for local environment
    val base: String

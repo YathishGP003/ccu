@@ -97,6 +97,7 @@ import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.util.PreferenceUtil;
+import a75f.io.logic.util.TimeZoneUtil;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -750,7 +751,7 @@ public class CreateNewSite extends Fragment {
 
     private void populateAndUpdateTimeZone() {
 
-        timeZoneAdapter = getAdapterValue(getSupportedTimeZones());
+        timeZoneAdapter = getAdapterValue(TimeZoneUtil.getSupportedTimeZones());
         timeZoneAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         mTimeZoneSelector.setAdapter(timeZoneAdapter);
         mTimeZoneSelector.setSelection(timeZoneAdapter.getPosition(TimeZone.getDefault().getID()));
@@ -759,21 +760,7 @@ public class CreateNewSite extends Fragment {
 
     }
 
-    private ArrayList<String> getSupportedTimeZones() {
-        String[] tzIds = TimeZone.getAvailableIDs();
-        ArrayList<String> supportedTimeZones = new ArrayList<>();
-        HashSet<String> regions = CCUHsApi.getInstance().getSupportedRegions();
 
-        for (String tz : tzIds) {
-            String[] parts = tz.split("/");
-            String region = parts[0];
-            if (regions.contains(region)) {
-                supportedTimeZones.add(tz);
-            }
-        }
-
-        return supportedTimeZones;
-    }
 
     private class EditTextWatcher implements TextWatcher {
 

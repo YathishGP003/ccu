@@ -35,7 +35,7 @@ object Domain {
     const val LOG_TAG_TUNER = "CCU_DOMAIN_TUNER"
 
     val domainScope = CoroutineScope(Dispatchers.IO + Job())
-    val hayStack: CCUHsApi = CCUHsApi.getInstance()
+    var hayStack: CCUHsApi = CCUHsApi.getInstance()
     var site: Site? = null
     lateinit var buildingEquip : BuildingEquip
     lateinit var systemEquip : DomainEquip

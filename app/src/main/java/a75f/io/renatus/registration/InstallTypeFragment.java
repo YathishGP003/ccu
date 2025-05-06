@@ -1,5 +1,7 @@
 package a75f.io.renatus.registration;
 
+import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +16,9 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.preconfig.PreconfigurationManager;
+import a75f.io.logic.preconfig.PreconfigurationState;
+import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.ENGG.LocalConnectionViewKt;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
@@ -60,7 +65,9 @@ public class InstallTypeFragment extends Fragment {
         prefs = new Prefs(getActivity());
 
         //TODO: enable when implement
-        layoutPreconfigCCU.setEnabled(false);
+        layoutPreconfigCCU.setEnabled(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD) || BuildConfig.BUILD_TYPE.equalsIgnoreCase("qa"));
+        layoutPreconfigCCU.setVisibility((BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD) ||BuildConfig.BUILD_TYPE.equalsIgnoreCase("qa"))
+                                                        ? View.VISIBLE : View.GONE);
         layoutReplaceCCU.setEnabled(true);
         layoutWithoutCloud.setEnabled(false);
 
@@ -84,6 +91,8 @@ public class InstallTypeFragment extends Fragment {
             prefs.setString("INSTALL_TYPE","PRECONFIGCCU");
             //mCallback.GoTo(2,7);
             ((FreshRegistration)getActivity()).selectItem(2);
+            PreconfigurationManager.INSTANCE.init(getContext());
+            PreconfigurationManager.INSTANCE.transitionTo(PreconfigurationState.Started.INSTANCE);
         });
 
         layoutReplaceCCU.setOnClickListener(v -> {

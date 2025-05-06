@@ -23,7 +23,7 @@ class CCUDeviceBuilder {
         isUpdate: Boolean
     ): String {
         val hsApi = Domain.hayStack
-        CcuLog.i(Domain.LOG_TAG, "AHU Ref "+if(isUpdate){" updated "}else{"Added "}+"to CCU :  $ahuRef")
+//        CcuLog.i(Domain.LOG_TAG, "AHU Ref "+if(isUpdate){" updated "}else{"Added "}+"to CCU :  $ahuRef")
 
         val hDictBuilder = HDictBuilder()
         val localId = if(isUpdate) { Domain.ccuDevice.deviceRef } else { UUID.randomUUID().toString() }

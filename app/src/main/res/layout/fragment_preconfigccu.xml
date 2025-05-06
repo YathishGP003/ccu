@@ -2,7 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <RelativeLayout
         android:id="@+id/layoutCreateNewSite"
@@ -29,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="260dp"
+            android:layout_marginRight="240dp"
             android:fontFamily="@font/lato_bold"
             android:text="@string/title_preconfig"
             android:textAllCaps="true"
@@ -38,13 +39,16 @@
             android:textStyle="bold" />
     </RelativeLayout>
 
-    <RelativeLayout
+
+    <ScrollView
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/layoutCreateNewSite">
 
         <RelativeLayout
             android:id="@+id/rlFields"
@@ -52,64 +56,73 @@
             android:layout_height="wrap_content"
             android:scrollbars="vertical">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputConfigCode"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/passcodeHeader"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:errorTextAppearance="?error_appearance">
+                android:layout_gravity="center"
+                android:text="@string/input_configcode"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="100dp"
+                tools:layout_editor_absoluteX="8dp" />
 
-                <EditText
-                    android:id="@+id/editConfigCode"
-                    android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_marginTop="@dimen/margin_right_otp"
+                android:id="@+id/ll_pinView"
+                android:layout_below="@+id/passcodeHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="100dp"
+                android:layout_gravity="right">
+                <com.chaos.view.PinView
+                    android:id="@+id/pinView"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/lato_regular"
-                    android:gravity="left|center_vertical"
-                    android:hint="@string/hint_configcode"
-                    android:singleLine="true"
-                    android:inputType="numberPassword"
-                    android:maxLength="6"
-                    android:textColor="@color/input_textcolor"
-                    android:textSize="19.5dp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    app:itemCount="6"
+                    android:inputType="number"
+                    android:layout_gravity="center"
+                    android:focusable="true"
+                    android:imeOptions="actionDone"
+                    android:focusableInTouchMode="true"
+                    app:viewType="line"
+                    app:lineWidth="1dp"
+                    app:lineColor="@color/black"
+                    app:itemSpacing="32dp"
+                    app:itemWidth="60dp"
+                    android:textSize="32sp"
+                    android:clickable="true"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginBottom="32dp"/>
+            </LinearLayout>
 
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputConfirmCode"
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/buttonNext"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/textInputConfigCode"
-                android:layout_marginTop="12dp"
-                app:errorTextAppearance="?error_appearance">
+                android:layout_below="@+id/ll_pinView"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="32dp"
+                android:background="@null"
+                android:drawableRight="@drawable/ic_baseline_keyboard_arrow_right_24"
+                android:drawablePadding="5dp"
+                android:fontFamily="@font/lato_bold"
+                android:text="@string/button_next"
+                android:textColor="?orange_75f"
+                android:textSize="32dp" />
 
-                <EditText
-                    android:id="@+id/editConfirmCode"
-                    android:layout_width="match_parent"
-                    android:layout_height="42dp"
-                    android:fontFamily="@font/lato_regular"
-                    android:gravity="left|center_vertical"
-                    android:singleLine="true"
-                    android:inputType="numberPassword"
-                    android:maxLength="6"
-                    android:hint="@string/hint_confirmcode"
-                    android:textColor="@color/input_textcolor"
-                    android:textSize="19.5dp" />
-            </com.google.android.material.textfield.TextInputLayout>
         </RelativeLayout>
-
-
-        <Button
-            android:id="@+id/buttonNext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginBottom="60dp"
-            android:background="@null"
-            android:drawableRight="@drawable/ic_baseline_keyboard_arrow_right_24"
-            android:drawablePadding="5dp"
-            android:fontFamily="@font/lato_bold"
-            android:text="@string/button_next"
-            android:textColor="?orange_75f"
-            android:textSize="24dp" />
-    </RelativeLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

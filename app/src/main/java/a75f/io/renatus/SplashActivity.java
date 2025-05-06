@@ -27,6 +27,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.SystemProperties;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.logtasks.UploadLogs;
+import a75f.io.logic.preconfig.PreconfigurationManager;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.anrwatchdog.ANRHandler;
@@ -75,6 +76,14 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
         if (PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()) {
             CcuLog.i(TAG, "Resume Update CCU");
             resumeUpdateCCU();
+        } else if (prefs.getString("INSTALL_TYPE").equals("PRECONFIGCCU") &&
+                !prefs.getString("preconfiguration_state").equalsIgnoreCase("Completed")) {
+            CcuLog.i(TAG, "Preconfiguration in progress");
+            PreconfigurationManager.INSTANCE.init(getApplicationContext());
+            Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
+            i.putExtra("viewpager_position", 7);
+            startActivity(i);
+            finish();
         } else if (site.isEmpty() || RestoreCCU.isReplaceCCUUnderProcess()) {
             CcuLog.i(TAG,"No Site Synced navigate to Register");
             Intent i = new Intent(SplashActivity.this, FreshRegistration.class);

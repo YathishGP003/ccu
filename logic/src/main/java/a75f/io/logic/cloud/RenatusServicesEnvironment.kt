@@ -82,7 +82,7 @@ class RenatusServicesEnvironment(
             BuildConfig.CCU_FILE_SIZE_API_BASE,
             BuildConfig.SEQUENCER_API_BASE,
             BuildConfig.VERSION_MANAGEMENT_API_BASE,
-
+            BuildConfig.PRECONFIG_API_BASE,
             BuildConfig.ALERTS_HEALTH,
             BuildConfig.AUTHORIZATION,
             BuildConfig.FILE_STORAGE_HEALTH,
@@ -147,6 +147,7 @@ class RenatusServicesEnvironment(
             HTTP + baseIp,
             HTTP + baseIp,
             HTTP + baseIp,
+            HTTP + baseIp
          )
       }
 
@@ -211,7 +212,7 @@ data class RenatusServicesUrls(
    val getCCUFileSize : String,
    val sequencerUrl: String,
    val versionManagementUrl: String,
-
+   val preconfigurationUrl: String,
    val alertsHealth: String,
    val authorization: String,
    val fileStorageHealth: String,

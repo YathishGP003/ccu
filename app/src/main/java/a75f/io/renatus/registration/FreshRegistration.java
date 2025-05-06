@@ -38,9 +38,13 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import org.projecthaystack.client.HClient;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.Site;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
@@ -49,6 +53,8 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.ccu.restore.RestoreCCU;
+import a75f.io.logic.preconfig.PreconfigurationManager;
+import a75f.io.logic.preconfig.PreconfigurationState;
 import a75f.io.logic.util.onLoadingCompleteListener;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.DABHybridAhuProfile;
@@ -173,6 +179,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 selectItem(1);
             }
             if (currentFragment instanceof PreConfigCCU) {
+                PreconfigurationManager.INSTANCE.transitionTo(PreconfigurationState.NotConfigured.INSTANCE);
                 selectItem(1);
             }
             if (currentFragment instanceof ReplaceCCU) {
@@ -659,7 +666,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
-            paramsPager.topMargin = 305;
+            paramsPager.topMargin = 150;
             paramsPager.leftMargin = 420;
             paramsPager.bottomMargin = 24;
             paramsPager.rightMargin = 92;
@@ -1149,7 +1156,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             L.saveCCUStateAsync();
         }
         if (position == 21) {
-
+            CcuLog.i("CCU_PRECONFIGURATION", "CongratsFragment");
             fragment = new CongratsFragment();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
@@ -1280,6 +1287,13 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             if (pingCloudServer()){
 
                 registerCcuInBackground();
+
+                ExecutorTask.executeBackground(() -> {
+                    Site siteObject = CCUHsApi.getInstance().getSite();
+                    CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
+                            HayStackConstants.USER, HayStackConstants.PASS), siteObject);
+                });
+
 
                 Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -316,15 +316,15 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
     }
 
     fun addBacnetTags(
-        context: Context,
+        context: Context?,
         floorRef: String,
         roomRef: String
     ) {
-       updateZone(context, roomRef, floorRef)
+       updateZone(roomRef, floorRef)
        CCUHsApi.getInstance().syncEntityTree()
     }
 
-    private fun updateZone(context: Context, roomRef: String, floorRef: String){
+    private fun updateZone(roomRef: String, floorRef: String){
         try {
             val bacnetId = generateBacnetIdForRoom(roomRef)
             val zone = HSUtil.getZone(roomRef, floorRef)

@@ -574,8 +574,8 @@
     <string name="installaddccu">Add CCU to Existing Site</string>
     <string name="descaddccu">Use this option to add a CCU to an existing building. This requires access to the site\'s ID.</string>
 
-    <string name="installpreconfig">Pre-Configured CCU</string>
-    <string name="descpreconfigccu">Use this option if you have a 6 digit pre-configuration code provided by the 75F support team.</string>
+    <string name="installpreconfig">Create Site from Preconfigured Details</string>
+    <string name="descpreconfigccu">Use this option if preconfigured site exists. A Site Setup code is required</string>
 
     <string name="installreplaceccu">Replace Existing CCU</string>
     <string name="descreplaceccu">Use this option if the CCU is damaged and needs to be replaced.</string>
@@ -648,9 +648,9 @@
     <string name="ccu_name">CCU Name</string>
 
     <!--Preconfigured CCU-->
-    <string name="title_preconfig">PRECONFIGURED CCU</string>
+    <string name="title_preconfig">Create Preconfigured Site</string>
     <string name="hint_configcode">Enter 6 Digit Pre-configuration Code</string>
-    <string name="input_configcode">Pre-configuration Code</string>
+    <string name="input_configcode">Please enter Site Activation Code (Generated on Mobile App)</string>
     <string name="hint_confirmcode">Confirm Code</string>
 
     <!--System Profile-->

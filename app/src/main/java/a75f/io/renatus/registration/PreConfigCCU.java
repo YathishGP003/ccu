@@ -1,42 +1,71 @@
 package a75f.io.renatus.registration;
 
+import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
+
+import static a75f.io.logic.bo.util.CCUUtils.isRecommendedVersionCheckIsNotFalse;
+import static a75f.io.renatus.UtilityApplication.context;
+
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
-import com.google.android.material.textfield.TextInputLayout;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
+import androidx.fragment.app.FragmentTransaction;
+
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.style.StyleSpan;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.chaos.view.PinView;
+
+import org.json.JSONException;
+
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.mesh.LSerial;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
+import a75f.io.logic.preconfig.InvalidPreconfigurationDataException;
+import a75f.io.logic.preconfig.InvalidStagesException;
+import a75f.io.logic.preconfig.PreconfigurationData;
+import a75f.io.logic.preconfig.PreconfigurationHandler;
+import a75f.io.logic.preconfig.PreconfigurationManager;
+import a75f.io.logic.preconfig.PreconfigurationRepository;
+import a75f.io.logic.preconfig.PreconfigurationState;
+import a75f.io.logic.preconfig.UnsupportedTimeZoneException;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.util.ExecutorTask;
 
 public class PreConfigCCU extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private ImageView   imageGoback;
+    private Button              mNext;
+    private Context             mContext;
 
-    ImageView            imageGoback;
-
-    TextInputLayout mTextInputPreConfigcode;
-    EditText             mPreConfigCode;
-
-    TextInputLayout mTextInputConfirmCode;
-    EditText             mConfirmCode;
-
-    Button              mNext;
-    Context             mContext;
-
+    PinView passCodeView;
+    private Handler mainHandler;
     private static final String TAG = PreConfigCCU.class.getSimpleName();
 
     public PreConfigCCU() {
@@ -54,140 +83,246 @@ public class PreConfigCCU extends Fragment {
     // TODO: Rename and change types and number of parameters
     public static PreConfigCCU newInstance(String param1, String param2) {
         PreConfigCCU fragment = new PreConfigCCU();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        //((FreshRegistration)getActivity()).showIcons(false);
         View rootView = inflater.inflate(R.layout.fragment_preconfigccu, container, false);
 
         mContext = getContext().getApplicationContext();
 
         imageGoback = rootView.findViewById(R.id.imageGoback);
 
-        mTextInputPreConfigcode = rootView.findViewById(R.id.textInputConfigCode);
-
-        mPreConfigCode = rootView.findViewById(R.id.editConfigCode);
-
-        mTextInputConfirmCode = rootView.findViewById(R.id.textInputConfirmCode);
-        mConfirmCode = rootView.findViewById(R.id.editConfirmCode);
+        passCodeView = rootView.findViewById(R.id.pinView);
 
         mNext = rootView.findViewById(R.id.buttonNext);
-
-        mTextInputPreConfigcode.setHintEnabled(false);
-        mTextInputConfirmCode.setHintEnabled(false);
-
-        mTextInputPreConfigcode.setErrorEnabled(true);
-        mTextInputConfirmCode.setErrorEnabled(true);
-
-        mTextInputPreConfigcode.setError("");
-        mTextInputConfirmCode.setError("");
-
-
-
-        mPreConfigCode.addTextChangedListener(new EditTextWatcher(mPreConfigCode));
-        mConfirmCode.addTextChangedListener(new EditTextWatcher(mConfirmCode));
-
-
 
         imageGoback.setOnClickListener(v -> {
             // TODO Auto-generated method stub
             ((FreshRegistration)getActivity()).selectItem(1);
         });
 
-
         mNext.setOnClickListener(v -> {
-            // TODO Auto-generated method stub
-            int[] mandotaryIds = new int []
-                    {
-                            R.id.editConfigCode,
-                            R.id.editConfirmCode
-                    };
-            if(!validateEditText(mandotaryIds))
-            {
-                goTonext();
+            String passCode = passCodeView.getText().toString();
+            if (passCode.length() == 6) {
+                validatePasscode(passCode);
+            } else {
+                SnackbarUtil.showInfoMessage(rootView, "Please enter a valid 6 digit passcode");
             }
         });
+
+        mainHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(@NonNull android.os.Message msg) {
+                SnackbarUtil.showInfoMessage(rootView, (String) msg.obj);
+            }
+        };
 
         return rootView;
     }
 
-
-
-    private class EditTextWatcher implements TextWatcher {
-
-        private View view;
-        private EditTextWatcher(View view) {
-            this.view = view;
-        }
-
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-
-        public void afterTextChanged(Editable editable) {
-            String text = editable.toString();
-            switch(view.getId()){
-                case R.id.editConfigCode:
-                    if(mPreConfigCode.getText().length() > 0) {
-                        mTextInputPreConfigcode.setErrorEnabled(true);
-                        mTextInputPreConfigcode.setError(getString(R.string.input_configcode));
-                        mPreConfigCode.setError(null);
-                    }else {
-                        mTextInputPreConfigcode.setErrorEnabled(true);
-                        mTextInputPreConfigcode.setError("");
-                        mPreConfigCode.setError(null);
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (PreconfigurationManager.INSTANCE.getState() instanceof PreconfigurationState.Started) {
+            if (isRecommendedVersionCheckIsNotFalse()) {
+                CcuLog.d(L.TAG_PRECONFIGURATION, "Preconfiguration : recommended version check");
+                if (PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()) {
+                    FragmentTransaction ft = getParentFragmentManager().beginTransaction();
+                    Fragment fragmentByTag = getParentFragmentManager().findFragmentByTag("popup");
+                    if (fragmentByTag != null) {
+                        ft.remove(fragmentByTag);
                     }
-                case R.id.editConfirmCode:
-                    if(mConfirmCode.getText().length() > 0) {
-                        mTextInputConfirmCode.setErrorEnabled(true);
-                        mTextInputConfirmCode.setError(getString(R.string.hint_confirmcode));
-                        mConfirmCode.setError(null);
-                    }else {
-                        mTextInputConfirmCode.setErrorEnabled(true);
-                        mTextInputConfirmCode.setError("");
-                        mConfirmCode.setError(null);
+                    try {
+                        UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment().resumeDownloadProcess(
+                                PreferenceUtil.getUpdateCCUStatus(), PreferenceUtil.isCCUInstalling(), false);
+                        updateCCUFragment.show(ft, "popup");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
+                } else {
+                    LayoutInflater inflater = LayoutInflater.from(getActivity());
+                    View toastLayout = inflater.inflate(R.layout.custom_layout_ccu_successful_update, null);
+                    UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment();
+                    updateCCUFragment.checkIsCCUHasRecommendedVersion(requireActivity(), getParentFragmentManager(), toastLayout, getContext(), requireActivity());
+                }
             }
+        } else if (PreconfigurationManager.INSTANCE.getState() instanceof PreconfigurationState.Downloaded) {
+            CcuLog.d(L.TAG_PRECONFIGURATION, "Preconfiguration Resume : data already downloaded");
+            PreconfigurationData preconfigurationData = PreconfigurationRepository.INSTANCE.getConfigurationData(mContext);
+            confirmSiteDetails(preconfigurationData, getActivity());
+        } else if (PreconfigurationManager.INSTANCE.getState() instanceof PreconfigurationState.Progress) {
+            CcuLog.d(L.TAG_PRECONFIGURATION, "Preconfiguration Resume : was already in progress");
+            PreconfigurationData preconfigurationData = PreconfigurationRepository.INSTANCE.getConfigurationData(mContext);
+            doPreconfiguration(preconfigurationData, true );
+        } else if (PreconfigurationManager.INSTANCE.getState() instanceof PreconfigurationState.Failed) {
+            CcuLog.d(L.TAG_PRECONFIGURATION, "Preconfiguration Resume : failed");
+            SnackbarUtil.showInfoMessage(getView(), "Preconfiguration Failed");
         }
     }
 
+    private void validatePasscode(String passcode) {
+        ExecutorTask.executeAsync(
+                () -> ProgressDialogUtils.showProgressDialog(getActivity(),""),
+                () -> {
+                    String data = PreconfigurationRepository.INSTANCE.fetchPreconfigurationData(passcode);
+                    CcuLog.d(L.TAG_PRECONFIGURATION, "Preconfiguration data fetched: " + data);
+                    if (data != null) {
+                        PreconfigurationRepository.INSTANCE.persistPreconfigurationData(data.toString(), mContext);
+                        PreconfigurationManager.INSTANCE.transitionTo(PreconfigurationState.Downloaded.INSTANCE);
+                    } else {
+                        PreconfigurationManager.INSTANCE.transitionTo(PreconfigurationState.Failed.INSTANCE);
+                    }
 
-    public boolean validateEditText(int[] ids)
-    {
-        boolean isEmpty = false;
+                },
+                () -> {
+                    ProgressDialogUtils.hideProgressDialog();
+                    if (PreconfigurationManager.INSTANCE.getState() instanceof PreconfigurationState.Downloaded) {
+                        CcuLog.d(L.TAG_PRECONFIGURATION, "Preconfiguration data fetch succeeded");
+                        PreconfigurationData preconfigurationData = PreconfigurationRepository.INSTANCE.getConfigurationData(mContext);
+                        if (preconfigurationData == null) {
+                            PreconfigurationManager.INSTANCE.transitionTo(PreconfigurationState.Failed.INSTANCE);
+                            postMessage("Failed to fetch preconfiguration data!!");
+                            return;
+                        }
+                        confirmSiteDetails(preconfigurationData, getActivity());
+                    } else {
+                        CcuLog.d(L.TAG_PRECONFIGURATION, "Preconfiguration data fetch failed");
+                        postMessage("Passcode validation Failed !!");
+                    }
+                });
 
-        for(int id: ids)
-        {
-            EditText et = getView().findViewById(id);
+    }
 
-            if(TextUtils.isEmpty(et.getText().toString()))
-            {
-                et.setError("Must enter Value");
-                isEmpty = true;
-            }
+    @SuppressLint("SetTextI18n")
+    private void confirmSiteDetails(PreconfigurationData data, Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        SpannableStringBuilder spannable = new SpannableStringBuilder();
+
+        String siteName = data.getSiteName();
+        String siteAddress = data.getSiteAddress().getFormattedAddress();
+
+        SpannableString boldName = new SpannableString(siteName + "\n");
+        boldName.setSpan(new StyleSpan(Typeface.BOLD), 0, boldName.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        spannable.append(boldName);
+        spannable.append(siteAddress);
+
+        TextView messageView = new TextView(context);
+        messageView.setText(spannable);
+        messageView.setPadding(15, 25, 15, 25);
+        messageView.setTextSize(18);
+        messageView.setBackgroundColor(getThemeColor(context));
+        messageView.setGravity(Gravity.START);
+
+        LinearLayout container = new LinearLayout(context);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.setPadding(40, 20, 40, 20);
+        container.setGravity(Gravity.CENTER);
+
+        container.addView(messageView);
+
+        builder.setTitle("Site Details")
+                .setView(container)
+                .setCancelable(true)
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .setPositiveButton("Next", (dialog, which) -> {
+                    dialog.dismiss();
+                    PreconfigurationManager.INSTANCE.transitionTo(PreconfigurationState.Progress.INSTANCE);
+                    CcuLog.d(L.TAG_PRECONFIGURATION, "Preconfiguration in progress");
+                    doPreconfiguration(data, false);
+                });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        Button cancel = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        Button next   = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        cancel.setTextColor(getPrimaryColor(context));
+        next.setTextColor(getPrimaryColor(context));
+
+    }
+
+    private int getThemeColor(Context context) {
+        if (CCUUiUtil.isCarrierThemeEnabled(context)) {
+            return ContextCompat.getColor(context, R.color.carrier_75f_secondary);
+        } else if (CCUUiUtil.isAiroverseThemeEnabled(context)) {
+            return ContextCompat.getColor(context, R.color.airoverse_primary);
+        } else {
+            return ContextCompat.getColor(context, R.color.renatus_75f_secondary);
         }
+    }
+    private int getPrimaryColor(Context context) {
+        if (CCUUiUtil.isCarrierThemeEnabled(context)) {
+            return ContextCompat.getColor(context, R.color.carrier_75f);
+        } else if (CCUUiUtil.isAiroverseThemeEnabled(context)) {
+            return ContextCompat.getColor(context, R.color.airoverse_primary);
+        } else {
+            return ContextCompat.getColor(context, R.color.renatus_75f_primary);
+        }
+    }
+    private void doPreconfiguration(PreconfigurationData data, Boolean isRetry) {
+        ExecutorTask.executeAsync(
+                () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Setting up the Site. This might take some time..."),
+                () -> {
+                    try {
+                        PreconfigurationHandler preconfigurationHandler = new PreconfigurationHandler();
+                        preconfigurationHandler.validatePreconfigurationData(data);
+                        if (isRetry) {
+                            preconfigurationHandler.cleanUpPreconfigurationData(CCUHsApi.getInstance());
+                        }
+                        String siteId = preconfigurationHandler.handlePreconfiguration(data, CCUHsApi.getInstance());
+                        Prefs prefs = new Prefs(getContext());
+                        prefs.setString("SITE_ID", siteId);
+                        prefs.setString("sitePreConfigId", data.getSitePreConfigId());
+                        PreconfigurationManager.INSTANCE.transitionTo(PreconfigurationState.Completed.INSTANCE);
+                        CcuLog.d(L.TAG_PRECONFIGURATION, "Preconfiguratzion completed successfully");
+                    } catch (InvalidPreconfigurationDataException e) {
+                        CcuLog.e(L.TAG_PRECONFIGURATION, "InvalidPreconfigurationDataException: "+e.getMessage());
+                        PreconfigurationManager.INSTANCE.transitionTo(PreconfigurationState.Failed.INSTANCE);
+                        postMessage("Invalid Preconfiguration Data: "+e.getMessage());
+                    } catch (InvalidStagesException e) {
+                        CcuLog.e(L.TAG_PRECONFIGURATION, "InvalidStagesException: "+e.getMessage());
+                        PreconfigurationManager.INSTANCE.transitionTo(PreconfigurationState.Failed.INSTANCE);
+                        postMessage("Invalid Stages: "+e.getMessage());
+                   } catch (UnsupportedTimeZoneException e) {
+                        CcuLog.e(L.TAG_PRECONFIGURATION, "UnsupportedTimeZoneException: "+e.getMessage());
+                        PreconfigurationManager.INSTANCE.transitionTo(PreconfigurationState.Failed.INSTANCE);
+                        postMessage(e.getMessage());
+                    } catch (Exception e) {
+                        CcuLog.e(L.TAG_PRECONFIGURATION, "Preconfiguration failed: " + e.getMessage());
+                        PreconfigurationManager.INSTANCE.transitionTo(PreconfigurationState.Failed.INSTANCE);
+                        postMessage("Preconfiguration failed: " + e.getMessage());
+                    }
+                },
+                () -> {
+                    ProgressDialogUtils.hideProgressDialog();
+                    if (PreconfigurationManager.INSTANCE.getState() instanceof PreconfigurationState.Completed) {
+                        LSerial.getInstance().setResetSeedMessage(true);
+                        goTonext();
+                    }
+                }
 
-        return isEmpty;
+        );
+
+
+    }
+
+    private void postMessage(String text) {
+        Message message = Message.obtain();
+        message.obj = text;
+        mainHandler.sendMessage(message);
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
     }
 

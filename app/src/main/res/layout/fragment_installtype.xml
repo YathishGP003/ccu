@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/installTypeFragment"
     tools:context=".registration.StartCCUFragment">
 
     <RelativeLayout
@@ -63,8 +64,8 @@
                     android:textSize="19sp" />
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="90dp"
@@ -109,12 +110,13 @@
                     android:alpha="0.6"
                     android:fontFamily="@font/lato_regular"
                     android:text="@string/descaddccu"
+                    android:textAlignment="viewEnd"
                     android:textColor="@android:color/black"
                     android:textSize="19sp" />
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="90dp"
@@ -130,6 +132,54 @@
                 android:alpha="0.37"
                 android:background="@color/line_greycolor" />
 
+            <RelativeLayout
+                android:id="@+id/layoutReplaceCCU"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="20dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:id="@+id/textReplaceCCU"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="197dp"
+                    android:alpha="0.87"
+                    android:fontFamily="@font/lato_regular"
+                    android:text="@string/installreplaceccu"
+                    android:textColor="@android:color/black"
+                    android:textSize="25sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textReplaceCCU"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="197dp"
+                    android:alpha="0.6"
+                    android:fontFamily="@font/lato_regular"
+                    android:text="@string/descreplaceccu"
+                    android:textColor="@android:color/black"
+                    android:textSize="19sp" />
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="90dp"
+                    app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="517dp"
+                android:layout_height="0.5dp"
+                android:layout_gravity="end"
+                android:layout_marginTop="10dp"
+                android:alpha="0.37"
+                android:background="@color/line_greycolor"/>
 
             <RelativeLayout
                 android:id="@+id/layoutPreconfigCCU"
@@ -169,8 +219,7 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="90dp"
-                    app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
-                    app:tint="?orange_75f" />
+                    app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24" />
             </RelativeLayout>
 
             <View
@@ -179,60 +228,7 @@
                 android:layout_gravity="end"
                 android:layout_marginTop="10dp"
                 android:alpha="0.37"
-                android:background="@color/line_greycolor"
-                android:visibility="gone" />
-
-
-            <RelativeLayout
-                android:id="@+id/layoutReplaceCCU"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginTop="20dp"
-                android:visibility="visible">
-
-                <TextView
-                    android:id="@+id/textReplaceCCU"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginEnd="197dp"
-                    android:alpha="0.87"
-                    android:fontFamily="@font/lato_regular"
-                    android:text="@string/installreplaceccu"
-                    android:textColor="@android:color/black"
-                    android:textSize="25sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/textReplaceCCU"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginEnd="197dp"
-                    android:alpha="0.6"
-                    android:fontFamily="@font/lato_regular"
-                    android:text="@string/descreplaceccu"
-                    android:textColor="@android:color/black"
-                    android:textSize="19sp" />
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="90dp"
-                    app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
-                    app:tint="?orange_75f" />
-            </RelativeLayout>
-
-            <View
-                android:layout_width="517dp"
-                android:layout_height="0.5dp"
-                android:layout_gravity="end"
-                android:layout_marginTop="10dp"
-                android:alpha="0.37"
-                android:background="@color/line_greycolor"
-                android:visibility="gone" />
+                android:background="@color/line_greycolor" />
 
 
             <RelativeLayout
@@ -274,8 +270,7 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="90dp"
-                    app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
-                    app:tint="?orange_75f" />
+                    app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24" />
             </RelativeLayout>
         </LinearLayout>
 

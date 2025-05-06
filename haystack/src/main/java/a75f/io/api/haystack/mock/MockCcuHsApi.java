@@ -15,6 +15,7 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.sync.SyncStatusService;
 
 /**
  * Mock API class bypasses sync and local data persisting.
@@ -144,5 +145,19 @@ public class MockCcuHsApi extends CCUHsApi {
 
     public void deleteEntityTree(String id) {
         deleteEntity(id);
+    }
+
+    private final SyncStatusService syncStatusService = new SyncStatusService() {
+        @Override
+        public void addUpdatedEntity(String id) {
+            // Mock implementation
+        }
+
+        @Override
+        public void addUnSyncedEntity(String id) {
+        }
+    };
+    public SyncStatusService getSyncStatusService() {
+        return syncStatusService;
     }
 }

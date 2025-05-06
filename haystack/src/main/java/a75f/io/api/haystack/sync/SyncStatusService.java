@@ -59,7 +59,10 @@ public class SyncStatusService {
         refTypes.add("ccuRef");
         
     }
-    
+    //Only for Unit testing
+    protected SyncStatusService() {
+        preferences = null;
+    }
     private SyncStatusService(Context appContext) {
         applicationContext = appContext;
         preferences = PreferenceManager.getDefaultSharedPreferences(appContext);

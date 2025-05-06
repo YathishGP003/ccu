@@ -1,5 +1,7 @@
 package a75f.io.api.haystack.sync;
 
+import android.preference.PreferenceManager;
+
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,8 +75,15 @@ public class SiteRegistrationHandler {
             return null;
         }
         JSONObject siteCreationRequestJson = new JSONObject();
-        
+
         try {
+            if (!siteUpdate) {
+                boolean isPreconfiguration = PreferenceManager.getDefaultSharedPreferences(CCUHsApi.getInstance().getContext())
+                        .getString("INSTALL_TYPE","").equals("PRECONFIGCCU");
+                if (isPreconfiguration) {
+                    siteCreationRequestJson.put(SiteFieldConstants.PRECONFIG_ID, siteDict.get(SiteFieldConstants.ID));
+                }
+            }
             siteCreationRequestJson.put(SiteFieldConstants.ID, siteDict.get(SiteFieldConstants.ID));
             siteCreationRequestJson.put(SiteFieldConstants.AREA, siteDict.get(SiteFieldConstants.AREA));
             siteCreationRequestJson.put(SiteFieldConstants.DESCRIPTION, siteDict.dis());

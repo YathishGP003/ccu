@@ -17,4 +17,5 @@ public class SiteFieldConstants {
     public static final String AREA = "area";
     public static final String WEATHERREF = "weatherRef";
     public static final String SITE = "site";
+    public static final String PRECONFIG_ID = "sitePreConfigId";
 }

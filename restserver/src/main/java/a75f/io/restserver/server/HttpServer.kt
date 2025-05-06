@@ -471,8 +471,8 @@ class HttpServer {
                                         idsStatus.put(JSONObject().put(id, "Id not found"))
                                     } else if (entity.containsKey(Tags.WRITABLE)) {
                                         when (value) {
-                                            is Number -> {
-                                                haystack.pointWrite(HRef.copy(id), level , "CCU_DASHBOARD", HNum.make(value as Double), HNum.make(0))
+                                            is Int, Double, is Number -> {
+                                                haystack.pointWrite(HRef.copy(id), level , "CCU_DASHBOARD", HNum.make(value.toString().toDouble()), HNum.make(0))
                                                 haystack.writeHisValById(id, haystack.readPointPriorityVal(id))
                                                 idsStatus.put(JSONObject().put(id, "Updated successfully"))
                                             }

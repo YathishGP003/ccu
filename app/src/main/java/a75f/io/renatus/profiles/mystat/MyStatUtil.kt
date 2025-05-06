@@ -108,8 +108,7 @@ fun showMyStatSupplyTemp(dischargeView: View, pointsList: HashMap<String,Any>, r
                 UnitUtils.fahrenheitToCelsiusTwoDecimal(pointsList[HSZoneStatus.SUPPLY_TEMP.name] as Double)
             supplyTemp = "${String.format("%.2f", converted)} °C"
         }
-        //showTextView(R.id.text_airflowValue, dischargeView, "$supplyTemp (${getSupplyDirection(nodeAddress)})")
-        showTextView(R.id.text_airflowValue, dischargeView, supplyTemp)
+        showTextView(R.id.text_airflowValue, dischargeView, "$supplyTemp (${getSupplyDirection(nodeAddress)})")
         rootView.removeView(dischargeView)
         rootView.addView(dischargeView)
     }
@@ -117,12 +116,3 @@ fun showMyStatSupplyTemp(dischargeView: View, pointsList: HashMap<String,Any>, r
 
 fun getMyStatAdapterValue(context : Context, itemArray : Int) = CustomSpinnerDropDownAdapter( context, R.layout.spinner_zone_item, context.resources.getStringArray(itemArray).toMutableList())
 
-fun universalInUnit(unit: String = "kΩ", deviceRef: String) {
-    val equip = MyStatDevice(deviceRef)
-    if (equip.universal1In.readPoint().unit == unit) return
-    val rawPoint = RawPoint.Builder().setHDict(
-        Domain.hayStack.readHDictById(equip.universal1In.id)
-    ).setUnit(unit).build()
-    Domain.hayStack.updatePoint(rawPoint, rawPoint.id)
-    CcuLog.d(L.TAG_CCU_MSHST, "universal in unit updated to $unit")
-}

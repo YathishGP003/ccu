@@ -172,7 +172,7 @@ class HyperstatSplitReconfigurationHandler {
         }
 
         private fun handleDynamicConfig (configPoint: Point, hayStack: CCUHsApi) {
-            CcuLog.i(L.TAG_CCU_PUBNUB, "Point " + configPoint.domainName + " would trigger a reconfig");
+            CcuLog.i(L.TAG_CCU_PUBNUB, "Point " + configPoint.domainName + " would trigger a reconfig")
 
             val equipModel = ModelLoader.getHyperStatSplitCpuModel() as SeventyFiveFProfileDirective
             val deviceModel = ModelLoader.getHyperStatSplitDeviceModel() as SeventyFiveFDeviceDirective
@@ -203,13 +203,14 @@ class HyperstatSplitReconfigurationHandler {
                 deviceDis
             )
 
-            addLinearFanLowMedHighPoints(equipId, hayStack.site!!.id, equipDis, hayStack, profileConfiguration as HyperStatSplitCpuProfileConfiguration, equipModel)
+            addLinearFanLowMedHighPoints(equipId, hayStack.site!!.id, equipDis, hayStack,
+                profileConfiguration, equipModel)
             correctSensorBusTempPoints(profileConfiguration, hayStack)
-            mapSensorBusPressureLogicalPoint(profileConfiguration, equipId, hayStack, equipModel)
+            mapSensorBusPressureLogicalPoint(profileConfiguration, equipId, hayStack)
             setOutputTypes(profileConfiguration, hayStack)
 
-            handleNonDefaultConditioningMode(profileConfiguration as HyperStatSplitCpuProfileConfiguration, hayStack)
-            handleNonDefaultFanMode(profileConfiguration as HyperStatSplitCpuProfileConfiguration, hayStack)
+            handleNonDefaultConditioningMode(profileConfiguration, hayStack)
+            handleNonDefaultFanMode(profileConfiguration, hayStack)
 
             initializePrePurgeStatus(profileConfiguration, hayStack, 1.0)
             initializePrePurgeStatus(profileConfiguration, hayStack, 0.0)
@@ -249,9 +250,9 @@ class HyperstatSplitReconfigurationHandler {
             equipModel: SeventyFiveFProfileDirective
         ) {
             if (profileConfiguration.analogOut1Enabled.enabled &&
-                profileConfiguration.analogOut1Association.associationVal.equals(CpuControlType.LINEAR_FAN.ordinal)) {
+                profileConfiguration.analogOut1Association.associationVal == CpuControlType.LINEAR_FAN.ordinal
+            ) {
 
-                requireNotNull(equipModel)
                 val equipBuilder = ProfileEquipBuilder(hayStack)
 
                 val fanLowDef = equipModel.points.find { it.domainName == DomainName.analog1FanLow }
@@ -261,7 +262,7 @@ class HyperstatSplitReconfigurationHandler {
                             this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
                         )
                     )
-                    hayStack.writeDefaultValById(fanLowId, (profileConfiguration as HyperStatSplitCpuProfileConfiguration).analogOut1Voltage.linearFanAtFanLow.currentVal)
+                    hayStack.writeDefaultValById(fanLowId, profileConfiguration.analogOut1Voltage.linearFanAtFanLow.currentVal)
                 }
 
                 val fanMediumDef = equipModel.points.find { it.domainName == DomainName.analog1FanMedium }
@@ -271,7 +272,7 @@ class HyperstatSplitReconfigurationHandler {
                             this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
                         )
                     )
-                    hayStack.writeDefaultValById(fanMediumId, (profileConfiguration as HyperStatSplitCpuProfileConfiguration).analogOut1Voltage.linearFanAtFanMedium.currentVal)
+                    hayStack.writeDefaultValById(fanMediumId, profileConfiguration.analogOut1Voltage.linearFanAtFanMedium.currentVal)
                 }
 
                 val fanHighDef = equipModel.points.find { it.domainName == DomainName.analog1FanHigh }
@@ -281,15 +282,15 @@ class HyperstatSplitReconfigurationHandler {
                             this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
                         )
                     )
-                    hayStack.writeDefaultValById(fanHighId, (profileConfiguration as HyperStatSplitCpuProfileConfiguration).analogOut1Voltage.linearFanAtFanHigh.currentVal)
+                    hayStack.writeDefaultValById(fanHighId, profileConfiguration.analogOut1Voltage.linearFanAtFanHigh.currentVal)
                 }
 
             }
 
             if (profileConfiguration.analogOut2Enabled.enabled &&
-                profileConfiguration.analogOut2Association.associationVal.equals(CpuControlType.LINEAR_FAN.ordinal)) {
+                profileConfiguration.analogOut2Association.associationVal == CpuControlType.LINEAR_FAN.ordinal
+            ) {
 
-                requireNotNull(equipModel)
                 val equipBuilder = ProfileEquipBuilder(hayStack)
 
                 val fanLowDef = equipModel.points.find { it.domainName == DomainName.analog2FanLow }
@@ -299,7 +300,7 @@ class HyperstatSplitReconfigurationHandler {
                             this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
                         )
                     )
-                    hayStack.writeDefaultValById(fanLowId, (profileConfiguration as HyperStatSplitCpuProfileConfiguration).analogOut2Voltage.linearFanAtFanLow.currentVal)
+                    hayStack.writeDefaultValById(fanLowId, profileConfiguration.analogOut2Voltage.linearFanAtFanLow.currentVal)
                 }
 
                 val fanMediumDef = equipModel.points.find { it.domainName == DomainName.analog2FanMedium }
@@ -309,7 +310,7 @@ class HyperstatSplitReconfigurationHandler {
                             this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
                         )
                     )
-                    hayStack.writeDefaultValById(fanMediumId, (profileConfiguration as HyperStatSplitCpuProfileConfiguration).analogOut2Voltage.linearFanAtFanMedium.currentVal)
+                    hayStack.writeDefaultValById(fanMediumId, profileConfiguration.analogOut2Voltage.linearFanAtFanMedium.currentVal)
                 }
 
                 val fanHighDef = equipModel.points.find { it.domainName == DomainName.analog2FanHigh }
@@ -319,15 +320,15 @@ class HyperstatSplitReconfigurationHandler {
                             this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
                         )
                     )
-                    hayStack.writeDefaultValById(fanHighId, (profileConfiguration as HyperStatSplitCpuProfileConfiguration).analogOut2Voltage.linearFanAtFanHigh.currentVal)
+                    hayStack.writeDefaultValById(fanHighId, profileConfiguration.analogOut2Voltage.linearFanAtFanHigh.currentVal)
                 }
 
             }
 
             if (profileConfiguration.analogOut3Enabled.enabled &&
-                profileConfiguration.analogOut3Association.associationVal.equals(CpuControlType.LINEAR_FAN.ordinal)) {
+                profileConfiguration.analogOut3Association.associationVal == CpuControlType.LINEAR_FAN.ordinal
+            ) {
 
-                requireNotNull(equipModel)
                 val equipBuilder = ProfileEquipBuilder(hayStack)
 
                 val fanLowDef = equipModel.points.find { it.domainName == DomainName.analog3FanLow }
@@ -337,7 +338,7 @@ class HyperstatSplitReconfigurationHandler {
                             this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
                         )
                     )
-                    val defVal = (profileConfiguration as HyperStatSplitCpuProfileConfiguration).analogOut3Voltage.linearFanAtFanLow.currentVal
+                    val defVal = profileConfiguration.analogOut3Voltage.linearFanAtFanLow.currentVal
                     hayStack.writeDefaultValById(fanLowId, defVal)
                 }
 
@@ -348,7 +349,7 @@ class HyperstatSplitReconfigurationHandler {
                             this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
                         )
                     )
-                    val defVal = (profileConfiguration as HyperStatSplitCpuProfileConfiguration).analogOut3Voltage.linearFanAtFanMedium.currentVal
+                    val defVal = profileConfiguration.analogOut3Voltage.linearFanAtFanMedium.currentVal
                     hayStack.writeDefaultValById(fanMediumId, defVal)
                 }
 
@@ -359,16 +360,16 @@ class HyperstatSplitReconfigurationHandler {
                             this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
                         )
                     )
-                    val defVal = (profileConfiguration as HyperStatSplitCpuProfileConfiguration).analogOut3Voltage.linearFanAtFanHigh.currentVal
+                    val defVal = profileConfiguration.analogOut3Voltage.linearFanAtFanHigh.currentVal
                     hayStack.writeDefaultValById(fanHighId, defVal)
                 }
 
             }
 
             if (profileConfiguration.analogOut4Enabled.enabled &&
-                profileConfiguration.analogOut4Association.associationVal.equals(CpuControlType.LINEAR_FAN.ordinal)) {
+                profileConfiguration.analogOut4Association.associationVal == CpuControlType.LINEAR_FAN.ordinal
+            ) {
 
-                requireNotNull(equipModel)
                 val equipBuilder = ProfileEquipBuilder(hayStack)
 
                 val fanLowDef = equipModel.points.find { it.domainName == DomainName.analog4FanLow }
@@ -378,7 +379,7 @@ class HyperstatSplitReconfigurationHandler {
                             this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
                         )
                     )
-                    hayStack.writeDefaultValById(fanLowId, (profileConfiguration as HyperStatSplitCpuProfileConfiguration).analogOut4Voltage.linearFanAtFanLow.currentVal)
+                    hayStack.writeDefaultValById(fanLowId, profileConfiguration.analogOut4Voltage.linearFanAtFanLow.currentVal)
                 }
 
                 val fanMediumDef = equipModel.points.find { it.domainName == DomainName.analog4FanMedium }
@@ -388,7 +389,7 @@ class HyperstatSplitReconfigurationHandler {
                             this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
                         )
                     )
-                    hayStack.writeDefaultValById(fanMediumId, (profileConfiguration as HyperStatSplitCpuProfileConfiguration).analogOut4Voltage.linearFanAtFanMedium.currentVal)
+                    hayStack.writeDefaultValById(fanMediumId, profileConfiguration.analogOut4Voltage.linearFanAtFanMedium.currentVal)
                 }
 
                 val fanHighDef = equipModel.points.find { it.domainName == DomainName.analog4FanHigh }
@@ -398,14 +399,18 @@ class HyperstatSplitReconfigurationHandler {
                             this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
                         )
                     )
-                    hayStack.writeDefaultValById(fanHighId, (profileConfiguration as HyperStatSplitCpuProfileConfiguration).analogOut4Voltage.linearFanAtFanHigh.currentVal)
+                    hayStack.writeDefaultValById(fanHighId, profileConfiguration.analogOut4Voltage.linearFanAtFanHigh.currentVal)
                 }
 
             }
 
         }
 
-        fun mapSensorBusPressureLogicalPoint(config: HyperStatSplitProfileConfiguration, equipRef: String, hayStack: CCUHsApi, equipModel: SeventyFiveFProfileDirective) {
+        fun mapSensorBusPressureLogicalPoint(
+            config: HyperStatSplitProfileConfiguration,
+            equipRef: String,
+            hayStack: CCUHsApi
+        ) {
             if (config.sensorBusPressureEnable.enabled && config.pressureAddress0SensorAssociation.associationVal > 0) {
                 val hssEquip = HyperStatSplitEquip(equipRef)
                 if (hssEquip.ductStaticPressureSensor1_2.pointExists()) {
@@ -423,31 +428,31 @@ class HyperstatSplitReconfigurationHandler {
             val device = hayStack.read("device and addr == \"" + config.nodeAddress + "\"")
 
             if (!isAnySensorBusMapped(config, CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY)) {
-                val deviceOATMap = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.outsideAirTempSensor + "\"")
+                val deviceOATMap = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.outsideAirTempSensor + "\"")
                 val deviceOATPoint = RawPoint.Builder().setHDict(deviceOATMap).setEnabled(false).setPointRef(null)
                 hayStack.updatePoint(deviceOATPoint.build(), deviceOATMap[Tags.ID].toString())
 
-                val deviceOAHMap = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.outsideAirHumiditySensor + "\"")
+                val deviceOAHMap = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.outsideAirHumiditySensor + "\"")
                 val deviceOAHPoint = RawPoint.Builder().setHDict(deviceOAHMap).setEnabled(false).setPointRef(null)
                 hayStack.updatePoint(deviceOAHPoint.build(), deviceOAHMap[Tags.ID].toString())
             }
 
             if (!isAnySensorBusMapped(config, CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY)) {
-                val deviceMATMap = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.mixedAirTempSensor + "\"")
+                val deviceMATMap = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.mixedAirTempSensor + "\"")
                 val deviceMATPoint = RawPoint.Builder().setHDict(deviceMATMap).setEnabled(false).setPointRef(null)
                 hayStack.updatePoint(deviceMATPoint.build(), deviceMATMap[Tags.ID].toString())
 
-                val deviceMAHMap = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.mixedAirHumiditySensor + "\"")
+                val deviceMAHMap = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.mixedAirHumiditySensor + "\"")
                 val deviceMAHPoint = RawPoint.Builder().setHDict(deviceMAHMap).setEnabled(false).setPointRef(null)
                 hayStack.updatePoint(deviceMAHPoint.build(), deviceMAHMap[Tags.ID].toString())
             }
 
             if (!isAnySensorBusMapped(config, CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY)) {
-                val deviceSATMap = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.supplyAirTemperature + "\"")
+                val deviceSATMap = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.supplyAirTemperature + "\"")
                 val deviceSATPoint = RawPoint.Builder().setHDict(deviceSATMap).setEnabled(false).setPointRef(null)
                 hayStack.updatePoint(deviceSATPoint.build(), deviceSATMap[Tags.ID].toString())
 
-                val deviceSAHMap = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.supplyAirHumiditySensor + "\"")
+                val deviceSAHMap = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.supplyAirHumiditySensor + "\"")
                 val deviceSAHPoint = RawPoint.Builder().setHDict(deviceSAHMap).setEnabled(false).setPointRef(null)
                 hayStack.updatePoint(deviceSAHPoint.build(), deviceSAHMap[Tags.ID].toString())
             }
@@ -463,10 +468,10 @@ class HyperstatSplitReconfigurationHandler {
         fun setOutputTypes(config: HyperStatSplitProfileConfiguration, hayStack: CCUHsApi) {
             val device = hayStack.read("device and addr == \"" + config.nodeAddress + "\"")
 
-            val relay1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"")
-            var relay1Point = RawPoint.Builder().setHDict(relay1).setType("Relay N/O").setEnabled(config.relay1Enabled.enabled)
+            val relay1 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay1 + "\"")
+            val relay1Point = RawPoint.Builder().setHDict(relay1).setType("Relay N/O").setEnabled(config.relay1Enabled.enabled)
             if (config.relay1Enabled.enabled && config.relay1Association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal) {
-                relay1Point.addMarker(Tags.WRITABLE);
+                relay1Point.addMarker(Tags.WRITABLE)
                 relay1Point.addMarker(Tags.UNUSED)
             } else {
                 relay1Point.removeMarkerIfExists(Tags.WRITABLE)
@@ -474,8 +479,8 @@ class HyperstatSplitReconfigurationHandler {
             }
             hayStack.updatePoint(relay1Point.build(), relay1[Tags.ID].toString())
 
-            val relay2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay2 + "\"")
-            var relay2Point = RawPoint.Builder().setHDict(relay2).setType("Relay N/O").setEnabled(config.relay2Enabled.enabled)
+            val relay2 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay2 + "\"")
+            val relay2Point = RawPoint.Builder().setHDict(relay2).setType("Relay N/O").setEnabled(config.relay2Enabled.enabled)
             if (config.relay2Enabled.enabled && config.relay2Association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal) {
                 relay2Point.addMarker(Tags.WRITABLE)
                 relay2Point.addMarker(Tags.UNUSED)
@@ -486,8 +491,8 @@ class HyperstatSplitReconfigurationHandler {
             }
             hayStack.updatePoint(relay2Point.build(), relay2[Tags.ID].toString())
 
-            val relay3 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay3 + "\"")
-            var relay3Point = RawPoint.Builder().setHDict(relay3).setType("Relay N/O").setEnabled(config.relay3Enabled.enabled)
+            val relay3 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay3 + "\"")
+            val relay3Point = RawPoint.Builder().setHDict(relay3).setType("Relay N/O").setEnabled(config.relay3Enabled.enabled)
             if (config.relay3Enabled.enabled && config.relay3Association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal) {
                 relay3Point.addMarker(Tags.WRITABLE)
                 relay3Point.addMarker(Tags.UNUSED)
@@ -498,8 +503,8 @@ class HyperstatSplitReconfigurationHandler {
             }
             hayStack.updatePoint(relay3Point.build(), relay3[Tags.ID].toString())
 
-            val relay4 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay4 + "\"")
-            var relay4Point = RawPoint.Builder().setHDict(relay4).setType("Relay N/O").setEnabled(config.relay4Enabled.enabled)
+            val relay4 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay4 + "\"")
+            val relay4Point = RawPoint.Builder().setHDict(relay4).setType("Relay N/O").setEnabled(config.relay4Enabled.enabled)
             if (config.relay4Enabled.enabled && config.relay4Association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal) {
                 relay4Point.addMarker(Tags.WRITABLE)
                 relay4Point.addMarker(Tags.UNUSED)
@@ -510,8 +515,8 @@ class HyperstatSplitReconfigurationHandler {
             }
             hayStack.updatePoint(relay4Point.build(), relay4[Tags.ID].toString())
 
-            val relay5 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay5 + "\"")
-            var relay5Point = RawPoint.Builder().setHDict(relay5).setType("Relay N/O").setEnabled(config.relay5Enabled.enabled)
+            val relay5 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay5 + "\"")
+            val relay5Point = RawPoint.Builder().setHDict(relay5).setType("Relay N/O").setEnabled(config.relay5Enabled.enabled)
             if (config.relay5Enabled.enabled && config.relay5Association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal) {
                 relay5Point.addMarker(Tags.WRITABLE)
                 relay5Point.addMarker(Tags.UNUSED)
@@ -522,8 +527,8 @@ class HyperstatSplitReconfigurationHandler {
             }
             hayStack.updatePoint(relay5Point.build(), relay5[Tags.ID].toString())
 
-            val relay6 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay6 + "\"")
-            var relay6Point = RawPoint.Builder().setHDict(relay6).setType("Relay N/O").setEnabled(config.relay6Enabled.enabled)
+            val relay6 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay6 + "\"")
+            val relay6Point = RawPoint.Builder().setHDict(relay6).setType("Relay N/O").setEnabled(config.relay6Enabled.enabled)
             if (config.relay6Enabled.enabled && config.relay6Association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal) {
                 relay6Point.addMarker(Tags.WRITABLE)
                 relay6Point.addMarker(Tags.UNUSED)
@@ -534,8 +539,8 @@ class HyperstatSplitReconfigurationHandler {
             }
             hayStack.updatePoint(relay6Point.build(), relay6[Tags.ID].toString())
 
-            val relay7 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay7 + "\"")
-            var relay7Point = RawPoint.Builder().setHDict(relay7).setType("Relay N/O").setEnabled(config.relay7Enabled.enabled)
+            val relay7 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay7 + "\"")
+            val relay7Point = RawPoint.Builder().setHDict(relay7).setType("Relay N/O").setEnabled(config.relay7Enabled.enabled)
             if (config.relay7Enabled.enabled && config.relay7Association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal) {
                 relay7Point.addMarker(Tags.WRITABLE)
                 relay7Point.addMarker(Tags.UNUSED)
@@ -546,8 +551,8 @@ class HyperstatSplitReconfigurationHandler {
             }
             hayStack.updatePoint(relay7Point.build(), relay7[Tags.ID].toString())
 
-            val relay8 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay8 + "\"")
-            var relay8Point = RawPoint.Builder().setHDict(relay8).setType("Relay N/O").setEnabled(config.relay8Enabled.enabled)
+            val relay8 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay8 + "\"")
+            val relay8Point = RawPoint.Builder().setHDict(relay8).setType("Relay N/O").setEnabled(config.relay8Enabled.enabled)
             if (config.relay8Enabled.enabled && config.relay8Association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal) {
                 relay8Point.addMarker(Tags.WRITABLE)
                 relay8Point.addMarker(Tags.UNUSED)
@@ -558,8 +563,8 @@ class HyperstatSplitReconfigurationHandler {
             }
             hayStack.updatePoint(relay8Point.build(), relay8[Tags.ID].toString())
 
-            val analogOut1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog1Out + "\"")
-            var analogOut1Point = RawPoint.Builder().setHDict(analogOut1).setType(config.analogOut1TypeToString()).setEnabled(config.analogOut1Enabled.enabled)
+            val analogOut1 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.analog1Out + "\"")
+            val analogOut1Point = RawPoint.Builder().setHDict(analogOut1).setType(config.analogOut1TypeToString()).setEnabled(config.analogOut1Enabled.enabled)
             if (config.analogOut1Enabled.enabled && config.analogOut1Association.associationVal == CpuControlType.EXTERNALLY_MAPPED.ordinal) {
                 analogOut1Point.addMarker(Tags.WRITABLE)
                 analogOut1Point.addMarker(Tags.UNUSED)
@@ -570,8 +575,8 @@ class HyperstatSplitReconfigurationHandler {
             }
             hayStack.updatePoint(analogOut1Point.build(), analogOut1[Tags.ID].toString())
 
-            val analogOut2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2Out + "\"")
-            var analogOut2Point = RawPoint.Builder().setHDict(analogOut2).setType(config.analogOut2TypeToString()).setEnabled(config.analogOut2Enabled.enabled)
+            val analogOut2 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.analog2Out + "\"")
+            val analogOut2Point = RawPoint.Builder().setHDict(analogOut2).setType(config.analogOut2TypeToString()).setEnabled(config.analogOut2Enabled.enabled)
             if (config.analogOut2Enabled.enabled && config.analogOut2Association.associationVal == CpuControlType.EXTERNALLY_MAPPED.ordinal) {
                 analogOut2Point.addMarker(Tags.WRITABLE)
                 analogOut2Point.addMarker(Tags.UNUSED)
@@ -582,8 +587,8 @@ class HyperstatSplitReconfigurationHandler {
             }
             hayStack.updatePoint(analogOut2Point.build(), analogOut2[Tags.ID].toString())
 
-            val analogOut3 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog3Out + "\"")
-            var analogOut3Point = RawPoint.Builder().setHDict(analogOut3).setType(config.analogOut3TypeToString()).setEnabled(config.analogOut3Enabled.enabled)
+            val analogOut3 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.analog3Out + "\"")
+            val analogOut3Point = RawPoint.Builder().setHDict(analogOut3).setType(config.analogOut3TypeToString()).setEnabled(config.analogOut3Enabled.enabled)
             if (config.analogOut3Enabled.enabled && config.analogOut3Association.associationVal == CpuControlType.EXTERNALLY_MAPPED.ordinal) {
                 analogOut3Point.addMarker(Tags.WRITABLE)
                 analogOut3Point.addMarker(Tags.UNUSED)
@@ -594,8 +599,8 @@ class HyperstatSplitReconfigurationHandler {
             }
             hayStack.updatePoint(analogOut3Point.build(), analogOut3[Tags.ID].toString())
 
-            val analogOut4 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog4Out + "\"")
-            var analogOut4Point = RawPoint.Builder().setHDict(analogOut4).setType(config.analogOut4TypeToString()).setEnabled(config.analogOut4Enabled.enabled)
+            val analogOut4 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.analog4Out + "\"")
+            val analogOut4Point = RawPoint.Builder().setHDict(analogOut4).setType(config.analogOut4TypeToString()).setEnabled(config.analogOut4Enabled.enabled)
             if (config.analogOut4Enabled.enabled && config.analogOut4Association.associationVal == CpuControlType.EXTERNALLY_MAPPED.ordinal) {
                 analogOut4Point.addMarker(Tags.WRITABLE)
                 analogOut4Point.addMarker(Tags.UNUSED)
@@ -630,11 +635,15 @@ class HyperstatSplitReconfigurationHandler {
 
         fun handleNonDefaultFanMode(config: HyperStatSplitCpuProfileConfiguration, hayStack: CCUHsApi) {
             val fanModePoint = hayStack.readEntity("point and domainName == \"" + DomainName.fanOpMode + "\" and group == \"" + config.nodeAddress + "\"")
-            val fanModeId = fanModePoint.get("id").toString()
+            val fanModeId = fanModePoint["id"].toString()
 
-            val isFanEnabled = config.isLinearFanEnabled() || config.isStagedFanEnabled() || config.isFanLowRelayEnabled() || config.isFanMediumRelayEnabled() || config.isFanHighRelayEnabled()
+            val isFanEnabledWithAllOptions = config.isLinearFanEnabled() || config.isStagedFanEnabled()
+                    || config.isFanLowEnabled() || config.isFanMediumEnabled() || config.isFanHighEnabled()
 
-            if (!isFanEnabled) {
+            if (config.isFanEnabled() && !isFanEnabledWithAllOptions) {
+                hayStack.writeDefaultValById(fanModeId, 1.0)
+            }
+            else if (!isFanEnabledWithAllOptions)  {
                 hayStack.writeDefaultValById(fanModeId, 0.0)
             }
         }
@@ -643,7 +652,7 @@ class HyperstatSplitReconfigurationHandler {
             if (config.prePurge.enabled) {
                 val prePurgeStatusPoint =
                     hayStack.readEntity("point and domainName == \"" + DomainName.prePurgeStatus + "\" and group == \"" + config.nodeAddress + "\"")
-                val prePurgeStatusId = prePurgeStatusPoint.get("id").toString()
+                val prePurgeStatusId = prePurgeStatusPoint["id"].toString()
 
                 hayStack.writeHisValById(prePurgeStatusId, value)
             }

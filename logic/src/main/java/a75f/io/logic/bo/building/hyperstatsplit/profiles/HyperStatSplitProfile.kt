@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.hyperstatsplit.profiles
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZoneProfile
@@ -11,14 +12,11 @@ import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstatsplit.common.BasicSettings
-import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil
-import a75f.io.domain.HyperStatSplitEquip
-import a75f.io.domain.api.DomainName
 import a75f.io.logic.bo.building.hyperstatsplit.common.FanModeCacheStorage
+import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil
 import a75f.io.logic.bo.building.hyperstatsplit.common.UserIntents
 import a75f.io.logic.bo.building.schedules.Occupancy
-import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler
-
+import a75f.io.logic.util.uiutils.updateUserIntentPoints
 
 
 /**
@@ -460,7 +458,7 @@ abstract class HyperStatSplitProfile(equipRef: String, nodeAddress: Short) : Zon
     }
 
     fun fallBackFanMode(
-        equipRef: String , fanModeSaved: Int , basicSettings: BasicSettings
+        equip: HyperStatSplitEquip , fanModeSaved: Int , basicSettings: BasicSettings
     ): StandaloneFanStage {
 
         logIt("FanModeSaved in Shared Preference $fanModeSaved")
@@ -468,15 +466,15 @@ abstract class HyperStatSplitProfile(equipRef: String, nodeAddress: Short) : Zon
 
         // If occupancy is unoccupied or demand response unoccupied and the fan mode is current occupied then remove the fan mode from cache
         if ((occupancyStatus == Occupancy.UNOCCUPIED || occupancyStatus == Occupancy.DEMAND_RESPONSE_UNOCCUPIED ) && isFanModeCurrentOccupied(fanModeSaved)) {
-            FanModeCacheStorage().removeFanModeFromCache(equipRef)
+            FanModeCacheStorage().removeFanModeFromCache(equip.equipRef)
         }
         logIt("Fall back fan mode " + basicSettings.fanMode + " conditioning mode " + basicSettings.conditioningMode)
         logIt("Fan Details :$occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved")
         if (isEligibleToAuto(basicSettings,currentOperatingMode)) {
             logIt("Resetting the Fan status back to  AUTO: ")
-            HyperStatSplitUserIntentHandler.updateHyperStatSplitUIPoints(
-                equipRef = equipRef,
-                command = "domainName == \"" + DomainName.fanOpMode + "\"",
+            updateUserIntentPoints(
+                equipRef = equip.equipRef,
+                point = equip.fanOpMode,
                 value = StandaloneFanStage.AUTO.ordinal.toDouble(),
                 CCUHsApi.getInstance().ccuUserName
             )
@@ -490,12 +488,13 @@ abstract class HyperStatSplitProfile(equipRef: String, nodeAddress: Short) : Zon
                     || occupancyStatus == Occupancy.DEMAND_RESPONSE_OCCUPIED)
             && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
             logIt("Resetting the Fan status back to ${StandaloneFanStage.values()[fanModeSaved]}")
-            HyperStatSplitUserIntentHandler.updateHyperStatSplitUIPoints(
-                equipRef = equipRef,
-                command = "domainName == \"" + DomainName.fanOpMode + "\"",
+            updateUserIntentPoints(
+                equipRef = equip.equipRef,
+                point = equip.fanOpMode,
                 value = fanModeSaved.toDouble(),
                 CCUHsApi.getInstance().ccuUserName
             )
+
             return StandaloneFanStage.values()[fanModeSaved]
         }
         return  StandaloneFanStage.values()[hssEquip.fanOpMode.readHisVal().toInt()]

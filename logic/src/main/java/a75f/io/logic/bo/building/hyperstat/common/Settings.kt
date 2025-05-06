@@ -82,5 +82,5 @@ enum class PossibleConditioningMode{
 }
 
 enum class PossibleFanMode{
-   OFF,LOW,MED,HIGH,LOW_MED_HIGH,LOW_MED,LOW_HIGH,MED_HIGH
+   OFF,LOW,MED,HIGH,LOW_MED_HIGH,LOW_MED,LOW_HIGH,MED_HIGH,AUTO
 }

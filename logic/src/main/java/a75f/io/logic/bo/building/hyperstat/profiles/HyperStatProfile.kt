@@ -1,7 +1,6 @@
 package a75f.io.logic.bo.building.hyperstat.profiles
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.logger.CcuLog
@@ -24,6 +23,7 @@ import a75f.io.logic.bo.building.hyperstat.profiles.util.updateAllLoopOutput
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler
 import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler.Companion.hyperStatStatus
+import a75f.io.logic.util.uiutils.updateUserIntentPoints
 import org.projecthaystack.HDateTime
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef
@@ -186,13 +186,16 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         }
     }
 
-    override fun doFanEnabled(currentState: ZoneState, whichPort: Port, fanLoopOutput: Int) {
+    fun doFanEnabled(currentState: ZoneState, whichPort: Port, fanLoopOutput: Int,
+                     relayStages: HashMap<String, Int>) {
         // Then Relay will be turned On when the zone is in occupied mode Or
         // any conditioning is happening during an unoccupied schedule
 
         if (occupancyStatus == Occupancy.OCCUPIED || fanLoopOutput > 0) {
             updateLogicalPoint(logicalPointsList[whichPort]!!, 1.0)
-        } else if (occupancyStatus != Occupancy.OCCUPIED || (currentState == ZoneState.COOLING || currentState == ZoneState.HEATING)) {
+            relayStages[AnalogOutput.FAN_ENABLED.name] = 1
+        } else if (occupancyStatus != Occupancy.OCCUPIED ||
+            (currentState == ZoneState.COOLING || currentState == ZoneState.HEATING)) {
             updateLogicalPoint(logicalPointsList[whichPort]!!, 0.0)
         }
     }
@@ -507,11 +510,11 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         logIt("Fan Details :$occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved")
         if (isEligibleToAuto(basicSettings,currentOccupancy)) {
             logIt("Resetting the Fan status back to  AUTO: ")
-            HyperStatUserIntentHandler.updateHyperStatUIPoints(
-                    equipRef = equipRef,
-                    command = "domainName == \"${DomainName.fanOpMode}\"",
-                    value = StandaloneFanStage.AUTO.ordinal.toDouble(),
-                    CCUHsApi.getInstance().ccuUserName
+            updateUserIntentPoints(
+                equipRef = equipRef,
+                equip.fanOpMode,
+                value = StandaloneFanStage.AUTO.ordinal.toDouble(),
+                CCUHsApi.getInstance().ccuUserName
             )
             return StandaloneFanStage.AUTO
         }
@@ -523,11 +526,11 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
                         || occupancyStatus == Occupancy.DEMAND_RESPONSE_OCCUPIED)
                 && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
             logIt("Resetting the Fan status back to ${StandaloneFanStage.values()[fanModeSaved]}")
-            HyperStatUserIntentHandler.updateHyperStatUIPoints(
-                    equipRef = equipRef,
-                    command = "domainName == \"${DomainName.fanOpMode}\"",
-                    value = fanModeSaved.toDouble(),
-                    CCUHsApi.getInstance().ccuUserName
+            updateUserIntentPoints(
+                equipRef = equipRef,
+                equip.fanOpMode,
+                value = fanModeSaved.toDouble(),
+                CCUHsApi.getInstance().ccuUserName
             )
             return StandaloneFanStage.values()[fanModeSaved]
         }

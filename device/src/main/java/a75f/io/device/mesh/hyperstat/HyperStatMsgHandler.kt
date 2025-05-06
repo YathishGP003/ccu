@@ -55,7 +55,7 @@ import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
 import a75f.io.logic.bo.building.sensors.SensorType
 import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.interfaces.ZoneDataInterface
-import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler.Companion.updateHyperStatUIPoints
+import a75f.io.logic.util.uiutils.updateUserIntentPoints
 
 /**
  * Created by Manjunath K on 22-10-2024.
@@ -138,7 +138,7 @@ private fun updateModes(equip: HyperStatEquip, message: HyperStatLocalControlsOv
             possibleMode = getPossibleConditionMode(configs)
         }
     }
-    updateFanMode(possibleFanMode, message.fanSpeed, equip.equipRef)
+    updateFanMode(possibleFanMode, message.fanSpeed, equip)
     updateConditioningMode(possibleMode, message.conditioningMode, equip)
 }
 
@@ -159,17 +159,18 @@ private fun updateConditioningMode(
         CcuLog.i(L.TAG_CCU_DEVICE, "Invalid selected $mode possibleMode $possibleMode Invalid conditioning mode ")
         return
     }
-    updateHyperStatUIPoints(equip.equipRef, "domainName == \"${DomainName.conditioningMode}\"", mode.ordinal.toDouble(), WhoFiledConstants.HYPERSTAT_WHO)
+    updateUserIntentPoints(equip.equipRef, equip.conditioningMode, mode.ordinal.toDouble(), WhoFiledConstants.HYPERSTAT_WHO)
     CcuLog.d(L.TAG_CCU_DEVICE, "${equip.nodeAddress} conditioning mode updated to $mode")
 }
 
 private fun updateFanMode(
-        possibleMode: PossibleFanMode, selectedMode: HyperStat.HyperStatFanSpeed_e, equipRef: String) {
+        possibleMode: PossibleFanMode, selectedMode: HyperStat.HyperStatFanSpeed_e, equip: HyperStatEquip) {
 
-    fun getFanLevel(lowActive: Boolean = false, mediumActive: Boolean = false, highActive: Boolean = false): Int {
+    fun getFanLevel(lowActive: Boolean = false, mediumActive: Boolean = false, highActive: Boolean = false, fanEnable: Boolean = false): Int {
         return when (selectedMode) {
+
             HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_OFF -> StandaloneFanStage.OFF.ordinal
-            HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO -> if (lowActive || mediumActive || highActive) StandaloneFanStage.AUTO.ordinal else -1
+            HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO -> if (lowActive || mediumActive || highActive || fanEnable) StandaloneFanStage.AUTO.ordinal else -1
             HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_LOW -> if (lowActive) StandaloneFanStage.LOW_CUR_OCC.ordinal else -1
             HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_MED -> if (mediumActive) StandaloneFanStage.MEDIUM_CUR_OCC.ordinal else -1
             HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH -> if (highActive) StandaloneFanStage.HIGH_CUR_OCC.ordinal else -1
@@ -179,6 +180,7 @@ private fun updateFanMode(
 
     val fanMode = when (possibleMode) {
         PossibleFanMode.OFF -> getFanLevel()
+        PossibleFanMode.AUTO -> getFanLevel(fanEnable = true)
         PossibleFanMode.LOW -> getFanLevel(lowActive = true)
         PossibleFanMode.MED -> getFanLevel(mediumActive = true)
         PossibleFanMode.HIGH -> getFanLevel(highActive = true)
@@ -188,8 +190,8 @@ private fun updateFanMode(
         PossibleFanMode.LOW_MED_HIGH -> getFanLevel(lowActive = true, mediumActive = true, highActive = true)
     }
     if (fanMode != -1) {
-        updateHyperStatUIPoints(equipRef, "domainName == \"${DomainName.fanOpMode}\"", fanMode.toDouble(), WhoFiledConstants.HYPERSTAT_WHO)
-        CcuLog.d(L.TAG_CCU_DEVICE, "$equipRef fan mode updated to $selectedMode")
+        updateUserIntentPoints(equip.equipRef, equip.fanOpMode, fanMode.toDouble(), WhoFiledConstants.HYPERSTAT_WHO)
+        CcuLog.d(L.TAG_CCU_DEVICE, "${equip.equipRef} fan mode updated to $selectedMode")
     } else {
         CcuLog.e(L.TAG_CCU_DEVICE, "Invalid fan mode possibleFanMode $possibleMode selectedMode $selectedMode")
     }

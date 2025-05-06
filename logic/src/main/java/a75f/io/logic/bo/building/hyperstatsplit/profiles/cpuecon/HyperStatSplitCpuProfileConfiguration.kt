@@ -4,7 +4,6 @@ import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
-import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ValueConfig
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfileConfiguration
@@ -533,132 +532,44 @@ class HyperStatSplitCpuProfileConfiguration (nodeAddress: Int, nodeType: String,
         }
     }
 
-    fun isCoolStage1Enabled() : Boolean {
-        return this.relay1Enabled.enabled && this.relay1Association.associationVal == CpuRelayType.COOLING_STAGE1.ordinal ||
-                this.relay2Enabled.enabled && this.relay2Association.associationVal == CpuRelayType.COOLING_STAGE1.ordinal ||
-                this.relay3Enabled.enabled && this.relay3Association.associationVal == CpuRelayType.COOLING_STAGE1.ordinal ||
-                this.relay4Enabled.enabled && this.relay4Association.associationVal == CpuRelayType.COOLING_STAGE1.ordinal ||
-                this.relay5Enabled.enabled && this.relay5Association.associationVal == CpuRelayType.COOLING_STAGE1.ordinal ||
-                this.relay6Enabled.enabled && this.relay6Association.associationVal == CpuRelayType.COOLING_STAGE1.ordinal ||
-                this.relay7Enabled.enabled && this.relay7Association.associationVal == CpuRelayType.COOLING_STAGE1.ordinal ||
-                this.relay8Enabled.enabled && this.relay8Association.associationVal == CpuRelayType.COOLING_STAGE1.ordinal
+    private fun isAnyRelayEnabledAndMapped(mapping: CpuRelayType): Boolean {
+        return this.relay1Enabled.enabled && this.relay1Association.associationVal == mapping.ordinal ||
+                this.relay2Enabled.enabled && this.relay2Association.associationVal == mapping.ordinal ||
+                this.relay3Enabled.enabled && this.relay3Association.associationVal == mapping.ordinal ||
+                this.relay4Enabled.enabled && this.relay4Association.associationVal == mapping.ordinal ||
+                this.relay5Enabled.enabled && this.relay5Association.associationVal == mapping.ordinal ||
+                this.relay6Enabled.enabled && this.relay6Association.associationVal == mapping.ordinal ||
+                this.relay7Enabled.enabled && this.relay7Association.associationVal == mapping.ordinal ||
+                this.relay8Enabled.enabled && this.relay8Association.associationVal == mapping.ordinal
     }
 
-    fun isCoolStage2Enabled() : Boolean {
-        return this.relay1Enabled.enabled && this.relay1Association.associationVal == CpuRelayType.COOLING_STAGE2.ordinal ||
-                this.relay2Enabled.enabled && this.relay2Association.associationVal == CpuRelayType.COOLING_STAGE2.ordinal ||
-                this.relay3Enabled.enabled && this.relay3Association.associationVal == CpuRelayType.COOLING_STAGE2.ordinal ||
-                this.relay4Enabled.enabled && this.relay4Association.associationVal == CpuRelayType.COOLING_STAGE2.ordinal ||
-                this.relay5Enabled.enabled && this.relay5Association.associationVal == CpuRelayType.COOLING_STAGE2.ordinal ||
-                this.relay6Enabled.enabled && this.relay6Association.associationVal == CpuRelayType.COOLING_STAGE2.ordinal ||
-                this.relay7Enabled.enabled && this.relay7Association.associationVal == CpuRelayType.COOLING_STAGE2.ordinal ||
-                this.relay8Enabled.enabled && this.relay8Association.associationVal == CpuRelayType.COOLING_STAGE2.ordinal
-    }
+    private fun isAnyAnalogEnabledAndMapped(mapping: CpuControlType): Boolean {
+    return this.analogOut1Enabled.enabled && this.analogOut1Association.associationVal == mapping.ordinal ||
+            this.analogOut2Enabled.enabled && this.analogOut2Association.associationVal == mapping.ordinal ||
+            this.analogOut3Enabled.enabled && this.analogOut3Association.associationVal == mapping.ordinal ||
+            this.analogOut4Enabled.enabled && this.analogOut4Association.associationVal == mapping.ordinal
+}
 
-    fun isCoolStage3Enabled() : Boolean {
-        return this.relay1Enabled.enabled && this.relay1Association.associationVal == CpuRelayType.COOLING_STAGE3.ordinal ||
-                this.relay2Enabled.enabled && this.relay2Association.associationVal == CpuRelayType.COOLING_STAGE3.ordinal ||
-                this.relay3Enabled.enabled && this.relay3Association.associationVal == CpuRelayType.COOLING_STAGE3.ordinal ||
-                this.relay4Enabled.enabled && this.relay4Association.associationVal == CpuRelayType.COOLING_STAGE3.ordinal ||
-                this.relay5Enabled.enabled && this.relay5Association.associationVal == CpuRelayType.COOLING_STAGE3.ordinal ||
-                this.relay6Enabled.enabled && this.relay6Association.associationVal == CpuRelayType.COOLING_STAGE3.ordinal ||
-                this.relay7Enabled.enabled && this.relay7Association.associationVal == CpuRelayType.COOLING_STAGE3.ordinal ||
-                this.relay8Enabled.enabled && this.relay8Association.associationVal == CpuRelayType.COOLING_STAGE3.ordinal
-    }
+    fun isCoolStage1Enabled() = isAnyRelayEnabledAndMapped(CpuRelayType.COOLING_STAGE1)
+    fun isCoolStage2Enabled() = isAnyRelayEnabledAndMapped(CpuRelayType.COOLING_STAGE2)
+    fun isCoolStage3Enabled() = isAnyRelayEnabledAndMapped(CpuRelayType.COOLING_STAGE3)
 
-    fun isHeatStage1Enabled() : Boolean {
-        return this.relay1Enabled.enabled && this.relay1Association.associationVal == CpuRelayType.HEATING_STAGE1.ordinal ||
-                this.relay2Enabled.enabled && this.relay2Association.associationVal == CpuRelayType.HEATING_STAGE1.ordinal ||
-                this.relay3Enabled.enabled && this.relay3Association.associationVal == CpuRelayType.HEATING_STAGE1.ordinal ||
-                this.relay4Enabled.enabled && this.relay4Association.associationVal == CpuRelayType.HEATING_STAGE1.ordinal ||
-                this.relay5Enabled.enabled && this.relay5Association.associationVal == CpuRelayType.HEATING_STAGE1.ordinal ||
-                this.relay6Enabled.enabled && this.relay6Association.associationVal == CpuRelayType.HEATING_STAGE1.ordinal ||
-                this.relay7Enabled.enabled && this.relay7Association.associationVal == CpuRelayType.HEATING_STAGE1.ordinal ||
-                this.relay8Enabled.enabled && this.relay8Association.associationVal == CpuRelayType.HEATING_STAGE1.ordinal
-    }
+    fun isHeatStage1Enabled() = isAnyRelayEnabledAndMapped(CpuRelayType.HEATING_STAGE1)
+    fun isHeatStage2Enabled() = isAnyRelayEnabledAndMapped(CpuRelayType.HEATING_STAGE2)
+    fun isHeatStage3Enabled() = isAnyRelayEnabledAndMapped(CpuRelayType.HEATING_STAGE3)
 
-    fun isHeatStage2Enabled() : Boolean {
-        return this.relay1Enabled.enabled && this.relay1Association.associationVal == CpuRelayType.HEATING_STAGE2.ordinal ||
-                this.relay2Enabled.enabled && this.relay2Association.associationVal == CpuRelayType.HEATING_STAGE2.ordinal ||
-                this.relay3Enabled.enabled && this.relay3Association.associationVal == CpuRelayType.HEATING_STAGE2.ordinal ||
-                this.relay4Enabled.enabled && this.relay4Association.associationVal == CpuRelayType.HEATING_STAGE2.ordinal ||
-                this.relay5Enabled.enabled && this.relay5Association.associationVal == CpuRelayType.HEATING_STAGE2.ordinal ||
-                this.relay6Enabled.enabled && this.relay6Association.associationVal == CpuRelayType.HEATING_STAGE2.ordinal ||
-                this.relay7Enabled.enabled && this.relay7Association.associationVal == CpuRelayType.HEATING_STAGE2.ordinal ||
-                this.relay8Enabled.enabled && this.relay8Association.associationVal == CpuRelayType.HEATING_STAGE2.ordinal
-    }
+    fun isFanLowEnabled() = isAnyRelayEnabledAndMapped(CpuRelayType.FAN_LOW_SPEED)
+    fun isFanMediumEnabled() = isAnyRelayEnabledAndMapped(CpuRelayType.FAN_MEDIUM_SPEED)
+    fun isFanHighEnabled() = isAnyRelayEnabledAndMapped(CpuRelayType.FAN_HIGH_SPEED)
 
-    fun isHeatStage3Enabled() : Boolean {
-        return this.relay1Enabled.enabled && this.relay1Association.associationVal == CpuRelayType.HEATING_STAGE3.ordinal ||
-                this.relay2Enabled.enabled && this.relay2Association.associationVal == CpuRelayType.HEATING_STAGE3.ordinal ||
-                this.relay3Enabled.enabled && this.relay3Association.associationVal == CpuRelayType.HEATING_STAGE3.ordinal ||
-                this.relay4Enabled.enabled && this.relay4Association.associationVal == CpuRelayType.HEATING_STAGE3.ordinal ||
-                this.relay5Enabled.enabled && this.relay5Association.associationVal == CpuRelayType.HEATING_STAGE3.ordinal ||
-                this.relay6Enabled.enabled && this.relay6Association.associationVal == CpuRelayType.HEATING_STAGE3.ordinal ||
-                this.relay7Enabled.enabled && this.relay7Association.associationVal == CpuRelayType.HEATING_STAGE3.ordinal ||
-                this.relay8Enabled.enabled && this.relay8Association.associationVal == CpuRelayType.HEATING_STAGE3.ordinal
-    }
+    fun isFanEnabled() = isAnyRelayEnabledAndMapped(CpuRelayType.FAN_ENABLED)
 
-    fun isFanLowRelayEnabled() : Boolean {
-        return this.relay1Enabled.enabled && this.relay1Association.associationVal == CpuRelayType.FAN_LOW_SPEED.ordinal ||
-                this.relay2Enabled.enabled && this.relay2Association.associationVal == CpuRelayType.FAN_LOW_SPEED.ordinal ||
-                this.relay3Enabled.enabled && this.relay3Association.associationVal == CpuRelayType.FAN_LOW_SPEED.ordinal ||
-                this.relay4Enabled.enabled && this.relay4Association.associationVal == CpuRelayType.FAN_LOW_SPEED.ordinal ||
-                this.relay5Enabled.enabled && this.relay5Association.associationVal == CpuRelayType.FAN_LOW_SPEED.ordinal ||
-                this.relay6Enabled.enabled && this.relay6Association.associationVal == CpuRelayType.FAN_LOW_SPEED.ordinal ||
-                this.relay7Enabled.enabled && this.relay7Association.associationVal == CpuRelayType.FAN_LOW_SPEED.ordinal ||
-                this.relay8Enabled.enabled && this.relay8Association.associationVal == CpuRelayType.FAN_LOW_SPEED.ordinal
-    }
 
-    fun isFanMediumRelayEnabled() : Boolean {
-        return this.relay1Enabled.enabled && this.relay1Association.associationVal == CpuRelayType.FAN_MEDIUM_SPEED.ordinal ||
-                this.relay2Enabled.enabled && this.relay2Association.associationVal == CpuRelayType.FAN_MEDIUM_SPEED.ordinal ||
-                this.relay3Enabled.enabled && this.relay3Association.associationVal == CpuRelayType.FAN_MEDIUM_SPEED.ordinal ||
-                this.relay4Enabled.enabled && this.relay4Association.associationVal == CpuRelayType.FAN_MEDIUM_SPEED.ordinal ||
-                this.relay5Enabled.enabled && this.relay5Association.associationVal == CpuRelayType.FAN_MEDIUM_SPEED.ordinal ||
-                this.relay6Enabled.enabled && this.relay6Association.associationVal == CpuRelayType.FAN_MEDIUM_SPEED.ordinal ||
-                this.relay7Enabled.enabled && this.relay7Association.associationVal == CpuRelayType.FAN_MEDIUM_SPEED.ordinal ||
-                this.relay8Enabled.enabled && this.relay8Association.associationVal == CpuRelayType.FAN_MEDIUM_SPEED.ordinal
-    }
 
-    fun isFanHighRelayEnabled() : Boolean {
-        return this.relay1Enabled.enabled && this.relay1Association.associationVal == CpuRelayType.FAN_HIGH_SPEED.ordinal ||
-                this.relay2Enabled.enabled && this.relay2Association.associationVal == CpuRelayType.FAN_HIGH_SPEED.ordinal ||
-                this.relay3Enabled.enabled && this.relay3Association.associationVal == CpuRelayType.FAN_HIGH_SPEED.ordinal ||
-                this.relay4Enabled.enabled && this.relay4Association.associationVal == CpuRelayType.FAN_HIGH_SPEED.ordinal ||
-                this.relay5Enabled.enabled && this.relay5Association.associationVal == CpuRelayType.FAN_HIGH_SPEED.ordinal ||
-                this.relay6Enabled.enabled && this.relay6Association.associationVal == CpuRelayType.FAN_HIGH_SPEED.ordinal ||
-                this.relay7Enabled.enabled && this.relay7Association.associationVal == CpuRelayType.FAN_HIGH_SPEED.ordinal ||
-                this.relay8Enabled.enabled && this.relay8Association.associationVal == CpuRelayType.FAN_HIGH_SPEED.ordinal
-    }
-
-    fun isAnalogCoolingEnabled() : Boolean {
-        return this.analogOut1Enabled.enabled && this.analogOut1Association.associationVal == CpuControlType.COOLING.ordinal ||
-                this.analogOut2Enabled.enabled && this.analogOut2Association.associationVal == CpuControlType.COOLING.ordinal ||
-                this.analogOut3Enabled.enabled && this.analogOut3Association.associationVal == CpuControlType.COOLING.ordinal ||
-                this.analogOut4Enabled.enabled && this.analogOut4Association.associationVal == CpuControlType.COOLING.ordinal
-    }
-
-    fun isAnalogHeatingEnabled() : Boolean {
-        return this.analogOut1Enabled.enabled && this.analogOut1Association.associationVal == CpuControlType.HEATING.ordinal ||
-                this.analogOut2Enabled.enabled && this.analogOut2Association.associationVal == CpuControlType.HEATING.ordinal ||
-                this.analogOut3Enabled.enabled && this.analogOut3Association.associationVal == CpuControlType.HEATING.ordinal ||
-                this.analogOut4Enabled.enabled && this.analogOut4Association.associationVal == CpuControlType.HEATING.ordinal
-    }
-
-    fun isLinearFanEnabled() : Boolean {
-        return this.analogOut1Enabled.enabled && this.analogOut1Association.associationVal == CpuControlType.LINEAR_FAN.ordinal ||
-                this.analogOut2Enabled.enabled && this.analogOut2Association.associationVal == CpuControlType.LINEAR_FAN.ordinal ||
-                this.analogOut3Enabled.enabled && this.analogOut3Association.associationVal == CpuControlType.LINEAR_FAN.ordinal ||
-                this.analogOut4Enabled.enabled && this.analogOut4Association.associationVal == CpuControlType.LINEAR_FAN.ordinal
-    }
-
-    fun isStagedFanEnabled() : Boolean {
-        return this.analogOut1Enabled.enabled && this.analogOut1Association.associationVal == CpuControlType.STAGED_FAN.ordinal ||
-                this.analogOut2Enabled.enabled && this.analogOut2Association.associationVal == CpuControlType.STAGED_FAN.ordinal ||
-                this.analogOut3Enabled.enabled && this.analogOut3Association.associationVal == CpuControlType.STAGED_FAN.ordinal ||
-                this.analogOut4Enabled.enabled && this.analogOut4Association.associationVal == CpuControlType.STAGED_FAN.ordinal
-    }
+    fun isAnalogCoolingEnabled() = isAnyAnalogEnabledAndMapped(CpuControlType.COOLING)
+    fun isAnalogHeatingEnabled() = isAnyAnalogEnabledAndMapped(CpuControlType.HEATING)
+    fun isLinearFanEnabled() = isAnyAnalogEnabledAndMapped(CpuControlType.LINEAR_FAN)
+    fun isStagedFanEnabled() = isAnyAnalogEnabledAndMapped(CpuControlType.STAGED_FAN)
 
 }
 

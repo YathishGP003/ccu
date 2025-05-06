@@ -12,7 +12,6 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
-
 import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2Configuration
 import a75f.io.logic.bo.building.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile
 import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatConfiguration
@@ -25,12 +24,10 @@ import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewStateUtil
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
-import a75f.io.renatus.util.showErrorDialog
 import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.text.Html
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective

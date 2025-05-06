@@ -12,5 +12,6 @@ enum class AnalogOutput {
     DCV_DAMPER,
     WATER_VALVE,
     OAO_DAMPER,
-    RETURN_DAMPER
+    RETURN_DAMPER,
+    FAN_ENABLED
 }

@@ -1,29 +1,20 @@
 package a75f.io.logic.util.uiutils
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.Point
 import a75f.io.domain.api.DomainName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.EpidemicState
 import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.bo.building.hvac.AnalogOutput
-import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HsPipe2RelayMapping
 import a75f.io.logic.bo.building.hyperstatsplit.common.BasicSettings
-import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.interfaces.ZoneDataInterface
-import a75f.io.logic.tuners.TunerConstants
-import a75f.io.util.ExecutorTask
-import org.projecthaystack.HNum
-import org.projecthaystack.HRef
 import kotlin.collections.set
 
 
 /**
- * Created for HyperStat by Manjunath K on 11-08-2021.
  * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 class HyperStatSplitUserIntentHandler {
@@ -32,10 +23,8 @@ class HyperStatSplitUserIntentHandler {
 
         var zoneDataInterface: ZoneDataInterface? = null
         var hyperStatSplitStatus: HashMap<String, String> = HashMap()
-
-        private fun getHyperStatSplitStatusString(equipRef: String?): String? {
-            return if (hyperStatSplitStatus.size > 0 && hyperStatSplitStatus.containsKey(equipRef))
-                hyperStatSplitStatus[equipRef] else "OFF"
+        private fun getHyperStatSplitStatusString(equipRef: String?): String {
+            return hyperStatSplitStatus[equipRef] ?: "OFF"
         }
 
         fun updateHyperStatSplitStatus(
@@ -52,161 +41,28 @@ class HyperStatSplitUserIntentHandler {
             basicSettings: BasicSettings,
             epidemicState: EpidemicState
         ) {
-            var status: String
-            status = when (temperatureState) {
-                ZoneTempState.RF_DEAD -> "RF Signal dead "
-                ZoneTempState.TEMP_DEAD -> "Zone Temp Dead "
-                ZoneTempState.EMERGENCY -> "Emergency "
-                ZoneTempState.NONE -> ""
-                ZoneTempState.FAN_OP_MODE_OFF -> "OFF "
-            }
 
-            if (epidemicState == EpidemicState.PREPURGE) {
-                status += "In Pre Purge "
-            }
+            var status = getStatusMsg(portStages, analogOutStages, temperatureState, epidemicState)
+            val haystack: CCUHsApi = CCUHsApi.getInstance()
+            if(analogOutStages.containsKey(AnalogOutput.OAO_DAMPER.name)) {
+                if(status.isNotBlank()
+                    && (status[status.length-2]!=',')
+                    && (status[status.length-2]!='|'))
+                    status += ", "
 
-            if (portStages.containsKey(Stage.COOLING_1.displayName)
-                && portStages.containsKey(Stage.COOLING_2.displayName)
-                && portStages.containsKey(Stage.COOLING_3.displayName)
-            ) {
-                status += "Cooling 1,2&3 ON "
-            } else if (portStages.containsKey(Stage.COOLING_1.displayName)
-                && portStages.containsKey(Stage.COOLING_2.displayName)
-            ) {
-                status += "Cooling 1&2 ON "
-            } else if (portStages.containsKey(Stage.COOLING_1.displayName)
-                && portStages.containsKey(Stage.COOLING_3.displayName)
-            ) {
-                status += "Cooling 1&3 ON "
-            } else if (portStages.containsKey(Stage.COOLING_2.displayName)
-                && portStages.containsKey(Stage.COOLING_3.displayName)
-            ) {
-                status += "Cooling 2&3 ON "
-            } else if (portStages.containsKey(Stage.COOLING_1.displayName)) {
-                status += "Cooling 1 ON "
-            } else if (portStages.containsKey(Stage.COOLING_2.displayName)) {
-                status += "Cooling 2 ON "
-            } else if (portStages.containsKey(Stage.COOLING_3.displayName)) {
-                status += "Cooling 3 ON "
-            }
-            if (portStages.containsKey(Stage.HEATING_1.displayName)
-                && portStages.containsKey(Stage.HEATING_2.displayName)
-                && portStages.containsKey(Stage.HEATING_3.displayName)
-            ) {
-                status += "Heating 1,2&3 ON "
-            } else if (portStages.containsKey(Stage.HEATING_1.displayName)
-                && portStages.containsKey(Stage.HEATING_2.displayName)
-            ) {
-                status += "Heating 1&2 ON "
-            } else if (portStages.containsKey(Stage.HEATING_1.displayName)
-                && portStages.containsKey(Stage.HEATING_3.displayName)
-            ) {
-                status += "Heating 1&3 ON "
-            } else if (portStages.containsKey(Stage.HEATING_2.displayName)
-                && portStages.containsKey(Stage.HEATING_3.displayName)
-            ) {
-                status += "Heating 2&3 ON "
-            } else if (portStages.containsKey(Stage.HEATING_1.displayName)) {
-                status += "Heating 1 ON "
-            } else if (portStages.containsKey(Stage.HEATING_2.displayName)) {
-                status += "Heating 2 ON "
-            } else if (portStages.containsKey(Stage.HEATING_3.displayName)) {
-                status += "Heating 3 ON "
-            }
-
-            if (portStages.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE1.name)
-                && portStages.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE2.name)
-            ) {
-                status += "Aux Heating 1&2 ON"
-            } else if (portStages.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE1.name)) {
-                status += "Aux Heating1 ON"
-            } else if (portStages.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE2.name)) {
-                status += "Aux Heating2 ON"
-            }
-            if (portStages.containsKey(HsPipe2RelayMapping.WATER_VALVE.name)){
-                status += if (status.isNotBlank())
-                    ", Water Valve ON"
-                else
-                    "Water Valve ON"
-            }
-
-            if (temperatureState != ZoneTempState.FAN_OP_MODE_OFF && temperatureState != ZoneTempState.TEMP_DEAD) {
-                if (status == "OFF " && portStages.size > 0) status = ""
-
-                if ((portStages.containsKey(Stage.FAN_1.displayName)
-                    || portStages.containsKey(Stage.FAN_2.displayName)
-                    || portStages.containsKey(Stage.FAN_3.displayName)) && status.isNotBlank()){
-                    status +=", "
-                }
-                if (portStages.containsKey(Stage.FAN_1.displayName)
-                    && portStages.containsKey(Stage.FAN_2.displayName)
-                    && portStages.containsKey(Stage.FAN_3.displayName)
-                ) {
-                    status += "Fan 1,2&3 ON"
-
-                } else if (portStages.containsKey(Stage.FAN_1.displayName)
-                    && portStages.containsKey(Stage.FAN_2.displayName)
-                ) {
-                    status += "Fan 1&2 ON"
-                } else if (portStages.containsKey(Stage.FAN_1.displayName)
-                    && portStages.containsKey(Stage.FAN_3.displayName)
-                ) {
-                    status += "Fan 1&3 ON"
-                } else if (portStages.containsKey(Stage.FAN_2.displayName)
-                    && portStages.containsKey(Stage.FAN_3.displayName)
-                ) {
-                    status += "Fan 2&3 ON"
-                } else if (portStages.containsKey(Stage.FAN_1.displayName)) {
-                    status += "Fan 1 ON"
-                } else if (portStages.containsKey(Stage.FAN_2.displayName)) {
-                    status += "Fan 2 ON"
-                } else if (portStages.containsKey(Stage.FAN_3.displayName)) {
-                    status += "Fan 3 ON"
-                }
-
-            }
-
-            if(analogOutStages.isNotEmpty()){
-                if (status == "OFF " || status.isBlank()) status = "" else status += ", "
-
-                if(analogOutStages.containsKey(AnalogOutput.COOLING.name))
-                    status += "Cooling Analog ON"
-
-                if(analogOutStages.containsKey(AnalogOutput.HEATING.name)) {
-                    if(status.isNotBlank()
-                        && (status[status.length-2]!=',')
-                        && (status[status.length-2]!='|'))
-                        status += " | "
-                    status += "Heating Analog ON"
-                }
-
-                if(analogOutStages.containsKey(AnalogOutput.FAN_SPEED.name)) {
-                    if(status.isNotBlank()
-                        && (status[status.length-2]!=',')
-                        && (status[status.length-2]!='|'))
-                        status += " | "
-                    status += "Fan Analog ON"
-                }
-
-                if(analogOutStages.containsKey(AnalogOutput.OAO_DAMPER.name)) {
-                    if(status.isNotBlank()
-                        && (status[status.length-2]!=',')
-                        && (status[status.length-2]!='|'))
-                        status += ", "
-
-                    /**
-                     * OAO behavior is surprisingly hard to explain in a status message.
-                     * I *think* this code captures all the possible edge cases.
-                      */
-                    if (outsideAirFinalLoopOutput > outsideDamperMinOpen && !(condensateOverflow > 0.0)) {
-                        if(economizingLoopOutput > outsideDamperMinOpen && (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO || basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY)) {
-                            status += "Free Cooling ON"
-                            if (dcvLoopOutput > outsideDamperMinOpen) {
-                                status += ", DCV ON"
-                            }
-                        } else if (dcvLoopOutput > outsideDamperMinOpen) {
-                            status += "DCV ON"
+                /**
+                 * OAO behavior is surprisingly hard to explain in a status message.
+                 * I *think* this code captures all the possible edge cases.
+                 */
+                if (outsideAirFinalLoopOutput > outsideDamperMinOpen && !(condensateOverflow > 0.0)) {
+                    if(economizingLoopOutput > outsideDamperMinOpen && (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
+                                || basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY)) {
+                        status += "Free Cooling ON"
+                        if (dcvLoopOutput > outsideDamperMinOpen) {
+                            status += ", DCV ON"
                         }
+                    } else if (dcvLoopOutput > outsideDamperMinOpen) {
+                        status += "DCV ON"
                     }
                 }
             }
@@ -239,15 +95,14 @@ class HyperStatSplitUserIntentHandler {
                 status += "Replace Filter"
             }
 
-            if (getHyperStatSplitStatusString(equipId) != status) {
-                if (hyperStatSplitStatus.containsKey(equipId)) hyperStatSplitStatus.remove(
-                    equipId
-                )
+            if (!hyperStatSplitStatus.containsKey(equipId)
+                || !getHyperStatSplitStatusString(equipId).contentEquals(status)) {
+                if (hyperStatSplitStatus.containsKey(equipId)) hyperStatSplitStatus.remove(equipId)
                 hyperStatSplitStatus[equipId] = status
-                if (status.isEmpty()) status = " OFF"
 
-                CCUHsApi.getInstance().writeDefaultVal(
-                    "point and domainName == \"" + DomainName.equipStatusMessage + "\" and equipRef == \"$equipId\"", status
+                haystack.writeDefaultVal(
+                    "point and domainName == \"" + DomainName.equipStatusMessage + "\" and equipRef == \"$equipId\"",
+                    status
                 )
                 zoneDataInterface?.refreshScreen("", false)
             }
@@ -268,58 +123,23 @@ class HyperStatSplitUserIntentHandler {
 
             // Ignore a change to LOW_CUR_OCC if current Fan Mode is LOW_CUR_OCC, LOW_OCC, or LOW_ALL_TIMES
             val isAlreadyFanLow = userIntentFanMode == StandaloneFanStage.LOW_CUR_OCC.ordinal &&
-                    (currentFanMode == StandaloneFanStage.LOW_CUR_OCC.ordinal || currentFanMode == StandaloneFanStage.LOW_OCC.ordinal || currentFanMode == StandaloneFanStage.LOW_ALL_TIME.ordinal)
+                    (currentFanMode == StandaloneFanStage.LOW_CUR_OCC.ordinal ||
+                            currentFanMode == StandaloneFanStage.LOW_OCC.ordinal ||
+                            currentFanMode == StandaloneFanStage.LOW_ALL_TIME.ordinal)
 
             // Ignore a change to MEDIUM_CUR_OCC if current Fan Mode is MEDIUM_CUR_OCC, MEDIUM_OCC, or MEDIUM_ALL_TIMES
             val isAlreadyFanMedium = userIntentFanMode == StandaloneFanStage.MEDIUM_CUR_OCC.ordinal &&
-                    (currentFanMode == StandaloneFanStage.MEDIUM_CUR_OCC.ordinal || currentFanMode == StandaloneFanStage.MEDIUM_OCC.ordinal || currentFanMode == StandaloneFanStage.MEDIUM_ALL_TIME.ordinal)
+                    (currentFanMode == StandaloneFanStage.MEDIUM_CUR_OCC.ordinal ||
+                            currentFanMode == StandaloneFanStage.MEDIUM_OCC.ordinal ||
+                            currentFanMode == StandaloneFanStage.MEDIUM_ALL_TIME.ordinal)
 
             // Ignore a change to HIGH_CUR_OCC if current Fan Mode is HIGH_CUR_OCC, HIGH_OCC, or HIGH_ALL_TIMES
             val isAlreadyFanHigh = userIntentFanMode == StandaloneFanStage.HIGH_CUR_OCC.ordinal &&
-                    (currentFanMode == StandaloneFanStage.HIGH_CUR_OCC.ordinal || currentFanMode == StandaloneFanStage.HIGH_OCC.ordinal || currentFanMode == StandaloneFanStage.HIGH_ALL_TIME.ordinal)
+                    (currentFanMode == StandaloneFanStage.HIGH_CUR_OCC.ordinal ||
+                            currentFanMode == StandaloneFanStage.HIGH_OCC.ordinal ||
+                            currentFanMode == StandaloneFanStage.HIGH_ALL_TIME.ordinal)
 
             return (isAlreadyFanOff || isAlreadyFanAuto || isAlreadyFanLow || isAlreadyFanMedium || isAlreadyFanHigh)
         }
-
-        fun updateHyperStatSplitUIPoints(equipRef: String, command: String, value: Double, who: String) {
-
-            val haystack: CCUHsApi = CCUHsApi.getInstance()
-            ExecutorTask.executeAsync(
-                { },
-                {
-                    val currentData = haystack.readEntity(
-                        "point and $command and equipRef == \"$equipRef\""
-                    )
-                    if (currentData?.get("id") != null) {
-
-                        val id: String = currentData["id"].toString()
-                        val pointDetails = Point.Builder().setHashMap(haystack.readMapById(id)).build()
-
-                        if(pointDetails.markers.contains("writable")){
-                            CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, " updated point write $id")
-                            haystack.pointWrite(
-                                HRef.copy(id),
-                                TunerConstants.UI_DEFAULT_VAL_LEVEL,
-                                who,
-                                HNum.make(value),
-                                HNum.make(0)
-                            )
-                        }
-                        if(pointDetails.markers.contains("his")){
-                            CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, " updated his write $id")
-                            haystack.writeHisValById(id, value)
-                        }
-                        DesiredTempDisplayMode.setModeType(pointDetails.roomRef, CCUHsApi.getInstance())
-                    }
-                    CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, " update HyperStat Split UI Points work done")
-
-                },
-                {
-
-                }
-            )
-
-        }
-
     }
 }

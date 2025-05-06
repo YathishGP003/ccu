@@ -122,6 +122,10 @@ private fun updateMyStatFanMode(equip: MyStatEquip, fanLevel: Int) {
         equip.fanOpMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
         return
     }
+    if (possibleFanMode == MyStatPossibleFanMode.AUTO) {
+        equip.fanOpMode.writePointValue(StandaloneConditioningMode.AUTO.ordinal.toDouble())
+        return
+    }
     val currentFanMode = MyStatFanStages.values()[equip.fanOpMode.readPriorityVal().toInt()]
     if (currentFanMode != MyStatFanStages.AUTO) {
 

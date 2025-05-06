@@ -1,8 +1,8 @@
 package a75f.io.logic.bo.building.hyperstatsplit.common
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.HyperStatSplitEquip
+import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
@@ -12,12 +12,10 @@ import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToHeating
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 
 /**
- * Created for HyperStat by Manjunath K on 06-08-2021.
  * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 class HSSplitHaystackUtil(
@@ -32,19 +30,19 @@ class HSSplitHaystackUtil(
             try {
                 val equip = CCUHsApi.getInstance().readEntity("equip and group == \"${node}\"")
 
-                if (!equip.isEmpty() && equip.containsKey("profile")) {
+                if (equip.isNotEmpty() && equip.containsKey("profile")) {
                     // Add conditioning status
-                    val config = when (equip.get("profile").toString()) {
+                    val config = when (equip["profile"].toString()) {
                         ProfileType.HYPERSTATSPLIT_CPU.name -> HyperStatSplitCpuProfileConfiguration(
                             node, NodeType.HYPERSTATSPLIT.name, 0,
-                            equip.get("roomRef").toString(), equip.get("floorRef").toString(),
+                            equip["roomRef"].toString(), equip["floorRef"].toString(),
                             ProfileType.HYPERSTATSPLIT_CPU, ModelLoader.getHyperStatSplitCpuModel() as SeventyFiveFProfileDirective
                         ).getActiveConfiguration()
 
                         // this case should never happen
                         else -> HyperStatSplitCpuProfileConfiguration(
                             node, NodeType.HYPERSTATSPLIT.name, 0,
-                            equip.get("roomRef").toString(), equip.get("floorRef").toString(),
+                            equip["roomRef"].toString(), equip["floorRef"].toString(),
                             ProfileType.HYPERSTATSPLIT_CPU, ModelLoader.getHyperStatSplitCpuModel() as SeventyFiveFProfileDirective
                         ).getActiveConfiguration()
 
@@ -119,14 +117,14 @@ class HSSplitHaystackUtil(
 
                 val equip = CCUHsApi.getInstance().readEntity("equip and group == \"${node}\"")
 
-                if (!equip.isEmpty() && equip.containsKey("profile")) {
-                    val config = when (equip.get("profile").toString()) {
+                if (equip.isNotEmpty() && equip.containsKey("profile")) {
+                    val config = when (equip["profile"].toString()) {
                         ProfileType.HYPERSTATSPLIT_CPU.name -> HyperStatSplitCpuProfileConfiguration(
                             node,
                             NodeType.HYPERSTATSPLIT.name,
                             0,
-                            equip.get("roomRef").toString(),
-                            equip.get("floorRef").toString(),
+                            equip["roomRef"].toString(),
+                            equip["floorRef"].toString(),
                             ProfileType.HYPERSTATSPLIT_CPU,
                             ModelLoader.getHyperStatSplitCpuModel() as SeventyFiveFProfileDirective
                         ).getActiveConfiguration()
@@ -136,15 +134,16 @@ class HSSplitHaystackUtil(
                             node,
                             NodeType.HYPERSTATSPLIT.name,
                             0,
-                            equip.get("roomRef").toString(),
-                            equip.get("floorRef").toString(),
+                            equip["roomRef"].toString(),
+                            equip["floorRef"].toString(),
                             ProfileType.HYPERSTATSPLIT_CPU,
                             ModelLoader.getHyperStatSplitCpuModel() as SeventyFiveFProfileDirective
                         ).getActiveConfiguration()
 
                     }
 
-                    val fanLevel = HyperStatSplitAssociationUtil.getSelectedFanLevel(config as HyperStatSplitCpuProfileConfiguration)
+                    val fanLevel = HyperStatSplitAssociationUtil.getSelectedFanLevel(config)
+                    if (fanLevel == 1) return PossibleFanMode.AUTO
                     if (fanLevel == 6) return PossibleFanMode.LOW
                     if (fanLevel == 7) return PossibleFanMode.MED
                     if (fanLevel == 8) return PossibleFanMode.HIGH
@@ -161,14 +160,7 @@ class HSSplitHaystackUtil(
             return PossibleFanMode.OFF
         }
 
-        fun getActualFanMode(nodeAddress: String, position: Int): Int{
-            val hssCpuProfile = L.getProfile(nodeAddress.toShort()) as HyperStatSplitCpuEconProfile
-            return HyperStatSplitAssociationUtil.getSelectedFanModeByLevel(
-                fanLevel = HyperStatSplitAssociationUtil.getSelectedFanLevel(hssCpuProfile.domainProfileConfiguration),
-                selectedFan = position
-            ).ordinal
 
-        }
         fun getActualFanMode(hssEquip: HyperStatSplitEquip, position: Int): Int{
             return HyperStatSplitAssociationUtil.getSelectedFanModeByLevel(
                 fanLevel = HyperStatSplitAssociationUtil.getSelectedFanLevel(hssEquip),
@@ -218,13 +210,6 @@ class HSSplitHaystackUtil(
     fun getCurrentTemp(): Double {
         return haystack.readHisValByQuery(
             "point and air and current and temp and sensor and equipRef == \"$equipRef\""
-        )
-    }
-
-    fun setProfilePoint(markers: String, value: Double) {
-        haystack.writeHisValByQuery(
-            "point and  his and $markers and equipRef == \"$equipRef\"",
-            value
         )
     }
 

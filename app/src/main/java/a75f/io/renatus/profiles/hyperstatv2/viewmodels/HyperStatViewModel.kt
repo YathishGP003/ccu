@@ -283,6 +283,11 @@ fun updateFanMode(isReconfigure: Boolean, equip: HyperStatEquip, fanLevel: Int) 
         resetFanToOff()
         return
     }
+    if (possibleFanMode == PossibleFanMode.AUTO) {
+        equip.fanOpMode.writePointValue(StandaloneFanStage.AUTO.ordinal.toDouble())
+        return
+    }
+
 
     if (isReconfigure) {
         val currentFanMode = StandaloneFanStage.values()[equip.fanOpMode.readPriorityVal().toInt()]

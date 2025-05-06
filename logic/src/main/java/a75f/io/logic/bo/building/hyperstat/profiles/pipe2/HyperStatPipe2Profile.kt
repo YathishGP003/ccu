@@ -1049,6 +1049,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             relayOutputPoints: HashMap<Int, String>, equip: Pipe2V2Equip, analogOutStages: HashMap<String, Int>
     ) {
 
+
         val relayMapping = HsPipe2RelayMapping.values().find { it.ordinal == association }
         when (relayMapping) {
 
@@ -1075,7 +1076,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                 }
             }
 
-            HsPipe2RelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput)
+            HsPipe2RelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput, relayStages)
             HsPipe2RelayMapping.OCCUPIED_ENABLED -> doOccupiedEnabled(port)
             HsPipe2RelayMapping.HUMIDIFIER -> doHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMinInsideHumidity, equip.zoneHumidity.readHisVal())
             HsPipe2RelayMapping.DEHUMIDIFIER -> doDeHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMaxInsideHumidity, equip.zoneHumidity.readHisVal())
@@ -1136,4 +1137,14 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
     override fun <T : BaseProfileConfiguration?> getProfileConfiguration(address: Short): T {
         TODO("Not using now")
     }
+
+    fun supplyDirection(): String {
+        return if (supplyWaterTempTh2 > heatingThreshold
+            || supplyWaterTempTh2 in coolingThreshold..heatingThreshold) {
+            "Heating"
+        } else {
+            "Cooling"
+        }
+    }
+
 }

@@ -248,7 +248,7 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
              * intentionally we are sending analogOutStages for dcv to handle status message
              */
             MyStatPipe2RelayMapping.DCV_DAMPER -> doDcvDamperOperation(equip, port, tuner.relayActivationHysteresis, analogOutStages, config.co2Threshold.currentVal, false)
-            MyStatPipe2RelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput)
+            MyStatPipe2RelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput, relayStages)
             MyStatPipe2RelayMapping.OCCUPIED_ENABLED -> doOccupiedEnabled(port)
             MyStatPipe2RelayMapping.HUMIDIFIER -> doHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMinInsideHumidity, equip.zoneHumidity.readHisVal())
             MyStatPipe2RelayMapping.DEHUMIDIFIER -> doDeHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMaxInsideHumidity, equip.zoneHumidity.readHisVal())
@@ -593,6 +593,8 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
         }
     }
     private fun resetAux(relayStages: HashMap<String, Int>) {
+        CcuLog.d(L.TAG_CCU_MSPIPE2, "Resetting Aux")
+        Thread.dumpStack()
         if (relayLogicalPoints.containsKey(MyStatPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal)) {
             resetLogicalPoint(relayLogicalPoints[MyStatPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal]!!)
         }
@@ -734,7 +736,8 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
             stage = MyStatPipe2RelayMapping.FAN_LOW_SPEED
             state = 1
             fanStatusMessage = Stage.FAN_1
-        } else if (analogLogicalPoints.containsKey(MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal)) {
+        } else if (analogLogicalPoints.containsKey(MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal)
+            || relayLogicalPoints.containsKey(MyStatPipe2RelayMapping.FAN_ENABLED.ordinal)) {
             stage = MyStatPipe2RelayMapping.FAN_ENABLED
             state = 1
         }

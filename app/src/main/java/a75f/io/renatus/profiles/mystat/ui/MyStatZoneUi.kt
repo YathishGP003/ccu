@@ -13,7 +13,6 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.MyStatFanStages
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
-import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus
 import a75f.io.logic.bo.building.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.mystat.configs.MyStatCpuConfiguration
@@ -30,7 +29,7 @@ import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPipe2FanLevel
 import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleConditionMode
 import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatSelectedConditioningMode
 import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatSelectedFanMode
-import a75f.io.logic.util.uiutils.MyStatUserIntentHandler
+import a75f.io.logic.util.uiutils.updateUserIntentPoints
 import a75f.io.renatus.R
 import a75f.io.renatus.profiles.mystat.CPU
 import a75f.io.renatus.profiles.mystat.HPU
@@ -204,7 +203,7 @@ private fun handleMyStatConditionMode(
             actualConditioningMode = StandaloneConditioningMode.values()[selectedPosition].ordinal
         }
         if (actualConditioningMode != -1) {
-            MyStatUserIntentHandler.updateMyStatUserIntentPoints(
+            updateUserIntentPoints(
                 equipId, conditioningMode,
                 actualConditioningMode.toDouble(),
                 CCUHsApi.getInstance().ccuUserName
@@ -270,7 +269,7 @@ private fun handleMyStatFanMode(
         }
         CcuLog.i(L.TAG_CCU_MSHST, "handleMyStatFanMode: $actualFanMode")
         if (actualFanMode != -1) {
-            MyStatUserIntentHandler.updateMyStatUserIntentPoints(
+            updateUserIntentPoints(
                 equipId, fanMode, actualFanMode.toDouble(), CCUHsApi.getInstance().ccuUserName
             )
             if (selectedPosition != 0 && ( selectedPosition % 3 == 0 || isFanModeCurrentOccupied(selectedPosition))) cacheStorage.saveFanModeInCache(
@@ -284,7 +283,7 @@ private fun handleMyStatFanMode(
 private fun handleMyStatHumidityMode(
     selectedPosition: Int, equipId: String, equip: MyStatEquip
 ) {
-    MyStatUserIntentHandler.updateMyStatUserIntentPoints(
+    updateUserIntentPoints(
         equipId, equip.targetHumidifier,
         (selectedPosition + 1).toDouble(),
         CCUHsApi.getInstance().ccuUserName
@@ -294,7 +293,7 @@ private fun handleMyStatHumidityMode(
 private fun handleMyStatDeHumidityMode(
     selectedPosition: Int, equipId: String, equip: MyStatEquip
 ) {
-    MyStatUserIntentHandler.updateMyStatUserIntentPoints(
+    updateUserIntentPoints(
         equipId, equip.targetDehumidifier,
         (selectedPosition + 1).toDouble(),
         CCUHsApi.getInstance().ccuUserName

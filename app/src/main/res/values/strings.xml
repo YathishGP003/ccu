@@ -415,6 +415,11 @@
         <!--<item>  Named Schedule</item>-->
     </string-array>
 
+    <string-array name="fan_off_auto">
+    <item>  Off </item>
+    <item>  Auto </item>
+    </string-array>
+
     <string-array name="smartstat_conditionmode">
         <item>  Off </item>
         <item>  Auto </item>

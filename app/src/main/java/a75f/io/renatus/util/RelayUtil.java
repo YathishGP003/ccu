@@ -24,6 +24,7 @@ public class RelayUtil {
     public static int getFanOptionByLevel(int fanLevel){
 
         if(fanLevel == 0) return R.array.smartstat_fanmode_off;
+        if(fanLevel == 1) return R.array.fan_off_auto;
         if(fanLevel == 6) return R.array.smartstat_fanmode_low;
         if(fanLevel == 7) return R.array.hyperstate_only_medium_fanmode;
         if(fanLevel == 8) return R.array.hyperstate_only_high_fanmode;

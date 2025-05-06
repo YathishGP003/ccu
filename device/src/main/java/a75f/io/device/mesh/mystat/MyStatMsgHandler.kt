@@ -44,7 +44,7 @@ import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleCondition
 import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.interfaces.ZoneDataInterface
-import a75f.io.logic.util.uiutils.MyStatUserIntentHandler.Companion.updateMyStatUserIntentPoints
+import a75f.io.logic.util.uiutils.updateUserIntentPoints
 import java.util.Calendar
 
 /**
@@ -210,7 +210,7 @@ private fun updateConditioningMode(
         )
         return
     }
-    updateMyStatUserIntentPoints(
+    updateUserIntentPoints(
         equip.equipRef,
         equip.conditioningMode,
         mode.ordinal.toDouble(),
@@ -224,10 +224,10 @@ private fun updateFanMode(
     possibleMode: MyStatPossibleFanMode, selectedMode: MyStat.MyStatFanSpeed_e, equip: MyStatEquip
 ) {
 
-    fun getFanLevel(lowActive: Boolean = false, highActive: Boolean = false): Int {
+    fun getFanLevel(lowActive: Boolean = false, highActive: Boolean = false, isFanEnabledPresent: Boolean = false): Int {
         return when (selectedMode) {
             MyStat.MyStatFanSpeed_e.MYSTAT_FAN_SPEED_OFF -> MyStatFanStages.OFF.ordinal
-            MyStat.MyStatFanSpeed_e.MYSTAT_FAN_SPEED_AUTO -> if (lowActive || highActive) MyStatFanStages.AUTO.ordinal else -1
+            MyStat.MyStatFanSpeed_e.MYSTAT_FAN_SPEED_AUTO -> if (lowActive || highActive || isFanEnabledPresent ) MyStatFanStages.AUTO.ordinal else -1
             MyStat.MyStatFanSpeed_e.MYSTAT_FAN_SPEED_LOW -> if (lowActive) MyStatFanStages.LOW_CUR_OCC.ordinal else -1
             MyStat.MyStatFanSpeed_e.MYSTAT_FAN_SPEED_HIGH -> if (highActive) MyStatFanStages.HIGH_CUR_OCC.ordinal else -1
             else -> -1
@@ -239,9 +239,10 @@ private fun updateFanMode(
         MyStatPossibleFanMode.LOW -> getFanLevel(lowActive = true)
         MyStatPossibleFanMode.HIGH -> getFanLevel(highActive = true)
         MyStatPossibleFanMode.LOW_HIGH -> getFanLevel(lowActive = true, highActive = true)
+        MyStatPossibleFanMode.AUTO -> getFanLevel(isFanEnabledPresent = true)
     }
     if (fanMode != -1) {
-        updateMyStatUserIntentPoints(
+        updateUserIntentPoints(
             equip.equipRef,
             equip.fanOpMode,
             fanMode.toDouble(),

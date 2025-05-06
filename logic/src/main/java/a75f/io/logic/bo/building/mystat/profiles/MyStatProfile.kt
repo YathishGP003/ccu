@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.mystat.profiles.util.updateLogicalPoint
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.util.uiutils.MyStatUserIntentHandler
 import a75f.io.logic.util.uiutils.MyStatUserIntentHandler.Companion.myStatStatus
+import a75f.io.logic.util.uiutils.updateUserIntentPoints
 
 /**
  * Created by Manjunath K on 16-01-2025.
@@ -43,12 +44,13 @@ abstract class MyStatProfile: ZoneProfile() {
     var dcvLoopOutput = 0
     var compressorLoopOutput = 0 // used in HPU
 
-    fun doFanEnabled(currentState: ZoneState, whichPort: Port, fanLoopOutput: Int) {
+    fun doFanEnabled(currentState: ZoneState, whichPort: Port, fanLoopOutput: Int, relayStages: HashMap<String, Int>){
         // Then Relay will be turned On when the zone is in occupied mode Or
         // any conditioning is happening during an unoccupied schedule
 
         if (occupancyStatus == Occupancy.OCCUPIED || fanLoopOutput > 0) {
             updateLogicalPoint(logicalPointsList[whichPort]!!, 1.0)
+            relayStages[AnalogOutput.FAN_ENABLED.name] = 1
         } else if (occupancyStatus != Occupancy.OCCUPIED || (currentState == ZoneState.COOLING || currentState == ZoneState.HEATING)) {
             updateLogicalPoint(logicalPointsList[whichPort]!!, 0.0)
         }
@@ -262,7 +264,7 @@ abstract class MyStatProfile: ZoneProfile() {
         logIt("Fan Details :$occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved")
         if (isEligibleToAuto(basicSettings,currentOccupancy)) {
             logIt("Resetting the Fan status back to  AUTO: ")
-            MyStatUserIntentHandler.updateMyStatUserIntentPoints(
+            updateUserIntentPoints(
                 equipRef = equipRef,
                 equip.fanOpMode,
                 value = MyStatFanStages.AUTO.ordinal.toDouble(),
@@ -278,7 +280,7 @@ abstract class MyStatProfile: ZoneProfile() {
                     || occupancyStatus == Occupancy.DEMAND_RESPONSE_OCCUPIED)
             && basicSettings.fanMode == MyStatFanStages.AUTO && fanModeSaved != 0) {
             logIt("Resetting the Fan status back to ${MyStatFanStages.values()[fanModeSaved]}")
-            MyStatUserIntentHandler.updateMyStatUserIntentPoints(
+            updateUserIntentPoints(
                 equipRef = equipRef,
                 equip.fanOpMode,
                 value = fanModeSaved.toDouble(),

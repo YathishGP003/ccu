@@ -165,7 +165,7 @@ class HyperStatSplitAssociationUtil {
             return isAnyRelayMapped(config,CpuRelayType.DEHUMIDIFIER)
         }
 
-        private fun isAnyRelayMapped(config: HyperStatSplitCpuProfileConfiguration, association: CpuRelayType): Boolean{
+        fun isAnyRelayMapped(config: HyperStatSplitCpuProfileConfiguration, association: CpuRelayType): Boolean{
             return when {
                 (config.relay1Enabled.enabled && config.relay1Association.associationVal == association.ordinal) -> true
                 (config.relay2Enabled.enabled && config.relay2Association.associationVal == association.ordinal) -> true
@@ -258,17 +258,17 @@ class HyperStatSplitAssociationUtil {
             if (fanEnabledStages.first) fanLevel += 6
             if (fanEnabledStages.second) fanLevel += 7
             if (fanEnabledStages.third) fanLevel += 8
+
+            if (fanLevel == 0 && (isAnyRelayMapped(config,CpuRelayType.FAN_ENABLED))) {
+                fanLevel = 1
+            }
+
             return fanLevel
         }
 
         fun getSelectedFanLevel(hssEquip: HyperStatSplitEquip): Int {
 
             var fanLevel = 0
-            var fanEnabledStages: Triple<Boolean, Boolean, Boolean> = Triple(
-                first = false,  //  Fan low
-                second = false, //  Fan Medium
-                third = false   //  Fan High
-            )
 
             if(hssEquip.linearFanSpeed.pointExists() || hssEquip.stagedFanSpeed.pointExists()) return 21 // All options are enabled due to
             // analog fan speed
@@ -276,6 +276,10 @@ class HyperStatSplitAssociationUtil {
             if (hssEquip.fanLowSpeed.pointExists()) fanLevel += 6
             if (hssEquip.fanMediumSpeed.pointExists()) fanLevel += 7
             if (hssEquip.fanHighSpeed.pointExists()) fanLevel += 8
+
+            if (fanLevel == 0 && hssEquip.fanEnable.pointExists()) {
+                fanLevel = 1
+            }
 
             return fanLevel
         }
@@ -625,7 +629,7 @@ class HyperStatSplitAssociationUtil {
             return StandaloneFanStage.OFF.ordinal
         }
 
-        fun isAnyAnalogOutMappedToStagedFan(
+        private fun isAnyAnalogOutMappedToStagedFan(
             hyperStatConfig: HyperStatSplitCpuProfileConfiguration,
         ): Boolean {
             return when {

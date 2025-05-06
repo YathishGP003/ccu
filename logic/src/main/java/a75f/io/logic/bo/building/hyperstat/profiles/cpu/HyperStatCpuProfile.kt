@@ -493,7 +493,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
                 }
             }
 
-            HsCpuRelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput)
+            HsCpuRelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput, relayStages)
             HsCpuRelayMapping.OCCUPIED_ENABLED -> doOccupiedEnabled(port)
             HsCpuRelayMapping.HUMIDIFIER -> doHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMinInsideHumidity, equip.zoneHumidity.readHisVal())
             HsCpuRelayMapping.DEHUMIDIFIER -> doDeHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMaxInsideHumidity, equip.zoneHumidity.readHisVal())

@@ -166,8 +166,14 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
     fun updateFanMode(isReconfigure: Boolean, equip: MyStatEquip, fanLevel: Int) {
 
         val possibleFanMode = getMyStatPossibleFanModeSettings(fanLevel)
+
         if (possibleFanMode == MyStatPossibleFanMode.OFF) {
             equip.fanOpMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
+            return
+        }
+
+        if (possibleFanMode == MyStatPossibleFanMode.AUTO) {
+            equip.fanOpMode.writePointValue(StandaloneConditioningMode.AUTO.ordinal.toDouble())
             return
         }
 

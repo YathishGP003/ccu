@@ -44,7 +44,7 @@ import kotlin.math.roundToInt
  *
  * Created for HyperStat Split CPU/Econ by Nick P on 07-24-2023.
  */
-class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : HyperStatSplitPackageUnitProfile(equipRef, nodeAddress) {
+class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Short) : HyperStatSplitPackageUnitProfile(equipRef, nodeAddress) {
 
     companion object {
 
@@ -60,8 +60,6 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
         }
 
     }
-
-    private val equipRef : String = equipRef
 
     private var wasCondensateTripped = false
 
@@ -99,7 +97,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
     override fun updateZonePoints() {
 
         if (Globals.getInstance().isTestMode) {
-            logIt("Test mode is on: ${nodeAddress}")
+            logIt("Test mode is on: $nodeAddress")
             return
         }
 
@@ -137,7 +135,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
         // It will revert to previous value when Condensate returns to normal
         val basicSettings = fetchBasicSettings(wasCondensateTripped, isCondensateTripped)
 
-        val updatedFanMode = fallBackFanMode(equipRef, fanModeSaved, basicSettings)
+        val updatedFanMode = fallBackFanMode(hssEquip, fanModeSaved, basicSettings)
         basicSettings.fanMode = updatedFanMode
 
         hyperstatSplitCPUEconAlgorithm.initialise(tuners = hyperStatSplitTuners)
@@ -236,14 +234,13 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
     }
 
     private fun getEffectiveOutsideDamperMinOpen(): Int {
-        var outsideDamperMinOpenFromConditioning : Double
-        if (isHeatingActive() || isCoolingActive() || hssEquip.economizingLoopOutput.readHisVal() > 0.0) {
-            outsideDamperMinOpenFromConditioning = hssEquip.outsideDamperMinOpenDuringConditioning.readDefaultVal()
+        val outsideDamperMinOpenFromConditioning : Double = if (isHeatingActive() || isCoolingActive() || hssEquip.economizingLoopOutput.readHisVal() > 0.0) {
+            hssEquip.outsideDamperMinOpenDuringConditioning.readDefaultVal()
         } else {
-            outsideDamperMinOpenFromConditioning = hssEquip.outsideDamperMinOpenDuringRecirculation.readDefaultVal()
+            hssEquip.outsideDamperMinOpenDuringRecirculation.readDefaultVal()
         }
 
-        var outsideDamperMinOpenFromFanStage : Double = 0.0
+        var outsideDamperMinOpenFromFanStage = 0.0
         if (hssEquip.fanHighSpeed.readHisVal() > 0.0
             || hssEquip.fanOpMode.readPriorityVal().toInt() == StandaloneFanStage.HIGH_ALL_TIME.ordinal
             || hssEquip.fanOpMode.readPriorityVal().toInt() == StandaloneFanStage.HIGH_CUR_OCC.ordinal
@@ -384,7 +381,6 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
 
             val oaoDamperMatTarget = hssEquip.standaloneOutsideDamperMixedAirTarget.readPriorityVal()
             val oaoDamperMatMin = hssEquip.standaloneOutsideDamperMixedAirMinimum.readPriorityVal()
-            val economizingMaxTemp = hssEquip.standaloneEconomizingMaxTemperature.readPriorityVal()
 
             val matTemp  = hssEquip.mixedAirTemperature.readHisVal()
 
@@ -406,20 +402,20 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
             // If Conditioning Mode is AUTO or COOL_ONLY, run full economizer loop algo
             if (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO || basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
                 if (outsideAirLoopOutput > effectiveOutsideDamperMinOpen) {
-                    if (matTemp < oaoDamperMatTarget && matTemp > oaoDamperMatMin) {
-                        outsideAirFinalLoopOutput = (outsideAirLoopOutput - outsideAirLoopOutput * ((oaoDamperMatTarget - matTemp) / (oaoDamperMatTarget - oaoDamperMatMin))).toInt()
+                    outsideAirFinalLoopOutput = if (matTemp < oaoDamperMatTarget && matTemp > oaoDamperMatMin) {
+                        (outsideAirLoopOutput - outsideAirLoopOutput * ((oaoDamperMatTarget - matTemp) / (oaoDamperMatTarget - oaoDamperMatMin))).toInt()
                     } else {
-                        outsideAirFinalLoopOutput = if (matTemp <= oaoDamperMatMin) 0 else outsideAirLoopOutput
+                        if (matTemp <= oaoDamperMatMin) 0 else outsideAirLoopOutput
                     }
                     if (matTemp < oaoDamperMatTarget) matThrottle = true
                 } else {
                     outsideAirFinalLoopOutput = effectiveOutsideDamperMinOpen
                 }
 
-                if (matThrottle) {
-                    outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , 0)
+                outsideAirFinalLoopOutput = if (matThrottle) {
+                    Math.max(outsideAirFinalLoopOutput , 0)
                 } else {
-                    outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , effectiveOutsideDamperMinOpen)
+                    Math.max(outsideAirFinalLoopOutput , effectiveOutsideDamperMinOpen)
                 }
 
                 outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100)
@@ -438,20 +434,20 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
                 val dcvOnlyOutsideAirLoopOutput = Math.max(dcvLoopOutput, effectiveOutsideDamperMinOpen)
 
                 if (dcvOnlyOutsideAirLoopOutput > effectiveOutsideDamperMinOpen) {
-                    if (matTemp < oaoDamperMatTarget && matTemp > oaoDamperMatMin) {
-                        outsideAirFinalLoopOutput = (dcvOnlyOutsideAirLoopOutput - dcvOnlyOutsideAirLoopOutput * ((oaoDamperMatTarget - matTemp) / (oaoDamperMatTarget - oaoDamperMatMin))).toInt()
+                    outsideAirFinalLoopOutput = if (matTemp < oaoDamperMatTarget && matTemp > oaoDamperMatMin) {
+                        (dcvOnlyOutsideAirLoopOutput - dcvOnlyOutsideAirLoopOutput * ((oaoDamperMatTarget - matTemp) / (oaoDamperMatTarget - oaoDamperMatMin))).toInt()
                     } else {
-                        outsideAirFinalLoopOutput = if (matTemp <= oaoDamperMatMin) 0 else dcvOnlyOutsideAirLoopOutput
+                        if (matTemp <= oaoDamperMatMin) 0 else dcvOnlyOutsideAirLoopOutput
                     }
                     if (matTemp < oaoDamperMatTarget) matThrottle = true
                 } else {
                     outsideAirFinalLoopOutput = effectiveOutsideDamperMinOpen
                 }
 
-                if (matThrottle) {
-                    outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , 0)
+                outsideAirFinalLoopOutput = if (matThrottle) {
+                    Math.max(outsideAirFinalLoopOutput , 0)
                 } else {
-                    outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , effectiveOutsideDamperMinOpen)
+                    Math.max(outsideAirFinalLoopOutput , effectiveOutsideDamperMinOpen)
                 }
 
                 outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100)
@@ -476,10 +472,12 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
     private fun doDcvForDcvDamper() {
 
         dcvAvailable = false
-        var zoneSensorCO2 = hssEquip.zoneCO2.readHisVal()
-        var zoneCO2Threshold = hssEquip.co2Threshold.readDefaultVal()
-        var co2DamperOpeningRate = hssEquip.co2DamperOpeningRate.readDefaultVal()
-        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "zoneSensorCO2: " + zoneSensorCO2 + ", zoneCO2Threshold: " + zoneCO2Threshold + ", co2DamperOpeningRate: " + co2DamperOpeningRate)
+        val zoneSensorCO2 = hssEquip.zoneCO2.readHisVal()
+        val zoneCO2Threshold = hssEquip.co2Threshold.readDefaultVal()
+        val co2DamperOpeningRate = hssEquip.co2DamperOpeningRate.readDefaultVal()
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON,
+            "zoneSensorCO2: $zoneSensorCO2, zoneCO2Threshold: $zoneCO2Threshold, co2DamperOpeningRate: $co2DamperOpeningRate"
+        )
         if (occupancyStatus == Occupancy.OCCUPIED || occupancyStatus == Occupancy.FORCEDOCCUPIED || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED) {
             if (zoneSensorCO2 > zoneCO2Threshold) {
                 dcvAvailable = true
@@ -599,7 +597,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
         var outsideAirTemp = externalTemp
 
         if (externalHumidity == 0.0 && externalTemp == 0.0) {
-            CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "System outside temp and humidity are both zero; using local OAT sensor");
+            CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "System outside temp and humidity are both zero; using local OAT sensor")
             outsideAirTemp = hssEquip.outsideTemperature.readHisVal()
         }
 
@@ -688,10 +686,12 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
     private fun doDcv(standaloneOutsideAirDamperMinOpen: Int) {
 
         dcvAvailable = false
-        var zoneSensorCO2 = hssEquip.zoneCO2.readHisVal()
-        var zoneCO2Threshold = hssEquip.co2Threshold.readDefaultVal()
-        var co2DamperOpeningRate = hssEquip.co2DamperOpeningRate.readDefaultVal()
-        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "zoneSensorCO2: " + zoneSensorCO2 + ", zoneCO2Threshold: " + zoneCO2Threshold + ", co2DamperOpeningRate: " + co2DamperOpeningRate)
+        val zoneSensorCO2 = hssEquip.zoneCO2.readHisVal()
+        val zoneCO2Threshold = hssEquip.co2Threshold.readDefaultVal()
+        val co2DamperOpeningRate = hssEquip.co2DamperOpeningRate.readDefaultVal()
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON,
+            "zoneSensorCO2: $zoneSensorCO2, zoneCO2Threshold: $zoneCO2Threshold, co2DamperOpeningRate: $co2DamperOpeningRate"
+        )
         if (occupancyStatus == Occupancy.OCCUPIED || occupancyStatus == Occupancy.FORCEDOCCUPIED || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED) {
             if (zoneSensorCO2 > zoneCO2Threshold) {
                 dcvAvailable = true
@@ -724,7 +724,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
 
             // If Condensate just tripped, store whatever the previous Conditioning Mode was as UserIntentConditioningMode.
             // Conditioning Mode will return to this value once condensate returns to normal. User will not be able to change it back until this happens.
-            if (!wasCondensateTripped && !appWasJustRestarted)  PreferenceUtil.setLastUserIntentConditioningMode(StandaloneConditioningMode.values()[hssEquip.conditioningMode.readHisVal().toInt()]);
+            if (!wasCondensateTripped && !appWasJustRestarted)  PreferenceUtil.setLastUserIntentConditioningMode(StandaloneConditioningMode.values()[hssEquip.conditioningMode.readHisVal().toInt()])
 
             hssEquip.conditioningMode.writeDefaultVal(StandaloneConditioningMode.OFF.ordinal.toDouble())
             return BasicSettings(
@@ -933,7 +933,10 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
 
             (HyperStatSplitAssociationUtil.isRelayAssociatedToFanEnabled(relayAssociation)) -> {
                 if (!isCondensateTripped) {
-                    doFanEnabled( curState,port, fanLoopOutput )
+                    doFanEnabled( curState,port, fanLoopOutput)
+                    if (hssEquip.fanEnable.readHisVal() > 0) {
+                        relayStages[AnalogOutput.FAN_ENABLED.name] = 1
+                    }
                 } else {
                     hssEquip.fanEnable.writeHisVal(0.0)
                 }
@@ -1199,7 +1202,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
             (HyperStatSplitAssociationUtil.isAnalogOutAssociatedToOaoDamper(analogOutAssociation)) -> {
                 if (!isCondensateTripped) {
                     doAnalogOAOAction(
-                        port,basicSettings.conditioningMode, analogOutStages, outsideAirFinalLoopOutput
+                        analogOutStages, outsideAirFinalLoopOutput
                     )
                 } else {
                     hssEquip.oaoDamper.writeHisVal(0.0)
@@ -1209,7 +1212,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
             (HyperStatSplitAssociationUtil.isAnalogOutAssociatedToReturnDamper(analogOutAssociation)) -> {
                 if (!isCondensateTripped) {
                     doAnalogReturnDamperAction(
-                        port,basicSettings.conditioningMode, analogOutStages, outsideAirFinalLoopOutput
+                        analogOutStages, outsideAirFinalLoopOutput
                     )
                 } else {
                     hssEquip.oaoDamper.writeHisVal(100.0)
@@ -1490,7 +1493,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
 
         val oaoDamperMatMin = hssEquip.standaloneOutsideDamperMixedAirMinimum.readPriorityVal()
         val matTemp  = hssEquip.mixedAirTemperature.readHisVal()
-        val zoneId = equip?.getRoomRef() ?: ""
+        val zoneId = equip?.roomRef ?: ""
         val occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId)
         val minutesToOccupancy =
             if (occuStatus != null) occuStatus.millisecondsUntilNextChange.toInt() / 60000 else -1
@@ -1506,9 +1509,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
     }
 
 
-    fun doAnalogOAOAction(
-        port: Port,
-        conditioningMode: StandaloneConditioningMode,
+    private fun doAnalogOAOAction(
         analogOutStages: HashMap<String, Int>,
         outsideAirFinalLoopOutput: Int
     ) {
@@ -1516,9 +1517,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
         if (outsideAirFinalLoopOutput > 0) analogOutStages[AnalogOutput.OAO_DAMPER.name] = outsideAirFinalLoopOutput
     }
 
-    fun doAnalogReturnDamperAction(
-        port: Port,
-        conditioningMode: StandaloneConditioningMode,
+    private fun doAnalogReturnDamperAction(
         analogOutStages: HashMap<String, Int>,
         outsideAirFinalLoopOutput: Int
     ) {
@@ -1529,7 +1528,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
 
     private fun handleDeadZone() {
 
-       logIt("Zone is Dead ${nodeAddress}")
+       logIt("Zone is Dead $nodeAddress")
         state = ZoneState.TEMPDEAD
         resetAllLogicalPointValues()
         hssEquip.operatingMode.writeHisVal(state.ordinal.toDouble())
@@ -1543,7 +1542,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
         hssEquip.equipStatus.writeHisVal(ZoneState.TEMPDEAD.ordinal.toDouble())
     }
     private fun handleRFDead() {
-        logIt("RF Signal is Dead ${nodeAddress}")
+        logIt("RF Signal is Dead $nodeAddress")
         state = ZoneState.RFDEAD
         hssEquip.operatingMode.writeHisVal(state.ordinal.toDouble())
         if (hssEquip.equipStatus.readHisVal() != state.ordinal.toDouble())
@@ -1557,7 +1556,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
     }
 
     override fun getEquip(): Equip? {
-        val equip = CCUHsApi.getInstance().readHDict("equip and group == \""+nodeAddress+"\"")
+        val equip = CCUHsApi.getInstance().readHDict("equip and group == \"$nodeAddress\"")
         return Equip.Builder().setHDict(equip).build()
     }
 
@@ -1593,7 +1592,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
 
     @JsonIgnore
     override fun getAverageZoneTemp(): Double {
-        return 0.0;
+        return 0.0
     }
 
     /**

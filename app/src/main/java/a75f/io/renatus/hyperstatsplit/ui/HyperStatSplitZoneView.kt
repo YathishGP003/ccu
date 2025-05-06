@@ -7,20 +7,25 @@ package a75f.io.renatus.hyperstatsplit.ui
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
+import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
-import a75f.io.logic.bo.building.hyperstatsplit.common.*
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage
+import a75f.io.logic.bo.building.hyperstatsplit.common.FanModeCacheStorage
 import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getActualConditioningMode
 import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getActualFanMode
 import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getFanSelectionMode
 import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getPossibleConditioningModeSettings
 import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getSelectedConditioningMode
+import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitZoneStatus
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getSelectedFanLevel
+import a75f.io.logic.bo.building.hyperstatsplit.common.HyperstatSplitProfileNames
+import a75f.io.logic.bo.building.hyperstatsplit.common.PossibleConditioningMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.bo.util.UnitUtils
-import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler.Companion.updateHyperStatSplitUIPoints
+import a75f.io.logic.util.uiutils.updateUserIntentPoints
 import a75f.io.renatus.R
 import a75f.io.renatus.util.CCUUiUtil
 import a75f.io.renatus.util.HeartBeatUtil
@@ -29,14 +34,15 @@ import a75f.io.renatus.views.CustomSpinnerDropDownAdapter
 import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
-import android.widget.*
-import android.widget.AdapterView.OnItemSelectedListener
-import java.util.*
-import a75f.io.domain.HyperStatSplitEquip
-import a75f.io.domain.api.DomainName
-import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import android.view.MotionEvent
+import android.view.View
+import android.widget.AdapterView
+import android.widget.AdapterView.OnItemSelectedListener
+import android.widget.ArrayAdapter
+import android.widget.LinearLayout
+import android.widget.Spinner
+import android.widget.TextView
+import java.util.Locale
 
 fun loadHyperStatSplitCpuEconProfile(
     cpuEconEquipPoints: HashMap<*, *>, inflater: LayoutInflater,
@@ -248,12 +254,8 @@ private fun setSpinnerListenerForHyperstatSplit(
                 HSSplitZoneStatus.FAN_MODE -> handleFanMode(
                     hssEquip, position, profileType,userClickCheck
                 )
-                HSSplitZoneStatus.TARGET_HUMIDITY -> handleHumidityMode(
-                    position, hssEquip.getId()
-                )
-                HSSplitZoneStatus.TARGET_DEHUMIDIFY -> handleDeHumidityMode(
-                    position, hssEquip.getId()
-                )
+                HSSplitZoneStatus.TARGET_HUMIDITY -> handleHumidityMode(hssEquip, position)
+                HSSplitZoneStatus.TARGET_DEHUMIDIFY -> handleDeHumidityMode(hssEquip, position)
                 else -> {}
             }
         }
@@ -277,8 +279,8 @@ private fun handleConditionMode(
             actualConditioningMode = getActualConditioningMode(hssEquip, selectedPosition)
         }
         if(actualConditioningMode != -1) {
-            updateHyperStatSplitUIPoints(
-                hssEquip.getId(), "domainName == \"" + DomainName.conditioningMode + "\"",
+            updateUserIntentPoints(
+                hssEquip.getId(), hssEquip.conditioningMode,
                 actualConditioningMode.toDouble(), CCUHsApi.getInstance().ccuUserName
             )
             val roomRef = HSUtil.getZoneIdFromEquipId(hssEquip.getId())
@@ -301,8 +303,8 @@ private fun handleFanMode(hssEquip: HyperStatSplitEquip, selectedPosition: Int, 
             else -> { -1 }
         }
         if (actualFanMode != -1) {
-            updateHyperStatSplitUIPoints(
-                hssEquip.getId(), "domainName == \"" + DomainName.fanOpMode + "\"",
+            updateUserIntentPoints(
+                hssEquip.getId(), hssEquip.fanOpMode,
                 actualFanMode.toDouble(), CCUHsApi.getInstance().ccuUserName)
             if (selectedPosition != 0 && (selectedPosition % 3 == 0 || isFanModeCurrentOccupied(StandaloneFanStage.values()[actualFanMode])) )
                 cacheStorage.saveFanModeInCache(hssEquip.getId(), actualFanMode)
@@ -314,15 +316,15 @@ private fun handleFanMode(hssEquip: HyperStatSplitEquip, selectedPosition: Int, 
 private fun isFanModeCurrentOccupied(basicSettings: StandaloneFanStage): Boolean {
     return (basicSettings == StandaloneFanStage.LOW_CUR_OCC || basicSettings == StandaloneFanStage.MEDIUM_CUR_OCC || basicSettings == StandaloneFanStage.HIGH_CUR_OCC)
 }
-private fun handleHumidityMode(selectedPosition: Int, equipId: String) {
-    updateHyperStatSplitUIPoints(
-        equipId, "domainName == \"" + DomainName.targetHumidifier + "\"", (selectedPosition + 1).toDouble(), CCUHsApi.getInstance().ccuUserName
+private fun handleHumidityMode(equip: HyperStatSplitEquip, selectedPosition: Int) {
+    updateUserIntentPoints(
+            equip.equipRef, equip.targetHumidifier, (selectedPosition + 1).toDouble(), CCUHsApi.getInstance().ccuUserName
     )
 }
 
-private fun handleDeHumidityMode(selectedPosition: Int, equipId: String) {
-    updateHyperStatSplitUIPoints(
-        equipId, "domainName == \"" + DomainName.targetDehumidifier + "\"", (selectedPosition + 1).toDouble(), CCUHsApi.getInstance().ccuUserName
+private fun handleDeHumidityMode(equip: HyperStatSplitEquip, selectedPosition: Int) {
+    updateUserIntentPoints(
+        equip.equipRef, equip.targetDehumidifier, (selectedPosition + 1).toDouble(), CCUHsApi.getInstance().ccuUserName
     )
 }
 

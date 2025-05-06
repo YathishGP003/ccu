@@ -72,10 +72,6 @@ interface RelayActions {
                        relayStages: HashMap<String, Int>,
                        doorWindowOperate: Boolean)
 
-    fun doFanEnabled(currentState: ZoneState,
-                     whichPort: Port,
-                     fanLoopOutput: Int)
-
     fun doOccupiedEnabled(relayPort: Port)
 
     fun doHumidifierOperation(relayPort: Port,

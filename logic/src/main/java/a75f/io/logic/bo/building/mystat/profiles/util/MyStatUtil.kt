@@ -292,6 +292,10 @@ fun getMyStatPipe2FanLevel(config: MyStatPipe2Configuration): Int {
 
     if (fanEnabledStages.first) fanLevel += LOW
     if (fanEnabledStages.second) fanLevel += HIGH
+    if (fanLevel == 0 && config.isAnyRelayEnabledAssociated(association = MyStatPipe2RelayMapping.FAN_ENABLED.ordinal)) {
+        fanLevel = AUTO
+    }
+
     return fanLevel
 }
 
@@ -301,6 +305,10 @@ fun getMyStatHpuFanLevel(config: MyStatHpuConfiguration): Int {
 
     if (config.analogOut1Enabled.enabled && config.analogOut1Association.associationVal == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal) {
         return LOW_HIGH // All options are enabled due to analog fan speed
+    }
+
+    if (config.isAnyRelayEnabledAssociated(association = MyStatCpuRelayMapping.FAN_ENABLED.ordinal)) {
+        return AUTO
     }
 
     val relays = config.getRelayEnabledAssociations()
@@ -315,6 +323,10 @@ fun getMyStatHpuFanLevel(config: MyStatHpuConfiguration): Int {
 
     if (fanEnabledStages.first) fanLevel += LOW
     if (fanEnabledStages.second) fanLevel += HIGH
+    if (fanLevel == 0 && config.isAnyRelayEnabledAssociated(association = MyStatHpuRelayMapping.FAN_ENABLED.ordinal)) {
+        fanLevel = AUTO
+    }
+
     return fanLevel
 }
 
@@ -362,13 +374,15 @@ fun getMyStatCpuFanLevel(config: MyStatCpuConfiguration): Int {
     var fanLevel = 0
     var fanEnabledStages: Pair<Boolean, Boolean> = Pair(first = false, second = false)
 
-    if (config.analogOut1Enabled.enabled && (config.analogOut1Association.associationVal == MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal ||
+    if (config.analogOut1Enabled.enabled
+        && (config.analogOut1Association.associationVal == MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal ||
                 config.analogOut1Association.associationVal == MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
         return LOW_HIGH // All options are enabled due to analog fan speed
     }
 
     val relays = config.getRelayEnabledAssociations()
     for ((enabled, association) in relays) {
+
         if (enabled && association == MyStatCpuRelayMapping.FAN_LOW_SPEED.ordinal) {
             fanEnabledStages = fanEnabledStages.copy(first = true)
         }
@@ -379,6 +393,11 @@ fun getMyStatCpuFanLevel(config: MyStatCpuConfiguration): Int {
 
     if (fanEnabledStages.first) fanLevel += LOW
     if (fanEnabledStages.second) fanLevel += HIGH
+
+    if (fanLevel == 0 && config.isAnyRelayEnabledAssociated(association = MyStatCpuRelayMapping.FAN_ENABLED.ordinal)) {
+            fanLevel = AUTO
+    }
+
     return fanLevel
 }
 
@@ -430,6 +449,7 @@ fun getMyStatPossibleFanModeSettings(fanLevel: Int): MyStatPossibleFanMode {
         LOW -> MyStatPossibleFanMode.LOW
         HIGH -> MyStatPossibleFanMode.HIGH
         LOW_HIGH -> MyStatPossibleFanMode.LOW_HIGH
+        AUTO -> MyStatPossibleFanMode.AUTO
         else -> MyStatPossibleFanMode.OFF
     }
 }
@@ -486,7 +506,7 @@ enum class MyStatPossibleConditioningMode {
 }
 
 enum class MyStatPossibleFanMode {
-    OFF, LOW, HIGH, LOW_HIGH
+    OFF, LOW, HIGH, LOW_HIGH, AUTO
 }
 
 fun getMyStatModelByEquipRef(equipRef: String): ModelDirective? {

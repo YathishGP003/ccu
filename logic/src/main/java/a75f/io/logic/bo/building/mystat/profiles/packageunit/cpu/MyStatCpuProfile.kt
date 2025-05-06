@@ -548,7 +548,7 @@ class MyStatCpuProfile: MyStatPackageUnitProfile() {
                 }
             }
 
-            MyStatCpuRelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput)
+            MyStatCpuRelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput, relayStages)
             MyStatCpuRelayMapping.OCCUPIED_ENABLED -> doOccupiedEnabled(port)
             MyStatCpuRelayMapping.HUMIDIFIER -> doHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMinInsideHumidity, equip.zoneHumidity.readHisVal())
             MyStatCpuRelayMapping.DEHUMIDIFIER -> doDeHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMaxInsideHumidity, equip.zoneHumidity.readHisVal())

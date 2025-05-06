@@ -172,8 +172,7 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
         equip.equipStatus.writeHisVal(curState.ordinal.toDouble())
         showOutputStatus()
         var temperatureState = ZoneTempState.NONE
-        if (buildingLimitMinBreached() || buildingLimitMaxBreached()) temperatureState =
-            ZoneTempState.EMERGENCY
+        if (buildingLimitMinBreached() || buildingLimitMaxBreached()) temperatureState = ZoneTempState.EMERGENCY
         MyStatUserIntentHandler.updateMyStatStatus(
             equip.equipRef,
             relayOutputStatus,
@@ -267,7 +266,7 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
              * intentionally we are sending analogOutStages for dcv to handle status message
              */
             MyStatHpuRelayMapping.DCV_DAMPER -> doDcvDamperOperation(equip, port, tuner.relayActivationHysteresis, analogOutStages, config.co2Threshold.currentVal, false)
-            MyStatHpuRelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput)
+            MyStatHpuRelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput, relayStages)
             MyStatHpuRelayMapping.OCCUPIED_ENABLED -> doOccupiedEnabled(port)
             MyStatHpuRelayMapping.HUMIDIFIER -> doHumidifierOperation(
                 port, tuner.humidityHysteresis,
@@ -352,7 +351,7 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
         relayOutputPoints: HashMap<Int, String>
     ) {
         if (basicSettings.fanMode == MyStatFanStages.AUTO && basicSettings.conditioningMode == StandaloneConditioningMode.OFF) {
-            CcuLog.i(L.TAG_CCU_HSHPU, "Cond is Off , Fan is Auto   ")
+            CcuLog.i(L.TAG_CCU_MSHPU, "Cond is Off , Fan is Auto   ")
             resetPort(whichPort)
             return
         }
@@ -449,7 +448,7 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
                 }
                 if (logicalPointsList.containsKey(Port.ANALOG_OUT_ONE)) {
                     CcuLog.i(
-                        L.TAG_CCU_HSHPU,
+                        L.TAG_CCU_MSHPU,
                         "${Port.ANALOG_OUT_ONE} = $analogMapping : ${
                             getCurrentLogicalPointStatus(logicalPointsList[Port.ANALOG_OUT_ONE]!!)
                         }"
@@ -470,7 +469,7 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
         val isAnalogFanAvailable = analogOutputPoints.containsKey(MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal)
 
         CcuLog.i(
-            L.TAG_CCU_HSHPU,
+            L.TAG_CCU_MSHPU,
             "Aux Based fan : aux1AvailableAndActive $aux1AvailableAndActive isAnalogFanAvailable $isAnalogFanAvailable"
         )
         if (aux1AvailableAndActive) operateAuxBasedOnFan(relayStages, relayOutputPoints, isAnalogFanAvailable)
@@ -509,7 +508,7 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
                 && analogOut1Association.associationVal == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal && fanSpeed != MyStatFanSpeed.OFF
             ) {
                 val percentage = getPercent(analogOut1FanSpeedConfig, fanSpeed)
-                CcuLog.i(L.TAG_CCU_HSHPU, "Fan Speed : $percentage")
+                CcuLog.i(L.TAG_CCU_MSHPU, "Fan Speed : $percentage")
                 updateLogicalPoint(
                     analogOutputPoints[MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal]!!, percentage
                 )
@@ -532,32 +531,34 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
             }
         }
 
-        fun getAvailableFanSpeed(relayOutputPoints: HashMap<Int, String>) = Pair(
+        fun getAvailableFanSpeed(relayOutputPoints: HashMap<Int, String>) = Triple(
             relayOutputPoints.containsKey(MyStatHpuRelayMapping.FAN_LOW_SPEED.ordinal),
-            relayOutputPoints.containsKey(MyStatHpuRelayMapping.FAN_HIGH_SPEED.ordinal)
+            relayOutputPoints.containsKey(MyStatHpuRelayMapping.FAN_HIGH_SPEED.ordinal),
+            relayOutputPoints.containsKey(MyStatHpuRelayMapping.FAN_ENABLED.ordinal)
         )
 
-        val (lowAvailable, highAvailable) = getAvailableFanSpeed(relayOutputPoints)
+        val (lowAvailable, highAvailable, fanEnable) = getAvailableFanSpeed(relayOutputPoints)
 
         fun deriveFanStage(): MyStatHpuRelayMapping {
             return when {
                 highAvailable -> MyStatHpuRelayMapping.FAN_HIGH_SPEED
                 lowAvailable -> MyStatHpuRelayMapping.FAN_LOW_SPEED
-                else -> MyStatHpuRelayMapping.FAN_ENABLED
+                fanEnable -> MyStatHpuRelayMapping.FAN_ENABLED
+                else -> MyStatHpuRelayMapping.OCCUPIED_ENABLED
             }
         }
 
-        if (!lowAvailable && !highAvailable && !isAnalogFanAvailable) {
+        if (!lowAvailable && !highAvailable && !isAnalogFanAvailable && !fanEnable) {
             resetAux(relayStages, relayOutputPoints) // non of the fans are available
         }
 
         val stage = deriveFanStage()
         val fanStatusMessage = getFanStage(stage)
-        CcuLog.i(L.TAG_CCU_HSHPU, "operateAuxBasedOnFan: derived mode is $stage")
+        CcuLog.i(L.TAG_CCU_MSHPU, "operateAuxBasedOnFan: derived mode is $stage")
         // operate specific fan  (low, medium, high) based on derived stage order
-        if (stage != MyStatHpuRelayMapping.FAN_ENABLED) {
+        if (fanStatusMessage != null) {
             updateLogicalPoint(relayOutputPoints[stage.ordinal]!!, 1.0)
-            relayStages[fanStatusMessage!!.displayName] = 1
+            relayStages[fanStatusMessage.displayName] = 1
         }
 
         when (stage) {
@@ -579,9 +580,15 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
                     relayStages[Stage.FAN_1.displayName] = 1
                 }
             }
+            MyStatHpuRelayMapping.FAN_ENABLED -> {
+                relayOutputPoints[MyStatHpuRelayMapping.FAN_ENABLED.ordinal]?.let { point ->
+                    updateLogicalPoint(point, 1.0)
+                    relayStages[AnalogOutput.FAN_ENABLED.name] = 1
+                }
+            }
 
             else -> {
-                CcuLog.i(L.TAG_CCU_HSHPU, "operateAuxBasedOnFan: Relay fan mapping is not available")
+                CcuLog.i(L.TAG_CCU_MSHPU, "operateAuxBasedOnFan: Relay fan mapping is not available")
             }
         }
     }

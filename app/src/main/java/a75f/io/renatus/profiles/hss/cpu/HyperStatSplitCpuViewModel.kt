@@ -12,7 +12,6 @@ import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfileConfiguration
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusTempAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
@@ -369,7 +368,13 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
 
         if (profileConfiguration.isDefault) {
 
-            val equipId = addEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, nodeType, hayStack, equipModel, deviceModel)
+            val equipId = addEquipAndPoints(
+                deviceAddress,
+                profileConfiguration,
+                hayStack,
+                equipModel,
+                deviceModel
+            )
             CoroutineScope(highPriorityDispatcher).launch {
                 runBlocking {
                     HyperstatSplitReconfigurationHandler.Companion.addLinearFanLowMedHighPoints(
@@ -387,8 +392,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
                     HyperstatSplitReconfigurationHandler.Companion.mapSensorBusPressureLogicalPoint(
                         profileConfiguration,
                         equipId,
-                        hayStack,
-                        equipModel
+                        hayStack
                     )
                     HyperstatSplitReconfigurationHandler.Companion.setOutputTypes(
                         profileConfiguration,
@@ -448,8 +452,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
                     HyperstatSplitReconfigurationHandler.Companion.mapSensorBusPressureLogicalPoint(
                         profileConfiguration,
                         equipId,
-                        hayStack,
-                        equipModel
+                        hayStack
                     )
                     HyperstatSplitReconfigurationHandler.Companion.setOutputTypes(
                         profileConfiguration,
@@ -483,9 +486,6 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
     private fun addEquipAndPoints(
         addr: Short,
         config: ProfileConfiguration,
-        floorRef: String?,
-        roomRef: String?,
-        nodeType: NodeType?,
         hayStack: CCUHsApi,
         equipModel: SeventyFiveFProfileDirective?,
         deviceModel: SeventyFiveFDeviceDirective?

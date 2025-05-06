@@ -263,6 +263,7 @@ fun getPossibleConditionMode(config: HyperStatConfiguration): PossibleConditioni
 
 fun getPossibleFanModeSettings(fanLevel: Int): PossibleFanMode {
     return when (fanLevel) {
+        AUTO -> PossibleFanMode.AUTO
         LOW -> PossibleFanMode.LOW
         MED -> PossibleFanMode.MED
         HIGH -> PossibleFanMode.HIGH
@@ -303,6 +304,12 @@ fun getCpuFanLevel(config: CpuConfiguration): Int {
     if (fanEnabledStages.first) fanLevel += LOW
     if (fanEnabledStages.second) fanLevel += MED
     if (fanEnabledStages.third) fanLevel += HIGH
+
+    if (fanLevel == 0 && config.isAnyRelayEnabledAssociated(association = HsCpuRelayMapping.FAN_ENABLED.ordinal)) {
+        fanLevel = AUTO
+    }
+
+
     return fanLevel
 }
 
@@ -334,6 +341,11 @@ fun getHpuFanLevel(config: HpuConfiguration): Int {
     if (fanEnabledStages.first) fanLevel += LOW
     if (fanEnabledStages.second) fanLevel += MED
     if (fanEnabledStages.third) fanLevel += HIGH
+
+    if (fanLevel == 0 && config.isAnyRelayEnabledAssociated(association = HsHpuRelayMapping.FAN_ENABLED.ordinal)) {
+        fanLevel = AUTO
+    }
+
     return fanLevel
 }
 
@@ -379,6 +391,12 @@ fun getPipe2FanLevel(config: Pipe2Configuration): Int {
     if (fanEnabledStages.first) fanLevel += LOW
     if (fanEnabledStages.second) fanLevel += MED
     if (fanEnabledStages.third) fanLevel += HIGH
+
+    if (fanLevel == 0 && config.isAnyRelayEnabledAssociated(association = HsPipe2RelayMapping.FAN_ENABLED.ordinal)) {
+        fanLevel = AUTO
+    }
+
+
     return fanLevel
 }
 

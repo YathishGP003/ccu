@@ -3232,7 +3232,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
         val bypassDamperEquip =
             hayStack.readEntity("equip and domainName==\"${DomainName.smartnodeBypassDamper}\"")
-        bypassDamperEquip?.let {
+        if(bypassDamperEquip.isNotEmpty()) {
             val bypassDamperDevice =
                 hayStack.readEntity("device and domainName==\"${DomainName.smartnodeDevice}\" and equipRef==\"${bypassDamperEquip["id"].toString()}\"")
             val physicalAnalog1outPoint =

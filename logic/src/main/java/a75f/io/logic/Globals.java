@@ -266,7 +266,6 @@ public class Globals {
         CCUHsApi.getInstance().trimObjectBoxHisStore();
         importTunersAndScheduleJobs();
         handleAutoCommissioning();
-        updateCCUAhuRef();
         setRecoveryMode();
 
         MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_CCU);
@@ -331,6 +330,7 @@ public class Globals {
                 mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
                 mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION + 15, TASK_SEPARATION_TIMEUNIT);
                 BearerTokenManager.getInstance().scheduleJob();
+                updateCCUAhuRef();
             }
         });
 
@@ -767,7 +767,7 @@ public class Globals {
             CCUDevice ccuDeviceObj = Domain.ccuDevice;
             ccuDeviceBuilder.buildCCUDevice(ccuDeviceObj.getEquipRef(), ccuDeviceObj.getSiteRef(), ccuDeviceObj.getCcuDisName(),
                     ccuDeviceObj.getInstallerEmail(), ccuDeviceObj.getManagerEmail(),
-                    ahuRef, true);
+                    systemProf, true);
         }
     }
 

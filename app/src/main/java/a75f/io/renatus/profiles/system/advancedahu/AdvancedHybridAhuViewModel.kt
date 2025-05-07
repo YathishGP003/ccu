@@ -2,7 +2,6 @@ package a75f.io.renatus.profiles.system.advancedahu
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
-import a75f.io.device.cm.TemperatureSensorBusMapping
 import a75f.io.device.cm.sendTestModeMessage
 import a75f.io.device.connect.ConnectModbusSerialComm
 import a75f.io.domain.api.Domain
@@ -40,16 +39,11 @@ import a75f.io.logic.bo.building.system.util.isConnectModuleExist
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.logic.tuners.TunerUtil
-import a75f.io.renatus.R
-import a75f.io.renatus.modbus.util.ALERT
-import a75f.io.renatus.modbus.util.OK
 import a75f.io.renatus.modbus.util.isOaoPairedInConnectModule
 import a75f.io.renatus.util.SystemProfileUtil
 import a75f.io.renatus.util.TestSignalManager
 import android.annotation.SuppressLint
 import android.content.Context
-import android.text.Spanned
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -654,7 +648,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     fun getConnectPhysicalPointForRelayIndex(relayIndex: Int): PhysicalPoint? {
         if (isConnectModulePaired) {
             val relayName = getRelayNameForIndex(relayIndex)
-            return getConnectRelayLogicalPhysicalMap(getConnectEquip(), Domain.connect1Device).values.find { it.domainName == relayName }
+            return getConnectRelayLogicalPhysicalMap(getConnectEquip()!!, Domain.connect1Device).values.find { it.domainName == relayName }
         }
         return null
     }
@@ -687,7 +681,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         if (isConnectModulePaired) {
             val connectEquip1 = getConnectEquip()
             val analogName = getAnalogNameForIndex(analogIndex)
-            return getConnectAnalogOutLogicalPhysicalMap(connectEquip1, Domain.connect1Device).values.find { it.domainName == analogName }
+            return getConnectAnalogOutLogicalPhysicalMap(connectEquip1!!, Domain.connect1Device).values.find { it.domainName == analogName }
         }
         return null
     }
@@ -729,12 +723,12 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         }
 
         if (isConnectModuleExist()) {
-            getConnectRelayLogicalPhysicalMap(getConnectEquip(), Domain.connect1Device).forEach {
+            getConnectRelayLogicalPhysicalMap(getConnectEquip()!!, Domain.connect1Device).forEach {
                 if (it.key.readDefaultVal() == 0.0) {
                     it.value.writePointValue(0.0)
                 }
             }
-            getConnectAnalogOutLogicalPhysicalMap(getConnectEquip(), Domain.connect1Device).forEach {
+            getConnectAnalogOutLogicalPhysicalMap(getConnectEquip()!!, Domain.connect1Device).forEach {
                 if (it.key.readDefaultVal() == 0.0) {
                     it.value.writePointValue(0.0)
                 }

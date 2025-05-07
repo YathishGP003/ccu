@@ -100,10 +100,11 @@ object ConnectModbusSerialComm {
 
     @JvmStatic
     fun sendSettingConfig() {
-        val connectEquip1 = getConnectEquip()
-        writeUniversalInputMappingConfig(getUniversalInputMappingConfig(connectEquip1))
-        writeRelayMappingConfig(getRelayMappingConfig(connectEquip1))
-        writeAnalogOutMappingConfig(getAnalogOutMappingConfig(connectEquip1))
+        getConnectEquip()?.let { connectEquip1 ->
+            writeUniversalInputMappingConfig(getUniversalInputMappingConfig(connectEquip1))
+            writeRelayMappingConfig(getRelayMappingConfig(connectEquip1))
+            writeAnalogOutMappingConfig(getAnalogOutMappingConfig(connectEquip1))
+        }
     }
 
     @JvmStatic

@@ -72,15 +72,56 @@ fun updateUniversalInputMappedValues(response: RtuMessageResponse) {
         CcuLog.e(L.TAG_CCU_SERIAL, "CM updateSensorBusData : Skipped AdvancedAHU not configured.")
         return
     }
-    val connectEquip = getConnectEquip()
-    writeUniversalInputMappedVal(connectEquip.universalIn1Association.readDefaultVal().toInt(), universalInput1Val, connectEquip, Domain.connect1Device.universal1In)
-    writeUniversalInputMappedVal(connectEquip.universalIn2Association.readDefaultVal().toInt(), universalInput2Val, connectEquip, Domain.connect1Device.universal2In)
-    writeUniversalInputMappedVal(connectEquip.universalIn3Association.readDefaultVal().toInt(), universalInput3Val, connectEquip, Domain.connect1Device.universal3In)
-    writeUniversalInputMappedVal(connectEquip.universalIn4Association.readDefaultVal().toInt(), universalInput4Val, connectEquip, Domain.connect1Device.universal4In)
-    writeUniversalInputMappedVal(connectEquip.universalIn5Association.readDefaultVal().toInt(), universalInput5Val, connectEquip, Domain.connect1Device.universal5In)
-    writeUniversalInputMappedVal(connectEquip.universalIn6Association.readDefaultVal().toInt(), universalInput6Val, connectEquip, Domain.connect1Device.universal6In)
-    writeUniversalInputMappedVal(connectEquip.universalIn7Association.readDefaultVal().toInt(), universalInput7Val, connectEquip, Domain.connect1Device.universal7In)
-    writeUniversalInputMappedVal(connectEquip.universalIn8Association.readDefaultVal().toInt(), universalInput8Val, connectEquip, Domain.connect1Device.universal8In)
+    getConnectEquip()?.let { connectEquip ->
+        writeUniversalInputMappedVal(
+            connectEquip.universalIn1Association.readDefaultVal().toInt(),
+            universalInput1Val,
+            connectEquip,
+            Domain.connect1Device.universal1In
+        )
+        writeUniversalInputMappedVal(
+            connectEquip.universalIn2Association.readDefaultVal().toInt(),
+            universalInput2Val,
+            connectEquip,
+            Domain.connect1Device.universal2In
+        )
+        writeUniversalInputMappedVal(
+            connectEquip.universalIn3Association.readDefaultVal().toInt(),
+            universalInput3Val,
+            connectEquip,
+            Domain.connect1Device.universal3In
+        )
+        writeUniversalInputMappedVal(
+            connectEquip.universalIn4Association.readDefaultVal().toInt(),
+            universalInput4Val,
+            connectEquip,
+            Domain.connect1Device.universal4In
+        )
+        writeUniversalInputMappedVal(
+            connectEquip.universalIn5Association.readDefaultVal().toInt(),
+            universalInput5Val,
+            connectEquip,
+            Domain.connect1Device.universal5In
+        )
+        writeUniversalInputMappedVal(
+            connectEquip.universalIn6Association.readDefaultVal().toInt(),
+            universalInput6Val,
+            connectEquip,
+            Domain.connect1Device.universal6In
+        )
+        writeUniversalInputMappedVal(
+            connectEquip.universalIn7Association.readDefaultVal().toInt(),
+            universalInput7Val,
+            connectEquip,
+            Domain.connect1Device.universal7In
+        )
+        writeUniversalInputMappedVal(
+            connectEquip.universalIn8Association.readDefaultVal().toInt(),
+            universalInput8Val,
+            connectEquip,
+            Domain.connect1Device.universal8In
+        )
+    }
 }
 
 private fun writeUniversalInputMappedVal(
@@ -138,89 +179,90 @@ fun updateSensorBusValues(slaveId: Int, response: RtuMessageResponse) {
         return
     }
 
-    val connectEquip = getConnectEquip()
     val messageData = response.messageData.copyOfRange(MODBUS_DATA_OFFSET, response.messageData.size)
-    if (connectEquip.sensorBusAddress0Enable.readDefaultVal() > 0) {
-        CcuLog.i(L.TAG_CCU_SERIAL, "CM updateSensorBusData sensorBusAddress0Enabled")
-        if (connectEquip.temperatureSensorBusAdd0.pointExists()) {
-            updateConnectTemperatureSensor(slaveId, messageData, connectEquip.temperatureSensorBusAdd0.readDefaultVal().toInt(),
-                SENSOR_BUS_TEMPERATURE_1, connectEquip)
+    getConnectEquip()?.let { connectEquip ->
+        if (connectEquip.sensorBusAddress0Enable.readDefaultVal() > 0) {
+            CcuLog.i(L.TAG_CCU_SERIAL, "CM updateSensorBusData sensorBusAddress0Enabled")
+            if (connectEquip.temperatureSensorBusAdd0.pointExists()) {
+                updateConnectTemperatureSensor(slaveId, messageData, connectEquip.temperatureSensorBusAdd0.readDefaultVal().toInt(),
+                    SENSOR_BUS_TEMPERATURE_1, connectEquip)
+            }
+            if (connectEquip.humiditySensorBusAdd0.pointExists()) {
+                updateConnectHumiditySensor(slaveId, messageData, connectEquip.humiditySensorBusAdd0.readDefaultVal().toInt(),
+                    SENSOR_BUS_HUMIDITY_1, connectEquip)
+            }
+            if (connectEquip.co2SensorBusAdd0.pointExists()) {
+                updateConnectCo2Sensor(slaveId, messageData, connectEquip.co2SensorBusAdd0.readDefaultVal().toInt(),
+                    SENSOR_BUS_CO2_1, connectEquip)
+            }
+            if (connectEquip.occupancySensorBusAdd0.pointExists()) {
+                updateConnectOccupancySensor(slaveId, messageData, connectEquip.occupancySensorBusAdd0.readDefaultVal().toInt(),
+                    SENSOR_BUS_OCCUPANCY_1, connectEquip)
+            }
         }
-        if (connectEquip.humiditySensorBusAdd0.pointExists()) {
-            updateConnectHumiditySensor(slaveId, messageData, connectEquip.humiditySensorBusAdd0.readDefaultVal().toInt(),
-                SENSOR_BUS_HUMIDITY_1, connectEquip)
+        if (connectEquip.sensorBus0PressureAssociation.pointExists()) {
+            updateConnectPressureSensor(slaveId, messageData, connectEquip.sensorBus0PressureAssociation.readDefaultVal().toInt(),
+                SENSOR_BUS_PRESSURE_1, connectEquip)
         }
-        if (connectEquip.co2SensorBusAdd0.pointExists()) {
-            updateConnectCo2Sensor(slaveId, messageData, connectEquip.co2SensorBusAdd0.readDefaultVal().toInt(),
-                SENSOR_BUS_CO2_1, connectEquip)
-        }
-        if (connectEquip.occupancySensorBusAdd0.pointExists()) {
-            updateConnectOccupancySensor(slaveId, messageData, connectEquip.occupancySensorBusAdd0.readDefaultVal().toInt(),
-                SENSOR_BUS_OCCUPANCY_1, connectEquip)
-        }
-    }
-    if (connectEquip.sensorBus0PressureAssociation.pointExists()) {
-        updateConnectPressureSensor(slaveId, messageData, connectEquip.sensorBus0PressureAssociation.readDefaultVal().toInt(),
-            SENSOR_BUS_PRESSURE_1, connectEquip)
-    }
 
-    if (connectEquip.sensorBusAddress1Enable.readDefaultVal() > 0) {
-        CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "CM updateSensorBusData sensorBusAddress1Enabled")
-        if (connectEquip.temperatureSensorBusAdd1.pointExists()) {
-            updateConnectTemperatureSensor(slaveId, messageData, connectEquip.temperatureSensorBusAdd1.readDefaultVal().toInt(),
-                SENSOR_BUS_TEMPERATURE_2, connectEquip)
+        if (connectEquip.sensorBusAddress1Enable.readDefaultVal() > 0) {
+            CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "CM updateSensorBusData sensorBusAddress1Enabled")
+            if (connectEquip.temperatureSensorBusAdd1.pointExists()) {
+                updateConnectTemperatureSensor(slaveId, messageData, connectEquip.temperatureSensorBusAdd1.readDefaultVal().toInt(),
+                    SENSOR_BUS_TEMPERATURE_2, connectEquip)
+            }
+            if (connectEquip.humiditySensorBusAdd1.pointExists()) {
+                updateConnectHumiditySensor(slaveId, messageData, connectEquip.humiditySensorBusAdd1.readDefaultVal().toInt(),
+                    SENSOR_BUS_HUMIDITY_2, connectEquip)
+            }
+            if (connectEquip.co2SensorBusAdd1.pointExists()) {
+                updateConnectCo2Sensor(slaveId, messageData, connectEquip.co2SensorBusAdd1.readDefaultVal().toInt(),
+                    SENSOR_BUS_CO2_2, connectEquip)
+            }
+            if (connectEquip.occupancySensorBusAdd1.pointExists()) {
+                updateConnectOccupancySensor(slaveId, messageData, connectEquip.occupancySensorBusAdd1.readDefaultVal().toInt(),
+                    SENSOR_BUS_OCCUPANCY_2, connectEquip)
+            }
         }
-        if (connectEquip.humiditySensorBusAdd1.pointExists()) {
-            updateConnectHumiditySensor(slaveId, messageData, connectEquip.humiditySensorBusAdd1.readDefaultVal().toInt(),
-                SENSOR_BUS_HUMIDITY_2, connectEquip)
-        }
-        if (connectEquip.co2SensorBusAdd1.pointExists()) {
-            updateConnectCo2Sensor(slaveId, messageData, connectEquip.co2SensorBusAdd1.readDefaultVal().toInt(),
-                SENSOR_BUS_CO2_2, connectEquip)
-        }
-        if (connectEquip.occupancySensorBusAdd1.pointExists()) {
-            updateConnectOccupancySensor(slaveId, messageData, connectEquip.occupancySensorBusAdd1.readDefaultVal().toInt(),
-                SENSOR_BUS_OCCUPANCY_2, connectEquip)
-        }
-    }
 
-    if (connectEquip.sensorBusAddress2Enable.readDefaultVal() > 0) {
-        CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "CM updateSensorBusData sensorBusAddress2Enabled")
-        if (connectEquip.temperatureSensorBusAdd2.pointExists()) {
-            updateConnectTemperatureSensor(slaveId, messageData, connectEquip.temperatureSensorBusAdd2.readDefaultVal().toInt(),
-                SENSOR_BUS_TEMPERATURE_3, connectEquip)
+        if (connectEquip.sensorBusAddress2Enable.readDefaultVal() > 0) {
+            CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "CM updateSensorBusData sensorBusAddress2Enabled")
+            if (connectEquip.temperatureSensorBusAdd2.pointExists()) {
+                updateConnectTemperatureSensor(slaveId, messageData, connectEquip.temperatureSensorBusAdd2.readDefaultVal().toInt(),
+                    SENSOR_BUS_TEMPERATURE_3, connectEquip)
+            }
+            if (connectEquip.humiditySensorBusAdd2.pointExists()) {
+                updateConnectHumiditySensor(slaveId, messageData, connectEquip.humiditySensorBusAdd2.readDefaultVal().toInt(),
+                    SENSOR_BUS_HUMIDITY_3, connectEquip)
+            }
+            if (connectEquip.co2SensorBusAdd2.pointExists()) {
+                updateConnectCo2Sensor(slaveId, messageData, connectEquip.co2SensorBusAdd2.readDefaultVal().toInt(),
+                    SENSOR_BUS_CO2_3, connectEquip)
+            }
+            if (connectEquip.occupancySensorBusAdd2.pointExists()) {
+                updateConnectOccupancySensor(slaveId, messageData, connectEquip.occupancySensorBusAdd2.readDefaultVal().toInt(),
+                    SENSOR_BUS_OCCUPANCY_3, connectEquip)
+            }
         }
-        if (connectEquip.humiditySensorBusAdd2.pointExists()) {
-            updateConnectHumiditySensor(slaveId, messageData, connectEquip.humiditySensorBusAdd2.readDefaultVal().toInt(),
-                SENSOR_BUS_HUMIDITY_3, connectEquip)
-        }
-        if (connectEquip.co2SensorBusAdd2.pointExists()) {
-            updateConnectCo2Sensor(slaveId, messageData, connectEquip.co2SensorBusAdd2.readDefaultVal().toInt(),
-                SENSOR_BUS_CO2_3, connectEquip)
-        }
-        if (connectEquip.occupancySensorBusAdd2.pointExists()) {
-            updateConnectOccupancySensor(slaveId, messageData, connectEquip.occupancySensorBusAdd2.readDefaultVal().toInt(),
-                SENSOR_BUS_OCCUPANCY_3, connectEquip)
-        }
-    }
 
-    if (connectEquip.sensorBusAddress3Enable.readDefaultVal() > 0) {
-        CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "CM updateSensorBusData sensorBusAddress3Enabled")
-        if (connectEquip.temperatureSensorBusAdd3.pointExists()) {
-            updateConnectTemperatureSensor(slaveId, messageData, connectEquip.temperatureSensorBusAdd3.readDefaultVal().toInt(),
-                SENSOR_BUS_TEMPERATURE_4, connectEquip)
-        }
-        if (connectEquip.humiditySensorBusAdd3.pointExists()) {
-            updateConnectHumiditySensor(slaveId, messageData, connectEquip.humiditySensorBusAdd3.readDefaultVal().toInt(),
-                SENSOR_BUS_HUMIDITY_4, connectEquip)
-        }
-        if (connectEquip.co2SensorBusAdd3.pointExists()) {
-            updateConnectCo2Sensor(slaveId, messageData, connectEquip.co2SensorBusAdd3.readDefaultVal().toInt(),
-                SENSOR_BUS_CO2_4, connectEquip)
-        }
-        if (connectEquip.occupancySensorBusAdd3.pointExists()) {
-            updateConnectOccupancySensor(slaveId, messageData, connectEquip.occupancySensorBusAdd3.readDefaultVal().toInt(),
-                SENSOR_BUS_OCCUPANCY_4, connectEquip)
+        if (connectEquip.sensorBusAddress3Enable.readDefaultVal() > 0) {
+            CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "CM updateSensorBusData sensorBusAddress3Enabled")
+            if (connectEquip.temperatureSensorBusAdd3.pointExists()) {
+                updateConnectTemperatureSensor(slaveId, messageData, connectEquip.temperatureSensorBusAdd3.readDefaultVal().toInt(),
+                    SENSOR_BUS_TEMPERATURE_4, connectEquip)
+            }
+            if (connectEquip.humiditySensorBusAdd3.pointExists()) {
+                updateConnectHumiditySensor(slaveId, messageData, connectEquip.humiditySensorBusAdd3.readDefaultVal().toInt(),
+                    SENSOR_BUS_HUMIDITY_4, connectEquip)
+            }
+            if (connectEquip.co2SensorBusAdd3.pointExists()) {
+                updateConnectCo2Sensor(slaveId, messageData, connectEquip.co2SensorBusAdd3.readDefaultVal().toInt(),
+                    SENSOR_BUS_CO2_4, connectEquip)
+            }
+            if (connectEquip.occupancySensorBusAdd3.pointExists()) {
+                updateConnectOccupancySensor(slaveId, messageData, connectEquip.occupancySensorBusAdd3.readDefaultVal().toInt(),
+                    SENSOR_BUS_OCCUPANCY_4, connectEquip)
+            }
         }
     }
     CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "CM updateSensorBusData Updated")

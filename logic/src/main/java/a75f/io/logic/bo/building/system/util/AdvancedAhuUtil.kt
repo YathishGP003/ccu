@@ -137,12 +137,15 @@ fun getAdvancedAhuSystemEquip(): AdvancedHybridSystemEquip {
     }
 }
 
-fun getConnectEquip(): ConnectModuleEquip {
-    return if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
-        (Domain.systemEquip as VavAdvancedHybridSystemEquip).connectEquip1
-    } else {
-        (Domain.systemEquip as DabAdvancedHybridSystemEquip).connectEquip1
+fun getConnectEquip(): ConnectModuleEquip? {
+    if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
+        return (Domain.systemEquip as VavAdvancedHybridSystemEquip).connectEquip1
     }
+
+    if (Domain.systemEquip is DabAdvancedHybridSystemEquip) {
+        return (Domain.systemEquip as DabAdvancedHybridSystemEquip).connectEquip1
+    }
+    return null
 }
 
 fun getConnectModuleDomain(): String? {

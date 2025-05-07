@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.bacnet;
 
 import android.util.Log;
 
+import org.projecthaystack.HDict;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HStr;
 
@@ -321,19 +322,21 @@ public class BacnetEquip {
 
     public void updateHaystackPoints(String equipRef, List<BacnetPoint> configuredParams) {
         for (BacnetPoint bacnetPoint : configuredParams) {
-            HashMap pointRead = CCUHsApi.getInstance().readMapById(bacnetPoint.getId());
-            Point logicalPoint = new Point.Builder().setHashMap(pointRead).build();
-            if (bacnetPoint.getProtocolData().getBacnet().getDisplayInUIDefault()) {
-                if (!logicalPoint.getMarkers().contains("displayInUi")) {
-                    logicalPoint.getMarkers().add("displayInUi");
+            HDict pointRead = CCUHsApi.getInstance().readHDictById(bacnetPoint.getId());
+            if(pointRead != null) {
+                Point logicalPoint = new Point.Builder().setHDict(pointRead).build();
+                if (bacnetPoint.getProtocolData().getBacnet().getDisplayInUIDefault()) {
+                    if (!logicalPoint.getMarkers().contains("displayInUi")) {
+                        logicalPoint.getMarkers().add("displayInUi");
+                        if (logicalPoint.getId() != null) {
+                            CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
+                        }
+                    }
+                } else if (logicalPoint.getMarkers().contains("displayInUi")) {
+                    logicalPoint.getMarkers().remove("displayInUi");
                     if (logicalPoint.getId() != null) {
                         CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
                     }
-                }
-            } else if (logicalPoint.getMarkers().contains("displayInUi")) {
-                logicalPoint.getMarkers().remove("displayInUi");
-                if (logicalPoint.getId() != null) {
-                    CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
                 }
             }
         }

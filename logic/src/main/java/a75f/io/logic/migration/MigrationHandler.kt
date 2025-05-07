@@ -102,6 +102,8 @@ import a75f.io.logic.migration.modbus.correctEnumsForCorruptModbusPoints
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.util.PreferenceUtil
+import a75f.io.logic.util.PreferenceUtil.getModbusKvtagsDataTypeUpdated
+import a75f.io.logic.util.PreferenceUtil.setModbusKvtagsDataTypeUpdate
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.NETWORK_INTERFACE
 import android.content.Context
@@ -124,6 +126,7 @@ import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
 import org.projecthaystack.HGrid
 import org.projecthaystack.HGridBuilder
+import org.projecthaystack.HNum
 import org.projecthaystack.HRef
 import org.projecthaystack.HRow
 import org.projecthaystack.HStr
@@ -418,6 +421,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 e.printStackTrace()
                 CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Error during Floor Ref Update  ${e.message}")
             }
+        }
+
+        if(!getModbusKvtagsDataTypeUpdated()) {
+            correctDataTypeForKVPairsInModbus()
+            setModbusKvtagsDataTypeUpdate()
         }
 
         hayStack.scheduleSync()
@@ -3437,6 +3445,37 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     )
                 }
             }
+        }
+    }
+
+    private fun correctDataTypeForKVPairsInModbus() {
+        try {
+            val tagValueCorrectionList = listOf("order", "stage", "pointNum")
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Executing correctDataTypeForKVPairsInModbus")
+            hayStack.readAllHDictByQuery("(order or stage or pointNum) and (modbus or bacnetDeviceId) and point").forEach { orderPoint ->
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Order point with name: " + orderPoint.dis())
+                val p = Point.Builder().setHDict(orderPoint)
+                var updatePoint = false
+                for(key in tagValueCorrectionList) {
+                    orderPoint.get(key, false)?.let { tagValue ->
+                        if(tagValue is HStr) {
+                            updatePoint = true
+                            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Point incorrect tag datatype for key: $key with value: $tagValue")
+                            p.addTag(key, HNum.make(Integer.parseInt(tagValue.toString())))
+                        }
+                    }
+                }
+                if(updatePoint) {
+                    hayStack.updatePoint(p.build(), orderPoint.id().`val`)
+                    CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Modbus point with incorrect tag data type updated: ${orderPoint.dis()}, ${orderPoint.id()} with correct tag datatype")
+                }
+            }
+        } catch (exception: Exception) {
+            CcuLog.e(
+                TAG_CCU_MIGRATION_UTIL,
+                "Error while updating order key data type for modbus points",
+                exception
+            )
         }
     }
 }

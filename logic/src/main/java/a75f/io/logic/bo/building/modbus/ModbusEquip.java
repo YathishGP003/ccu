@@ -412,23 +412,25 @@ public class ModbusEquip {
 
             if (tags.length() > 0) {
                 HDict pointRead = CCUHsApi.getInstance().readHDict("point and logical and modbus " + tags + " and equipRef == \"" + equipRef + "\"");
-                Point logicalPoint = new Point.Builder().setHDict(pointRead).build();
-                CcuLog.d("Modbus", "UpdateHaystackPoints: Tags -> " +tags);
-                CcuLog.d("Modbus", "UpdateHaystackPoints: Logical Point -> " + pointRead +" name "+configParams.getName() +" display in UI "+configParams.isDisplayInUI() );
+                if(pointRead != null) {
+                    Point logicalPoint = new Point.Builder().setHDict(pointRead).build();
+                    CcuLog.d("Modbus", "UpdateHaystackPoints: Tags -> " +tags);
+                    CcuLog.d("Modbus", "UpdateHaystackPoints: Logical Point -> " + pointRead +" name "+configParams.getName() +" display in UI "+configParams.isDisplayInUI() );
 
-                if (configParams.isDisplayInUI()) {
-                    if (!logicalPoint.getMarkers().contains("displayInUi")) {
-                        logicalPoint.getMarkers().add("displayInUi");
-                        CcuLog.d("Modbus", "UpdateHaystackPoints: Add displayUI tag " + logicalPoint.getDisplayName());
+                    if (configParams.isDisplayInUI()) {
+                        if (!logicalPoint.getMarkers().contains("displayInUi")) {
+                            logicalPoint.getMarkers().add("displayInUi");
+                            CcuLog.d("Modbus", "UpdateHaystackPoints: Add displayUI tag " + logicalPoint.getDisplayName());
+                            if (logicalPoint.getId() != null) {
+                                CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
+                            }
+                        }
+                    } else if (logicalPoint.getMarkers().contains("displayInUi")) {
+                        logicalPoint.getMarkers().remove("displayInUi");
+                        CcuLog.d("Modbus", "UpdateHaystackPoints: Remove displayUI tag " + logicalPoint.getDisplayName());
                         if (logicalPoint.getId() != null) {
                             CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
                         }
-                    }
-                } else if (logicalPoint.getMarkers().contains("displayInUi")) {
-                    logicalPoint.getMarkers().remove("displayInUi");
-                    CcuLog.d("Modbus", "UpdateHaystackPoints: Remove displayUI tag " + logicalPoint.getDisplayName());
-                    if (logicalPoint.getId() != null) {
-                        CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
                     }
                 }
             }

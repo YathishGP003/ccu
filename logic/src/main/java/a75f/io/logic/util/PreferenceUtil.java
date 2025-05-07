@@ -8,7 +8,6 @@ import android.preference.PreferenceManager;
 import java.util.Date;
 
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.L;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 
 public class PreferenceUtil {
@@ -114,6 +113,7 @@ public class PreferenceUtil {
 
     private static final String NON_DM_POINTS_REMOVE_STATUS = "nonDmPointsRemoveStatus";
     private static final String FLOOR_REF_UPDATE_STATUS = "floorRefUpdateStatus";
+    private static final String MODBUS_KVTAGS_DATA_TYPE_UPDATED = "modbusKVTagsDataTypeUpdated";
 
     private static final String MIGRATE_UPDATE_DAB_AND_VAV_POINTS = "migrateUpdateVavAndDabPoints";
     private static final String MIGRATE_UPDATE_BYPASS_DAMPER_POINTS = "migrateUpdateBypassDamperPoints";
@@ -935,5 +935,13 @@ public class PreferenceUtil {
 
     public static void setFloorRefUpdateStatus() {
         setBooleanPreference(FLOOR_REF_UPDATE_STATUS, true);
+    }
+
+    public static boolean getModbusKvtagsDataTypeUpdated() {
+        return getBooleanPreference(MODBUS_KVTAGS_DATA_TYPE_UPDATED);
+    }
+
+    public static void setModbusKvtagsDataTypeUpdate() {
+        setBooleanPreference(MODBUS_KVTAGS_DATA_TYPE_UPDATED, true);
     }
 }

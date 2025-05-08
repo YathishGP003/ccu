@@ -667,8 +667,8 @@ public class FloorPlanFragment extends Fragment {
                 updateFloors();
                 hideKeyboard();
                 floorList.sort(new FloorComparator());
-                refreshScreen();
                 selectFloor(floorList.indexOf(hsFloor));
+                refreshScreen();
                 floorToRename = null;
                 L.saveCCUState();
                 CCUHsApi.getInstance().syncEntityTree();

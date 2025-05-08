@@ -17,12 +17,14 @@ import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.ModelLoader.getCCUBaseConfigurationModel
 import a75f.io.logger.CcuLog
+import a75f.io.logic.BuildConfig
 import a75f.io.logic.DefaultSchedules
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfile
 import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfileConfiguration
 import a75f.io.logic.bo.building.dab.DabProfile
+import a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.definitions.ScheduleType
@@ -34,6 +36,8 @@ import a75f.io.logic.limits.SchedulabeLimits.Companion.addSchedulableLimits
 import a75f.io.logic.util.TimeZoneUtil.getTimeZoneIdFromString
 import a75f.io.logic.util.bacnet.addBacnetTags
 import a75f.io.logic.util.bacnet.generateBacnetIdForRoom
+import android.app.AlarmManager
+import android.content.Context
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.projecthaystack.HRef
@@ -53,6 +57,9 @@ fun createSite (
 ): String {
 
     val tzID = getTimeZoneIdFromString(timeZone)
+    val am = ccuHsApi.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    am.setTimeZone(tzID)
+
     val s75f = Site.Builder()
         .setDisplayName(siteName)
         .addMarker("site")
@@ -231,7 +238,11 @@ fun createTerminalEquip(
     ).getDefaultConfiguration()
 
     val equipBuilder = ProfileEquipBuilder(hayStack)
-    val equipDis = hayStack.siteName + "-VVT-C-"+deviceAddress
+    val equipDis =  if (BuildConfig.BUILD_TYPE.equals(CARRIER_PROD, ignoreCase = true)) {
+        hayStack.siteName + "-VVT-C-" + profileConfiguration.nodeAddress
+    }else{
+        hayStack.siteName + "-DAB-" + profileConfiguration.nodeAddress
+    }
     val equipId = equipBuilder.buildEquipAndPoints(
         profileConfiguration, equipModel, hayStack.site!!
             .id, equipDis

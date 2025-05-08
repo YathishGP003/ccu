@@ -1404,6 +1404,7 @@
     <string name="title_pair_mystat">MYSTAT | PAIRING STEPS </string>
     <string name="title_pairhssplit">HYPERSTAT SPLIT | PAIRING STEPS </string>
     <string name="prefs_theme_key">isEnabled</string>
+    <string name="prefs_access_local_assests">accessLocalAssetFile</string>
     <string name="txt_CCU_occupancy_status">Occupancy Status on IE Gateway :</string>
     <string name="txt_GUID_details">GUID Details:</string>
 

@@ -139,6 +139,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     @BindView(R.id.reconnectSerial) Button reconnectSerial;
     public  @BindView(R.id.daikin_theme_config) CheckBox daikinThemeConfig;
     public  @BindView(R.id.carrier_theme_config) CheckBox carrierThemeConfig;
+    @BindView(R.id.access_local_assest) CheckBox accessLocalAssestFile;
 
     @BindView(R.id.ackdMessagingBtn) ToggleButton ackdMessagingBtn;
 
@@ -367,6 +368,16 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             if (isChecked) {
                 daikinThemeConfig.setChecked(false);
             }
+        });
+
+        boolean isLocalAccessEnabled = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(this.getContext().getString(R.string.prefs_access_local_assests),false);
+        accessLocalAssestFile.setChecked(isLocalAccessEnabled);
+        accessLocalAssestFile.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            PreferenceManager.getDefaultSharedPreferences(getContext())
+                    .edit()
+                    .putBoolean(getContext().getString(R.string.prefs_access_local_assests), isChecked)
+                    .apply();
+
         });
 
 

@@ -4,8 +4,11 @@ package a75f.io.renatus;
 import static a75f.io.util.DashboardUtilKt.DASHBOARD;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +35,7 @@ public class DashboardFragment extends Fragment {
     public DashboardFragment() {
     }
 
+	private SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
     public static DashboardFragment newInstance() {
         return new DashboardFragment();
     }
@@ -80,9 +84,14 @@ public class DashboardFragment extends Fragment {
 					Log.i(DASHBOARD, "onPageFinished: ");
 				}
 			});
+
 			WebView.setWebContentsDebuggingEnabled(true);
-			//webView.loadUrl("file:///sdcard/CCU/www/index.html");    // use to dump it in sdcard for temporary testing
-			webView.loadUrl("file:///android_asset/www/index.html"); //use to dump it in assets folder
+			boolean isLocalAccessEnabled = sharedPrefs.getBoolean(this.getContext().getString(R.string.prefs_access_local_assests),false);
+			if (isLocalAccessEnabled) {
+				webView.loadUrl("file:///sdcard/CCU/www/index.html");    // use to dump it in sdcard for temporary testing
+			} else {
+				webView.loadUrl("file:///android_asset/www/index.html"); //use to dump it in assets folder
+			}
 		} else {
 			emptyDashboard.setVisibility(View.VISIBLE);
 			webView.setVisibility(View.GONE);

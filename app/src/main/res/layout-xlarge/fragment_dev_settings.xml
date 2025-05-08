@@ -870,6 +870,29 @@
                     android:textSize="12sp" />
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:text="Access Equips graphics assests file from local storage"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+
+                <CheckBox
+                    android:id="@+id/access_local_assest"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:gravity="center" />
+
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 

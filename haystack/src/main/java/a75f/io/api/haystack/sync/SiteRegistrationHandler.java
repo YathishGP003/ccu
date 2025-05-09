@@ -81,7 +81,10 @@ public class SiteRegistrationHandler {
                 boolean isPreconfiguration = PreferenceManager.getDefaultSharedPreferences(CCUHsApi.getInstance().getContext())
                         .getString("INSTALL_TYPE","").equals("PRECONFIGCCU");
                 if (isPreconfiguration) {
-                    siteCreationRequestJson.put(SiteFieldConstants.PRECONFIG_ID, siteDict.get(SiteFieldConstants.ID));
+                    String preconfigurationId = PreferenceManager.getDefaultSharedPreferences(CCUHsApi.getInstance().getContext())
+                            .getString("sitePreConfigId", "");
+                    CcuLog.d(TAG, "Preconfiguration site id: " + preconfigurationId);
+                    siteCreationRequestJson.put(SiteFieldConstants.PRECONFIG_ID, preconfigurationId);
                 }
             }
             siteCreationRequestJson.put(SiteFieldConstants.ID, siteDict.get(SiteFieldConstants.ID));

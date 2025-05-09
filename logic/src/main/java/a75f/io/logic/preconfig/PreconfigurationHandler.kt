@@ -104,8 +104,8 @@ class PreconfigurationHandler {
         L.ccu().systemProfile = DabStagedRtuWithVfd()
         L.ccu().systemProfile.removeSystemEquipModbus()
         L.ccu().systemProfile.addSystemEquip()
-
-        updateScheduleTypeToZone(ccuHsApi)
+        
+        updateMigrationVersionPoint(ccuHsApi)
         CcuLog.i(L.TAG_PRECONFIGURATION,"Imported Named Schedule with Org")
         ccuHsApi.syncEntityTree()
         CcuLog.i(L.TAG_PRECONFIGURATION,"Synced Entity with Point Write")

@@ -275,13 +275,13 @@ public class PreConfigCCU extends Fragment {
                     try {
                         PreconfigurationHandler preconfigurationHandler = new PreconfigurationHandler();
                         preconfigurationHandler.validatePreconfigurationData(data);
+                        Prefs prefs = new Prefs(getContext());
+                        prefs.setString("sitePreConfigId", data.getSitePreConfigId());
                         if (isRetry) {
                             preconfigurationHandler.cleanUpPreconfigurationData(CCUHsApi.getInstance());
                         }
                         String siteId = preconfigurationHandler.handlePreconfiguration(data, CCUHsApi.getInstance());
-                        Prefs prefs = new Prefs(getContext());
                         prefs.setString("SITE_ID", siteId);
-                        prefs.setString("sitePreConfigId", data.getSitePreConfigId());
                         PreconfigurationManager.INSTANCE.transitionTo(PreconfigurationState.Completed.INSTANCE);
                         CcuLog.d(L.TAG_PRECONFIGURATION, "Preconfiguratzion completed successfully");
                     } catch (InvalidPreconfigurationDataException e) {

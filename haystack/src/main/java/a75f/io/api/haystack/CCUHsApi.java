@@ -201,8 +201,6 @@ public class CCUHsApi
             CcuLog.i(TAG_CCU_HS, "Migrating tags database to Silo.");
 
             Migrations.migrateTagsDb(tagsDb);
-
-            syncEntityTree();       // used during dev; can remove otherwise if desired.
             PreferenceManager.getDefaultSharedPreferences(context).edit()
                     .putBoolean(PREFS_HAS_MIGRATED_TO_SILO, true)
                     .apply();

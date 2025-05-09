@@ -1,5 +1,7 @@
 package a75f.io.renatus.registration;
 
+import static java.lang.Thread.sleep;
+
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -40,11 +42,14 @@ import androidx.fragment.app.FragmentTransaction;
 
 import org.projecthaystack.client.HClient;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Site;
+import a75f.io.api.haystack.Zone;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
@@ -1289,11 +1294,16 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 registerCcuInBackground();
 
                 ExecutorTask.executeBackground(() -> {
-                    Site siteObject = CCUHsApi.getInstance().getSite();
-                    CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
-                            HayStackConstants.USER, HayStackConstants.PASS), siteObject);
-                });
+                    try {
+                        //Delaying the schedule download a bit to make sure it is created.
+                        sleep(1000);
+                        updateDefaultSchedule(CCUHsApi.getInstance());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        CcuLog.e("CCU_HS", "Unexpected error updating default schedule. : "+e.getMessage());
+                    }
 
+                });
 
                 Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1431,6 +1441,26 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 }
                 ethernetStatus.setVisibility(View.INVISIBLE);
             }
+        }
+    }
+
+    private void updateDefaultSchedule(CCUHsApi hsApi) {
+        Site siteObject = hsApi.getSite();
+        hsApi.importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
+                HayStackConstants.USER, HayStackConstants.PASS), siteObject);
+
+        HashMap<Object, Object> defaultNamedSchedule =  hsApi.readEntity
+                ("named and schedule and default and siteRef == "+siteObject.getId());
+
+        if(!defaultNamedSchedule.isEmpty()) {
+            List<HashMap<Object, Object>> zones = hsApi.readAllEntities("room");
+            zones.forEach(zoneMap -> {
+                Zone zone =  new Zone.Builder().setHashMap(zoneMap).build();
+                zone.setScheduleRef(defaultNamedSchedule.get("id").toString());
+                hsApi.updateZone(zone, zone.getId());
+            });
+        } else {
+            CcuLog.e(L.TAG_CCU_UI, "No default schedule found !!!! ");
         }
     }
 }

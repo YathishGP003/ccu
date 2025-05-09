@@ -7,6 +7,7 @@ import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.Zone
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.Domain.getDomainDiagEquip
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.logic.CCUBaseConfigurationBuilder
 import a75f.io.domain.logic.DeviceBuilder
@@ -19,6 +20,7 @@ import a75f.io.domain.util.ModelLoader.getCCUBaseConfigurationModel
 import a75f.io.logger.CcuLog
 import a75f.io.logic.BuildConfig
 import a75f.io.logic.DefaultSchedules
+import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfile
@@ -38,6 +40,7 @@ import a75f.io.logic.util.bacnet.addBacnetTags
 import a75f.io.logic.util.bacnet.generateBacnetIdForRoom
 import android.app.AlarmManager
 import android.content.Context
+import android.content.pm.PackageManager
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.projecthaystack.HRef
@@ -317,20 +320,19 @@ fun doZoneConfig(hsZone: Zone ) {
     CcuLog.i(L.TAG_PRECONFIGURATION, "Completed schedule configuration for zone ${hsZone.displayName}")
 }
 
-fun updateScheduleTypeToZone(ccuHsApi: CCUHsApi) {
-    CcuLog.i(L.TAG_PRECONFIGURATION, "Updating schedule type to zone")
-    val scheduleTypes = ccuHsApi.readAllEntities("point and domainName == \"" + DomainName.scheduleType + "\"")
-    scheduleTypes.mapNotNull { it["id"] }
-            .map { it.toString() }
-            .forEach {
-                ccuHsApi.writePointForCcuUser(
-                    it,
-                    8,
-                    ScheduleType.ZONE.ordinal.toDouble(),
-                    0,
-                    "Schedule Type Updated"
-                )
-                ccuHsApi.writeHisValById(it, ScheduleType.ZONE.ordinal.toDouble())
-            }
+fun updateMigrationVersionPoint(ccuHsApi: CCUHsApi) {
+    val packageManager = ccuHsApi.context.packageManager
+    try {
+        val info = packageManager.getPackageInfo(Globals.getInstance().applicationContext.packageName, 0)
+        val appVersion = info.versionName
+        val migrationVersion = appVersion.substring(appVersion.lastIndexOf('_') + 1)
+        val diagEquip = getDomainDiagEquip()
+        diagEquip?.migrationVersion?.writeDefaultVal(migrationVersion)
+        CcuLog.d(L.TAG_PRECONFIGURATION, "Update Migration Diag Point $migrationVersion")
+    } catch (e: PackageManager.NameNotFoundException) {
+        e.printStackTrace()
+        CcuLog.e(L.TAG_PRECONFIGURATION, "Error updating migration version: ${e.message}")
+    }
 }
+
 

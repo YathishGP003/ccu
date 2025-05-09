@@ -631,7 +631,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         prefs.setString(BacnetConfigConstants.BACNET_BBMD_CONFIGURATION, bacnet_pref.getString(BacnetConfigConstants.BACNET_BBMD_CONFIGURATION,null));
         prefs.setString(BacnetConfigConstants.BACNET_FD_CONFIGURATION, bacnet_pref.getString(BacnetConfigConstants.BACNET_FD_CONFIGURATION,null));
         prefs.setString(BacnetConfigConstants.BACNET_DEVICE_TYPE, bacnet_pref.getString(BacnetConfigConstants.BACNET_DEVICE_TYPE,null));
-        prefs.setBoolean(BacnetConfigConstants.IS_GLOBAL, bacnet_pref.getBoolean(BacnetConfigConstants.IS_GLOBAL,false));
+        prefs.setBoolean(BacnetConfigConstants.IS_GLOBAL, bacnet_pref.getBoolean(BacnetConfigConstants.IS_GLOBAL,true));
         DashboardHandlerKt.getDashboardConfiguration();
     }
 

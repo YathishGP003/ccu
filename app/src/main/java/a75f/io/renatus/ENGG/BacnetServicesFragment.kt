@@ -49,7 +49,7 @@ class BacnetServicesFragment : Fragment() {
 
         val sharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(UtilityApplication.context)
-            val isGlobal = sharedPreferences.getBoolean(IS_GLOBAL, false)
+            val isGlobal = sharedPreferences.getBoolean(IS_GLOBAL, true)
 
         val checkBoxGlobal = view.findViewById<CheckBox>(R.id.cb_global)
             checkBoxGlobal.isChecked = isGlobal

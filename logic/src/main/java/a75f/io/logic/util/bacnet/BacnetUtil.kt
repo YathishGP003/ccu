@@ -261,7 +261,7 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
 
         val sharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().applicationContext)
-        val isGlobal = sharedPreferences.getBoolean(IS_GLOBAL, false)
+        val isGlobal = sharedPreferences.getBoolean(IS_GLOBAL, true)
 
         // Set the intent action and extras
         bacAppLaunchIntent.setAction(intentAction)

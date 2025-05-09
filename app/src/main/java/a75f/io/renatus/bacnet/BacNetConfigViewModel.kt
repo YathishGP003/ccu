@@ -393,23 +393,20 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     }*/
 
     private fun setUpBacnetProfile() {
-        CcuLog.d(TAG, "setUpBacnetProfile node address ${deviceId.value}")
-        val parentMap = getBacnetEquipMap(deviceId.value)
-        if (parentMap.isNullOrEmpty()) {
+        val groupId = L.generateSmartNodeAddress()
+        CcuLog.d(TAG, "setUpBacnetProfile node address $groupId")
 
             bacnetProfile = BacnetProfile()
             val configParam = "deviceId:${deviceId.value},destinationIp:${destinationIp.value},destinationPort:${destinationPort.value},macAddress:${destinationMacAddress.value},deviceNetwork:${dnet.value}"
             val modelConfig = "modelName:${modelName.value},modelId:${getModelIdByName(modelName.value)}"
-            bacnetProfile.addBacAppEquip(configParam, modelConfig, deviceId.value, deviceId.value, floorRef, zoneRef,
+            bacnetProfile.addBacAppEquip(configParam, modelConfig, deviceId.value,
+                groupId.toString(), floorRef, zoneRef,
                 bacnetModel.value.equipDevice.value,
                 profileType,moduleLevel,bacnetModel.value.version.value)
 
             L.ccu().zoneProfiles.add(bacnetProfile)
             L.saveCCUState()
             CcuLog.d(TAG, "setUpBacnetProfile completed")
-        } else {
-            updateBacnetProfile()
-        }
     }
 
     //Todo will require in future

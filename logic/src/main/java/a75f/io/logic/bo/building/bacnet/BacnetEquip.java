@@ -151,7 +151,8 @@ public class BacnetEquip {
                 .setEquipRef(equipmentRef)
                 .setRoomRef(roomRef)
                 .build();
-        //String deviceRef = CCUHsApi.getInstance().addDevice(bacnetDevice);
+        String deviceID = CCUHsApi.getInstance().addDevice(bacnetDevice);
+        CcuLog.d(TAG, "BACnet Device Entity created... device id--> "+deviceID);
 
         List<BacnetPoint> points = equipmentInfo.getPoints();
         CcuLog.d(TAG, "points to add-->"+points.size());

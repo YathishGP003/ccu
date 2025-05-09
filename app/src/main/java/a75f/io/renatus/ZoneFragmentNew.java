@@ -2646,7 +2646,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                             View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
                             TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
-                            String deviceId = nonTempEquip.getTags().get("bacnetDeviceId").toString();
+                            String deviceId = nonTempEquip.getGroup();
                             tvEquipmentType.setText(equipName+" - "+deviceId);
                             RecyclerView bacnetRecyclerView = zoneDetails.findViewById(R.id.recyclerParams);
 

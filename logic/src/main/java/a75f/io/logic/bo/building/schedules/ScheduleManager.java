@@ -1112,7 +1112,8 @@ public class ScheduleManager {
             statusString = String.format(Locale.US, "In Energy saving %s till %s", "Vacation",
                     cachedOccupied.getVacation().getEndDateString());
             if(curOccupancyMode == DEMAND_RESPONSE_UNOCCUPIED) {
-                statusString = getUnOccupiedStatusMessage(cachedOccupied, "Demand Response Unoccupied mode");
+                statusString = String.format(Locale.US, "In Energy saving %s till %s", "Demand Response Vacation",
+                        cachedOccupied.getVacation().getEndDateString());
             }
         } else {
             boolean isZoneTempDead = hayStack.readHisValByQuery("point and status and not ota and " +

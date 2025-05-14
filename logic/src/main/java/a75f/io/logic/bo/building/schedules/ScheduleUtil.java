@@ -114,12 +114,19 @@ public class ScheduleUtil {
     }
 
     public static Occupancy getDemandResponseMode(Map<String, OccupancyData> equipOccupancy) {
+        boolean unoccupiedFound = false;
         for (OccupancyData occupancyData : equipOccupancy.values()) {
             if (occupancyData.occupancy == DEMAND_RESPONSE_OCCUPIED) {
+                // Highest priority, return immediately
                 return DEMAND_RESPONSE_OCCUPIED;
             } else if (occupancyData.occupancy == DEMAND_RESPONSE_UNOCCUPIED) {
-                return DEMAND_RESPONSE_UNOCCUPIED;
+                // Lower priority, mark that we found it
+                unoccupiedFound = true;
             }
+        }
+        // If occupied wasn't found but unoccupied was, return that
+        if (unoccupiedFound) {
+            return DEMAND_RESPONSE_UNOCCUPIED;
         }
         return null;
     }

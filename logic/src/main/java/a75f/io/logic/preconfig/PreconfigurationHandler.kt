@@ -73,32 +73,39 @@ class PreconfigurationHandler {
         )
 
         val floorName = preconfigData.floor
-        val floorId = createFloor(
-            floorName,
-            siteId,
-            ccuHsApi
-        )
-        CcuLog.i(L.TAG_PRECONFIGURATION,"Created Floor with ID: $floorId")
-
-        for (zone in preconfigData.zones) {
-            val zoneId = createZone(
-                zone,
-                floorId,
+        if (floorName.trim().isNotBlank()) {
+            val floorId = createFloor(
+                floorName,
                 siteId,
                 ccuHsApi
             )
-            CcuLog.i(L.TAG_PRECONFIGURATION,"Created Zone with ID: $zoneId")
-            val equipId = createTerminalEquip(
-                "dabSmartNode", //TODO
-                floorId,
-                zoneId,
-                L.generateSmartNodeAddress().toInt(),
-                NodeType.SMART_NODE,
-                ccuHsApi
-            )
-            CcuLog.i(L.TAG_PRECONFIGURATION,"Created Terminal Equip with ID: $equipId")
+            CcuLog.i(L.TAG_PRECONFIGURATION, "Created Floor with ID: $floorId")
 
-            DesiredTempDisplayMode.setModeType(zoneId, ccuHsApi)
+            for (zone in preconfigData.zones) {
+                val zoneId = createZone(
+                    zone,
+                    floorId,
+                    siteId,
+                    ccuHsApi
+                )
+                CcuLog.i(L.TAG_PRECONFIGURATION, "Created Zone with ID: $zoneId")
+                val equipId = createTerminalEquip(
+                    "dabSmartNode", //TODO
+                    floorId,
+                    zoneId,
+                    L.generateSmartNodeAddress().toInt(),
+                    NodeType.SMART_NODE,
+                    ccuHsApi
+                )
+                CcuLog.i(L.TAG_PRECONFIGURATION, "Created Terminal Equip with ID: $equipId")
+
+                DesiredTempDisplayMode.setModeType(zoneId, ccuHsApi)
+            }
+        }
+        else
+        {
+            CcuLog.d(L.TAG_PRECONFIGURATION, "Floor name is empty, skipping floor and zone  creation")
+
         }
 
         L.ccu().systemProfile = DabStagedRtuWithVfd()

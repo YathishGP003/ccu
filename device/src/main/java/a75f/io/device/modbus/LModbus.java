@@ -163,7 +163,12 @@ public class LModbus {
                 writeValue = writeValue * multiplierValue;
             }
             ModbusRequest request;
-            short[] shortValues = ModbusConversions.floatToRegisters(writeValue);
+            short[] shortValues;
+            if (register.wordOrder.equals("bigEndian")) {
+                shortValues = ModbusConversions.floatToRegistersBigEndian(writeValue);
+            } else {
+                shortValues = ModbusConversions.floatToRegistersLittleEndian(writeValue);
+            }
             if (register.getRegisterType().equals(MODBUS_REGISTER_HOLDING)) {
                 request = new WriteRegistersRequest(slaveId,  register.getRegisterAddress(), shortValues);
             } else if (register.getRegisterType().equals(MODBUS_REGISTER_COIL)) {

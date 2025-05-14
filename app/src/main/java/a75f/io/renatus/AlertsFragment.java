@@ -189,7 +189,7 @@ public class AlertsFragment extends Fragment implements AlertManager.AlertListLi
 		{
 			return "";
 		}
-		SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy | h:mm a");
+		SimpleDateFormat sdf = new SimpleDateFormat("MMM d, yyyy | h:mm a");
 		Date date = new Date(millis);
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);

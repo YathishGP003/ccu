@@ -302,8 +302,8 @@ private fun getFcuTunerDetails(equipRef: String): HyperStat.HyperStatTunersFcu_t
     return HyperStat.HyperStatTunersFcu_t.newBuilder().apply {
         auxHeating1Activate = getTunerByDomain(DomainName.auxHeating1Activate, equipRef).toInt()
         auxHeating2Activate = getTunerByDomain(DomainName.auxHeating2Activate, equipRef).toInt()
-        twoPipeHeatingThreshold = getTunerByDomain(DomainName.pipe2FancoilHeatingThreshold, equipRef).toInt()
-        twoPipeCoolingThreshold = getTunerByDomain(DomainName.pipe2FancoilCoolingThreshold, equipRef).toInt()
+        twoPipeHeatingThreshold = getTunerByDomain(DomainName.hyperstatPipe2FancoilCoolingThreshold, equipRef).toInt()
+        twoPipeCoolingThreshold = getTunerByDomain(DomainName.hyperstatPipe2FancoilHeatingThreshold, equipRef).toInt()
         waterValueSamplingOnTime = getTunerByDomain(DomainName.waterValveSamplingOnTime, equipRef).toInt()
         watreValueSamplingWaitTime = getTunerByDomain(DomainName.waterValveSamplingWaitTime, equipRef).toInt()
         waterValveSamplingDuringLoopDeadbandOnTime = getTunerByDomain(DomainName.waterValveSamplingLoopDeadbandOnTime, equipRef).toInt()

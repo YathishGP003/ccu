@@ -642,9 +642,11 @@ class HyperstatSplitReconfigurationHandler {
 
             if (config.isFanEnabled() && !isFanEnabledWithAllOptions) {
                 hayStack.writeDefaultValById(fanModeId, 1.0)
+                FanModeCacheStorage().removeFanModeFromCache(fanModePoint["equipRef"].toString())
             }
             else if (!isFanEnabledWithAllOptions)  {
                 hayStack.writeDefaultValById(fanModeId, 0.0)
+                FanModeCacheStorage().removeFanModeFromCache(fanModePoint["equipRef"].toString())
             }
         }
 

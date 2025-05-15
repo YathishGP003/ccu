@@ -25,6 +25,7 @@ import a75f.io.logic.bo.building.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2Configuration
 import a75f.io.logic.bo.building.mystat.profiles.MyStatProfile
+import a75f.io.logic.bo.building.mystat.profiles.util.MyStatFanModeCacheStorage
 import a75f.io.logic.bo.building.mystat.profiles.util.MyStatPossibleFanMode
 import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
@@ -169,11 +170,13 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
 
         if (possibleFanMode == MyStatPossibleFanMode.OFF) {
             equip.fanOpMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
+            MyStatFanModeCacheStorage().removeFanModeFromCache(equip.equipRef)
             return
         }
 
         if (possibleFanMode == MyStatPossibleFanMode.AUTO) {
             equip.fanOpMode.writePointValue(StandaloneConditioningMode.AUTO.ordinal.toDouble())
+            MyStatFanModeCacheStorage().removeFanModeFromCache(equip.equipRef)
             return
         }
 

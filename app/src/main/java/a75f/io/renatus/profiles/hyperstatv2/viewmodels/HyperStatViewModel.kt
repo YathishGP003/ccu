@@ -14,6 +14,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
+import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
 import a75f.io.logic.bo.building.hyperstat.common.PossibleFanMode
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatProfile
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleFanModeSettings
@@ -276,14 +277,18 @@ open class HyperStatViewModel(application: Application) : AndroidViewModel(appli
     }
 }
 
+
 fun updateFanMode(isReconfigure: Boolean, equip: HyperStatEquip, fanLevel: Int) {
     fun resetFanToOff() = equip.fanOpMode.writePointValue(StandaloneFanStage.OFF.ordinal.toDouble())
     val possibleFanMode = getPossibleFanModeSettings(fanLevel)
+    val cacheStorage = FanModeCacheStorage()
     if (possibleFanMode == PossibleFanMode.OFF) {
         resetFanToOff()
+        cacheStorage.removeFanModeFromCache(equip.equipRef)
         return
     }
     if (possibleFanMode == PossibleFanMode.AUTO) {
+        cacheStorage.removeFanModeFromCache(equip.equipRef)
         equip.fanOpMode.writePointValue(StandaloneFanStage.AUTO.ordinal.toDouble())
         return
     }

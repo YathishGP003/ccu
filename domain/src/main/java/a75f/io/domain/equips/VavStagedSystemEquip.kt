@@ -41,5 +41,7 @@ open class VavStagedSystemEquip(equipRef : String) : VavSystemEquip(equipRef) {
 
     val humidifierEnable = Point(DomainName.humidifierEnable ,equipRef)
     val dehumidifierEnable = Point(DomainName.dehumidifierEnable ,equipRef)
+    val co2Threshold = Point(DomainName.co2Threshold, equipRef)
+
 
 }

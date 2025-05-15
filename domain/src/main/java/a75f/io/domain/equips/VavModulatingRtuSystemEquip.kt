@@ -35,4 +35,5 @@ open class VavModulatingRtuSystemEquip(equipRef : String) : VavSystemEquip(equip
 
     //Association point
     val relay7OutputAssociation = Point(DomainName.relay7OutputAssociation , equipRef)
+    val co2Threshold = Point(DomainName.co2Threshold, equipRef)
 }

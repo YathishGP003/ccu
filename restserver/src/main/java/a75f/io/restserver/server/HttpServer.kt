@@ -10,6 +10,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.interfaces.ModbusDataInterface
+import a75f.io.logic.interfaces.ZoneDataInterface
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.HTTP_SERVER_STATUS
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED
 import a75f.io.logic.util.bacnet.readExternalBacnetJsonFile
@@ -62,6 +63,7 @@ class HttpServer {
     private val HTTP_SERVER = "HttpServer"
 
     companion object{
+        var currentTempInterface: ZoneDataInterface? = null
         var modbusDataInterface: ModbusDataInterface? = null
         var sharedPreferences: SharedPreferences? = null
         private var instance: HttpServer? = null
@@ -300,12 +302,13 @@ class HttpServer {
 
                 //example call = http://127.0.0.1:5001/pointWrite?id=6a1f6539-86dd-48d3-be6c-0ae0b50fa388&level=1&val=7.5&who=bacnet&duration=200000
                 get("/pointWrite") {
-                    CcuLog.i(HTTP_SERVER, "called API: /pointWrite")
                     val id = call.parameters["id"]
                     var level = call.parameters["level"]
                     var value = call.parameters["val"]
                     val who = call.parameters["who"]
                     var duration : String? = call.parameters["duration"]
+
+                    CcuLog.i(HTTP_SERVER, "called API: /pointWrite-id->$id<--value-->$value<--level-->$level")
 
                     if(id == null || level == null || who == null || duration == null) {
                         call.respond(HttpStatusCode.NotFound, BaseResponse( "Invalid request"))
@@ -321,6 +324,10 @@ class HttpServer {
                         CCUHsApi.getInstance()
                             .writeHisValById(id, value!!.toDouble())
                         val pointGrid = CCUHsApi.getInstance().writePoint(id, level!!.toInt(), who, value!!.toDouble(), duration!!.toInt())
+                        if(isBacnetClientPoint(id)){
+                            CcuLog.i(HTTP_SERVER, "this is a bacnet client point update ui-->$id")
+                            updateZoneUi(id)
+                        }
                         if (pointGrid != null) {
                             if(!pointGrid.isEmpty || !pointGrid.isErr){
                                 call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK))
@@ -607,5 +614,8 @@ class HttpServer {
         idList.forEach { refined.add(HRef.copy(it)) }
         val finalRes = refined.toTypedArray<HRef>()
         return CCUHsApi.getInstance().readHDictByIds(finalRes)
+    }
+    private fun updateZoneUi(id: String) {
+        currentTempInterface?.updateBacnetUi(id)
     }
 }

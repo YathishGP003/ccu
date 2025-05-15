@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import static android.app.Activity.RESULT_OK;
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
 import static a75f.io.api.haystack.Tags.BACNET;
+import static a75f.io.api.haystack.Tags.BACNET_POINT_UPDATE;
 import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
 import static a75f.io.logic.bo.util.CCUUtils.getTruncatedString;
 import static a75f.io.logic.util.bacnet.BacnetModelBuilderKt.buildBacnetModel;
@@ -258,6 +259,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
     private ZoneRecyclerBacnetParamAdapter zoneRecyclerBacnetParamAdapter;
 
+    private RecyclerView bacnetRecyclerView;
+
+    private Equip visibleEquip;
+
     public ZoneFragmentNew() {
     }
 
@@ -454,6 +459,53 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     getActivity().runOnUiThread(() -> HeartBeatUtil.zoneStatus(statusView, isZoneAlive));
                 }
             }
+        }
+    }
+
+    @Override
+    public void updateBacnetUi(String id) {
+        CcuLog.d(BACNET_POINT_UPDATE, "--update received for bacnet point id is -->" + id + "<--Called on thread: " + Thread.currentThread().getName());
+
+        String pointId = id;
+        if (!pointId.startsWith("@")) {
+            pointId = "@" + id;
+        }
+        if (visibleEquip != null) {
+            HashMap<Object, Object> map = CCUHsApi.getInstance().readMapById(pointId);
+            if (map != null && !map.isEmpty()) {
+                String equipRef = (String) map.get("equipRef");
+                CcuLog.d(BACNET_POINT_UPDATE, "equip ref for point -->" + equipRef);
+                CcuLog.d(BACNET_POINT_UPDATE, "equip ref for visible equip-->" + visibleEquip.getId());
+                if (equipRef.trim().equalsIgnoreCase(visibleEquip.getId().trim())) {
+                    List<BacnetModelDetailResponse> list = buildBacnetModel(visibleEquip.getRoomRef());
+                    String equipName = "";
+                    List<BacnetZoneViewItem> pointList = new ArrayList<>();
+                    if(!list.isEmpty()){
+                        BacnetModelDetailResponse item = list.get(0);
+                        equipName = item.getName();
+                        CcuLog.d(BACNET_POINT_UPDATE, "EquipName:: " + equipName);
+                        List<BacnetPoint> bacnetPoints = item.getPoints();
+                        pointList = fetchZoneDataForBacnet(bacnetPoints, visibleEquip.getTags().get("bacnetConfig").toString());
+                        CcuLog.d(BACNET_POINT_UPDATE, "bacNetPointsList after receving update::> " + pointList.size());
+
+                        if(!pointList.isEmpty()){
+                            bacNetPointsList.clear();
+                            bacNetPointsList.addAll(pointList);
+
+                            requireActivity().runOnUiThread(() -> {
+                                zoneRecyclerBacnetParamAdapter.notifyDataSetChanged();
+                            });
+                            CcuLog.d(BACNET_POINT_UPDATE, "---successfully updated ui-----");
+                        }
+                    }
+                } else {
+                    CcuLog.d(BACNET_POINT_UPDATE, "equip ref didnt match");
+                }
+            } else {
+                CcuLog.d(BACNET_POINT_UPDATE, "no bacnet equip present for this point");
+            }
+        } else {
+            CcuLog.d(BACNET_POINT_UPDATE, "no bacnet equip visible");
         }
     }
 
@@ -2642,13 +2694,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 CcuLog.d(BACNET, "EquipName: " + equipName);
                                 List<BacnetPoint> bacnetPoints = item.getPoints();
                                 bacNetPointsList = fetchZoneDataForBacnet(bacnetPoints, nonTempEquip.getTags().get("bacnetConfig").toString());
+                                CcuLog.d(BACNET, "bacNetPointsList: " + bacNetPointsList.size());
                             }
 
                             View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
                             TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
                             String deviceId = nonTempEquip.getGroup();
                             tvEquipmentType.setText(equipName+" - "+deviceId);
-                            RecyclerView bacnetRecyclerView = zoneDetails.findViewById(R.id.recyclerParams);
+                            bacnetRecyclerView = zoneDetails.findViewById(R.id.recyclerParams);
 
                             int spanCount = 2;
                             int spacingInDp = 60;
@@ -2665,6 +2718,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             bacnetRecyclerView.invalidate();
                             linearLayoutZonePoints.addView(zoneDetails);
                             linearLayoutZonePoints.setPadding(0, 0, 0, 20);
+                            visibleEquip = nonTempEquip;
                         }
                     } else {
                         //Non paired devices
@@ -2693,26 +2747,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         CCUHsApi.getInstance().writeDefaultValById(id, Double.parseDouble(value));
         CCUHsApi.getInstance().writeHisValById(id, Double.parseDouble(value));
     };
-
-    private void updateBacnetView(String remotePointId) {
-        HashMap remotePointMap = CCUHsApi.getInstance().readMapById(remotePointId);
-        if(equipOpen.getId().equalsIgnoreCase(remotePointMap.get("equip").toString())){
-            if(remotePointMap.containsKey("bacnetDeviceId")){
-                HashMap equipMap = CCUHsApi.getInstance().readMapById(remotePointMap.get("equip").toString());
-                Equip nonTempEquip = new Equip.Builder().setHashMap(equipMap).build();
-                List<BacnetModelDetailResponse> list = buildBacnetModel(nonTempEquip.getRoomRef());
-                for (BacnetModelDetailResponse item : list){
-                    List<BacnetPoint> bacnetPoints = item.getPoints();
-                    bacNetPointsList.clear();
-                    bacNetPointsList = fetchZoneDataForBacnet(bacnetPoints, nonTempEquip.getTags().get("bacnetConfig").toString());
-                }
-                if(zoneRecyclerBacnetParamAdapter != null){
-                    if(bacNetPointsList.size() > 0)
-                        zoneRecyclerBacnetParamAdapter.notifyDataSetChanged();
-                }
-            }
-        }
-    }
 
     private List<BacnetZoneViewItem> fetchZoneDataForBacnet(List<BacnetPoint> bacnetPoints, String bacnetConfig){
         List<BacnetZoneViewItem> listBacnetZoneViewItems = new ArrayList<>();
@@ -4104,10 +4138,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onResume Done");
         UpdatePointHandler.setZoneDataInterface(this);
         UpdateEntityHandler.setZoneDataInterface(this);
-        HttpServer.Companion.setModbusDataInterface(bacAppUpdateInterface);
+        HttpServer.Companion.setCurrentTempInterface(this);
     }
-
-    ModbusDataInterface bacAppUpdateInterface = id -> updateBacnetView(id);
 
     private void setListeners() {
         if (getUserVisibleHint()) {
@@ -4145,6 +4177,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         UpdatePointHandler.setZoneDataInterface(null);
         UpdateEntityHandler.setZoneDataInterface(null);
         HttpServer.Companion.setModbusDataInterface(null);
+        HttpServer.Companion.setCurrentTempInterface(null);
     }
 
     @Override

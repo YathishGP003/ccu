@@ -9,5 +9,7 @@ public interface ZoneDataInterface {
                             String zoneId);
     void updateSensorValue(short nodeAddress);
     void refreshHeartBeatStatus(String nodeAddress);
+
+    void updateBacnetUi(String id);
 }
 

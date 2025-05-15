@@ -25,6 +25,7 @@ import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.messaging.handler.AdvanceAhuReconfigHandlerKt.isAdvanceAhuV2Profile;
+import static a75f.io.renatus.modbus.util.UtilSourceKt.BACNET;
 import static a75f.io.renatus.modbus.util.UtilSourceKt.isOaoPairedInConnectModule;
 
 import android.annotation.SuppressLint;
@@ -317,6 +318,12 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void updateTemperature(double currentTemp, short nodeAddress){}
 	public void updateSensorValue(short nodeAddress){}
 	public void refreshHeartBeatStatus(String id){}
+
+	@Override
+	public void updateBacnetUi(String id) {
+		CcuLog.d(BACNET, "system fragment update ui bacnet for id-->"+id);
+	}
+
 	@Override
 	public void onResume() {
 		super.onResume();

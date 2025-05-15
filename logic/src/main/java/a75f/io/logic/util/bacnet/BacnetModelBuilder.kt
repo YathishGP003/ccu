@@ -3,6 +3,7 @@ package a75f.io.logic.util.bacnet
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.RawPoint
+import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.bacnet.parser.AllowedValues
 import a75f.io.api.haystack.bacnet.parser.BacnetModelDetailResponse
 import a75f.io.api.haystack.bacnet.parser.BacnetPoint
@@ -11,6 +12,7 @@ import a75f.io.api.haystack.bacnet.parser.BacnetProtocolData
 import a75f.io.api.haystack.bacnet.parser.PresentationData
 import a75f.io.api.haystack.bacnet.parser.ProtocolData
 import a75f.io.api.haystack.bacnet.parser.ValueConstraint
+import a75f.io.logger.CcuLog
 import org.projecthaystack.HStr
 
 
@@ -54,7 +56,12 @@ private fun buildEquipModel(parentMap: HashMap<Any, Any>, parentEquipRef: String
     val equipDevice = getEquipByMap(parentMap, parentEquipRef)
     val registersMapList = getRegistersMap(equipId)
     registersMapList.forEach { registerMap ->
-        equipDevice.points.add(getRegister(registerMap))
+        try {
+            equipDevice.points.add(getRegister(registerMap))
+        }catch (e : Exception){
+            CcuLog.d(Tags.BACNET, "--buildEquipModel hit with exception==>${e.message}")
+            e.printStackTrace()
+        }
     }
     return equipDevice
 }
@@ -93,9 +100,13 @@ private fun getRegister(rawMap: HashMap<Any, Any>): BacnetPoint {
     var valueConstraints: ValueConstraint? = null
     if (physicalPoint.tags.containsKey("incrementStep")) {
         incrementStep = (physicalPoint.tags["incrementStep"] as HStr).`val`
-        val min : Int = physicalPoint.minVal.toDouble().toInt()
-        val max : Int = physicalPoint.maxVal.toDouble().toInt()
-        valueConstraints = ValueConstraint("NUMERIC", min, max, null)
+        try {
+            val min : Int = physicalPoint.minVal.toDouble().toInt()
+            val max : Int = physicalPoint.maxVal.toDouble().toInt()
+            valueConstraints = ValueConstraint("NUMERIC", min, max, null)
+        }catch (e : Exception){
+            e.printStackTrace()
+        }
     }else if(physicalPoint.enums != null && physicalPoint.enums.isNotEmpty()){
         //val enumValues = physicalPoint.tags["enum"]?.toString()?.split(",")
         val enumValues = physicalPoint.enums.toString().split(",")

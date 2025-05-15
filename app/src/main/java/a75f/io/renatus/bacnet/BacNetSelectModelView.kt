@@ -29,6 +29,7 @@ import a75f.io.renatus.compose.SubTitle
 import a75f.io.renatus.compose.TextViewWithClickCustom
 import a75f.io.renatus.compose.TitleTextViewCustom
 import a75f.io.renatus.compose.ToggleButton
+import a75f.io.renatus.compose.UnderlinedInput
 import a75f.io.renatus.modbus.ModelSelectionFragment
 import a75f.io.renatus.modbus.util.BAC_PROP_NOT_FETCHED
 import a75f.io.renatus.modbus.util.CANCEL
@@ -700,14 +701,13 @@ class BacNetSelectModelView : BaseDialogFragment() {
                             .weight(1f)
                             .fillMaxWidth()
                     ) {
-                        EditableTextFieldWhiteBgUnderlineOnlyNumbers(
-                            "Enter Device ID",
-                            "Invalid Device ID",
-                            !viewModel.isDeviceIdValid.value,
+                        UnderlinedInput(
                             onTextChanged = {
                                 viewModel.deviceId.value = it
                                 CcuLog.d("BacNetSelectModelView", "device id-->$it")
-                            })
+                            },
+                            placeholder = "Enter Device ID"
+                        )
                     }
                 }
             }
@@ -735,15 +735,13 @@ class BacNetSelectModelView : BaseDialogFragment() {
                             .fillMaxWidth()
                     ) {
                         val isDestinationIpInvalid = viewModel.isDestinationIpValid
-                        EditableTextFieldWhiteBgUnderline(
-                            "Enter IP Address",
-                            "Invalid IP Address",
-                            showError = isDestinationIpInvalid.value.not(),
+                        UnderlinedInput(
                             onTextChanged = {
-                                //viewModel.bacnetModel.value.bacNetDevice.value!!.name = it
                                 CcuLog.d("BacNetSelectModelView", "destination ip-->$it")
                                 viewModel.destinationIp.value = it
-                            })
+                            },
+                            placeholder = "Enter IP Address"
+                        )
                     }
                 }
             }
@@ -831,7 +829,7 @@ class BacNetSelectModelView : BaseDialogFragment() {
 
         Row(
             modifier = Modifier
-                .padding(PaddingValues(bottom = 5.dp)),
+                .padding(PaddingValues(bottom = 5.dp, top = 16.dp)),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -857,11 +855,12 @@ class BacNetSelectModelView : BaseDialogFragment() {
                             .weight(1f)
                             .fillMaxWidth()
                     ) {
-                        EditableTextFieldWhiteBgUnderlineOnlyNumbers("Enter Port","Invalid Port", false, onTextChanged = {
-                            //viewModel.bacnetModel.value.bacNetDevice.value!!.name = it
+                        UnderlinedInput(onTextChanged = {
                             CcuLog.d("BacNetSelectModelView", "port value-->$it")
                             viewModel.destinationPort.value = it
-                        })
+                        },
+                            placeholder = "Enter Port"
+                        )
                     }
                 }
             }
@@ -888,15 +887,13 @@ class BacNetSelectModelView : BaseDialogFragment() {
                             .weight(1f)
                             .fillMaxWidth()
                     ) {
-                        EditableTextFieldWhiteBgUnderline(
-                            "Enter Mac Address",
-                            "Invalid Mac Address",
-                            false,
+                        UnderlinedInput(
                             onTextChanged = {
-                                //viewModel.bacnetModel.value.bacNetDevice.value!!.name = it
                                 CcuLog.d("BacNetSelectModelView", "destination ip-->$it")
                                 viewModel.destinationMacAddress.value = it
-                            })
+                            },
+                            placeholder = "Enter Mac Address"
+                        )
                     }
                 }
             }
@@ -908,7 +905,7 @@ class BacNetSelectModelView : BaseDialogFragment() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(PaddingValues(bottom = 5.dp)),
+                .padding(PaddingValues(bottom = 5.dp, top = 16.dp)),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -933,14 +930,13 @@ class BacNetSelectModelView : BaseDialogFragment() {
                         modifier = Modifier
                             .weight(1f)
                     ) {
-                        EditableTextFieldWhiteBgUnderline(
-                            "Enter Device Network Number",
-                            "Invalid DNET Number",
-                            false,
+                        UnderlinedInput(
                             onTextChanged = {
                                 CcuLog.d("BacNetSelectModelView", "device network val-->$it")
                                 viewModel.dnet.value = it
-                            })
+                            },
+                            placeholder = "Enter Device Network Number"
+                        )
                     }
                 }
             }

@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.bacnet.parser.BacnetZoneViewItem;
@@ -116,12 +117,23 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
             viewHolder.spValue.setVisibility(View.GONE);
             //viewHolder.spinnerLayout.setVisibility(View.INVISIBLE);
         }
+
+        AtomicBoolean isUserInteraction = new AtomicBoolean(false);
+        viewHolder.spValue.setOnTouchListener((v, event) -> {
+            isUserInteraction.set(true);
+            return false;
+        });
         viewHolder.spValue.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (isFirstSelectionArray[position]) {
                     isFirstSelectionArray[position] = false;
                     return; // Skip handling the first selection
+                }
+
+                if(!isUserInteraction.get()){
+                    CcuLog.d(TAG, "onItemSelected: but not from user");
+                    return;
                 }
 
                 String value = bacnetZoneViewItem.getSpinnerValues().get(i);
@@ -132,6 +144,7 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
                     writeValue(bacnetZoneViewItem, String.valueOf(i));
                 }
                 CcuLog.d(TAG, "onItemSelected: " + value + " " + bacnetZoneViewItem.getBacnetConfig());
+                isUserInteraction.set(false);
             }
 
             @Override

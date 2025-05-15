@@ -17,7 +17,7 @@ data class BacnetDevice(
     val deviceId: String,
     val deviceIp: String,
     val deviceNetwork: String,
-    val deviceName: String,
+    var deviceName: String,
     val devicePort: String,
     val deviceMacAddress: String?
 )

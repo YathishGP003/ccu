@@ -465,6 +465,52 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         sendRequestMultipleRead(BacnetReadRequestMultiple(destination, rpmRequest))
     }
 
+    private fun fetchDeviceNames(){
+        connectedDevices.value.forEach {
+            CcuLog.d(TAG, "--deviceId-->${it.deviceId}<--deviceIp-->${it.deviceIp}<--deviceName-->${it.deviceName}<--deviceMacAddress-->${it.deviceMacAddress}<--deviceNetwork-->${it.deviceNetwork}")
+            var destinationMacAddress = ""
+            if(it.deviceMacAddress != null && it.deviceMacAddress.trim().isNotEmpty()){
+                destinationMacAddress = macAddressToByteArray(it.deviceMacAddress)
+            }
+            service = ServiceManager.makeCcuService(ipAddress = deviceIp)
+            val destination = DestinationMultiRead(
+                it.deviceIp,
+                it.devicePort,
+                it.deviceId,
+                it.deviceNetwork,
+                destinationMacAddress
+            )
+            val readAccessSpecification = mutableListOf<ReadRequestMultiple>()
+
+            val objectId = it.deviceId
+            val objectType = "DEVICE"
+
+            val objectIdentifier = getDetailsFromObjectLayout(objectType, objectId)
+            val propertyReference = getPropertyDetailsForDeviceName()
+            readAccessSpecification.add(
+                ReadRequestMultiple(
+                    objectIdentifier,
+                    propertyReference
+                )
+            )
+
+            val rpmRequest = RpmRequest(readAccessSpecification)
+            val rpmRequestFinal = BacnetReadRequestMultiple(destination, rpmRequest)
+            sendRequestMultipleReadDeviceName(rpmRequestFinal)
+        }
+    }
+
+    private fun getPropertyDetailsForDeviceName(): MutableList<PropertyReference> {
+        val list = mutableListOf<PropertyReference>()
+        list.add(
+            PropertyReference(
+                BacNetConstants.PropertyType.valueOf("PROP_OBJECT_NAME").value,
+                -1
+            )
+        )
+        return list
+    }
+
     private fun isDeviceIdAlreadyInUse(deviceId: String): Boolean {
         return isEquipExists(deviceId)
     }
@@ -497,6 +543,55 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                 showToastMessage("ConnectException")
             } catch (e: java.lang.Exception) {
                 CcuLog.d(TAG, "--connection time out--${e.message}")
+            }
+        }
+    }
+
+    private fun sendRequestMultipleReadDeviceName(rpmRequest: BacnetReadRequestMultiple) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = service.multiread(rpmRequest)
+                val resp = BaseResponse(response)
+                ProgressDialogUtils.hideProgressDialog()
+                if (response.isSuccessful) {
+                    val result = resp.data
+                    if (result != null) {
+                        val readResponse = result.body()
+                        CcuLog.d(TAG, "received response for device names->${readResponse}")
+                        if (readResponse != null && readResponse.rpResponse.listOfItems.size > 0) {
+                            try {
+                                val objectInstance = readResponse.rpResponse.listOfItems[0].objectIdentifier.objectInstance
+                                val deviceName = readResponse.rpResponse.listOfItems[0].results[0].propertyValue.value
+                                CcuLog.d(TAG, "deviceName->${deviceName} ---->objectInstance<--$objectInstance")
+                                updateDeviceNameOnUi(deviceName, objectInstance)
+                            }catch (e : Exception){
+                                e.printStackTrace()
+                            }
+                        }
+                    } else {
+                        CcuLog.d(TAG, "--null response--")
+                    }
+                } else {
+                    CcuLog.d(TAG, "--error--${resp.error}")
+                }
+            } catch (e: SocketTimeoutException) {
+                CcuLog.d(TAG, "--SocketTimeoutException--${e.message}")
+                showToastMessage("SocketTimeoutException")
+            } catch (e: ConnectException) {
+                CcuLog.d(TAG, "--ConnectException--${e.message}")
+                showToastMessage("ConnectException")
+            } catch (e: java.lang.Exception) {
+                CcuLog.d(TAG, "--connection time out--${e.message}")
+            }
+        }
+    }
+
+    private fun updateDeviceNameOnUi(deviceName: String, objectInstance: String) {
+        connectedDevices.value = connectedDevices.value.map { device ->
+            if (device.deviceId == objectInstance) {
+                device.copy(deviceName = deviceName) // Create a new instance
+            } else {
+                device
             }
         }
     }
@@ -550,6 +645,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         }
         connectedDevices = mutableStateOf(emptyList())
         connectedDevices.value = list
+        fetchDeviceNames()
     }
 
     private fun fetchConnectedDeviceGlobally() {

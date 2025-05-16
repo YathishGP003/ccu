@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -49,6 +50,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     List<Parameter> modbusParam;
     String equipRef;
     String deviceRef;
+    boolean userAction = false;
 
     public  ZoneRecyclerModbusParamAdapter(Context context, String equipRef, List<Parameter> modbusParam) {
         this.context = context;
@@ -122,17 +124,28 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                             viewHolder.spValue.setSelection(doubleArrayList.indexOf(readVal(p.getId())), false);
                         }
 
+                        //added the touch listener , while setting the spinner value to avoid  writing value to device
+                        viewHolder.spValue.setOnTouchListener((v, event) -> {
+                            if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_UP) {
+                                v.performClick();
+                                userAction = true;
+                            }
+                            return false;
+                        });
+
                         viewHolder.spValue.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
                             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
-                                ExecutorTask.executeBackground( () -> {
-                                    if (modbusParam.get(position).getCommands() != null && modbusParam.get(position).getCommands().size() > 0) {
-                                        Command command = (Command) adapterView.getSelectedItem();
-                                        writePoint(p, command.getBitValues(), modbusParam.get(position));
-                                    } else {
-                                        writePoint(p, adapterView.getItemAtPosition(pos).toString(), modbusParam.get(position));
-                                    }
-                                });
+                                if (userAction) {
+                                    ExecutorTask.executeBackground(() -> {
+                                        if (modbusParam.get(position).getCommands() != null && modbusParam.get(position).getCommands().size() > 0) {
+                                            Command command = (Command) adapterView.getSelectedItem();
+                                            writePoint(p, command.getBitValues(), modbusParam.get(position));
+                                        } else {
+                                            writePoint(p, adapterView.getItemAtPosition(pos).toString(), modbusParam.get(position));
+                                        }
+                                    });
+                                }
                             }
 
                             @Override

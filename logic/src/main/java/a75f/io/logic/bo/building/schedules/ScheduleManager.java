@@ -785,8 +785,8 @@ public class ScheduleManager {
 
         if (ScheduleUtil.isAnyZoneOccupiedOrAutoAway(ahuServedEquipsOccupancy)) {
             updatedSystemOccupancy = OCCUPIED;
-            currentOccupiedInfo = ScheduleUtil.getCurrentOccupied(occupiedHashMap);
-            CcuLog.i(TAG_CCU_SCHEDULER, "updateSystemOccupancy occupied , currentOccupied "+currentOccupiedInfo);
+            updatedOccupiedInfo = ScheduleUtil.getCurrentOccupied(occupiedHashMap);
+            CcuLog.i(TAG_CCU_SCHEDULER, "updateSystemOccupancy occupied , currentOccupied "+updatedOccupiedInfo);
         }
 
 

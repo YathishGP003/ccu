@@ -425,51 +425,70 @@ public class Pulse
                 CcuLog.d(L.TAG_CCU_DEVICE, " Sensor Added , type "+t+" port "+p);
 			} else if (sp.getPointRef() == null) {
 				if (isDomainEquip) {
-					sp = node.addDomainEquipSensorFromRawPoint(sp, p);
+					try {
+						sp = node.addDomainEquipSensorFromRawPoint(sp, p);
+					} catch (Exception e) {
+						CcuLog.e(L.TAG_CCU_DEVICE, "Error in addDomainEquipSensorFromRawPoint for type " + t + ", port " + p);
+						e.printStackTrace();
+						continue;
+					}
 				} else {
 					sp = node.addEquipSensorFromRawPoint(sp, p);
 				}
 			}
 			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : "+t+" : "+val);
-			switch (t) {
-				case HUMIDITY:
-					double curHumidityVal = getHumidityConversion(val);
-					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
-					if(sp.getPointRef() != null)
-						CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), curHumidityVal);
-					break;
-				case PRESSURE:
-					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
-					if (sp.getPointRef() != null) { CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), convertPressureFromPaToInH2O(val)); }
-					break;
-				case UVI:
-					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
-					if (sp.getPointRef() != null) { CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val); }
-					break;
-				case OCCUPANCY:
-					updateOTNOccupancyStatus(sp, val, device);
-					break;
-				case ILLUMINANCE:
-					CCUHsApi.getInstance().writeHisValById(sp.getId(), CCUUtils.roundToOneDecimal(val * 10) );
-					if (sp.getPointRef() != null) { CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),CCUUtils.roundToOneDecimal(val*10)); }
-					break;
-				case CO2:
-				case CO:
-				case NO:
-				case SOUND:
-				case VOC:
-				case CO2_EQUIVALENT:
-				case PM2P5:
-				case PM10:
-					CCUHsApi.getInstance().writeHisValById(sp.getId(), CCUUtils.roundToOneDecimal(val) );
-					if (sp.getPointRef() != null)  { CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),CCUUtils.roundToOneDecimal(val)); }
-					break;
-				case ENERGY_METER_HIGH:
-					emVal = emVal > 0 ?  (emVal | (r.sensorData.get() << 12)) : r.sensorData.get();
-					break;
-				case ENERGY_METER_LOW:
-					emVal = emVal > 0 ? ((emVal << 12) | r.sensorData.get()) : r.sensorData.get();
-					break;
+			try {
+				switch (t) {
+					case HUMIDITY:
+						double curHumidityVal = getHumidityConversion(val);
+						CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
+						if (sp.getPointRef() != null)
+							CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), curHumidityVal);
+						break;
+					case PRESSURE:
+						CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
+						if (sp.getPointRef() != null) {
+							CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), convertPressureFromPaToInH2O(val));
+						}
+						break;
+					case UVI:
+						CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
+						if (sp.getPointRef() != null) {
+							CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), val);
+						}
+						break;
+					case OCCUPANCY:
+						updateOTNOccupancyStatus(sp, val, device);
+						break;
+					case ILLUMINANCE:
+						CCUHsApi.getInstance().writeHisValById(sp.getId(), CCUUtils.roundToOneDecimal(val * 10));
+						if (sp.getPointRef() != null) {
+							CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), CCUUtils.roundToOneDecimal(val * 10));
+						}
+						break;
+					case CO2:
+					case CO:
+					case NO:
+					case SOUND:
+					case VOC:
+					case CO2_EQUIVALENT:
+					case PM2P5:
+					case PM10:
+						CCUHsApi.getInstance().writeHisValById(sp.getId(), CCUUtils.roundToOneDecimal(val));
+						if (sp.getPointRef() != null) {
+							CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), CCUUtils.roundToOneDecimal(val));
+						}
+						break;
+					case ENERGY_METER_HIGH:
+						emVal = emVal > 0 ? (emVal | (r.sensorData.get() << 12)) : r.sensorData.get();
+						break;
+					case ENERGY_METER_LOW:
+						emVal = emVal > 0 ? ((emVal << 12) | r.sensorData.get()) : r.sensorData.get();
+						break;
+				}
+			} catch (Exception e) {
+				CcuLog.d(L.TAG_CCU_DEVICE, "Error in regularSmartNodeUpdate for type " + t + ", port " + p);
+				e.printStackTrace();
 			}
 		}
 		

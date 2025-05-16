@@ -24,6 +24,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.UtilKt;
 import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import a75f.io.logic.bo.building.oao.OAOProfileConfiguration;
 import a75f.io.logic.bo.building.plc.PlcProfileConfig;
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration;
 import a75f.io.logic.bo.building.vav.AcbProfileConfiguration;
@@ -450,7 +451,9 @@ public class SmartNode
             return new PlcProfileConfig(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.PLC, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else if (equip.getDomainName().equals(DomainName.helionodePID)) {
             return new PlcProfileConfig(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.PLC, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
-        }else {
+        } else if (equip.getDomainName().equals(DomainName.smartnodeOAO)) {
+            return new OAOProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.OAO, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+        } else {
             return null;
         }
     }
@@ -698,7 +701,6 @@ public class SmartNode
             case SENSOR_OCCUPANCY: return DomainName.zoneOccupancy;
             case SENSOR_ENERGY_METER: return DomainName.sensorEnergyMeter;
             case SENSOR_PM10: return DomainName.sensorPm10;
-
             default: return null;
         }
     }

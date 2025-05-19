@@ -622,12 +622,15 @@ class HyperstatSplitReconfigurationHandler {
                 if (!isCoolingAvailable && !isHeatingAvailable) {
                     // If there are no cooling or heating outputs mapped, set the Conditioning Mode to OFF
                     hayStack.writeDefaultValById(conditioningModeId, StandaloneConditioningMode.OFF.ordinal.toDouble())
+                    hayStack.writeHisValById(conditioningModeId, StandaloneConditioningMode.OFF.ordinal.toDouble())
                 } else if (!isCoolingAvailable) {
                     // If there are only heating outputs mapped, set the Conditioning Mode to HEAT-ONLY
                     hayStack.writeDefaultValById(conditioningModeId, StandaloneConditioningMode.HEAT_ONLY.ordinal.toDouble())
+                    hayStack.writeHisValById(conditioningModeId, StandaloneConditioningMode.HEAT_ONLY.ordinal.toDouble())
                 } else if (!isHeatingAvailable) {
                     // If there are only cooling outputs mapped, set the Conditioning Mode to COOL-ONLY
                     hayStack.writeDefaultValById(conditioningModeId, StandaloneConditioningMode.COOL_ONLY.ordinal.toDouble())
+                    hayStack.writeHisValById(conditioningModeId, StandaloneConditioningMode.COOL_ONLY.ordinal.toDouble())
                 }
                 // If both cooling and heating outputs are mapped, keep the default value of AUTO
             }

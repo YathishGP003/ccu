@@ -3,6 +3,7 @@ package a75f.io.logic.util.bacnet
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.Tags
+import a75f.io.api.haystack.Tags.BACNET_DEVICE_JOB
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
@@ -52,6 +53,9 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.preference.PreferenceManager
 import android.text.format.Formatter
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.InetAddress
@@ -60,6 +64,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 
@@ -392,4 +397,22 @@ fun updateBacnetStackInitStatus(isStackInitSuccess: Boolean) {
         updateBacnetServerStatus(BacnetServerStatus.INITIALIZED_OFFLINE.ordinal)
         sharedPreferences.edit().putBoolean(IS_BACNET_STACK_INITIALIZED, false).apply()
     }
+}
+
+fun scheduleJobToCheckBacnetDeviceOnline(){
+    val workRequest = PeriodicWorkRequestBuilder<BacnetDeviceJob>(15, TimeUnit.MINUTES)
+        .build()
+
+    WorkManager.getInstance(Globals.getInstance().applicationContext)
+        .enqueueUniquePeriodicWork(
+            BACNET_DEVICE_JOB,
+            ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
+    CcuLog.d(BACNET_DEVICE_JOB, "--created work request for looking bacnet device for system profile--")
+}
+
+fun cancelScheduleJobToCheckBacnet(reason : String){
+    CcuLog.d(BACNET_DEVICE_JOB, "--cancelScheduleJobToCheckBacnet--$reason")
+    WorkManager.getInstance(Globals.getInstance().applicationContext).cancelUniqueWork(BACNET_DEVICE_JOB)
 }

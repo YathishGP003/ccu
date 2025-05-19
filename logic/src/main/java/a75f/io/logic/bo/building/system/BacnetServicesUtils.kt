@@ -1,9 +1,10 @@
-package a75f.io.renatus.ENGG.bacnet.services
+package a75f.io.logic.bo.building.system
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logger.CcuLog
-import a75f.io.renatus.ENGG.bacnet.services.client.BaseResponse
-import a75f.io.renatus.ENGG.bacnet.services.client.ServiceManager
-import a75f.io.renatus.bacnet.RemotePointUpdateInterface
+import a75f.io.logic.bo.building.system.client.BaseResponse
+import a75f.io.logic.bo.building.system.client.RemotePointUpdateInterface
+import a75f.io.logic.bo.building.system.client.ServiceManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -70,4 +71,27 @@ class BacnetServicesUtils {
             }
         }
     }
+
+//    override fun sendMultiWriteRequest(
+//        data: BacnetWriteRequest,
+//        ipAddress: String,
+//        selectedValue: String,
+//        id: String
+//    ) {
+//        sendWriteRequest(data, ipAddress, remotePointUpdateInterface, selectedValue, id)
+//    }
+
+    private val remotePointUpdateInterface =
+        RemotePointUpdateInterface { message: String?, id: String?, value: String ->
+            CcuLog.d("BACNET", "--updateMessage::>> " + message);
+//            getActivity().runOnUiThread(Runnable {
+//                Toast.makeText(
+//                    requireContext(),
+//                    message,
+//                    Toast.LENGTH_SHORT
+//                ).show()
+//            })
+            CCUHsApi.getInstance().writeDefaultValById(id, value.toDouble())
+            CCUHsApi.getInstance().writeHisValById(id, value.toDouble())
+        }
 }

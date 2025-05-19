@@ -53,14 +53,20 @@ import a75f.io.logic.bo.building.EpidemicState
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.ScheduleUtil
+import a75f.io.logic.bo.building.system.client.RemotePointUpdateInterface
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.tuners.TunerUtil
+import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.RxjavaUtil
+import a75f.io.logic.util.bacnet.BacnetConfigConstants
 import android.content.Intent
+import android.preference.PreferenceManager
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
+import org.json.JSONException
+import org.json.JSONObject
 import java.util.Objects
 import kotlin.math.roundToInt
 
@@ -84,58 +90,123 @@ const val DISCHARGE_AIR_TEMP = "air and discharge and temp and sensor"
 const val DUCT_STATIC_PRESSURE_SENSOR = "air and discharge and pressure and sensor"
 const val OPERATING_MODE = "mode and operating and sp"
 
+private val TAG_BACNET = "ExternalAHU_BACNET"
+
 fun pushSatSetPoints(
     haystack: CCUHsApi, equipId: String, value: Double, setPointsList: ArrayList<String>
 ) {
-    mapModbusPoint(haystack, SINGLE_SAT_SET_POINT, equipId, value, setPointsList)
+    val point = haystack.readEntity("modbus and id == $equipId")
+    if(point.isNotEmpty()){
+        CcuLog.d(TAG_BACNET, "it is modbus mapModbusPoint for pushSatSetPoints")
+        mapModbusPoint(haystack, SINGLE_SAT_SET_POINT, equipId, value, setPointsList)
+    }else{
+        CcuLog.d(TAG_BACNET, "it is bacnet mapBacnetPoint for pushSatSetPoints")
+        mapBacnetPoint(haystack, SINGLE_SAT_SET_POINT, equipId, value, setPointsList)
+    }
 }
 
 fun pushSatCoolingSetPoints(
     haystack: CCUHsApi, equipId: String, value: Double, setPointsList: ArrayList<String>
 ) {
-    mapModbusPoint(haystack, COOLING_SAT_SET_POINT, equipId, value, setPointsList)
+    val point = haystack.readEntity("modbus and id == $equipId")
+    if(point.isNotEmpty()){
+        CcuLog.d(TAG_BACNET, "it is modbus mapModbusPoint for pushSatCoolingSetPoints")
+        mapModbusPoint(haystack, COOLING_SAT_SET_POINT, equipId, value, setPointsList)
+    }else{
+        CcuLog.d(TAG_BACNET, "it is bacnet mapBacnetPoint for pushSatCoolingSetPoints")
+        mapBacnetPoint(haystack, COOLING_SAT_SET_POINT, equipId, value, setPointsList)
+    }
 }
 
 fun pushSatHeatingSetPoints(
     haystack: CCUHsApi, equipId: String, value: Double, setPointsList: ArrayList<String>
 ) {
-    mapModbusPoint(haystack, HEATING_SAT_SET_POINT, equipId, value, setPointsList)
+    val point = haystack.readEntity("modbus and id == $equipId")
+    if(point.isNotEmpty()){
+        CcuLog.d(TAG_BACNET, "it is modbus mapModbusPoint for pushSatHeatingSetPoints")
+        mapModbusPoint(haystack, HEATING_SAT_SET_POINT, equipId, value, setPointsList)
+    }else{
+        CcuLog.d(TAG_BACNET, "it is bacnet mapBacnetPoint for pushSatHeatingSetPoints")
+        mapBacnetPoint(haystack, HEATING_SAT_SET_POINT, equipId, value, setPointsList)
+    }
 }
 
 fun pushDuctStaticPressure(
     haystack: CCUHsApi, equipId: String, value: Double, setPointsList: ArrayList<String>
 ) {
-    mapModbusPoint(haystack, DUCT_STATIC_PRESSURE, equipId, value, setPointsList)
+    val point = haystack.readEntity("modbus and id == $equipId")
+    if(point.isNotEmpty()){
+        CcuLog.d(TAG_BACNET, "it is modbus mapModbusPoint for pushDuctStaticPressure")
+        mapModbusPoint(haystack, DUCT_STATIC_PRESSURE, equipId, value, setPointsList)
+    }else{
+        CcuLog.d(TAG_BACNET, "it is bacnet mapBacnetPoint for pushDuctStaticPressure")
+        mapBacnetPoint(haystack, DUCT_STATIC_PRESSURE, equipId, value, setPointsList)
+    }
 }
 
 fun pushDamperCmd(
     haystack: CCUHsApi, equipId: String, value: Double, setPointsList: ArrayList<String>
 ) {
-    mapModbusPoint(haystack, DAMPER_CMD, equipId, value, setPointsList)
+    val point = haystack.readEntity("modbus and id == $equipId")
+    if(point.isNotEmpty()){
+        CcuLog.d(TAG_BACNET, "it is modbus mapModbusPoint for pushDamperCmd")
+        mapModbusPoint(haystack, DAMPER_CMD, equipId, value, setPointsList)
+    }else{
+        CcuLog.d(TAG_BACNET, "it is bacnet mapBacnetPoint for pushDamperCmd")
+        mapBacnetPoint(haystack, DAMPER_CMD, equipId, value, setPointsList)
+    }
 }
 
 fun pushOccupancyMode(
     haystack: CCUHsApi, equipId: String, value: Double, setPointsList: ArrayList<String>
 ) {
-    mapModbusPoint(haystack, OCCUPANCY_MODE, equipId, value, setPointsList)
+    val point = haystack.readEntity("modbus and id == $equipId")
+    if(point.isNotEmpty()){
+        CcuLog.d(TAG_BACNET, "it is modbus mapBacnetPoint for pushOccupancyMode")
+        mapModbusPoint(haystack, OCCUPANCY_MODE, equipId, value, setPointsList)
+    }else{
+        CcuLog.d(TAG_BACNET, "it is bacnet mapBacnetPoint for pushOccupancyMode")
+        mapBacnetPoint(haystack, OCCUPANCY_MODE, equipId, value, setPointsList)
+    }
 }
 
 fun pushHumidifierCmd(
     haystack: CCUHsApi, equipId: String, value: Double, setPointsList: ArrayList<String>
 ) {
-    mapModbusPoint(haystack, HUMIDIFIER_CMD, equipId, value, setPointsList)
+    val point = haystack.readEntity("modbus and id == $equipId")
+    if(point.isNotEmpty()){
+        CcuLog.d(TAG_BACNET, "it is modbus mapModbusPoint for pushHumidifierCmd")
+        mapModbusPoint(haystack, HUMIDIFIER_CMD, equipId, value, setPointsList)
+    }else{
+        CcuLog.d(TAG_BACNET, "it is bacnet mapBacnetPoint for pushHumidifierCmd")
+        mapBacnetPoint(haystack, HUMIDIFIER_CMD, equipId, value, setPointsList)
+    }
 }
 
 fun pushDeHumidifierCmd(
     haystack: CCUHsApi, equipId: String, value: Double, setPointsList: ArrayList<String>
 ) {
-    mapModbusPoint(haystack, DEHUMIDIFIER_CMD, equipId, value, setPointsList)
+    val point = haystack.readEntity("modbus and id == $equipId")
+    if(point.isNotEmpty()){
+        CcuLog.d(TAG_BACNET, "it is modbus mapModbusPoint for pushDeHumidifierCmd")
+        mapModbusPoint(haystack, DEHUMIDIFIER_CMD, equipId, value, setPointsList)
+    }else{
+        CcuLog.d(TAG_BACNET, "it is bacnet mapBacnetPoint for pushDeHumidifierCmd")
+        mapBacnetPoint(haystack, DEHUMIDIFIER_CMD, equipId, value, setPointsList)
+    }
 }
 
 fun pushOperatingMode(
     haystack: CCUHsApi, equipId: String, value: Double, setPointsList: ArrayList<String>
 ) {
-    mapModbusPoint(haystack, OPERATING_MODE, equipId, value, setPointsList)
+    val point = haystack.readEntity("modbus and id == $equipId")
+    if(point.isNotEmpty()){
+        CcuLog.d(TAG_BACNET, "it is modbus mapModbusPoint for pushOperatingMode")
+        mapModbusPoint(haystack, OPERATING_MODE, equipId, value, setPointsList)
+    }else{
+        CcuLog.d(TAG_BACNET, "it is bacnet mapBacnetPoint for pushOperatingMode")
+        mapBacnetPoint(haystack, OPERATING_MODE, equipId, value, setPointsList)
+    }
 }
 
 
@@ -149,6 +220,7 @@ fun updateSetPoint(
 ) {
 
     updatePointValue(systemEquip, domainName, setPoint)
+    CcuLog.d(TAG_BACNET, "---------updateSetPoint----------$externalEquipId")
     externalEquipId?.let {
         pushSatSetPoints(haystack, externalEquipId, setPoint, externalSpList)
     }
@@ -164,6 +236,7 @@ fun updateCoolingSetPoint(
 ) {
 
     updatePointValue(systemEquip, domainName, setPoint)
+    CcuLog.d(TAG_BACNET, "---------updateCoolingSetPoint----------$externalEquipId")
     externalEquipId?.let {
         pushSatCoolingSetPoints(haystack, externalEquipId, setPoint, externalSpList)
     }
@@ -179,6 +252,7 @@ fun updateHeatingSetPoint(
 ) {
 
     updatePointValue(systemEquip, domainName, setPoint)
+    CcuLog.d(TAG_BACNET, "---------updateHeatingSetPoint----------$externalEquipId")
     externalEquipId?.let {
         pushSatHeatingSetPoints(haystack, externalEquipId, setPoint, externalSpList)
     }
@@ -194,11 +268,86 @@ fun updateOperatingMode(
 ) {
 
     updatePointValue(systemEquip, domainName, setPoint)
+    CcuLog.d(TAG_BACNET, "---------updateOperatingMode----------$externalEquipId")
     externalEquipId?.let {
         pushOperatingMode(haystack, externalEquipId, setPoint, externalSpList)
     }
 }
 
+fun mapBacnetPoint(
+    haystack: CCUHsApi,
+    query: String,
+    equipId: String,
+    value: Double,
+    setPointsList: ArrayList<String>
+) {
+    val equip = haystack.readEntity("id == $equipId")
+    val point = haystack.readEntity("$query and equipRef == \"$equipId\"")
+    val pointId = point[Tags.ID].toString()
+    val objectIdFromPoint = point["bacnetId"].toString().toInt()
+    val objectType = point["bacnetType"].toString()
+    val bacnetConfig = equip["bacnetConfig"].toString()
+    val defaultPriority = point["defaultWriteLevel"].toString()
+    //val isSystemPoint = point["system"]
+    var objectId = 0
+    CcuLog.d(TAG_BACNET, "--checking bool--")
+    try {
+        objectId = objectIdFromPoint - 1100000
+
+    }catch (e : Exception){
+        e.printStackTrace()
+        CcuLog.d(TAG_BACNET, "--we landed in error")
+    }
+
+    CcuLog.d(TAG_BACNET, "mapBacnetPoint objectId-->$objectId--objectType--$objectType--bacnetConfig--$bacnetConfig--defaultPriority--$defaultPriority--pointId--$pointId")
+
+    if (point.isNotEmpty()) {
+        CcuLog.i(TAG_BACNET, " point found $query-----#going to update local point and remote point--value--$value")
+        if(BacNetConstants.ObjectType.OBJECT_MULTI_STATE_VALUE.key == getObjectType(objectType)){
+            val wholeNumber = value.toInt()
+            val bacnetWholeNumber = wholeNumber - 1
+            updatePointValueChanges(pointId, haystack, setPointsList, wholeNumber.toDouble())
+            doMakeRequest(getConfig(bacnetConfig), objectId, bacnetWholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
+        }else{
+            updatePointValueChanges(pointId, haystack, setPointsList, value)
+            doMakeRequest(getConfig(bacnetConfig), objectId, value.toString(),getObjectType(objectType), defaultPriority, pointId)
+        }
+
+    } else {
+        CcuLog.i(L.TAG_CCU_MODBUS, " point not found $query")
+    }
+}
+
+private fun getObjectType(objectTypeValue : String) : String{
+    var objectType: String
+    if (objectTypeValue.equals("MultiStateValue", ignoreCase = true)) {
+        objectType =
+            BacNetConstants.ObjectType.OBJECT_MULTI_STATE_VALUE.key
+    } else if (objectTypeValue.equals("BinaryValue", ignoreCase = true)) {
+        objectType =
+            BacNetConstants.ObjectType.OBJECT_BINARY_VALUE.key
+    } else {
+        objectType =
+            BacNetConstants.ObjectType.OBJECT_ANALOG_VALUE.key
+    }
+    return objectType
+}
+
+private fun getConfig(configString: String): MutableMap<String, String> {
+    val pairs: Array<String> =
+        configString.split(",".toRegex()).dropLastWhile { it.isEmpty() }
+            .toTypedArray()
+    val configMap: MutableMap<String, String> = java.util.HashMap()
+    for (pair in pairs) {
+        val keyValue = pair.split(":".toRegex()).dropLastWhile { it.isEmpty() }
+            .toTypedArray()
+        if (keyValue.size != 2) continue  // Skip invalid key value pairs (e.g. "destinationIp:
+        val key = keyValue[0]
+        val value = keyValue[1]
+        configMap[key] = value
+    }
+    return configMap
+}
 fun mapModbusPoint(
     haystack: CCUHsApi,
     query: String,
@@ -459,6 +608,7 @@ private fun updateDspSetPoint(
     dspSetPoint = (dspSetPoint * 100.0).roundToInt() / 100.0
     updatePointValue(systemEquip, ductStaticPressureSetpoint, dspSetPoint)
     updatePointValue(systemEquip, fanLoopOutput, fanLoop)
+    CcuLog.d(TAG_BACNET, "---------updateDspSetPoint----------$externalEquipId")
     externalEquipId?.let {
         pushDuctStaticPressure(haystack, externalEquipId, dspSetPoint, externalSpList)
     }
@@ -532,6 +682,7 @@ fun handleHumidityOperation(
     if (baseConfig.loopOutput == 0.0 && (occupancyMode == Occupancy.UNOCCUPIED || conditioningMode == SystemMode.OFF
                 || occupancyMode == Occupancy.VACATION)) {
         updatePointValue(systemEquip, humidifierEnable, 0.0)
+        CcuLog.d(TAG_BACNET, "---------handleHumidityOperation----------1--$externalEquipId")
         externalEquipId?.let {
             pushHumidifierCmd(haystack, externalEquipId, 0.0, externalSpList)
         }
@@ -556,6 +707,7 @@ fun handleHumidityOperation(
 
     if (currentStatus != newStatus) {
         updatePointValue(systemEquip, humidifierEnable, newStatus)
+        CcuLog.d(TAG_BACNET, "---------handleHumidityOperation----------2---$externalEquipId")
         externalEquipId?.let {
             pushHumidifierCmd(haystack, externalEquipId, newStatus, externalSpList)
         }
@@ -590,6 +742,7 @@ fun handleDeHumidityOperation(
     if (baseConfig.loopOutput == 0.0 && (occupancyMode == Occupancy.UNOCCUPIED || conditioningMode == SystemMode.OFF
                 || occupancyMode == Occupancy.VACATION)) {
         updatePointValue(systemEquip, dehumidifierEnable, 0.0)
+        CcuLog.d(TAG_BACNET, "---------handleDeHumidityOperation----------1----$externalEquipId")
         externalEquipId?.let {
             pushDeHumidifierCmd(haystack, externalEquipId, 0.0, externalSpList)
         }
@@ -612,6 +765,7 @@ fun handleDeHumidityOperation(
 
     if (currentStatus != newStatus) {
         updatePointValue(systemEquip, dehumidifierEnable, newStatus)
+        CcuLog.d(TAG_BACNET, "---------handleDeHumidityOperation----------2----$externalEquipId")
         externalEquipId?.let {
             pushDeHumidifierCmd(haystack, externalEquipId, newStatus, externalSpList)
         }
@@ -657,6 +811,9 @@ fun operateDamper(
 
     updatePointValue(systemEquip, dcvLoopOutput, damperOperationPercent)
     updatePointValue(systemEquip, dcvDamperCalculatedSetpoint, dcvSetPoint)
+
+    CcuLog.d(TAG_BACNET, "---------operateDamper----------$externalEquipId")
+
     externalEquipId?.let {
         pushDamperCmd(haystack, externalEquipId, dcvSetPoint, externalSpList)
     }
@@ -685,6 +842,7 @@ fun setOccupancyMode(
     if (isConfigEnabled(systemEquip, occupancyModeControl)) {
         logIt("Occupancy mode $occupancyMode")
         updatePointValue(systemEquip, systemOccupancyMode, occupancyMode)
+        CcuLog.d(TAG_BACNET, "---------setOccupancyMode----------$externalEquipId")
         externalEquipId?.let {
             pushOccupancyMode(haystack, it, occupancyMode, externalSpList)
         }
@@ -768,11 +926,18 @@ fun getConfiguration(profileDomain: String, profileType: ProfileType): ExternalA
 }
 
 fun getExternalEquipId(): String? {
-    // TODO check if bacnet is configured then we need to find bacnet equip id
-    val modbusEquip =
-        CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu")
-    if (modbusEquip.isNotEmpty()) {
-        return modbusEquip["id"].toString()
+    if(PreferenceUtil.getSelectedProfileWithAhu() == "bacnet"){
+        val bacnetEquip =
+            CCUHsApi.getInstance().readEntity("system and equip and bacnet and not emr and not btu")
+        if (bacnetEquip.isNotEmpty()) {
+            return bacnetEquip["id"].toString()
+        }
+    }else if(PreferenceUtil.getSelectedProfileWithAhu() == "modbus"){
+        val modbusEquip =
+            CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu")
+        if (modbusEquip.isNotEmpty()) {
+            return modbusEquip["id"].toString()
+        }
     }
     return null
 }
@@ -782,6 +947,7 @@ fun addSystemEquip(
     definition: SeventyFiveFProfileDirective?,
     systemProfile: SystemProfile
 ) {
+    CcuLog.d(a75f.io.api.haystack.Tags.ADD_REMOVE_PROFILE, "ExternalAhuUtil----addSystemEquip----")
     CcuLog.i(L.TAG_CCU_SYSTEM, "Adding system equip " + definition?.name)
     val profileEquipBuilder = ProfileEquipBuilder(CCUHsApi.getInstance())
     val equipId = profileEquipBuilder.buildEquipAndPoints(
@@ -790,6 +956,7 @@ fun addSystemEquip(
         CCUHsApi.getInstance().site!!.id,
         CCUHsApi.getInstance().siteName + "-" + definition.name
     )
+    CcuLog.d(a75f.io.api.haystack.Tags.ADD_REMOVE_PROFILE, "ExternalAhuUtil----updateAhuRef----")
     systemProfile.updateAhuRef(equipId)
     ControlMote(equipId)
     if (systemProfile is VavExternalAhu) {
@@ -814,8 +981,8 @@ fun getModbusPointValue(query: String): String {
 }
 
 fun getConfigValue(domainName: String, modelName: String): Boolean {
-    val systemEquip = Domain.getSystemEquipByDomainName(modelName)
-    return getConfigByDomainName(systemEquip!!, domainName)
+    return CCUHsApi.getInstance()
+        .readDefaultVal(("point and domainName == \"$domainName\" and equipRef == \"${Domain.systemEquip.equipRef}\"")) > 0
 }
 
 fun getSetPoint(domainName: String): String {
@@ -941,3 +1108,101 @@ fun logIt(msg: String) {
     CcuLog.i(L.TAG_CCU_SYSTEM, msg)
 }
 
+private const val DEVICE_ID = "deviceId"
+private const val DESTINATION_IP = "destinationIp"
+private const val DESTINATION_PORT = "destinationPort"
+private const val MAC_ADDRESS = "macAddress"
+private const val DEVICE_NETWORK = "deviceNetwork"
+private fun generateWriteObject(
+    configMap: Map<String, String?>,
+    objectId: Int,
+    selectedValue: String,
+    objectType: String,
+    priority: String
+): BacnetWriteRequest {
+    var macAddress: String? = ""
+    if (configMap[MAC_ADDRESS] != null) {
+        macAddress = configMap[MAC_ADDRESS]
+    }
+    //OBJECT_MULTI_STATE_VALUE
+    val destinationMultiRead = Objects.requireNonNull(
+        configMap[DESTINATION_IP]
+    )?.let {
+        Objects.requireNonNull(
+            configMap[DESTINATION_PORT]
+        )?.let { it1 ->
+            Objects.requireNonNull(
+                configMap[DEVICE_ID]
+            )?.let { it2 ->
+                Objects.requireNonNull(
+                    configMap[DEVICE_NETWORK]
+                )?.let { it3 ->
+                    DestinationMultiRead(
+                        it,
+                        it1,
+                        it2,
+                        it3,
+                        macAddress!!
+                    )
+                }
+            }
+        }
+    }
+    val dataType: Int
+    val selectedValueAsPerType: String
+    if (BacNetConstants.ObjectType.valueOf(objectType).value == 2) {
+        dataType = BacNetConstants.DataTypes.BACNET_DT_REAL.ordinal + 1
+        selectedValueAsPerType = selectedValue
+    } else if (BacNetConstants.ObjectType.valueOf(objectType).value == 5) {
+        dataType = BacNetConstants.DataTypes.BACNET_DT_ENUM.ordinal + 1
+        selectedValueAsPerType = selectedValue //String.valueOf(Integer.parseInt(selectedValue)+1);
+    } else {
+        dataType = BacNetConstants.DataTypes.BACNET_DT_UNSIGNED.ordinal + 1
+        selectedValueAsPerType = (selectedValue.toDouble() + 1).toString()
+    }
+    val objectIdentifierBacNet = ObjectIdentifierBacNet(
+        BacNetConstants.ObjectType.valueOf(objectType).value,
+        objectId.toString()
+    )
+    val propertyValueBacNet =
+        PropertyValueBacNet(dataType, selectedValueAsPerType)
+    val writeRequest = WriteRequest(
+        objectIdentifierBacNet, propertyValueBacNet, priority,
+        BacNetConstants.PropertyType.valueOf("PROP_PRESENT_VALUE").value, null
+    )
+    return BacnetWriteRequest(destinationMultiRead!!, writeRequest)
+}
+private fun doMakeRequest(configMap: Map<String, String?>, objectId : Int, newValue : String,
+                          objectType: String, priority: String, pointId: String){
+    val serverIpAddress: String? = getServerIpAddress()
+    if(serverIpAddress != null){
+        val bacnetServicesUtils = BacnetServicesUtils()
+        CcuLog.d(TAG_BACNET, "--doMakeRequest-->$objectId<--newValue-->$newValue-->objectType-->$objectType<-pointId->$pointId<---serverIpAddress-->$serverIpAddress")
+        bacnetServicesUtils.sendWriteRequest(generateWriteObject(configMap, objectId, newValue,
+            objectType, priority),
+            serverIpAddress, remotePointUpdateInterface, newValue, pointId)
+    }
+}
+
+private val remotePointUpdateInterface =
+    RemotePointUpdateInterface { message: String?, id: String?, value: String ->
+        CcuLog.d(TAG_BACNET, "--updateMessage::>> $message")
+        //CCUHsApi.getInstance().writeDefaultValById(id, value.toDouble())
+        //CCUHsApi.getInstance().writeHisValById(id, value.toDouble())
+    }
+
+private fun getServerIpAddress() : String?{
+    var ipAddress : String? = null
+    val bacnetServerConfig = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().applicationContext)
+        .getString(BacnetConfigConstants.BACNET_CONFIGURATION, null)
+    if (bacnetServerConfig != null) {
+        try {
+            val config = JSONObject(bacnetServerConfig)
+            val networkObject = config.getJSONObject("network")
+            ipAddress =  networkObject.getString(BacnetConfigConstants.IP_ADDRESS)
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+    }
+    return ipAddress
+}

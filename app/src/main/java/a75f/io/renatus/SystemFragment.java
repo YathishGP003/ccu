@@ -11,6 +11,8 @@ import static a75f.io.domain.api.DomainName.supplyAirflowTemperatureSetpoint;
 import static a75f.io.domain.api.DomainName.systemEnhancedVentilationEnable;
 import static a75f.io.domain.api.DomainName.systemPostPurgeEnable;
 import static a75f.io.domain.api.DomainName.systemPrePurgeEnable;
+import static a75f.io.logic.bo.building.bacnet.BacnetEquip.TAG_BACNET;
+import static a75f.io.logic.bo.building.bacnet.BacnetEquip.TAG_BACNET_HEART_BEAT;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.DISCHARGE_AIR_TEMP;
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.DUCT_STATIC_PRESSURE_SENSOR;
@@ -24,6 +26,7 @@ import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.isConnectM
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.logic.util.bacnet.BacnetModelBuilderKt.buildBacnetModelSystem;
 import static a75f.io.messaging.handler.AdvanceAhuReconfigHandlerKt.isAdvanceAhuV2Profile;
 import static a75f.io.renatus.modbus.util.UtilSourceKt.BACNET;
 import static a75f.io.renatus.modbus.util.UtilSourceKt.isOaoPairedInConnectModule;
@@ -57,6 +60,7 @@ import android.widget.SeekBar;
 import android.widget.Space;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
@@ -80,8 +84,10 @@ import org.jsoup.helper.StringUtil;
 import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -90,9 +96,15 @@ import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.bacnet.parser.BacnetModelDetailResponse;
+import a75f.io.api.haystack.bacnet.parser.BacnetPoint;
+import a75f.io.api.haystack.bacnet.parser.BacnetZoneViewItem;
+import a75f.io.api.haystack.bacnet.parser.PresentationData;
+import a75f.io.api.haystack.bacnet.parser.ValueConstraint;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.domain.OAOEquip;
@@ -105,6 +117,7 @@ import a75f.io.logic.TaskManager;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.client.RemotePointUpdateInterface;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
@@ -127,8 +140,12 @@ import a75f.io.logic.interfaces.IntrinsicScheduleListener;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.schedule.IntrinsicScheduleCreator;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.messaging.handler.UpdateScheduleHandler;
+import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants;
+import a75f.io.renatus.bacnet.GridSpacingItemDecoration;
+import a75f.io.renatus.bacnet.ZoneRecyclerBacnetParamAdapter;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.modbus.util.UtilSourceKt;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -321,7 +338,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	@Override
 	public void updateBacnetUi(String id) {
-		CcuLog.d(BACNET, "system fragment update ui bacnet for id-->"+id);
+		CcuLog.d(Tags.BACNET, "system fragment update ui bacnet for id-->"+id);
 	}
 
 	@Override
@@ -755,6 +772,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		textViewCn1 =  view.findViewById(R.id.textview_CN);
 		textViewCM = view.findViewById(R.id.textviewCM);
 		linearLayoutCn = view.findViewById(R.id.linear_layout_cn);
+		bacnetRecyclerView = view.findViewById(R.id.external_bacnet_device);
 		if(prefs.getBoolean("REGISTRATION")){
 			lastUpdated.setVisibility(View.VISIBLE);
 			scheduleType.setVisibility(View.VISIBLE);
@@ -1583,6 +1601,177 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				HeartBeatUtil.moduleStatus(externalModbusStatus, nodeAddress);
 			}
 
+			if(PreferenceUtil.getSelectedProfileWithAhu().equalsIgnoreCase("bacnet")){
+				CcuLog.d(TAG_BACNET, "--bacnet profile found attached with external ahu---system fragment");
+				HashMap<Object, Object>  bacnetEquip =
+						CCUHsApi.getInstance().readEntity("system and equip and bacnet and not emr and not btu");
+				if(bacnetEquip != null){
+					showBacnetUi(bacnetEquip);
+				}
+			}
 		}
+	}
+
+	private List<BacnetZoneViewItem> bacNetPointsList = new ArrayList<>();
+	private ZoneRecyclerBacnetParamAdapter zoneRecyclerBacnetParamAdapter;
+
+	private RecyclerView bacnetRecyclerView;
+
+	private void showBacnetUi(HashMap<Object, Object> bacnetEquip){
+
+		if(bacnetEquip == null || bacnetEquip.get("id") == null){
+			CcuLog.d(TAG_BACNET, "--can not populate ui as bacnet equip is null");
+			return;
+		}
+
+		String bacnetEquipId = bacnetEquip.get("id").toString();
+		String heartBeatPointId = CCUHsApi.getInstance().readEntity("point and heartbeat and equipRef==\"" + bacnetEquipId + "\"").get("id").toString();
+		Double hisValue = CCUHsApi.getInstance().readHisValById(heartBeatPointId);
+		HisItem heartBeatHisItem = CCUHsApi.getInstance().curRead(heartBeatPointId);
+		String lastUpdatedTime = "--";
+
+		if(hisValue == 1.0){
+			lastUpdatedTime = "Just now";
+			externalModbusStatus.setBackgroundResource(R.drawable.module_alive);
+		}else{
+			if(heartBeatHisItem != null){
+				Date updatedTime = heartBeatHisItem.getDate();
+				lastUpdatedTime = HeartBeatUtil.getLastUpdatedTimeBacnetSystem(updatedTime);
+
+				Date currTime = new Date();
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(updatedTime);
+				calendar.add(Calendar.MINUTE, 15);
+				Date currTimePlus15 = calendar.getTime();
+
+				CcuLog.d(TAG_BACNET_HEART_BEAT, "--heart beat point his value-->"+hisValue+"<--heartBeatHisItem time-->"+heartBeatHisItem.getDate() + "<----currTimePlus15-->"+currTimePlus15 + "<currTime>"+currTime);
+
+				if (currTime.after(currTimePlus15)) {
+					CcuLog.d(TAG_BACNET_HEART_BEAT, "givenTime is more than 15 minutes ahead of current time.");
+					externalModbusStatus.setBackgroundResource(R.drawable.module_dead);
+				} else {
+					CcuLog.d(TAG_BACNET_HEART_BEAT, "givenTime is not more than 15 minutes ahead.");
+					externalModbusStatus.setBackgroundResource(R.drawable.module_alive);
+				}
+			}else{
+				CcuLog.d(TAG_BACNET_HEART_BEAT, "givenTime not found");
+				externalModbusStatus.setBackgroundResource(R.drawable.module_dead);
+			}
+		}
+
+
+
+		List<BacnetModelDetailResponse> list = buildBacnetModelSystem(bacnetEquip);
+
+		externalModbusStatus.setVisibility(View.VISIBLE);
+		externalModbusLastUpdated.setVisibility(View.VISIBLE);
+		externalModbusLastUpdated.setText(lastUpdatedTime);
+		external_last_updated.setVisibility(View.VISIBLE);
+		externalModbusModelDetails.setVisibility(View.VISIBLE);
+		externalModbusModelDetails.setText(Objects.requireNonNull(bacnetEquip.get("dis")).toString());
+
+		for (BacnetModelDetailResponse item : list){
+			List<BacnetPoint> bacnetPoints = item.getPoints();
+			bacNetPointsList = fetchZoneDataForBacnet(bacnetPoints, bacnetEquip.get("bacnetConfig").toString());
+		}
+
+		int spanCount = 2;
+		int spacingInDp = 60;
+		int spacing = GridSpacingItemDecoration.dpToPx(spacingInDp, getContext());
+
+
+		GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),spanCount);
+		bacnetRecyclerView.setLayoutManager(gridLayoutManager);
+		bacnetRecyclerView.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing));
+		zoneRecyclerBacnetParamAdapter =
+				new ZoneRecyclerBacnetParamAdapter(getContext(),
+						bacNetPointsList, remotePointUpdateInterface);
+		bacnetRecyclerView.setAdapter(zoneRecyclerBacnetParamAdapter);
+		bacnetRecyclerView.invalidate();
+	}
+
+	private RemotePointUpdateInterface remotePointUpdateInterface = (message, id, value) -> {
+		//CcuLog.d(LOG_TAG, "--updateMessage::>> " + message);
+		getActivity().runOnUiThread(() -> {
+			Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+		});
+
+		CCUHsApi.getInstance().writeDefaultValById(id, Double.parseDouble(value));
+		CCUHsApi.getInstance().writeHisValById(id, Double.parseDouble(value));
+	};
+
+	private List<BacnetZoneViewItem> fetchZoneDataForBacnet(List<BacnetPoint> bacnetPoints, String bacnetConfig){
+		List<BacnetZoneViewItem> listBacnetZoneViewItems = new ArrayList<>();
+		List<String> parameterList = new ArrayList<>();
+		for (BacnetPoint bacnetPoint : bacnetPoints){
+			CcuLog.d(BACNET, "bacnet tags: " + bacnetPoint.getEquipTagNames());
+			boolean isWritable = false;
+			String objectTypeFromProtocolData = bacnetPoint.getProtocolData().getBacnet().getObjectType();
+			String objectType = BacNetConstants.ObjectType.OBJECT_ANALOG_VALUE.getKey();
+			List<String> spinnerValues = new ArrayList<>();
+			if(bacnetPoint.getEquipTagNames().contains("writable")){
+				isWritable = true;
+				PresentationData presentationData = bacnetPoint.getPresentationData();
+				ValueConstraint valueConstraint = bacnetPoint.getValueConstraint();
+				if(objectTypeFromProtocolData.equalsIgnoreCase("MultiStateValue")){
+					objectType = BacNetConstants.ObjectType.OBJECT_MULTI_STATE_VALUE.getKey();
+				}else if(objectTypeFromProtocolData.equalsIgnoreCase("BinaryValue")){
+					objectType = BacNetConstants.ObjectType.OBJECT_BINARY_VALUE.getKey();
+				}else{
+					objectType = BacNetConstants.ObjectType.OBJECT_ANALOG_VALUE.getKey();
+				}
+
+				if(presentationData != null && valueConstraint != null){
+					if(valueConstraint.getMinValue() != null && valueConstraint.getMinValue() != null){
+						int minValue = valueConstraint.getMinValue();
+						int maxValue = valueConstraint.getMaxValue();
+						//float step = Float.parseFloat(presentationData.getTagValueIncrement(
+						double step = Double.parseDouble(presentationData.getTagValueIncrement());
+						spinnerValues = generateValuesForSpinner(minValue, maxValue, step);
+						CcuLog.d(BACNET, "For point id--> " + bacnetPoint.getId() + " MinValue: " + minValue + " MaxValue: " + maxValue + " Increment Value: " + step);
+					}else {
+						CcuLog.d(BACNET, "For point id--> " + bacnetPoint.getId() + " there is no min max value checking multi state");
+						List<String> finalSpinnerValues = spinnerValues;
+						valueConstraint.getAllowedValues().forEach(allowedValue -> {
+							CcuLog.d(BACNET, "For point id--> " + bacnetPoint.getId() + " Allowed Value: " + allowedValue);
+							finalSpinnerValues.add(allowedValue.getValue());
+						});
+					}
+				}
+			}
+
+			if(bacnetPoint.getProtocolData().getBacnet().getDisplayInUIDefault()){
+				String pointName = bacnetPoint.getDisName();
+				String pointId = bacnetPoint.getId();
+				String value = CCUHsApi.getInstance().readDefaultStrVal("id=="+pointId);
+				String hisValue = String.valueOf(CCUHsApi.getInstance().readHisValById(pointId));
+				String defaultValById = String.valueOf(CCUHsApi.getInstance().readDefaultValById(pointId));
+				CcuLog.d(BACNET, "pointName: " + pointName + "pointId: " + pointId + "value: " + value
+						+ "hisValue: " + hisValue + "defaultValById: " + defaultValById);
+				String curretValue = "";
+				if(!isWritable){
+					parameterList.add(pointName + " : " + hisValue);
+					curretValue = hisValue;
+				}else{
+					parameterList.add(pointName + " : " + defaultValById);
+					curretValue = defaultValById;
+				}
+
+				BacnetZoneViewItem bacnetZoneViewItem = new BacnetZoneViewItem(pointName, curretValue,
+						bacnetConfig, true, bacnetPoint, isWritable, spinnerValues, objectType);
+				listBacnetZoneViewItems.add(bacnetZoneViewItem);
+			}
+		}
+		return listBacnetZoneViewItems;
+	}
+
+	public List<String> generateValuesForSpinner(double minValue, double maxValue, double step) {
+		List<String> arrayList = new ArrayList<>();
+		DecimalFormat df = new DecimalFormat("#.##");
+		for (double value = minValue; value <= maxValue; value += step) {
+			String formattedValue = df.format(value);
+			arrayList.add(formattedValue);
+		}
+		return arrayList;
 	}
 }

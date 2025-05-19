@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.RawPoint
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.TunerUtil.updateSystemTunerVal
 import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfileConfiguration
 import a75f.io.logic.tuners.TunerUtil
@@ -29,7 +30,7 @@ fun overrideTunersForBypassDamper(hayStack: CCUHsApi) {
     updateSystemTunerVal("vav and pspread and not airflow and not air", 1.5, "Bypass Damper Added", hayStack)
 
 
-    CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule")["id"]?.let { sysEquipId ->
+    CCUHsApi.getInstance().readEntity(CommonQueries.SYSTEM_PROFILE)["id"]?.let { sysEquipId ->
         val childEquips = HSUtil.getEquipsWithAhuRefOnThisCcu(sysEquipId.toString())
         val childEquipsIterator = childEquips.iterator()
         while(childEquipsIterator.hasNext()) {

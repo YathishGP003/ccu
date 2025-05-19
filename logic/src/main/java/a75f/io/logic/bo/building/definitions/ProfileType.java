@@ -39,6 +39,10 @@ public enum ProfileType
                 return SYSTEM_DAB_HYBRID_RTU;
             case "OAO":
                 return OAO;
+            case "vavExternalAHUController":
+                return vavExternalAHUController;
+            case "dabExternalAHUController":
+                return dabExternalAHUController;
         }
         return null;
     }

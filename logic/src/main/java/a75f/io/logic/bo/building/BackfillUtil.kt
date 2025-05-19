@@ -6,6 +6,7 @@ import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.util.CommonQueries
 import a75f.io.logic.tuners.SystemTuners
 import a75f.io.logic.tuners.TunerConstants
 import java.util.*
@@ -15,7 +16,7 @@ private val backfillPref = BackfillPref()
 fun addBackFillDurationPointIfNotExists(ccuHsApi: CCUHsApi) {
 
     val siteMap = ccuHsApi.readEntity(Tags.SITE)
-    val equipMap = ccuHsApi.readEntity("equip and system and not modbus and not connectModule")
+    val equipMap = ccuHsApi.readEntity(CommonQueries.SYSTEM_PROFILE)
     val equip = Equip.Builder().setHashMap(equipMap).build()
     val equipRef = equip.id
     val siteRef = Objects.requireNonNull(siteMap[Tags.ID]).toString()

@@ -11,6 +11,7 @@ import a75.io.algos.tr.TRSystem;
 import a75.io.algos.tr.TrimResponseProcessor;
 import a75.io.algos.tr.TrimResponseRequest;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 
 /**
@@ -179,7 +180,7 @@ public class VavTRSystem extends TRSystem
 
     public double getSatTRTunerVal(String trParam, String tunerType) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        if(hayStack.readEntity("system and equip and not modbus").containsKey("domainName")){
+        if(hayStack.readEntity(CommonQueries.SYSTEM_PROFILE).containsKey("domainName")){
             double tunerValue = getSystemTunerVal(trParam, hayStack, tunerType);
             if(tunerValue != -1) return tunerValue;
         }
@@ -224,7 +225,7 @@ public class VavTRSystem extends TRSystem
     }
     public double getSpTRTunerVal(String trParam, String tunerType) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        if(hayStack.readEntity("system and equip and not modbus").containsKey("domainName")){
+        if(hayStack.readEntity(CommonQueries.SYSTEM_PROFILE).containsKey("domainName")){
             double tunerValue = getSystemTunerVal(trParam, hayStack, tunerType);
             if(tunerValue != -1) return tunerValue;
         }
@@ -266,7 +267,7 @@ public class VavTRSystem extends TRSystem
     
     public double getCO2TRTunerVal(String trParam, String tunerType) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        if(hayStack.readEntity("system and equip and not modbus").containsKey("domainName")){
+        if(hayStack.readEntity(CommonQueries.SYSTEM_PROFILE).containsKey("domainName")){
             double tunerValue = getSystemTunerVal(trParam, hayStack, tunerType);
             if(tunerValue != -1) return tunerValue;
         }

@@ -17,6 +17,7 @@ import a75f.io.domain.api.DomainName.vavHumidityHysteresis
 import a75f.io.domain.api.DomainName.vavOutsideTempCoolingLockout
 import a75f.io.domain.api.DomainName.vavOutsideTempHeatingLockout
 import a75f.io.domain.api.Equip
+import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
@@ -154,11 +155,16 @@ class VavExternalAhu : VavSystemProfile() {
 
     @Synchronized
     override fun deleteSystemEquip() {
-        val equip = CCUHsApi.getInstance().readEntity(SYSTEM_MODBUS)
-        if (equip["profile"]?.toString().contentEquals(ProfileType.vavExternalAHUController.name)) {
-            CCUHsApi.getInstance().deleteEntityTree(equip[Tags.ID].toString())
+        val listOfEquips = CCUHsApi.getInstance().readAllEntities(CommonQueries.SYSTEM_PROFILE)
+        for(equip in listOfEquips){
+            if (ProfileType.getProfileTypeForName(equip["profile"]?.toString()).name.contentEquals(ProfileType.vavExternalAHUController.name)) {
+                CcuLog.d(Tags.ADD_REMOVE_PROFILE, "vavExternalAhu removing profile with it -->${equip[Tags.ID].toString()}")
+                CCUHsApi.getInstance().deleteEntityTree(equip[Tags.ID].toString())
+            }
         }
+
         removeSystemEquipModbus()
+        removeSystemEquipBacnet()
         deleteSystemConnectModule()
     }
 
@@ -281,7 +287,11 @@ class VavExternalAhu : VavSystemProfile() {
             vavConfig
         )
         updateSystemStatusPoints(systemEquip.id, statusMessage, equipStatusMessage)
-        instance.modbusInterface?.writeSystemModbusRegister(externalEquipId, externalSpList)
+
+        val point = hayStack.readEntity("modbus and id == $externalEquipId")
+        if(point.isNotEmpty()){
+            instance.modbusInterface?.writeSystemModbusRegister(externalEquipId, externalSpList)
+        }
     }
 
     private fun updateLoopDirection(basicConfig: BasicConfig, systemEquip: Equip) {

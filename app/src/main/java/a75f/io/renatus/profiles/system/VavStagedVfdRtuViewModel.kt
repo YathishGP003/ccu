@@ -1,9 +1,11 @@
 package a75f.io.renatus.profiles.system
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.hasChanges
+import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
@@ -29,7 +31,7 @@ class VavStagedVfdRtuViewModel : StagedRtuProfileViewModel() {
 
         CcuLog.i(Domain.LOG_TAG, "VavStagedVfdRtuViewModel Init")
 
-        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule") //TODO - via domain
+        val systemEquip = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE) //TODO - via domain
         CcuLog.i(Domain.LOG_TAG, "Current System Equip $systemEquip")
 
         if (systemEquip["profile"].toString() == "vavStagedRtuVfdFan" ||
@@ -58,16 +60,19 @@ class VavStagedVfdRtuViewModel : StagedRtuProfileViewModel() {
         var systemEquipId : String? = null
         ProgressDialogUtils.showProgressDialog(context, "Saving VAV Configuration")
         viewModelScope.launch (highPriorityDispatcher) {
-            val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
+            val systemEquip = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
             if (systemEquip["profile"].toString() != "vavStagedRtuVfdFan" &&
                     systemEquip["profile"].toString() != ProfileType.SYSTEM_VAV_STAGED_VFD_RTU.name) {
                 val vfdViewState = viewState.value as StagedRtuVfdViewState
                 val vfdConfig = profileConfiguration as StagedVfdRtuProfileConfig
                 vfdViewState.updateConfigFromViewState(vfdConfig)
+                CcuLog.d(Tags.ADD_REMOVE_PROFILE, "VavStagedVfdRtuViewModel removing profile with it -->${systemEquip["id"].toString()}")
                 deleteSystemProfile(systemEquip["id"].toString())
                 systemEquipId = createNewEquip(systemEquip["id"].toString())
+                L.ccu().systemProfile!!.deleteSystemEquip()
                 L.ccu().systemProfile = VavStagedRtuWithVfd()
                 L.ccu().systemProfile.removeSystemEquipModbus()
+                L.ccu().systemProfile.removeSystemEquipBacnet()
                 L.ccu().systemProfile.addSystemEquip()
                 UnusedPortsModel.saveUnUsedPortStatusOfSystemProfile(profileConfiguration, hayStack)
                 profileConfiguration.unusedPorts.clear()
@@ -110,7 +115,7 @@ class VavStagedVfdRtuViewModel : StagedRtuProfileViewModel() {
     }
 
     fun reset() {
-        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
+        val systemEquip = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
         if (systemEquip["profile"].toString() == "vavStagedRtuVfdFan" ||
             systemEquip["profile"].toString() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU.name) {
             profileConfiguration = StagedVfdRtuProfileConfig(model).getActiveConfiguration()

@@ -1,5 +1,7 @@
 package a75f.io.renatus.bacnet;
 
+import static a75f.io.logic.bo.building.bacnet.BacnetEquip.TAG_BACNET;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
@@ -31,17 +33,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.bacnet.parser.BacnetZoneViewItem;
+import a75f.io.logic.bo.building.system.BacnetServicesUtils;
+import a75f.io.logic.bo.building.system.BacnetWriteRequest;
+import a75f.io.logic.bo.building.system.DestinationMultiRead;
+import a75f.io.logic.bo.building.system.ObjectIdentifierBacNet;
+import a75f.io.logic.bo.building.system.PropertyValueBacNet;
+import a75f.io.logic.bo.building.system.WriteRequest;
+import a75f.io.logic.bo.building.system.client.RemotePointUpdateInterface;
 import a75f.io.logic.util.bacnet.BacnetConfigConstants;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants;
-import a75f.io.renatus.ENGG.bacnet.services.BacnetServicesUtils;
-import a75f.io.renatus.ENGG.bacnet.services.BacnetWriteRequest;
-import a75f.io.renatus.ENGG.bacnet.services.DestinationMultiRead;
-import a75f.io.renatus.ENGG.bacnet.services.ObjectIdentifierBacNet;
-import a75f.io.renatus.ENGG.bacnet.services.PropertyValueBacNet;
-import a75f.io.renatus.ENGG.bacnet.services.WriteRequest;
 import a75f.io.renatus.R;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 
@@ -94,7 +97,14 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int viewPosition) {
         int position = viewHolder.getAdapterPosition();
         BacnetZoneViewItem bacnetZoneViewItem = param.get(position);
-        String title = bacnetZoneViewItem.getDisName() + " (" + bacnetZoneViewItem.getBacnetObj().getDefaultUnit() + ")";
+        String title;
+        if(bacnetZoneViewItem.getBacnetObj().getDefaultUnit().isEmpty()){
+            title = bacnetZoneViewItem.getDisName() + " : ";
+        }else{
+            title = bacnetZoneViewItem.getDisName() + " (" + bacnetZoneViewItem.getBacnetObj().getDefaultUnit() + ") : ";
+        }
+
+        CcuLog.d(TAG,"onBindViewHolder -->"+title);
         viewHolder.tvParamLabel.setText(title);
         viewHolder.tvParamValue.setText(bacnetZoneViewItem.getValue());
         if(bacnetZoneViewItem.isWritable()) {
@@ -172,9 +182,20 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
 
         int objectId = bacnetZoneViewItem.getBacnetObj().getProtocolData().getBacnet().getObjectId();
         BacnetServicesUtils bacnetServicesUtils = new BacnetServicesUtils();
-        bacnetServicesUtils.sendWriteRequest(generateWriteObject(configMap, objectId, selectedValue,
-                bacnetZoneViewItem.getObjectType(), bacnetZoneViewItem.getBacnetObj().getDefaultWriteLevel()),
-                serverIpAddress, remotePointUpdateInterface, selectedValue, bacnetZoneViewItem.getBacnetObj().getId());
+        if(bacnetZoneViewItem.getBacnetObj().isSystem()){
+            CcuLog.d(TAG_BACNET, "--this is a system point, subtract 110000 from objectId--"+objectId);
+            int originalBacnetId = objectId - 1100000;
+            bacnetServicesUtils.sendWriteRequest(generateWriteObject(configMap, originalBacnetId, selectedValue,
+                            bacnetZoneViewItem.getObjectType(), bacnetZoneViewItem.getBacnetObj().getDefaultWriteLevel()),
+                    serverIpAddress, remotePointUpdateInterface, selectedValue, bacnetZoneViewItem.getBacnetObj().getId());
+        }else{
+            CcuLog.d(TAG_BACNET, "--this is a normal bacnet client point");
+            bacnetServicesUtils.sendWriteRequest(generateWriteObject(configMap, objectId, selectedValue,
+                            bacnetZoneViewItem.getObjectType(), bacnetZoneViewItem.getBacnetObj().getDefaultWriteLevel()),
+                    serverIpAddress, remotePointUpdateInterface, selectedValue, bacnetZoneViewItem.getBacnetObj().getId());
+        }
+
+
     }
 
     private BacnetWriteRequest generateWriteObject(Map<String, String> configMap, int objectId, String selectedValue, String objectType, String priority) {

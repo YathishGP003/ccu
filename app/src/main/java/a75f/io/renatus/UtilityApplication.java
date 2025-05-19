@@ -224,6 +224,7 @@ public abstract class UtilityApplication extends Application implements Globals.
             postProcessingInit();
             CcuLog.i("CCU_DB", "post processing done- launch ui now");
             setCcuDbReady(true);
+            Globals.getInstance().checkBacnetSystemProfileStatus();
         }
     }
 

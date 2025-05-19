@@ -22,6 +22,7 @@ import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.LogicalPointTags;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.UserIntentPointTags;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -86,7 +87,7 @@ public class ModbusEquip {
         String gatewayRef = null;
         configuredParams = configParams;
         CcuLog.d("Modbus",modbusEquipType+"MbEquip create Entity = "+configuredParams.size());
-        HashMap systemEquip = hayStack.read("equip and system and not modbus and not connectModule");
+        HashMap systemEquip = hayStack.read(CommonQueries.SYSTEM_PROFILE);
         if (systemEquip != null && !systemEquip.isEmpty()) {
             gatewayRef = systemEquip.get("id").toString();
         }

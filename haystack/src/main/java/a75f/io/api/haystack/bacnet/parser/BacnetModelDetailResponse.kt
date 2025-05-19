@@ -57,6 +57,7 @@ data class BacnetPoint(
     var displayInUi: Boolean = true,
     @SerializedName("disName") val disName: String = "",
     @SerializedName("defaultWriteLevel") var defaultWriteLevel: String = "8",
+    @SerializedName("isSystem") var isSystem : Boolean = false
 ){
     constructor() : this("", "", "", "", null,null, "", null, "", ""
         , mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf(), true, true, "")

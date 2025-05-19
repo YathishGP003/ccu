@@ -8,6 +8,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -73,11 +74,12 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
     @Override
     public void addSystemEquip() {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap equip = hayStack.read("equip and system and not modbus and not connectModule");
+        HashMap equip = hayStack.read(CommonQueries.SYSTEM_PROFILE);
         if (equip != null && equip.size() > 0) {
             if (!equip.get("profile").equals(ProfileType.SYSTEM_DAB_HYBRID_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
                 removeSystemEquipModbus();
+                removeSystemEquipBacnet();
                 deleteSystemConnectModule();
             } else {
                 addNewSystemUserIntentPoints(equip.get("id").toString());
@@ -783,11 +785,12 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
     
     @Override
     public synchronized void deleteSystemEquip() {
-        HashMap equip = CCUHsApi.getInstance().read("system and equip and not modbus and not connectModule");
-        if (equip.get("profile").equals(ProfileType.SYSTEM_DAB_HYBRID_RTU.name())) {
+        HashMap equip = CCUHsApi.getInstance().read(CommonQueries.SYSTEM_PROFILE);
+        if (ProfileType.getProfileTypeForName(equip.get("profile").toString()).name().equals(ProfileType.SYSTEM_DAB_HYBRID_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
         removeSystemEquipModbus();
+        removeSystemEquipBacnet();
         deleteSystemConnectModule();
     }
     

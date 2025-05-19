@@ -1,4 +1,4 @@
-package a75f.io.renatus.ENGG.bacnet.services
+package a75f.io.logic.bo.building.system
 
 import com.google.gson.annotations.SerializedName
 

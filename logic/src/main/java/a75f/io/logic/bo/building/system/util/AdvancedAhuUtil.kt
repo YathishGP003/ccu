@@ -6,6 +6,7 @@ import a75f.io.domain.equips.AdvancedHybridSystemEquip
 import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
+import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.ModelLoader.getDabAdvancedAhuCmModelV2
 import a75f.io.domain.util.ModelLoader.getDabAdvancedAhuConnectModelV2
 import a75f.io.domain.util.ModelLoader.getVavAdvancedAhuCmModelV2
@@ -202,7 +203,7 @@ fun getVavConnectEquip(): HashMap<Any, Any> = readEntity(ModelNames.vavAdvancedH
 fun getDabConnectEquip(): HashMap<Any, Any> = readEntity(ModelNames.dabAdvancedHybridAhuV2_connectModule)
 
 fun getCurrentSystemEquip(): HashMap<Any, Any> {
-    return CCUHsApi.getInstance().readEntity("system and equip and not modbus and not connectModule")
+    return CCUHsApi.getInstance().readEntity(CommonQueries.SYSTEM_PROFILE)
 }
 
 fun getAdvanceAhuModels():  Pair<SeventyFiveFProfileDirective, SeventyFiveFProfileDirective> {

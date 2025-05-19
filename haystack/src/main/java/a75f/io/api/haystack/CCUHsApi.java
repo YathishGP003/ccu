@@ -426,6 +426,7 @@ public class CCUHsApi
         q.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
         q.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         q.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
+        CcuLog.d(Tags.ADD_REMOVE_PROFILE, "addEquip--->"+q);
         String equipId = tagsDb.addEquip(q);
         //BuildingTuner euip will be local to each CCU based its domain model. It should not be synced.
         if (!isBuildingTunerEquip) {
@@ -667,6 +668,7 @@ public class CCUHsApi
             q.setCcuRef(getCcuId());
         }
         q.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
+        CcuLog.d(Tags.ADD_REMOVE_PROFILE, "updateEquip--->"+id+"<-->"+q);
         tagsDb.updateEquip(q, id);
         if(!isBuildingTunerEquip(q)){
             if (syncStatusService.hasEntitySynced(id)) {

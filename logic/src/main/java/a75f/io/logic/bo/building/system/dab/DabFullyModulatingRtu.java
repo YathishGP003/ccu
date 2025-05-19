@@ -2,15 +2,18 @@ package a75f.io.logic.bo.building.system.dab;
 
 import android.content.Intent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.PhysicalPoint;
 import a75f.io.domain.api.Point;
 import a75f.io.domain.equips.DabModulatingRtuSystemEquip;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
@@ -214,11 +217,20 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     
     @Override
     public synchronized void deleteSystemEquip() {
-        HashMap equip = CCUHsApi.getInstance().read("system and equip and not modbus and not connectModule");
-        if (equip.get("profile").equals(ProfileType.SYSTEM_DAB_ANALOG_RTU.name())) {
-            CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
+        ArrayList<HashMap<Object, Object>> listOfEquips = CCUHsApi.getInstance().readAllEntities(CommonQueries.SYSTEM_PROFILE);
+        for (HashMap<Object, Object> equip : listOfEquips) {
+            if(equip.get("profile") != null){
+                if(ProfileType.getProfileTypeForName(equip.get("profile").toString()) != null){
+                    if (ProfileType.getProfileTypeForName(equip.get("profile").toString()).name().equals(ProfileType.SYSTEM_DAB_ANALOG_RTU.name())) {
+                        CcuLog.d(Tags.ADD_REMOVE_PROFILE, "DabFullyModulatingRtu removing profile with it id-->"+equip.get("id").toString());
+                        CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
+                    }
+                }
+            }
         }
+
         removeSystemEquipModbus();
+        removeSystemEquipBacnet();
         deleteSystemConnectModule();
     }
     

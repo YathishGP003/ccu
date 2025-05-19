@@ -149,7 +149,9 @@ fun SpinnerElement(
                 }
             }
             LaunchedEffect(expanded) {
-                lazyListState.scrollToItem(selectedIndex)
+                if(selectedIndex != -1) {
+                    lazyListState.scrollToItem(selectedIndex)
+                }
             }
         }
     }

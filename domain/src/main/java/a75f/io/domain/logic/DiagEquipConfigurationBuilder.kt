@@ -2,8 +2,10 @@ package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.util.ModelLoader
+import a75f.io.logger.CcuLog
 import org.projecthaystack.HDateTime
 
 class DiagEquipConfigurationBuilder(private val hayStack : CCUHsApi): DefaultEquipBuilder() {
@@ -18,6 +20,7 @@ class DiagEquipConfigurationBuilder(private val hayStack : CCUHsApi): DefaultEqu
     }
 
     fun updateDiagGatewayRef(systemEquipId: String) {
+        CcuLog.d(Tags.ADD_REMOVE_PROFILE, "DiagEquipConfigurationBuilder----updateDiagGatewayRef----")
         val ccuName = Domain.ccuDevice.ccuDisName
         val hayStackEquip = getDiagEquip(ccuName)
         val diagEquipId = Domain.diagEquip.getId()

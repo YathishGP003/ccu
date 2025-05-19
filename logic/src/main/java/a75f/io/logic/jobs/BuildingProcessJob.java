@@ -136,6 +136,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 L.ccu().systemProfile.doSystemControl();
             }
        } catch (Exception e) {
+           e.printStackTrace();
            CcuLog.e(L.TAG_CCU_JOB, "runSystemControlAlgorithm Failed ! ", e);
        }
     }

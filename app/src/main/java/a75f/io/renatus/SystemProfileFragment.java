@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logic.L;
 import a75f.io.renatus.profiles.system.DabModulatingRtuFragment;
 import a75f.io.renatus.profiles.system.DabStagedRtuFragment;
@@ -469,7 +470,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                 systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
     }
     private boolean getProfileType() {
-        HashMap profileList = CCUHsApi.getInstance().read("system and equip and not modbus ");
+        HashMap profileList = CCUHsApi.getInstance().read(CommonQueries.SYSTEM_PROFILE);
         //Non -DM profile and vavExternalAHUController and dabExternalAHUController we not have loading while selecting the profile
         if(profileList.get("domainName") == null || profileList.get("domainName").equals("vavExternalAHUController") || profileList.get("domainName").equals("dabExternalAHUController")){
             return true;

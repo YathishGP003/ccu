@@ -36,6 +36,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -58,6 +59,25 @@ fun HeaderTextView(text: String, padding : Int = 5, fontSize : Int = 22,fontWeig
             textAlign = TextAlign.Center,
         ),
         text = text
+    )
+}
+
+@Composable
+fun HeaderTextViewMultiLine(text: String, padding : Int = 5, fontSize : Int = 22,fontWeight: FontWeight = FontWeight.Bold) {
+    Text(
+        modifier = Modifier
+            .wrapContentSize()
+            .padding(top = padding.dp),
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = fontWeight,
+            fontSize = fontSize.sp,
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+        ),
+        text = text,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis
     )
 }
 

@@ -9,6 +9,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.api.Point;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
@@ -520,7 +521,7 @@ public class ControlMote
     /*Null pointer exception occurs at the time of cut-over migration, because In Domain CM Device
      * is not yet loaded*/
     public static HashMap<String, Boolean> getCMUnusedPorts(CCUHsApi ccuHsApi){
-        HashMap<Object, Object> systemEquip = ccuHsApi.readEntity("system and equip and not modbus and not connectModule");
+        HashMap<Object, Object> systemEquip = ccuHsApi.readEntity(CommonQueries.SYSTEM_PROFILE);
         HashMap<String, String> cmPortsWithSystemEquipDomainName;
         try {
              cmPortsWithSystemEquipDomainName = getSystemEquipPointsDomainNameWithCmPortsDisName();

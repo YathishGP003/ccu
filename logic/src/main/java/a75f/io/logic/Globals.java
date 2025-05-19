@@ -1,5 +1,9 @@
 package a75f.io.logic;
 
+
+import static a75f.io.api.haystack.Tags.BACNET_DEVICE_JOB;
+import static a75f.io.logic.bo.building.bacnet.BacnetEquip.TAG_BACNET;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -34,6 +38,7 @@ import a75f.io.domain.devices.CCUDevice;
 import a75f.io.domain.logic.CCUDeviceBuilder;
 import a75f.io.domain.logic.DomainManager;
 import a75f.io.domain.migration.DiffManger;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.domain.util.ModelCache;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.AutoCommissioningState;
@@ -95,6 +100,8 @@ import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.util.CCUProxySettings;
 import a75f.io.logic.util.MigrationUtil;
 import a75f.io.logic.util.PreferenceUtil;
+import a75f.io.logic.util.bacnet.BacnetDeviceJob;
+import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.util.ExecutorTask;
 
@@ -390,7 +397,7 @@ public class Globals {
             CcuLog.d(L.TAG_CCU, "Site does not exist. Profiles not loaded");
             return;
         }
-        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
+        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity(CommonQueries.SYSTEM_PROFILE);
         DomainManager.INSTANCE.buildDomain(CCUHsApi.getInstance());
 
         boolean isDefaultSystem = false;
@@ -667,6 +674,13 @@ public class Globals {
             mbProfile.addMbEquip(address, ProfileType.MODBUS_EMR);
             L.ccu().zoneProfiles.add(mbProfile);
         }
+
+        if(L.ccu().systemProfile instanceof VavExternalAhu || L.ccu().systemProfile instanceof DabExternalAhu){
+            if(PreferenceUtil.getSelectedProfileWithAhu().isEmpty()){
+                CcuLog.d(TAG_BACNET, "--it seems we hit migration, just load modbus profile");
+                PreferenceUtil.setSelectedProfileWithAhu("modbus");
+            }
+        }
     }
 
 
@@ -819,6 +833,22 @@ public class Globals {
     public void unRegisterLandingActivityListener() {
         if (landingActivityListener != null) {
             landingActivityListener = null;
+        }
+    }
+
+    public void checkBacnetSystemProfileStatus(){
+        if(PreferenceUtil.getSelectedProfileWithAhu().equalsIgnoreCase("bacnet")){
+            CcuLog.d(BACNET_DEVICE_JOB, "--globals bacnet profile found attached with external ahu--");
+            HashMap<Object, Object>  bacnetEquip =
+                    CCUHsApi.getInstance().readEntity("system and equip and bacnet and not emr and not btu");
+            if(bacnetEquip != null){
+                CcuLog.d(BACNET_DEVICE_JOB, "--globals bacnet equip found attached with external ahu---");
+                BacnetDeviceJob.Companion.handleDoWork(mApplicationContext);
+                BacnetUtilKt.scheduleJobToCheckBacnetDeviceOnline();
+            }
+        }else{
+            CcuLog.d(BACNET_DEVICE_JOB, "--globals bacnet profile not found attached with external ahu---close the job if scheduled");
+            BacnetUtilKt.cancelScheduleJobToCheckBacnet("globals didnt find any system bacnet profile");
         }
     }
 }

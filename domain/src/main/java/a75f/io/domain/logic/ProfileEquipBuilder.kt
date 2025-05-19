@@ -13,6 +13,7 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.getConfig
 import a75f.io.domain.cutover.BuildingEquipCutOverMapping
 import a75f.io.domain.cutover.getDomainNameFromDis
+import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.TunerUtil
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -42,7 +43,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         val entityConfiguration = entityMapper.getEntityConfiguration(configuration)
 
         val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone, equipDis))
-        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
+        val systemEquip = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
         if (systemEquip.isEmpty()) {
             CcuLog.i(Domain.LOG_TAG, "addEquip - Invalid System equip , ahuRef cannot be applied")
         } else if (isStandAloneEquip(hayStackEquip) || isDiagEquip(hayStackEquip)) {
@@ -111,7 +112,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
 
         val equip = if(configuration.nodeAddress == 99){
-            hayStack.readEntity("equip and system and not modbus and not connectModule")
+            hayStack.readEntity("equip and system and not modbus and not connectModule and not bacnet")
         } else if (configuration is CCUEquipConfiguration){
             hayStack.readMapById(Domain.ccuEquip.getId())
         } else{
@@ -119,6 +120,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         }
 
         val equipId =  equip["id"].toString()
+        CcuLog.d(Tags.ADD_REMOVE_PROFILE, "updateEquip--->found equip to update---${equipId}--<-->$equip")
 
         val entityConfiguration = if (isReconfiguration) {
             ReconfigHandler.getEntityReconfiguration(
@@ -131,7 +133,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
         if(!isReconfiguration || !equip.containsKey("domainName")) {
             val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone, equipDis))
-            val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
+            val systemEquip = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
             if (systemEquip.isEmpty()) {
                 CcuLog.i(Domain.LOG_TAG, "addEquip - Invalid System equip , ahuRef cannot be applied")
             } else if (isStandAloneEquip(hayStackEquip)) {

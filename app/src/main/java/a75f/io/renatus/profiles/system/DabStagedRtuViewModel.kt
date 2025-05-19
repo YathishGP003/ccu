@@ -1,8 +1,10 @@
 package a75f.io.renatus.profiles.system
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.logic.hasChanges
+import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
@@ -28,7 +30,7 @@ class DabStagedRtuViewModel : DabStagedRtuBaseViewModel()  {
         super.init(context, ModelLoader.getDabStageRtuModelDef(), hayStack)
 
         CcuLog.i(Domain.LOG_TAG, "DabStagedRtuViewModel Init")
-        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule") //TODO - via domain
+        val systemEquip = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE) //TODO - via domain
         CcuLog.i(Domain.LOG_TAG, "Current System Equip $systemEquip")
 
         if (systemEquip["profile"].toString() == "dabStagedRtu" ||
@@ -59,14 +61,17 @@ class DabStagedRtuViewModel : DabStagedRtuBaseViewModel()  {
             ProgressDialogUtils.showProgressDialog(context, "Saving DAB Configuration")
         }
         viewModelScope.launch (highPriorityDispatcher) {
-            val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
+            val systemEquip = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
             if (systemEquip["profile"].toString() != "dabStagedRtu" &&
                 systemEquip["profile"].toString() != ProfileType.SYSTEM_DAB_STAGED_RTU.name) {
                 viewState.value.updateConfigFromViewState(profileConfiguration)
+                CcuLog.d(Tags.ADD_REMOVE_PROFILE, "DabStagedRtuViewModel removing profile with it -->${systemEquip["id"].toString()}")
                 deleteSystemProfile(systemEquip["id"].toString())
                 systemEquipId = createNewEquip(systemEquip["id"].toString())
-                L.ccu().systemProfile = DabStagedRtu()
+                L.ccu().systemProfile!!.deleteSystemEquip()
                 L.ccu().systemProfile.removeSystemEquipModbus()
+                L.ccu().systemProfile.removeSystemEquipBacnet()
+                L.ccu().systemProfile = DabStagedRtu()
                 L.ccu().systemProfile.addSystemEquip()
                 CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
                 UnusedPortsModel.saveUnUsedPortStatusOfSystemProfile(
@@ -95,7 +100,7 @@ class DabStagedRtuViewModel : DabStagedRtuBaseViewModel()  {
     }
 
     fun reset() {
-        val systemEquip = Domain.hayStack.readEntity("system and equip and not modbus and not connectModule")
+        val systemEquip = Domain.hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
         if (systemEquip["profile"].toString() == "dabStagedRtu" ||
             systemEquip["profile"].toString() == ProfileType.SYSTEM_DAB_STAGED_RTU.name) {
             profileConfiguration = StagedRtuProfileConfig(model).getActiveConfiguration()

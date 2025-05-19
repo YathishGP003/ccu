@@ -11,6 +11,7 @@ import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForVav;
 
 import android.content.Intent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +22,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.PhysicalPoint;
 import a75f.io.domain.equips.VavModulatingRtuSystemEquip;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -507,11 +509,21 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     
     @Override
     public synchronized void deleteSystemEquip() {
-        HashMap equip = CCUHsApi.getInstance().read("system and equip and not modbus and not connectModule");
-        if ((ProfileType.getProfileTypeForName(equip.get("profile").toString()).name()).equals(ProfileType.SYSTEM_VAV_ANALOG_RTU.name())) {
-            CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
+
+        ArrayList<HashMap<Object, Object>> listOfEquips = CCUHsApi.getInstance().readAllEntities(CommonQueries.SYSTEM_PROFILE);
+        for (HashMap<Object, Object> equip : listOfEquips) {
+            if(equip.get("profile") != null){
+                if(ProfileType.getProfileTypeForName(equip.get("profile").toString()) != null){
+                    if (ProfileType.getProfileTypeForName(equip.get("profile").toString()).name().equals(ProfileType.SYSTEM_VAV_ANALOG_RTU.name())) {
+                        CcuLog.d(Tags.ADD_REMOVE_PROFILE, "VavFullyModulatingRtu removing profile with it id-->"+equip.get("id").toString());
+                        CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
+                    }
+                }
+            }
         }
+
         removeSystemEquipModbus();
+        removeSystemEquipBacnet();
         deleteSystemConnectModule();
     }
 

@@ -2,9 +2,14 @@ package a75f.io.renatus.ENGG.bacnet.services
 
 import a75f.io.logic.util.bacnet.BacnetConfigConstants
 import a75f.io.logger.CcuLog
-import a75f.io.renatus.ENGG.bacnet.services.client.BaseResponse
-import a75f.io.renatus.ENGG.bacnet.services.client.CcuService
-import a75f.io.renatus.ENGG.bacnet.services.client.ServiceManager
+import a75f.io.logic.bo.building.system.BacnetWriteRequest
+import a75f.io.logic.bo.building.system.DestinationMultiRead
+import a75f.io.logic.bo.building.system.ObjectIdentifierBacNet
+import a75f.io.logic.bo.building.system.PropertyValueBacNet
+import a75f.io.logic.bo.building.system.WriteRequest
+import a75f.io.logic.bo.building.system.client.BaseResponse
+import a75f.io.logic.bo.building.system.client.CcuService
+import a75f.io.logic.bo.building.system.client.ServiceManager
 import a75f.io.renatus.R
 import a75f.io.renatus.UtilityApplication
 import a75f.io.renatus.util.CCUUiUtil
@@ -477,17 +482,22 @@ class FragmentWriteProperty : Fragment() {
 
                                 if (readResponse.error != null) {
                                     //showToastMessage("error code->${readResponse.error.errorCode}--error class->${readResponse.error.errorClass}")
-                                    val errorCode = BacNetConstants.BacnetErrorCodes.from(readResponse.error.errorCode.toInt())
-                                    val errorClass = BacNetConstants.BacnetErrorClasses.from(readResponse.error.errorClass.toInt())
+                                    val errorCode = BacNetConstants.BacnetErrorCodes.from(
+                                        readResponse.error!!.errorCode.toInt())
+                                    val errorClass = BacNetConstants.BacnetErrorClasses.from(
+                                        readResponse.error!!.errorClass.toInt())
                                     showToastMessage("error code->${errorCode}--error class->${errorClass}")
                                 } else if(readResponse.errorAbort != null){
-                                    showToastMessage("abort reason->${BacNetConstants.BacnetAbortErrors.from(readResponse.errorAbort.abortReason.toInt())}")
+                                    showToastMessage("abort reason->${BacNetConstants.BacnetAbortErrors.from(
+                                        readResponse.errorAbort!!.abortReason.toInt())}")
                                 }else if(readResponse.errorBacApp != null){
-                                    showToastMessage("abort reason->${BacNetConstants.BacnetAppErrors.from(readResponse.errorBacApp.abortReason.toInt())}")
+                                    showToastMessage("abort reason->${BacNetConstants.BacnetAppErrors.from(
+                                        readResponse.errorBacApp!!.abortReason.toInt())}")
                                 }else if(readResponse.errorReject != null){
-                                    showToastMessage("abort reason->${BacNetConstants.BacnetRejectErrors.from(readResponse.errorReject.abortReason.toInt())}")
+                                    showToastMessage("abort reason->${BacNetConstants.BacnetRejectErrors.from(
+                                        readResponse.errorReject!!.abortReason.toInt())}")
                                 }else if(readResponse.errorASide != null){
-                                    showToastMessage("abort reason->${readResponse.errorASide.abortReason}")
+                                    showToastMessage("abort reason->${readResponse.errorASide!!.abortReason}")
                                 }else {
                                     showToastMessage("Success")
                                 }

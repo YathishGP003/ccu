@@ -39,6 +39,7 @@ import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
+import a75f.io.domain.util.CommonQueries
 import a75f.io.logger.CcuLog
 import io.seventyfivef.ph.core.Tags
 
@@ -150,7 +151,7 @@ object DomainManager {
     }
 
     fun addSystemDomainEquip(hayStack: CCUHsApi) {
-        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
+        val systemEquip = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
         if (systemEquip.isNotEmpty()) {
             if (systemEquip["domainName"] != null) {
                     Domain.systemEquip = when(systemEquip["domainName"].toString()) {

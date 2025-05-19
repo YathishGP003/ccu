@@ -46,7 +46,14 @@ interface DomainModelerService {
 
     @GET("/models/external/list")
     fun getBacNetModelsList(
-        @retrofit2.http.Query("protocol") tagNames: String?
+        @retrofit2.http.Query("protocol") protocol: String?,
+        @retrofit2.http.Query("tag-names") tagNames: String?
+    ): retrofit2.Call<ResponseBody>
+
+    @GET("/hayloft/models/external/list")
+    fun getExternalBacNetModelsList(
+        @retrofit2.http.Query("protocol") protocol: String?,
+        @retrofit2.http.Query("tag-names") tagNames: String?
     ): retrofit2.Call<ResponseBody>
 
     @GET("/models/external/{modelId}")
@@ -59,6 +66,13 @@ interface DomainModelerService {
         @retrofit2.http.Path("modelId") modelId: String?,
         @retrofit2.http.Query("version") version: String?
     ): retrofit2.Call<ResponseBody>
+
+    @GET("/hayloft/models/external/export/{modelId}")
+    fun getExternalBacnetModelById(
+        @retrofit2.http.Path("modelId") modelId: String?,
+        @retrofit2.http.Query("version") version: String?
+    ): retrofit2.Call<ResponseBody>
+
 
     @GET("/models/external/export/{modelId}")
     fun getBacNetModelById21(

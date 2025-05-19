@@ -13,6 +13,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -151,7 +152,7 @@ public class DualDuctEquip {
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-DualDuct-" + nodeAddr;
         String ahuRef = null;
-        HashMap<Object, Object> systemEquip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
+        HashMap<Object, Object> systemEquip = CCUHsApi.getInstance().readEntity(CommonQueries.SYSTEM_PROFILE);
         if (systemEquip != null && systemEquip.size() > 0) {
             ahuRef = systemEquip.get("id").toString();
         }

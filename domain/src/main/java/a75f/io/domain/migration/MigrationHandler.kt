@@ -23,6 +23,7 @@ import a75f.io.domain.logic.EquipBuilderConfig
 import a75f.io.domain.logic.PointBuilderConfig
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.logic.TunerEquipBuilder
+import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.ModelCache
 import a75f.io.logger.CcuLog
 import android.util.Log
@@ -264,7 +265,8 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                 haystack.timeZone, equipMap["dis"].toString()))
             // TODO: once OAO is DM-migrated, a similar conditional should be created for it
             if (Domain.readEquip(newModel.id)["domainName"].toString() == DomainName.smartnodeBypassDamper) {
-                hayStackEquip.ahuRef = equipMap["ahuRef"]?.toString()?: haystack.readEntity("system and equip and not connectModule and not modbus")["id"].toString()
+                hayStackEquip.ahuRef = equipMap["ahuRef"]?.toString()?: haystack.readEntity(
+                    CommonQueries.SYSTEM_PROFILE)["id"].toString()
                 hayStackEquip.roomRef = "SYSTEM"
                 hayStackEquip.floorRef = "SYSTEM"
                 haystack.updateEquip(hayStackEquip, it.id)

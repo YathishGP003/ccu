@@ -15,6 +15,7 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
+import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.TunerUtil.updateChildEquipsTunerVal
 import a75f.io.domain.util.TunerUtil.updateSystemTunerVal
@@ -331,7 +332,7 @@ class BypassConfigViewModel : ViewModel() {
         updateSystemTunerVal("vav and pspread and not airflow and not air", 1.5, "Bypass Damper Added", hayStack)
 
 
-        CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule")["id"]?.let {sysEquipId ->
+        CCUHsApi.getInstance().readEntity(CommonQueries.SYSTEM_PROFILE)["id"]?.let {sysEquipId ->
             val childEquips = HSUtil.getEquipsWithAhuRefOnThisCcu(sysEquipId.toString())
             val childEquipsIterator = childEquips.iterator()
             while(childEquipsIterator.hasNext()) {
@@ -378,7 +379,7 @@ class BypassConfigViewModel : ViewModel() {
         updateSystemTunerVal("vav and igain and not airflow and not air", null, "Bypass Damper Unpaired", hayStack)
         updateSystemTunerVal("vav and pspread and not airflow and not air", null, "Bypass Damper Unpaired", hayStack)
 
-        hayStack.readEntity("equip and system and not modbus and not connectModule")["id"]?.let { sysEquipId ->
+        hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)["id"]?.let { sysEquipId ->
             val childEquips = HSUtil.getEquipsWithAhuRefOnThisCcu(sysEquipId.toString())
             val childEquipsIterator = childEquips.iterator()
             while(childEquipsIterator.hasNext()) {

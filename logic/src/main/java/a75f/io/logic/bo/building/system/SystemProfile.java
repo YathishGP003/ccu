@@ -30,9 +30,12 @@ import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.api.PhysicalPoint;
 import a75f.io.domain.devices.CCUDevice;
+import a75f.io.domain.equips.DabAdvancedHybridSystemEquip;
+import a75f.io.domain.equips.VavAdvancedHybridSystemEquip;
 import a75f.io.domain.logic.CCUBaseConfigurationBuilder;
 import a75f.io.domain.logic.CCUDeviceBuilder;
 import a75f.io.domain.logic.DiagEquipConfigurationBuilder;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -51,6 +54,7 @@ import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.util.ExecutorTask;
 
 /**
@@ -186,7 +190,7 @@ public abstract class SystemProfile
     public String getSystemEquipRef() {
         if (equipRef == null)
         {
-            HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus and not connectModule");
+            HashMap equip = CCUHsApi.getInstance().read(CommonQueries.SYSTEM_PROFILE);
             equipRef = equip.get("id").toString();
             equipDis = equip.get("dis").toString();
         }
@@ -713,15 +717,18 @@ public abstract class SystemProfile
                 hayStack.writeHisValByQuery("outsideWeather and air and humidity and equipRef == \"" + equipId + "\"", externalHumidity);
             }
         }
-        if (getConnectEquip() != null && getConnectEquip().getEnableOutsideAirOptimization().readDefaultVal() == 1.0) {
-            // Update weather points on connect Module equips
-            if (!getConnectEquip().getOutsideHumidity().pointExists()) {
-                getConnectEquip().getOutsideHumidity().writeHisVal(externalHumidity);
-            }
-            if (!getConnectEquip().getOutsideTemperature().pointExists()) {
-                getConnectEquip().getOutsideTemperature().writeHisVal(externalTemp);
+        if(Domain.systemEquip instanceof DabAdvancedHybridSystemEquip || Domain.systemEquip instanceof VavAdvancedHybridSystemEquip) {
+            if (getConnectEquip() != null && getConnectEquip().getEnableOutsideAirOptimization().readDefaultVal() == 1.0) {
+                // Update weather points on connect Module equips
+                if (!getConnectEquip().getOutsideHumidity().pointExists()) {
+                    getConnectEquip().getOutsideHumidity().writeHisVal(externalHumidity);
+                }
+                if (!getConnectEquip().getOutsideTemperature().pointExists()) {
+                    getConnectEquip().getOutsideTemperature().writeHisVal(externalTemp);
+                }
             }
         }
+
         hayStack.writeHisValByQuery("system and not connectModule and outside and temp and not lockout", externalTemp);
         hayStack.writeHisValByQuery("system and not connectModule and outside and humidity", externalHumidity);
     }
@@ -965,10 +972,27 @@ public abstract class SystemProfile
                     CCUHsApi.getInstance().deleteEntityTree(Objects.requireNonNull(modbusSubEquipDevice.get("id")).toString());
                 }
             }
-
         }
-
     }
+
+    public void removeSystemEquipBacnet() {
+        CcuLog.i(L.TAG_CCU_SYSTEM, "---- ExternalAHU_BACNET BACNET system Equip deleted successfully----");
+        try {
+            HashMap bacnetEquip = CCUHsApi.getInstance().readEntity("system and equip and bacnet and external and not emr and not btu and not equipRef");
+            if (bacnetEquip != null && !bacnetEquip.isEmpty()) {
+                CCUHsApi.getInstance().deleteEntityTree(Objects.requireNonNull(bacnetEquip.get("id")).toString());
+                HashMap bacnetDevice = CCUHsApi.getInstance().readEntity("bacnet and device and equipRef == \"" + Objects.requireNonNull(bacnetEquip.get("id")) + "\"");
+                if (bacnetDevice != null && !bacnetEquip.isEmpty()) {
+                    CCUHsApi.getInstance().deleteEntityTree(Objects.requireNonNull(bacnetDevice.get("id")).toString());
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        PreferenceUtil.setSelectedProfileWithAhu("");
+        a75f.io.logic.util.bacnet.BacnetUtilKt.cancelScheduleJobToCheckBacnet("removed system bacnet equip");
+    }
+
      public void deleteOAODamperEquip() {
         if((ccu().oaoProfile != null)) {
             CCUHsApi hayStack = CCUHsApi.getInstance();

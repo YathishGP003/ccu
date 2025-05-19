@@ -1,10 +1,13 @@
 package a75f.io.logic.bo.building.system.dab;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.equips.DabStagedVfdSystemEquip;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
@@ -117,11 +120,20 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
     
     @Override
     public synchronized void deleteSystemEquip() {
-        HashMap equip = CCUHsApi.getInstance().read("system and equip and not modbus and not connectModule");
-        if (ProfileType.getProfileTypeForName(equip.get("profile").toString()).name().equals(ProfileType.SYSTEM_DAB_STAGED_VFD_RTU.name())) {
-            CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
+        ArrayList<HashMap<Object, Object>> listOfEquips = CCUHsApi.getInstance().readAllEntities(CommonQueries.SYSTEM_PROFILE);
+        for (HashMap<Object, Object> equip : listOfEquips) {
+            if(equip.get("profile") != null){
+                if(ProfileType.getProfileTypeForName(equip.get("profile").toString()) != null){
+                    if (ProfileType.getProfileTypeForName(equip.get("profile").toString()).name().equals(ProfileType.SYSTEM_DAB_STAGED_VFD_RTU.name())) {
+                        CcuLog.d(Tags.ADD_REMOVE_PROFILE, "DabStagedRtuWithVfd removing profile with it id-->"+equip.get("id").toString());
+                        CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
+                    }
+                }
+            }
         }
+
         removeSystemEquipModbus();
+        removeSystemEquipBacnet();
         deleteSystemConnectModule();
     }
 

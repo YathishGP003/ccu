@@ -53,7 +53,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
     override fun saveConfiguration() {
         ((viewState.value) as VavAdvancedAhuState).fromStateToProfileConfig(profileConfiguration as VavAdvancedHybridAhuConfig)
         val isAnalogOutMappedToOaoDamper = isAnalogOutMappedToOaoDamper()
-        val validConfig = isValidateConfiguration(profileConfiguration,isAnalogOutMappedToOaoDamper)
+        val validConfig = isValidateConfiguration(profileConfiguration, isAnalogOutMappedToOaoDamper)
         if (!validConfig.first) {
             showErrorDialog(context,validConfig.second)
             viewState.value.isSaveRequired = true
@@ -125,8 +125,11 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
             L.ccu().systemProfile.updateAhuRef(newEquipId)
             val vavAdvancedAhuProfile = L.ccu().systemProfile as VavAdvancedAhu
             vavAdvancedAhuProfile.updateStagesSelected()
-            launch { L.ccu().systemProfile.removeSystemEquipModbus() }
-            enableDisableCoolingLockOut(false,profileConfiguration)
+            launch {
+                L.ccu().systemProfile.removeSystemEquipModbus()
+                L.ccu().systemProfile.removeSystemEquipBacnet()
+            }
+            enableDisableCoolingLockOut(false, profileConfiguration)
         }
         newEquipJob.join()
     }

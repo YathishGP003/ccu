@@ -1,13 +1,9 @@
-package a75f.io.renatus.ENGG.bacnet.services.client
+package a75f.io.logic.bo.building.system.client
 
-import a75f.io.renatus.ENGG.bacnet.services.BacnetReadRequest
-import a75f.io.renatus.ENGG.bacnet.services.BacnetReadRequestMultiple
-import a75f.io.renatus.ENGG.bacnet.services.BacnetWhoIsRequest
-import a75f.io.renatus.ENGG.bacnet.services.BacnetWriteRequest
-import a75f.io.renatus.ENGG.bacnet.services.MultiReadResponse
-import a75f.io.renatus.ENGG.bacnet.services.ReadResponse
-import a75f.io.renatus.ENGG.bacnet.services.WhoIsResponse
-import a75f.io.renatus.ENGG.bacnet.services.WriteResponse
+import a75f.io.logic.bo.building.system.BacnetReadRequest
+import a75f.io.logic.bo.building.system.BacnetReadRequestMultiple
+import a75f.io.logic.bo.building.system.BacnetWhoIsRequest
+import a75f.io.logic.bo.building.system.BacnetWriteRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST

@@ -340,6 +340,101 @@ fun EditableTextField3() {
     )
 }
 
+@Composable
+fun UnderlinedInputNumberOnly(
+    modifier: Modifier = Modifier,
+    placeholder: String = "",
+    onTextChanged: (String) -> Unit,
+    underlineColor: Color = Color.Gray,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default.copy()
+) {
+    var textValue by remember { mutableStateOf(TextFieldValue()) }
+
+    Column(modifier = modifier) {
+        BasicTextField(
+            value = textValue,
+            textStyle = TextStyle(
+                fontFamily = ComposeUtil.myFontFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 22.sp,
+                color = Color.Black,),
+            onValueChange = {
+                // Filter to allow only digits
+                val filteredText = it.text.filter { char -> char.isDigit() }
+                // Preserve cursor position
+                val newTextValue = it.copy(text = filteredText)
+                textValue = newTextValue
+                onTextChanged(filteredText)
+            },
+            keyboardOptions = keyboardOptions,
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth(),
+            decorationBox = { innerTextField ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    if (textValue.text.isEmpty()) {
+                        Text(text = placeholder, color = Color.Gray, fontSize = 22.sp)
+                    }
+                    innerTextField()
+                }
+            }
+        )
+        Divider(
+            color = underlineColor,
+            thickness = 1.dp,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+@Composable
+fun UnderlinedInput(
+    modifier: Modifier = Modifier,
+    placeholder: String = "",
+    onTextChanged: (String) -> Unit,
+    underlineColor: Color = Color.Gray,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default.copy()
+) {
+    var textValue by remember { mutableStateOf(TextFieldValue()) }
+
+    Column(modifier = modifier) {
+        BasicTextField(
+            value = textValue,
+            textStyle = TextStyle(
+                fontFamily = ComposeUtil.myFontFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 22.sp,
+                color = Color.Black,),
+            onValueChange = {
+                textValue = it
+                onTextChanged(it.text)
+            },
+            keyboardOptions = keyboardOptions,
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth(),
+            decorationBox = { innerTextField ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    if (textValue.text.isEmpty()) {
+                        Text(text = placeholder, color = Color.Gray, fontSize = 22.sp)
+                    }
+                    innerTextField()
+                }
+            }
+        )
+        Divider(
+            color = underlineColor,
+            thickness = 1.dp,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -461,8 +556,9 @@ fun EditableTextFieldWhiteBgUnderlineOnlyNumbers(
                     )
                 }
 
-                // Render the actual BasicTextField
-                innerTextField()
+                Box(modifier = Modifier.padding(0.dp)) {
+                    innerTextField()
+                }
 
                 // Add underline
                 Box(
@@ -536,50 +632,5 @@ fun EditableTextField(errorMessage: String? = null) {
                 color = Color.Blue
             )
         }
-    }
-}
-
-@Composable
-fun UnderlinedInput(
-    modifier: Modifier = Modifier,
-    placeholder: String = "",
-    onTextChanged: (String) -> Unit,
-    underlineColor: Color = Color.Gray,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default.copy()
-) {
-    var textValue by remember { mutableStateOf(TextFieldValue()) }
-
-    Column(modifier = modifier) {
-        BasicTextField(
-            value = textValue,
-            textStyle = TextStyle(
-                fontFamily = ComposeUtil.myFontFamily,
-                fontWeight = FontWeight.Normal,
-                fontSize = 22.sp,
-                color = Color.Black,),
-            onValueChange = { textValue = it
-                onTextChanged(it.text)
-            },
-            keyboardOptions = keyboardOptions,
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth(),
-            decorationBox = { innerTextField ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    if (textValue.text.isEmpty()) {
-                        Text(text = placeholder, color = Color.Gray, fontSize = 22.sp)
-                    }
-                    innerTextField()
-                }
-            }
-        )
-        Divider(
-            color = underlineColor,
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 }

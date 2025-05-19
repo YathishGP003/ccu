@@ -153,4 +153,18 @@ public class HeartBeatUtil {
         }
         return true; // Return true if all modules are alive
     }
+
+    public static String getLastUpdatedTimeBacnetSystem(Date updatedTime){
+        if(updatedTime == null){
+            return "--";
+        }
+        StringBuffer message = new StringBuffer();
+        Date currTime = new Date();
+        if(currTime.getDate() == updatedTime.getDate()){
+            return getTimeDifference(currTime, updatedTime, message);
+
+        } else{
+            return getLastUpdatedTime(message, updatedTime);
+        }
+    }
 }

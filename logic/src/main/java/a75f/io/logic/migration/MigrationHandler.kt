@@ -54,6 +54,7 @@ import a75f.io.domain.logic.EquipBuilderConfig
 import a75f.io.domain.logic.PointBuilderConfig
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.migration.DiffManger
+import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.MODEL_SN_OAO
 import a75f.io.domain.util.ModelCache
 import a75f.io.domain.util.ModelLoader
@@ -434,7 +435,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     private fun removeDuplicateBuildingAndSystemPoints() {
         CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Removing duplicate building and system points")
 
-        val systemEquip = hayStack.readEntity("equip and system and not modbus and not connectModule")
+        val systemEquip = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
         val buildingEquip = Domain.hayStack.readEntityByDomainName("buildingEquip")
 
         val vavDabAndDuplicatePointMigrationHandler = VavDabAndDuplicatePointMigrationHandler(systemEquip)
@@ -2558,7 +2559,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             TAG_CCU_MIGRATION_UTIL,
             "MigrationHandler.logic correctAhuRefForBypassDamper started"
         )
-        hayStack.readId("system and equip and not modbus and not connect")
+        hayStack.readId(CommonQueries.SYSTEM_PROFILE)
             ?.let { systemProfileEquipId ->
                 hayStack.readAllHDictByQuery(
                     "equip and (domainName == \"${DomainName.smartnodeBypassDamper}\" or " +
@@ -3043,7 +3044,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             CcuLog.i(TAG_CCU_MIGRATION_UTIL, "CCU Configuration Equip already has profile")
             return
         }
-        val systemEquip = hayStack.readEntity("equip and system and not modbus and not connectModule")
+        val systemEquip = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
         val ccuEquipId = ccuEquip["id"].toString()
 
         val ccuConfigEquip = CCUBaseConfigurationBuilder(hayStack).getCcuEquip(ccuName)

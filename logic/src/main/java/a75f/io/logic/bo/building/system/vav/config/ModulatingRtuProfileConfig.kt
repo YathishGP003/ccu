@@ -7,6 +7,7 @@ import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.VavModulatingRtuSystemEquip
+import a75f.io.domain.util.CommonQueries
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.bo.haystack.device.ControlMote.getAllUnusedPorts
 import a75f.io.logic.bo.haystack.device.ControlMote.getCMUnusedPorts
@@ -62,7 +63,7 @@ open class ModulatingRtuProfileConfig(val model: SeventyFiveFProfileDirective) :
 
     open fun getActiveConfiguration(): ModulatingRtuProfileConfig {
 
-        val equip = Domain.hayStack.readEntity("system and equip and not modbus")
+        val equip = Domain.hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
         if (equip.isEmpty()) {
             return this
         }

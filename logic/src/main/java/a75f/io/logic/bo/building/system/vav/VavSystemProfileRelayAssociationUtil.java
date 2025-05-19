@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -13,7 +14,7 @@ import a75f.io.logic.bo.util.TemperatureMode;
 
 public class VavSystemProfileRelayAssociationUtil {
     public static boolean getDesiredTempDisplayMode(TemperatureMode modeType){
-        HashMap<Object, Object> equips = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
+        HashMap<Object, Object> equips = CCUHsApi.getInstance().readEntity(CommonQueries.SYSTEM_PROFILE);
         Equip equip = new Equip.Builder().setHashMap(equips).build();
         ProfileType profileType = ProfileType.getProfileTypeForName(equip.getProfile());
         //This will be needed for profiles not migrated to DM.

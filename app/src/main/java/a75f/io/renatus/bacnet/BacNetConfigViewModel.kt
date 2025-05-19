@@ -9,24 +9,24 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.bacnet.BacnetProfile
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.system.BacnetReadRequestMultiple
+import a75f.io.logic.bo.building.system.BacnetWhoIsRequest
+import a75f.io.logic.bo.building.system.BroadCast
+import a75f.io.logic.bo.building.system.DestinationMultiRead
+import a75f.io.logic.bo.building.system.ObjectIdentifierBacNet
+import a75f.io.logic.bo.building.system.PropertyReference
+import a75f.io.logic.bo.building.system.ReadRequestMultiple
+import a75f.io.logic.bo.building.system.RpmRequest
+import a75f.io.logic.bo.building.system.WhoIsRequest
 import a75f.io.logic.util.bacnet.buildBacnetModel
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants
-import a75f.io.renatus.ENGG.bacnet.services.BacnetReadRequestMultiple
-import a75f.io.renatus.ENGG.bacnet.services.BacnetWhoIsRequest
-import a75f.io.renatus.ENGG.bacnet.services.BroadCast
-import a75f.io.renatus.ENGG.bacnet.services.DestinationMultiRead
-import a75f.io.renatus.ENGG.bacnet.services.MultiReadResponse
-import a75f.io.renatus.ENGG.bacnet.services.ObjectIdentifierBacNet
-import a75f.io.renatus.ENGG.bacnet.services.PropertyReference
-import a75f.io.renatus.ENGG.bacnet.services.ReadRequestMultiple
-import a75f.io.renatus.ENGG.bacnet.services.RpResponseMultiReadItem
-import a75f.io.renatus.ENGG.bacnet.services.RpmRequest
-import a75f.io.renatus.ENGG.bacnet.services.WhoIsRequest
-import a75f.io.renatus.ENGG.bacnet.services.WhoIsResponseItem
-import a75f.io.renatus.ENGG.bacnet.services.client.BaseResponse
-import a75f.io.renatus.ENGG.bacnet.services.client.CcuService
-import a75f.io.renatus.ENGG.bacnet.services.client.ServiceManager
+import a75f.io.logic.bo.building.system.client.BaseResponse
+import a75f.io.logic.bo.building.system.client.CcuService
+import a75f.io.logic.bo.building.system.client.MultiReadResponse
+import a75f.io.logic.bo.building.system.client.RpResponseMultiReadItem
+import a75f.io.logic.bo.building.system.client.ServiceManager
+import a75f.io.logic.bo.building.system.client.WhoIsResponseItem
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
 import a75f.io.renatus.bacnet.models.BacnetDevice
@@ -223,7 +223,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun readDeviceModels() {
-        domainService.readBacNetModelsList(/*filer*/"BACNET", object : ResponseCallback {
+        domainService.readBacNetModelsList("BACNET", "", object : ResponseCallback {
             override fun onSuccessResponse(response: String?) {
                 try {
                     if (!response.isNullOrEmpty()) {
@@ -402,7 +402,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
             bacnetProfile.addBacAppEquip(configParam, modelConfig, deviceId.value,
                 groupId.toString(), floorRef, zoneRef,
                 bacnetModel.value.equipDevice.value,
-                profileType,moduleLevel,bacnetModel.value.version.value)
+                profileType,moduleLevel,bacnetModel.value.version.value, false)
 
             L.ccu().zoneProfiles.add(bacnetProfile)
             L.saveCCUState()
@@ -722,17 +722,19 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     private fun updateUi(readResponse: MultiReadResponse?) {
         if (readResponse != null) {
             if (readResponse.error != null) {
-                val errorCode = BacNetConstants.BacnetErrorCodes.from(readResponse.error.errorCode.toInt())
-                val errorClass = BacNetConstants.BacnetErrorClasses.from(readResponse.error.errorClass.toInt())
+                val errorCode = BacNetConstants.BacnetErrorCodes.from(readResponse.error!!.errorCode.toInt())
+                val errorClass = BacNetConstants.BacnetErrorClasses.from(readResponse.error!!.errorClass.toInt())
                 showToastMessage("error code->${errorCode}--error class->${errorClass}")
             } else if(readResponse.errorAbort != null){
-                showToastMessage("abort reason->${BacNetConstants.BacnetAbortErrors.from(readResponse.errorAbort.abortReason.toInt())}")
+                showToastMessage("abort reason->${BacNetConstants.BacnetAbortErrors.from(
+                    readResponse.errorAbort!!.abortReason.toInt())}")
             }else if(readResponse.errorBacApp != null){
-                showToastMessage("abort reason->${BacNetConstants.BacnetAppErrors.from(readResponse.errorBacApp.abortReason.toInt())}")
+                showToastMessage("abort reason->${BacNetConstants.BacnetAppErrors.from(readResponse.errorBacApp!!.abortReason.toInt())}")
             }else if(readResponse.errorReject != null){
-                showToastMessage("abort reason->${BacNetConstants.BacnetRejectErrors.from(readResponse.errorReject.abortReason.toInt())}")
+                showToastMessage("abort reason->${BacNetConstants.BacnetRejectErrors.from(
+                    readResponse.errorReject!!.abortReason.toInt())}")
             }else if(readResponse.errorASide != null){
-                showToastMessage("abort reason->${readResponse.errorASide.abortReason}")
+                showToastMessage("abort reason->${readResponse.errorASide!!.abortReason}")
             }else {
                 if(readResponse.rpResponse != null){
                     for (item in readResponse.rpResponse.listOfItems) {
@@ -772,7 +774,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                     for (item in results) {
                         if(item.propertyValue.type == "34"){
                             if(item.propertyArrayIndex != null){
-                                point.defaultWriteLevel = item.propertyArrayIndex
+                                point.defaultWriteLevel = item.propertyArrayIndex!!
                                 CcuLog.d(TAG,"default write level is -->${item.propertyArrayIndex}")
                                 break
                             }

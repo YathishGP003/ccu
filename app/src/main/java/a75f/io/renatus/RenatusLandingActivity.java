@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.bo.building.bacnet.BacnetEquip.TAG_BACNET;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_BBMD;
@@ -499,6 +500,16 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
 
             @Override
             public void onPageSelected(int i) {
+                if(btnTabs.getSelectedTabPosition() == 0 && i == 1){
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    for (Fragment fragment : fragmentManager.getFragments()) {
+                        if(fragment instanceof ExternalAhuFragment){
+                            CcuLog.d(TAG_BACNET, "--update tab change--");
+                            ((ExternalAhuFragment) fragment).onOpenFragment();
+                            break;
+                        }
+                    }
+                }
                 if(btnTabs.getSelectedTabPosition() == 0 && i != 1 && !isBacnetConfigStateChanged){
                     FragmentManager fragmentManager = getSupportFragmentManager();
                     for (Fragment fragment : fragmentManager.getFragments()) {

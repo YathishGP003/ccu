@@ -1,5 +1,6 @@
 package a75f.io.renatus.compose
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,7 +31,9 @@ import androidx.compose.ui.unit.sp
  */
 
 @Composable
-fun RadioButtonCompose(radioOptions: List<String>, default: Int, onSelect: (String) -> Unit) {
+fun RadioButtonCompose(radioOptions: List<String>, default: Int,
+                       disabledOptions: List<String> = emptyList(),
+                       onSelect: (String) -> Unit) {
     var selectedItem by remember { mutableStateOf(radioOptions[default]) }
 
     if (selectedItem != radioOptions[default]) {
@@ -42,14 +45,25 @@ fun RadioButtonCompose(radioOptions: List<String>, default: Int, onSelect: (Stri
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
     ) {
-        radioOptions.forEach { label ->
+        radioOptions.forEachIndexed  { index, label ->
+            val isDisabled = disabledOptions.contains(label)
+            val isSelected = selectedItem == label
+
+
+            val backgroundModifier = if (isDisabled) {
+                Modifier.background(Color.Gray)
+            } else Modifier
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
+                    .then(backgroundModifier)
                     .wrapContentSize()
                     .height(56.dp)
                     .selectable(
-                        selected = (selectedItem == label), onClick = {
+                        selected = isSelected,
+                        enabled = !isDisabled,
+                        onClick = {
                             selectedItem = label
                             onSelect(selectedItem)
                         }, role = Role.RadioButton
@@ -58,11 +72,14 @@ fun RadioButtonCompose(radioOptions: List<String>, default: Int, onSelect: (Stri
             ) {
                 RadioButton(
                     modifier = Modifier.padding(end = 10.dp),
-                    selected = (selectedItem == label),
+                    selected = isSelected,
                     onClick = null,
+                    enabled = !isDisabled,
                     colors = RadioButtonDefaults.colors(
                         selectedColor = ComposeUtil.primaryColor,
-                        unselectedColor = Color.Gray
+                        unselectedColor = Color.Gray,
+                        disabledSelectedColor = Color.Gray,
+                        disabledUnselectedColor = Color.Gray
                     )
                 )
                 Text(text = label, style =  TextStyle( fontFamily = ComposeUtil.myFontFamily,fontSize = 20.sp,  fontWeight = FontWeight.Normal))

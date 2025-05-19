@@ -15,6 +15,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.UtilKt;
@@ -68,7 +69,7 @@ public class TwoPipeFanCoilUnitEquip {
         String equipDis = siteDis+"-2PFCU-"+nodeAddr;
         String profile = "pipe2";
         String gatewayRef = null;
-        HashMap systemEquip = CCUHsApi.getInstance().read("equip and system and not modbus and not connectModule");
+        HashMap systemEquip = CCUHsApi.getInstance().read(CommonQueries.SYSTEM_PROFILE);
         if (systemEquip != null && systemEquip.size() > 0) {
             gatewayRef = systemEquip.get("id").toString();
         }

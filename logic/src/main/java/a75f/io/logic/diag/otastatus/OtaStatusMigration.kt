@@ -3,6 +3,7 @@ package a75f.io.logic.diag.otastatus
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Tags
+import a75f.io.domain.util.CommonQueries
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.addOTAStatusPoint
 
 /**
@@ -20,7 +21,7 @@ class OtaStatusMigration {
             val hsApi = CCUHsApi.getInstance()
             val siteMap = CCUHsApi.getInstance().read(Tags.SITE)
             val ccu: HashMap<*, *> = CCUHsApi.getInstance().readEntity("device and ccu")
-            val systemEquip: HashMap<*, *> = CCUHsApi.getInstance().readEntity("system and equip and not modbus and not connectModule")
+            val systemEquip: HashMap<*, *> = CCUHsApi.getInstance().readEntity(CommonQueries.SYSTEM_PROFILE)
 
             migrateOtaStatusForCCU(siteMap,ccu)
             migrateOtaStatusForCM(siteMap, systemEquip[Tags.ID].toString())

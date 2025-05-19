@@ -5,6 +5,7 @@ import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
+import a75f.io.domain.util.CommonQueries
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 
@@ -146,7 +147,7 @@ class OtaStatusDiagPoint {
             val hsApi = CCUHsApi.getInstance()
             nodes.forEach { i ->
                 if (isCMDevice(i)) {
-                    val systemEquip: HashMap<*, *> = hsApi.readEntity("system and equip and not modbus and not connectModule")
+                    val systemEquip: HashMap<*, *> = hsApi.readEntity(CommonQueries.SYSTEM_PROFILE)
                     hsApi.writeHisValByQuery("ota and status and equipRef ==\"${systemEquip[Tags.ID].toString()}\"",status.ordinal.toDouble())
                 } else{
                     //hyperstatsplit we have two OTA point -->  connect module and Hyperstatsplit
@@ -183,7 +184,7 @@ class OtaStatusDiagPoint {
         fun getCurrentOtaStatus(node: Int): Double {
             CcuLog.d(L.TAG_CCU_OTA_PROCESS, "Reading OTA status $node" )
             return if (isCMDevice(node)) {
-                val systemEquip: HashMap<*, *> = CCUHsApi.getInstance().readEntity("system and equip and not modbus and not connectModule")
+                val systemEquip: HashMap<*, *> = CCUHsApi.getInstance().readEntity(CommonQueries.SYSTEM_PROFILE)
                 CCUHsApi.getInstance().readHisValByQuery("ota and status and equipRef ==\"${systemEquip[Tags.ID].toString()}\"")
             } else {
                 if(connectmoduleUpdateLevel) {

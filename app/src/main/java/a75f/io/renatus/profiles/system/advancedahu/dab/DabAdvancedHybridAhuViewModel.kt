@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.logic.hasChanges
+import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
@@ -128,14 +129,17 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
             L.ccu().systemProfile.updateAhuRef(newEquipId)
             val dabAdvancedAhuProfile = L.ccu().systemProfile as DabAdvancedAhu
             dabAdvancedAhuProfile.updateStagesSelected()
-            launch { L.ccu().systemProfile.removeSystemEquipModbus() }
-            enableDisableCoolingLockOut(false,profileConfiguration)
+            launch {
+                L.ccu().systemProfile.removeSystemEquipModbus()
+                L.ccu().systemProfile.removeSystemEquipBacnet()
+            }
+            enableDisableCoolingLockOut(false, profileConfiguration)
         }
         newEquipJob.join()
     }
 
     override fun reset() {
-        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
+        val systemEquip = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
         profileConfiguration = if (systemEquip["profile"].toString().contentEquals("dabAdvancedHybridAhuV2")) {
             DabAdvancedHybridAhuConfig(cmModel, connectModel).getActiveConfiguration() as DabAdvancedHybridAhuConfig
         } else {

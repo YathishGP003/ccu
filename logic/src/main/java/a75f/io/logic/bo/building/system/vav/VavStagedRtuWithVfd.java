@@ -6,11 +6,14 @@ import static a75f.io.logic.bo.building.hvac.Stage.COOLING_3;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_4;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_5;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.equips.VavStagedVfdSystemEquip;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
@@ -139,11 +142,21 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
     
     @Override
     public synchronized void deleteSystemEquip() {
-        HashMap equip = CCUHsApi.getInstance().read("system and equip and not modbus and not connectModule");
-        if (ProfileType.getProfileTypeForName(equip.get("profile").toString()).name().equals(ProfileType.SYSTEM_VAV_STAGED_VFD_RTU.name())) {
-            CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
+
+        ArrayList<HashMap<Object, Object>> listOfEquips = CCUHsApi.getInstance().readAllEntities(CommonQueries.SYSTEM_PROFILE);
+        for (HashMap<Object, Object> equip : listOfEquips) {
+            if(equip.get("profile") != null){
+                if(ProfileType.getProfileTypeForName(equip.get("profile").toString()) != null){
+                    if (ProfileType.getProfileTypeForName(equip.get("profile").toString()).name().equals(ProfileType.SYSTEM_VAV_STAGED_VFD_RTU.name())) {
+                        CcuLog.d(Tags.ADD_REMOVE_PROFILE, "VavStagedRtuWithVfd removing profile with it id-->"+equip.get("id").toString());
+                        CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
+                    }
+                }
+            }
         }
+
         removeSystemEquipModbus();
+        removeSystemEquipBacnet();
         deleteSystemConnectModule();
     }
 }

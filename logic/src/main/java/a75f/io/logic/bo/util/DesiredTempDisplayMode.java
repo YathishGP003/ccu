@@ -22,6 +22,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.HyperStatSplitEquip;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -209,7 +210,7 @@ public class DesiredTempDisplayMode {
         boolean heating = false;
         boolean cooling = false;
         Equip systemEquip = new Equip.Builder()
-                .setHashMap(ccuHsApi.readEntity("system and equip and not modbus and not connectModule")).build();
+                .setHashMap(ccuHsApi.readEntity(CommonQueries.SYSTEM_PROFILE)).build();
         if (systemEquip.getMarkers().contains(Tags.DAB)) {
             if (DABSystemProfileRelayAssociationUtil.getDesiredTempDisplayMode(
                     TemperatureMode.COOLING)) {

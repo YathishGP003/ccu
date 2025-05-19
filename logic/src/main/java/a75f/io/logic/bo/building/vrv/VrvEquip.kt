@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.vrv
 
 import a75f.io.api.haystack.*
+import a75f.io.domain.util.CommonQueries
 import a75f.io.logic.*
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -52,7 +53,7 @@ class VrvEquip(hsApi : CCUHsApi,
         floorRef: String,
     ): String {
 
-        val systemEquip = hayStack.read("equip and system and not modbus and not connectModule")
+        val systemEquip = hayStack.read(CommonQueries.SYSTEM_PROFILE)
         lateinit var ahuRef: String
         if (systemEquip.isNotEmpty()) ahuRef = systemEquip["id"].toString()
 

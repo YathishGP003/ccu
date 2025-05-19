@@ -3,7 +3,6 @@ package a75f.io.logic.util.bacnet
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.RawPoint
-import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.bacnet.parser.AllowedValues
 import a75f.io.api.haystack.bacnet.parser.BacnetModelDetailResponse
 import a75f.io.api.haystack.bacnet.parser.BacnetPoint
@@ -34,6 +33,14 @@ fun buildBacnetModel(zoneRef: String): List<BacnetModelDetailResponse> {
     return equips
 }
 
+fun buildBacnetModelSystem(equipMap: java.util.HashMap<Any, Any>): List<BacnetModelDetailResponse> {
+    val equips = mutableListOf<BacnetModelDetailResponse>()
+    val equipDevice = buildEquipModel(equipMap, null)
+    equips.add(equipDevice)
+    CcuLog.d(TAG_BACNET, "buildBacnetModelSystem==>${equipDevice.displayName}")
+    return equips
+}
+
 /**
  * @param equipMap
  * @param parentEquipRef
@@ -51,18 +58,21 @@ private fun getEquipByMap(equipMap: HashMap<Any, Any>, parentEquipRef: String?):
     return equipDevice
 }
 
+val TAG_BACNET: String = "ExternalAHU_BACNET"
 private fun buildEquipModel(parentMap: HashMap<Any, Any>, parentEquipRef: String?): BacnetModelDetailResponse {
     val equipId = parentMap[ID].toString()
     val equipDevice = getEquipByMap(parentMap, parentEquipRef)
     val registersMapList = getRegistersMap(equipId)
     registersMapList.forEach { registerMap ->
         try {
-            equipDevice.points.add(getRegister(registerMap))
+            val bacnetPoint = getRegister(registerMap)
+            equipDevice.points.add(bacnetPoint)
         }catch (e : Exception){
-            CcuLog.d(Tags.BACNET, "--buildEquipModel hit with exception==>${e.message}")
+            CcuLog.d(TAG_BACNET, "buildEquipModel hit with exception==>${e.message}")
             e.printStackTrace()
         }
     }
+    CcuLog.d(TAG_BACNET, "buildEquipModel returning with points size==>${equipDevice.points.size}")
     return equipDevice
 }
 
@@ -74,7 +84,7 @@ private fun getRegistersMap(equipId: String): ArrayList<HashMap<Any, Any>> {
     val hsApi = CCUHsApi.getInstance()
     //val deviceId = hsApi.readId("device and bacnet and equipRef == \"$equipId\"")
     //return hsApi.readAllEntities("physical and point and deviceRef == \"$deviceId\"")
-    return hsApi.readAllEntities("logical and point and equipRef == \"$equipId\"")
+    return hsApi.readAllEntities("logical and point and equipRef == \"$equipId\" and not heartbeat")
 }
 
 /**
@@ -84,6 +94,7 @@ private fun getRegistersMap(equipId: String): ArrayList<HashMap<Any, Any>> {
 private fun getRegister(rawMap: HashMap<Any, Any>): BacnetPoint {
     val physicalPoint = RawPoint.Builder().setHashMap(rawMap).build()
     var isDisplayInUiEnabled = false
+    var isSystem = physicalPoint.markers.contains("system")
     for (marker in physicalPoint.markers) {
         if (marker.equals("displayInUi")) {
             isDisplayInUiEnabled = true
@@ -98,8 +109,8 @@ private fun getRegister(rawMap: HashMap<Any, Any>): BacnetPoint {
 
     var incrementStep = ""
     var valueConstraints: ValueConstraint? = null
-    if (physicalPoint.tags.containsKey("incrementStep")) {
-        incrementStep = (physicalPoint.tags["incrementStep"] as HStr).`val`
+    if (physicalPoint.incrementVal != null) {
+        incrementStep = physicalPoint.incrementVal
         try {
             val min : Int = physicalPoint.minVal.toDouble().toInt()
             val max : Int = physicalPoint.maxVal.toDouble().toInt()
@@ -112,7 +123,17 @@ private fun getRegister(rawMap: HashMap<Any, Any>): BacnetPoint {
         val enumValues = physicalPoint.enums.toString().split(",")
         val allowedValues = mutableListOf<AllowedValues>()
         enumValues?.forEachIndexed { index, it ->
-            allowedValues.add(AllowedValues(index, it, it))
+            if (it.contains("=")) {
+                val parts = it.split("=")
+                if (parts.isNotEmpty() && parts[0].isNotBlank()) {
+                    val value = parts[0]
+                    allowedValues.add(AllowedValues(index, value, value))
+                } else {
+                    allowedValues.add(AllowedValues(index, it, it))
+                }
+            } else {
+                allowedValues.add(AllowedValues(index, it, it))
+            }
         }
         valueConstraints = ValueConstraint("MULTI_STATE", null, null, allowedValues)
     }
@@ -141,7 +162,8 @@ private fun getRegister(rawMap: HashMap<Any, Any>): BacnetPoint {
         mutableListOf(),
         bacnetProperty,
         disName = shortDisplayName,
-        defaultWriteLevel = defaultWriteLevel
+        defaultWriteLevel = defaultWriteLevel,
+        isSystem = isSystem
     )
 }
 

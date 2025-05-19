@@ -8,6 +8,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -54,7 +55,7 @@ public class HyperStatMonitoringEquip {
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-MONITORING-" + mNodeAddr;
-        HashMap systemEquip = mHayStack.read("equip and system and not modbus and not connectModule");
+        HashMap systemEquip = mHayStack.read(CommonQueries.SYSTEM_PROFILE);
         String ahuRef = null;
         if (systemEquip != null && !systemEquip.isEmpty()) {
             ahuRef = systemEquip.get("id").toString();

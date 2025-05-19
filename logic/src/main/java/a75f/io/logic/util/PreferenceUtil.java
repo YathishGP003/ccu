@@ -115,6 +115,9 @@ public class PreferenceUtil {
     private static final String FLOOR_REF_UPDATE_STATUS = "floorRefUpdateStatus";
     private static final String MODBUS_KVTAGS_DATA_TYPE_UPDATED = "modbusKVTagsDataTypeUpdated";
 
+
+    private static final String SELECTED_PROFILE_WITH_AHU = "selectedProfileWithAhu";
+
     private static final String MIGRATE_UPDATE_DAB_AND_VAV_POINTS = "migrateUpdateVavAndDabPoints";
     private static final String MIGRATE_UPDATE_BYPASS_DAMPER_POINTS = "migrateUpdateBypassDamperPoints";
     public static void setContext(Context c) {
@@ -905,6 +908,14 @@ public class PreferenceUtil {
     public static boolean isBypassDamperEquipPointsMigrationRequired() {
         return getBooleanPreference(MIGRATE_UPDATE_BYPASS_DAMPER_POINTS);
 
+    }
+
+    public static String getSelectedProfileWithAhu() {
+        return getStringPreference(SELECTED_PROFILE_WITH_AHU);
+    }
+
+    public static void setSelectedProfileWithAhu(String profile) {
+        setStringPreference(SELECTED_PROFILE_WITH_AHU, profile);
     }
     public static boolean isDuplicateDualDuctSensorPointsAreRemoved() {
         return getBooleanPreference(DUAL_DUCT_SENSOR_POINT_REMOVE);

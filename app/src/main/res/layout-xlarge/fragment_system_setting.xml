@@ -751,6 +751,12 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/margin_20"
                         android:visibility="gone" />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/external_bacnet_device"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/margin_20"
+                        />
                 </LinearLayout>
 
                 <LinearLayout

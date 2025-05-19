@@ -22,6 +22,7 @@ import a75f.io.api.haystack.bacnet.parser.BacnetModelDetailResponse;
 import a75f.io.api.haystack.bacnet.parser.BacnetPoint;
 import a75f.io.api.haystack.bacnet.parser.BacnetProperty;
 import a75f.io.api.haystack.bacnet.parser.TagItem;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -34,13 +35,18 @@ public class BacnetEquip {
     String equipRef = null;
     CCUHsApi hayStack = CCUHsApi.getInstance();
 
-    private static final String TAG = "BacNetEquip";
+    private static final String TAG = "BACNET_BacNetEquip";
 
     private static final String CONST_BACNET = "bacnet";
-    private static final String  CONST_BACNET_CUR = "bacnetCur";
+    private static final String CONST_BACNET_CUR = "bacnetCur";
     private static final String CONST_BACNET_DEVICE_ID = "bacnetDeviceId";
 
     private static final String CONST_LOGICAL = "logical";
+
+    private static final int BACNET_RANGE_SYSTEM_POINT = 1100000;
+
+    public static final String TAG_BACNET = "ExternalAHU_BACNET";
+    public static final String TAG_BACNET_HEART_BEAT = "ExternalAHU_BACNET_HEART_BEAT";
 
     public BacnetEquip(ProfileType type, long node) {
         profileType = type;
@@ -49,9 +55,9 @@ public class BacnetEquip {
 
     public void init(long slaveId) {
         if (equipRef == null) {
-            HashMap equip = hayStack.read("equip and bacnet and group == \"" + slaveId + "\"");
+            HashMap equip = hayStack.read("equip and bacnet and group == \"" + "@" + slaveId + "\"");
             if (equip.isEmpty()) {
-                CcuLog.e("Bacnet","Init Failed : Equip does not exist "+slaveId);
+                CcuLog.e(TAG, "Init Failed : Equip does not exist " + slaveId);
                 return;
             }
             equipRef = equip.get("id").toString();
@@ -59,7 +65,7 @@ public class BacnetEquip {
     }
 
     public String createEntities(String configParam, String modelConfig, String deviceId, String slaveId1, String floorRef, String roomRef,
-                                 BacnetModelDetailResponse equipmentInfo, String parentEquipId,String moduleLevel,String modelVersion) {
+                                 BacnetModelDetailResponse equipmentInfo, String parentEquipId, String moduleLevel, String modelVersion, boolean isSystemEquip) {
         CcuLog.d(TAG, "##--bacnet client starting points creation--");
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
@@ -68,51 +74,55 @@ public class BacnetEquip {
         String bacNetEquipType = "BACNET_DEFAULT";
         double equipScheduleTypeVal;
 
-        if(roomRef.contains("SYSTEM")) {
+        if (roomRef.contains("SYSTEM")) {
             equipScheduleTypeVal = ScheduleType.ZONE.ordinal();
-        }else{
-            equipScheduleTypeVal = (UtilKt.getSchedule(roomRef, floorRef)).isZoneSchedule()? ScheduleType.ZONE.ordinal() :
+        } else {
+            equipScheduleTypeVal = (UtilKt.getSchedule(roomRef, floorRef)).isZoneSchedule() ? ScheduleType.ZONE.ordinal() :
                     ScheduleType.NAMED.ordinal();
         }
 
         String equipName = equipmentInfo.getName();
         String equipDisplayName = equipmentInfo.getDisplayName();
         List<TagItem> equipTagsList = equipmentInfo.getEquipTagsList();
-        String equipDis = siteDis + "-"+equipName+"-"+equipDisplayName+"-"+ slaveId;
+        String equipDis = siteDis + "-" + equipName + "-" + equipDisplayName + "-" + slaveId;
         String gatewayRef = null;
 
-        HashMap systemEquip = hayStack.read("equip and system and not bacnet");
+        HashMap systemEquip = hayStack.read(CommonQueries.SYSTEM_PROFILE);
         if (systemEquip != null && systemEquip.size() > 0) {
             gatewayRef = systemEquip.get("id").toString();
         }
 
-        int bacnetIdForEquip = HSUtil.generateBacnetId(String.valueOf(slaveId),false,false);
+        int bacnetIdForEquip = HSUtil.generateBacnetId(String.valueOf(slaveId), false, false);
 
         Equip.Builder bacNetEquip = new Equip.Builder().setSiteRef(siteRef)
-                    .setDisplayName(equipDis)
-                    .setRoomRef(roomRef)
-                    .setFloorRef(floorRef)
-                    .setProfile(profileType.name())
-                    .setBacnetId(bacnetIdForEquip)
-                    .setBacnetType("device")
-                    .addMarker("equip").addMarker(CONST_BACNET).addMarker(CONST_BACNET_CUR)
-                    .addTag(CONST_BACNET_DEVICE_ID, HNum.make(Integer.parseInt(deviceId)))
-                    .addTag("version", HStr.make(modelVersion))
-                    .addTag("bacnetConfig", HStr.make(configParam))
-                    .addTag("modelConfig", HStr.make(modelConfig))
-                    .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(slaveId));
+                .setDisplayName(equipDis)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setProfile(profileType.name())
+                .setBacnetId(bacnetIdForEquip)
+                .setBacnetType("device")
+                .addMarker("equip").addMarker(CONST_BACNET)
+                .addTag(CONST_BACNET_DEVICE_ID, HNum.make(Integer.parseInt(deviceId)))
+                .addTag("version", HStr.make(modelVersion))
+                .addTag("bacnetConfig", HStr.make(configParam))
+                .addTag("modelConfig", HStr.make(modelConfig))
+                .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(slaveId));
         if (parentEquipId != null) {
             bacNetEquip.setEquipRef(parentEquipId);
         }
 
-        if(equipTagsList.size() > 0){
-            for(TagItem tagItem : equipTagsList){
-                if(tagItem.getKind().toLowerCase().equals("marker")){
+        if (isSystemEquip) {
+            bacNetEquip.addMarker("external");
+        }
+
+        if (equipTagsList.size() > 0) {
+            for (TagItem tagItem : equipTagsList) {
+                if (tagItem.getKind().toLowerCase().equals("marker")) {
                     bacNetEquip.addMarker(tagItem.getName().toLowerCase().trim());
-                }else{
+                } else {
                     try {
                         bacNetEquip.addTag(tagItem.getKind().toLowerCase(), HStr.make(tagItem.getDefaultValue()));
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         CcuLog.d(TAG, "hit exception 6-->" + e.getMessage());
                     }
                 }
@@ -123,27 +133,24 @@ public class BacnetEquip {
         bacNetEquip.addMarker(moduleLevel.toLowerCase().trim());
         String equipmentRef = hayStack.addEquip(bacNetEquip.build());
 
-        CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipmentRef,
-                siteRef, roomRef, floorRef, (int) slaveId, "bacnet", tz));
-
         Point equipScheduleType = new Point.Builder()
-                    .setDisplayName(siteDis+"-"+bacNetEquipType+"-"+slaveId+"-scheduleType")
-                    .setEquipRef(equipmentRef)
-                    .setSiteRef(siteRef)
-                    .setRoomRef(roomRef)
-                    .setFloorRef(floorRef).setHisInterpolate("cov")
-                    .addMarker(bacNetEquipType.toLowerCase()).addMarker("bacnet").addMarker("scheduleType").addMarker("writable").addMarker("his")
-                    .addMarker(moduleLevel.toLowerCase().trim())
-                    .setGroup(String.valueOf(slaveId))
-                    .setEnums("building,named")
-                    .setTz(tz).build();
+                .setDisplayName(siteDis + "-" + bacNetEquipType + "-" + slaveId + "-scheduleType")
+                .setEquipRef(equipmentRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef).setHisInterpolate("cov")
+                .addMarker(bacNetEquipType.toLowerCase()).addMarker("bacnet").addMarker("scheduleType").addMarker("writable").addMarker("his")
+                .addMarker(moduleLevel.toLowerCase().trim())
+                .setGroup(String.valueOf(slaveId))
+                .setEnums("building,named")
+                .setTz(tz).build();
 
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, equipScheduleTypeVal);
-        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId,equipScheduleTypeVal);
+        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, equipScheduleTypeVal);
 
         Device bacnetDevice = new Device.Builder()
-                .setDisplayName(bacNetEquipType+"-"+slaveId)
+                .setDisplayName(bacNetEquipType + "-" + slaveId)
                 .addMarker("network").addMarker("bacnet").addMarker(bacNetEquipType.toLowerCase()).addMarker("his").addMarker("node")
                 .setAddr((int) slaveId)
                 .setSiteRef(siteRef)
@@ -155,16 +162,30 @@ public class BacnetEquip {
         CcuLog.d(TAG, "BACnet Device Entity created... device id--> "+deviceID);
 
         List<BacnetPoint> points = equipmentInfo.getPoints();
-        CcuLog.d(TAG, "points to add-->"+points.size());
+        CcuLog.d(TAG, "points to add-->" + points.size());
+        int totalNoOfPoints = points.size();
+
+        if (isSystemEquip) {
+            Point heartBeatPoint = HeartBeat.getHeartBeatPoint(equipDis, equipmentRef,
+                    siteRef, roomRef, floorRef, (int) slaveId, "bacnet", tz);
+            int uniqueIdHeatBeat = BACNET_RANGE_SYSTEM_POINT + totalNoOfPoints + 1;
+            heartBeatPoint.setBacnetId(uniqueIdHeatBeat);
+            CCUHsApi.getInstance().addPoint(heartBeatPoint);
+
+        } else {
+            CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipmentRef,
+                    siteRef, roomRef, floorRef, (int) slaveId, "bacnet", tz));
+        }
+
         try {
-            for (BacnetPoint point : points){
+            for (BacnetPoint point : points) {
 
                 boolean isPointHistorized = point.getEquipTagNames().contains("his");
                 boolean isWritable = point.getEquipTagNames().contains("writable");
 
                 int bacnetId = point.getProtocolData().getBacnet().getObjectId();
                 Point.Builder logicalParamPoint = new Point.Builder()
-                        .setDisplayName(equipDis+"-"+point.getName())
+                        .setDisplayName(equipDis + "-" + point.getName())
                         .setShortDis(point.getName())
                         .setEquipRef(equipmentRef)
                         .setSiteRef(siteRef)
@@ -173,27 +194,38 @@ public class BacnetEquip {
                         .setUnit(point.getDefaultUnit())
                         .setBacnetType(getBacNetType(Objects.requireNonNull(point.getProtocolData()).getBacnet().getObjectType()))
                         .setFloorRef(floorRef).addMarker(CONST_LOGICAL)
-                        .addMarker(CONST_BACNET).addMarker(CONST_BACNET_CUR)
+                        .addMarker(CONST_BACNET)/*.addMarker(CONST_BACNET_CUR)*/
                         .addTag(CONST_BACNET_DEVICE_ID, HNum.make(Integer.parseInt(deviceId)))
                         .setGroup(String.valueOf(slaveId))
                         .setTz(tz);
 
-                if(Objects.requireNonNull(point.getValueConstraint()).getAllowedValues() != null){
+                if (Objects.requireNonNull(point.getValueConstraint()).getAllowedValues() != null) {
+                    StringBuffer enumVariables = new StringBuffer();
                     AtomicReference<String> values = new AtomicReference<>("");
                     point.getValueConstraint().getAllowedValues().forEach((allowedValue) -> {
-                        if(values.get().equals("")) {
+
+                        if(enumVariables.length() == 0)
+                            enumVariables.append(allowedValue.getValue()).append("=").append(allowedValue.getIndex());
+                        else {
+                            enumVariables.append(",");
+                            enumVariables.append(allowedValue.getValue()).append("=").append(allowedValue.getIndex());
+                        }
+
+                        if (values.get().equals("")) {
                             values.set(allowedValue.getValue());
-                        }else{
+                        } else {
                             values.set(values + ", " + allowedValue.getValue());
                         }
                     });
-                    logicalParamPoint.addTag("enum", HStr.make(String.valueOf(values)));
+                    logicalParamPoint.setEnums(enumVariables.toString());
+                    //logicalParamPoint.addTag("enum", HStr.make(String.valueOf(values)));
                 }
 
 
-                if(point.getPresentationData()!= null) {
+                if (point.getPresentationData() != null) {
                     String incrementStep = point.getPresentationData().getTagValueIncrement();
-                    logicalParamPoint.addTag("incrementStep", HStr.make(incrementStep));
+                    //logicalParamPoint.addTag("incrementVal", HStr.make(incrementStep));
+                    logicalParamPoint.setIncrementVal(incrementStep);
                 }
 
 //                RawPoint.Builder physicalParamPoint = new RawPoint.Builder()
@@ -207,21 +239,21 @@ public class BacnetEquip {
 //                        .setTz(tz);
 
 
-                if(point.getEquipTagsList().size() > 0){
-                    for(TagItem tagItem : point.getEquipTagsList()){
-                        if(tagItem.getKind().toLowerCase().equals("marker")){
+                if (point.getEquipTagsList().size() > 0) {
+                    for (TagItem tagItem : point.getEquipTagsList()) {
+                        if (tagItem.getKind().toLowerCase().equals("marker")) {
                             bacNetEquip.addMarker(tagItem.getName().toLowerCase().trim());
-                        }else{
+                        } else {
                             try {
                                 bacNetEquip.addTag(tagItem.getKind().toLowerCase(), HStr.make(tagItem.getDefaultValue()));
-                            }catch (Exception e){
+                            } catch (Exception e) {
                                 CcuLog.d(TAG, "hit exception 5-->" + e.getMessage());
                             }
                         }
                     }
                 }
 
-                if(point.getProtocolData().getBacnet().getDisplayInUIDefault()){
+                if (point.getProtocolData().getBacnet().getDisplayInUIDefault()) {
                     logicalParamPoint.addMarker("displayInUi");
                     //physicalParamPoint.addMarker("displayInUi");
                 }
@@ -229,57 +261,73 @@ public class BacnetEquip {
                 AtomicBoolean hasPresentValue = new AtomicBoolean(false);
                 AtomicReference<String> presentValue = new AtomicReference<>("");
                 point.getBacnetProperties().forEach((bacnetProperty) -> {
-                    if(bacnetProperty.getName().equals("PRESENT_VALUE")){
+                    if (bacnetProperty.getName().equals("PRESENT_VALUE")) {
                         String presentVal = getValue(bacnetProperty);
-                        if(presentVal != null && !presentVal.equals("null") && !presentVal.equals("") && !presentVal.equals("NA")){
+                        if (presentVal != null && !presentVal.equals("null") && !presentVal.equals("") && !presentVal.equals("NA")) {
                             hasPresentValue.set(true);
                             presentValue.set(presentVal);
                         }
-                    }else if(bacnetProperty.getName().equals("MIN_PRESENT_VALUE")){
+                    } else if (bacnetProperty.getName().equals("MIN_PRESENT_VALUE")) {
                         String minValue = getValue(bacnetProperty);
-                        if(minValue != null && !minValue.equals("null") && !minValue.equals("") && !minValue.equals("NA")){
+                        if (minValue != null && !minValue.equals("null") && !minValue.equals("") && !minValue.equals("NA")) {
                             logicalParamPoint.setMinVal(minValue);
                         }
-                    }else if(bacnetProperty.getName().equals("MAX_PRESENT_VALUE")){
+                    } else if (bacnetProperty.getName().equals("MAX_PRESENT_VALUE")) {
                         String minValue = getValue(bacnetProperty);
-                        if(minValue != null && !minValue.equals("null") && !minValue.equals("") && !minValue.equals("NA")){
+                        if (minValue != null && !minValue.equals("null") && !minValue.equals("") && !minValue.equals("NA")) {
                             logicalParamPoint.setMaxVal(minValue);
                         }
-                    }else {
+                    } else {
                         try {
                             String value = String.valueOf(bacnetProperty.getSelectedValue());
-                            CcuLog.d(TAG, "tag to add-->" +bacnetProperty.getName().toLowerCase() + " value-->"+HStr.make(value));
-                            if(value != null && !value.equals("null") && !value.equals("") && !value.equals("NA")){
+                            CcuLog.d(TAG, "tag to add-->" + bacnetProperty.getName().toLowerCase() + " value-->" + HStr.make(value));
+                            if (value != null && !value.equals("null") && !value.equals("") && !value.equals("NA")) {
                                 logicalParamPoint.addTag(bacnetProperty.getName().toLowerCase(), HStr.make(value));
                             }
-                        }catch (Exception e) {
+                        } catch (Exception e) {
                             CcuLog.d(TAG, "hit exception 1-->" + e.getMessage());
                         }
                     }
 
                 });
 
-                if(isWritable){
+                if (isWritable) {
                     logicalParamPoint.addMarker("writable");
                     logicalParamPoint.addTag("defaultWriteLevel", HStr.make(point.getDefaultWriteLevel()));
                 }
 
-                if(isPointHistorized){
+                if (isPointHistorized) {
                     logicalParamPoint.addMarker("his");
                 }
+
+                for (TagItem tagItem : point.getEquipTagsList()) {
+                    if (tagItem.getKind().equalsIgnoreCase("marker")) {
+                        logicalParamPoint.addMarker(tagItem.getName());
+                    }
+                }
+
+                if (isSystemEquip) {
+                    logicalParamPoint.addMarker("system");
+                    int uniqueId = BACNET_RANGE_SYSTEM_POINT + bacnetId;
+                    logicalParamPoint.setBacnetId(uniqueId);
+                    logicalParamPoint.addMarker(CONST_BACNET_CUR);
+                } else {
+                    logicalParamPoint.addMarker(CONST_BACNET_CUR);
+                }
+
 
                 logicalParamPoint.setHisInterpolate(point.getHisInterpolate().toLowerCase());
                 Point logicalPoint = logicalParamPoint.build();
                 String logicalParamId = CCUHsApi.getInstance().addPoint(logicalPoint);
-
-                if(hasPresentValue.get()){
+                CcuLog.d(TAG, "logicalParamId----->$logicalParamId");
+                if (hasPresentValue.get()) {
                     try {
-                        if(presentValue.get() != null && !presentValue.get().equals("null") && !presentValue.get().equals("") && !presentValue.get().equals("NA")){
-                            Log.d(TAG, "write present value to the point id-->"+logicalParamId+" value-->"+presentValue +"<--is writable-->"+isWritable);
+                        if (presentValue.get() != null && !presentValue.get().equals("null") && !presentValue.get().equals("") && !presentValue.get().equals("NA")) {
+                            Log.d(TAG, "write present value to the point id-->" + logicalParamId + " value-->" + presentValue + "<--is writable-->" + isWritable);
                             CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(presentValue.get()));
-                            CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId,Double.parseDouble(presentValue.get()));
+                            CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, Double.parseDouble(presentValue.get()));
                         }
-                    }catch (Exception e) {
+                    } catch (Exception e) {
                         CcuLog.d(TAG, "hit exception 4-->" + e.getMessage());
                     }
 
@@ -290,11 +338,11 @@ public class BacnetEquip {
 //                    }
 
                 }
-                CcuLog.d(TAG, "point added to haystack-->"+logicalPoint.getDisplayName()+"--id-->"+logicalParamId);
+                CcuLog.d(TAG, "point added to haystack-->" + logicalPoint.getDisplayName() + "--id-->" + logicalParamId);
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            CcuLog.d(TAG, "hit exception-->"+e.getMessage());
+            CcuLog.d(TAG, "hit exception-->" + e.getMessage());
         }
 
         CCUHsApi.getInstance().syncEntityTree();
@@ -302,12 +350,12 @@ public class BacnetEquip {
         return equipmentRef;
     }
 
-    private static String getBacNetType(String objectType){
-        if(objectType.equalsIgnoreCase("ANALOG_VALUE")){
+    private static String getBacNetType(String objectType) {
+        if (objectType.equalsIgnoreCase("ANALOG_VALUE")) {
             return "AnalogValue";
-        }else if(objectType.equalsIgnoreCase("BINARY_VALUE")){
+        } else if (objectType.equalsIgnoreCase("BINARY_VALUE")) {
             return "BinaryValue";
-        }else if(objectType.equalsIgnoreCase("MULTI_STATE_VALUE")){
+        } else if (objectType.equalsIgnoreCase("MULTI_STATE_VALUE")) {
             return "MultiStateValue";
         }
         return "AnalogValue";
@@ -315,7 +363,7 @@ public class BacnetEquip {
 
     private static String getValue(BacnetProperty bacnetProperty) {
         String minValue = bacnetProperty.getDefaultValue();
-        if(bacnetProperty.getSelectedValue() == 1){
+        if (bacnetProperty.getSelectedValue() == 1) {
             minValue = bacnetProperty.getFetchedValue();
         }
         return minValue;
@@ -324,19 +372,30 @@ public class BacnetEquip {
     public void updateHaystackPoints(String equipRef, List<BacnetPoint> configuredParams) {
         for (BacnetPoint bacnetPoint : configuredParams) {
             HDict pointRead = CCUHsApi.getInstance().readHDictById(bacnetPoint.getId());
-            if(pointRead != null) {
+            if (pointRead != null) {
                 Point logicalPoint = new Point.Builder().setHDict(pointRead).build();
                 if (bacnetPoint.getProtocolData().getBacnet().getDisplayInUIDefault()) {
                     if (!logicalPoint.getMarkers().contains("displayInUi")) {
+                        CcuLog.d(TAG_BACNET, "--displayInUi--added for point with id-->" + logicalPoint.getId());
                         logicalPoint.getMarkers().add("displayInUi");
                         if (logicalPoint.getId() != null) {
+                            CcuLog.d(TAG_BACNET, "--displayInUi-2--added for point with id-->" + logicalPoint.getId());
+                            CcuLog.d(TAG_BACNET, "");
+                            CcuLog.d(TAG_BACNET, "updating point@@-1-->" + logicalPoint.getId() + "<-->" + logicalPoint.getEquipRef() + "<-->" + logicalPoint);
                             CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
+                        } else {
+                            CcuLog.d(TAG_BACNET, "updating point@@-1--failed--no id-->" + logicalPoint);
                         }
                     }
                 } else if (logicalPoint.getMarkers().contains("displayInUi")) {
                     logicalPoint.getMarkers().remove("displayInUi");
+                    CcuLog.d(TAG_BACNET, "--displayInUi--removed for point with id-->" + logicalPoint.getId());
                     if (logicalPoint.getId() != null) {
+                        CcuLog.d(TAG_BACNET, "--displayInUi--2--removed for point with id-->" + logicalPoint.getId());
+                        CcuLog.d(TAG_BACNET, "updating point@@-2-->" + logicalPoint.getId() + "<-->" + logicalPoint.getEquipRef() + "<-->" + logicalPoint);
                         CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
+                    } else {
+                        CcuLog.d(TAG_BACNET, "updating point@@-2--failed--no id-->" + logicalPoint);
                     }
                 }
             }

@@ -20,6 +20,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -306,7 +307,7 @@ public abstract class VavSystemProfile extends SystemProfile
             return;
         }
 
-        if(CCUHsApi.getInstance().readEntity("system and equip and not modbus").containsKey("domainName")){
+        if(CCUHsApi.getInstance().readEntity(CommonQueries.SYSTEM_PROFILE).containsKey("domainName")){
             Domain.writeHisValByDomain(DomainName.satTRSp, trSystem.satTRProcessor.getSetPoint());
             Domain.writeHisValByDomain(DomainName.co2TRSp, trSystem.co2TRProcessor.getSetPoint());
             Domain.writeHisValByDomain(DomainName.staticPressureTRSp, trSystem.spTRProcessor.getSetPoint());

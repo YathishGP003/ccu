@@ -25,6 +25,7 @@ import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForVav;
 
 import android.content.Intent;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,6 +41,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.equips.VavStagedSystemEquip;
 import a75f.io.domain.equips.VavStagedVfdSystemEquip;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -899,7 +901,7 @@ public class VavStagedRtu extends VavSystemProfile
             String timeZone = CCUHsApi.getInstance().getTimeZone();
     
             Equip systemEquip = new Equip.Builder()
-                                    .setHashMap(CCUHsApi.getInstance().read("system and equip and not modbus and not connectModule")).build();
+                                    .setHashMap(CCUHsApi.getInstance().read(CommonQueries.SYSTEM_PROFILE)).build();
     
             if (val <= Stage.COOLING_5.ordinal() && val >= COOLING_1.ordinal()) {
                 if (CCUHsApi.getInstance().read("point and system and cooling and cmd and stage"+newStageNum).isEmpty()) {
@@ -951,11 +953,21 @@ public class VavStagedRtu extends VavSystemProfile
 
     @Override
     public void deleteSystemEquip() {
-        HashMap equip = CCUHsApi.getInstance().read("system and equip and not modbus and not connectModule");
-        if (ProfileType.getProfileTypeForName(equip.get("profile").toString()).name().equals(ProfileType.SYSTEM_VAV_STAGED_RTU.name())) {
-            CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
+
+        ArrayList<HashMap<Object, Object>> listOfEquips = CCUHsApi.getInstance().readAllEntities(CommonQueries.SYSTEM_PROFILE);
+        for (HashMap<Object, Object> equip : listOfEquips) {
+            if(equip.get("profile") != null){
+                if(ProfileType.getProfileTypeForName(equip.get("profile").toString()) != null){
+                    if (ProfileType.getProfileTypeForName(equip.get("profile").toString()).name().equals(ProfileType.SYSTEM_VAV_STAGED_RTU.name())) {
+                        CcuLog.d(Tags.ADD_REMOVE_PROFILE, "VavStagedRtu removing profile with it id-->"+equip.get("id").toString());
+                        CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
+                    }
+                }
+            }
         }
+
         removeSystemEquipModbus();
+        removeSystemEquipBacnet();
         deleteSystemConnectModule();
     }
 

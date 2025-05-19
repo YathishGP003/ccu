@@ -11,6 +11,7 @@ import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.api.Point
 import a75f.io.domain.api.readPoint
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
+import a75f.io.domain.util.CommonQueries
 import a75f.io.logger.CcuLog
 import a75f.io.logic.BuildConfig
 import a75f.io.logic.Globals
@@ -154,9 +155,12 @@ class DabAdvancedAhu : DabSystemProfile() {
 
     override fun deleteSystemEquip() {
         val hayStack = CCUHsApi.getInstance()
-        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
-        if (systemEquip.isNotEmpty()) {
-            hayStack.deleteEntity(systemEquip["id"].toString())
+        val listOfEquips = hayStack.readAllEntities(CommonQueries.SYSTEM_PROFILE)
+        for(equip in listOfEquips){
+            if (equip.isNotEmpty()) {
+                CcuLog.d(Tags.ADD_REMOVE_PROFILE, "DabAdvancedAhu removing profile with it -->${equip[Tags.ID].toString()}")
+                CCUHsApi.getInstance().deleteEntityTree(equip[Tags.ID].toString())
+            }
         }
         deleteSystemConnectModule()
     }

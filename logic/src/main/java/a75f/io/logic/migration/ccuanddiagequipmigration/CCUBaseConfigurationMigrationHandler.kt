@@ -69,7 +69,7 @@ class CCUBaseConfigurationMigrationHandler {
     private fun deleteCCURelatedPointsFromNonDmSystemProfile(hayStack: CCUHsApi) {
 
         val systemEquip = hayStack.readEntity("system and equip and not" +
-                " modbus and not connectModule and not domainName")
+                " modbus and not connectModule and not domainName and not bacnet")
         CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Deleting CCU points present in NON DM systemEquip $systemEquip")
 
         if (systemEquip.isNotEmpty()) {

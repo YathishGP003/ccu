@@ -2,6 +2,7 @@ package a75f.io.renatus
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.mesh.LSerial
+import a75f.io.domain.util.CommonQueries
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.renatus.ota.OTAUpdateHandlerService
@@ -242,7 +243,7 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
         if (L.isSimulation()) return false
         try {
             val equip = CCUHsApi.getInstance()
-                .readEntity("equip and system and not modbus and not connectModule")
+                .readEntity(CommonQueries.SYSTEM_PROFILE)
             if (equip.isNotEmpty() && (equip["profile"].toString() == "vavAdvancedHybridAhuV2" || equip["profile"].toString() == "dabAdvancedHybridAhuV2")) {
                 return true
             }

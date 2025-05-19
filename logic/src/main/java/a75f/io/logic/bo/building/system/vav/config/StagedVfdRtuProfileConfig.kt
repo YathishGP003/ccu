@@ -6,6 +6,7 @@ import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.VavStagedVfdSystemEquip
+import a75f.io.domain.util.CommonQueries
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.bo.haystack.device.ControlMote.getAllUnusedPorts
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -67,7 +68,7 @@ open class StagedVfdRtuProfileConfig(modelDef : SeventyFiveFProfileDirective)
 
     override fun getActiveConfiguration() : StagedVfdRtuProfileConfig {
 
-        val equip = Domain.hayStack.readEntity("system and equip and not modbus and not connectModule")
+        val equip = Domain.hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
         if (equip.isEmpty()) {
             return this
         }

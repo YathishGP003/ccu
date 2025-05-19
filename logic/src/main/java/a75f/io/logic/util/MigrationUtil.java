@@ -37,6 +37,7 @@ import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.CCUDiagEquip;
 import a75f.io.domain.equips.DabEquip;
 import a75f.io.domain.equips.SystemEquip;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.BuildConfig;
@@ -235,7 +236,7 @@ public class MigrationUtil {
 
     private static void migrateHyperStatSplitGatewayRef(CCUHsApi hayStack) {
         ArrayList<HashMap<Object, Object>> hsEquips = hayStack.readAllEntities("equip and hyperstatsplit");
-        HashMap<Object, Object> sysEquipMap = hayStack.readEntity("system and equip and not modbus and not connectModule");
+        HashMap<Object, Object> sysEquipMap = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE);
         if (sysEquipMap.containsKey("id") && sysEquipMap.get("id") != null) {
             hsEquips.forEach(equipMap -> {
                 Equip hsEquip = new Equip.Builder().setHashMap(equipMap).build();
@@ -1234,7 +1235,7 @@ public class MigrationUtil {
 
     private static void deleteNonDMSystemOTAStatusPoint(CCUHsApi ccuHsApi) {
         HashMap<Object, Object> systemEquip = ccuHsApi.readEntity("system and equip and not" +
-                " modbus and not connectModule and not domainName");
+                " modbus and not connectModule and not domainName and not bacnet");
         if (systemEquip.size() > 0) {
             HashMap<Object, Object> otaStatusPoint =  ccuHsApi.readEntity("ota and status" +
                     " and equipRef == \"" + systemEquip.get(Tags.ID) + "\"");

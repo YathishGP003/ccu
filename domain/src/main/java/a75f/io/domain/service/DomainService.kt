@@ -62,8 +62,14 @@ class DomainService {
         })
     }
 
-    fun readBacNetModelsList(query: String, callback: ResponseCallback) {
-        val call: Call<ResponseBody> = apiService.getBacNetModelsList(query)
+    fun readBacNetModelsList(queryProtocol: String, queryTagNames : String, callback: ResponseCallback) {
+        val call: Call<ResponseBody> = if (BuildConfig.BUILD_TYPE.contentEquals("carrier_prod")
+            || BuildConfig.BUILD_TYPE.contentEquals("daikin_prod") || BuildConfig.BUILD_TYPE.contentEquals("airoverse_prod")) {
+            apiService.getExternalBacNetModelsList(queryProtocol, queryTagNames)
+        } else {
+            apiService.getBacNetModelsList(queryProtocol, queryTagNames)
+        }
+
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful)
@@ -77,7 +83,13 @@ class DomainService {
         })
     }
     fun readBacNetModelById(context: Context, modelId: String, version: String, callback: ResponseCallback) {
-        val call: Call<ResponseBody> = apiService.getBacNetModelById2(modelId, version)
+        val call: Call<ResponseBody> = if (BuildConfig.BUILD_TYPE.contentEquals("carrier_prod")
+            || BuildConfig.BUILD_TYPE.contentEquals("daikin_prod")
+            || BuildConfig.BUILD_TYPE.contentEquals("airoverse_prod")) {
+            apiService.getExternalBacnetModelById(modelId,version)
+        } else {
+            apiService.getBacNetModelById2(modelId,version)
+        }
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful)

@@ -15,6 +15,7 @@ import a75f.io.domain.api.DomainName.operatingMode
 import a75f.io.domain.api.DomainName.useOutsideTempLockoutCooling
 import a75f.io.domain.api.DomainName.useOutsideTempLockoutHeating
 import a75f.io.domain.api.Equip
+import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
 import a75f.io.logic.BuildConfig
@@ -40,6 +41,7 @@ import a75f.io.logic.bo.building.system.updateOperatingMode
 import a75f.io.logic.bo.building.system.updatePointHistoryAndDefaultValue
 import a75f.io.logic.bo.building.system.updatePointValue
 import a75f.io.logic.bo.building.system.updateSystemStatusPoints
+import a75f.io.logic.bo.building.system.vav.VavExternalAhu
 import a75f.io.logic.bo.building.system.writePointForCcuUser
 import a75f.io.logic.interfaces.ModbusWritableDataInterface
 
@@ -142,11 +144,15 @@ class DabExternalAhu : DabSystemProfile() {
 
     @Synchronized
     override fun deleteSystemEquip() {
-        val equip = CCUHsApi.getInstance().readEntity(SYSTEM_MODBUS)
-        if (equip["profile"]?.toString().contentEquals(ProfileType.dabExternalAHUController.name)) {
-            CCUHsApi.getInstance().deleteEntityTree(equip[Tags.ID].toString())
+        val listOfEquips = CCUHsApi.getInstance().readAllEntities(CommonQueries.SYSTEM_PROFILE)
+        for(equip in listOfEquips){
+            if (ProfileType.getProfileTypeForName(equip["profile"]?.toString()).name.contentEquals(ProfileType.dabExternalAHUController.name)) {
+                CcuLog.d(Tags.ADD_REMOVE_PROFILE, "dabExternalAhu removing profile with it -->${equip[Tags.ID].toString()}")
+                CCUHsApi.getInstance().deleteEntityTree(equip[Tags.ID].toString())
+            }
         }
         removeSystemEquipModbus()
+        removeSystemEquipBacnet()
         deleteSystemConnectModule()
     }
 
@@ -252,7 +258,11 @@ class DabExternalAhu : DabSystemProfile() {
             dabConfig
         )
         updateSystemStatusPoints(systemEquip.id, statusMessage, equipStatusMessage)
-        instance.modbusInterface?.writeSystemModbusRegister(externalEquipId, externalSpList)
+
+        val point = hayStack.readEntity("modbus and id == $externalEquipId")
+        if(point.isNotEmpty()){
+            instance.modbusInterface?.writeSystemModbusRegister(externalEquipId, externalSpList)
+        }
     }
 
     private fun updateLoopDirection(basicConfig: BasicConfig, systemEquip: Equip) {

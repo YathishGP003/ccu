@@ -9,6 +9,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.util.StringUtil;
+import a75f.io.domain.util.CommonQueries;
 import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -46,7 +47,7 @@ public class EmrEquip
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-EMR-" + nodeAddr;
         String ahuRef = null;
-        HashMap systemEquip = hayStack.read("equip and system and not modbus and not connectModule");
+        HashMap systemEquip = hayStack.read(CommonQueries.SYSTEM_PROFILE);
         if (systemEquip != null && systemEquip.size() > 0)
         {
             ahuRef = systemEquip.get("id").toString();

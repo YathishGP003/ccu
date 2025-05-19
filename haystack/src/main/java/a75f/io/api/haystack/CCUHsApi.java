@@ -2310,7 +2310,8 @@ public class CCUHsApi
                 return mCurrentTemperature;
             }
         }
-        return 0;
+        mCurrentTemperature = 0;
+        return mCurrentTemperature;
     }
 
     public double getExternalHumidity() {
@@ -2357,7 +2358,8 @@ public class CCUHsApi
                 return mCurrentHumidity;
             }
         }
-        return 0;
+        mCurrentHumidity = 0;
+        return mCurrentHumidity;
     }
 
     /**

@@ -562,7 +562,10 @@ public class OAOProfile
          * Then fallback to Local Outside Air Temp.
          */
         if (externalHumidity == 0 && externalTemp == 0) {
+            CcuLog.d(L.TAG_CCU_OAO, "Weather Info is not available due to network unavailability.");
             outsideAirTemp  = oaoEquip.getOutsideTemperature().readHisVal();
+            CcuLog.d(L.TAG_CCU_OAO, "Using Local Outside Air Temp for dry bulb economizing " +
+                    "decision. OutsideTemp based on TH1In value = " + outsideAirTemp);
         }
         
         if (outsideAirTemp > economizingMinTemp) {

@@ -195,7 +195,7 @@ android {
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
             buildConfigField "String", 'SEQUENCER_API_BASE', '\"https://seq-runner.prod.service.75f.io/\"'
-            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api.qa.service.75f.io/site/preconfig/\"'
+            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api.prod.service.75f.io/site/preconfig/\"'
 
             String env = "prod"
             buildHealthAndInfoUrls(baseUrls, env, delegate)
@@ -235,7 +235,7 @@ android {
             buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.airoverse.service.75f.io/version/getDetails\"'
             buildConfigField "String", 'VERSION_MANAGEMENT_API_BASE', '\"https://version-management-api.airoverse.service.75f.io/\"'
             buildConfigField "String", 'SEQUENCER_API_BASE', '\"https://seq-runner.airoverse.service.75f.io/\"'
-            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api.qa.service.75f.io/site/preconfig/\"'
+            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api.airoverse.service.75f.io/site/preconfig/\"'
             minifyEnabled false
 
             String env = "airoverse"

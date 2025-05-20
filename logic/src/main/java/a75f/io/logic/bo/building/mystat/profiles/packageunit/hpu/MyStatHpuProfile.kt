@@ -245,20 +245,22 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
             }
 
             MyStatHpuRelayMapping.CHANGE_OVER_O_COOLING -> {
-                if (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
-                    || basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
-                    val status = if (coolingLoopOutput > 0) 1.0 else 0.0
-                    updateLogicalPoint(logicalPointsList[port]!!, status)
-                    if (status == 1.0) relayStages[MyStatHpuRelayMapping.CHANGE_OVER_O_COOLING.name] = 1
+                if (coolingLoopOutput > 0) {
+                    updateLogicalPoint(logicalPointsList[port]!!, 1.0)
+                    relayStages[MyStatHpuRelayMapping.CHANGE_OVER_O_COOLING.name] = 1
+                } else {
+                    updateLogicalPoint(logicalPointsList[port]!!, 0.0)
+                    relayStages.remove(MyStatHpuRelayMapping.CHANGE_OVER_O_COOLING.name)
                 }
             }
 
             MyStatHpuRelayMapping.CHANGE_OVER_B_HEATING -> {
-                if (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
-                    || basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
-                    val status = if (heatingLoopOutput > 0) 1.0 else 0.0
-                    updateLogicalPoint(logicalPointsList[port]!!, status)
-                    if (status == 1.0) relayStages[MyStatHpuRelayMapping.CHANGE_OVER_B_HEATING.name] = 1
+                if (heatingLoopOutput > 0) {
+                    updateLogicalPoint(logicalPointsList[port]!!, 1.0)
+                    relayStages[MyStatHpuRelayMapping.CHANGE_OVER_B_HEATING.name] = 1
+                } else {
+                    updateLogicalPoint(logicalPointsList[port]!!, 0.0)
+                    relayStages.remove(MyStatHpuRelayMapping.CHANGE_OVER_B_HEATING.name)
                 }
             }
 

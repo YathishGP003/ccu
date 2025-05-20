@@ -20,6 +20,7 @@ import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationTypeConnect.OAO_DAMPER
 import a75f.io.logic.tuners.TunerUtil
+import a75f.io.logic.util.isOfflineMode
 import android.content.Context
 import java.lang.Double.max
 import kotlin.math.min
@@ -428,24 +429,42 @@ class AdvAhuEconAlgoHandler(private val connectEquip: ConnectModuleEquip) {
             "ccu_devsetting",
             Context.MODE_PRIVATE
         )
-        val isTestModeEnabled = Globals.getInstance().isWeatherTest()
+        val isTestModeEnabled = Globals.getInstance().isWeatherTest
+        val weatherTemp= hayStack.getExternalTemp()
+        val weatherHumidity= hayStack.getExternalHumidity()
 
-        externalTemp = if (connectEquip.outsideTemperature.pointExists()) {
-            connectEquip.outsideTemperature.readHisVal()
-        } else if (isTestModeEnabled) {
+        externalTemp = if (isTestModeEnabled) {
             sharedPreferences.getInt("outside_temp", 0).toDouble()
+        } else if (isOfflineMode() || weatherTemp.toInt() == 0) {
+            //falling back to local sensor value
+            if (connectEquip.outsideTemperature.pointExists()) {
+                CcuLog.d(L.TAG_CCU_OAO, "Outside temperature is not available in weather service or CCU is in offline mode , falling back to local sensor OAT value")
+                connectEquip.outsideTemperature.readHisVal()
+            } else {
+                weatherTemp
+            }
         } else {
-            hayStack.externalTemp
+            weatherTemp
         }
 
-        externalHumidity = if (connectEquip.outsideHumidity.pointExists()) {
-            connectEquip.outsideHumidity.readHisVal()
-        } else if (isTestModeEnabled) {
+        externalHumidity = if (isTestModeEnabled) {
             sharedPreferences.getInt("outside_humidity", 0).toDouble()
-        } else {
-            hayStack.externalHumidity
-        }
+        } else if (isOfflineMode() || weatherHumidity.toInt() == 0) {
+            //falling back to local sensor value
+            if (connectEquip.outsideHumidity.pointExists()) {
+                CcuLog.d(L.TAG_CCU_OAO, "Outside temperature is not available in weather service or CCU is in offline mode , falling back to local sensor humidity  value")
+                connectEquip.outsideHumidity.readHisVal()
+            } else {
+                weatherHumidity
+            }
 
+        } else {
+            weatherHumidity
+        }
+        CcuLog.d(
+            L.TAG_CCU_OAO,
+            "Final  value externalTemp $externalTemp externalHumidity $externalHumidity"
+        )
         val economizingToMainCoolingLoopMap: Double =
             connectEquip.economizingToMainCoolingLoopMap.readPriorityVal()
 

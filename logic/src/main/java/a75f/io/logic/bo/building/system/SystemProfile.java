@@ -32,6 +32,7 @@ import a75f.io.domain.api.PhysicalPoint;
 import a75f.io.domain.devices.CCUDevice;
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip;
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip;
+import a75f.io.domain.equips.ConnectModuleEquip;
 import a75f.io.domain.logic.CCUBaseConfigurationBuilder;
 import a75f.io.domain.logic.CCUDeviceBuilder;
 import a75f.io.domain.logic.DiagEquipConfigurationBuilder;
@@ -802,7 +803,15 @@ public abstract class SystemProfile
     }
     
     public double getOutsideAirTemp(CCUHsApi hayStack) {
-        double outsideAirTemp = hayStack.readHisValByQuery("system and outside and temp and not lockout");
+        double outsideAirTemp = hayStack.readHisValByQuery("system and outside and temp and not lockout and  not connectModule");
+
+        ConnectModuleEquip connectModuleEquip = getConnectEquip();
+        //We could be here when weather API fails or the device is offline
+        // if connect module OAO is paired ,sending the connect module outside temp value for lockout calculation
+        if (outsideAirTemp == 0 && connectModuleEquip != null && connectModuleEquip.getEnableOutsideAirOptimization().readPriorityVal() == 1.0) {
+            return connectModuleEquip.getOutsideTemperature().readHisVal();
+        }
+
         if (outsideAirTemp == 0 && ccu().oaoProfile != null) {
             //We could be here when weather API fails or the device is offline and oao is paired.
             //Try to read LocalOAT fed by the thermistor.

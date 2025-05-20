@@ -295,6 +295,10 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
                 if (progressbar.isShown()) {
                     progressbar.setVisibility(View.GONE);
                 }
+            } else {
+                if (!mainWifiObj.isWifiEnabled()) {
+                    progressbar.setVisibility(View.GONE);
+                }
             }
 
             wifiListAdapter.updateData(wifinetworks);

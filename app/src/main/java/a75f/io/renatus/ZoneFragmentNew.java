@@ -148,6 +148,7 @@ import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.handler.UpdateEntityHandler;
 import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants;
+import a75f.io.renatus.anrwatchdog.ANRHandler;
 import a75f.io.renatus.bacnet.GridSpacingItemDecoration;
 import a75f.io.renatus.bacnet.ZoneRecyclerBacnetParamAdapter;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvZoneViewKt;
@@ -872,6 +873,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         isZoneViewReady = true;
         CCUHsApi.getInstance().setCcuReady();
         zoneLoadTextView.setVisibility(View.GONE);
+        if (ANRHandler.isAnrWatchdogEnabled()) {
+            //Configure ANR Watchdog with a delay so that app startup UI load does not trigger unwanted ANRs.
+            new Handler(Looper.getMainLooper()).postDelayed(ANRHandler::configureANRWatchdog, 10000);
+        }
         if(PreferenceUtil.getIsCcuLaunched()) {
             Toast.makeText(getContext(), "CCU Ready", Toast.LENGTH_SHORT).show();
             CCUUtils.setCCUReadyProperty("true");

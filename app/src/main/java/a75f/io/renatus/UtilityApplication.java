@@ -199,9 +199,6 @@ public abstract class UtilityApplication extends Application implements Globals.
         cache.restoreOtaRequests(context);
         CCUUtils.setCCUReadyProperty("false");
         registerEthernetListener();
-        if (ANRHandler.isAnrWatchdogEnabled()) {
-            ANRHandler.configureANRWatchdog();
-        }
         checkAndServerStatus();
         DashboardHandler.Companion.setDashboardListener(dashboardListener);
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");

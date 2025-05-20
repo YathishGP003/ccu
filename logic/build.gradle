@@ -94,7 +94,7 @@ android {
             buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.dev.service.75f.io/version/getDetails\"'
             buildConfigField "String", 'VERSION_MANAGEMENT_API_BASE', '\"https://version-management-api.dev.service.75f.io/\"'
             buildConfigField "String", 'SEQUENCER_API_BASE', '\"https://seq-runner.dev.service.75f.io/\"'
-            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api-75f-service-dev.azurewebsites.net/site/preconfig/\"'
+            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api.dev.service.75f.io/site/preconfig/\"'
 
             String env = "dev"
             buildHealthAndInfoUrls(baseUrls, env, delegate)
@@ -112,7 +112,7 @@ android {
             buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.qa.service.75f.io/version/getDetails\"'
             buildConfigField "String", 'VERSION_MANAGEMENT_API_BASE', '\"https://version-management-api.qa.service.75f.io/\"'
             buildConfigField "String", 'SEQUENCER_API_BASE', '\"https://seq-runner.qa.service.75f.io/\"'
-            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api-75f-service-qa.azurewebsites.net/site/preconfig/\"'
+            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api.qa.service.75f.io/site/preconfig/\"'
             minifyEnabled false
 
             String env = "qa"
@@ -132,7 +132,7 @@ android {
             buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.qa.service.75f.io/version/getDetails\"'
             buildConfigField "String", 'VERSION_MANAGEMENT_API_BASE', '\"https://version-management-api.qa.service.75f.io/\"'
             buildConfigField "String", 'SEQUENCER_API_BASE', '\"https://seq-runner.qa.service.75f.io/\"'
-            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api-75f-service-qa.azurewebsites.net/site/preconfig/\"'
+            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api.qa.service.75f.io/site/preconfig/\"'
             minifyEnabled false
 
             String env = "qa"
@@ -152,7 +152,7 @@ android {
             buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.carrier.service.75f.io//version/getDetails\"'
             buildConfigField "String", 'VERSION_MANAGEMENT_API_BASE', '\"https://version-management-api.carrier.service.75f.io/\"'
             buildConfigField "String", 'SEQUENCER_API_BASE', '\"https://seq-runner.carrier.service.75f.io/\"'
-            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api-carrier-service.azurewebsites.net/site/preconfig/\"'
+            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api.carrier.service.75f.io/site/preconfig/\"'
             minifyEnabled false
 
             String env = "carrier"
@@ -172,7 +172,7 @@ android {
             buildConfigField "String", 'GATEWAY_API_BASE', '\"https://gateway-apis.staging.service.75f.io/\"'
             buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global-staging\"'
             buildConfigField "String", 'SEQUENCER_API_BASE', '\"https://seq-runner.staging.service.75f.io/\"'
-            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api-75f-service-staging.azurewebsites.net/site/preconfig/\"'
+            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api.staging.service.75f.io/site/preconfig/\"'
             minifyEnabled false
 
             String env = "staging"
@@ -195,7 +195,7 @@ android {
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
             buildConfigField "String", 'SEQUENCER_API_BASE', '\"https://seq-runner.prod.service.75f.io/\"'
-            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api-75f-service-qa.azurewebsites.net/site/preconfig/\"'
+            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api.qa.service.75f.io/site/preconfig/\"'
 
             String env = "prod"
             buildHealthAndInfoUrls(baseUrls, env, delegate)
@@ -217,7 +217,7 @@ android {
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
             buildConfigField "String", 'SEQUENCER_API_BASE', '\"seq-runner.qa.service.75f.io/\"'
-            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api-75f-service-qa.azurewebsites.net/site/preconfig/\"'
+            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api.qa.service.75f.io/site/preconfig/\"'
 
             String env = "daikin"
             buildHealthAndInfoUrls(baseUrls, env, delegate)
@@ -235,7 +235,7 @@ android {
             buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.airoverse.service.75f.io/version/getDetails\"'
             buildConfigField "String", 'VERSION_MANAGEMENT_API_BASE', '\"https://version-management-api.airoverse.service.75f.io/\"'
             buildConfigField "String", 'SEQUENCER_API_BASE', '\"https://seq-runner.airoverse.service.75f.io/\"'
-            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api-75f-service-qa.azurewebsites.net/site/preconfig/\"'
+            buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api.qa.service.75f.io/site/preconfig/\"'
             minifyEnabled false
 
             String env = "airoverse"

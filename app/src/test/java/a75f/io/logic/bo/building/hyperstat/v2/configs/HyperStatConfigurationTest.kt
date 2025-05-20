@@ -2,7 +2,11 @@ package a75f.io.logic.bo.building.hyperstat.v2.configs
 
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
+import io.seventyfivef.domainmodeler.client.ModelTagDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
+import io.seventyfivef.domainmodeler.common.Version
+import io.seventyfivef.domainmodeler.common.point.ModelAssociation
 import org.junit.Test
 
 /**
@@ -13,7 +17,7 @@ class HyperStatConfigurationTest {
 
 
     private fun getCpuConfig(): CpuConfiguration {
-        val dummyModel = SeventyFiveFProfileDirective("", "", "", emptySet(), emptySet(), emptyList())
+        val dummyModel = SeventyFiveFProfileDirective(id = "", domainName = "", name = "",  "", emptySet(), emptySet(), emptyList())
         val cpuConfiguration = CpuConfiguration(1000, NodeType.HYPER_STAT.name, 0, "", "", ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT, dummyModel)
         cpuConfiguration.getDefaultConfiguration()
         cpuConfiguration.relay1Enabled.enabled = true

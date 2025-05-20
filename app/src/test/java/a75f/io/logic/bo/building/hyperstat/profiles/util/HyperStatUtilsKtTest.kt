@@ -15,9 +15,8 @@ import org.junit.Test
 
 class HyperStatUtilsKtTest {
 
-
     private fun getCpuConfig(): CpuConfiguration {
-        val dummyModel = SeventyFiveFProfileDirective("", "", "", emptySet(), emptySet(), emptyList())
+        val dummyModel = SeventyFiveFProfileDirective(id = "", domainName = "", name = "",  "", emptySet(), emptySet(), emptyList())
         val cpuConfiguration = CpuConfiguration(1000, NodeType.HYPER_STAT.name, 0, "", "", ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT, dummyModel)
         cpuConfiguration.getDefaultConfiguration()
         cpuConfiguration.relay1Enabled.enabled = true

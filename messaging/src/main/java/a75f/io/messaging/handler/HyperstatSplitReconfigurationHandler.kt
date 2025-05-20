@@ -11,7 +11,6 @@ import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
-import a75f.io.domain.logic.PointBuilderConfig
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
@@ -203,8 +202,6 @@ class HyperstatSplitReconfigurationHandler {
                 deviceDis
             )
 
-            addLinearFanLowMedHighPoints(equipId, hayStack.site!!.id, equipDis, hayStack,
-                profileConfiguration, equipModel)
             correctSensorBusTempPoints(profileConfiguration, hayStack)
             mapSensorBusPressureLogicalPoint(profileConfiguration, equipId, hayStack)
             setOutputTypes(profileConfiguration, hayStack)
@@ -234,178 +231,6 @@ class HyperstatSplitReconfigurationHandler {
             }
         }
 
-        /*
-            analog1FanLow, etc. points require a multi-dependency. They need to be created when the
-            corresponding analog output is mapped to either Linear Fan (1) or Staged Fan (4).
-
-            Framework doesn't support this yet. So these points are configured in framework to create only
-            when AO is mapped to Staged Fan. If an AO mapped to Linear Fan, we create the point manually here.
-         */
-        fun addLinearFanLowMedHighPoints(
-            equipId : String,
-            siteRef : String,
-            equipDis : String,
-            hayStack: CCUHsApi,
-            profileConfiguration: HyperStatSplitCpuProfileConfiguration,
-            equipModel: SeventyFiveFProfileDirective
-        ) {
-            if (profileConfiguration.analogOut1Enabled.enabled &&
-                profileConfiguration.analogOut1Association.associationVal == CpuControlType.LINEAR_FAN.ordinal
-            ) {
-
-                val equipBuilder = ProfileEquipBuilder(hayStack)
-
-                val fanLowDef = equipModel.points.find { it.domainName == DomainName.analog1FanLow }
-                fanLowDef?.run {
-                    val fanLowId = equipBuilder.createPoint(
-                        PointBuilderConfig(
-                            this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
-                        )
-                    )
-                    hayStack.writeDefaultValById(fanLowId, profileConfiguration.analogOut1Voltage.linearFanAtFanLow.currentVal)
-                }
-
-                val fanMediumDef = equipModel.points.find { it.domainName == DomainName.analog1FanMedium }
-                fanMediumDef?.run {
-                    val fanMediumId = equipBuilder.createPoint(
-                        PointBuilderConfig(
-                            this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
-                        )
-                    )
-                    hayStack.writeDefaultValById(fanMediumId, profileConfiguration.analogOut1Voltage.linearFanAtFanMedium.currentVal)
-                }
-
-                val fanHighDef = equipModel.points.find { it.domainName == DomainName.analog1FanHigh }
-                fanHighDef?.run {
-                    val fanHighId = equipBuilder.createPoint(
-                        PointBuilderConfig(
-                            this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
-                        )
-                    )
-                    hayStack.writeDefaultValById(fanHighId, profileConfiguration.analogOut1Voltage.linearFanAtFanHigh.currentVal)
-                }
-
-            }
-
-            if (profileConfiguration.analogOut2Enabled.enabled &&
-                profileConfiguration.analogOut2Association.associationVal == CpuControlType.LINEAR_FAN.ordinal
-            ) {
-
-                val equipBuilder = ProfileEquipBuilder(hayStack)
-
-                val fanLowDef = equipModel.points.find { it.domainName == DomainName.analog2FanLow }
-                fanLowDef?.run {
-                    val fanLowId = equipBuilder.createPoint(
-                        PointBuilderConfig(
-                            this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
-                        )
-                    )
-                    hayStack.writeDefaultValById(fanLowId, profileConfiguration.analogOut2Voltage.linearFanAtFanLow.currentVal)
-                }
-
-                val fanMediumDef = equipModel.points.find { it.domainName == DomainName.analog2FanMedium }
-                fanMediumDef?.run {
-                    val fanMediumId = equipBuilder.createPoint(
-                        PointBuilderConfig(
-                            this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
-                        )
-                    )
-                    hayStack.writeDefaultValById(fanMediumId, profileConfiguration.analogOut2Voltage.linearFanAtFanMedium.currentVal)
-                }
-
-                val fanHighDef = equipModel.points.find { it.domainName == DomainName.analog2FanHigh }
-                fanHighDef?.run {
-                    val fanHighId = equipBuilder.createPoint(
-                        PointBuilderConfig(
-                            this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
-                        )
-                    )
-                    hayStack.writeDefaultValById(fanHighId, profileConfiguration.analogOut2Voltage.linearFanAtFanHigh.currentVal)
-                }
-
-            }
-
-            if (profileConfiguration.analogOut3Enabled.enabled &&
-                profileConfiguration.analogOut3Association.associationVal == CpuControlType.LINEAR_FAN.ordinal
-            ) {
-
-                val equipBuilder = ProfileEquipBuilder(hayStack)
-
-                val fanLowDef = equipModel.points.find { it.domainName == DomainName.analog3FanLow }
-                fanLowDef?.run {
-                    val fanLowId = equipBuilder.createPoint(
-                        PointBuilderConfig(
-                            this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
-                        )
-                    )
-                    val defVal = profileConfiguration.analogOut3Voltage.linearFanAtFanLow.currentVal
-                    hayStack.writeDefaultValById(fanLowId, defVal)
-                }
-
-                val fanMediumDef = equipModel.points.find { it.domainName == DomainName.analog3FanMedium }
-                fanMediumDef?.run {
-                    val fanMediumId = equipBuilder.createPoint(
-                        PointBuilderConfig(
-                            this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
-                        )
-                    )
-                    val defVal = profileConfiguration.analogOut3Voltage.linearFanAtFanMedium.currentVal
-                    hayStack.writeDefaultValById(fanMediumId, defVal)
-                }
-
-                val fanHighDef = equipModel.points.find { it.domainName == DomainName.analog3FanHigh }
-                fanHighDef?.run {
-                    val fanHighId = equipBuilder.createPoint(
-                        PointBuilderConfig(
-                            this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
-                        )
-                    )
-                    val defVal = profileConfiguration.analogOut3Voltage.linearFanAtFanHigh.currentVal
-                    hayStack.writeDefaultValById(fanHighId, defVal)
-                }
-
-            }
-
-            if (profileConfiguration.analogOut4Enabled.enabled &&
-                profileConfiguration.analogOut4Association.associationVal == CpuControlType.LINEAR_FAN.ordinal
-            ) {
-
-                val equipBuilder = ProfileEquipBuilder(hayStack)
-
-                val fanLowDef = equipModel.points.find { it.domainName == DomainName.analog4FanLow }
-                fanLowDef?.run {
-                    val fanLowId = equipBuilder.createPoint(
-                        PointBuilderConfig(
-                            this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
-                        )
-                    )
-                    hayStack.writeDefaultValById(fanLowId, profileConfiguration.analogOut4Voltage.linearFanAtFanLow.currentVal)
-                }
-
-                val fanMediumDef = equipModel.points.find { it.domainName == DomainName.analog4FanMedium }
-                fanMediumDef?.run {
-                    val fanMediumId = equipBuilder.createPoint(
-                        PointBuilderConfig(
-                            this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
-                        )
-                    )
-                    hayStack.writeDefaultValById(fanMediumId, profileConfiguration.analogOut4Voltage.linearFanAtFanMedium.currentVal)
-                }
-
-                val fanHighDef = equipModel.points.find { it.domainName == DomainName.analog4FanHigh }
-                fanHighDef?.run {
-                    val fanHighId = equipBuilder.createPoint(
-                        PointBuilderConfig(
-                            this, profileConfiguration, equipId, siteRef, hayStack.timeZone, equipDis
-                        )
-                    )
-                    hayStack.writeDefaultValById(fanHighId, profileConfiguration.analogOut4Voltage.linearFanAtFanHigh.currentVal)
-                }
-
-            }
-
-        }
-
         fun mapSensorBusPressureLogicalPoint(
             config: HyperStatSplitProfileConfiguration,
             equipRef: String,
@@ -425,7 +250,7 @@ class HyperstatSplitReconfigurationHandler {
         }
 
         fun correctSensorBusTempPoints(config: HyperStatSplitProfileConfiguration, hayStack: CCUHsApi) {
-            val device = hayStack.read("device and addr == \"" + config.nodeAddress + "\"")
+            val device = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
 
             if (!isAnySensorBusMapped(config, CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY)) {
                 val deviceOATMap = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.outsideAirTempSensor + "\"")
@@ -466,7 +291,7 @@ class HyperstatSplitReconfigurationHandler {
         }
 
         fun setOutputTypes(config: HyperStatSplitProfileConfiguration, hayStack: CCUHsApi) {
-            val device = hayStack.read("device and addr == \"" + config.nodeAddress + "\"")
+            val device = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
 
             val relay1 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay1 + "\"")
             val relay1Point = RawPoint.Builder().setHDict(relay1).setType("Relay N/O").setEnabled(config.relay1Enabled.enabled)

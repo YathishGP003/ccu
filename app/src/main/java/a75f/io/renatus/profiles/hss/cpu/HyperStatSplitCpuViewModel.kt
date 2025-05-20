@@ -153,9 +153,6 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
     fun isCoolStage1RelayEnabled() = isAnyRelayMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuRelayType.COOLING_STAGE1)
     fun isCoolStage2RelayEnabled() = isAnyRelayMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuRelayType.COOLING_STAGE2)
     fun isCoolStage3RelayEnabled() = isAnyRelayMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuRelayType.COOLING_STAGE3)
-    fun isFanLowRelayEnabled() = isAnyRelayMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuRelayType.FAN_LOW_SPEED)
-    fun isFanMediumRelayEnabled() = isAnyRelayMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuRelayType.FAN_MEDIUM_SPEED)
-    fun isFanHighRelayEnabled() = isAnyRelayMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuRelayType.FAN_HIGH_SPEED)
 
     fun isAO1MappedToFan() : Boolean {
         return this.viewState.value.analogOut1Enabled &&
@@ -377,14 +374,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
             )
             CoroutineScope(highPriorityDispatcher).launch {
                 runBlocking {
-                    HyperstatSplitReconfigurationHandler.Companion.addLinearFanLowMedHighPoints(
-                        equipId,
-                        hayStack.site!!.id,
-                        equipDis,
-                        hayStack,
-                        profileConfiguration as HyperStatSplitCpuProfileConfiguration,
-                        equipModel
-                    )
+
                     HyperstatSplitReconfigurationHandler.Companion.correctSensorBusTempPoints(
                         profileConfiguration,
                         hayStack
@@ -437,14 +427,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
             )
             CoroutineScope(highPriorityDispatcher).launch {
                 runBlocking {
-                    HyperstatSplitReconfigurationHandler.Companion.addLinearFanLowMedHighPoints(
-                        equipId,
-                        hayStack.site!!.id,
-                        equipDis,
-                        hayStack,
-                        profileConfiguration as HyperStatSplitCpuProfileConfiguration,
-                        equipModel
-                    )
+
                     HyperstatSplitReconfigurationHandler.Companion.correctSensorBusTempPoints(
                         profileConfiguration,
                         hayStack
@@ -528,10 +511,10 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
     }
 
     override fun hasUnsavedChanges() : Boolean {
-        try {
-            return !HyperStatSplitCpuState.fromProfileConfigToState(profileConfiguration as HyperStatSplitCpuProfileConfiguration).equalsViewState(viewState.value as HyperStatSplitCpuState)
+        return try {
+            !HyperStatSplitCpuState.fromProfileConfigToState(profileConfiguration as HyperStatSplitCpuProfileConfiguration).equalsViewState(viewState.value as HyperStatSplitCpuState)
         } catch (e: Exception) {
-            return false
+            false
         }
     }
 

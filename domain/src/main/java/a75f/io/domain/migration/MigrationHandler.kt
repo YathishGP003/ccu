@@ -12,6 +12,7 @@ import a75f.io.domain.api.Domain.getSystemEquipByDomainName
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.api.Equip
+import a75f.io.domain.api.toInt
 import a75f.io.domain.config.DefaultProfileConfiguration
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ExternalAhuConfiguration
@@ -23,6 +24,8 @@ import a75f.io.domain.logic.EquipBuilderConfig
 import a75f.io.domain.logic.PointBuilderConfig
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.logic.TunerEquipBuilder
+import a75f.io.domain.logic.applyLogicalOperations
+import a75f.io.domain.logic.evaluateConfiguration
 import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.ModelCache
 import a75f.io.logger.CcuLog
@@ -36,7 +39,9 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
 import io.seventyfivef.domainmodeler.common.point.AssociationConfiguration
 import io.seventyfivef.domainmodeler.common.point.ComparisonType
+import io.seventyfivef.domainmodeler.common.point.Condition
 import io.seventyfivef.domainmodeler.common.point.DependentConfiguration
+import io.seventyfivef.domainmodeler.common.point.Operator
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
 
 /**
@@ -57,7 +62,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             CcuLog.printLongMessage(Domain.LOG_TAG,
                 "Device equip model upgrade detected : Run migration to $newModel. modelId: ${newModel.id} "
             )
-            migrateDeviceModel(entityData, oldModel, newModel, siteRef)
+            migrateDeviceModel(entityData, oldModel, newModel)
 
         } else {
             val equips: List<Equip>
@@ -94,11 +99,10 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
         }
     }
 
-    fun migrateDeviceModel(
+    private fun migrateDeviceModel(
         entityData: EntityConfiguration,
         oldModel: ModelDirective,
-        newModel: ModelDirective,
-        siteRef: String
+        newModel: ModelDirective
     ) {
         val devices: List<Device> =
             if (Domain.readEquip(newModel.id)["roomRef"].toString().replace("@","") == "SYSTEM") {
@@ -121,8 +125,8 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
         }
         if (devices.isNotEmpty()) {
             addDeviceEntityData(entityData.tobeAdded, newModel, devices)
-            removeDeviceEntityData(entityData.tobeDeleted, oldModel, devices, siteRef)
-            updateDeviceEntityData(entityData.tobeUpdated, newModel, devices, siteRef)
+            removeDeviceEntityData(entityData.tobeDeleted, oldModel, devices)
+            updateDeviceEntityData(entityData.tobeUpdated, newModel, devices)
         }
 
     }
@@ -174,8 +178,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
     private fun updateDeviceEntityData(
         tobeUpdated: MutableList<EntityConfig>,
         newModel: ModelDirective,
-        devices: List<Device>,
-        siteRef: String
+        devices: List<Device>
     ){
         devices.forEach { device ->
             CcuLog.d(Domain.LOG_TAG, "Update device Id: ${device.id}, domainName: ${device.domainName}")
@@ -188,7 +191,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             updateRef(deviceEntity, profileConfiguration)
             val entityMapper = EntityMapper(modelDirective as SeventyFiveFProfileDirective)
             val deviceBuilder = DeviceBuilder(haystack, entityMapper)
-            var devicePoints = haystack.readAllEntities("point and deviceRef == \"${device.id}\"")
+            val devicePoints = haystack.readAllEntities("point and deviceRef == \"${device.id}\"")
 
             tobeUpdated.forEach { diffDomain ->
                 val modelPointDef = newModel.points.find { it.domainName == diffDomain.domainName }
@@ -218,8 +221,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
     private fun removeDeviceEntityData(
         tobeDeleted: MutableList<EntityConfig>,
         oldModel: ModelDirective,
-        devices: List<Device>,
-        siteRef: String
+        devices: List<Device>
     ) {
         if(tobeDeleted.isEmpty()) return
         devices.forEach { device ->
@@ -302,6 +304,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
     private fun addEntityData(tobeAdded: MutableList<EntityConfig>, newModel: ModelDirective,
                               equips: List<Equip>, siteRef : String) {
         val equipBuilder = ProfileEquipBuilder (haystack)
+        val entityMapper = EntityMapper(newModel as SeventyFiveFProfileDirective)
          // need to revisit this line
         tobeAdded.forEach { diffDomain ->
             // updated Equip
@@ -331,7 +334,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                 updateRef(equipMap, profileConfiguration)
                 val modelPointDef = newModel.points.find { it.domainName == diffDomain.domainName }
                 modelPointDef?.run {
-                    if (toBeAddedForEquip(modelPointDef, equip.id, false)) {
+                    if (toBeAddedForEquip(modelPointDef, equip.id, profileConfiguration,false, entityMapper)) {
                         equipBuilder.createPoint(
                             PointBuilderConfig(modelPointDef, profileConfiguration, equip.id, siteRef, haystack.timeZone, equipMap["dis"].toString())
                         )
@@ -363,8 +366,10 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
 
     private fun updateEntityData(tobeUpdate: MutableList<EntityConfig>, newModel: ModelDirective,
                                  equips: List<Equip>, siteRef: String) {
+        Log.d(Domain.LOG_TAG, "updateEntityData called")
         val equipBuilder = ProfileEquipBuilder (haystack)
         tobeUpdate.forEach { diffDomain ->
+            Log.d(Domain.LOG_TAG, "loop item diffDomain ${diffDomain.domainName} ${newModel.domainName}")
             // updated Equip
             if (diffDomain.domainName == newModel.domainName) {
                 equips.forEach {
@@ -385,13 +390,16 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                     }
                 }
             }
-            equips.forEach {equip ->
+            equips.forEach equips@{equip ->
+                Log.d(Domain.LOG_TAG, "loop equip item diffDomain ${equip.domainName} ")
                 val modelPointDef = newModel.points.find { it.domainName == diffDomain.domainName }
                 val equipMap = haystack.readMapById(equip.id)
                 val profileConfiguration = getProfileConfig(equipMap["profile"].toString())
                 updateRef(equipMap, profileConfiguration)
                 modelPointDef?.run {
-                    if (toBeAddedForEquip(modelPointDef, equip.id, true)) {
+                   /* val status = toBeAddedForEquip(modelPointDef, equip.id, profileConfiguration, true, entityMapper)
+                    Log.d(Domain.LOG_TAG, "eligible to update $status")
+                    if (status) {*/
                         val hayStackPoint = equipBuilder.buildPoint(
                             PointBuilderConfig(
                                 modelPointDef,
@@ -402,10 +410,12 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                                 equipMap["dis"].toString()
                             )
                         )
+                        Log.d(Domain.LOG_TAG, "point constructed ${hayStackPoint.domainName} ")
                         val point = CCUHsApi.getInstance()
                             .readEntity("point and domainName == \"${diffDomain.domainName}\" and equipRef == \"${equip.id}\"")
                         if(point["id"]==null) {
-                            return@forEach
+                            Log.d(Domain.LOG_TAG, "point not found: $diffDomain.domainName")
+                            return@equips
                         }
                         Log.d(Domain.LOG_TAG, "updated haystack point: $hayStackPoint")
                         if (Domain.readEquip(newModel.id)["roomRef"].toString().replace("@","") == "SYSTEM") {
@@ -426,7 +436,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                             CcuLog.d(Domain.LOG_TAG, "Update point Association is failed : " + point["id"].toString())
                             e.printStackTrace()
                         }
-                    }
+
                 }
             }
         }
@@ -448,7 +458,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                     "point association updated: ${modelPointDef.domainName} " +
                             "logicalPoint.id: $logicalPointId\" " +
                             "physicalPoint: ${physicalPoint.id} " +
-                            "device: ${device}"
+                            "device: $device"
                 )
             }
         }
@@ -460,7 +470,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             "dabExternalAHUController", "vavExternalAHUController" -> {
                 val profile = ExternalAhuConfiguration(profileType)
                 profile
-            }else -> {
+            } else -> {
                 /*
                  This is not a robust solution, but it works for now.
                  Right now, existing configuration classes reside in the :logic package and aren't accessible here.
@@ -488,40 +498,58 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
 
    /* isDynamicSensorRequired is required to decide whether to add/update a dynamic sensor point or not
        While Adding we never add DYNAMIC_SENSOR points; they are created from the device layer, but updating the point we can allow to update the dynamic sensor points*/
-    private fun toBeAddedForEquip(pointDef : ModelPointDef, equipRef : String, isDynamicSensorRequired : Boolean) : Boolean {
+   private fun toBeAddedForEquip(
+       pointDef : ModelPointDef, equipRef : String, profileConfiguration: ProfileConfiguration,
+       isDynamicSensorRequired : Boolean, entityMapper: EntityMapper) : Boolean {
 
-        if (pointDef is SeventyFiveFProfilePointDef) {
-            return when (pointDef.configuration.configType) {
-                PointConfiguration.ConfigType.BASE -> true // always add BASE points
-                PointConfiguration.ConfigType.DEPENDENT -> isDependentPointEnabled(pointDef, equipRef)
-                PointConfiguration.ConfigType.DYNAMIC_SENSOR -> isDynamicSensorRequired // never add DYNAMIC_SENSOR points; they are created from the device layer
-                PointConfiguration.ConfigType.ASSOCIATED -> isAssociatedPointEnabled(pointDef)
-                PointConfiguration.ConfigType.ASSOCIATION -> isAssociationPointEnabled(pointDef, equipRef)
-            }
+       if (pointDef is SeventyFiveFProfilePointDef) {
+           return when (pointDef.configuration.configType) {
+               PointConfiguration.ConfigType.BASE -> true // always add BASE points
+               PointConfiguration.ConfigType.DEPENDENT -> isDependentPointEnabled(
+                   pointDef,
+                   profileConfiguration,
+                   entityMapper
+               )
+               PointConfiguration.ConfigType.DYNAMIC_SENSOR -> isDynamicSensorRequired // never add DYNAMIC_SENSOR points; they are created from the device layer
+               PointConfiguration.ConfigType.ASSOCIATED -> isAssociatedPointEnabled()
+               PointConfiguration.ConfigType.ASSOCIATION -> isAssociationPointEnabled(pointDef, equipRef)
+           }
+       }
+
+       return true
+   }
+    private fun isDependentPointEnabled(
+        pointDef: SeventyFiveFProfilePointDef, configuration: ProfileConfiguration,
+        entityMapper: EntityMapper
+    ) : Boolean {
+
+        val currentPoint = pointDef.configuration as? DependentConfiguration ?: return false
+        val conditions = currentPoint.conditions
+        val operators = mutableListOf<Operator>()
+        val statusList = mutableListOf<Boolean>()
+
+        conditions.forEach { condition ->
+            val status = entityMapper.evaluationCondition(condition, configuration)
+            statusList.add(status)
+            operators.add(condition.operator)
         }
-
-        return true
+        val shouldAdd = applyLogicalOperations(statusList, operators)
+        return shouldAdd
     }
 
-    private fun isDependentPointEnabled(pointDef: SeventyFiveFProfilePointDef, equipRef : String) : Boolean {
-        // If a point is DEPENDENT, read the point it depends on from Haystack, then evaluate the config
-        val pointConfig = pointDef.configuration as DependentConfiguration
-        val configValue = haystack.readPointPriorityValByQuery("point and domainName == \"" + pointConfig.domainName + "\" and equipRef == \"" + equipRef + "\"")
-
-        if (configValue != null) {
-            return when (pointConfig.comparisonType) {
-                ComparisonType.EQUALS -> (pointConfig.value as Int) == configValue.toInt()
-                ComparisonType.NOT_EQUALS -> (pointConfig.value as Int) != configValue.toInt()
-                ComparisonType.GREATER_THAN -> (pointConfig.value as Int) > configValue.toInt()
-                ComparisonType.LESS_THAN -> (pointConfig.value as Int) < configValue.toInt()
-                ComparisonType.GREATER_THAN_OR_EQUAL_TO -> (pointConfig.value as Int) >= configValue.toInt()
-                ComparisonType.LESS_THAN_OR_EQUAL_TO -> (pointConfig.value as Int) <= configValue.toInt()
-            }
+    private fun isAssociatedConfigEnabled(enabledConfig: Condition, config: ProfileConfiguration): Boolean {
+        val configPoint = config.getEnableConfigs().find { it.domainName == enabledConfig.domainName }
+        if (configPoint != null) {
+            return evaluateConfiguration(
+                enabledConfig.comparisonType,
+                enabledConfig.value as Int,
+                configPoint.enabled.toInt()
+            )
         }
-        return true
+        return false
     }
 
-    private fun isAssociatedPointEnabled(pointDef: SeventyFiveFProfilePointDef) : Boolean {
+    private fun isAssociatedPointEnabled(): Boolean {
         /*  ASSOCIATED points should not be added as part of a migration.
             They are created only during configuration (when their domainName shows up in the enum of a created ASSOCIATION point).
          */
@@ -531,7 +559,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
     private fun isAssociationPointEnabled(pointDef: SeventyFiveFProfilePointDef, equipRef : String) : Boolean {
         // Expectation is that new ASSOCIATION points would not be added to a model that's already in production
         // But, if one appears, read the point it depends on from Haystack, then evaluate the config. Add only if it is enabled per the config.
-        val pointConfig = pointDef.configuration as AssociationConfiguration
+        val pointConfig = (pointDef.configuration as AssociationConfiguration).conditions.first()
         val configValue = haystack.readPointPriorityValByQuery("point and domainName == \"" + pointConfig.domainName + "\" and equipRef == \"" + equipRef + "\"")
 
         if (configValue != null) {

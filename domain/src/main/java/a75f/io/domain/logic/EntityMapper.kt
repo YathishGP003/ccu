@@ -13,9 +13,11 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.AssociationConfiguration
 import io.seventyfivef.domainmodeler.common.point.ComparisonType
+import io.seventyfivef.domainmodeler.common.point.Condition
 import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.DependentConfiguration
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
+import io.seventyfivef.domainmodeler.common.point.Operator
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
 
 
@@ -41,11 +43,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
                 entityConfiguration.tobeAdded.add(EntityConfig(newDomain))
             }
         }
-        getEnabledDependencies(configuration).forEach { newDomain ->
-            if (entityConfiguration.tobeAdded.find { it.domainName == newDomain } == null) {
-                entityConfiguration.tobeAdded.add(EntityConfig(newDomain))
-            }
-        }
+
         getMultiDependentPoints(configuration, entityConfiguration.tobeAdded).forEach { newDomain ->
             if (entityConfiguration.tobeAdded.find { it.domainName == newDomain } == null) {
                 entityConfiguration.tobeAdded.add(EntityConfig(newDomain))
@@ -107,8 +105,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
         //Get all association that are present in the profileConfig.
         getAssociationDefinitions().forEach { def ->
             val associationEnabled = isAssociationEnabled(def, profileConfiguration)
-            val profileConfig =
-                profileConfiguration.getAssociationConfigs().find { it.domainName == def.domainName }
+            val profileConfig = profileConfiguration.getAssociationConfigs().find { it.domainName == def.domainName }
 
             profileConfig?.let { associationConfig ->
                 if (associationEnabled) {
@@ -127,18 +124,16 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
 
     private fun isAssociationEnabled(pointDef : SeventyFiveFProfilePointDef,
                                      profileConfiguration: ProfileConfiguration) : Boolean {
-        //TODO- add to DM validation
-        val pointConfiguration = pointDef.configuration as AssociationConfiguration
-        val associationPointName = pointConfiguration.domainName
 
+        // conditions list will always have ony one element because it is association point
+        val conditionConfig = (pointDef.configuration as AssociationConfiguration).conditions.first()
         val baseConfig = profileConfiguration.getEnableConfigs()
-            .find { point -> point.domainName == associationPointName }
+            .find { point -> point.domainName == conditionConfig.domainName }
 
-        //TODO -index starts at 1 ?
         return baseConfig != null && evaluateConfiguration(
-                pointConfiguration.comparisonType,
-                pointConfiguration.value as Int, //TODO -index starts at 1 ?
-                baseConfig.enabled.toInt()
+            conditionConfig.comparisonType,
+            conditionConfig.value as Int,
+            baseConfig.enabled.toInt()
         )
     }
 
@@ -152,79 +147,113 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
         val enabledDependencies = mutableListOf<String>()
         //Get all association that are present in the profileConfig.
         getDependentPoints().forEach { def ->
-            val pointConfiguration = def.configuration as DependentConfiguration
-            val associationPointName = pointConfiguration.domainName
+            val currentPoint = def.configuration as? DependentConfiguration ?: return@forEach
+            val conditions = currentPoint.conditions
 
-            val baseEnableConfig = profileConfiguration.getEnableConfigs().find { point -> point.domainName == associationPointName }
-            if (baseEnableConfig != null && evaluateConfiguration(ComparisonType.EQUALS,
-                    pointConfiguration.value as Int,
-                    baseEnableConfig.enabled.toInt())) {
-                enabledDependencies.add(def.domainName)
+            val operators = mutableListOf<Operator>()
+            val statusList = mutableListOf<Boolean>()
+
+            conditions.forEach { condition ->
+                val status = evaluationCondition(condition, profileConfiguration)
+                statusList.add(status)
+                operators.add(condition.operator)
             }
 
-            val baseValueConfig = profileConfiguration.getValueConfigs().find { point -> point.domainName == associationPointName }
-            if (baseValueConfig != null && evaluateConfiguration(ComparisonType.EQUALS,
-                    pointConfiguration.value as Int,
-                    baseValueConfig.currentVal.toInt()
-            )) {
+            if (applyLogicalOperations(statusList, operators)) {
                 enabledDependencies.add(def.domainName)
             }
         }
         return enabledDependencies
     }
+
     private fun getMultiDependentPoints(configuration: ProfileConfiguration, pointsToAdd: MutableList<EntityConfig>): List<String> {
         val dynamicConfigs = mutableListOf<String>()
 
         getDependentPoints().forEach { def ->
-            val dynamicPoint = def.configuration as? DependentConfiguration ?: return@forEach
-            val dependentPoint = getPointByDomainName(dynamicPoint.domainName) ?: return@forEach
+            val currentPoint = def.configuration as? DependentConfiguration ?: return@forEach
+            val conditions = currentPoint.conditions
+            logIt("-------------------------------------------")
+            logIt("Checking dynamic point ${def.domainName}\n ( with conditions ${getDependencyLog(conditions)})")
 
-            val configType = dependentPoint.configuration.configType
-            if (configType != PointConfiguration.ConfigType.ASSOCIATION &&
-                configType != PointConfiguration.ConfigType.DEPENDENT &&
-                configType != PointConfiguration.ConfigType.ASSOCIATED) {
-                return@forEach
+            val operators = mutableListOf<Operator>()
+            val statusList = mutableListOf<Boolean>()
+
+            conditions.forEach { condition ->
+                val status = evaluationCondition(condition, configuration, pointsToAdd)
+                statusList.add(status)
+                operators.add(condition.operator)
             }
+            val shouldAdd = applyLogicalOperations(statusList, operators)
 
-            if (configType == PointConfiguration.ConfigType.ASSOCIATION &&
-                !isAssociatedConfigEnabled(dependentPoint, configuration)) {
-                return@forEach
-            }
-
-            val associationConfig = configuration.getAssociationConfigs().getConfig(dynamicPoint.domainName)
-            val shouldAdd =
-                when (configType) {
-                    PointConfiguration.ConfigType.ASSOCIATION -> {
-                        associationConfig?.associationVal?.let {
-                            evaluateConfiguration(dynamicPoint.comparisonType, dynamicPoint.value as Int, it)
-                        } ?: false
-                    }
-                    PointConfiguration.ConfigType.DEPENDENT -> {
-                    // TODO Revisit if it has any use case and check it for base config type
-                        val valueConfig = configuration.getValueConfigs().getConfig(dynamicPoint.domainName)
-                        valueConfig?.currentVal?.let {
-                            evaluateConfiguration(dynamicPoint.comparisonType, dynamicPoint.value as Int, it.toInt())
-                        } ?: false
-                    }
-                    PointConfiguration.ConfigType.ASSOCIATED -> {
-                        val isDependencyExist = pointsToAdd.find { it.domainName == dynamicPoint.domainName }
-                        isDependencyExist != null
-                    }
-                    else -> true
-                }
-
+            logIt("${def.domainName}  $statusList  $operators shouldAdd $shouldAdd")
             if (shouldAdd) {
                 dynamicConfigs.add(def.domainName)
-                logIt("added ${def.domainName}  > depends on  ${dependentPoint.domainName} & its Config $configType")
             }
-
             getEnumPointIfExist(def, configuration)?.let { enumPoint ->
-                dynamicConfigs.add(enumPoint)
-                logIt("Added Dynamic enum point $enumPoint")
+
+                if (!enumPoint.contentEquals("off", ignoreCase = true)
+                    && !enumPoint.contentEquals("on", ignoreCase = true)
+                    && !enumPoint.contentEquals("true", ignoreCase = true)
+                    && !enumPoint.contentEquals("false", ignoreCase = true)) {
+                    dynamicConfigs.add(enumPoint)
+                    logIt("Added Dynamic enum point $enumPoint")
+                }
+
             }
+            logIt("-------------------------------------------")
         }
         dynamicConfigs.addAll(getCustomPoints(configuration).map { it })
         return dynamicConfigs
+    }
+
+
+    fun evaluationCondition(condition: Condition, configuration: ProfileConfiguration, pointsToAdd: MutableList<EntityConfig> = mutableListOf()): Boolean {
+
+        logIt("evaluationCondition is ${condition.domainName} ${condition.dependentConfigType}")
+        return when (condition.dependentConfigType) {
+
+            PointConfiguration.ConfigType.BASE, PointConfiguration.ConfigType.DEPENDENT -> {
+
+                val findConfig = configuration.getEnableConfigs().find { point -> point.domainName == condition.domainName }
+                if (findConfig != null) {
+                    logIt("found in getEnableConfigs is ${findConfig.domainName} ${findConfig.enabled}")
+                    (evaluateConfiguration(condition.comparisonType, condition.value as Int, findConfig.enabled.toInt()))
+                } else {
+                    val valueConfig = configuration.getValueConfigs().find { point -> point.domainName == condition.domainName }
+                    logIt("found in getValueConfigs is ${valueConfig?.domainName} ${valueConfig?.currentVal}")
+                    if (valueConfig != null) {
+                        (evaluateConfiguration(condition.comparisonType, condition.value as Int, valueConfig.currentVal.toInt()))
+                    } else {
+                        logIt("dependency not found in getEnableConfigs or getValueConfigs")
+                        false
+                    }
+                }
+            }
+
+            PointConfiguration.ConfigType.ASSOCIATION -> {
+                logIt("condition ${condition.domainName} checking isAssociatedConfigEnabled")
+                if (isAssociatedConfigEnabled(condition, configuration)) {
+                    val associationConfig =
+                        configuration.getAssociationConfigs().getConfig(condition.domainName)
+                    associationConfig?.associationVal?.let {
+                        evaluateConfiguration(condition.comparisonType, condition.value as Int, it)
+                    } ?: false
+                } else {
+                    false
+                }
+            }
+
+            PointConfiguration.ConfigType.ASSOCIATED -> {
+                val isDependencyExist = pointsToAdd.find { it.domainName == condition.domainName }
+                isDependencyExist != null
+            }
+
+            PointConfiguration.ConfigType.DYNAMIC_SENSOR -> {
+                // TODO need to check how to handle dynamic sensor points
+                false
+            }
+
+        }
     }
 
     /**
@@ -267,18 +296,12 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
             val constraint = pointDef.valueConstraint as MultiStateConstraint
             val value = configuration.getConfigByDomainName(pointDef.domainName)
             logIt("${pointDef.domainName} : ${value?.javaClass?.simpleName}")
-
             if (value != null) {
-                when (value) {
-                    is ValueConfig -> {
-                        return (constraint.allowedValues[value.currentVal.toInt()].value)
-                    }
-                    is EnableConfig -> {
-                        return (constraint.allowedValues[value.enabled.toInt()].value)
-                    }
-                    is AssociationConfig -> {
-                        return constraint.allowedValues.find { it.index == value?.associationVal!! }?.value
-                    }
+                return when (value) {
+                    is ValueConfig -> constraint.allowedValues[value.currentVal.toInt()].value
+                    is EnableConfig -> constraint.allowedValues[value.enabled.toInt()].value
+                    is AssociationConfig -> constraint.allowedValues.find { it.index == value.associationVal }?.value
+                    else -> { null }
                 }
             }
         }
@@ -289,13 +312,24 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
     /**
      * Returns true if the associated config is enabled for dynamic points.
      */
-    private fun isAssociatedConfigEnabled(point: SeventyFiveFProfilePointDef, config: ProfileConfiguration): Boolean {
-        val dependency = point.configuration as AssociationConfiguration
-        val configPoint = config.getEnableConfigs().find { it.domainName == dependency.domainName }
+    private fun isAssociatedConfigEnabled(associationConfig: Condition, config: ProfileConfiguration): Boolean {
+        logIt("associationConfig checking ${associationConfig.domainName} ")
+        val dependPointDef = getPointByDomainName(associationConfig.domainName)
+        logIt("get association point def $dependPointDef")
+        val dependentConfig = (dependPointDef!!.configuration as? AssociationConfiguration)
+        logIt("get dependentConfig $dependentConfig")
+        val enabledConfig = dependentConfig?.conditions?.first()
+        logIt("associationConfig depends on this config ${enabledConfig?.domainName} ")
+
+        if (enabledConfig == null) {
+            return false
+        }
+        val configPoint = config.getEnableConfigs().find { it.domainName == enabledConfig.domainName }
+        logIt("finding in getEnableConfigs $dependentConfig")
         if (configPoint != null) {
             return evaluateConfiguration(
-                dependency.comparisonType,
-                dependency.value as Int,
+                enabledConfig.comparisonType,
+                enabledConfig.value as Int,
                 configPoint.enabled.toInt()
             )
         }
@@ -313,7 +347,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
         //Linked profile point is an association point. Attach the link if it is enabled.
         val associationPoint = associationPoints.find {
             val associationConfig = it.configuration as AssociationConfiguration
-            profilePointWithPhysicalMapping.domainName == associationConfig.domainName && pointIsPresentInConfig(it, profileConfiguration)
+            profilePointWithPhysicalMapping.domainName == associationConfig.conditions.first().domainName && pointIsPresentInConfig(it, profileConfiguration)
         }
 
         if (associationPoint != null) {
@@ -361,6 +395,13 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
         } else {
             CcuLog.i(Domain.LOG_TAG, msg)
         }
+    }
+    private fun getDependencyLog(condition: Set<Condition>): String {
+        val log = StringBuilder()
+        condition.forEach {
+            log.append("\n${it.domainName} ${it.comparisonType} ${it.value} ${it.dependentConfigType} ${it.operator}")
+        }
+        return log.toString()
     }
 
 }

@@ -790,7 +790,7 @@ public class ScheduleManager {
         }
 
 
-        if (systemOccupancy == UNOCCUPIED || systemOccupancy == DEMAND_RESPONSE_UNOCCUPIED) {
+        if (updatedSystemOccupancy == UNOCCUPIED || updatedSystemOccupancy == DEMAND_RESPONSE_UNOCCUPIED) {
             nextOccupiedInfo = ScheduleUtil.getNextOccupied(occupiedHashMap);
             if (nextOccupiedInfo != null) {
                 CcuLog.i(TAG_CCU_SCHEDULER, "Next Occupied : "+nextOccupiedInfo);
@@ -802,11 +802,11 @@ public class ScheduleManager {
             nextOccupiedInfo = ScheduleUtil.getNextOccupied(occupiedHashMap);
             updatedSystemOccupancy = ScheduleUtil.getDemandResponseMode(ahuServedEquipsOccupancy);
         }
-        if (systemOccupancy == UNOCCUPIED && ScheduleUtil.isAnyZoneForcedOccupied(ahuServedEquipsOccupancy)) {
+        if (updatedSystemOccupancy == UNOCCUPIED && ScheduleUtil.isAnyZoneForcedOccupied(ahuServedEquipsOccupancy)) {
             updatedSystemOccupancy = FORCEDOCCUPIED;
         }
         
-        if (systemOccupancy == UNOCCUPIED && ScheduleUtil.isAnyZoneAutoForcedOccupied(ahuServedEquipsOccupancy)) {
+        if (updatedSystemOccupancy == UNOCCUPIED && ScheduleUtil.isAnyZoneAutoForcedOccupied(ahuServedEquipsOccupancy)) {
             updatedSystemOccupancy = AUTOFORCEOCCUPIED;
         }
 

@@ -11,10 +11,17 @@ import a75f.io.logic.L
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.APDU_SEGMENT_TIMEOUT
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.APDU_TIMEOUT
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.APPLICATION_SOFTWARE_VERSION
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_BBMD_CONFIGURATION
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_BBMD
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_FD
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_NORMAL
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_HEART_BEAT
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_ID
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_CONFIGURATION_TYPE
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_START
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_STOP
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.DAYLIGHT_SAVING_STATUS
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.DESCRIPTION
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.FIRMWARE_REVISION
@@ -244,6 +251,14 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
         }
     }
 
+    fun reInitialiseBacnetStack() {
+        val intent = Intent(BROADCAST_BACNET_APP_STOP)
+        intent.putExtra("message", "Watch Id was changed. Reinitialise BACnet Stack")
+        CcuLog.d(L.TAG_CCU_BACNET, "reInitialiseBacnetStack: Watch Id was changed. Reinitialise BACnet Stack")
+        Globals.getInstance().applicationContext.sendBroadcast(intent)
+        launchBacApp(Globals.getInstance().applicationContext, BROADCAST_BACNET_APP_START, "Start BACnet App", "")
+    }
+
    fun launchBacApp(context: Context, intentAction: String, message: String, deviceId: String) {
     CcuLog.d(L.TAG_CCU_BACNET, "launchBacApp started")
 
@@ -415,4 +430,33 @@ fun scheduleJobToCheckBacnetDeviceOnline(){
 fun cancelScheduleJobToCheckBacnet(reason : String){
     CcuLog.d(BACNET_DEVICE_JOB, "--cancelScheduleJobToCheckBacnet--$reason")
     WorkManager.getInstance(Globals.getInstance().applicationContext).cancelUniqueWork(BACNET_DEVICE_JOB)
+}
+
+fun updateBacnetIpModeConfigurations(isStackInitSuccess: Boolean) {
+    val context = Globals.getInstance().applicationContext
+    val sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+
+    if (isStackInitSuccess) {
+        val deviceType = sharedPreferences.getString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_NORMAL)
+        CcuLog.d(L.TAG_CCU_BACNET, "BACnet Stack initialized successfully and device configured as $deviceType. Sending broadcast.....")
+        when (deviceType) {
+            BACNET_DEVICE_TYPE_BBMD -> {
+                val jsonString = sharedPreferences.getString(BACNET_BBMD_CONFIGURATION, null).toString()
+                val intent = Intent(BROADCAST_BACNET_APP_CONFIGURATION_TYPE)
+                intent.putExtra("message", "BBMD")
+                intent.putExtra("data", jsonString)
+                context.sendBroadcast(intent)
+            }
+            BACNET_DEVICE_TYPE_FD -> {
+                val jsonString = sharedPreferences.getString(BACNET_BBMD_CONFIGURATION, null).toString()
+                val intent = Intent(BROADCAST_BACNET_APP_CONFIGURATION_TYPE)
+                intent.putExtra("message", "Foreign Device")
+                intent.putExtra("data", jsonString)
+                context.sendBroadcast(intent)
+            }
+            else -> {
+                sendBroadCast(context, BROADCAST_BACNET_APP_CONFIGURATION_TYPE, "Normal")
+            }
+        }
+    }
 }

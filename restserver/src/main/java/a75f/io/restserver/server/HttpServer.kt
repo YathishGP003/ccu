@@ -13,8 +13,10 @@ import a75f.io.logic.interfaces.ModbusDataInterface
 import a75f.io.logic.interfaces.ZoneDataInterface
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.HTTP_SERVER_STATUS
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED
+import a75f.io.logic.util.bacnet.reInitialiseBacnetStack
 import a75f.io.logic.util.bacnet.readExternalBacnetJsonFile
 import a75f.io.logic.util.bacnet.updateBacnetHeartBeat
+import a75f.io.logic.util.bacnet.updateBacnetIpModeConfigurations
 import a75f.io.logic.util.bacnet.updateBacnetStackInitStatus
 import a75f.io.util.query_parser.modifyKVPairFromFilter
 import android.content.Context
@@ -230,6 +232,7 @@ class HttpServer {
                     val stackStatus = call.request.queryParameters["status"]
                     if (stackStatus != null) {
                         updateBacnetStackInitStatus(stackStatus.toBoolean())
+                        updateBacnetIpModeConfigurations(stackStatus.toBoolean())
                     }
                     call.respond(HttpStatusCode.OK)
                 }
@@ -285,6 +288,8 @@ class HttpServer {
                             call.respondText(HZincWriter.gridToString(watchPollResponse), ContentType.Any , HttpStatusCode.OK)
                         }else{
                             call.respond(HttpStatusCode.NotFound)
+                            CcuLog.i(HTTP_SERVER, "Error in watch poll response ${watchPollResponse.isErr}")
+                            reInitialiseBacnetStack() // wrong watch id, needs to reInitialiseBacnetStack to get unique watch id
                         }
                     } else {
                         call.respond(HttpStatusCode.NotFound)

@@ -6,6 +6,7 @@ object  BacnetConfigConstants {
     const val BROADCAST_BACNET_APP_START = "a75f.io.renatus.BACNET_APP_START"
     const val BROADCAST_BACNET_APP_STOP = "a75f.io.renatus.BACNET_APP_STOP"
     const val BROADCAST_BACNET_ZONE_ADDED = "a75f.io.renatus.BACNET_ZONE_ADDED"
+    const val BROADCAST_BACNET_CONFIG_CHANGE = "a75f.io.renatus.BACNET_CONFIG_CHANGE"
 
     const val BACNET_CONFIGURATION = "BACnet_Config"
     const val IS_BACNET_CONFIG_FILE_CREATED = "isBACnetConfigFileCreated"

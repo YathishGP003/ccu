@@ -8,6 +8,7 @@ import static a75f.io.constants.SiteFieldConstants.GEOPOSTALCODE;
 import static a75f.io.constants.SiteFieldConstants.GEOSTATE;
 import static a75f.io.constants.SiteFieldConstants.ORGANIZATION;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_CONFIG_CHANGE;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.DAYLIGHT_SAVING_STATUS;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.UTC_OFFSET;
@@ -1072,7 +1073,7 @@ public class CreateNewSite extends Fragment {
             }
             if(changesFound) {
                 prefs.setString(BACNET_CONFIGURATION, config.toString());
-                sendBroadCast(mContext, "a75f.io.renatus.BACNET_CONFIG_CHANGE", "BACnet configurations are changed");
+                sendBroadCast(mContext, BROADCAST_BACNET_CONFIG_CHANGE, "BACnet configurations are changed");
                 performConfigFileBackup();
             }
         } catch (JSONException e) {

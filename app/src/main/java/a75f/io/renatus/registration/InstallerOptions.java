@@ -2,6 +2,7 @@ package a75f.io.renatus.registration;
 
 import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_CONFIG_CHANGE;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.sendBroadCast;
 import static a75f.io.logic.L.ccu;
@@ -355,7 +356,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
                             JSONObject deviceObject = config.getJSONObject("device");
                             deviceObject.put(IP_DEVICE_INSTANCE_NUMBER,Integer.parseInt(addressBandSelected) + 99);
                             prefs.setString(BACNET_CONFIGURATION, config.toString());
-                            sendBroadCast(mContext, "a75f.io.renatus.BACNET_CONFIG_CHANGE", "BACnet configurations are changed");
+                            sendBroadCast(mContext, BROADCAST_BACNET_CONFIG_CHANGE, "BACnet configurations are changed");
                             performConfigFileBackup();
                         } catch (JSONException e) {
                             e.printStackTrace();

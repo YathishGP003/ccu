@@ -5,22 +5,29 @@ import a75f.io.device.mesh.DeviceUtil
 import a75f.io.device.mesh.MeshUtil
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
-import a75f.io.domain.api.PhysicalPoint
+import a75f.io.domain.api.Point
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.logic.toDouble
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.allSystemProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode
 import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
+import a75f.io.logic.bo.haystack.device.ControlMote
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
 import a75f.io.renatus.util.SystemProfileUtil
+import a75f.io.renatus.util.TestSignalManager
+import a75f.io.renatus.util.modifyConditioningMode
 import android.app.Activity
 import android.content.Context
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -30,12 +37,6 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import a75f.io.logic.bo.haystack.device.ControlMote
-import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
-import a75f.io.renatus.util.TestSignalManager
-import androidx.compose.runtime.MutableState
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import kotlin.system.measureTimeMillis
 
 open class DabStagedRtuBaseViewModel : ViewModel() {
@@ -182,6 +183,16 @@ open class DabStagedRtuBaseViewModel : ViewModel() {
 
     fun updateSystemMode() {
         val systemProfile = L.ccu().systemProfile as DabStagedRtu
+        val possibleConditioningMode = when {
+            systemProfile.isCoolingAvailable && systemProfile.isHeatingAvailable -> PossibleConditioningMode.BOTH
+            systemProfile.isCoolingAvailable && !systemProfile.isHeatingAvailable -> PossibleConditioningMode.COOLONLY
+            !systemProfile.isCoolingAvailable && systemProfile.isHeatingAvailable -> PossibleConditioningMode.HEATONLY
+            else -> PossibleConditioningMode.OFF
+        }
+
+        val conditioningMode = Point(DomainName.conditioningMode, Domain.systemEquip.equipRef)
+        modifyConditioningMode(possibleConditioningMode.ordinal, conditioningMode, allSystemProfileConditions)
+
         val mode = SystemMode.values()[systemProfile.systemEquip.conditioningMode.readPriorityVal().toInt()]
         if (mode == SystemMode.OFF) {
             return

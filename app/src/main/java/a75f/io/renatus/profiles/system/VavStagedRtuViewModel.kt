@@ -85,7 +85,9 @@ class VavStagedRtuViewModel : StagedRtuProfileViewModel() {
             stagedRtu.updateStagesSelected()
             DesiredTempDisplayMode.setSystemModeForVav(hayStack)
             updateSystemMode()
-            systemEquipId?.let { L.ccu().systemProfile.updateAhuRef(it) }
+            systemEquipId?.let {
+                L.ccu().systemProfile.updateAhuRef(it)
+            }
             updateOaoPoints()
             hayStack.syncEntityTree()
             hayStack.setCcuReady()

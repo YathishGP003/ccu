@@ -10,16 +10,20 @@ import a75f.io.domain.api.DomainName.systemEnhancedVentilationEnable
 import a75f.io.domain.api.DomainName.systemPostPurgeEnable
 import a75f.io.domain.api.DomainName.systemPrePurgeEnable
 import a75f.io.domain.api.PhysicalPoint
+import a75f.io.domain.api.Point
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.logic.toDouble
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.allSystemProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode
+import a75f.io.logic.bo.building.system.SystemProfile
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.getAnalogOutLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.getCMRelayLogicalPhysicalMap
@@ -42,6 +46,7 @@ import a75f.io.logic.tuners.TunerUtil
 import a75f.io.renatus.modbus.util.isOaoPairedInConnectModule
 import a75f.io.renatus.util.SystemProfileUtil
 import a75f.io.renatus.util.TestSignalManager
+import a75f.io.renatus.util.modifyConditioningMode
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
@@ -734,6 +739,18 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                 }
             }
         }
+    }
+
+    fun updateConditioningMode() {
+        val systemProfile = L.ccu().systemProfile
+        val possibleConditioningMode = when {
+            systemProfile.isCoolingAvailable && systemProfile.isHeatingAvailable -> PossibleConditioningMode.BOTH
+            systemProfile.isCoolingAvailable && !systemProfile.isHeatingAvailable -> PossibleConditioningMode.COOLONLY
+            !systemProfile.isCoolingAvailable && systemProfile.isHeatingAvailable -> PossibleConditioningMode.HEATONLY
+            else -> PossibleConditioningMode.OFF
+        }
+        val conditioningMode = Point(DomainName.conditioningMode, Domain.systemEquip.equipRef)
+        modifyConditioningMode(possibleConditioningMode.ordinal, conditioningMode, allSystemProfileConditions)
     }
 
 }

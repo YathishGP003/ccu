@@ -10,8 +10,11 @@ import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.NodeType
+import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfileConfiguration
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusTempAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
@@ -25,6 +28,8 @@ import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.hss.HyperStatSplitViewModel
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
+import a75f.io.renatus.util.modifyConditioningMode
+import a75f.io.renatus.util.modifyFanMode
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -464,6 +469,11 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
                 }
             }
         }
+
+        val possibleConditioningMode = HSSplitHaystackUtil.Companion.getPossibleConditioningModeSettings(hssProfile.hssEquip)
+        val possibleFanMode = HSSplitHaystackUtil.Companion.getPossibleFanModeSettings(profileConfiguration.nodeAddress)
+        modifyFanMode(possibleFanMode.ordinal, hssProfile.hssEquip.fanOpMode)
+        modifyConditioningMode(possibleConditioningMode.ordinal, hssProfile.hssEquip.conditioningMode, allStandaloneProfileConditions)
     }
 
     private fun addEquipAndPoints(

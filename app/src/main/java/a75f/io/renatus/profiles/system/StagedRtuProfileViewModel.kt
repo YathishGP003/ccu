@@ -5,15 +5,18 @@ import a75f.io.device.mesh.DeviceUtil
 import a75f.io.device.mesh.MeshUtil
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.Point
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.logic.toDouble
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.allSystemProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode
 import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.util.deleteSystemConnectModule
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu
@@ -32,6 +35,7 @@ import kotlinx.coroutines.withContext
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
 import a75f.io.renatus.util.TestSignalManager
+import a75f.io.renatus.util.modifyConditioningMode
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
@@ -181,6 +185,15 @@ open class StagedRtuProfileViewModel : ViewModel() {
 
     fun updateSystemMode() {
         val systemProfile = L.ccu().systemProfile as VavStagedRtu
+        val possibleConditioningMode = when {
+            systemProfile.isCoolingAvailable && systemProfile.isHeatingAvailable -> PossibleConditioningMode.BOTH
+            systemProfile.isCoolingAvailable && !systemProfile.isHeatingAvailable -> PossibleConditioningMode.COOLONLY
+            !systemProfile.isCoolingAvailable && systemProfile.isHeatingAvailable -> PossibleConditioningMode.HEATONLY
+            else -> PossibleConditioningMode.OFF
+        }
+
+        val conditioningMode = Point(DomainName.conditioningMode, Domain.systemEquip.equipRef)
+        modifyConditioningMode(possibleConditioningMode.ordinal, conditioningMode, allSystemProfileConditions)
         val mode = SystemMode.values()[systemProfile.systemEquip.conditioningMode.readPriorityVal().toInt()]
         if (mode == SystemMode.OFF) {
             return

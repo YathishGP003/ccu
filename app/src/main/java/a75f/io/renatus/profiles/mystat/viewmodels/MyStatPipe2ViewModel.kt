@@ -8,6 +8,7 @@ import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
@@ -16,6 +17,8 @@ import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2Configuration
 import a75f.io.logic.bo.building.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile
 import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPipe2FanLevel
+import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleConditionMode
+import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
@@ -24,6 +27,8 @@ import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewStateUtil
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
+import a75f.io.renatus.util.modifyConditioningMode
+import a75f.io.renatus.util.modifyFanMode
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -100,9 +105,9 @@ class MyStatPipe2ViewModel(application: Application) : MyStatViewModel(applicati
         profileConfiguration.priority = ZonePriority.NONE.ordinal
 
         val equipBuilder = ProfileEquipBuilder(hayStack)
-
+        val equipId: String
         if (profileConfiguration.isDefault) {
-            val equipId = addEquipment(
+            equipId = addEquipment(
                 profileConfiguration as MyStatPipe2Configuration,
                 equipModel,
                 deviceModel
@@ -119,7 +124,7 @@ class MyStatPipe2ViewModel(application: Application) : MyStatViewModel(applicati
             )
             CcuLog.i(Domain.LOG_TAG, "Pipe2 profile added")
         } else {
-            val equipId = equipBuilder.updateEquipAndPoints(
+            equipId = equipBuilder.updateEquipAndPoints(
                 profileConfiguration,
                 equipModel,
                 hayStack.site!!.id,
@@ -137,20 +142,17 @@ class MyStatPipe2ViewModel(application: Application) : MyStatViewModel(applicati
                 getDeviceDis()
             )
             val equip = MyStatPipe2Equip(equipId)
-            updateFanMode(
-                true,
-                equip,
-                getMyStatPipe2FanLevel(profileConfiguration as MyStatPipe2Configuration)
-            )
+            updateFanMode(true, equip, getMyStatPipe2FanLevel(profileConfiguration as MyStatPipe2Configuration))
             universalInUnit(profileConfiguration, deviceRef)
         }
 
         profileConfiguration.apply {
-            setPortConfiguration(
-                nodeAddress,
-                getRelayMap(),
-                getAnalogMap()
-            )
+            val possibleConditioningMode = getMyStatPossibleConditionMode(profileConfiguration)
+            val possibleFanMode = getMyStatPossibleFanModeSettings(getMyStatPipe2FanLevel(profileConfiguration as MyStatPipe2Configuration))
+            val equip = MyStatPipe2Equip(equipId)
+            modifyFanMode(possibleFanMode, equip.fanOpMode)
+            modifyConditioningMode(possibleConditioningMode.ordinal, equip.conditioningMode, allStandaloneProfileConditions)
+            setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap())
         }
     }
 

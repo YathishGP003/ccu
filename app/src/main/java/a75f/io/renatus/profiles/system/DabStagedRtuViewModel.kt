@@ -91,7 +91,9 @@ class DabStagedRtuViewModel : DabStagedRtuBaseViewModel()  {
             stagedRtu.updateStagesSelected()
             DesiredTempDisplayMode.setSystemModeForDab(hayStack)
             updateSystemMode()
-            systemEquipId?.let { L.ccu().systemProfile.updateAhuRef(it) }
+            systemEquipId?.let {
+                L.ccu().systemProfile.updateAhuRef(it)
+            }
             updateOaoPoints()
             hayStack.syncEntityTree()
             hayStack.setCcuReady()

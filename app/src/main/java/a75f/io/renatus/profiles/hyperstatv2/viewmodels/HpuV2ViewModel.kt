@@ -8,6 +8,7 @@ import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
@@ -15,6 +16,8 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getHpuFanLevel
+import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleConditionMode
+import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleFanModeSettings
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HsHpuRelayMapping
 import a75f.io.logic.bo.building.system.logIt
@@ -26,6 +29,8 @@ import a75f.io.renatus.profiles.hyperstatv2.viewstates.HpuViewState
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.HyperStatV2ViewState
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
+import a75f.io.renatus.util.modifyConditioningMode
+import a75f.io.renatus.util.modifyFanMode
 import a75f.io.renatus.util.showErrorDialog
 import android.app.Application
 import android.content.Context
@@ -148,9 +153,9 @@ class HpuV2ViewModel(application: Application) : HyperStatViewModel(application)
         profileConfiguration.priority = ZonePriority.NONE.ordinal
 
         val equipBuilder = ProfileEquipBuilder(hayStack)
-
+        val equipId: String
         if (profileConfiguration.isDefault) {
-            val equipId = addEquipment(profileConfiguration as HpuConfiguration, equipModel, deviceModel)
+             equipId = addEquipment(profileConfiguration as HpuConfiguration, equipModel, deviceModel)
             hyperStatProfile = HyperStatHpuProfile()
             (hyperStatProfile as HyperStatHpuProfile).addEquip(equipId)
             L.ccu().zoneProfiles.add(hyperStatProfile)
@@ -160,7 +165,7 @@ class HpuV2ViewModel(application: Application) : HyperStatViewModel(application)
             CcuLog.i(Domain.LOG_TAG, "Hpu profile added")
 
         } else {
-            val equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, getEquipDis(), true)
+            equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, getEquipDis(), true)
             val entityMapper = EntityMapper(equipModel)
             val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
             CcuLog.i(Domain.LOG_TAG, " updateDeviceAndPoints")
@@ -168,7 +173,14 @@ class HpuV2ViewModel(application: Application) : HyperStatViewModel(application)
             val equip = HpuV2Equip(equipId)
             updateFanMode(true,equip, getHpuFanLevel(profileConfiguration as HpuConfiguration))
         }
-        profileConfiguration.apply { setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap()) }
+        profileConfiguration.apply {
+            val possibleConditioningMode = getPossibleConditionMode(profileConfiguration)
+            val possibleFanMode = getPossibleFanModeSettings(getHpuFanLevel(profileConfiguration as HpuConfiguration))
+            val equip = HpuV2Equip(equipId)
+            modifyFanMode(possibleFanMode.ordinal, equip.fanOpMode)
+            modifyConditioningMode(possibleConditioningMode.ordinal, equip.conditioningMode, allStandaloneProfileConditions)
+            setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap())
+        }
     }
 
     private fun addEquipment(config: HpuConfiguration, equipModel: SeventyFiveFProfileDirective, deviceModel: SeventyFiveFDeviceDirective): String {

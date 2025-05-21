@@ -8,6 +8,7 @@ import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
@@ -17,6 +18,7 @@ import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getCpuFanLevel
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleConditionMode
+import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleFanModeSettings
 import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HsCpuAnalogOutMapping
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HsCpuRelayMapping
@@ -28,6 +30,8 @@ import a75f.io.renatus.profiles.hyperstatv2.viewstates.CpuViewState
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.HyperStatV2ViewState
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
+import a75f.io.renatus.util.modifyConditioningMode
+import a75f.io.renatus.util.modifyFanMode
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -109,9 +113,9 @@ class CpuV2ViewModel(application: Application) : HyperStatViewModel(application)
         profileConfiguration.priority = ZonePriority.NONE.ordinal
 
         val equipBuilder = ProfileEquipBuilder(hayStack)
-
+        val equipId: String
         if (profileConfiguration.isDefault) {
-            val equipId = addEquipment(profileConfiguration as CpuConfiguration, equipModel, deviceModel)
+            equipId = addEquipment(profileConfiguration as CpuConfiguration, equipModel, deviceModel)
             hyperStatProfile = HyperStatCpuProfile()
             (hyperStatProfile as HyperStatCpuProfile).addEquip(equipId)
             L.ccu().zoneProfiles.add(hyperStatProfile)
@@ -120,7 +124,7 @@ class CpuV2ViewModel(application: Application) : HyperStatViewModel(application)
             updateFanMode(false,equip, getCpuFanLevel(profileConfiguration as CpuConfiguration))
             CcuLog.i(Domain.LOG_TAG, "Cpu profile added")
         } else {
-            val equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, getEquipDis(), true)
+             equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, getEquipDis(), true)
             val entityMapper = EntityMapper(equipModel)
             val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
             deviceBuilder.updateDeviceAndPoints(profileConfiguration, deviceModel, equipId, hayStack.site!!.id, getDeviceDis())
@@ -129,7 +133,14 @@ class CpuV2ViewModel(application: Application) : HyperStatViewModel(application)
             updateFanMode(true,equip, getCpuFanLevel(profileConfiguration as CpuConfiguration))
             CcuLog.i(Domain.LOG_TAG, "Cpu profile reconfigured")
         }
-        profileConfiguration.apply { setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap()) }
+        profileConfiguration.apply {
+            val possibleConditioningMode = getPossibleConditionMode(profileConfiguration)
+            val possibleFanMode = getPossibleFanModeSettings(getCpuFanLevel(profileConfiguration as CpuConfiguration))
+            val equip = CpuV2Equip(equipId)
+            modifyFanMode(possibleFanMode.ordinal, equip.fanOpMode)
+            modifyConditioningMode(possibleConditioningMode.ordinal, equip.conditioningMode, allStandaloneProfileConditions)
+            setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap())
+        }
     }
 
     private fun setConditioningMode(equip: CpuV2Equip) {

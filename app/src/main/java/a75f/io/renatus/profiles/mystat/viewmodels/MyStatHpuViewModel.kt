@@ -8,6 +8,7 @@ import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
@@ -17,6 +18,8 @@ import a75f.io.logic.bo.building.mystat.configs.MyStatHpuRelayMapping
 import a75f.io.logic.bo.building.mystat.profiles.packageunit.hpu.MyStatHpuProfile
 import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatHpuFanLevel
+import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleConditionMode
+import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
@@ -25,6 +28,8 @@ import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewStateUtil
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
+import a75f.io.renatus.util.modifyConditioningMode
+import a75f.io.renatus.util.modifyFanMode
 import a75f.io.renatus.util.showErrorDialog
 import android.app.Application
 import android.content.Context
@@ -126,11 +131,9 @@ class MyStatHpuViewModel(application: Application) : MyStatViewModel(application
         profileConfiguration.priority = ZonePriority.NONE.ordinal
 
         val equipBuilder = ProfileEquipBuilder(hayStack)
-
+        val equipId: String
         if (profileConfiguration.isDefault) {
-            val equipId = addEquipment(
-                profileConfiguration as MyStatHpuConfiguration, equipModel, deviceModel
-            )
+            equipId = addEquipment(profileConfiguration as MyStatHpuConfiguration, equipModel, deviceModel)
             myStatProfile = MyStatHpuProfile()
             (myStatProfile as MyStatHpuProfile).addEquip(equipId)
             L.ccu().zoneProfiles.add(myStatProfile)
@@ -141,7 +144,7 @@ class MyStatHpuViewModel(application: Application) : MyStatViewModel(application
             )
             CcuLog.i(Domain.LOG_TAG, "MyStatHpu profile added")
         } else {
-            val equipId = equipBuilder.updateEquipAndPoints(
+            equipId = equipBuilder.updateEquipAndPoints(
                 profileConfiguration, equipModel, hayStack.site!!.id, getEquipDis(), true
             )
             val entityMapper = EntityMapper(equipModel)
@@ -158,9 +161,13 @@ class MyStatHpuViewModel(application: Application) : MyStatViewModel(application
         }
 
         profileConfiguration.apply {
-            setPortConfiguration(
-                nodeAddress, getRelayMap(), getAnalogMap()
-            )
+            setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap())
+            val possibleConditioningMode = getMyStatPossibleConditionMode(profileConfiguration)
+            val possibleFanMode = getMyStatPossibleFanModeSettings(getMyStatHpuFanLevel(profileConfiguration as MyStatHpuConfiguration))
+            val equip = MyStatHpuEquip(equipId)
+            modifyFanMode(possibleFanMode, equip.fanOpMode)
+            modifyConditioningMode(possibleConditioningMode.ordinal, equip.conditioningMode, allStandaloneProfileConditions)
+            setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap())
         }
     }
 

@@ -109,7 +109,9 @@ class DabStagedVfdRtuViewModel : DabStagedRtuBaseViewModel() {
             stagedRtu.updateStagesSelected()
             DesiredTempDisplayMode.setSystemModeForDab(hayStack)
             updateSystemMode()
-            systemEquipId?.let { L.ccu().systemProfile.updateAhuRef(it) }
+            systemEquipId?.let {
+                L.ccu().systemProfile.updateAhuRef(it)
+            }
             hayStack.syncEntityTree()
             hayStack.setCcuReady()
             initialPortValues = HashMap(profileConfiguration.unusedPorts)

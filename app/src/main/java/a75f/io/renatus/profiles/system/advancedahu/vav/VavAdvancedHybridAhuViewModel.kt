@@ -88,7 +88,10 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                         newEquipConfiguration()
                     }
                 }
-                (L.ccu().systemProfile as VavAdvancedAhu).updateDomainEquip(Domain.systemEquip as VavAdvancedHybridSystemEquip)
+                (L.ccu().systemProfile as VavAdvancedAhu).apply {
+                    updateDomainEquip(Domain.systemEquip as VavAdvancedHybridSystemEquip)
+                    updateStagesSelected()
+                }
                 withContext(Dispatchers.Main) {
                     if (ProgressDialogUtils.isDialogShowing()) {
                         ProgressDialogUtils.hideProgressDialog()
@@ -103,6 +106,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                 if (profileConfiguration.connectConfiguration.connectEnabled) {
                     updateAhuRefForConnectModule()
                 }
+                updateConditioningMode()
                 hayStack.setCcuReady()
                 hayStack.syncEntityTree()
             }

@@ -15,7 +15,6 @@ import a75f.io.logic.bo.building.system.dab.config.DabAdvancedHybridAhuConfig
 import a75f.io.logic.bo.building.system.util.deleteCurrentSystemProfile
 import a75f.io.logic.bo.building.system.util.getCurrentSystemEquip
 import a75f.io.logic.bo.building.system.util.getDabConnectEquip
-import a75f.io.renatus.modbus.util.isOaoPairedInConnectModule
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.oao.updateOaoPoints
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
@@ -92,7 +91,10 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                         newEquipConfiguration()
                     }
                 }
-                (L.ccu().systemProfile as DabAdvancedAhu).updateDomainEquip(Domain.systemEquip as DabAdvancedHybridSystemEquip)
+                (L.ccu().systemProfile as DabAdvancedAhu).apply {
+                    updateDomainEquip(Domain.systemEquip as DabAdvancedHybridSystemEquip)
+                    updateStagesSelected()
+                }
                 withContext(Dispatchers.Main) {
                     if (ProgressDialogUtils.isDialogShowing()) {
                         ProgressDialogUtils.hideProgressDialog()
@@ -107,6 +109,7 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                 if (profileConfiguration.connectConfiguration.connectEnabled) {
                     updateAhuRefForConnectModule()
                 }
+                updateConditioningMode()
                 hayStack.syncEntityTree()
                 hayStack.setCcuReady()
             }

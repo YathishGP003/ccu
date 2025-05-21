@@ -5,23 +5,26 @@ import a75f.io.device.mesh.DeviceUtil
 import a75f.io.device.mesh.MeshUtil
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.Point
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.logic.toDouble
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.allSystemProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode
+import a75f.io.logic.bo.building.system.SystemMode
+import a75f.io.logic.bo.building.system.SystemProfile
+import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
-import a75f.io.logic.bo.building.system.SystemMode
-import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu
-import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu
-import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.renatus.util.SystemProfileUtil
 import a75f.io.renatus.util.TestSignalManager
+import a75f.io.renatus.util.modifyConditioningMode
 import android.app.Activity
 import android.content.Context
 import androidx.compose.runtime.MutableState
@@ -134,24 +137,18 @@ open class ModulatingRtuViewModel : ViewModel() {
     }
 
     fun updateSystemMode() {
-        val systemProfile = L.ccu().systemProfile as VavFullyModulatingRtu
-        val mode = SystemMode.values()[systemProfile.systemEquip.conditioningMode.readPriorityVal()
-            .toInt()]
-        if (mode == SystemMode.OFF) {
-            return
+        val systemProfile = L.ccu().systemProfile
+        val possibleConditioningMode = when {
+            systemProfile.isCoolingAvailable && systemProfile.isHeatingAvailable -> PossibleConditioningMode.BOTH
+            systemProfile.isCoolingAvailable && !systemProfile.isHeatingAvailable -> PossibleConditioningMode.COOLONLY
+            !systemProfile.isCoolingAvailable && systemProfile.isHeatingAvailable -> PossibleConditioningMode.HEATONLY
+            else -> PossibleConditioningMode.OFF
         }
-        if (mode == SystemMode.AUTO && (!systemProfile.isCoolingAvailable || !systemProfile.isHeatingAvailable)
-            || mode == SystemMode.COOLONLY && !systemProfile.isCoolingAvailable
-            || mode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable
-        ) {
-            SystemProfileUtil.showConditioningDisabledDialog(context as Activity, mode)
-        }
-    }
+        val conditioningMode = Point(DomainName.conditioningMode, Domain.systemEquip.equipRef)
+        modifyConditioningMode(possibleConditioningMode.ordinal, conditioningMode, allSystemProfileConditions)
 
-    fun updateDabSystemMode() {
-        val systemProfile = L.ccu().systemProfile as DabFullyModulatingRtu
-        val mode = SystemMode.values()[systemProfile.systemEquip.conditioningMode.readPriorityVal()
-            .toInt()]
+
+        val mode = SystemMode.values()[conditioningMode.readPriorityVal().toInt()]
         if (mode == SystemMode.OFF) {
             return
         }

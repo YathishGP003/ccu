@@ -8,6 +8,7 @@ import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
@@ -15,6 +16,8 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getPipe2FanLevel
+import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleConditionMode
+import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleFanModeSettings
 import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.FloorPlanFragment
@@ -24,6 +27,8 @@ import a75f.io.renatus.profiles.hyperstatv2.viewstates.HyperStatV2ViewState
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.Pipe2ViewState
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
+import a75f.io.renatus.util.modifyConditioningMode
+import a75f.io.renatus.util.modifyFanMode
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -98,9 +103,9 @@ class Pipe2ViewModel(application: Application) : HyperStatViewModel(application)
         profileConfiguration.priority = ZonePriority.NONE.ordinal
 
         val equipBuilder = ProfileEquipBuilder(hayStack)
-
+        val equipId: String
         if (profileConfiguration.isDefault) {
-            val equipId = addEquipment(profileConfiguration as Pipe2Configuration, equipModel, deviceModel)
+            equipId = addEquipment(profileConfiguration as Pipe2Configuration, equipModel, deviceModel)
             hyperStatProfile = HyperStatPipe2Profile()
             (hyperStatProfile as HyperStatPipe2Profile).addEquip(equipId)
             L.ccu().zoneProfiles.add(hyperStatProfile)
@@ -109,7 +114,7 @@ class Pipe2ViewModel(application: Application) : HyperStatViewModel(application)
             updateFanMode(false,equip, getPipe2FanLevel(profileConfiguration as Pipe2Configuration))
             CcuLog.i(Domain.LOG_TAG, "Pipe2 profile added")
         } else {
-            val equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, getEquipDis(), true)
+            equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, getEquipDis(), true)
             val entityMapper = EntityMapper(equipModel)
             val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
             CcuLog.i(Domain.LOG_TAG, " updateDeviceAndPoints")
@@ -117,7 +122,14 @@ class Pipe2ViewModel(application: Application) : HyperStatViewModel(application)
             val equip = Pipe2V2Equip(equipId)
             updateFanMode(true, equip, getPipe2FanLevel(profileConfiguration as Pipe2Configuration))
         }
-        profileConfiguration.apply { setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap()) }
+        profileConfiguration.apply {
+            val possibleConditioningMode = getPossibleConditionMode(profileConfiguration)
+            val possibleFanMode = getPossibleFanModeSettings(getPipe2FanLevel(profileConfiguration as Pipe2Configuration))
+            val equip = Pipe2V2Equip(equipId)
+            modifyFanMode(possibleFanMode.ordinal, equip.fanOpMode)
+            modifyConditioningMode(possibleConditioningMode.ordinal, equip.conditioningMode, allStandaloneProfileConditions)
+            setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap())
+        }
     }
 
     private fun addEquipment(config: Pipe2Configuration, equipModel: SeventyFiveFProfileDirective, deviceModel: SeventyFiveFDeviceDirective): String {

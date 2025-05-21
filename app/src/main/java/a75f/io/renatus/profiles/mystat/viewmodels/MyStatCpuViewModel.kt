@@ -8,6 +8,7 @@ import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
@@ -15,9 +16,11 @@ import a75f.io.logic.bo.building.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.mystat.configs.MyStatCpuRelayMapping
 import a75f.io.logic.bo.building.mystat.profiles.packageunit.cpu.MyStatCpuProfile
 import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatConfiguration
-import a75f.io.logic.bo.building.mystat.profiles.util.updateConditioningMode
 import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatCpuFanLevel
+import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleConditionMode
+import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.logic.bo.building.mystat.profiles.util.setConditioningMode
+import a75f.io.logic.bo.building.mystat.profiles.util.updateConditioningMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
@@ -26,6 +29,8 @@ import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewStateUtil
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
+import a75f.io.renatus.util.modifyConditioningMode
+import a75f.io.renatus.util.modifyFanMode
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -107,11 +112,9 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
         profileConfiguration.priority = ZonePriority.NONE.ordinal
 
         val equipBuilder = ProfileEquipBuilder(hayStack)
-
+        val equipId: String
         if (profileConfiguration.isDefault) {
-            val equipId = addEquipment(
-                profileConfiguration as MyStatCpuConfiguration, equipModel, deviceModel
-            )
+            equipId = addEquipment(profileConfiguration as MyStatCpuConfiguration, equipModel, deviceModel)
             myStatProfile = MyStatCpuProfile()
             (myStatProfile as MyStatCpuProfile).addEquip(equipId)
             L.ccu().zoneProfiles.add(myStatProfile)
@@ -122,9 +125,7 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
             )
             CcuLog.i(Domain.LOG_TAG, "MyStatCpu profile added")
         } else {
-            val equipId = equipBuilder.updateEquipAndPoints(
-                profileConfiguration, equipModel, hayStack.site!!.id, getEquipDis(), true
-            )
+            equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, getEquipDis(), true)
             val entityMapper = EntityMapper(equipModel)
             val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
             CcuLog.i(Domain.LOG_TAG, " updateDeviceAndPoints")
@@ -140,9 +141,12 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
         }
 
         profileConfiguration.apply {
-            setPortConfiguration(
-                nodeAddress, getRelayMap(), getAnalogMap()
-            )
+            val possibleConditioningMode = getMyStatPossibleConditionMode(profileConfiguration)
+            val possibleFanMode = getMyStatPossibleFanModeSettings(getMyStatCpuFanLevel(profileConfiguration as MyStatCpuConfiguration))
+            val equip = MyStatCpuEquip(equipId)
+            modifyFanMode(possibleFanMode, equip.fanOpMode)
+            modifyConditioningMode(possibleConditioningMode.ordinal, equip.conditioningMode, allStandaloneProfileConditions)
+            setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap())
         }
     }
 

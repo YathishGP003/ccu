@@ -637,9 +637,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             }
                             if (currentTempSensor > 0) {
                                 tempSeekArc.setCurrentTemp((float) (currentTempSensor));
+                                CcuLog.e("UI_PROFILING","ZoneFragmentNew.updateTemperature Arc updated");
                             }
                         });
                         break;
+                    } else {
+                        CcuLog.e("UI_PROFILING","ZoneFragmentNew.updateTemperature zoneNodes is null or empty");
                     }
                 }
             }
@@ -871,6 +874,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         CcuLog.i("UI_PROFILING","zoneViewready set");
         isZoneViewReady = true;
         CCUHsApi.getInstance().setCcuReady();
+        setListeners();
         zoneLoadTextView.setVisibility(View.GONE);
         if(PreferenceUtil.getIsCcuLaunched()) {
             Toast.makeText(getContext(), "CCU Ready", Toast.LENGTH_SHORT).show();
@@ -4135,9 +4139,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             UpdateWeatherData();
         }
         weatherInIt(15*60000);
+        CcuLog.i("UI_PROFILING",""+getUserVisibleHint());
+        if (isZoneViewReady) {
+            setListeners();
+        } else {
+            CcuLog.i("UI_PROFILING","ZoneFragmentNew.onResume Temp Listening not set");
+        }
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onResume Done");
-        UpdatePointHandler.setZoneDataInterface(this);
-        UpdateEntityHandler.setZoneDataInterface(this);
         HttpServer.Companion.setCurrentTempInterface(this);
     }
 
@@ -4156,6 +4164,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             HyperStatSplitUserIntentHandler.Companion.setZoneDataInterface(this);
             UpdatePointHandler.setZoneDataInterface(this);
             UpdateEntityHandler.setZoneDataInterface(this);
+        } else {
+            CcuLog.i("UI_PROFILING","ZoneFragmentNew.setListeners Skipped : UserVisibleHint not set");
         }
     }
 

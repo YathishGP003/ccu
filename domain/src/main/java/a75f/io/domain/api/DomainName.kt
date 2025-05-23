@@ -14,6 +14,7 @@ object DomainName {
     const val myStatCPU = "myStatCPU"
     const val vavStagedRtu = "vavStagedRtu"
     const val vavAdvancedHybridAhuV2 = "vavAdvancedHybridAhuV2"
+    const val dabAdvancedHybridAhuV2 = "dabAdvancedHybridAhuV2"
     const val hyperstatSplitCpu = "hyperstatSplitCpu"
     const val helionodeDevice = "helionodeDevice"
     const val smartnodeDevice = "smartnodeDevice"

@@ -149,7 +149,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
     override fun deleteSystemEquip() {
         val hayStack = CCUHsApi.getInstance()
-        val listOfEquips = hayStack.readAllEntities(CommonQueries.SYSTEM_PROFILE)
+        val listOfEquips = hayStack.readAllEntities("domainName == \"${DomainName.vavAdvancedHybridAhuV2}\"")
         for(equip in listOfEquips){
             if (equip.isNotEmpty()) {
                 CcuLog.d(Tags.ADD_REMOVE_PROFILE, "VavAdvancedAhu removing profile with it -->${equip[Tags.ID].toString()}")

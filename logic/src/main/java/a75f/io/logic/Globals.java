@@ -291,8 +291,6 @@ public class Globals {
                 if (!isSafeMode()) {
                     migrationHandler.doMigration();
                     MigrationUtil.doMigrationTasksIfRequired();
-                    CcuLog.i(L.TAG_CCU_INIT, "Load Profiles");
-                    isInitCompleted = true;
                     Site siteObject = new Site.Builder().setHashMap(site).build();
                     CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
                             HayStackConstants.USER, HayStackConstants.PASS), siteObject);
@@ -392,6 +390,7 @@ public class Globals {
     }
 
     public void loadEquipProfiles() {
+        CcuLog.d(L.TAG_CCU_INIT, "Load Equip Profiles");
         HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity(Tags.SITE);
         if (site == null || site.size() == 0) {
             CcuLog.d(L.TAG_CCU, "Site does not exist. Profiles not loaded");

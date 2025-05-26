@@ -1024,6 +1024,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	private void setUpDRModeActivationLayout() {
 		CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+		// added the null check to avoid the CCU crash
+		if(drActivationLayout == null || switchActivation == null) {
+			return;
+		}
 		if (DemandResponseMode.isDREnrollmentSelected()) {
 			drActivationLayout.setVisibility(View.VISIBLE);
 			switchActivation.setChecked(DemandResponseMode.isDRModeActivated());

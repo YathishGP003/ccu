@@ -4,7 +4,9 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
+import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.util.CommonQueries
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
@@ -283,7 +285,19 @@ class OtaStatusDiagPoint {
 
 
         fun updateCCUOtaStatus(status: OtaStatus) {
-            Domain.diagEquip.otaStatusCCU.writeHisVal(status.ordinal.toDouble())
+            val daigEquip = CCUHsApi.getInstance()
+                .readEntity("equip and diag or domainName == \"${DomainName.diagEquip}\"")
+            if (daigEquip["domainName"] != null && daigEquip["domainName"].toString() == DomainName.diagEquip) {
+                Domain.isDiagEquipInitialised();
+                CcuLog.e(L.TAG_CCU_DOWNLOAD, "updateCCUOtaStatus: DM DiagEquip")
+                Domain.diagEquip.otaStatusCCU.writeHisVal(status.ordinal.toDouble())
+            } else {
+                CcuLog.e(L.TAG_CCU_DOWNLOAD, "updateCCUOtaStatus: Non DM DiagEquip")
+                hayStack.writeHisValByQuery(
+                    "ota and status and equipRef ==\"${daigEquip.get("id")}\"",
+                    status.ordinal.toDouble()
+                )
+            }
         }
 
         /**

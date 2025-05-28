@@ -304,7 +304,6 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
     private fun addEntityData(tobeAdded: MutableList<EntityConfig>, newModel: ModelDirective,
                               equips: List<Equip>, siteRef : String) {
         val equipBuilder = ProfileEquipBuilder (haystack)
-        val entityMapper = EntityMapper(newModel as SeventyFiveFProfileDirective)
          // need to revisit this line
         tobeAdded.forEach { diffDomain ->
             // updated Equip
@@ -334,7 +333,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                 updateRef(equipMap, profileConfiguration)
                 val modelPointDef = newModel.points.find { it.domainName == diffDomain.domainName }
                 modelPointDef?.run {
-                    if (toBeAddedForEquip(modelPointDef, equip.id, profileConfiguration,false, entityMapper)) {
+                    if (toBeAddedForEquip(modelPointDef, equip.id, profileConfiguration,false, newModel)) {
                         equipBuilder.createPoint(
                             PointBuilderConfig(modelPointDef, profileConfiguration, equip.id, siteRef, haystack.timeZone, equipMap["dis"].toString())
                         )
@@ -500,7 +499,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
        While Adding we never add DYNAMIC_SENSOR points; they are created from the device layer, but updating the point we can allow to update the dynamic sensor points*/
    private fun toBeAddedForEquip(
        pointDef : ModelPointDef, equipRef : String, profileConfiguration: ProfileConfiguration,
-       isDynamicSensorRequired : Boolean, entityMapper: EntityMapper) : Boolean {
+       isDynamicSensorRequired : Boolean, newModel: ModelDirective) : Boolean {
 
        if (pointDef is SeventyFiveFProfilePointDef) {
            return when (pointDef.configuration.configType) {
@@ -508,7 +507,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                PointConfiguration.ConfigType.DEPENDENT -> isDependentPointEnabled(
                    pointDef,
                    profileConfiguration,
-                   entityMapper
+                   EntityMapper(newModel as SeventyFiveFProfileDirective)
                )
                PointConfiguration.ConfigType.DYNAMIC_SENSOR -> isDynamicSensorRequired // never add DYNAMIC_SENSOR points; they are created from the device layer
                PointConfiguration.ConfigType.ASSOCIATED -> isAssociatedPointEnabled()

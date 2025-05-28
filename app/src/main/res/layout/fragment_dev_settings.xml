@@ -314,47 +314,24 @@
                     android:layout_margin="10dp"
                     android:text="Re-Sync" />
 
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
-                    android:text="Capture Logs to SD Card"
+                    android:text="Clear the unsynced List"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
 
                 <Button
-                    android:id="@+id/logCaptureBtn"
+                    android:id="@+id/unsyncedSyncBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
-                    android:text="Save" />
-
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:text="Upload CCU logs to cloud"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-
-                <Button
-                    android:id="@+id/logUploadBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:text="Upload" />
+                    android:text="Remove - UnSync data " />
 
             </LinearLayout>
+
 
             <LinearLayout
                 android:layout_width="match_parent"

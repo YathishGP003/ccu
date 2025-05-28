@@ -96,6 +96,10 @@ public class SyncStatusService {
     
     public void addUnSyncedEntity(String id) {
         CcuLog.i(HayStackConstants.LOG_TAG," addUnSyncedEntity "+id);
+        if(unsyncedIdList.contains(id)) {
+            CcuLog.i(HayStackConstants.LOG_TAG," addUnSyncedEntity already present "+id);
+            return;
+        }
         unsyncedIdList.add(id);
         if (fileSaveDelayTimer == null) {
             scheduleSyncDataSaveTimer();
@@ -151,6 +155,11 @@ public class SyncStatusService {
                 }
             }
         }, 15000);
+    }
+    public void clearSyncStatus() {
+        CcuLog.i(HayStackConstants.LOG_TAG,"clearSyncStatus");
+        unsyncedIdList.clear();
+        saveSyncStatus();
     }
 
     public void setDeletedEntitySynced(String id) {
@@ -231,6 +240,7 @@ public class SyncStatusService {
             HDictBuilder builder = new HDictBuilder();
             builder.add(entity);
             updateRefs(entity, builder);
+            updateLastModifiedDateTime(entity, builder);
             unsyncedDictList.add(builder.toDict());
         }
         HGrid unsyncedGridData = HGridBuilder.dictsToGrid(unsyncedDictList.toArray(new HDict[0]));

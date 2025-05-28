@@ -315,6 +315,22 @@
                     android:layout_margin="10dp"
                     android:text="Re-Sync" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:text="Clear the unsynced List "
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+
+                <Button
+                    android:id="@+id/unsyncedSyncBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:text="Remove - UnSync data " />
+
             </LinearLayout>
 
             <LinearLayout

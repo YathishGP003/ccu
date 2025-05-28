@@ -1,5 +1,7 @@
 package a75f.io.renatus.ENGG;
 
+import static a75f.io.renatus.UtilityApplication.context;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
 import android.view.LayoutInflater;
@@ -34,10 +37,12 @@ import org.projecthaystack.client.HClient;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -82,6 +87,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         return new DevSettings();
     }
     private final String TAG = "CCU_DEV_SETTINGS";
+    private final String pending = "PENDING";
+    private final String completed = "COMPLETED";
     private int previousControlLoopFrequency = 0;
 
     private int prevoiusAhuConnectPort = 0;
@@ -113,6 +120,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
 
     @BindView(R.id.forceSyncBtn)
     Button forceSyncBtn;
+    @BindView(R.id.unsyncedSyncBtn)
+    Button unsyncedSyncBtn;
     
     @BindView(R.id.testModBtn)
     ToggleButton testModBtn;
@@ -271,25 +280,65 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 },
                 ProgressDialogUtils::hideProgressDialog
         ));
-        
+
         deleteHis.setOnClickListener(view15 -> {
-            CcuLog.d(L.TAG_CCU," deleteHis data ");
-            ExecutorTask.executeAsync(
-                    () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting history data"),
-                    () -> CCUHsApi.getInstance().deleteHistory(),
-                    ProgressDialogUtils::hideProgressDialog
+            CcuLog.d(L.TAG_CCU, " deleteHis data ");
+            if (returnDevSettingPreference("his_box_sync").equals(pending)) {
+                Toast.makeText(getActivity(), "Clearing the his box history is already running ", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            updateDevSettingPreference("his_box_sync",pending);
+            ExecutorTask.executeBackground(
+                    () ->   CCUHsApi.getInstance().deleteHistory()
             );
+            updateDevSettingPreferencesWithDateAndTime("clear_his_box_history", "clear_hix_box_data", true);
+            Toast.makeText(getActivity(), "Successfully Cleared the local his box data ", Toast.LENGTH_SHORT).show();
+            updateDevSettingPreference("his_box_sync", completed);
+            ProgressDialogUtils.hideProgressDialog();
         });
 
         clearHisData.setOnClickListener(view15 -> {
-            CcuLog.d(L.TAG_CCU," Clear History data(Respecting Backfill time) ");
-            RxTask.executeAsync(() -> CCUHsApi.getInstance().trimObjectBoxHisStore());
-        });
+                    if (returnDevSettingPreference("object_box_sync").equals(pending)) {
+                        Toast.makeText(getActivity(), "Clearing the object box history is already running ", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    updateDevSettingPreference("object_box_sync", pending);
+                    ExecutorTask.executeBackground(
+                            () ->   CCUHsApi.getInstance().trimObjectBoxHisStore()
+                    );
+                    updateDevSettingPreferencesWithDateAndTime("clear_object_box_history", "clear_object_box_data", true);
+                    Toast.makeText(getActivity(), "Successfully Cleared the local object box data ", Toast.LENGTH_SHORT).show();
+                    updateDevSettingPreference("object_box_sync", completed);
+
+                }
+        );
+
 
         forceSyncBtn.setOnClickListener(view112 -> {
-            CcuLog.d(L.TAG_CCU," forceSync site data ");
+            if (returnDevSettingPreference("sync_local_data").equals(pending)) {
+                Toast.makeText(getActivity(), "syncing the local data to cloud  is already running ", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            updateDevSettingPreference("sync_local_data", pending);
+            ExecutorTask.executeBackground(() -> {
+                CcuLog.d(TAG, "Syncing local data to cloud");
+                CCUHsApi.getInstance().resyncSiteTree();
+            });
+            updateDevSettingPreferencesWithDateAndTime("sync_local_data_history", "sync_local_data", true);
+            Toast.makeText(getActivity(), "Successfully syncing the local data to cloud   ", Toast.LENGTH_SHORT).show();
+            updateDevSettingPreference("sync_local_data", completed);
+        });
 
-            CCUHsApi.getInstance().resyncSiteTree();
+        unsyncedSyncBtn.setOnClickListener(view111 -> {
+            if (returnDevSettingPreference("clear_unsynced_id_list").equals(pending)) {
+                Toast.makeText(getActivity(), "clearing the unsynced id list  is already running ", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            updateDevSettingPreference("clear_unsynced_id_list", pending);
+            CCUHsApi.getInstance().getSyncStatusService().clearSyncStatus();
+            updateDevSettingPreferencesWithDateAndTime("remove_unsync_list_history", "remove_unsync_list", true);
+            updateDevSettingPreference("clear_unsynced_id_list", completed);
+            Toast.makeText(getActivity(), "Successfully cleared  the unsynced id list", Toast.LENGTH_SHORT).show();
         });
 
         ackdMessagingBtn.setOnCheckedChangeListener((compoundButton, b) -> {
@@ -904,5 +953,31 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .edit().putString(key, value).apply();
     }
+    private String returnDevSettingPreference(String key) {
+        CcuLog.d(TAG,"Updating dev setting preference: "+key);
+       return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE).getString(key, completed);
+    }
+    private void updateDevSettingPreferencesWithDateAndTime(String historyKey, String buttonKey, boolean value) {
+        // Format the current date and time with timezone
+        String currentTimeDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
+                .format(new Date());
+        SharedPreferences prefs = Globals.getInstance().getApplicationContext()
+                .getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE);
+        String history = prefs.getString(historyKey, "");
+        List<String> entries = new ArrayList<>(Arrays.asList(history.split(",")));
+        if (history.isEmpty()) {
+            entries.clear();
+        }
+        entries.add(currentTimeDate);
+        if (entries.size() > 10) {
+            entries = entries.subList(entries.size() - 10, entries.size());
+        }
+        String updatedHistory = TextUtils.join(",", entries);
+        prefs.edit()
+                .putBoolean(buttonKey, value)
+                .putString(historyKey, updatedHistory)
+                .apply();
+    }
+
 
 }

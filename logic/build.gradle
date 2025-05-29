@@ -316,6 +316,8 @@ dependencies {
 
     testImplementation("org.mockito:mockito-core:4.1.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+
+    implementation project(':sanity')
 }
 repositories {
     mavenCentral()

@@ -1,5 +1,6 @@
 package a75f.io.sanity.framework
 
+import a75f.io.sanity.framework.ResultHandler.handleResult
 import android.util.Log
 
 class SanityRunner {
@@ -7,6 +8,7 @@ class SanityRunner {
         val results = mutableMapOf<SanityCase, SanityResult>()
 
         suite.getCases().forEach { case ->
+            Log.i(SANITTY_TAG, "Running case: ${case.getName()}")
             val result = case.execute()
             val report = case.report()
 
@@ -14,7 +16,8 @@ class SanityRunner {
                 name = case.getName(),
                 result = if (result) SanityResultType.PASSED else SanityResultType.FAILED,
                 report = report,
-                corrected = !result
+                corrected = case.correct(),
+                severity = case.getSeverity()
             )
 
             if (!result) {
@@ -22,7 +25,7 @@ class SanityRunner {
                     resultDto.corrected = true
                 }
             }
-
+            handleResult(resultDto)
             results[case] = resultDto
         }
 
@@ -38,7 +41,8 @@ class SanityRunner {
             name = case.getName(),
             result = if (result) SanityResultType.PASSED else SanityResultType.FAILED,
             report = report,
-            corrected = !result
+            corrected = case.correct(),
+            severity = case.getSeverity()
         )
 
         if (!result) {

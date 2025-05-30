@@ -8,12 +8,14 @@ interface SanityCase {
     /**
      * If the intention of the SanityCase is only to report , correct() method should return false
      */
-    fun correct(): Boolean
+    fun correct(): Boolean {
+        return false
+    }
 
     fun getDescription(): String {
         return "No description provided for ${getName()}"
     }
-    fun getSeverity(): Int {
-        return 0 // Default severity
+    fun getSeverity(): SanityResultSeverity {
+        return SanityResultSeverity.LOW
     }
 }

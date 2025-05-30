@@ -24,7 +24,6 @@ class SanityManager {
             suite.getCases().forEach { case ->
                 val result = runner.runCase(case)
                 emit(case to result)
-                delay(1000)
             }
         }
     }
@@ -51,7 +50,7 @@ class SanityManager {
             val editor = prefs.edit()
             val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
             val currentTime: String = sdf.format(Date())
-            editor.putString("Report_generated_at : ", currentTime)
+            editor.putString("_Report_generated_at : ", currentTime)
             runOnce(runner).collect { (case, result) ->
                 editor.putString(case.getName(), result.toString())
             }
@@ -69,7 +68,7 @@ class SanityManager {
             periodHours, TimeUnit.HOURS // ⏰
         )
             .addTag(sanitySuite)
-            .setInitialDelay(periodHours, TimeUnit.MINUTES)
+            .setInitialDelay(periodHours, TimeUnit.HOURS)
             .setInputData(data)
             .build()
 
@@ -87,10 +86,10 @@ class SanityManager {
             .build()
 
         val workRequest = PeriodicWorkRequestBuilder<SanityWorker>(
-            periodHours, TimeUnit.MINUTES
+            periodHours, TimeUnit.HOURS
         )
             .addTag("All")
-            .setInitialDelay(periodHours, TimeUnit.MINUTES)
+            .setInitialDelay(periodHours, TimeUnit.HOURS)
             .setInputData(data)
             .build()
 

@@ -29,6 +29,7 @@ open class StagedVfdRtuProfileConfig(modelDef : SeventyFiveFProfileDirective)
     lateinit var analogOut2HeatStage4 : ValueConfig
     lateinit var analogOut2HeatStage5 : ValueConfig
     lateinit var analogOut2Default : ValueConfig
+    lateinit var analogOut2Association : AssociationConfig
 
     override fun getDefaultConfiguration() : StagedVfdRtuProfileConfig {
         relay1Enabled = getDefaultEnableConfig(DomainName.relay1OutputEnable, model)
@@ -46,6 +47,7 @@ open class StagedVfdRtuProfileConfig(modelDef : SeventyFiveFProfileDirective)
         relay5Association = getDefaultAssociationConfig(DomainName.relay5OutputAssociation, model)
         relay6Association = getDefaultAssociationConfig(DomainName.relay6OutputAssociation, model)
         relay7Association = getDefaultAssociationConfig(DomainName.relay7OutputAssociation, model)
+        analogOut2Association = getDefaultAssociationConfig(DomainName.analog2OutputAssociation, model)
 
         analogOut2Enabled = getDefaultEnableConfig(DomainName.analog2OutputEnable, model)
         analogOut2Economizer = getDefaultValConfig(DomainName.analog2Economizer, model)
@@ -119,6 +121,13 @@ open class StagedVfdRtuProfileConfig(modelDef : SeventyFiveFProfileDirective)
         } else {
             getDefaultAssociationConfig(DomainName.relay7OutputAssociation, model).associationVal
         }
+
+        analogOut2Association.associationVal = if (analogOut2Enabled.enabled) {
+            stagedRtuEquip.analog2OutputAssociation.readDefaultVal().toInt()
+        } else {
+            getDefaultAssociationConfig(DomainName.analog2OutputAssociation, model).associationVal
+        }
+
         analogOut2Economizer.currentVal = stagedRtuEquip.analog2Economizer.readDefaultVal()
         analogOut2Recirculate.currentVal = stagedRtuEquip.analog2Recirculate.readDefaultVal()
         analogOut2CoolStage1.currentVal = stagedRtuEquip.analog2CoolStage1.readDefaultVal()
@@ -147,6 +156,7 @@ open class StagedVfdRtuProfileConfig(modelDef : SeventyFiveFProfileDirective)
             add(relay5Association)
             add(relay6Association)
             add(relay7Association)
+            add(analogOut2Association)
         }
     }
 
@@ -192,13 +202,14 @@ open class StagedVfdRtuProfileConfig(modelDef : SeventyFiveFProfileDirective)
                 " relay2Association ${relay2Association.associationVal} relay3Association ${relay3Association.associationVal}" +
                 " relay4Association ${relay4Association.associationVal} relay5Association ${relay5Association.associationVal}" +
                 " relay6Association ${relay6Association.associationVal} relay7Association ${relay7Association.associationVal} " +
-                " analogOut2Enabled ${analogOut2Enabled.enabled} analogOut2Economizer ${analogOut2Economizer.currentVal}" +
-                " analogOut2Recirculate ${analogOut2Recirculate.currentVal} analogOut2CoolStage1 ${analogOut2CoolStage1.currentVal}" +
-                " analogOut2CoolStage2 ${analogOut2CoolStage2.currentVal} analogOut2CoolStage3 ${analogOut2CoolStage3.currentVal}" +
-                " analogOut2CoolStage4 ${analogOut2CoolStage4.currentVal} analogOut2CoolStage5 ${analogOut2CoolStage5.currentVal}" +
-                " analogOut2HeatStage1 ${analogOut2HeatStage1.currentVal} analogOut2HeatStage2 ${analogOut2HeatStage2.currentVal}" +
-                " analogOut2HeatStage3 ${analogOut2HeatStage3.currentVal} analogOut2HeatStage4 ${analogOut2HeatStage4.currentVal}" +
-                " analogOut2HeatStage5 ${analogOut2HeatStage5.currentVal} analogOut2Default ${analogOut2Default.currentVal} "
+                " analogOut2Enabled ${analogOut2Enabled.enabled} analogOut2Association ${analogOut2Association.associationVal} " +
+                "analogOut2Economizer ${analogOut2Economizer.currentVal} analogOut2Recirculate ${analogOut2Recirculate.currentVal} " +
+                "analogOut2CoolStage1 ${analogOut2CoolStage1.currentVal} analogOut2CoolStage2 ${analogOut2CoolStage2.currentVal} " +
+                "analogOut2CoolStage3 ${analogOut2CoolStage3.currentVal} analogOut2CoolStage4 ${analogOut2CoolStage4.currentVal} " +
+                "analogOut2CoolStage5 ${analogOut2CoolStage5.currentVal} analogOut2HeatStage1 ${analogOut2HeatStage1.currentVal} " +
+                "analogOut2HeatStage2 ${analogOut2HeatStage2.currentVal} analogOut2HeatStage3 ${analogOut2HeatStage3.currentVal} " +
+                "analogOut2HeatStage4 ${analogOut2HeatStage4.currentVal} analogOut2HeatStage5 ${analogOut2HeatStage5.currentVal} " +
+                "analogOut2Default ${analogOut2Default.currentVal} "
     }
 
 }

@@ -1,7 +1,5 @@
 package a75f.io.renatus.profiles.system
 
-import a75f.io.domain.api.Domain
-import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,6 +8,7 @@ import androidx.compose.runtime.setValue
 class StagedRtuVfdViewState : StagedRtuViewState() {
 
     var analogOut2Enabled by mutableStateOf(false)
+    var analogOut2Association by mutableStateOf(0)
     //var analogOut2 by mutableStateOf (0)
 
     var analogOut2Economizer by mutableStateOf(0)
@@ -48,6 +47,7 @@ class StagedRtuVfdViewState : StagedRtuViewState() {
                 this.relay5Association = config.relay5Association.associationVal
                 this.relay6Association = config.relay6Association.associationVal
                 this.relay7Association = config.relay7Association.associationVal
+                this.analogOut2Association = config.analogOut2Association.associationVal
                 this.analogOut2Economizer = config.analogOut2Economizer.currentVal.toInt()
                 this.analogOut2Recirculate = config.analogOut2Recirculate.currentVal.toInt()
                 this.analogOut2CoolStage1 = config.analogOut2CoolStage1.currentVal.toInt()
@@ -83,6 +83,7 @@ class StagedRtuVfdViewState : StagedRtuViewState() {
         config.relay5Association.associationVal = this.relay5Association
         config.relay6Association.associationVal = this.relay6Association
         config.relay7Association.associationVal = this.relay7Association
+        config.analogOut2Association.associationVal = this.analogOut2Association
         config.analogOut2Economizer.currentVal = this.analogOut2Economizer.toDouble()
         config.analogOut2Recirculate.currentVal = this.analogOut2Recirculate.toDouble()
         config.analogOut2CoolStage1.currentVal = this.analogOut2CoolStage1.toDouble()

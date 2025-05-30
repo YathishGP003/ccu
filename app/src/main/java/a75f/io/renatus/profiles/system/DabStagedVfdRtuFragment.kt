@@ -153,7 +153,8 @@ class DabStagedVfdRtuFragment : DStagedRtuFragment() {
             || (viewState.value.relay4Enabled  && viewState.value.relay4Association == associationIndex )
             || (viewState.value.relay5Enabled  && viewState.value.relay5Association == associationIndex )
             || (viewState.value.relay6Enabled  && viewState.value.relay6Association == associationIndex )
-            || (viewState.value.relay7Enabled  && viewState.value.relay7Association == associationIndex)) {
+            || (viewState.value.relay7Enabled  && viewState.value.relay7Association == associationIndex)
+            || (viewState.value.analogOut2Enabled && viewState.value.analogOut2Association == associationIndex)) {
             return true
         }
         else {

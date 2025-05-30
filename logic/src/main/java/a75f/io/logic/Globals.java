@@ -466,6 +466,7 @@ public class Globals {
                         break;
                 }
             }
+            L.ccu().systemProfile.setFanTypeToStages(eq.getProfile());
         } else {
             CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create Default System Profile");
             L.ccu().systemProfile = new DefaultSystem();

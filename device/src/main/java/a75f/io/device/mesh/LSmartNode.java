@@ -14,6 +14,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -36,6 +37,7 @@ import a75f.io.device.serial.SmartNodeSettings2_t;
 import a75f.io.device.serial.SmartNodeSettings_t;
 import a75f.io.device.util.DeviceConfigurationUtil;
 import a75f.io.domain.BypassDamperEquip;
+import a75f.io.domain.OAOEquip;
 import a75f.io.domain.VavAcbEquip;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
@@ -49,6 +51,8 @@ import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
+import a75f.io.logic.bo.building.hvac.Stage;
+import a75f.io.logic.bo.building.system.FanType;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
@@ -102,6 +106,9 @@ public class LSmartNode
     }
     private static void fillSmartNodeSettings(SmartNodeSettings_t settings,Zone zone, short address, String equipRef,String profile) {
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+        HashMap<Object, Object> equipMap = ccuHsApi.readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+
         try
         {
             double coolingDeadband =
@@ -118,8 +125,7 @@ public class LSmartNode
             settings.minUserTemp.set((short) 69);
         }
 
-        HashMap<Object, Object> equipMap = ccuHsApi.readMapById(equipRef);
-        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+
 
         if (profile.equals("bypass")) {
             settings.minDamperOpen.set(Short.parseShort(String.valueOf(ccuHsApi.readDefaultVal("point and domainName == \"" + DomainName.damperMinPosition + "\" and equipRef == \"" + equip.getId() + "\"").intValue())));
@@ -231,6 +237,107 @@ public class LSmartNode
             settings.enableOccupationDetection.set((short) getConfigNumVal("enable and occupancy", address));
         } catch (Exception e) {
             settings.enableOccupationDetection.set((short)0);
+        }
+
+        if (profile.equals("oao")) {
+            OAOEquip oaoEquip = new OAOEquip(equipRef);
+            int outsideMin = (int) oaoEquip.getOutsideDamperMinDrive().readDefaultVal();
+            int outsideMax = (int) oaoEquip.getOutsideDamperMaxDrive().readDefaultVal();
+            int returnMin = (int) oaoEquip.getReturnDamperMinDrive().readDefaultVal();
+            int returnMax = (int) oaoEquip.getReturnDamperMaxDrive().readDefaultVal();
+            DamperActuator_t outSideAirActuatorType = getActuatorType(outsideMin, outsideMax);
+            DamperActuator_t returnAirActuatorType = getActuatorType(returnMin, returnMax);
+            int oaoDamperPos = getOaoDamperPos(oaoEquip);
+            settings.defaultOutsideAirOptimizationDamperPosition.set((short) oaoDamperPos);
+            settings.outsideAirOptimizationDamperActuatorType.set(outSideAirActuatorType);
+            settings.returnAirDamperActuatorType.set(returnAirActuatorType);
+            CcuLog.d(TAG_CCU_DEVICE, "OAO Damper Position: " + oaoDamperPos
+                    + "\nOutside Actuator Type: " + outSideAirActuatorType
+                    + "\nReturn Actuator Type: " + returnAirActuatorType
+                    + "\nOutside Min: " + outsideMin
+                    + "\nOutside Max: " + outsideMax
+                    + "\nReturn Min: " + returnMin
+                    + "\nReturn Max: " + returnMax);
+        }
+    }
+
+    private static int getOaoDamperPos(OAOEquip oaoEquip) {
+        try {
+
+            int reCirc = (int) oaoEquip.getOutsideDamperMinOpenDuringRecirculation().readDefaultVal();
+            int conditioning = (int) oaoEquip.getOutsideDamperMinOpenDuringConditioning().readDefaultVal();
+            int fanLow = (int) oaoEquip.getOutsideDamperMinOpenDuringFanLow().readDefaultVal();
+            int fanMid = (int) oaoEquip.getOutsideDamperMinOpenDuringFanMedium().readDefaultVal();
+            int fanHigh = (int) oaoEquip.getOutsideDamperMinOpenDuringFanHigh().readDefaultVal();
+            HashMap<FanType, Set<Stage>> fanTypeToStages = L.ccu().systemProfile.getFanTypeToStages();
+            CcuLog.d(TAG_CCU_DEVICE, "FanTypeToStages: " + fanTypeToStages);
+            final int[] damperSize = {0};
+            fanTypeToStages.forEach((fanType, stages) -> {
+
+                if (fanType.equals(FanType.RELAY)) {
+                    getDamperSize(stages, damperSize, fanLow, fanMid, fanHigh);
+                } else if (fanType.equals(FanType.ANALOG)) {
+                    damperSize[0] = Math.max(reCirc, conditioning);
+                } else if (fanType.equals(FanType.HYBRID)) {
+                    getDamperSize(stages, damperSize, fanLow, fanMid, fanHigh);
+                    damperSize[0] = Math.max(Math.max(reCirc, conditioning), damperSize[0]);
+                } else {
+                    damperSize[0] = 0;
+                }
+            });
+
+            CcuLog.d(TAG_CCU_DEVICE, "OAO Damper Position: " + damperSize[0]
+                    + "\nReCirc: " + reCirc
+                    + "\nConditioning: " + conditioning
+                    + "\nFanLow: " + fanLow
+                    + "\nFanMid: " + fanMid
+                    + "\nFanHigh: " + fanHigh);
+
+            return damperSize[0];
+        } catch (Exception e) {
+            CcuLog.e(TAG_CCU_DEVICE, "Error getting OAO damper position: " + e.getMessage());
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    private static void getDamperSize(Set<Stage> stages, int[] damperSize, int fanLow, int fanMid, int fanHigh) {
+        boolean hasFan1 = stages.contains(Stage.FAN_1);
+        boolean hasFan2 = stages.contains(Stage.FAN_2);
+        boolean hasFan3 = stages.contains(Stage.FAN_3);
+
+        if (hasFan1 && hasFan2 && hasFan3) {
+            damperSize[0] = Math.max(fanLow, Math.max(fanMid, fanHigh));
+        } else if (hasFan2 && hasFan3) {
+            damperSize[0] = Math.max(fanLow, fanMid);
+        } else if (hasFan1 && hasFan2) {
+            damperSize[0] = Math.max(fanMid, fanHigh);
+        } else if (hasFan1 && hasFan3) {
+            damperSize[0] = Math.max(fanLow, fanHigh);
+        } else if (hasFan1) {
+            damperSize[0] = fanHigh;
+        } else if (hasFan2) {
+            damperSize[0] = fanMid;
+        } else if (hasFan3) {
+            damperSize[0] = fanLow;
+        } else {
+            damperSize[0] = 0;
+        }
+    }
+
+    public static DamperActuator_t getActuatorType(int minDrive, int maxDrive) {
+        try {
+            if (minDrive < 2) {
+                return DamperActuator_t.valueOf(DamperActuator_t.DAMPER_ACTUATOR_0_10V.name());
+            } else if (minDrive >= 5 && maxDrive < 2) {
+                return DamperActuator_t.valueOf(DamperActuator_t.DAMPER_ACTUATOR_10_0V.name());
+            } else if (minDrive < 5) {
+                return DamperActuator_t.valueOf(DamperActuator_t.DAMPER_ACTUATOR_2_10V.name());
+            } else {
+                return DamperActuator_t.valueOf(DamperActuator_t.DAMPER_ACTUATOR_10_2V.name());
+            }
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return DamperActuator_t.DAMPER_ACTUATOR_NOT_PRESENT;
         }
     }
 

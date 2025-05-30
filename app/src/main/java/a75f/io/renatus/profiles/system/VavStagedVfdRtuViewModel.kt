@@ -10,6 +10,7 @@ import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.system.setFanTypeToStages
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
@@ -113,6 +114,7 @@ class VavStagedVfdRtuViewModel : StagedRtuProfileViewModel() {
             hayStack.syncEntityTree()
             hayStack.setCcuReady()
             initialPortValues = HashMap(profileConfiguration.unusedPorts)
+            setFanTypeToStages(profileConfiguration)
         }
     }
 

@@ -12,6 +12,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.dab.config.DabAdvancedHybridAhuConfig
+import a75f.io.logic.bo.building.system.setFanTypeToStages
 import a75f.io.logic.bo.building.system.util.deleteCurrentSystemProfile
 import a75f.io.logic.bo.building.system.util.getCurrentSystemEquip
 import a75f.io.logic.bo.building.system.util.getDabConnectEquip
@@ -112,6 +113,11 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                 updateConditioningMode()
                 hayStack.syncEntityTree()
                 hayStack.setCcuReady()
+                setFanTypeToStages(
+                    profileConfiguration.cmConfiguration,
+                    profileConfiguration.cmConfiguration,
+                    profileConfiguration.connectConfiguration
+                )
             }
 
         }

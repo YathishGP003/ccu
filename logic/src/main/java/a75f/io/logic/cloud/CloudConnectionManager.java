@@ -1,19 +1,16 @@
 package a75f.io.logic.cloud;
 
-import android.util.Log;
+import static a75f.io.constants.HttpConstants.APP_NAME_HEADER_NAME;
+import static a75f.io.constants.HttpConstants.APP_NAME_HEADER_VALUE;
 
 import android.app.AlarmManager;
 import android.content.Context;
 
 import org.jetbrains.annotations.NotNull;
 import org.projecthaystack.HDateTime;
-import org.projecthaystack.HDict;
-import org.projecthaystack.HGrid;
-import org.projecthaystack.HRow;
 import org.projecthaystack.io.HZincReader;
 
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +42,7 @@ public class CloudConnectionManager {
 
                     Request originalRequest = chain.request();
                     Request newRequest = originalRequest.newBuilder()
+                            .header(APP_NAME_HEADER_NAME, APP_NAME_HEADER_VALUE)
                             .header("Authorization", "Bearer " + bearerToken)
                             .build();
 

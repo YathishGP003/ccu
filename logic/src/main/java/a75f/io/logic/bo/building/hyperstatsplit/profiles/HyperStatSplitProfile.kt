@@ -220,13 +220,17 @@ abstract class HyperStatSplitProfile(equipRef: String, nodeAddress: Short) : Zon
         }
     }
 
-    open fun doFanEnabled(currentState: ZoneState, whichPort: Port, fanLoopOutput: Int) {
+    open fun doFanEnabled(currentState: ZoneState, whichPort: Port, fanLoopOutput: Int, isFanLoopCounterEnabled: Boolean = false) {
         // Then Relay will be turned On when the zone is in occupied mode Or
         // any conditioning is happening during an unoccupied schedule
-
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON," Relay : $whichPort ,  isFanLoopCounterEnabled $isFanLoopCounterEnabled ")
         if (occupancyStatus == Occupancy.OCCUPIED || fanLoopOutput > 0) {
             hssEquip.fanEnable.writeHisVal(1.0)
         } else if (occupancyStatus != Occupancy.OCCUPIED || (currentState == ZoneState.COOLING || currentState == ZoneState.HEATING)) {
+            if (isFanLoopCounterEnabled){
+                hssEquip.fanEnable.writeHisVal(1.0)
+                return
+            }
             hssEquip.fanEnable.writeHisVal(0.0)
         }
     }

@@ -54,6 +54,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
     private var fanLoopOutput = 0
     private var doorWindowSensorOpenStatus = false
     private var runFanLowDuringDoorWindow = false
+    private var hasZeroFanLoopBeenHandled = false
 
 
     // Flags for keeping tab of occupancy during linear fan operation(Only to be used in doAnalogFanActionCpu())
@@ -178,7 +179,9 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
                 previousFanLoopValStaged = fanLoopForAnalog
             }
             // When in dead-band, set the fan-loopForAnalog to the recirculate analog value. Also ensure fan protection is not ON
-            if ((fanLoopOutput == 0 || runFanLowDuringDoorWindow) && fanProtectionCounter == 0 && isInSoftOccupiedMode()) {
+            // added the new check if the fan loop output is with in relayActivationHysteresis ,sending the Analog recirculate value
+            val relayActivationHysteresis = equip.standaloneRelayActivationHysteresis.readPriorityVal();
+            if ((fanLoopOutput == 0 || runFanLowDuringDoorWindow || (fanLoopOutput > 0 && fanLoopOutput < relayActivationHysteresis)) && fanProtectionCounter == 0 && isInSoftOccupiedMode()) {
                 fanLoopForAnalog = getPercentFromVolt(getAnalogRecirculateValueActivated(equip).roundToInt())
                 logMsg = "Deadband"
             }
@@ -465,6 +468,10 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             userIntents: UserIntents, basicSettings: BasicSettings, relayStages: HashMap<String, Int>, equip: CpuV2Equip
     ) {
         val relayMapping = HsCpuRelayMapping.values().find { it.ordinal == association }
+        var isFanLoopCounterEnabled = false;
+        if (previousFanLoopVal > 0 && fanLoopCounter > 0) {
+            isFanLoopCounterEnabled = true
+        }
         when (relayMapping) {
             HsCpuRelayMapping.COOLING_STAGE_1, HsCpuRelayMapping.COOLING_STAGE_2, HsCpuRelayMapping.COOLING_STAGE_3 -> {
                 if (basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY
@@ -493,7 +500,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
                 }
             }
 
-            HsCpuRelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput, relayStages)
+            HsCpuRelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput, relayStages,isFanLoopCounterEnabled)
             HsCpuRelayMapping.OCCUPIED_ENABLED -> doOccupiedEnabled(port)
             HsCpuRelayMapping.HUMIDIFIER -> doHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMinInsideHumidity, equip.zoneHumidity.readHisVal())
             HsCpuRelayMapping.DEHUMIDIFIER -> doDeHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMaxInsideHumidity, equip.zoneHumidity.readHisVal())
@@ -626,11 +633,15 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
     private fun updateTitle24LoopCounter(tuners: HyperStatProfileTuners, basicSettings: BasicSettings) {
         // Check if there is change in occupancy and the fan-loop output is less than the previous value,
         // then offer the fan protection
-        if ((occupancyStatus != previousOccupancyStatus && fanLoopOutput < previousFanLoopVal) ||
-                (basicSettings.fanMode != previousFanStageStatus && fanLoopOutput < previousFanLoopVal)) {
+        CcuLog.d( L.TAG_CCU_HSCPU, "Occupancy: $occupancyStatus, Fan Loop Output: $fanLoopOutput, Previous Fan Loop Val: $previousFanLoopVal, Fan Loop Counter: $fanLoopCounter , hasZeroFanLoopBeenHandled $hasZeroFanLoopBeenHandled")
+        if ((occupancyStatus != previousOccupancyStatus && fanLoopOutput < previousFanLoopVal) || (basicSettings.fanMode != previousFanStageStatus && fanLoopOutput < previousFanLoopVal) ||
+            (fanLoopOutput == 0 && fanLoopOutput < previousFanLoopVal && !hasZeroFanLoopBeenHandled)) {
             fanLoopCounter = tuners.minFanRuntimePostConditioning
-        } else if (occupancyStatus != previousOccupancyStatus && fanLoopOutput > previousFanLoopVal)
+            hasZeroFanLoopBeenHandled = true
+        } else if ((occupancyStatus != previousOccupancyStatus || (hasZeroFanLoopBeenHandled && fanLoopOutput > 0)) && fanLoopOutput > previousFanLoopVal) {
             fanLoopCounter = 0 // Reset the counter if the fan-loop output is greater than the previous value
+            hasZeroFanLoopBeenHandled = false
+        }
     }
 
     /**

@@ -187,15 +187,19 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
     }
 
     fun doFanEnabled(currentState: ZoneState, whichPort: Port, fanLoopOutput: Int,
-                     relayStages: HashMap<String, Int>) {
-        // Then Relay will be turned On when the zone is in occupied mode Or
-        // any conditioning is happening during an unoccupied schedule
-
+                     relayStages: HashMap<String, Int>, isFanLoopCounterEnabled : Boolean = false) {
+        CcuLog.d(L.TAG_CCU_HSCPU," Relay : $whichPort ,  isFanLoopCounterEnabled $isFanLoopCounterEnabled ")
         if (occupancyStatus == Occupancy.OCCUPIED || fanLoopOutput > 0) {
             updateLogicalPoint(logicalPointsList[whichPort]!!, 1.0)
             relayStages[AnalogOutput.FAN_ENABLED.name] = 1
         } else if (occupancyStatus != Occupancy.OCCUPIED ||
             (currentState == ZoneState.COOLING || currentState == ZoneState.HEATING)) {
+            // In order to protect the fan, persist the fan for few cycles when there is a sudden change in
+            // occupancy and decrease in fan loop output
+            if (isFanLoopCounterEnabled ) {
+                updateLogicalPoint(logicalPointsList[whichPort]!!, 1.0)
+                return
+            }
             updateLogicalPoint(logicalPointsList[whichPort]!!, 0.0)
         }
     }

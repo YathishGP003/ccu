@@ -1286,6 +1286,7 @@ object DomainName {
     const val homeAppVersion = "homeAppVersion"
     const val otaStatusCCU = "otaStatusCCU"
     const val otaStatusCM = "otaStatusCM"
+    const val modbusSerialConnection = "modbusSerialConnection"
 
 
     // CCU Specific points

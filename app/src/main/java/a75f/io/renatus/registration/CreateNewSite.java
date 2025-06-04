@@ -1098,7 +1098,7 @@ public class CreateNewSite extends Fragment {
             L.ccu().setCCUName(ccuName);
             CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuRef));
         }
-        L.ccu().systemProfile = new DefaultSystem();
+        L.ccu().systemProfile = new DefaultSystem().createDefaultSystemEquip();
         DomainManager.INSTANCE.addSystemDomainEquip(CCUHsApi.getInstance());
         updateMigrationDiagWithAppVersion();
         CcuLog.d(TAG, "RegisterCcuToExistingSite postSiteCreationSetup() complete");

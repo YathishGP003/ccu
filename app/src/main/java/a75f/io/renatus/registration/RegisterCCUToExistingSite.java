@@ -209,7 +209,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
                     L.saveCCUState();
                     L.ccu().setCCUName(ccuName);
                     String ccuId = getCcuId(ccuName, installerEmail, managerEmail);
-                    L.ccu().systemProfile = new DefaultSystem();
+                    L.ccu().systemProfile = new DefaultSystem().createDefaultSystemEquip();
                     DomainManager.INSTANCE.addSystemDomainEquip(CCUHsApi.getInstance());
                     CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuId));
                     CCUHsApi.getInstance().registerCcu(installerEmail);

@@ -61,12 +61,11 @@ public class DefaultSystemProfile extends Fragment
                             systemProfile.deleteSystemEquip();
                             L.ccu().systemProfile = null;
                             }
-                            systemProfile = new DefaultSystem();
-                            L.ccu().systemProfile = systemProfile;
+                            L.ccu().systemProfile = new DefaultSystem().createDefaultSystemEquip();
                             CCUHsApi.getInstance().saveTagsData();
                             CCUHsApi.getInstance().syncEntityTree();
                         },
-                        () -> ProgressDialogUtils.hideProgressDialog()
+                        ProgressDialogUtils::hideProgressDialog
                     );
 
             }

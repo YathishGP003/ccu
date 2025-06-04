@@ -196,6 +196,11 @@ object DomainManager {
                         DabModulatingRtuSystemEquip(systemEquip["id"].toString())
                     }
 
+                     DomainName.defaultSystemEquip -> {
+                        CcuLog.i(Domain.LOG_TAG, "Add defaultSystemEquip systemEquip to domain ")
+                            DefaultSystemEquip(systemEquip["id"].toString())
+                     }
+
                     else -> {
                         CcuLog.e(Domain.LOG_TAG, "Unknown system equip ${systemEquip["domainName"]}")
                         DomainEquip(systemEquip["id"].toString())
@@ -203,7 +208,6 @@ object DomainManager {
                 }
             } else  {
                 CcuLog.e(Domain.LOG_TAG, "Unknown system (${systemEquip["profile"]}) equip does not contains domainName ")
-                Domain.systemEquip = DefaultSystemEquip(systemEquip["id"].toString())
             }
         } else {
             CcuLog.e(Domain.LOG_TAG, "No system equip found")

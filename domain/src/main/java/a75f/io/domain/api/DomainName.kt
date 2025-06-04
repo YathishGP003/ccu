@@ -1392,5 +1392,6 @@ object DomainName {
     const val disableTouch = "disableTouch"
     const val enableBrightness = "enableBrightness"
     const val enableCo2Display = "enableCo2Display"
+    const val defaultSystemEquip = "defaultSystemEquip"
 }
 

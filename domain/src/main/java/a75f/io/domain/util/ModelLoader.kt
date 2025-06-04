@@ -195,6 +195,10 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_MYSTAT_PIPE2)
     }
 
+    fun getDefaultSystemProfileModel(): ModelDirective {
+        return ModelCache.getModelById(MODEL_DEFAULT_SYSTEM_PROFILE)
+    }
+
     fun getModelForDomainName( domainName : String) : ModelDirective {
         return when(domainName) {
             "smartnodeVAVReheatNoFan" -> getSmartNodeVavNoFanModelDef()

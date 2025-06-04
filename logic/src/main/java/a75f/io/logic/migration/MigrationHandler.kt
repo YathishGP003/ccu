@@ -24,6 +24,7 @@ import a75f.io.domain.cutover.DabFullyModulatingRtuCutOverMapping
 import a75f.io.domain.cutover.DabStagedRtuCutOverMapping
 import a75f.io.domain.cutover.DabStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.DabZoneProfileCutOverMapping
+import a75f.io.domain.cutover.DefaultSystemCutOverMapping
 import a75f.io.domain.cutover.HyperStatDeviceCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitCpuCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitDeviceCutoverMapping
@@ -87,6 +88,7 @@ import a75f.io.logic.bo.building.plc.addBaseProfileConfig
 import a75f.io.logic.bo.building.plc.doPlcDomainModelCutOverMigration
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration
+import a75f.io.logic.bo.building.system.DefaultSystemConfig
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
@@ -160,6 +162,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     override fun doMigration() {
         CCUBaseConfigurationMigrationHandler().doCCUBaseConfigurationMigration(hayStack)
+        doDefaultSystemDomainModelMigration()
         doVavTerminalDomainModelMigration()
         doDabTerminalDomainModelMigration()
         doVavSystemDomainModelMigration()
@@ -430,6 +433,46 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
 
         hayStack.scheduleSync()
+    }
+
+    private fun doDefaultSystemDomainModelMigration() {
+        val defaultSystemEquip = hayStack.readEntity("equip and not domainName and system and default and $not_external_model_query")
+
+        val site = hayStack.site
+        if (defaultSystemEquip.isEmpty() || site == null) {
+            CcuLog.i(Domain.LOG_TAG, "Default DM system equip migration not required : site $site")
+            return
+        }
+        CcuLog.i(Domain.LOG_TAG, "Default DM system equip migration started : equip $defaultSystemEquip")
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val deviceModel = ModelLoader.getCMDeviceModel() as SeventyFiveFDeviceDirective
+        val deviceDis = hayStack.siteName +"-"+ deviceModel.name
+
+        val model = ModelLoader.getDefaultSystemProfileModel()
+        val equipDis = "${site.displayName}-${model.name}"
+        val profileConfig = DefaultSystemConfig(model as SeventyFiveFProfileDirective)
+        val equipId = defaultSystemEquip["id"].toString()
+
+        equipBuilder.doCutOverMigration(equipId, model,
+            equipDis, DefaultSystemCutOverMapping.entries , profileConfig.getDefaultConfiguration(), isSystem = true,equipHashMap = defaultSystemEquip)
+
+        val entityMapper = EntityMapper(model)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+
+        val cmDevice = hayStack.readEntity("cm and device")
+        if (cmDevice.isNotEmpty()) {
+            CcuLog.d(Domain.LOG_TAG, "Deleting cm device")
+            hayStack.deleteEntityTree(cmDevice["id"].toString())
+        }
+
+        CcuLog.i(Domain.LOG_TAG, " buildDeviceAndPoints")
+        deviceBuilder.buildDeviceAndPoints(
+            profileConfig.getActiveConfiguration(),
+            deviceModel,
+            equipId,
+            hayStack.site!!.id,
+            deviceDis
+        )
     }
 
     private fun removeDuplicateBuildingAndSystemPoints() {

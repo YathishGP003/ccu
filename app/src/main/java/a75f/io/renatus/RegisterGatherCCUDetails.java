@@ -170,7 +170,7 @@ public class RegisterGatherCCUDetails extends Activity {
                 L.saveCCUState();
                 L.ccu().setCCUName(ccuName);
                 String ccuId = getCcuId(ccuName, installerEmail, managerEmail);
-                L.ccu().systemProfile = new DefaultSystem();
+                L.ccu().systemProfile = new DefaultSystem().createDefaultSystemEquip();
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuId));
                 CCUHsApi.getInstance().registerCcu(installerEmail);
                 prefs.setString(CcuFieldConstants.INSTALLER_EMAIL, installerEmail);

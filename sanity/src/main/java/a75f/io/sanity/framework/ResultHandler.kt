@@ -1,7 +1,8 @@
 package a75f.io.sanity.framework
 
 import a75f.io.alerts.AlertManager
-import a75f.io.alerts.CCU_SANITY_FAILED
+import a75f.io.alerts.SANITY_CHECK_STATUS
+import a75f.io.api.haystack.CCUHsApi
 import android.util.Log
 
 object ResultHandler {
@@ -18,9 +19,12 @@ object ResultHandler {
     }
 
     fun generateAlert(result: SanityResult) {
+        val ccuName = CCUHsApi.getInstance().ccuName
+        val alertMessage = String.format("%s Sanity check failed - %s",ccuName, result.name)
+
         AlertManager.getInstance().generateAlert(
-            CCU_SANITY_FAILED,
-            "Sanity check failed: ${result.name}",
+            SANITY_CHECK_STATUS,
+            alertMessage,
         )
     }
 }

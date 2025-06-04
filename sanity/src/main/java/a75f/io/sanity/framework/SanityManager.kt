@@ -24,6 +24,7 @@ class SanityManager {
             suite.getCases().forEach { case ->
                 val result = runner.runCase(case)
                 emit(case to result)
+                delay(1000) // TODO- TEST
             }
         }
     }

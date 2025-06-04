@@ -51,6 +51,7 @@ class SanityRunner {
             }
         }
         Log.i(SANITTY_TAG, "Case ${case.getName()} result: ${resultDto.result.name}")
+        handleResult(resultDto)
         return resultDto
     }
 }

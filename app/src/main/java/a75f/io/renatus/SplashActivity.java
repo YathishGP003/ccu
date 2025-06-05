@@ -91,40 +91,33 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             finish();
         }  else if(!site.isEmpty() && !prefs.getBoolean(PreferenceConstants.CCU_SETUP) &&
             prefs.getString("INSTALL_TYPE").equals("CREATENEW")) {
-            if (prefs.getBoolean("siteRegistrationRetry")) {
-                Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
-                i.putExtra("viewpager_position", 3);
-                startActivity(i);
-                finish();
-            } else {
-                if (!CCUHsApi.getInstance().isCCURegistered()) {
-                    CcuLog.d(TAG, "Site was successfully created but ccu device is not registered/created. " +
-                            "Creating and Registering CCU now.");
-                    ExecutorTask.executeAsync(
-                            () -> CcuLog.i(TAG, "Create CCU & Diag Equip "),
-                            () -> {
-                                if (!CCUHsApi.getInstance().isCCURegistered()) {
-                                    CreateNewSite.postSiteCreationSetup(
-                                            false, site, prefs.getString("temp_ccu_name"),
-                                            site.get(Tags.INSTALLER_EMAIL).toString(),
-                                            site.get(Tags.FM_EMAIL).toString());
-                                }
-                            },
-                            () -> {
-                                prefs.remove("temp_ccu_name");
-                                prefs.setBoolean(PreferenceConstants.CCU_SETUP, true);
-                                PreferenceUtil.setTempModeMigrationNotRequired();
-                                L.saveCCUState();
-                                CcuLog.i(TAG, "CCU Setup Complete ");
+            if(!CCUHsApi.getInstance().isCCURegistered()) {
+                CcuLog.d(TAG, "Site was successfully created but ccu device is not registered/created. " +
+                        "Creating and Registering CCU now.");
+                ExecutorTask.executeAsync(
+                        () -> CcuLog.i(TAG,"Create CCU & Diag Equip "),
+                        () -> {
+                            if (!CCUHsApi.getInstance().isCCURegistered()) {
+                                CreateNewSite.postSiteCreationSetup(
+                                        false, site, prefs.getString("temp_ccu_name"),
+                                        site.get(Tags.INSTALLER_EMAIL).toString(),
+                                        site.get(Tags.FM_EMAIL).toString());
                             }
-                    );
-                }
-                CcuLog.i(TAG, "CCU Setup is not completed");
-                Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
-                i.putExtra("viewpager_position", 21);
-                startActivity(i);
-                finish();
+                        },
+                        () -> {
+                            prefs.remove("temp_ccu_name");
+                            prefs.setBoolean(PreferenceConstants.CCU_SETUP, true);
+                            PreferenceUtil.setTempModeMigrationNotRequired();
+                            L.saveCCUState();
+                            CcuLog.i(TAG,"CCU Setup Complete ");
+                        }
+                );
             }
+            CcuLog.i(TAG,"CCU Setup is not completed");
+            Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
+            i.putExtra("viewpager_position", 21);
+            startActivity(i);
+            finish();
         } else if(prefs.getBoolean(PreferenceConstants.CCU_SETUP) && !prefs.getBoolean(PreferenceConstants.PROFILE_SETUP)
                 && !prefs.getBoolean("ADD_CCU")) {
             CcuLog.i(TAG,"No profile synced navigate to create profile");

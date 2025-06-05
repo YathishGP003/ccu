@@ -300,14 +300,4 @@ public class CCUUiUtil {
         return CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + domainName + "\" " +
                 " and equipRef ==\"" + equipRef + "\"");
     }
-
-    public static int getSecondaryColor() {
-        if (BuildConfig.BUILD_TYPE.equals(CARRIER_PROD)) {
-            return ContextCompat.getColor(context, R.color.carrier_75f_secondary);
-        } else if (BuildConfig.BUILD_TYPE.equals(AIROVERSE_PROD)) {
-            return ContextCompat.getColor(context, R.color.airoverse_secondary);
-        } else {
-            return ContextCompat.getColor(context, R.color.renatus_75f_secondary);
-        }
-    }
 }

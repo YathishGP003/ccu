@@ -42,21 +42,21 @@ import androidx.fragment.app.FragmentTransaction;
 
 import org.projecthaystack.client.HClient;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Site;
-import a75f.io.api.haystack.sync.CareTakerResponse;
-
-import java.util.HashMap;
-import java.util.List;
-
 import a75f.io.api.haystack.Zone;
-
+import a75f.io.constants.CcuFieldConstants;
+import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.preconfig.PreconfigurationManager;
 import a75f.io.logic.preconfig.PreconfigurationState;
@@ -85,6 +85,9 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.util.ExecutorTask;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.seventyfivef.domainmodeler.client.ModelDirective;
+import io.seventyfivef.domainmodeler.common.Version;
 
 public class FreshRegistration extends AppCompatActivity implements VerticalTabAdapter.OnItemClickListener, SwitchFragment {
     VerticalTabAdapter verticalTabAdapter;
@@ -327,12 +330,10 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             }
             if (currentFragment instanceof CongratsFragment) {
                 prefs.setBoolean("REGISTRATION", true);
-                ExecutorTask.executeBackground(() -> Globals.getInstance().copyModels());
-                if (prefs.getString("INSTALL_TYPE").equals("PRECONFIGCCU")) {
-                    registerSite(currentFragment.getView());
-                } else {
-                    registerCCU();
-                }
+                ExecutorTask.executeBackground(() -> {
+                    Globals.getInstance().copyModels();
+                });
+                updateCCURegistrationInfo();
                 buttonNext.setEnabled(true);
             }
         });
@@ -1272,148 +1273,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         container.setLayoutParams(paramsPager);
     }
 
-    private void registerSite(View currentView) {
-        ProgressDialogUtils.showProgressDialog(this,"CCU Registering...");
-        buttonNext.setEnabled(false);
-
-        ExecutorTask.executeBackground(() -> {
-            if (!Globals.getInstance().siteAlreadyCreated()) {
-                DefaultSchedules.generateDefaultSchedule(false, null);
-            }
-
-            prefs.setBoolean(PreferenceConstants.CCU_SETUP, true);
-            prefs.setBoolean(PreferenceConstants.PROFILE_SETUP, true);
-        });
-        //This is a hack to give bit more time to complete Site-registration before we start
-        //CCU registration
-        if (!CCUHsApi.getInstance().siteSynced()) {
-            if (pingCloudServer()){
-                ExecutorTask.executeBackground(() -> {
-                    try {
-                        CareTakerResponse siteResponse = CCUHsApi.getInstance().registerSite();
-
-                        if (siteResponse == null) {
-                            SnackbarUtil.showInfoMessage(currentView, "Error registering site. Please try again");
-                            CcuLog.w(L.TAG_REGISTRATION, "Error registering site. NULL response.");
-                            return;
-                        }
-                        CcuLog.i(L.TAG_REGISTRATION, "Site registration response: " + siteResponse);
-                        if (siteResponse.getResponseCode() == 200) {
-                            CcuLog.i(L.TAG_REGISTRATION, "Site registered successfully.");
-                            Site siteObject = CCUHsApi.getInstance().getSite();
-                            CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
-                                    HayStackConstants.USER, HayStackConstants.PASS), siteObject);
-
-                            registerCcuInBackground();
-
-                            //Delaying the schedule download a bit to make sure it is created.
-                            sleep(1000);
-                            updateDefaultSchedule(CCUHsApi.getInstance());
-                            launchLandingActivity();
-
-                        } else if (siteResponse.getResponseCode() >= 400) {
-                            if (siteResponse.getErrorResponse() != null && siteResponse.getErrorResponse().getMessage() != null) {
-                                CcuLog.w(L.TAG_REGISTRATION, "Error registering site." + siteResponse.getErrorResponse().getMessage());
-                                SnackbarUtil.showConfirmationMessage(currentView,
-                                        "Registration Failed !!",
-                                        getRegistrationErrorMessage(siteResponse),
-                                        this::launchLandingActivity);
-                            } else {
-                                SnackbarUtil.showConfirmationMessage(currentView,
-                                        "Registration Failed !!",
-                                        getRegistrationErrorMessage(siteResponse),
-                                        this::launchLandingActivity);
-                                CcuLog.w(L.TAG_REGISTRATION, "Error registering site." + siteResponse);
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        CcuLog.w("CCU_HS", "Unexpected error registering site.", e);
-                        SnackbarUtil.showConfirmationMessage(currentView,
-                                "Registration Failed !!",
-                                getRegistrationErrorMessage(null),
-                                this::launchLandingActivity);
-                    }
-
-                    runOnUiThread(ProgressDialogUtils::hideProgressDialog);
-
-                });
-            } else {
-                ProgressDialogUtils.hideProgressDialog();
-                new AlertDialog.Builder(FreshRegistration.this)
-                        .setCancelable(false)
-                        .setMessage("No network connection, Registration is not complete and Facilisight cannot be accessed unless you connect to network.")
-                        .setPositiveButton("Proceed", (dialog, id) -> {
-                            registerCcuInBackground();
-                           launchLandingActivity();
-                        })
-                        .show();
-            }
-
-
-        } else {
-            CcuLog.i(L.TAG_REGISTRATION, "Site already registered.");
-        }
-    }
-
-    private String getRegistrationErrorMessage(CareTakerResponse siteResponse) {
-        if (siteResponse.getErrorResponse() != null && siteResponse.getErrorResponse().getMessage() != null) {
-            return siteResponse.getErrorResponse().getMessage();
-        } else {
-            return "Error registering site. " +
-                    "Update details from Settings screen and register again";
-        }
-    }
-
-    private void launchLandingActivity() {
-        Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
-        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(i);
-        finish();
-
-    }
-
-    private void registerCCU() {
-        ProgressDialogUtils.showProgressDialog(this,"CCU Registering...");
-        buttonNext.setEnabled(false);
-
-        CcuLog.i(L.TAG_REGISTRATION, "registerCCU");
-        if (!Globals.getInstance().siteAlreadyCreated()) {
-            DefaultSchedules.generateDefaultSchedule(false, null);
-        }
-        prefs.setBoolean(PreferenceConstants.CCU_SETUP, true);
-        prefs.setBoolean(PreferenceConstants.PROFILE_SETUP, true);
-        boolean isNetworkAvailable = pingCloudServer();
-        if (isNetworkAvailable){
-            CcuLog.i(L.TAG_REGISTRATION, "send registration request to server");
-            registerCcuInBackground();
-            ExecutorTask.executeBackground(() -> {
-                try {
-                    //Delaying the schedule download a bit to make sure it is created.
-                    sleep(1000);
-                    updateDefaultSchedule(CCUHsApi.getInstance());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    CcuLog.e(L.TAG_REGISTRATION, "Unexpected error updating default schedule. : "+e.getMessage());
-                }
-            });
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                ProgressDialogUtils.hideProgressDialog();
-                launchLandingActivity();
-            }, 2000);
-        } else {
-            CcuLog.e(L.TAG_REGISTRATION, "No network connection or server not reachable, Registration is not complete !!");
-            new AlertDialog.Builder(FreshRegistration.this)
-                    .setCancelable(false)
-                    .setMessage("No network connection, Registration is not complete and Facilisight cannot be accessed unless you connect to network.")
-                    .setPositiveButton("Proceed", (dialog, id) -> {
-                        registerCcuInBackground();
-                        launchLandingActivity();
-                    })
-                    .show();
-        }
-    }
-
     private void updateCCURegistrationInfo() {
         ProgressDialogUtils.showProgressDialog(this,"CCU Registering...");
         buttonNext.setEnabled(false);
@@ -1421,9 +1280,9 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         //This is a hack to give bit more time to complete Site-registration before we start
         //CCU registration
         long delay = CCUHsApi.getInstance().siteSynced() ? 1000 : 30000;
-        CcuLog.i(L.TAG_REGISTRATION, "updateCCURegistrationInfo with delay "+delay);
+        CcuLog.i(L.TAG_CCU_UI, "updateCCURegistrationInfo with delay "+delay);
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            CcuLog.i(L.TAG_REGISTRATION, "updateCCURegistrationInfo");
+            CcuLog.i(L.TAG_CCU_UI, "updateCCURegistrationInfo");
             if (!Globals.getInstance().siteAlreadyCreated()) {
                 DefaultSchedules.generateDefaultSchedule(false, null);
             }
@@ -1443,15 +1302,24 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                         e.printStackTrace();
                         CcuLog.e("CCU_HS", "Unexpected error updating default schedule. : "+e.getMessage());
                     }
+
                 });
-                launchLandingActivity();
+
+                Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
+                finish();
+
             } else {
                 new AlertDialog.Builder(FreshRegistration.this)
                         .setCancelable(false)
                         .setMessage("No network connection, Registration is not complete and Facilisight cannot be accessed unless you connect to network.")
                         .setPositiveButton("Proceed", (dialog, id) -> {
                             registerCcuInBackground();
-                            launchLandingActivity();
+                            Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
+                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(i);
+                            finish();
                         })
                         .show();
             }
@@ -1463,7 +1331,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
         ExecutorTask.executeBackground( () ->  {
             try {
-                CcuLog.i(L.TAG_REGISTRATION, "Registering CCU with email: " + installerEmail);
                 CCUHsApi.getInstance().registerCcu(installerEmail);
                 if (Globals.getInstance().isAckdMessagingEnabled()) {
                     MessagingClient.getInstance().init();
@@ -1471,7 +1338,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 UtilityApplication.scheduleMessagingAckJob();
                 CCUHsApi.getInstance().syncEntityWithPointWriteDelayed(15);
             } catch (Exception e) {
-                CcuLog.w(L.TAG_REGISTRATION, "Unexpected error registering CCU.", e);
+                CcuLog.w("CCU_HS", "Unexpected error registering CCU.", e);
                 runOnUiThread( () -> {
                     // A Toast rather than a dialog is necessary since the interface does not wait
                     // for the response here.  We should fix that when we rewrite Registration.

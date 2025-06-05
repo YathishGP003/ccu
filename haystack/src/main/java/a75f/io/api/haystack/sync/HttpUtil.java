@@ -2,8 +2,6 @@ package a75f.io.api.haystack.sync;
 
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
 
-import com.google.gson.Gson;
-
 import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.constants.HttpConstants;
@@ -126,10 +124,27 @@ public class HttpUtil {
                 CcuLog.d("CCU_HTTP_RESPONSE", "HttpUtil:executePost: " + responseCode + " - [POST] " + url);
 
                 if (responseCode >= 400) {
-                    printErrorStream(connection);
+
+                    BufferedReader rde = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                    String linee;
+                    StringBuilder responsee = new StringBuilder();
+                    while ((linee = rde.readLine()) != null) {
+                        responsee.append(linee);
+                        responsee.append('\n');
+                    }
+                    CcuLog.e("CCU_HTTP_RESPONSE", "Response error stream: " + responsee);
                 }
 
-                return responseCode == 200 ? getResponseString(connection) : null;
+                //Get Response
+                BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String line;
+                StringBuilder response = new StringBuilder();
+                while ((line = rd.readLine()) != null) {
+                    response.append(line);
+                    response.append('\n');
+                }
+                connection.getInputStream().close();
+                return responseCode == 200 ? response.toString() : null;
 
             } catch (Exception e) {
                 CcuLog.e("CCU_HTTP_RESPONSE", "Exception reading stream: " + e.getLocalizedMessage());
@@ -236,10 +251,26 @@ public class HttpUtil {
                 CcuLog.d("CCU_HTTP_RESPONSE", "HttpUtil:executeJson: " + responseCode + " - [POST] " + url);
 
                 if (responseCode >= 400) {
-                    printErrorStream(connection);
+
+                    BufferedReader rde = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                    String linee;
+                    StringBuilder response = new StringBuilder();
+                    while ((linee = rde.readLine()) != null) {
+                        response.append(linee);
+                        response.append('\n');
+                    }
+                    CcuLog.i("CCU_HS", "Response error stream: " + response);
                 }
 
-                return responseCode == 200 ? getResponseString(connection) : null;
+                //Get Response
+                BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String line;
+                StringBuilder response = new StringBuilder();
+                while ((line = rd.readLine()) != null) {
+                    response.append(line);
+                    response.append('\n');
+                }
+                return responseCode == 200 ? response.toString() : null;
 
             } catch (Exception e) {
 
@@ -313,121 +344,5 @@ public class HttpUtil {
             return null;
         }
 
-    }
-
-    private static void printErrorStream(HttpURLConnection connection) {
-        String response = getErrorResponseString(connection);
-        if (response == null) {
-            CcuLog.e("CCU_HTTP_RESPONSE", "Response error stream is null");
-            return;
-        }
-        CcuLog.e("CCU_HTTP_RESPONSE", "Response error stream: " + response);
-    }
-
-    private static String getErrorResponseString(HttpURLConnection connection) {
-        try {
-            BufferedReader rde = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
-            String linee;
-            StringBuilder response = new StringBuilder();
-            while ((linee = rde.readLine()) != null) {
-                response.append(linee);
-                response.append('\n');
-            }
-            return response.toString();
-        } catch (IOException e) {
-            CcuLog.e("CCU_HTTP_RESPONSE", "Exception reading error stream: " + e);
-            return null;
-        }
-    }
-
-    private static String getResponseString(HttpURLConnection connection) {
-        try {
-            BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String line;
-            StringBuilder response = new StringBuilder();
-            while ((line = rd.readLine()) != null) {
-                response.append(line);
-                response.append('\n');
-            }
-            return response.toString();
-        } catch (IOException e) {
-            CcuLog.e("CCU_HTTP_RESPONSE", "Exception reading stream: " + e);
-            return null;
-        }
-    }
-
-    public static CareTakerResponse executeJsonWithApiKey(String targetUrl, String urlParameters, String token, String httpMethod) {
-        URL url;
-        HttpURLConnection connection = null;
-        targetUrl = StringUtils.appendIfMissing(targetUrl, "/");
-        if (StringUtils.isNotBlank(token)) {
-            try {
-                //Create connection
-                url = new URL(targetUrl);
-
-                connection = openConnection(urlParameters, url, targetUrl, httpMethod);
-
-                connection.setRequestProperty("Content-Type", "application/json");
-                connection.setRequestProperty(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE);
-
-                CcuLog.i("CCU_HS", Objects.toString(url.toString(), ""));
-                CcuLog.i("CCU_HS", Objects.toString(urlParameters, ""));
-
-                connection.setRequestProperty("Content-Language", "en-US");
-
-                connection.setRequestProperty("api-key", token);
-                CcuLog.d("CCU_HTTP_REQUEST", "HttpUtil:executeJson: [" + httpMethod + "] " + url + " - Token: " + token);
-
-                connection.setUseCaches(false);
-                connection.setRequestMethod(httpMethod);
-
-                connection.setConnectTimeout(HTTP_REQUEST_TIMEOUT_MS_LONG);
-                connection.setReadTimeout(HTTP_REQUEST_TIMEOUT_MS_LONG);
-
-                if (StringUtils.equals(httpMethod, HttpConstants.HTTP_METHOD_GET)) {
-                    connection.setDoOutput(false);
-                } else {
-                    connection.setDoOutput(true);
-                    connection.setRequestProperty(
-                            "Content-Length", "" + urlParameters.getBytes(StandardCharsets.UTF_8).length
-                    );
-                    //Send request
-                    DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-                    wr.write(urlParameters.getBytes(StandardCharsets.UTF_8));
-                    wr.flush();
-                    wr.close();
-                }
-
-                int responseCode = connection.getResponseCode();
-                CcuLog.i("CCU_HS", "HttpResponse: responseCode " + responseCode);
-
-                CcuLog.d("CCU_HTTP_RESPONSE", "HttpUtil:executeJson: " + responseCode + " - [POST] " + url);
-
-                CareTakerResponse syncResponse = new CareTakerResponse(responseCode);
-
-                if (responseCode >= HTTP_RESPONSE_ERR_REQUEST) {
-                    Gson gson = new Gson();
-                    ErrorResponse errorResponse = gson.fromJson(getErrorResponseString(connection), ErrorResponse.class);
-                    syncResponse.setErrorResponse(errorResponse);
-                    CcuLog.e("CCU_HTTP_RESPONSE", "ErrorResponse: " + errorResponse);
-                } else {
-                    syncResponse.setResponseMessage(getResponseString(connection));
-                }
-                return syncResponse;
-
-            } catch (Exception e) {
-
-                if (connection != null)
-                    connection.disconnect();
-                e.printStackTrace();
-                return null;
-
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
-                }
-            }
-        }
-        return null;
     }
 }

@@ -66,10 +66,10 @@ import org.projecthaystack.io.HZincReader;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -79,7 +79,6 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
-import a75f.io.api.haystack.sync.CareTakerResponse;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
@@ -359,61 +358,27 @@ public class CreateNewSite extends Fragment {
                 String installerEmail = mSiteInstallerEmailId.getText().toString().trim();
                 String installerOrg = mSiteOrg.getText().toString().trim();
                 String ccuName = mSiteCCU.getText().toString().trim();
-                AtomicBoolean siteRegistered = new AtomicBoolean(false);
                 ExecutorTask.executeAsync(
                         () -> {},
                         () -> {
-                            CcuLog.i(L.TAG_REGISTRATION,"Add Save Site to DB ");
+                            CcuLog.i("UI_PROFILING","Add Save Site to DB ");
                             prefs.setString("temp_ccu_name", ccuName);
-                            HashMap<Object, Object> siteEntity = CCUHsApi.getInstance().readEntity("site");
-                            if (!siteEntity.isEmpty()) {
-                                String siteId = siteEntity.get("id").toString();
+                            if (!site.isEmpty()) {
+                                String siteId = site.get("id").toString();
                                 updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail);
                             } else {
                                 saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail,managerEmail);
                             }
 
-                            CcuLog.i(L.TAG_REGISTRATION,"Create CCU & Diag Equip ");
-                            postSiteCreationSetup(isCCUDeviceExists, siteEntity, ccuName, installerEmail, managerEmail);
+                            CcuLog.i("UI_PROFILING","Create CCU & Diag Equip ");
+                            postSiteCreationSetup(isCCUDeviceExists, site, ccuName, installerEmail, managerEmail);
                             prefs.remove("temp_ccu_name");
-
-                            try {
-                                CareTakerResponse siteResponse = CCUHsApi.getInstance().registerSite();
-                                CcuLog.i(L.TAG_REGISTRATION,"Site Registration Response: " + siteResponse);
-                                if (siteResponse != null && siteResponse.getResponseCode() == 200) {
-                                    siteRegistered.set(true);
-                                } else if (siteResponse.getResponseCode() >= 400) {
-                                    siteRegistered.set(false);
-                                    if (siteResponse.getErrorResponse() != null && siteResponse.getErrorResponse().getMessage() != null) {
-                                        SnackbarUtil.showConfirmationMessage(this.getView(),
-                                                "Registration Failed !!",
-                                                siteResponse.getErrorResponse().getMessage(),
-                                                ProgressDialogUtils::hideProgressDialog);
-                                    } else {
-                                        SnackbarUtil.showConfirmationMessage(this.getView(),
-                                                "Registration Failed !!",
-                                                "Error registering site. ",
-                                                ProgressDialogUtils::hideProgressDialog);
-                                        CcuLog.w(L.TAG_REGISTRATION, "Error registering site." + siteResponse);
-                                    }
-                                }
-                            } catch (Exception e) {
-                                siteRegistered.set(false);
-                                SnackbarUtil.showConfirmationMessage(this.getView(),
-                                        "Site Registration Failed",
-                                        "Unable to register site. Please try again later.",
-                                        () -> {});
-                                CcuLog.e(L.TAG_REGISTRATION, "Error in registering site: " + e.getMessage());
-                            }
                         },
                         () -> {
                             mNext.setEnabled(true);
                             ProgressDialogUtils.hideProgressDialog();
-                            prefs.setBoolean("siteRegistrationRetry", !siteRegistered.get());
-                            if (siteRegistered.get()) {
-                                goToNext();
-                                CcuLog.i("UI_PROFILING","Add CCU Complete ");
-                            }
+                            goToNext();
+                            CcuLog.i("UI_PROFILING","Add CCU Complete ");
                         }
                 );
             } else {
@@ -663,8 +628,7 @@ public class CreateNewSite extends Fragment {
     @SuppressLint("SetTextI18n")
     private void checkDebugPrepopulate() {
         //noinspection ConstantConditions
-        if ((BuildConfig.BUILD_TYPE.equals("local") || BuildConfig.BUILD_TYPE.equals("dev_qa")
-                || BuildConfig.BUILD_TYPE.equals("qa"))
+        if ((BuildConfig.BUILD_TYPE.equals("local") || BuildConfig.BUILD_TYPE.equals("dev_qa"))
                 && !BuildConfig.DEBUG_USER.isEmpty()) {
 
             String user = BuildConfig.DEBUG_USER;
@@ -990,7 +954,7 @@ public class CreateNewSite extends Fragment {
 
         TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
 
-        //CCUHsApi.getInstance().syncEntityTree();
+        CCUHsApi.getInstance().syncEntityTree();
         CcuLog.i(TAG, "LocalSiteID: " + localSiteId);
         ccuHsApi.log();
         prefs.setString("SITE_ID", localSiteId);

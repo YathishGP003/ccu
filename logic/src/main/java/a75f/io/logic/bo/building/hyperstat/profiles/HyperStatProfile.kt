@@ -189,10 +189,11 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
     fun doFanEnabled(currentState: ZoneState, whichPort: Port, fanLoopOutput: Int,
                      relayStages: HashMap<String, Int>, isFanLoopCounterEnabled : Boolean = false) {
         CcuLog.d(L.TAG_CCU_HSCPU," Relay : $whichPort ,  isFanLoopCounterEnabled $isFanLoopCounterEnabled ")
-        if (occupancyStatus == Occupancy.OCCUPIED || fanLoopOutput > 0) {
+
+        if (isOccupancyModeIsOccupied(occupancyStatus) || fanLoopOutput > 0) {
             updateLogicalPoint(logicalPointsList[whichPort]!!, 1.0)
             relayStages[AnalogOutput.FAN_ENABLED.name] = 1
-        } else if (occupancyStatus != Occupancy.OCCUPIED ||
+        } else if (isOccupancyModeIsUnOccupied(occupancyStatus) ||
             (currentState == ZoneState.COOLING || currentState == ZoneState.HEATING)) {
             // In order to protect the fan, persist the fan for few cycles when there is a sudden change in
             // occupancy and decrease in fan loop output
@@ -206,7 +207,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
 
     override fun doOccupiedEnabled(relayPort: Port) {
         // Relay will be turned on when module is in occupied state
-        updateLogicalPoint(logicalPointsList[relayPort]!!, if (occupancyStatus == Occupancy.OCCUPIED) 1.0 else 0.0)
+        updateLogicalPoint(logicalPointsList[relayPort]!!, if (isOccupancyModeIsOccupied(occupancyStatus)) 1.0 else 0.0)
     }
 
     override fun doHumidifierOperation(
@@ -227,7 +228,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         )
 
         var relayStatus = 0.0
-        if (currentHumidity > 0 && occupancyStatus == Occupancy.OCCUPIED) {
+        if (currentHumidity > 0 && isOccupancyModeIsOccupied(occupancyStatus)) {
             if (currentHumidity < targetMinInsideHumidity) {
                 relayStatus = 1.0
             } else if (currentPortStatus > 0) {
@@ -252,7 +253,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
                         "| currentPortStatus : $currentPortStatus targetMaxInsideHumidity : $targetMaxInsideHumidity  Hysteresis : $humidityHysteresis \n"
         )
         var relayStatus = 0.0
-        if (currentHumidity > 0 && occupancyStatus == Occupancy.OCCUPIED) {
+        if (currentHumidity > 0 && isOccupancyModeIsOccupied(occupancyStatus)) {
             if (currentHumidity > targetMaxInsideHumidity) {
                 relayStatus = 1.0
             } else if (currentPortStatus > 0) {
@@ -335,15 +336,10 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             isDoorOpen: Boolean,
             equip: HyperStatEquip
     ) {
-        val currentOccupancyMode = equip.occupancyMode.readHisVal().toInt()
         val co2Value = equip.zoneCo2.readHisVal()
         CcuLog.d(L.TAG_CCU_HSHST, "doAnalogDCVAction: co2Value : $co2Value zoneCO2Threshold: $zoneCO2Threshold zoneCO2DamperOpeningRate $zoneCO2DamperOpeningRate")
         if (co2Value > 0 && co2Value > zoneCO2Threshold
-            && !isDoorOpen && (currentOccupancyMode == Occupancy.OCCUPIED.ordinal ||
-                    currentOccupancyMode == Occupancy.AUTOFORCEOCCUPIED.ordinal ||
-                    currentOccupancyMode == Occupancy.PRECONDITIONING.ordinal ||
-                    currentOccupancyMode == Occupancy.DEMAND_RESPONSE_OCCUPIED.ordinal ||
-                    currentOccupancyMode == Occupancy.FORCEDOCCUPIED.ordinal)
+            && !isDoorOpen && isOccupancyModeIsOccupied(occupancyStatus)
         ) {
             var damperOperationPercent = (co2Value - zoneCO2Threshold) / zoneCO2DamperOpeningRate
             if (damperOperationPercent > 100) damperOperationPercent = 100.0
@@ -351,10 +347,8 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             if (damperOperationPercent > 0) analogOutStages[AnalogOutput.DCV_DAMPER.name] =
                     damperOperationPercent.toInt()
 
-        } else if (co2Value < zoneCO2Threshold || currentOccupancyMode == Occupancy.AUTOAWAY.ordinal ||
-            currentOccupancyMode == Occupancy.VACATION.ordinal ||
-            currentOccupancyMode == Occupancy.DEMAND_RESPONSE_UNOCCUPIED.ordinal ||
-            currentOccupancyMode == Occupancy.UNOCCUPIED.ordinal || isDoorOpen
+        } else if (co2Value < zoneCO2Threshold || isOccupancyModeIsUnOccupied(occupancyStatus)
+            || isDoorOpen
         ) {
             updateLogicalPoint(logicalPointsList[port]!!, 0.0)
         }

@@ -224,7 +224,7 @@ abstract class HyperStatSplitProfile(equipRef: String, nodeAddress: Short) : Zon
         // Then Relay will be turned On when the zone is in occupied mode Or
         // any conditioning is happening during an unoccupied schedule
         CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON," Relay : $whichPort ,  isFanLoopCounterEnabled $isFanLoopCounterEnabled ")
-        if (occupancyStatus == Occupancy.OCCUPIED || fanLoopOutput > 0) {
+        if (isOccupancyModeIsOccupied(occupancyStatus) || fanLoopOutput > 0) {
             hssEquip.fanEnable.writeHisVal(1.0)
         } else if (occupancyStatus != Occupancy.OCCUPIED || (currentState == ZoneState.COOLING || currentState == ZoneState.HEATING)) {
             if (isFanLoopCounterEnabled){
@@ -237,10 +237,11 @@ abstract class HyperStatSplitProfile(equipRef: String, nodeAddress: Short) : Zon
 
     open fun doOccupiedEnabled(relayPort: Port) {
         // Relay will be turned on when module is in occupied state
+        val isOccupancyModeOccupied = isOccupancyModeIsOccupied(occupancyStatus)
         hssEquip.occupiedEnable.writeHisVal(
-            if (occupancyStatus == Occupancy.OCCUPIED) 1.0 else 0.0
+            if (isOccupancyModeOccupied) 1.0 else 0.0
         )
-        logIt("$relayPort = OccupiedEnabled  ${if (occupancyStatus == Occupancy.OCCUPIED) 1.0 else 0.0}")
+        logIt("$relayPort = OccupiedEnabled  ${if (isOccupancyModeOccupied) 1.0 else 0.0}")
 
     }
 
@@ -264,7 +265,7 @@ abstract class HyperStatSplitProfile(equipRef: String, nodeAddress: Short) : Zon
          )
 
         var relayStatus = 0.0
-        if (currentHumidity > 0 && occupancyStatus == Occupancy.OCCUPIED) {
+        if (currentHumidity > 0 && isOccupancyModeIsOccupied(occupancyStatus)) {
             if (currentHumidity < targetMinInsideHumidity) {
                 relayStatus = 1.0
             } else if (currentPortStatus > 0) {
@@ -296,7 +297,7 @@ abstract class HyperStatSplitProfile(equipRef: String, nodeAddress: Short) : Zon
                     "| Hysteresis : $humidityHysteresis \n"
         )
         var relayStatus = 0.0
-        if (currentHumidity > 0 && occupancyStatus == Occupancy.OCCUPIED) {
+        if (currentHumidity > 0 && isOccupancyModeIsOccupied(occupancyStatus)) {
             if (currentHumidity > targetMaxInsideHumidity) {
                 relayStatus = 1.0
             } else if (currentPortStatus > 0) {

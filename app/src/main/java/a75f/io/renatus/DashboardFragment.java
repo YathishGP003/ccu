@@ -4,7 +4,6 @@ package a75f.io.renatus;
 import static a75f.io.util.DashboardUtilKt.DASHBOARD;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -21,8 +20,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.messaging.handler.DashboardHandler;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.util.DashboardListener;
 import a75f.io.util.DashboardUtilKt;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -31,7 +33,7 @@ import butterknife.ButterKnife;
  * Created by samjithsadasivan isOn 8/7/17.
  */
 
-public class DashboardFragment extends Fragment {
+public class DashboardFragment extends Fragment implements DashboardListener {
     public DashboardFragment() {
     }
 
@@ -56,7 +58,12 @@ public class DashboardFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+		DashboardHandler.Companion.setDashboardListener(this);
+		super.onViewCreated(view, savedInstanceState);
+        dashboardView();
+    }
+
+	private void dashboardView() {
 		if(DashboardUtilKt.isDashboardConfig(Globals.getInstance().getApplicationContext())) {
 			ProgressDialogUtils.showProgressDialog(getActivity(),"Loading dashboard...!");
 			emptyDashboard.setVisibility(View.GONE);
@@ -96,5 +103,39 @@ public class DashboardFragment extends Fragment {
 			emptyDashboard.setVisibility(View.VISIBLE);
 			webView.setVisibility(View.GONE);
 		}
-    }
+	}
+
+	@Override
+	public void onDashboardConfigured(boolean isDashboardConfigured) {
+		CcuLog.d(DASHBOARD, "onDashboardConfigured: " + isDashboardConfigured);
+
+		if(DashboardFragment.this.getUserVisibleHint() && DashboardFragment.this.isVisible()) {
+			CcuLog.d(DASHBOARD, "onDashboardConfigured: DashboardFragment is  visible");
+			dashboardView();
+		}
+		else {
+			CcuLog.d(DASHBOARD, "onDashboardConfigured: DashboardFragment is not visible");
+		}
+	}
+	@Override
+	public void onResume() {
+		super.onResume();
+		DashboardHandler.Companion.setDashboardListener(this);
+		CcuLog.d(DASHBOARD, "onResume: DashboardFragment");
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		DashboardHandler.Companion.setDashboardListener(null);
+		CcuLog.d(DASHBOARD, "onPause: DashboardFragment");
+	}
+
+	@Override
+	public  void onStop() {
+		super.onStop();
+		DashboardHandler.Companion.setDashboardListener(null);
+		CcuLog.d(DASHBOARD, "onStop: DashboardFragment");
+	}
+
 }

@@ -108,6 +108,7 @@ public class L
     public static final String TAG_SEQUENCER_LOGS = "SEQUENCER_LOGS";
     public static final String TAG_ALERT_LOGS = "ALERT_LOGS";
     public static final String TAG_PRECONFIGURATION = "PRECONFIGURATION";
+    public static final String TAG_REGISTRATION = "REGISTRATION";
 
     public static Context app()
     {

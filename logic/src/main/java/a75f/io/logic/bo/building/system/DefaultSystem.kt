@@ -106,7 +106,6 @@ class DefaultSystem : SystemProfile() {
         DomainManager.addSystemDomainEquip(hayStack)
         DomainManager.addCmBoardDevice(hayStack)
         L.saveCCUState()
-        CCUHsApi.getInstance().syncEntityTree()
 
         DesiredTempDisplayMode.setSystemModeForDefaultSystemProfile(CCUHsApi.getInstance())
         return this

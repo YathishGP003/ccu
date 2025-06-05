@@ -75,7 +75,6 @@ android {
             buildConfigField "String", 'VERSION_MANAGEMENT_API_BASE', '\"\"'
             buildConfigField "String", 'SEQUENCER_API_BASE', '\"https://seq-runner.qa.service.75f.io/\"'
             buildConfigField "String", 'PRECONFIG_API_BASE', '\"https://site-preconfig-api-75f-service-qa.azurewebsites.net/site/preconfig/\"'
-
             String env = "local"
             buildHealthAndInfoUrls(baseUrls, env, delegate)
         }

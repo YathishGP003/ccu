@@ -220,7 +220,7 @@ public class PreConfigCCU extends Fragment {
         messageView.setText(spannable);
         messageView.setPadding(15, 25, 15, 25);
         messageView.setTextSize(18);
-        messageView.setBackgroundColor(getThemeColor(context));
+        messageView.setBackgroundColor(CCUUiUtil.getSecondaryColor());
         messageView.setGravity(Gravity.START);
 
         LinearLayout container = new LinearLayout(context);
@@ -249,16 +249,6 @@ public class PreConfigCCU extends Fragment {
         next.setTextColor(getPrimaryColor(context));
 
     }
-
-    private int getThemeColor(Context context) {
-        if (CCUUiUtil.isCarrierThemeEnabled(context)) {
-            return ContextCompat.getColor(context, R.color.carrier_75f_secondary);
-        } else if (CCUUiUtil.isAiroverseThemeEnabled(context)) {
-            return ContextCompat.getColor(context, R.color.airoverse_primary);
-        } else {
-            return ContextCompat.getColor(context, R.color.renatus_75f_secondary);
-        }
-    }
     private int getPrimaryColor(Context context) {
         if (CCUUiUtil.isCarrierThemeEnabled(context)) {
             return ContextCompat.getColor(context, R.color.carrier_75f);
@@ -268,11 +258,13 @@ public class PreConfigCCU extends Fragment {
             return ContextCompat.getColor(context, R.color.renatus_75f_primary);
         }
     }
+
     private void doPreconfiguration(PreconfigurationData data, Boolean isRetry) {
         ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Setting up the Site. This might take some time..."),
                 () -> {
                     try {
+                        CCUHsApi.getInstance().setPreconfigInProgress(true);
                         PreconfigurationHandler preconfigurationHandler = new PreconfigurationHandler();
                         preconfigurationHandler.validatePreconfigurationData(data);
                         Prefs prefs = new Prefs(getContext());
@@ -300,6 +292,8 @@ public class PreConfigCCU extends Fragment {
                         CcuLog.e(L.TAG_PRECONFIGURATION, "Preconfiguration failed: " + e.getMessage());
                         PreconfigurationManager.INSTANCE.transitionTo(PreconfigurationState.Failed.INSTANCE);
                         postMessage("Preconfiguration failed: " + e.getMessage());
+                    } finally {
+                        CCUHsApi.getInstance().setPreconfigInProgress(false);
                     }
                 },
                 () -> {

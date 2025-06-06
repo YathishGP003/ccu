@@ -366,7 +366,7 @@ public class ScheduleUtil {
                                                                            "temp and equipRef == \"" + equipId + "\"");
         HashMap<Object, Object> heatDT = CCUHsApi.getInstance().read("point and desired and heating and " +
                                                                      "temp and equipRef == \"" + equipId + "\"");
-        HashMap averageDT =CCUHsApi.getInstance().read("point and desired and average and temp and equipRef == \"" + equipId + "\"");
+        HashMap averageDT =CCUHsApi.getInstance().read("point and desired and (average or avg) and temp and equipRef == \"" + equipId + "\"");
         
         CCUHsApi.getInstance().clearPointArrayLevel(coolDT.get("id").toString(), level, false);
         CCUHsApi.getInstance().clearPointArrayLevel(heatDT.get("id").toString(), level, false);

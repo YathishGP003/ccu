@@ -642,10 +642,15 @@ public class Pulse
 				" == \"" + equip.getRoomRef() + "\"").intValue();
 		TemperatureMode temperatureMode = TemperatureMode.values()[modeType];
 		if(temperatureMode == TemperatureMode.COOLING){
-			coolingDesiredTemp = dt;
+			coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
+					dt, coolingDeadband, DeviceUtil.getMaxCoolingUserLimit(zoneId),
+					DeviceUtil.getMinCoolingUserLimit(zoneId));
 			averageTemp = (dt + CCUHsApi.getInstance().readPointPriorityVal(heatingDtPoint.get("id").toString())) / 2;
 		}else if(temperatureMode == TemperatureMode.HEATING) {
-			heatingDesiredTemp = dt;
+			heatingDesiredTemp = DeviceUtil.getValidDesiredHeatingTemp(
+					dt, heatingDeadband, DeviceUtil.getMaxHeatingUserLimit(zoneId),
+					DeviceUtil.getMinHeatingUserLimit(zoneId)
+			);
 			averageTemp = (dt + CCUHsApi.getInstance().readPointPriorityVal(coolingDtPoint.get("id").toString())) / 2;
 		}
 		else {

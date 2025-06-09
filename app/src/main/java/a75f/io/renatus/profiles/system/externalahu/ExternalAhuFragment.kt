@@ -574,7 +574,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                             val radioOptions = listOf(BACNET, MODBUS)
                             var disabledOptions: List<String>
                             if(!viewModel.isBacntEnabled.value){
-                                disabledOptions =  listOf() //listOf(BACNET)
+                                disabledOptions =  listOf(BACNET)
                             }else{
                                 disabledOptions = listOf()
                             }
@@ -724,7 +724,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
         /**
          * Add Bacnet configuration here
          */
-        /*viewModel.configBacnetDetails()
+        viewModel.configBacnetDetails()
 
         if(viewModel.bacnetModel.value.isDevicePaired){
             //resetScreen()
@@ -778,7 +778,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             ParameterLabel()
         }
         ParametersListViewBacnet(data = viewModel.bacnetModel)
-        BacnetButtons()*/
+        BacnetButtons()
     }
 
     @Composable

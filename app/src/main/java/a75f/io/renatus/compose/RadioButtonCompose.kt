@@ -57,7 +57,6 @@ fun RadioButtonCompose(radioOptions: List<String>, default: Int,
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .then(backgroundModifier)
                     .wrapContentSize()
                     .height(56.dp)
                     .selectable(
@@ -77,7 +76,7 @@ fun RadioButtonCompose(radioOptions: List<String>, default: Int,
                     enabled = !isDisabled,
                     colors = RadioButtonDefaults.colors(
                         selectedColor = ComposeUtil.primaryColor,
-                        unselectedColor = Color.Gray,
+                        unselectedColor = ComposeUtil.primaryColor,
                         disabledSelectedColor = Color.Gray,
                         disabledUnselectedColor = Color.Gray
                     )

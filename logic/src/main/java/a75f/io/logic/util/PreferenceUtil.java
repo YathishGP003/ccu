@@ -116,7 +116,7 @@ public class PreferenceUtil {
     private static final String MODBUS_KVTAGS_DATA_TYPE_UPDATED = "modbusKVTagsDataTypeUpdated";
 
 
-    private static final String SELECTED_PROFILE_WITH_AHU = "selectedProfileWithAhu";
+    public static final String SELECTED_PROFILE_WITH_AHU = "selectedProfileWithAhu";
 
     private static final String MIGRATE_UPDATE_DAB_AND_VAV_POINTS = "migrateUpdateVavAndDabPoints";
     private static final String MIGRATE_UPDATE_BYPASS_DAMPER_POINTS = "migrateUpdateBypassDamperPoints";

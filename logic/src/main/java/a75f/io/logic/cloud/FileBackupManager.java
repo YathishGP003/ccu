@@ -24,6 +24,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.util.backupfiles.FileConstants;
 import a75f.io.logic.util.backupfiles.FileOperationsUtil;
 import okhttp3.MediaType;
@@ -137,6 +138,12 @@ public class FileBackupManager {
                         }
 
                         if(name.equalsIgnoreCase(BACNET_DEVICE_TYPE)){
+                            String value = element.getTextContent();
+                            CcuLog.e(TAG_CCU_REPLACE, "String : name:" + name +"-"+ "value:" + value);
+                            bacnet_pref.edit().putString(name, value).apply();
+                        }
+
+                        if(name.equalsIgnoreCase(PreferenceUtil.SELECTED_PROFILE_WITH_AHU)){
                             String value = element.getTextContent();
                             CcuLog.e(TAG_CCU_REPLACE, "String : name:" + name +"-"+ "value:" + value);
                             bacnet_pref.edit().putString(name, value).apply();

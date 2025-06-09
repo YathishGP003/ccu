@@ -462,7 +462,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
 
     private fun isValidConfigurationBacnet(): Boolean {
         if (bacnetModel.value.points.isEmpty()) {
-            //showToast("Please select bacnet model", context)
+            showToast("Please select bacnet model", context)
             return false
         }
         if(!isBacnetConfigDetailsFilled()){

@@ -2,6 +2,7 @@ package a75f.io.renatus.registration;
 
 import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
 import static a75f.io.logic.L.ccu;
+import static a75f.io.logic.UtilKt.getMigrationVersion;
 import static a75f.io.renatus.util.CCUUtils.updateMigrationDiagWithAppVersion;
 
 import android.os.Bundle;
@@ -237,7 +238,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
         DiagEquipConfigurationBuilder diagEquipConfigurationBuilder = new DiagEquipConfigurationBuilder(CCUHsApi.getInstance());
         CCUBaseConfigurationBuilder ccuBaseConfigurationBuilder = new CCUBaseConfigurationBuilder(CCUHsApi.getInstance());
         ModelDirective ccuBaseConfigurationModel = ModelLoader.INSTANCE.getCCUBaseConfigurationModel();
-        String diagEquipId = diagEquipConfigurationBuilder.createDiagEquipAndPoints(ccuName);
+        String diagEquipId = diagEquipConfigurationBuilder.createDiagEquipAndPoints(ccuName, getMigrationVersion());
         String ccuId = ccuBaseConfigurationBuilder.createCCUBaseConfiguration(ccuName,
                 installerEmail, managerEmail, diagEquipId, ccuBaseConfigurationModel);
         return ccuId;

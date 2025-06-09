@@ -19,6 +19,8 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -63,11 +65,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import a75f.io.api.haystack.exception.NullHGridException;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
+import a75f.io.api.haystack.sync.CareTakerResponse;
 import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncResponse;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.api.haystack.sync.PointWriteCache;
+import a75f.io.api.haystack.sync.SiteRegistrationHandler;
 import a75f.io.api.haystack.sync.SyncManager;
 import a75f.io.api.haystack.sync.SyncStatusService;
 import a75f.io.api.haystack.util.BackfillUtil;
@@ -123,6 +127,7 @@ public class CCUHsApi
     public Boolean isAuthorized = false;
 
     private static int ccuLogLevel = -1;
+    private boolean preconfigInProgress = false;
 
     private static double mCurrentTemperature =-1;
     private static double mCurrentHumidity =-1;
@@ -1649,11 +1654,15 @@ public class CCUHsApi
 
     public void syncEntityTree()
     {
-        if(CCUHsApi.getInstance().readDefaultVal("offline and mode and point") > 0) {
-            CcuLog.d(TAG_CCU_HS," Skip his sync in offlineMode");
+        if (preconfigInProgress) {
+            CcuLog.d(TAG_CCU_HS," Skip sync while preconfigInProgress");
             return;
         }
-        //TODO : Check if sync session is already in progress
+
+        if(CCUHsApi.getInstance().readDefaultVal("offline and mode and point") > 0) {
+            CcuLog.d(TAG_CCU_HS," Skip sync in offlineMode");
+            return;
+        }
         if (syncManager.isEntitySyncProgress()) {
             syncManager.scheduleSync();
         } else {
@@ -2430,12 +2439,17 @@ public class CCUHsApi
         return spDefaultPrefs.getBoolean("75fNetworkAvailable", false);
     }
 
+    public CareTakerResponse registerSite() {
+        SiteRegistrationHandler siteRegistrationHandler = new SiteRegistrationHandler();
+        return siteRegistrationHandler.sendSiteData();
+    }
+
     public void registerCcu(String installerEmail) {
 
-        HashMap site = CCUHsApi.getInstance().read("site");
-        CcuLog.i("CCURegInfo","registerCcu");
+        HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
+        CcuLog.i("REGISTRATION","registerCcu");
         if (siteSynced() && CCUHsApi.getInstance().isNetworkConnected()) {
-            CcuLog.d("CCURegInfo","The CCU is not registered, but the site is created with ID " + getSiteIdRef().toString());
+            CcuLog.d("REGISTRATION","The CCU is not registered, but the site is created with ID " + getSiteIdRef().toString());
             HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("device and ccu");
 
             String ccuLuid = Objects.toString(ccu.get(CcuFieldConstants.ID),"");
@@ -2453,35 +2467,55 @@ public class CCUHsApi
                 JSONObject ccuRegistrationRequest = getCcuRegisterJson(ccuLuid, getSiteIdRef().toString(),
                         dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installEmail, null);
                 if (ccuRegistrationRequest != null) {
-                    CcuLog.d("CCURegInfo","Sending CCU registration request: " + ccuRegistrationRequest);
-                    String ccuRegistrationResponse = HttpUtil.executeJson(
+                    CcuLog.d("REGISTRATION","Sending CCU registration request: " + ccuRegistrationRequest);
+                    CareTakerResponse ccuRegistrationResponse = HttpUtil.executeJsonWithApiKey(
                             CCUHsApi.getInstance().getAuthenticationUrl()+"devices",
                             ccuRegistrationRequest.toString(),
                             BuildConfig.CARETAKER_API_KEY,
-                            true,
                             HttpConstants.HTTP_METHOD_POST
                     );
-                    CcuLog.d("CCURegInfo","Registration response: " + ccuRegistrationResponse);
 
-                    if (ccuRegistrationResponse != null) {
-                        completeRegistration(ccuRegistrationResponse, ccuLuid);
+                    CcuLog.d("REGISTRATION","Registration response: " + ccuRegistrationResponse);
+
+                    if (ccuRegistrationResponse != null && ccuRegistrationResponse.getResponseCode() == 200) {
+                        completeRegistration(ccuRegistrationResponse.getResponseMessage(), ccuLuid);
+                    } else {
+                        String errorMessage = getErrorMessage(ccuRegistrationResponse);
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            Toast.makeText(context, errorMessage, LENGTH_LONG).show();
+                        });
                     }
                 }
             } else {
-                CcuLog.d("CCURegInfo","The CCU is synced, id: " + ccuLuid + " and the token is " + CCUHsApi.getInstance().getJwt());
+                CcuLog.d("REGISTRATION","The CCU is synced, id: " + ccuLuid + " and the token is " + CCUHsApi.getInstance().getJwt());
                 // TODO Matt Rudd - Need mechanism to handle the token being null here but the GUID existing; may happen in edge cases
                 CCUHsApi.getInstance().setCcuRegistered();
                 if (StringUtils.isBlank(CCUHsApi.getInstance().getJwt())) {
-                    CcuLog.e("CCURegInfo", "There was a fatal error registering the CCU. The GUID is set, but the token is unavailable.");
+                    CcuLog.e("REGISTRATION", "There was a fatal error registering the CCU. The GUID is set, but the token is unavailable.");
                 }
             }
         } else {
-            CcuLog.e("CCURegInfo","Registration cannot be completed now  - siteSynced : "+siteSynced());
+            CcuLog.e("REGISTRATION","Registration cannot be completed now  - siteSynced : "+siteSynced());
             new Handler(Looper.getMainLooper()).post(() -> {
                 Toast.makeText(context, "CCU cannot be completed at the moment. Please complete registration by clicking REGISTER button ", LENGTH_LONG).show();
                 importNamedSchedule(hsClient);
             });
         }
+    }
+
+    private static @NonNull String getErrorMessage(CareTakerResponse ccuRegistrationResponse) {
+        String errorMessage;
+        if (ccuRegistrationResponse == null) {
+            errorMessage = "Registration Failed. No response from server";
+        } else if (ccuRegistrationResponse.getResponseCode() == 500) {
+            errorMessage = "Registration Failed. Server Error";
+        } else if (ccuRegistrationResponse.getResponseCode() != 200 &&
+                ccuRegistrationResponse.getErrorResponse() != null) {
+            errorMessage = "Registration Failed. " + ccuRegistrationResponse.getErrorResponse().getMessage();
+        } else {
+            errorMessage = "Registration Failed.";
+        }
+        return errorMessage;
     }
 
     /**
@@ -2536,14 +2570,14 @@ public class CCUHsApi
 
         } catch (JSONException jsonException) {
             ccuJsonRequest = null;
-            CcuLog.e("CCURegInfo","Unable to construct a valid CCU registration request", jsonException);
+            CcuLog.e("REGISTRATION","Unable to construct a valid CCU registration request", jsonException);
         }
 
         return ccuJsonRequest;
     }
 
     public void completeRegistration(String ccuRegistrationResponse, String ccuId) {
-        CcuLog.d("CCURegInfo", "completeRegistration"+ccuRegistrationResponse);
+        CcuLog.d("REGISTRATION", "completeRegistration"+ccuRegistrationResponse);
         try {
             JSONObject ccuRegistrationResponseJson = new JSONObject(ccuRegistrationResponse);
             String ccuGuid = ccuRegistrationResponseJson.getString("id");
@@ -2551,7 +2585,7 @@ public class CCUHsApi
             setSynced(ccuId);
             setJwt(token);
             setCcuRegistered();
-            CcuLog.d("CCURegInfo","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
+            CcuLog.d("REGISTRATION","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
             defaultSharedPrefs.edit().putLong("ccuRegistrationTimeStamp", System.currentTimeMillis()).apply();
             new Handler(Looper.getMainLooper()).post(() -> {
                 Toast.makeText(context, "CCU Registered Successfully ", LENGTH_LONG).show();
@@ -2564,10 +2598,10 @@ public class CCUHsApi
     }
 
     public void publishRegistrationSuccessful() {
-        CcuLog.d("CCURegInfo", "RegistrationCompletedListeners count "+onCcuRegistrationCompletedListeners.size());
+        CcuLog.d("REGISTRATION", "RegistrationCompletedListeners count "+onCcuRegistrationCompletedListeners.size());
         onCcuRegistrationCompletedListeners.forEach( listener -> {
             listener.onRegistrationCompleted(this);
-            CcuLog.d("CCURegInfo", "RegistrationCompletedListener "+listener);
+            CcuLog.d("REGISTRATION", "RegistrationCompletedListener "+listener);
         } );
     }
 
@@ -3402,5 +3436,9 @@ public class CCUHsApi
     public long getConnectionChangeTime() {
         SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         return spDefaultPrefs.getLong("connectionChangeTimestamp", 0);
+    }
+
+    public void setPreconfigInProgress(boolean progress) {
+        preconfigInProgress = progress;
     }
 }

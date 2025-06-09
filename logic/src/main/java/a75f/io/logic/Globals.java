@@ -782,7 +782,7 @@ public class Globals {
             CCUDevice ccuDeviceObj = Domain.ccuDevice;
             ccuDeviceBuilder.buildCCUDevice(ccuDeviceObj.getEquipRef(), ccuDeviceObj.getSiteRef(), ccuDeviceObj.getCcuDisName(),
                     ccuDeviceObj.getInstallerEmail(), ccuDeviceObj.getManagerEmail(),
-                    systemProf, true);
+                    systemProf);
         }
     }
 

@@ -67,6 +67,46 @@ public class SiteRegistrationHandler {
         }
         return synced;
     }
+
+    /**
+     * Used for first time registration of the site
+     * @return
+     */
+    public CareTakerResponse sendSiteData() {
+        HDict siteDict =  CCUHsApi.getInstance().readHDict("site");
+
+        String siteId = siteDict.get("id").toString();
+        if (!CCUHsApi.getInstance().isEligibleForSync(siteId)) {
+            CcuLog.d(TAG, "SiteRegistrationHandler Site Sync not required : "+siteId);
+            return new CareTakerResponse(200);
+        }
+
+        JSONObject siteCreationRequestJson = getSiteJsonRequest(siteDict, false);
+
+        if (siteCreationRequestJson != null) {
+            try {
+                CcuLog.d(TAG, "Sending Site registration request: " + siteCreationRequestJson);
+                CareTakerResponse response = HttpUtil.executeJsonWithApiKey(
+                        CCUHsApi.getInstance().getAuthenticationUrl() + "sites",
+                        siteCreationRequestJson.toString(),
+                        BuildConfig.CARETAKER_API_KEY,
+                        HttpConstants.HTTP_METHOD_POST
+                );
+
+                if (response != null && response.getResponseCode() == 200) {
+                    JSONObject siteCreationResponseJson = new JSONObject(response.getResponseMessage());
+                    String siteGuidFromResponse = siteCreationResponseJson.getString("id");
+                    CCUHsApi.getInstance().setEntitySynced(siteId);
+                    CcuLog.d(TAG, "Site registration successful: " + siteGuidFromResponse);
+                }
+                return response;
+            } catch (JSONException e) {
+                e.printStackTrace();
+                CcuLog.d(TAG, "Unable to sync site due to JSON exception. This is likely unrecoverable.");
+            }
+        }
+        return null;
+    }
     
     private JSONObject getSiteJsonRequest(HDict siteDict, boolean siteUpdate) {
         HashMap<Object, Object> tunerEquip = CCUHsApi.getInstance().readEntity("equip and tuner");

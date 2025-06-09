@@ -54,6 +54,7 @@ import io.seventyfivef.domainmodeler.client.ModelDirective;
 import a75f.io.util.ExecutorTask;
 
 import static a75f.io.logic.L.ccu;
+import static a75f.io.logic.UtilKt.getMigrationVersion;
 
 public class RegisterGatherCCUDetails extends Activity {
 
@@ -191,7 +192,7 @@ public class RegisterGatherCCUDetails extends Activity {
         DiagEquipConfigurationBuilder diagEquipConfigurationBuilder = new DiagEquipConfigurationBuilder(CCUHsApi.getInstance());
         CCUBaseConfigurationBuilder ccuBaseConfigurationBuilder = new CCUBaseConfigurationBuilder(CCUHsApi.getInstance());
         ModelDirective ccuBaseConfigurationModel = ModelLoader.INSTANCE.getCCUBaseConfigurationModel();
-        String diagEquipId = diagEquipConfigurationBuilder.createDiagEquipAndPoints(ccuName);
+        String diagEquipId = diagEquipConfigurationBuilder.createDiagEquipAndPoints(ccuName, getMigrationVersion());
         String ccuId = ccuBaseConfigurationBuilder.createCCUBaseConfiguration(ccuName,
                 installerEmail, managerEmail, diagEquipId, ccuBaseConfigurationModel);
         return ccuId;

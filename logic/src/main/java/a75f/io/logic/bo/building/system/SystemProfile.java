@@ -260,7 +260,7 @@ public abstract class SystemProfile
         CCUDevice ccuDeviceObj = Domain.ccuDevice;
         ccuDeviceBuilder.buildCCUDevice(ccuDeviceObj.getEquipRef(), ccuDeviceObj.getSiteRef(),
                 ccuDeviceObj.getCcuDisName(), ccuDeviceObj.getInstallerEmail(),
-                ccuDeviceObj.getManagerEmail(), systemEquipId, true);
+                ccuDeviceObj.getManagerEmail(), systemEquipId);
     }
 
     public void addSystemTuners() {

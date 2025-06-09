@@ -6,6 +6,7 @@ import a75f.io.api.haystack.Schedule
 import a75f.io.api.haystack.Zone
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L.TAG_CCU
+import android.content.pm.PackageManager
 
 
 /**
@@ -58,4 +59,18 @@ fun getSchedule(roomRef : String, floorRef: String) : Schedule{
       return roomSchedule
    }
    return Schedule()
+}
+
+fun getMigrationVersion(): String? {
+   val manager = Globals.getInstance().applicationContext.packageManager
+   try {
+      val info = manager.getPackageInfo(Globals.getInstance().applicationContext.packageName, 0)
+      val appVersion = info.versionName
+      val migrationVersion = appVersion.substring(appVersion.lastIndexOf('_') + 1)
+      CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, " Migration version value $migrationVersion")
+      return migrationVersion
+   } catch (e: PackageManager.NameNotFoundException) {
+      e.printStackTrace()
+      return null
+   }
 }

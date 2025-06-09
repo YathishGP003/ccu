@@ -5,6 +5,7 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.DefaultSystemEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager
+import a75f.io.domain.logic.DomainManager.addSystemDomainEquip
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader.getCMDeviceModel
@@ -16,6 +17,9 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Created by samjithsadasivan on 1/8/19.
@@ -72,46 +76,46 @@ class DefaultSystem : SystemProfile() {
                 return this
             }
         }
-        val defaultSystemModel = getDefaultSystemProfileModel() as SeventyFiveFProfileDirective
-        val deviceModel = getCMDeviceModel() as SeventyFiveFDeviceDirective
-        val entityMapper = EntityMapper(defaultSystemModel)
-        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
-        val equipBuilder = ProfileEquipBuilder(hayStack)
-        val profileConfiguration = DefaultSystemConfig(defaultSystemModel)
+        CoroutineScope(Dispatchers.IO).launch {
+            val defaultSystemModel = getDefaultSystemProfileModel() as SeventyFiveFProfileDirective
+            val deviceModel = getCMDeviceModel() as SeventyFiveFDeviceDirective
+            val entityMapper = EntityMapper(defaultSystemModel)
+            val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+            val equipBuilder = ProfileEquipBuilder(hayStack)
+            val profileConfiguration = DefaultSystemConfig(defaultSystemModel)
 
-        val equipDis = hayStack.siteName + "-" + defaultSystemModel.name
-        val equipId = equipBuilder.buildEquipAndPoints(
-            profileConfiguration,
-            defaultSystemModel,
-            hayStack.site!!.id,
-            equipDis
-        )
-        val cmDevice = hayStack.readEntity("cm and device")
-        if (cmDevice.isNotEmpty()) {
-            hayStack.deleteEntityTree(cmDevice["id"].toString())
+            val equipDis = hayStack.siteName + "-" + defaultSystemModel.name
+            val equipId = equipBuilder.buildEquipAndPoints(
+                profileConfiguration,
+                defaultSystemModel,
+                hayStack.site!!.id,
+                equipDis
+            )
+            val cmDevice = hayStack.readEntity("cm and device")
+            if (cmDevice.isNotEmpty()) {
+                hayStack.deleteEntityTree(cmDevice["id"].toString())
+            }
+
+            val deviceDis = hayStack.siteName + "-" + deviceModel.name
+            deviceBuilder.buildDeviceAndPoints(
+                profileConfiguration,
+                deviceModel,
+                equipId,
+                hayStack.site!!.id,
+                deviceDis, null
+            )
+
+            CcuLog.d(L.TAG_CCU_SYSTEM, "Add Default System Equip")
+            updateAhuRef(equipId)
+
+            addSystemDomainEquip(hayStack)
+            DomainManager.addCmBoardDevice(hayStack)
+            L.saveCCUState()
+
+            DesiredTempDisplayMode.setSystemModeForDefaultSystemProfile(CCUHsApi.getInstance())
         }
-
-        val deviceDis = hayStack.siteName + "-" + deviceModel.name
-        deviceBuilder.buildDeviceAndPoints(
-            profileConfiguration,
-            deviceModel,
-            equipId,
-            hayStack.site!!.id,
-            deviceDis, null
-        )
-
-        CcuLog.d(L.TAG_CCU_SYSTEM, "Add Default System Equip")
-        updateAhuRef(equipId)
-
-        DomainManager.addSystemDomainEquip(hayStack)
-        DomainManager.addCmBoardDevice(hayStack)
-        L.saveCCUState()
-        CCUHsApi.getInstance().syncEntityTree()
-
-        DesiredTempDisplayMode.setSystemModeForDefaultSystemProfile(CCUHsApi.getInstance())
         return this
-    }
-    override fun addSystemEquip() {
+    }    override fun addSystemEquip() {
         CcuLog.d(L.TAG_CCU_SYSTEM, "Updated temp modes for default system")
         DesiredTempDisplayMode.setSystemModeForDefaultSystemProfile(CCUHsApi.getInstance())
     }

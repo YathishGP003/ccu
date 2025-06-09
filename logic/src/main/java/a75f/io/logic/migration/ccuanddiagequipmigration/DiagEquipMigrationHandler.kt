@@ -8,6 +8,7 @@ import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
+import a75f.io.logic.getMigrationVersion
 import io.seventyfivef.ph.core.Tags
 
 class DiagEquipMigrationHandler {
@@ -22,7 +23,7 @@ class DiagEquipMigrationHandler {
             }
             val diagEquipConfigurationBuilder =  DiagEquipConfigurationBuilder(hayStack)
 
-            val diagEquipId = diagEquipConfigurationBuilder.createDiagEquipAndPoints(ccu)
+            val diagEquipId = diagEquipConfigurationBuilder.createDiagEquipAndPoints(ccu, getMigrationVersion())
             DomainManager.addDiagEquip(hayStack)
             CcuLog.i(Domain.LOG_TAG, "Diag equip created with id $diagEquipId")
             return

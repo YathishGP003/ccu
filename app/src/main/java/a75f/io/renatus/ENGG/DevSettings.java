@@ -1,6 +1,6 @@
 package a75f.io.renatus.ENGG;
 
-import static a75f.io.renatus.UtilityApplication.context;
+import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -32,7 +32,13 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HRef;
+import org.projecthaystack.HRow;
 import org.projecthaystack.client.HClient;
+import org.projecthaystack.io.HZincReader;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -41,6 +47,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -88,6 +95,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     }
     private final String TAG = "CCU_DEV_SETTINGS";
     private final String pending = "PENDING";
+    private final String failed = "FAILED";
     private final String completed = "COMPLETED";
     private int previousControlLoopFrequency = 0;
 
@@ -202,6 +210,10 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
 
     public @BindView(R.id.anrReportText) TextView anrReportText;
     public @BindView(R.id.anrTriggerBtn) Button anrTriggerBtn;
+
+    public @BindView(R.id.remoteId) TextView remoteEntity;
+    public @BindView(R.id.remoteBtn) Button remoteBtn;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                                   Bundle savedInstanceState) {
@@ -291,7 +303,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             ExecutorTask.executeBackground(
                     () ->   CCUHsApi.getInstance().deleteHistory()
             );
-            updateDevSettingPreferencesWithDateAndTime("clear_his_box_history", "clear_hix_box_data", true);
+            updateDevSettingPreferencesWithDateAndTime("clear_his_box_history", "clear_hix_box_data", true,"sample");
             Toast.makeText(getActivity(), "Successfully Cleared the local his box data ", Toast.LENGTH_SHORT).show();
             updateDevSettingPreference("his_box_sync", completed);
             ProgressDialogUtils.hideProgressDialog();
@@ -306,7 +318,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                     ExecutorTask.executeBackground(
                             () ->   CCUHsApi.getInstance().trimObjectBoxHisStore()
                     );
-                    updateDevSettingPreferencesWithDateAndTime("clear_object_box_history", "clear_object_box_data", true);
+                    updateDevSettingPreferencesWithDateAndTime("clear_object_box_history", "clear_object_box_data", true,"sample");
                     Toast.makeText(getActivity(), "Successfully Cleared the local object box data ", Toast.LENGTH_SHORT).show();
                     updateDevSettingPreference("object_box_sync", completed);
 
@@ -324,7 +336,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 CcuLog.d(TAG, "Syncing local data to cloud");
                 CCUHsApi.getInstance().resyncSiteTree();
             });
-            updateDevSettingPreferencesWithDateAndTime("sync_local_data_history", "sync_local_data", true);
+            updateDevSettingPreferencesWithDateAndTime("sync_local_data_history", "sync_local_data", true,"sample");
             Toast.makeText(getActivity(), "Successfully syncing the local data to cloud   ", Toast.LENGTH_SHORT).show();
             updateDevSettingPreference("sync_local_data", completed);
         });
@@ -336,7 +348,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             }
             updateDevSettingPreference("clear_unsynced_id_list", pending);
             CCUHsApi.getInstance().getSyncStatusService().clearSyncStatus();
-            updateDevSettingPreferencesWithDateAndTime("remove_unsync_list_history", "remove_unsync_list", true);
+            updateDevSettingPreferencesWithDateAndTime("remove_unsync_list_history", "remove_unsync_list", true,"sample");
             updateDevSettingPreference("clear_unsynced_id_list", completed);
             Toast.makeText(getActivity(), "Successfully cleared  the unsynced id list", Toast.LENGTH_SHORT).show();
         });
@@ -672,6 +684,39 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                     ProgressDialogUtils::hideProgressDialog
             );
         });
+
+        remoteBtn.setOnClickListener(view1 -> {
+            if (returnDevSettingPreference("remote_id_fetch").equals(pending)) {
+                Toast.makeText(getActivity(), "Remote entity fetching from cloud is running ", Toast.LENGTH_SHORT).show();
+                remoteEntity.setText("");
+                return;
+            }
+            String remoteId = remoteEntity.getText().toString().trim().replace("@", "");
+            remoteEntity.setText("");
+            if (remoteId.isEmpty() || remoteId == null || remoteId.length() == 0) {
+                Toast.makeText(getActivity(), "please enter the valid ID ", Toast.LENGTH_LONG).show();
+                return;
+            }
+            try {
+                returnDevSettingPreference("remote_id_fetch").equals(pending);
+                String msg = "Are you sure to do the remote call to pull the remoteEntity for this id : "+ remoteId ;
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                builder.setTitle(" Operation Required !");
+                builder.setMessage(msg);
+                builder.setPositiveButton("Continue Anyway", (dialog, which) -> {
+                    fetchRemoteEntity(remoteId,hayStack);
+                    Toast.makeText(getActivity(), "Remote fetch successfully  ", Toast.LENGTH_LONG).show();
+                    returnDevSettingPreference("remote_id_fetch").equals(completed);
+                });
+                builder.setNegativeButton("Abort", (dialog, which) -> {});
+                builder.show();
+            } catch (Exception e) {
+                CcuLog.i(TAG, "Remote Entity fetch failed " + remoteEntity);
+                CcuLog.i(TAG, "Exception " + e.getMessage());
+                returnDevSettingPreference("remote_id_fetch").equals(failed);
+                Toast.makeText(getActivity(), "Remote fetch failed ", Toast.LENGTH_LONG).show();
+            }
+        });
     }
     private boolean validateForReboot() {
         Calendar calendar = Calendar.getInstance();
@@ -957,10 +1002,15 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         CcuLog.d(TAG,"Updating dev setting preference: "+key);
        return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE).getString(key, completed);
     }
-    private void updateDevSettingPreferencesWithDateAndTime(String historyKey, String buttonKey, boolean value) {
-        // Format the current date and time with timezone
-        String currentTimeDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
-                .format(new Date());
+    private void updateDevSettingPreferencesWithDateAndTime(String historyKey, String buttonKey, boolean value,String id ) {
+
+        String inputValue;
+        if (!Objects.equals(id, "sample")) {
+            inputValue = id;
+        } else {
+            inputValue = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
+                    .format(new Date());
+        }
         SharedPreferences prefs = Globals.getInstance().getApplicationContext()
                 .getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE);
         String history = prefs.getString(historyKey, "");
@@ -968,7 +1018,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         if (history.isEmpty()) {
             entries.clear();
         }
-        entries.add(currentTimeDate);
+        entries.add(inputValue);
         if (entries.size() > 10) {
             entries = entries.subList(entries.size() - 10, entries.size());
         }
@@ -977,6 +1027,31 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 .putBoolean(buttonKey, value)
                 .putString(historyKey, updatedHistory)
                 .apply();
+    }
+
+    private void fetchRemoteEntity (String Id,CCUHsApi ccuHsApi){
+        ExecutorTask.executeBackground(() -> {
+            String response = ccuHsApi.fetchRemoteEntity(Id);
+            if (response != null) {
+                HZincReader hZincReader = new HZincReader(response);
+                Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
+                while (hZincReaderIterator.hasNext()) {
+                    HRow row = (HRow) hZincReaderIterator.next();
+                    ccuHsApi.tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
+                    CcuLog.i(TAG, "Remote Entity fetch" + row);
+                    if (row.get("writable") != null) {
+                        HDict PointDict = new HDictBuilder().add("id", HRef.copy(row.get("id").toString())).toDict();
+                        List<HDict> hDicts = new ArrayList<>();
+                        hDicts.add(PointDict);
+                        ccuHsApi.importPointArrays(hDicts);
+                        CcuLog.i(TAG, "Remote Point Array  fetch" + row.get("id"));
+                    }
+                    updateDevSettingPreferencesWithDateAndTime("remote_id_fetch_history", "remote_fetch_ids", true, Id);
+                    updateDevSettingPreferencesWithDateAndTime("remote_id_fetch_history_date", "remote_fetch_date", true, "sample");
+
+                }
+            }
+        });
     }
 
 

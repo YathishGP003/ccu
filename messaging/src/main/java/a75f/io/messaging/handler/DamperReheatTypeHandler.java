@@ -9,6 +9,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.DomainName;
@@ -117,9 +118,10 @@ public class DamperReheatTypeHandler {
         }
 
         String who = msgObject.get("who").getAsString();
-        int duration = msgObject.get("duration") != null ? msgObject.get("duration").getAsInt() : 0;
         int level = msgObject.get("level").getAsInt();
-        hayStack.writePointLocal(configPoint.getId(), level, who, (double) typeVal, duration);
+        double durationDiff = MessageUtil.Companion.returnDurationDiff(msgObject);
+        hayStack.writePointLocal(configPoint.getId(), level, who, Double.valueOf(typeVal), durationDiff);
+        CcuLog.d(L.TAG_CCU_PUBNUB, "SSE: writePointFromJson - level: " + level + " who: " + who + " val: " + Double.valueOf(typeVal) + " durationDiff: " + durationDiff);
         if (configPoint.getMarkers().contains(Tags.REHEAT) && configPoint.getMarkers().contains(Tags.TYPE)) {
             if (configPoint.getMarkers().contains(Tags.VAV)) {
                 VavProfile profile = (VavProfile) L.getProfile((short) address);

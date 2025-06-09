@@ -15,6 +15,7 @@ import a75f.io.data.message.MESSAGE_ATTRIBUTE_SEQUENCE_ID
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_SITE_ID
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_TARGET
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_TARGET_SCOPE
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_VALUE_DURATION
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_VERSION
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_WHO
 import a75f.io.data.message.Message
@@ -73,6 +74,7 @@ fun jsonToMessage(msgJson : JsonObject) : Message? {
 
         messagePojo.value = messageContent.asJsonObject.get("val")?.asString
         messagePojo.who = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_WHO)?.asString
+        messagePojo.duration = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_VALUE_DURATION)?.asLong
         messagePojo.remoteCmdType = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_REMOTE_CMD_TYPE)?.asString
         if (messagePojo.remoteCmdType != null) {
             messagePojo.remoteCmdLevel = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_LEVEL)?.asString

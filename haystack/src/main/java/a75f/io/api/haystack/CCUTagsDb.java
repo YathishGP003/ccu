@@ -1518,9 +1518,7 @@ public class CCUTagsDb extends HServer {
         for (int i = 0; i < 17; ++i) {
             
             if (array.duration[i] != 0 && array.duration[i] < System.currentTimeMillis()) {
-                array.val[i] = null;
-                array.who[i] = null;
-                array.duration[i] = 0;
+              deletePointArrayLevel(rec.id(),i+1);
             }
             b.addRow(new HVal[]{
                     HNum.make(i + 1),
@@ -1614,6 +1612,7 @@ public class CCUTagsDb extends HServer {
             array.val[level - 1] = null;
             array.who[level - 1] = null;
             array.duration[level-1] = 0;
+            array.lastModifiedDateTime[level-1] = null;
         } else {
             CcuLog.d(TAG_CCU_HS," Invalid point array delete command "+id);
         }

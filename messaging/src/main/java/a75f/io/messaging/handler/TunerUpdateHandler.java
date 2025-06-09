@@ -100,11 +100,13 @@ class TunerUpdateHandler {
     
             String who = msgObject.get(HayStackConstants.WRITABLE_ARRAY_WHO).getAsString();
             double value = Double.parseDouble(val);
-            int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(
-                                        HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;
             if (local) {
-                hayStack.writePointLocal(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL, who, value, duration);
+                double durationDiff = MessageUtil.Companion.returnDurationDiff(msgObject);
+                hayStack.writePointLocal(id,TunerConstants.TUNER_BUILDING_VAL_LEVEL, who, value, durationDiff);
+                CcuLog.d(L.TAG_CCU_PUBNUB, "Building tuner point  Point : writePointFromJson - level: " +TunerConstants.TUNER_BUILDING_VAL_LEVEL + " who: " + who + " val: " + val  + " durationDiff: " + durationDiff);
             } else {
+                int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(
+                        HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;
                 hayStack.writePoint(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL,
                                     CCUHsApi.getInstance().getCCUUserName(), value, duration);
             }

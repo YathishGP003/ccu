@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
@@ -472,9 +473,10 @@ class ConfigPointUpdateHandler {
     private static void writePointFromJson(String id, JsonObject msgObject, CCUHsApi hayStack) {
         String who = msgObject.get("who").getAsString();
         double val = msgObject.get("val").getAsDouble();
-        int duration = msgObject.get("duration") != null ? msgObject.get("duration").getAsInt() : 0;
         int level = msgObject.get("level").getAsInt();
-        hayStack.writePointLocal(id, level, who, val, duration);
+        double durationDiff = MessageUtil.Companion.returnDurationDiff(msgObject);
+        hayStack.writePointLocal(id, level, who, val, durationDiff);
+        CcuLog.d(L.TAG_CCU_PUBNUB, "System configuration Point : writePointFromJson - level: " + level + " who: " + who + " val: " + val + " durationDiff: " + durationDiff);
     }
 
     private static String getOutputTagFromConfig(Point configPoint) {

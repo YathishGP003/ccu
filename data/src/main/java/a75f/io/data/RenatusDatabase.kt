@@ -20,7 +20,7 @@ import java.lang.reflect.Type
 import java.util.*
 
 
-@Database(entities = [Message::class,HayStackEntity ::class, WritableArray :: class], version = 8, exportSchema = false)
+@Database(entities = [Message::class,HayStackEntity ::class, WritableArray :: class], version = 9, exportSchema = false)
 @TypeConverters(Converters::class, WriteArrayTypeConverter::class)
 abstract class RenatusDatabase : RoomDatabase() {
     abstract fun messageDao(): MessageDao
@@ -112,6 +112,75 @@ abstract class RenatusDatabase : RoomDatabase() {
                 Log.d("RenatusDatabase", "Migrating from 7 to 8")
                 try {
                     database.execSQL("ALTER TABLE messages ADD COLUMN bundle_id TEXT")
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    database.execSQL("DROP TABLE messages")
+                }
+            }
+        }
+
+        val MIGRATION_4_9: Migration = object : Migration(4, 9) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                Log.d("RenatusDatabase", "Migrating from 4 to 9")
+                try {
+                    database.execSQL("ALTER TABLE messages ADD COLUMN logLevel TEXT")
+                    database.execSQL("ALTER TABLE messages ADD COLUMN scope TEXT")
+                    database.execSQL("ALTER TABLE messages ADD COLUMN target_id TEXT")
+                    database.execSQL("ALTER TABLE messages ADD COLUMN sequenceId TEXT")
+                    database.execSQL("ALTER TABLE messages ADD COLUMN bundle_id TEXT")
+                    database.execSQL("ALTER TABLE messages ADD COLUMN duration INTEGER")
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    database.execSQL("DROP TABLE messages")
+                }
+            }
+        }
+        val MIGRATION_5_9: Migration = object : Migration(5, 9) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                Log.d("RenatusDatabase", "Migrating from 5 to 9")
+                try {
+                    database.execSQL("ALTER TABLE messages ADD COLUMN scope TEXT")
+                    database.execSQL("ALTER TABLE messages ADD COLUMN target_id TEXT")
+                    database.execSQL("ALTER TABLE messages ADD COLUMN sequenceId TEXT")
+                    database.execSQL("ALTER TABLE messages ADD COLUMN bundle_id TEXT")
+                    database.execSQL("ALTER TABLE messages ADD COLUMN duration INTEGER")
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    database.execSQL("DROP TABLE messages")
+                }
+            }
+        }
+        val MIGRATION_6_9: Migration = object : Migration(6, 9) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                Log.d("RenatusDatabase", "Migrating from 6 to 9")
+                try {
+                    database.execSQL("ALTER TABLE messages ADD COLUMN target_id TEXT")
+                    database.execSQL("ALTER TABLE messages ADD COLUMN sequenceId TEXT")
+                    database.execSQL("ALTER TABLE messages ADD COLUMN bundle_id TEXT")
+                    database.execSQL("ALTER TABLE messages ADD COLUMN duration INTEGER")
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    database.execSQL("DROP TABLE messages")
+                }
+            }
+        }
+        val MIGRATION_7_9: Migration = object : Migration(7, 9) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                Log.d("RenatusDatabase", "Migrating from 7 to 9")
+                try {
+                    database.execSQL("ALTER TABLE messages ADD COLUMN bundle_id TEXT")
+                    database.execSQL("ALTER TABLE messages ADD COLUMN duration INTEGER")
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    database.execSQL("DROP TABLE messages")
+                }
+            }
+        }
+        val MIGRATION_8_9: Migration = object : Migration(8, 9) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                Log.d("RenatusDatabase", "Migrating from 8 to 9")
+                try {
+                    database.execSQL("ALTER TABLE messages ADD COLUMN duration INTEGER")
                 } catch (e: Exception) {
                     e.printStackTrace()
                     database.execSQL("DROP TABLE messages")

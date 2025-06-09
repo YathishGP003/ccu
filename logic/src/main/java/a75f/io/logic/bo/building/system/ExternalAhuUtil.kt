@@ -269,9 +269,39 @@ fun updateOperatingMode(
 
     updatePointValue(systemEquip, domainName, setPoint)
     CcuLog.d(TAG_BACNET, "---------updateOperatingMode----------$externalEquipId")
+    val operatingPointEnumString = haystack.readEntity("point and domainName == \"$domainName\"")["enum"].toString().lowercase()
+    val operatingPointEnumStringForExternal = haystack.readEntity("$OPERATING_MODE and equipRef == \"$externalEquipId\"")["enum"].toString().lowercase()
+    val setPointValueFromModel = searchRealValueForOperatingMode(operatingPointEnumString, operatingPointEnumStringForExternal , setPoint.toInt().toString())
     externalEquipId?.let {
-        pushOperatingMode(haystack, externalEquipId, setPoint, externalSpList)
+        pushOperatingMode(haystack, externalEquipId, setPointValueFromModel, externalSpList)
     }
+}
+
+private fun searchRealValueForOperatingMode(operatingPointEnumString: String,
+                                            operatingPointEnumStringForExternal: String, inputValue : String) : Double{
+    CcuLog.d(TAG_BACNET, "---------searchRealValueForOperatingMode------one----$operatingPointEnumString<--two-->$operatingPointEnumStringForExternal<--inputValue-->$inputValue")
+    try {
+        val mapOne = operatingPointEnumString.split(",").associate {
+            val (k, v) = it.split("=")
+            k to v
+        }
+
+        val mapTwo = operatingPointEnumStringForExternal.split(",").associate {
+            val (k, v) = it.split("=")
+            k to v
+        }
+        val reverseMapOne = mapOne.entries.associate { it.value to it.key }
+        val matchingKey = reverseMapOne[inputValue]
+        val finalValue = matchingKey?.let { mapTwo[it] }
+        CcuLog.d(TAG_BACNET, "---------searchRealValueForOperatingMode------finalValue----$finalValue")
+        if (finalValue != null) {
+            return finalValue.toDouble()
+        }
+        return inputValue.toDouble()
+    }catch (e : Exception){
+        e.printStackTrace()
+    }
+    return inputValue.toDouble()
 }
 
 fun mapBacnetPoint(
@@ -305,9 +335,14 @@ fun mapBacnetPoint(
         CcuLog.i(TAG_BACNET, " point found $query-----#going to update local point and remote point--value--$value")
         if(BacNetConstants.ObjectType.OBJECT_MULTI_STATE_VALUE.key == getObjectType(objectType)){
             val wholeNumber = value.toInt()
-            val bacnetWholeNumber = wholeNumber - 1
+            //val bacnetWholeNumber = wholeNumber
             updatePointValueChanges(pointId, haystack, setPointsList, wholeNumber.toDouble())
-            doMakeRequest(getConfig(bacnetConfig), objectId, bacnetWholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
+            doMakeRequest(getConfig(bacnetConfig), objectId, wholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
+        }else if(BacNetConstants.ObjectType.OBJECT_BINARY_VALUE.key == getObjectType(objectType)){
+            val wholeNumber = value.toInt()
+            //  val bacnetWholeNumber = wholeNumber - 1
+            updatePointValueChanges(pointId, haystack, setPointsList, wholeNumber.toDouble())
+            doMakeRequest(getConfig(bacnetConfig), objectId, wholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
         }else{
             updatePointValueChanges(pointId, haystack, setPointsList, value)
             doMakeRequest(getConfig(bacnetConfig), objectId, value.toString(),getObjectType(objectType), defaultPriority, pointId)
@@ -844,7 +879,10 @@ fun setOccupancyMode(
         updatePointValue(systemEquip, systemOccupancyMode, occupancyMode)
         CcuLog.d(TAG_BACNET, "---------setOccupancyMode----------$externalEquipId")
         externalEquipId?.let {
-            pushOccupancyMode(haystack, it, occupancyMode, externalSpList)
+            val operatingPointEnumString = haystack.readEntity("point and domainName == \"$systemOccupancyMode\"")["enum"].toString().lowercase()
+            val operatingPointEnumStringForExternal = haystack.readEntity("$OCCUPANCY_MODE and equipRef == \"$externalEquipId\"")["enum"].toString().lowercase()
+            val setPointValueFromModel = searchRealValueForOperatingMode(operatingPointEnumString, operatingPointEnumStringForExternal , occupancyMode.toInt().toString())
+            pushOccupancyMode(haystack, it, setPointValueFromModel, externalSpList)
         }
     } else {
         logIt("OccupancyModeControlEnabled disabled")
@@ -1158,7 +1196,7 @@ private fun generateWriteObject(
         selectedValueAsPerType = selectedValue //String.valueOf(Integer.parseInt(selectedValue)+1);
     } else {
         dataType = BacNetConstants.DataTypes.BACNET_DT_UNSIGNED.ordinal + 1
-        selectedValueAsPerType = (selectedValue.toDouble() + 1).toString()
+        selectedValueAsPerType = (selectedValue.toInt() + 1).toString()
     }
     val objectIdentifierBacNet = ObjectIdentifierBacNet(
         BacNetConstants.ObjectType.valueOf(objectType).value,

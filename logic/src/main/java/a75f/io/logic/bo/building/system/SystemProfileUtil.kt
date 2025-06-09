@@ -65,7 +65,7 @@ fun getActiveSystemConfiguration(systemProfile: String): ProfileConfiguration? {
         return ModulatingRtuProfileConfig(getVavModulatingRtuModelDef() as SeventyFiveFProfileDirective)
             .getActiveConfiguration()
     } else if (systemProfile == "dabFullyModulatingAhu" || ProfileType.SYSTEM_DAB_ANALOG_RTU.name == systemProfile) {
-        return ModulatingRtuProfileConfig(getDabModulatingRtuModelDef() as SeventyFiveFProfileDirective)
+        return DabModulatingRtuProfileConfig(getDabModulatingRtuModelDef() as SeventyFiveFProfileDirective)
             .getActiveConfiguration()
     } else if (systemProfile == "vavAdvancedHybridAhuV2") {
         return AdvancedHybridAhuConfig(

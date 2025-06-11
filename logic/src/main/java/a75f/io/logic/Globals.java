@@ -337,7 +337,7 @@ public class Globals {
                 mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION + 15, TASK_SEPARATION_TIMEUNIT);
                 BearerTokenManager.getInstance().scheduleJob();
                 updateCCUAhuRef();
-                new SanityManager().scheduleAllSanityPeriodic(getApplicationContext(), 24);
+                //new SanityManager().scheduleAllSanityPeriodic(getApplicationContext(), 24);
             }
         });
 

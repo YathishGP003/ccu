@@ -102,6 +102,7 @@ import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.util.bacnet.BacnetDeviceJob;
 import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.logic.watchdog.Watchdog;
+import a75f.io.sanity.framework.SanityManager;
 import a75f.io.util.ExecutorTask;
 
 /*
@@ -335,6 +336,7 @@ public class Globals {
                 mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION + 15, TASK_SEPARATION_TIMEUNIT);
                 BearerTokenManager.getInstance().scheduleJob();
                 updateCCUAhuRef();
+                //new SanityManager().scheduleAllSanityPeriodic(getApplicationContext(), 24);
             }
         });
 

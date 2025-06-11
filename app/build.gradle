@@ -317,6 +317,8 @@ dependencies {
 
     implementation project(':util')
     implementation 'io.github.chaosleung:pinview:1.4.4'
+
+    implementation project(':sanity')
 }
 
 

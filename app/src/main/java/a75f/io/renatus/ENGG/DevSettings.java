@@ -69,7 +69,6 @@ import a75f.io.logic.filesystem.FileSystemTools;
 import a75f.io.logic.logtasks.UploadLogs;
 import a75f.io.logic.migration.MigrationHandler;
 import a75f.io.logic.tuners.TunerEquip;
-import a75f.io.logic.util.RxTask;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -79,6 +78,9 @@ import a75f.io.renatus.anrwatchdog.ANRHandler;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.sanity.framework.SanityManager;
+import a75f.io.sanity.framework.SanityRunner;
+import a75f.io.sanity.ui.SanityResultsFragment;
 import a75f.io.usbserial.UsbSerialUtil;
 import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
@@ -210,9 +212,11 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
 
     public @BindView(R.id.anrReportText) TextView anrReportText;
     public @BindView(R.id.anrTriggerBtn) Button anrTriggerBtn;
+    public @BindView(R.id.executeSanity) Button executeSanity;
 
     public @BindView(R.id.remoteId) TextView remoteEntity;
     public @BindView(R.id.remoteBtn) Button remoteBtn;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -684,6 +688,13 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                     ProgressDialogUtils::hideProgressDialog
             );
         });
+        executeSanity.setOnClickListener(view1 -> {
+                    new SanityResultsFragment().show(getActivity().getSupportFragmentManager(), "SanityDialog");
+                    ExecutorTask.executeBackground(() -> {
+                        SanityManager sanityManager = new SanityManager();
+                        sanityManager.runOnceAndSaveReport(new SanityRunner(), getContext());
+                    });
+                });
 
         remoteBtn.setOnClickListener(view1 -> {
             if (returnDevSettingPreference("remote_id_fetch").equals(pending)) {

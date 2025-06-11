@@ -15,7 +15,6 @@ import org.projecthaystack.client.HClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -468,9 +467,10 @@ public class Globals {
                         break;
                 }
             }
+            L.ccu().systemProfile.setFanTypeToStages(eq.getProfile());
         } else {
             CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create Default System Profile");
-            L.ccu().systemProfile = new DefaultSystem();
+            L.ccu().systemProfile = new DefaultSystem().createDefaultSystemEquip();
             isDefaultSystem = true;
         }
         if (!isDefaultSystem)
@@ -700,6 +700,8 @@ public class Globals {
             case DomainName.smartnodePID:
             case DomainName.helionodePID:
                 return ProfileType.PLC.name();
+            case DomainName.defaultSystemEquip:
+                return ProfileType.SYSTEM_DEFAULT.name();
             default:
                 return profile;
         }
@@ -782,7 +784,7 @@ public class Globals {
             CCUDevice ccuDeviceObj = Domain.ccuDevice;
             ccuDeviceBuilder.buildCCUDevice(ccuDeviceObj.getEquipRef(), ccuDeviceObj.getSiteRef(), ccuDeviceObj.getCcuDisName(),
                     ccuDeviceObj.getInstallerEmail(), ccuDeviceObj.getManagerEmail(),
-                    systemProf, true);
+                    systemProf);
         }
     }
 

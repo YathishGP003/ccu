@@ -26,6 +26,7 @@ import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.domain.util.CommonQueries;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.renatus.profiles.system.DabModulatingRtuFragment;
 import a75f.io.renatus.profiles.system.DabStagedRtuFragment;
@@ -141,6 +142,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                     switch (i) {
                         case 0:
                             if (canAddDABProfile() && canAddVAVProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new DefaultSystemProfile()).commit();
                                 if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
@@ -155,6 +157,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 1:
                             if (canAddVAVProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new VavStagedRtuFragment(dialogListener)).commit();
                             } else {
@@ -166,6 +169,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
 
                         case 2:
                             if (canAddVAVProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new VavModulatingRtuFragment(dialogListener)).commit();
                             } else {
@@ -176,6 +180,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 3:
                             if (canAddVAVProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new VavStagedVfdRtuFragment(dialogListener)).commit();
                             } else {
@@ -186,6 +191,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 4:
                             if (canAddVAVProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new VavAdvancedHybridAhuFragment(dialogListener)).commit();
                             } else {
@@ -196,6 +202,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 5:
                             if (canAddVAVProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new ExternalAhuFragment(ProfileType.vavExternalAHUController), "vavExternalAHUController").commit();
                                 PreferenceUtil.setIsNewExternalAhu(true);
@@ -207,6 +214,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 6:
                             if (canAddDABProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new DabStagedRtuFragment()).commit();
                                 if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
@@ -221,6 +229,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 7:
                             if (canAddDABProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new DabModulatingRtuFragment()).commit();
                                 if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
@@ -234,6 +243,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 8:
                             if (canAddDABProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new DabStagedVfdRtuFragment()).commit();
                                 if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
@@ -248,6 +258,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
 
                         case 9:
                             if (canAddDABProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new DabAdvancedHybridAhuFragment()).commit();
                                 if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
@@ -261,6 +272,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 10:
                             if (canAddDABProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new ExternalAhuFragment(ProfileType.dabExternalAHUController), "dabExternalAHUController").commit();
                                 PreferenceUtil.setIsNewExternalAhu(true);
@@ -273,6 +285,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
 
                         case 11:
                             if (canAddVAVProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new VavIERtuProfile()).commit();
                                 if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
@@ -290,6 +303,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                     switch (i) {
                         case 0:
                             if (canAddDABProfile() && canAddVAVProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new DefaultSystemProfile()).commit();
                                 if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
@@ -303,6 +317,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 1:
                             if (canAddVAVProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new VavStagedRtuFragment(dialogListener)).commit();
                             } else {
@@ -314,6 +329,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
 
                         case 2:
                             if (canAddVAVProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new VavModulatingRtuFragment(dialogListener)).commit();
                             } else {
@@ -324,6 +340,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 3:
                             if (canAddVAVProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new VavStagedVfdRtuFragment(dialogListener)).commit();
                             } else {
@@ -334,6 +351,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 4:
                             if (canAddVAVProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new VavHybridRtuProfile()).commit();
                                 if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
@@ -347,6 +365,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 5:
                             if (canAddVAVProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new VavAdvancedHybridAhuFragment(dialogListener)).commit();
                             } else {
@@ -357,6 +376,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 6:
                             if (canAddVAVProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new ExternalAhuFragment(ProfileType.vavExternalAHUController), "vavExternalAHUController").commit();
                                 PreferenceUtil.setIsNewExternalAhu(true);
@@ -368,6 +388,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 7:
                             if (canAddDABProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new DabStagedRtuFragment()).commit();
                                 if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
@@ -382,6 +403,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 8:
                             if (canAddDABProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new DabModulatingRtuFragment()).commit();
                                 if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
@@ -395,6 +417,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 9:
                             if (canAddDABProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new DabStagedVfdRtuFragment()).commit();
                                 if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
@@ -408,6 +431,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 10:
                             if (canAddDABProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new DABHybridAhuProfile()).commit();
                                 if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
@@ -422,6 +446,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
 
                         case 11:
                             if (canAddDABProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new DabAdvancedHybridAhuFragment()).commit();
                                 if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
@@ -435,6 +460,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             break;
                         case 12:
                             if (canAddDABProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new ExternalAhuFragment(ProfileType.dabExternalAHUController), "dabExternalAHUController").commit();
                                 PreferenceUtil.setIsNewExternalAhu(true);
@@ -447,6 +473,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
 
                         case 13:
                             if (canAddVAVProfile()) {
+                                if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new VavIERtuProfile()).commit();
                                 if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
@@ -553,6 +580,14 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
             updatedList.remove("DAB Advanced Hybrid AHU");
         }
         return updatedList;
+    }
+    private boolean isSystemViewVisible(){
+        View profileContainer = getActivity().findViewById(R.id.profileContainer);
+        if(profileContainer == null) {
+            CcuLog.d(L.TAG_CCU_SYSTEM,"profile Container is not found");
+            return false;
+        }
+        return true;
     }
 
 }

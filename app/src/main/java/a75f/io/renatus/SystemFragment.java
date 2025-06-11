@@ -1753,13 +1753,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				CcuLog.d(BACNET, "pointName: " + pointName + "pointId: " + pointId + "value: " + value
 						+ "hisValue: " + hisValue + "defaultValById: " + defaultValById);
 				String curretValue = "";
-				if(!isWritable){
-					parameterList.add(pointName + " : " + hisValue);
-					curretValue = hisValue;
-				}else{
-					parameterList.add(pointName + " : " + defaultValById);
-					curretValue = defaultValById;
-				}
+				parameterList.add(pointName + " : " + hisValue);
+				curretValue = hisValue;
 
 				BacnetZoneViewItem bacnetZoneViewItem = new BacnetZoneViewItem(pointName, curretValue,
 						bacnetConfig, true, bacnetPoint, isWritable, spinnerValues, objectType);

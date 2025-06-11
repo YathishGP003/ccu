@@ -43,6 +43,8 @@ public enum ProfileType
                 return vavExternalAHUController;
             case "dabExternalAHUController":
                 return dabExternalAHUController;
+            case "defaultSystemEquip":
+                return SYSTEM_DEFAULT;
         }
         return null;
     }

@@ -14,6 +14,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.caz.configs.TIConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.messaging.handler.MessageUtil.Companion.returnDurationDiff
 import com.google.gson.JsonObject
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -87,9 +88,12 @@ private fun writePointFromJson(configPoint: Point, msgObject: JsonObject, haySta
             hayStack.writeHisValById(configPoint.id, HSUtil.getPriorityVal(configPoint.id))
             return
         }
-        val duration =
-            if (msgObject[HayStackConstants.WRITABLE_ARRAY_DURATION] != null) msgObject[HayStackConstants.WRITABLE_ARRAY_DURATION].asInt else 0
-        hayStack.writePointLocal(configPoint.id, level, who, value.toDouble(), duration)
+        val durationDiff = returnDurationDiff(msgObject);
+        hayStack.writePointLocal(configPoint.id, level, who, value.toDouble(), durationDiff)
+        CcuLog.d(
+            L.TAG_CCU_PUBNUB,
+            "TI: writePointFromJson - level: $level who: $who val: $value  durationDiff: $durationDiff"
+        )
     } catch (e: Exception) {
         CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to parse tuner value : " + msgObject + " ; " + e.message)
     }

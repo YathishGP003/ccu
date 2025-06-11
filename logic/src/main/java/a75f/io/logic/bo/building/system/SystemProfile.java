@@ -1,6 +1,8 @@
 package a75f.io.logic.bo.building.system;
 
 import static a75f.io.logic.L.ccu;
+import static a75f.io.logic.bo.building.system.SystemProfileUtilKt.getActiveSystemConfiguration;
+import static a75f.io.logic.bo.building.system.SystemProfileUtilKt.isAdvanceV2;
 import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.getConnectEquip;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
@@ -11,9 +13,11 @@ import org.projecthaystack.HDict;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -29,6 +33,8 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.api.PhysicalPoint;
+import a75f.io.domain.config.AssociationConfig;
+import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.domain.devices.CCUDevice;
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip;
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip;
@@ -37,6 +43,7 @@ import a75f.io.domain.logic.CCUBaseConfigurationBuilder;
 import a75f.io.domain.logic.CCUDeviceBuilder;
 import a75f.io.domain.logic.DiagEquipConfigurationBuilder;
 import a75f.io.domain.util.CommonQueries;
+import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -44,19 +51,27 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.dab.DabSystemProfile;
 import a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt;
+import a75f.io.logic.bo.building.system.util.AdvancedHybridAhuConfig;
+import a75f.io.logic.bo.building.system.util.CmConfiguration;
+import a75f.io.logic.bo.building.system.util.ConnectConfiguration;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
+import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig;
+import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig;
+import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig;
 import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.util.ExecutorTask;
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -90,6 +105,7 @@ public abstract class SystemProfile
     private Timer bypassCoolingLockoutTimer;
     private TimerTask heatingTimerTask;
     private TimerTask coolingTimerTask;
+    private HashMap<FanType, Set<Stage>> fanTypeToStages;
 
     public abstract void doSystemControl();
 
@@ -244,7 +260,7 @@ public abstract class SystemProfile
         CCUDevice ccuDeviceObj = Domain.ccuDevice;
         ccuDeviceBuilder.buildCCUDevice(ccuDeviceObj.getEquipRef(), ccuDeviceObj.getSiteRef(),
                 ccuDeviceObj.getCcuDisName(), ccuDeviceObj.getInstallerEmail(),
-                ccuDeviceObj.getManagerEmail(), systemEquipId, true);
+                ccuDeviceObj.getManagerEmail(), systemEquipId);
     }
 
     public void addSystemTuners() {
@@ -1040,14 +1056,43 @@ public abstract class SystemProfile
     }
 
     public boolean isVavSystemProfile() {
-        if(ccu().systemProfile.getProfileName().contains("VAV")) {
-            return true;
+        return ccu().systemProfile.getProfileName().contains("VAV");
+    }
+
+    public HashMap<FanType, Set<Stage>> getFanTypeToStages() {
+        return fanTypeToStages;
+    }
+
+    public void setFanTypeToStages(HashMap<FanType, Set<Stage>> fanTypeToStages) {
+        this.fanTypeToStages = fanTypeToStages;
+    }
+
+    public void setFanTypeToStages(String systemProfile) {
+        try {
+            if (isAdvanceV2()) {
+                AdvancedHybridAhuConfig config = new AdvancedHybridAhuConfig(
+                        (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getVavAdvancedAhuCmModelV2(),
+                        (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getVavAdvancedAhuConnectModelV2()
+                );
+                SystemProfileUtilKt.setFanTypeToStages(
+                        config.getActiveConfiguration().getCmConfiguration(),
+                        config.getActiveConfiguration().getCmConfiguration(),
+                        config.getActiveConfiguration().getConnectConfiguration()
+                );
+            } else {
+                ProfileConfiguration profileConfiguration = getActiveSystemConfiguration(systemProfile);
+                SystemProfileUtilKt.setFanTypeToStages(profileConfiguration, null, null);
+            }
+
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU_SYSTEM, "Error in setting fan type to stages", e);
+            e.printStackTrace();
         }
-        return false;
     }
 
     public boolean isLockoutActiveDuringUnoccupied() {
         return ((isCoolingLockoutActive() && getSystemController().getSystemState() == COOLING) ||
                 (isHeatingLockoutActive() && getSystemController().getSystemState() == HEATING));
     }
+
 }

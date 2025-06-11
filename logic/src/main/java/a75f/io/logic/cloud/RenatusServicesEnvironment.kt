@@ -106,7 +106,6 @@ class RenatusServicesEnvironment(
             BuildConfig.SEQUENCE_RUNNER_INFO,
             BuildConfig.TUNERS_INFO,
             BuildConfig.VERSION_MANAGEMENT_INFO
-
          )
       }
 

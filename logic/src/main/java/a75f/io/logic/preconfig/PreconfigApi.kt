@@ -29,11 +29,11 @@ import a75f.io.logic.bo.building.dab.DabProfile
 import a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.definitions.ScheduleType
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
+import a75f.io.logic.getMigrationVersion
 import a75f.io.logic.limits.SchedulabeLimits.Companion.addSchedulableLimits
 import a75f.io.logic.util.TimeZoneUtil.getTimeZoneIdFromString
 import a75f.io.logic.util.bacnet.addBacnetTags
@@ -93,7 +93,7 @@ fun createCcuDevice(
     val ccuBaseConfigurationBuilder = CCUBaseConfigurationBuilder(CCUHsApi.getInstance())
 
     val ccuBaseConfigurationModel = getCCUBaseConfigurationModel()
-    val diagEquipId = diagEquipConfigurationBuilder.createDiagEquipAndPoints(ccuName)
+    val diagEquipId = diagEquipConfigurationBuilder.createDiagEquipAndPoints(ccuName, getMigrationVersion())
 
     val ccuRef = ccuBaseConfigurationBuilder.createCCUBaseConfiguration(
         ccuName,

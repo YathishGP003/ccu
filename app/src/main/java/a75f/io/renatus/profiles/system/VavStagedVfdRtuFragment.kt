@@ -159,7 +159,8 @@ class VavStagedVfdRtuFragment(loadingListener: onLoadingCompleteListener) : Stag
             || (viewState.value.relay4Enabled == true && viewState.value.relay4Association == associationIndex )
             || (viewState.value.relay5Enabled == true && viewState.value.relay5Association == associationIndex )
             || (viewState.value.relay6Enabled == true && viewState.value.relay6Association == associationIndex )
-            || (viewState.value.relay7Enabled == true && viewState.value.relay7Association == associationIndex)) {
+            || (viewState.value.relay7Enabled == true && viewState.value.relay7Association == associationIndex)
+            || (viewState.value.analogOut2Enabled == true && viewState.value.analogOut2Association == associationIndex)) {
             return true
         }
         else {

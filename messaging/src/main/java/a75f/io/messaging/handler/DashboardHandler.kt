@@ -7,6 +7,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.messaging.BuildConfig
 import a75f.io.messaging.MessageHandler
+import a75f.io.messaging.handler.DashboardHandler.Companion.dashboardListener
 import a75f.io.util.DASHBOARD
 import a75f.io.util.DashboardListener
 import a75f.io.util.ExecutorTask
@@ -83,6 +84,10 @@ fun getDashboardConfiguration() {
     }, {
         DashboardHandler.dashboardListener?.onDashboardConfigured(isConfigured)
     })
+}
+
+fun setDashboardListener(listener: DashboardListener) {
+    DashboardHandler.dashboardListener = listener
 }
 
 

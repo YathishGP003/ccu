@@ -25,6 +25,7 @@ import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBu
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.messaging.handler.MessageUtil.Companion.returnDurationDiff
 import android.util.Log
 import com.google.gson.JsonObject
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
@@ -221,10 +222,11 @@ class HyperstatSplitReconfigurationHandler {
                 val who = msgObject[HayStackConstants.WRITABLE_ARRAY_WHO].asString
                 val level = msgObject[HayStackConstants.WRITABLE_ARRAY_LEVEL].asInt
                 val value = msgObject[HayStackConstants.WRITABLE_ARRAY_VAL].asDouble
-                val duration =
-                    if (msgObject[HayStackConstants.WRITABLE_ARRAY_DURATION] != null)
-                        msgObject[HayStackConstants.WRITABLE_ARRAY_DURATION].asInt else 0
-                hayStack.writePointLocal(configPoint.id, level, who, value, duration)
+                val durationDiff = returnDurationDiff(msgObject);
+                CcuLog.d(
+                    L.TAG_CCU_PUBNUB,
+                    "HS Split: writePointFromJson - level: $level who: $who val: $value  durationDiff: $durationDiff"
+                )
             } catch (e: Exception) {
                 e.printStackTrace()
                 CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to parse tuner value : " + msgObject + " ; " + e.message)

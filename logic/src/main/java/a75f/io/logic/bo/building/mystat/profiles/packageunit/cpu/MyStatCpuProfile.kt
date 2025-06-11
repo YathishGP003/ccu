@@ -47,6 +47,8 @@ class MyStatCpuProfile: MyStatPackageUnitProfile() {
     private val cpuDeviceMap: MutableMap<Int, MyStatCpuEquip> = mutableMapOf()
     private var analogLogicalPoints: HashMap<Int, String> = HashMap()
     private var relayLogicalPoints: HashMap<Int, String> = HashMap()
+    private var hasZeroFanLoopBeenHandled = false
+
 
     private val myStatLoopController = MyStatLoopController()
     private lateinit var curState: ZoneState
@@ -173,12 +175,20 @@ class MyStatCpuProfile: MyStatPackageUnitProfile() {
      */
     private fun updateTitle24LoopCounter(tuners: MyStatTuners, basicSettings: MyStatBasicSettings) {
         // Check if there is change in occupancy and the fan-loop output is less than the previous value,
-        // then offer the fan protection
+        // then offer the fan
+
+        CcuLog.d( L.TAG_CCU_MSCPU, "Occupancy: $occupancyStatus, Fan Loop Output: $fanLoopOutput, Previous Fan Loop Val: $previousFanLoopVal, Fan Loop Counter: $fanLoopCounter , hasZeroFanLoopBeenHandled $hasZeroFanLoopBeenHandled")
         if ((occupancyStatus != previousOccupancyStatus && fanLoopOutput < previousFanLoopVal) ||
-            (basicSettings.fanMode != previousFanStageStatus && fanLoopOutput < previousFanLoopVal)) {
+            (basicSettings.fanMode != previousFanStageStatus && fanLoopOutput < previousFanLoopVal) ||
+            (fanLoopOutput == 0 && fanLoopOutput < previousFanLoopVal && !hasZeroFanLoopBeenHandled)) {
             fanLoopCounter = tuners.minFanRuntimePostConditioning
-        } else if (occupancyStatus != previousOccupancyStatus && fanLoopOutput > previousFanLoopVal)
+            hasZeroFanLoopBeenHandled = true
+        } else if ((occupancyStatus != previousOccupancyStatus || (hasZeroFanLoopBeenHandled && fanLoopOutput > 0)) && fanLoopOutput > previousFanLoopVal) {
+            // If the fan loop output is greater than the previous value and the counter is greater than 0, reset the counter
             fanLoopCounter = 0 // Reset the counter if the fan-loop output is greater than the previous value
+            hasZeroFanLoopBeenHandled = false
+        }
+
     }
 
     /**
@@ -331,7 +341,9 @@ class MyStatCpuProfile: MyStatPackageUnitProfile() {
                 previousFanLoopValStaged = fanLoopForAnalog
             }
             // When in dead-band, set the fan-loopForAnalog to the recirculate analog value. Also ensure fan protection is not ON
-            if ((fanLoopOutput == 0 || runFanLowDuringDoorWindow) && fanProtectionCounter == 0 && isInSoftOccupiedMode()) {
+            // added the new check if the fan loop output is with in relayActivationHysteresis ,sending the Analog recirculate value
+            val relayActivationHysteresis = equip.standaloneRelayActivationHysteresis.readPriorityVal();
+            if ((fanLoopOutput == 0 || runFanLowDuringDoorWindow || (fanLoopOutput > 0 && fanLoopOutput < relayActivationHysteresis)) && fanProtectionCounter == 0 && isInSoftOccupiedMode()) {
                 fanLoopForAnalog = getPercentFromVolt(getAnalogRecirculateValueActivated(equip).roundToInt())
                 logMsg = "Deadband"
             }
@@ -518,6 +530,10 @@ class MyStatCpuProfile: MyStatPackageUnitProfile() {
         equip: MyStatCpuEquip
     ) {
         val relayMapping = MyStatCpuRelayMapping.values().find { it.ordinal == association }
+        var isFanLoopCounterEnabled = false;
+        if (previousFanLoopVal > 0 && fanLoopCounter > 0) {
+            isFanLoopCounterEnabled = true
+        }
         when (relayMapping) {
             MyStatCpuRelayMapping.COOLING_STAGE_1, MyStatCpuRelayMapping.COOLING_STAGE_2 -> {
                 if (basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY
@@ -548,7 +564,7 @@ class MyStatCpuProfile: MyStatPackageUnitProfile() {
                 }
             }
 
-            MyStatCpuRelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput, relayStages)
+            MyStatCpuRelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput, relayStages,isFanLoopCounterEnabled)
             MyStatCpuRelayMapping.OCCUPIED_ENABLED -> doOccupiedEnabled(port)
             MyStatCpuRelayMapping.HUMIDIFIER -> doHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMinInsideHumidity, equip.zoneHumidity.readHisVal())
             MyStatCpuRelayMapping.DEHUMIDIFIER -> doDeHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMaxInsideHumidity, equip.zoneHumidity.readHisVal())

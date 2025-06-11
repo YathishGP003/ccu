@@ -12,18 +12,10 @@ import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader.getModelForDomainName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.plc.PLCConstants.AIR_TEMP_SENSOR_100K_OHMS
-import a75f.io.logic.bo.building.plc.PLCConstants.CURRENT_TX10_AI1
-import a75f.io.logic.bo.building.plc.PLCConstants.CURRENT_TX20_AI1
-import a75f.io.logic.bo.building.plc.PLCConstants.CURRENT_TX50_AI1
-import a75f.io.logic.bo.building.plc.PLCConstants.EXTERNAL_AIR_TEMP_SENSOR
-import a75f.io.logic.bo.building.plc.PLCConstants.VOLTAGE_INPUT_AI1
-import a75f.io.logic.bo.building.plc.PLCConstants.ZONE_CO_AI1
-import a75f.io.logic.bo.building.plc.PLCConstants.ZONE_HUMIDITY_AI1
-import a75f.io.logic.bo.building.plc.PLCConstants.ZONE_NO2_AI1
 import a75f.io.logic.bo.building.plc.PlcProfile
 import a75f.io.logic.bo.building.plc.PlcProfileConfig
 import a75f.io.logic.bo.building.plc.addBaseProfileConfig
+import a75f.io.messaging.handler.MessageUtil.Companion.returnDurationDiff
 import com.google.gson.JsonObject
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -168,9 +160,12 @@ private fun writePointFromJson(configPoint: Point, msgObject: JsonObject, haySta
         val who = msgObject[HayStackConstants.WRITABLE_ARRAY_WHO].asString
 
         val `val` = msgObject[HayStackConstants.WRITABLE_ARRAY_VAL].asDouble
-        val duration =
-            if (msgObject[HayStackConstants.WRITABLE_ARRAY_DURATION] != null) msgObject[HayStackConstants.WRITABLE_ARRAY_DURATION].asInt else 0
-        hayStack.writePointLocal(configPoint.id, level, who, `val`, duration)
+        val durationDiff = returnDurationDiff(msgObject);
+        hayStack.writePointLocal(id, level, who, `val`, durationDiff)
+        CcuLog.d(
+            L.TAG_CCU_PUBNUB,
+            "plc: writePointFromJson - level: $level who: $who val: $`val`  durationDiff: $durationDiff"
+        )
     } catch (e: Exception) {
         CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to parse tuner value : " + msgObject + " ; " + e.message)
     }

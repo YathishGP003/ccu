@@ -10,6 +10,7 @@ import a75f.io.domain.util.MODEL_DAB_ADVANCED_AHU_V2_CONNECT
 import a75f.io.domain.util.MODEL_DAB_MODULATING_AHU
 import a75f.io.domain.util.MODEL_DAB_STAGED_RTU
 import a75f.io.domain.util.MODEL_DAB_STAGED_VFD_RTU
+import a75f.io.domain.util.MODEL_DEFAULT_SYSTEM_PROFILE
 import a75f.io.domain.util.MODEL_EXTERNAL_AHU_DAB
 import a75f.io.domain.util.MODEL_EXTERNAL_AHU_VAV
 import a75f.io.domain.util.MODEL_HELIONODE_PID
@@ -115,6 +116,7 @@ fun getRequiredModels(): List<String> {
             MODEL_MYSTAT_DEVICE,
             MODEL_MYSTAT_CPU,
             MODEL_MYSTAT_PIPE2,
-            MODEL_MYSTAT_HPU
+            MODEL_MYSTAT_HPU,
+            MODEL_DEFAULT_SYSTEM_PROFILE
     )
 }

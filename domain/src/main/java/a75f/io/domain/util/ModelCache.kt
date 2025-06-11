@@ -70,7 +70,13 @@ object ModelCache {
             loadSystemProfileModels()
             loadBypassDamperModels()
             loadOAOModelAsync()
+            loadCCUAndDiagEquipModels()
         }
+    }
+
+    private fun loadCCUAndDiagEquipModels() {
+        modelContainer[MODEL_CCU_BASE_CONFIGURATION] = getModelById(MODEL_CCU_BASE_CONFIGURATION)
+        modelContainer[MODEL_CCU_DIAG_EQUIP] = getModelById(MODEL_CCU_DIAG_EQUIP)
     }
 
     private fun loadTerminalModelsAsync() {
@@ -177,6 +183,9 @@ object ModelCache {
         modelContainer[MODEL_DAB_ADVANCED_AHU_V2_CONNECT] = getModelById(
                 MODEL_DAB_ADVANCED_AHU_V2_CONNECT)
         CcuLog.i(Domain.LOG_TAG, "MODEL_VAV_ADVANCED_AHU_V2_CONNECT model loaded")
+
+        modelContainer[MODEL_DEFAULT_SYSTEM_PROFILE] = getModelById(MODEL_DEFAULT_SYSTEM_PROFILE)
+        CcuLog.i(Domain.LOG_TAG, "Default System Profile model loaded")
     }
 
     private fun loadBypassDamperModels() {

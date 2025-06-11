@@ -908,6 +908,35 @@
                     android:gravity="center" />
 
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:text="Pull remote Entity : "
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+                <EditText
+                    android:layout_width="500dp"                    android:id="@+id/remoteId"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+
+                <Button
+                    android:id="@+id/remoteBtn"
+                    android:layout_height="wrap_content"
+                    android:layout_width="150dp"
+                    android:text="Pull Entity"
+                    android:layout_gravity="center"
+                    android:gravity="center" />
+
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"

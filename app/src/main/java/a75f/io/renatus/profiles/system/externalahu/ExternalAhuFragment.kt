@@ -574,7 +574,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                             val radioOptions = listOf(BACNET, MODBUS)
                             var disabledOptions: List<String>
                             if(!viewModel.isBacntEnabled.value){
-                                disabledOptions =  listOf() //listOf(BACNET)
+                                disabledOptions =  listOf(BACNET)
                             }else{
                                 disabledOptions = listOf()
                             }

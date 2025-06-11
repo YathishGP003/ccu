@@ -19,4 +19,5 @@ class VavStagedVfdSystemEquip(equipRef : String) : VavStagedSystemEquip (equipRe
     val analog2Economizer = Point(DomainName.analog2Economizer, equipRef)
     val analog2Default = Point(DomainName.analog2Default, equipRef)
     val fanSignal = Point(DomainName.fanSignal, equipRef)
+    val analog2OutputAssociation = Point(DomainName.analog2OutputAssociation, equipRef)
 }

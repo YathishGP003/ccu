@@ -9,6 +9,7 @@ import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.system.setFanTypeToStages
 import a75f.io.logic.bo.building.system.util.deleteCurrentSystemProfile
 import a75f.io.logic.bo.building.system.util.getCurrentSystemEquip
 import a75f.io.logic.bo.building.system.util.getVavConnectEquip
@@ -109,6 +110,12 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                 updateConditioningMode()
                 hayStack.setCcuReady()
                 hayStack.syncEntityTree()
+                setFanTypeToStages(
+                    profileConfiguration.cmConfiguration,
+                    profileConfiguration.cmConfiguration,
+                    profileConfiguration.connectConfiguration
+                )
+
             }
         }
 

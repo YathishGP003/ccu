@@ -24,5 +24,10 @@ object RenatusDatabaseBuilder {
                     .addMigrations(RenatusDatabase.MIGRATION_5_7)
                     .addMigrations(RenatusDatabase.MIGRATION_6_7)
                     .addMigrations(RenatusDatabase.MIGRATION_7_8)
+                    .addMigrations(RenatusDatabase.MIGRATION_4_9)
+                    .addMigrations(RenatusDatabase.MIGRATION_5_9)
+                    .addMigrations(RenatusDatabase.MIGRATION_6_9)
+                    .addMigrations(RenatusDatabase.MIGRATION_7_9)
+                    .addMigrations(RenatusDatabase.MIGRATION_8_9)
                     .build()
 }

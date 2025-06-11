@@ -13,6 +13,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.system.setFanTypeToStages
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.haystack.device.ControlMote
@@ -95,6 +96,7 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
             hayStack.syncEntityTree()
             hayStack.setCcuReady()
             initialPortValues = HashMap(profileConfiguration.unusedPorts)
+            setFanTypeToStages(profileConfiguration)
         }
     }
 

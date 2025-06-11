@@ -102,13 +102,8 @@ public class UpdatePointHandler implements MessageHandler
                 hayStack.clearPointArrayLevel(localPoint.getId(), level, true);
                 hayStack.writeHisValById(localPoint.getId(), HSUtil.getPriorityVal(localPoint.getId()));
             } else {
-                hayStack.writePointLocal(localPoint.getId(), msgObject.get(WRITABLE_ARRAY_LEVEL).getAsInt(),
-                        msgObject.get(WRITABLE_ARRAY_WHO).getAsString(), Double.parseDouble(value), msgObject.has(WRITABLE_ARRAY_DURATION) ?
-                                msgObject.get(WRITABLE_ARRAY_DURATION).getAsInt() : 0);
+                writePointFromJson(localPoint.getId(), msgObject, hayStack);
                 hayStack.writeHisValById(localPoint.getId(),Double.parseDouble( value));
-                // Read priority array list to get duration of levels.
-                // read all points once
-                fetchRemotePoint(pointUid, isDataSync, msgObject);
             }
             return;
         }
@@ -295,7 +290,7 @@ public class UpdatePointHandler implements MessageHandler
 
         if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {
-            fetchRemotePoint(pointUid, isDataSync, msgObject);
+            writePointFromJson(pointUid, msgObject, hayStack);
 
             //TODO- Should be removed one pubnub is stable
             logPointArray(localPoint);
@@ -507,5 +502,13 @@ public class UpdatePointHandler implements MessageHandler
         return  (localPoint.getMarkers().contains(Tags.DESIRED)
                 || localPoint.getMarkers().contains(Tags.SCHEDULE_TYPE)
                 || localPoint.getMarkers().contains(Tags.TUNER));
+    }
+    private static void writePointFromJson(String id, JsonObject msgObject, CCUHsApi hayStack) {
+        String who = msgObject.get("who").getAsString();
+        double val = msgObject.get("val").getAsDouble();
+        int level = msgObject.get("level").getAsInt();
+        double durationDiff = MessageUtil.Companion.returnDurationDiff(msgObject);
+        hayStack.writePointLocal(id, level, who, val, durationDiff);
+        CcuLog.d(L.TAG_CCU_PUBNUB, "updatePoint : writePointFromJson - level: " + level + " who: " + who + " val: " + val  + " durationDiff: " + durationDiff);
     }
 }

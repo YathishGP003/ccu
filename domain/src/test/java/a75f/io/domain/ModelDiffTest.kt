@@ -1,9 +1,7 @@
 package a75f.io.domain
 
 import a75f.io.domain.config.EntityConfiguration
-import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.migration.DiffFinder
-import a75f.io.domain.migration.DiffManger
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import org.junit.Before
 import org.junit.Test
@@ -17,8 +15,8 @@ class ModelDiffTest {
     private lateinit var dmModel2: ModelDirective
     @Before
     fun setUp() {
-        dmModel1 = ResourceHelper.loadProfileModelDefinition("DiffBuilder_TestModel.json")
-        dmModel2 = ResourceHelper.loadProfileModelDefinition("newmodels/DiffBuilder_TestModelNew.json")
+        dmModel1 = ResourceHelper.loadModel("model1.json")
+        dmModel2 = ResourceHelper.loadProfileModelDefinition("model2.json")
 
     }
 
@@ -46,17 +44,17 @@ class ModelDiffTest {
             println(it.domainName)
         }
     }
-
+/*
     private fun getTestProfileConfig(node: Int): ProfileConfiguration {
         val profile = HyperStat2pfcuTestConfiguration(node, "HS", 0, "", "")
         profile.autoForcedOccupied.enabled = true
         profile.autoAway.enabled = true
         return profile
-    }
+    }*/
 
-    @Test
+   /* @Test
     fun getVersionDetailsTest(){
-        val version = ResourceHelper.getModelVersion(""/*DiffManger.NEW_VERSION*/)
+        val version = ResourceHelper.getModelVersion(""*//*DiffManger.NEW_VERSION*//*)
         println(version.toString())
         version!!.keys().forEach {
             //println(it)
@@ -66,5 +64,5 @@ class ModelDiffTest {
             print(version.getJSONObject(it as String).getInt("minor"))
         }
         println()
-    }
+    }*/
 }

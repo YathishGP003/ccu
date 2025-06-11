@@ -91,6 +91,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
     private var epidemicState = EpidemicState.OFF
     private var prePurgeEnabled = false
     private var prePurgeOpeningValue = 0.0
+    private var hasZeroFanLoopBeenHandled = false
 
     override fun getProfileType() = ProfileType.HYPERSTATSPLIT_CPU
 
@@ -299,12 +300,17 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
     private fun updateTitle24LoopCounter(tuners: HyperStatSplitProfileTuners, basicSettings: BasicSettings) {
         // Check if there is change in occupancy and the fan-loop output is less than the previous value,
         // then offer the fan protection
-        if((occupancyStatus != previousOccupancyStatus && fanLoopOutput < previousFanLoopVal) ||
-                (basicSettings.fanMode != previousFanStageStatus && fanLoopOutput < previousFanLoopVal)) {
+        CcuLog.d( L.TAG_CCU_HSSPLIT_CPUECON, "Occupancy: $occupancyStatus, Fan Loop Output: $fanLoopOutput, Previous Fan Loop Val: $previousFanLoopVal, Fan Loop Counter: $fanLoopCounter , hasZeroFanLoopBeenHandled $hasZeroFanLoopBeenHandled")
+
+        if((occupancyStatus != previousOccupancyStatus && fanLoopOutput < previousFanLoopVal) || (basicSettings.fanMode != previousFanStageStatus && fanLoopOutput < previousFanLoopVal) ||
+            (fanLoopOutput == 0 && fanLoopOutput < previousFanLoopVal && !hasZeroFanLoopBeenHandled)) {
             fanLoopCounter = tuners.minFanRuntimePostConditioning
+            hasZeroFanLoopBeenHandled = true
         }
-        else if(occupancyStatus != previousOccupancyStatus && fanLoopOutput > previousFanLoopVal)
+        else if((occupancyStatus != previousOccupancyStatus || (hasZeroFanLoopBeenHandled && fanLoopOutput > 0)) && fanLoopOutput > previousFanLoopVal) {
             fanLoopCounter = 0 // Reset the counter if the fan-loop output is greater than the previous value
+            hasZeroFanLoopBeenHandled = false
+        }
     }
 
     private fun handleChangeOfDirection(userIntents: UserIntents){
@@ -472,13 +478,11 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
     private fun doDcvForDcvDamper() {
 
         dcvAvailable = false
-        val zoneSensorCO2 = hssEquip.zoneCO2.readHisVal()
-        val zoneCO2Threshold = hssEquip.co2Threshold.readDefaultVal()
-        val co2DamperOpeningRate = hssEquip.co2DamperOpeningRate.readDefaultVal()
-        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON,
-            "zoneSensorCO2: $zoneSensorCO2, zoneCO2Threshold: $zoneCO2Threshold, co2DamperOpeningRate: $co2DamperOpeningRate"
-        )
-        if (occupancyStatus == Occupancy.OCCUPIED || occupancyStatus == Occupancy.FORCEDOCCUPIED || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED) {
+        var zoneSensorCO2 = hssEquip.zoneCO2.readHisVal()
+        var zoneCO2Threshold = hssEquip.co2Threshold.readDefaultVal()
+        var co2DamperOpeningRate = hssEquip.co2DamperOpeningRate.readDefaultVal()
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "zoneSensorCO2: " + zoneSensorCO2 + ", zoneCO2Threshold: " + zoneCO2Threshold + ", co2DamperOpeningRate: " + co2DamperOpeningRate)
+        if (isOccupancyModeIsOccupied(occupancyStatus)) {
             if (zoneSensorCO2 > zoneCO2Threshold) {
                 dcvAvailable = true
                 dcvLoopOutput = Math.max(0, Math.min(((zoneSensorCO2 - zoneCO2Threshold) / co2DamperOpeningRate).toInt(), 100))
@@ -686,13 +690,11 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
     private fun doDcv(standaloneOutsideAirDamperMinOpen: Int) {
 
         dcvAvailable = false
-        val zoneSensorCO2 = hssEquip.zoneCO2.readHisVal()
-        val zoneCO2Threshold = hssEquip.co2Threshold.readDefaultVal()
-        val co2DamperOpeningRate = hssEquip.co2DamperOpeningRate.readDefaultVal()
-        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON,
-            "zoneSensorCO2: $zoneSensorCO2, zoneCO2Threshold: $zoneCO2Threshold, co2DamperOpeningRate: $co2DamperOpeningRate"
-        )
-        if (occupancyStatus == Occupancy.OCCUPIED || occupancyStatus == Occupancy.FORCEDOCCUPIED || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED) {
+        var zoneSensorCO2 = hssEquip.zoneCO2.readHisVal()
+        var zoneCO2Threshold = hssEquip.co2Threshold.readDefaultVal()
+        var co2DamperOpeningRate = hssEquip.co2DamperOpeningRate.readDefaultVal()
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "zoneSensorCO2: " + zoneSensorCO2 + ", zoneCO2Threshold: " + zoneCO2Threshold + ", co2DamperOpeningRate: " + co2DamperOpeningRate)
+        if (isOccupancyModeIsOccupied(occupancyStatus)) {
             if (zoneSensorCO2 > zoneCO2Threshold) {
                 dcvAvailable = true
                 dcvLoopOutput = Math.max(0, Math.min(((zoneSensorCO2 - zoneCO2Threshold) / co2DamperOpeningRate).toInt(), 100))
@@ -881,6 +883,11 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         userIntents: UserIntents, basicSettings: BasicSettings, relayStages: HashMap<String, Int>, isCondensateTripped : Boolean,
         exhaustFanStage1Threshold: Int, exhaustFanStage2Threshold: Int, exhaustFanHysteresis: Int
     ) {
+
+        var isFanLoopCounterEnabled = false;
+        if (previousFanLoopVal > 0 && fanLoopCounter > 0) {
+            isFanLoopCounterEnabled = true
+        }
         when {
             (HyperStatSplitAssociationUtil.isRelayAssociatedToCoolingStage(relayAssociation)) -> {
 
@@ -933,7 +940,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
 
             (HyperStatSplitAssociationUtil.isRelayAssociatedToFanEnabled(relayAssociation)) -> {
                 if (!isCondensateTripped) {
-                    doFanEnabled( curState,port, fanLoopOutput)
+                    doFanEnabled( curState,port, fanLoopOutput,isFanLoopCounterEnabled)
                     if (hssEquip.fanEnable.readHisVal() > 0) {
                         relayStages[AnalogOutput.FAN_ENABLED.name] = 1
                     }
@@ -1386,9 +1393,11 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
                     logMsg = "Fan Protection"
                 }
                 else previousFanLoopValStaged = fanLoopForAnalog // else indicates we are not in protection mode, so store the fanLoopForAnalog value for protection mode
-
+//                 val relayActivationHysteresis = hssEquip.standaloneRelayActivationHysteresis.readPriorityVal();
                 // Check Dead-band condition
-                if (fanLoopOutput == 0 && fanProtectionCounter == 0 && checkIfInOccupiedMode()) { // When in dead-band, set the fan-loopForAnalog to the recirculate analog value
+                // added the new check if the fan loop output is with in relayActivationHysteresis ,sending the Analog recirculate value
+                val relayActivationHysteresis = hssEquip.standaloneRelayActivationHysteresis.readPriorityVal();
+                if ((fanLoopOutput == 0 ||  (fanLoopOutput > 0 && fanLoopOutput < relayActivationHysteresis) ) && fanProtectionCounter == 0 && checkIfInOccupiedMode()) { // When in dead-band, set the fan-loopForAnalog to the recirculate analog value
                     fanLoopForAnalog = getPercentageFromVoltageSelected(getAnalogRecirculateValueActivated().roundToInt())
                     logMsg = "Deadband"
                 }

@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.dab
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.Equip
+import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.DomainName
@@ -12,6 +13,7 @@ import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader.getModelForDomainName
 import a75f.io.domain.util.ModelLoader.getSmartNodeDabModel
 import a75f.io.domain.util.ModelLoader.getSmartNodeDevice
+import a75f.io.logger.CcuLog
 import a75f.io.logic.ANALOG_VALUE
 import a75f.io.logic.L
 import a75f.io.logic.REHEATCMDID
@@ -167,9 +169,17 @@ fun updateReheatTypeByDomain(
     configPoint: Point
 ) {
     val who: String = msgObject.get("who").asString
-    val duration = if (msgObject.get("duration") != null) msgObject.get("duration").asInt else 0
     val level: Int = msgObject.get("level").asInt
-    hayStack.writePointLocal(configPoint.id, level, who, typeVal, duration)
+    val value: Double = msgObject.get("val").asDouble
+    val durationVal =
+        if (msgObject[HayStackConstants.WRITABLE_ARRAY_DURATION] != null) msgObject[HayStackConstants.WRITABLE_ARRAY_DURATION].asLong else 0
+    //If duration shows it has already expired, then just write 1ms to force-expire it locally.
+    val durationDiff = (if (durationVal == 0L) 0 else if ((durationVal - System.currentTimeMillis()) > 0) (durationVal - System.currentTimeMillis()) else 1).toDouble()
+    hayStack.writePointLocal(configPoint.id, level, who, value, durationDiff)
+    CcuLog.d(
+        L.TAG_CCU_PUBNUB,
+        "DAB : writePointFromJson - level: $level who: $who val: $value durationVal: $durationVal durationDiff: $durationDiff"
+    )
     if (configPoint.markers.contains(Tags.REHEAT) && configPoint.markers.contains(Tags.TYPE)) {
             val profile = L.getProfile(address.toShort()) as DabProfile
             val equip = profile.equip

@@ -71,6 +71,8 @@ class OAOViewModel : ViewModel() {
     lateinit var hayStack: CCUHsApi
     val systemProfile: SystemProfile = L.ccu().systemProfile
 
+    private var saveJobInProgress = false
+
     fun init(bundle: Bundle, context: Context, hayStack: CCUHsApi) {
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
         zoneRef = bundle.getString(FragmentCommonBundleArgs.ARG_NAME)!!
@@ -153,34 +155,38 @@ class OAOViewModel : ViewModel() {
     }
 
     fun saveConfiguration() {
-        viewModelScope.launch {
-            ProgressDialogUtils.showProgressDialog(
-                context,
-                "Saving OAO Configuration"
-            )
-            withContext(Dispatchers.IO) {
-                CCUHsApi.getInstance().resetCcuReady()
+        if(!saveJobInProgress) {
+            saveJobInProgress = true
+            viewModelScope.launch {
+                ProgressDialogUtils.showProgressDialog(
+                    context,
+                    "Saving OAO Configuration"
+                )
+                withContext(Dispatchers.IO) {
+                    CCUHsApi.getInstance().resetCcuReady()
 
-                setUpOAOProfile()
-                CcuLog.i(Domain.LOG_TAG, "OAO Profile Setup complete")
-                L.saveCCUState()
-                hayStack.syncEntityTree()
-                CCUHsApi.getInstance().setCcuReady()
-                CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
-                LSerial.getInstance().sendOAOSeedMessage()
+                    setUpOAOProfile()
+                    CcuLog.i(Domain.LOG_TAG, "OAO Profile Setup complete")
+                    L.saveCCUState()
+                    hayStack.syncEntityTree()
+                    CCUHsApi.getInstance().setCcuReady()
+                    CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
+                    LSerial.getInstance().sendOAOSeedMessage()
 
-                CcuLog.i(Domain.LOG_TAG, "OAO Profile Pairing complete")
+                    CcuLog.i(Domain.LOG_TAG, "OAO Profile Pairing complete")
 
-                withContext(Dispatchers.Main) {
-                    if (ProgressDialogUtils.isDialogShowing()) {
-                        ProgressDialogUtils.hideProgressDialog()
-                        CcuLog.i(Domain.LOG_TAG, "Closing OAO dialog")
-                        pairingCompleteListener.onPairingComplete()
+                    withContext(Dispatchers.Main) {
+                        if (ProgressDialogUtils.isDialogShowing()) {
+                            ProgressDialogUtils.hideProgressDialog()
+                            CcuLog.i(Domain.LOG_TAG, "Closing OAO dialog")
+                            pairingCompleteListener.onPairingComplete()
+                        }
+                        SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(6)
+                        context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+                        showToast("OAO Configuration saved successfully", context)
                     }
-                    SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(6)
-                    context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                    showToast("OAO Configuration saved successfully", context)
                 }
+                saveJobInProgress = false
             }
         }
     }

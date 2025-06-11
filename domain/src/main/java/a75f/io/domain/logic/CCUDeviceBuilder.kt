@@ -1,11 +1,11 @@
 package a75f.io.domain.logic
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.util.StringUtil.addAtSymbolIfMissing
 import a75f.io.constants.CcuFieldConstants
 import a75f.io.domain.api.Domain
-import a75f.io.logger.CcuLog
 import org.projecthaystack.HDateTime
 import org.projecthaystack.HDictBuilder
 import org.projecthaystack.HRef
@@ -20,13 +20,12 @@ class CCUDeviceBuilder {
         installerEmail: String,
         managerEmail: String,
         ahuRef: String,
-        isUpdate: Boolean
     ): String {
+        val ccuDevice = CCUHsApi.getInstance().readEntity("ccu and device")
         val hsApi = Domain.hayStack
-//        CcuLog.i(Domain.LOG_TAG, "AHU Ref "+if(isUpdate){" updated "}else{"Added "}+"to CCU :  $ahuRef")
 
         val hDictBuilder = HDictBuilder()
-        val localId = if(isUpdate) { Domain.ccuDevice.deviceRef } else { UUID.randomUUID().toString() }
+        val localId = if(ccuDevice.isNotEmpty()) { ccuDevice[Tags.ID].toString() } else { UUID.randomUUID().toString() }
         val cleanedCCURef = localId.replaceFirst("@", "")
         hDictBuilder.add(HayStackConstants.ID, HRef.make(cleanedCCURef))
         hDictBuilder.add(CcuFieldConstants.DESCRIPTION, HStr.make(ccuName))
@@ -42,7 +41,7 @@ class CCUDeviceBuilder {
         hDictBuilder.add(CcuFieldConstants.AHUREF, ahuRef)
 
         hsApi.tagsDb.addHDict(cleanedCCURef, hDictBuilder.toDict())
-        if(isUpdate){
+        if(ccuDevice.isNotEmpty()){
             hsApi.syncStatusService.addUpdatedEntity(
                 addAtSymbolIfMissing(localId)
             )

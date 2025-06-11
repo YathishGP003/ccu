@@ -122,9 +122,9 @@ public class TrueCFMVAVConfigHandler {
         String who = msgObject.get(HayStackConstants.WRITABLE_ARRAY_WHO).getAsString();
         int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
         double val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsDouble();
-        int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(
-                HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;
-        hayStack.writePointLocal(configPoint.getId(), level, who, val, duration);
+        double durationDiff = MessageUtil.Companion.returnDurationDiff(msgObject);
+        hayStack.writePointLocal(configPoint.getId(), level, who, val, durationDiff);
+        CcuLog.d(L.TAG_CCU_PUBNUB, "VAV : writePointFromJson - level: " + level + " who: " + who + " val: " + val  + " durationDiff: " + durationDiff);
         writeHisValue(configPoint.getId(), hayStack);
     }
 }

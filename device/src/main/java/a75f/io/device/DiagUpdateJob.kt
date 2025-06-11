@@ -24,6 +24,7 @@ internal class DiagUpdateJob : BaseJob() {
             CCUHsApi.getInstance().readEntity("domainName == \"" + DomainName.diagEquip + "\"")
         if (diagEquip.isNotEmpty() && Domain.isDiagEquipInitialised()) {
             Domain.diagEquip.serialConnection.writeHisValueByIdWithoutCOV(if (LSerial.getInstance().isConnected) 1.0 else 0.0)
+            Domain.diagEquip.modbusSerialConnection.writeHisValueByIdWithoutCOV(if (LSerial.getInstance().isModbusConnected) 1.0 else 0.0)
             DiagEquip.getInstance().updatePoints()
         } else {
             CcuLog.d(L.TAG_CCU_JOB, "diagUpdateJob: diagEquip not found")

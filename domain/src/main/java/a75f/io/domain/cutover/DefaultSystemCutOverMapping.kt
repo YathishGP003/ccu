@@ -1,0 +1,46 @@
+package a75f.io.domain.cutover
+
+import a75f.io.domain.api.DomainName
+
+object DefaultSystemCutOverMapping {
+    val entries = linkedMapOf(
+        "stage2CoolingAirflowTempLowerOffset" to DomainName.stage2CoolingAirflowTempLowerOffset,
+        "stage5CoolingAirflowTempUpperOffset" to DomainName.stage5CoolingAirflowTempUpperOffset,
+        "stage1CoolingAirflowTempLowerOffset" to DomainName.stage1CoolingAirflowTempLowerOffset,
+        "airflowSampleWaitTime" to DomainName.airflowSampleWaitTime,
+        "coolingPreconditioningRate" to DomainName.coolingPreconditioningRate,
+        "stage2CoolingAirflowTempUpperOffset" to DomainName.stage2CoolingAirflowTempUpperOffset,
+        "stage4CoolingAirflowTempUpperOffset" to DomainName.stage4CoolingAirflowTempUpperOffset,
+        "stage4CoolingAirflowTempLowerOffset" to DomainName.stage4CoolingAirflowTempLowerOffset,
+        "stage1CoolingAirflowTempUpperOffset" to DomainName.stage1CoolingAirflowTempUpperOffset,
+        "cmTempPercentDeadZonesAllowed" to DomainName.cmTempPercentDeadZonesAllowed,
+        "heatingPreconditioningRate" to DomainName.heatingPreconditioningRate,
+        "stage5CoolingAirflowTempLowerOffset" to DomainName.stage5CoolingAirflowTempLowerOffset,
+        "stage3CoolingAirflowTempUpperOffset" to DomainName.stage3CoolingAirflowTempUpperOffset,
+        "stage3CoolingAirflowTempLowerOffset" to DomainName.stage3CoolingAirflowTempLowerOffset,
+        "stage5HeatingAirflowTempLowerOffset" to DomainName.stage5HeatingAirflowTempLowerOffset,
+        "stage2HeatingAirflowTempUpperOffset" to DomainName.stage2HeatingAirflowTempUpperOffset,
+        "perDegreeHumidityFactor" to DomainName.perDegreeHumidityFactor,
+        "cmHeartBeatInterval" to DomainName.cmHeartBeatInterval,
+        "stage3HeatingAirflowTempLowerOffset" to DomainName.stage3HeatingAirflowTempLowerOffset,
+        "heartBeatsToSkip" to DomainName.heartBeatsToSkip,
+        "Demand Response Setback" to DomainName.demandResponseSetback,
+        "stage5HeatingAirflowTempUpperOffset" to DomainName.stage5HeatingAirflowTempUpperOffset,
+        "humidityCompensationOffset" to DomainName.humidityCompensationOffset,
+        "stage4HeatingAirflowTempLowerOffset" to DomainName.stage4HeatingAirflowTempLowerOffset,
+        "clockUpdateInterval" to DomainName.clockUpdateInterval,
+        "stage1HeatingAirflowTempLowerOffset" to DomainName.stage1HeatingAirflowTempLowerOffset,
+        "ccuAlarmVolumeLevel" to DomainName.ccuAlarmVolumeLevel,
+        "ScheduleStatus" to DomainName.equipScheduleStatus,
+        "stage2HeatingAirflowTempLowerOffset" to DomainName.stage2HeatingAirflowTempLowerOffset,
+        "stage4HeatingAirflowTempUpperOffset" to DomainName.stage4HeatingAirflowTempUpperOffset,
+        "outsideTemperature" to DomainName.outsideTemperature,
+        "outsideHumidity" to DomainName.outsideHumidity,
+        "stage3HeatingAirflowTempUpperOffset" to DomainName.stage3HeatingAirflowTempUpperOffset,
+        "cmCurrentTemp" to DomainName.cmCurrentTemp,
+        "zoneTemperatureDeadLeeway" to DomainName.zoneTemperatureDeadLeeway,
+        "stage1HeatingAirflowTempUpperOffset" to DomainName.stage1HeatingAirflowTempUpperOffset,
+        "cmResetCommandTimer" to DomainName.cmResetCommandTimer,
+        "StatusMessage" to DomainName.equipStatusMessage,
+    )
+}

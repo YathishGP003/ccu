@@ -116,10 +116,14 @@ public class PreferenceUtil {
     private static final String MODBUS_KVTAGS_DATA_TYPE_UPDATED = "modbusKVTagsDataTypeUpdated";
 
 
-    private static final String SELECTED_PROFILE_WITH_AHU = "selectedProfileWithAhu";
+    public static final String SELECTED_PROFILE_WITH_AHU = "selectedProfileWithAhu";
 
     private static final String MIGRATE_UPDATE_DAB_AND_VAV_POINTS = "migrateUpdateVavAndDabPoints";
     private static final String MIGRATE_UPDATE_BYPASS_DAMPER_POINTS = "migrateUpdateBypassDamperPoints";
+
+    private static final String MIGRATE_DELETE_REDUNDANT_OAO_POINTS_BY_SYSTEM_EQUIP = "migrateDeleteRedundantOaoPointsBySystemEquip";
+
+
     public static void setContext(Context c) {
         context= c;
     }
@@ -954,5 +958,12 @@ public class PreferenceUtil {
 
     public static void setModbusKvtagsDataTypeUpdate() {
         setBooleanPreference(MODBUS_KVTAGS_DATA_TYPE_UPDATED, true);
+    }
+
+    public static boolean getMigrateDeleteRedundantOaoPointsBySystemEquip() {
+        return getBooleanPreference(MIGRATE_DELETE_REDUNDANT_OAO_POINTS_BY_SYSTEM_EQUIP);
+    }
+    public static void setMigrateDeleteRedundantOaoPointsBySystemEquip() {
+        setBooleanPreference(MIGRATE_DELETE_REDUNDANT_OAO_POINTS_BY_SYSTEM_EQUIP, true);
     }
 }

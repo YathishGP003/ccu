@@ -7,6 +7,7 @@ import static a75f.io.constants.SiteFieldConstants.GEOCOUNTRY;
 import static a75f.io.constants.SiteFieldConstants.GEOPOSTALCODE;
 import static a75f.io.constants.SiteFieldConstants.GEOSTATE;
 import static a75f.io.constants.SiteFieldConstants.ORGANIZATION;
+import static a75f.io.logic.UtilKt.getMigrationVersion;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_CONFIG_CHANGE;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.DAYLIGHT_SAVING_STATUS;
@@ -66,10 +67,10 @@ import org.projecthaystack.io.HZincReader;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -79,6 +80,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
+import a75f.io.api.haystack.sync.CareTakerResponse;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
@@ -198,13 +200,6 @@ public class CreateNewSite extends Fragment {
         prefs = new Prefs(mContext);
 
         HashMap site = CCUHsApi.getInstance().read("site");
-        CCUDevice ccuDevice = Domain.INSTANCE.checkCCUDeviceInitialisedAndGet();
-        boolean isCCUDeviceExists;
-        if(ccuDevice != null && ccuDevice.isCCUExists()) {
-            isCCUDeviceExists = true;
-        } else {
-            isCCUDeviceExists = false;
-        }
 
         mTextInputSitename = rootView.findViewById(R.id.textInputSitename);
         mSiteName = rootView.findViewById(R.id.editSitename);
@@ -358,27 +353,62 @@ public class CreateNewSite extends Fragment {
                 String installerEmail = mSiteInstallerEmailId.getText().toString().trim();
                 String installerOrg = mSiteOrg.getText().toString().trim();
                 String ccuName = mSiteCCU.getText().toString().trim();
+                AtomicBoolean siteRegistered = new AtomicBoolean(false);
                 ExecutorTask.executeAsync(
                         () -> {},
                         () -> {
-                            CcuLog.i("UI_PROFILING","Add Save Site to DB ");
+                            CcuLog.i(L.TAG_REGISTRATION,"Add Save Site to DB ");
                             prefs.setString("temp_ccu_name", ccuName);
-                            if (!site.isEmpty()) {
-                                String siteId = site.get("id").toString();
+                            HashMap<Object, Object> siteEntity = CCUHsApi.getInstance().readEntity("site");
+                            if (!siteEntity.isEmpty()) {
+                                String siteId = siteEntity.get("id").toString();
                                 updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail);
                             } else {
                                 saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail,managerEmail);
                             }
 
-                            CcuLog.i("UI_PROFILING","Create CCU & Diag Equip ");
-                            postSiteCreationSetup(isCCUDeviceExists, site, ccuName, installerEmail, managerEmail);
+                            CcuLog.i(L.TAG_REGISTRATION,"Create CCU & Diag Equip ");
+                            boolean isCCUDeviceExists = !CCUHsApi.getInstance().readEntity("ccu and device").isEmpty();
+                            postSiteCreationSetup(isCCUDeviceExists, siteEntity, ccuName, installerEmail, managerEmail);
                             prefs.remove("temp_ccu_name");
+
+                            try {
+                                CareTakerResponse siteResponse = CCUHsApi.getInstance().registerSite();
+                                CcuLog.i(L.TAG_REGISTRATION,"Site Registration Response: " + siteResponse);
+                                if (siteResponse != null && siteResponse.getResponseCode() == 200) {
+                                    siteRegistered.set(true);
+                                } else if (siteResponse.getResponseCode() >= 400) {
+                                    siteRegistered.set(false);
+                                    if (siteResponse.getErrorResponse() != null && siteResponse.getErrorResponse().getMessage() != null) {
+                                        SnackbarUtil.showConfirmationMessage(this.getView(),
+                                                "Registration Failed !!",
+                                                siteResponse.getErrorResponse().getMessage(),
+                                                ProgressDialogUtils::hideProgressDialog);
+                                    } else {
+                                        SnackbarUtil.showConfirmationMessage(this.getView(),
+                                                "Registration Failed !!",
+                                                "Error registering site. please try again",
+                                                ProgressDialogUtils::hideProgressDialog);
+                                        CcuLog.w(L.TAG_REGISTRATION, "Error registering site." + siteResponse);
+                                    }
+                                }
+                            } catch (Exception e) {
+                                siteRegistered.set(false);
+                                SnackbarUtil.showConfirmationMessage(this.getView(),
+                                        "Site Registration Failed",
+                                        "Unable to register site. Please try again later.",
+                                        () -> {});
+                                CcuLog.e(L.TAG_REGISTRATION, "Error in registering site: " + e.getMessage());
+                            }
                         },
                         () -> {
                             mNext.setEnabled(true);
                             ProgressDialogUtils.hideProgressDialog();
-                            goToNext();
-                            CcuLog.i("UI_PROFILING","Add CCU Complete ");
+                            prefs.setBoolean("siteRegistrationRetry", !siteRegistered.get());
+                            if (siteRegistered.get()) {
+                                goToNext();
+                                CcuLog.i("UI_PROFILING","Add CCU Complete ");
+                            }
                         }
                 );
             } else {
@@ -430,6 +460,8 @@ public class CreateNewSite extends Fragment {
 
                     Intent locationUpdateIntent = new Intent(RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED);
                     getContext().sendBroadcast(locationUpdateIntent);
+                    boolean isCCUDeviceExists = !CCUHsApi.getInstance().readEntity("ccu and device").isEmpty();
+                    CCUDevice ccuDevice = Domain.INSTANCE.checkCCUDeviceInitialisedAndGet();
 
                     if (ccuDevice != null && isCCUDeviceExists) {
                         if (!ccuDevice.getCcuDisName().equals(ccuName) ||
@@ -441,7 +473,7 @@ public class CreateNewSite extends Fragment {
                             ccuDeviceBuilder.buildCCUDevice(Domain.ccuDevice.getEquipRef(),
                                     site.get("id").toString(),ccuName, installerEmail,
                                     Domain.ccuDevice.getManagerEmail(),
-                                    Domain.INSTANCE.checkSystemEquipInitialisedAndGetId(), true);
+                                    Domain.INSTANCE.checkSystemEquipInitialisedAndGetId());
                             L.ccu().setCCUName(ccuName);
                         }
 
@@ -495,6 +527,7 @@ public class CreateNewSite extends Fragment {
                     break;
                 }
             }
+            CCUDevice ccuDevice = Domain.INSTANCE.checkCCUDeviceInitialisedAndGet();
             if (ccuDevice != null) {
                 //if CCU Exists
                 String ccuName = ccuDevice.getCcuDisName();
@@ -528,7 +561,7 @@ public class CreateNewSite extends Fragment {
                 String deviceId = ccuDeviceBuilder.buildCCUDevice(
                         diagEquip.get("id").toString(), site.get("id").toString(),ccuName, installerEmail,
                         facilityManagerEmail,
-                        Domain.INSTANCE.checkSystemEquipInitialisedAndGetId(), false);
+                        Domain.INSTANCE.checkSystemEquipInitialisedAndGetId());
                 L.ccu().setCCUName(ccuName);
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(deviceId));
                 L.saveCCUState();
@@ -549,14 +582,10 @@ public class CreateNewSite extends Fragment {
         CCUBaseConfigurationBuilder ccuBaseConfigurationBuilder = new CCUBaseConfigurationBuilder(CCUHsApi.getInstance());
 
         ModelDirective ccuBaseConfigurationModel = ModelLoader.INSTANCE.getCCUBaseConfigurationModel();
-        String diagEquipId = diagEquipConfigurationBuilder.createDiagEquipAndPoints(ccuName);
-
+        String diagEquipId = diagEquipConfigurationBuilder.createDiagEquipAndPoints(ccuName, getMigrationVersion());
         String ccuRef = ccuBaseConfigurationBuilder.createCCUBaseConfiguration(ccuName,
                 installerEmail, facilityManagerEmail, diagEquipId, ccuBaseConfigurationModel);
-        Domain.ccuEquip.getAddressBand().writeDefaultVal("1000");   // Default value`for address band
         L.ccu().setAddressBand(Short.parseShort("1000"));
-
-
         return ccuRef;
     }
 
@@ -628,7 +657,8 @@ public class CreateNewSite extends Fragment {
     @SuppressLint("SetTextI18n")
     private void checkDebugPrepopulate() {
         //noinspection ConstantConditions
-        if ((BuildConfig.BUILD_TYPE.equals("local") || BuildConfig.BUILD_TYPE.equals("dev_qa"))
+        if ((BuildConfig.BUILD_TYPE.equals("local") || BuildConfig.BUILD_TYPE.equals("dev_qa")
+                || BuildConfig.BUILD_TYPE.equals("qa"))
                 && !BuildConfig.DEBUG_USER.isEmpty()) {
 
             String user = BuildConfig.DEBUG_USER;
@@ -676,7 +706,7 @@ public class CreateNewSite extends Fragment {
             CCUDeviceBuilder ccuDeviceBuilder = new CCUDeviceBuilder();
             ccuDeviceBuilder.buildCCUDevice(equipRef, siteRef, ccuName,
                     installerEmail, managerEmail,
-                    ahuRef, true);
+                    ahuRef);
             L.ccu().setCCUName(ccuName);
 
             ProgressDialogUtils.showProgressDialog(getActivity(), "UnRegistering CCU...");
@@ -947,25 +977,30 @@ public class CreateNewSite extends Fragment {
                 .setGeoAddress(geoAddress)
                 .setGeoFence("2.0")
                 .setArea(10000).build();
-
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         String localSiteId = ccuHsApi.addSite(s75f);
-        CCUHsApi.getInstance().setPrimaryCcu(true);
 
-        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
 
-        CCUHsApi.getInstance().syncEntityTree();
-        CcuLog.i(TAG, "LocalSiteID: " + localSiteId);
-        ccuHsApi.log();
-        prefs.setString("SITE_ID", localSiteId);
-        HashMap<Object, Object> buildingOccupancy =
-                CCUHsApi.getInstance().readEntity(Queries.BUILDING_OCCUPANCY);
-        if (buildingOccupancy.isEmpty() && CCUHsApi.getInstance().isPrimaryCcu()) {
-            BuildingOccupancy.buildDefaultBuildingOccupancy();
-        }
+        ExecutorTask.executeBackground(() -> {
 
-        CCUHsApi.getInstance().importNamedScheduleWithOrg(
-                new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS),org);
+            CCUHsApi.getInstance().setPrimaryCcu(true);
+
+            TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
+
+            //CCUHsApi.getInstance().syncEntityTree();
+            CcuLog.i(TAG, "LocalSiteID: " + localSiteId);
+            ccuHsApi.log();
+            prefs.setString("SITE_ID", localSiteId);
+            HashMap<Object, Object> buildingOccupancy =
+                    CCUHsApi.getInstance().readEntity(Queries.BUILDING_OCCUPANCY);
+            if (buildingOccupancy.isEmpty() && CCUHsApi.getInstance().isPrimaryCcu()) {
+                BuildingOccupancy.buildDefaultBuildingOccupancy();
+            }
+
+            CCUHsApi.getInstance().importNamedScheduleWithOrg(
+                    new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS), org);
+
+        });
         return localSiteId;
     }
 
@@ -1091,16 +1126,14 @@ public class CreateNewSite extends Fragment {
             CCUDeviceBuilder ccuDeviceBuilder = new CCUDeviceBuilder();
             ccuDeviceBuilder.buildCCUDevice(Domain.diagEquip.getEquipRef(),
                     site.get("id").toString(),ccuName, installerEmail, managerEmail,
-                    Domain.INSTANCE.checkSystemEquipInitialisedAndGetId(), true);
+                    Domain.INSTANCE.checkSystemEquipInitialisedAndGetId());
             L.ccu().setCCUName(ccuName);
         } else {
             String ccuRef = getCcuRef(ccuName, installerEmail, managerEmail);
             L.ccu().setCCUName(ccuName);
             CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuRef));
         }
-        L.ccu().systemProfile = new DefaultSystem();
-        DomainManager.INSTANCE.addSystemDomainEquip(CCUHsApi.getInstance());
-        updateMigrationDiagWithAppVersion();
+        L.ccu().systemProfile = new DefaultSystem().createDefaultSystemEquip();
         CcuLog.d(TAG, "RegisterCcuToExistingSite postSiteCreationSetup() complete");
     }
 }

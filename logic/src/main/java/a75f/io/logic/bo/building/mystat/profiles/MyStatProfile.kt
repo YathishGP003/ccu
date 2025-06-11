@@ -44,21 +44,27 @@ abstract class MyStatProfile: ZoneProfile() {
     var dcvLoopOutput = 0
     var compressorLoopOutput = 0 // used in HPU
 
-    fun doFanEnabled(currentState: ZoneState, whichPort: Port, fanLoopOutput: Int, relayStages: HashMap<String, Int>){
+    fun doFanEnabled(currentState: ZoneState, whichPort: Port, fanLoopOutput: Int, relayStages: HashMap<String, Int>, isFanLoopCounterEnabled : Boolean = false) {
         // Then Relay will be turned On when the zone is in occupied mode Or
         // any conditioning is happening during an unoccupied schedule
-
-        if (occupancyStatus == Occupancy.OCCUPIED || fanLoopOutput > 0) {
+        CcuLog.d(L.TAG_CCU_MSCPU," Relay : $whichPort ,  isFanLoopCounterEnabled $isFanLoopCounterEnabled ")
+        if (isOccupancyModeIsOccupied(occupancyStatus) || fanLoopOutput > 0) {
             updateLogicalPoint(logicalPointsList[whichPort]!!, 1.0)
             relayStages[AnalogOutput.FAN_ENABLED.name] = 1
         } else if (occupancyStatus != Occupancy.OCCUPIED || (currentState == ZoneState.COOLING || currentState == ZoneState.HEATING)) {
+            // In order to protect the fan, persist the fan for few cycles when there is a sudden change in
+            // occupancy and decrease in fan loop output
+            if (isFanLoopCounterEnabled ) {
+                updateLogicalPoint(logicalPointsList[whichPort]!!, 1.0)
+                return
+            }
             updateLogicalPoint(logicalPointsList[whichPort]!!, 0.0)
         }
     }
 
     fun doOccupiedEnabled(relayPort: Port) {
         // Relay will be turned on when module is in occupied state
-        updateLogicalPoint(logicalPointsList[relayPort]!!, if (occupancyStatus == Occupancy.OCCUPIED) 1.0 else 0.0)
+        updateLogicalPoint(logicalPointsList[relayPort]!!, if (isOccupancyModeIsOccupied(occupancyStatus)) 1.0 else 0.0)
     }
 
     fun doHumidifierOperation(
@@ -79,7 +85,7 @@ abstract class MyStatProfile: ZoneProfile() {
         )
 
         var relayStatus = 0.0
-        if (currentHumidity > 0 && occupancyStatus == Occupancy.OCCUPIED) {
+        if (currentHumidity > 0 && isOccupancyModeIsOccupied(occupancyStatus)) {
             if (currentHumidity < targetMinInsideHumidity) {
                 relayStatus = 1.0
             } else if (currentPortStatus > 0) {
@@ -104,7 +110,7 @@ abstract class MyStatProfile: ZoneProfile() {
                     "| currentPortStatus : $currentPortStatus targetMaxInsideHumidity : $targetMaxInsideHumidity  Hysteresis : $humidityHysteresis \n"
         )
         var relayStatus = 0.0
-        if (currentHumidity > 0 && occupancyStatus == Occupancy.OCCUPIED) {
+        if (currentHumidity > 0 && isOccupancyModeIsOccupied(occupancyStatus)) {
             if (currentHumidity > targetMaxInsideHumidity) {
                 relayStatus = 1.0
             } else if (currentPortStatus > 0) {
@@ -127,7 +133,7 @@ abstract class MyStatProfile: ZoneProfile() {
         val currentOccupancy = equip.occupancyMode.readHisVal().toInt()
         val co2Value = equip.zoneCo2.readHisVal()
 
-        if (isDcvEligibleToOn(co2Value, cO2Threshold, currentOccupancy, isDoorOpen)) {
+        if (isDcvEligibleToOn(co2Value, cO2Threshold, occupancyStatus, isDoorOpen)) {
             if (dcvLoopOutput > relayActivationHysteresis) {
                 relayState = 1.0
             }
@@ -156,7 +162,7 @@ abstract class MyStatProfile: ZoneProfile() {
             L.TAG_CCU_MSHST,
             "doAnalogDCVAction: co2Value : $co2Value zoneCO2Threshold: $cO2Threshold zoneCO2DamperOpeningRate $damperOpeningRate"
         )
-        if (isDcvEligibleToOn(co2Value, cO2Threshold, currentOccupancy, isDoorOpen)) {
+        if (isDcvEligibleToOn(co2Value, cO2Threshold, occupancyStatus, isDoorOpen)) {
             updateLogicalPoint(logicalPointsList[port]!!, dcvLoopOutput.toDouble())
             analogOutStages[AnalogOutput.DCV_DAMPER.name] = dcvLoopOutput
         } else if (isDcvEligibleToOff(co2Value, cO2Threshold, currentOccupancy, isDoorOpen)) {
@@ -167,21 +173,15 @@ abstract class MyStatProfile: ZoneProfile() {
     private fun isDcvEligibleToOff(
         co2Value: Double, zoneCO2Threshold: Double, currentOccupancy: Int, isDoorOpen: Boolean
     ): Boolean {
-        return (dcvLoopOutput == 0 || co2Value < zoneCO2Threshold || currentOccupancy == Occupancy.AUTOAWAY.ordinal
-                || currentOccupancy == Occupancy.VACATION.ordinal || isDoorOpen
-                || currentOccupancy == Occupancy.DEMAND_RESPONSE_UNOCCUPIED.ordinal
-                || currentOccupancy == Occupancy.UNOCCUPIED.ordinal)
+        return (dcvLoopOutput == 0 || co2Value < zoneCO2Threshold || isDoorOpen
+                || isOccupancyModeIsUnOccupied(occupancyStatus))
     }
 
     private fun isDcvEligibleToOn(
-        co2Value: Double, zoneCO2Threshold: Double, currentOccupancyMode: Int, isDoorOpen: Boolean
+        co2Value: Double, zoneCO2Threshold: Double, currentOccupancyMode: Occupancy, isDoorOpen: Boolean
     ): Boolean {
         return (co2Value > 0 && co2Value > zoneCO2Threshold && dcvLoopOutput > 0 && !isDoorOpen
-                && (currentOccupancyMode == Occupancy.OCCUPIED.ordinal
-                || currentOccupancyMode == Occupancy.AUTOFORCEOCCUPIED.ordinal
-                || currentOccupancyMode == Occupancy.PRECONDITIONING.ordinal
-                || currentOccupancyMode == Occupancy.DEMAND_RESPONSE_OCCUPIED.ordinal
-                || currentOccupancyMode == Occupancy.FORCEDOCCUPIED.ordinal))
+                && (isOccupancyModeIsOccupied(currentOccupancyMode)))
     }
 
     fun doorWindowIsOpen(doorWindowEnabled: Double, doorWindowSensor: Double, equip: MyStatEquip) {

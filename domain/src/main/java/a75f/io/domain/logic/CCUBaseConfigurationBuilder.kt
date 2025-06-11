@@ -31,8 +31,7 @@ class CCUBaseConfigurationBuilder(private val hayStack : CCUHsApi): DefaultEquip
             ccuName,
             installerEmail,
             managerEmail,
-            Domain.checkSystemEquipInitialisedAndGetId(),
-            false
+            Domain.checkSystemEquipInitialisedAndGetId()
         )
         createCCUEquip(ccuConfigurationModelDef, ccuName)
         return ccuDeviceId

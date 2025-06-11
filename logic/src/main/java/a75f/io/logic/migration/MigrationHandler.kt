@@ -24,6 +24,7 @@ import a75f.io.domain.cutover.DabFullyModulatingRtuCutOverMapping
 import a75f.io.domain.cutover.DabStagedRtuCutOverMapping
 import a75f.io.domain.cutover.DabStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.DabZoneProfileCutOverMapping
+import a75f.io.domain.cutover.DefaultSystemCutOverMapping
 import a75f.io.domain.cutover.HyperStatDeviceCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitCpuCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitDeviceCutoverMapping
@@ -87,6 +88,7 @@ import a75f.io.logic.bo.building.plc.addBaseProfileConfig
 import a75f.io.logic.bo.building.plc.doPlcDomainModelCutOverMigration
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration
+import a75f.io.logic.bo.building.system.DefaultSystemConfig
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
@@ -103,7 +105,9 @@ import a75f.io.logic.migration.modbus.correctEnumsForCorruptModbusPoints
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.util.PreferenceUtil
+import a75f.io.logic.util.PreferenceUtil.getMigrateDeleteRedundantOaoPointsBySystemEquip
 import a75f.io.logic.util.PreferenceUtil.getModbusKvtagsDataTypeUpdated
+import a75f.io.logic.util.PreferenceUtil.setMigrateDeleteRedundantOaoPointsBySystemEquip
 import a75f.io.logic.util.PreferenceUtil.setModbusKvtagsDataTypeUpdate
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.NETWORK_INTERFACE
@@ -160,6 +164,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     override fun doMigration() {
         CCUBaseConfigurationMigrationHandler().doCCUBaseConfigurationMigration(hayStack)
+        doDefaultSystemDomainModelMigration()
         doVavTerminalDomainModelMigration()
         doDabTerminalDomainModelMigration()
         doVavSystemDomainModelMigration()
@@ -429,7 +434,51 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             setModbusKvtagsDataTypeUpdate()
         }
 
+        if(!getMigrateDeleteRedundantOaoPointsBySystemEquip()) {
+            deleteRedundantOaoPointsBasedOnCurrentSystemProfile()
+        }
+
         hayStack.scheduleSync()
+    }
+
+    private fun doDefaultSystemDomainModelMigration() {
+        val defaultSystemEquip = hayStack.readEntity("equip and not domainName and system and default and $not_external_model_query")
+
+        val site = hayStack.site
+        if (defaultSystemEquip.isEmpty() || site == null) {
+            CcuLog.i(Domain.LOG_TAG, "Default DM system equip migration not required : site $site")
+            return
+        }
+        CcuLog.i(Domain.LOG_TAG, "Default DM system equip migration started : equip $defaultSystemEquip")
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val deviceModel = ModelLoader.getCMDeviceModel() as SeventyFiveFDeviceDirective
+        val deviceDis = hayStack.siteName +"-"+ deviceModel.name
+
+        val model = ModelLoader.getDefaultSystemProfileModel()
+        val equipDis = "${site.displayName}-${model.name}"
+        val profileConfig = DefaultSystemConfig(model as SeventyFiveFProfileDirective)
+        val equipId = defaultSystemEquip["id"].toString()
+
+        equipBuilder.doCutOverMigration(equipId, model,
+            equipDis, DefaultSystemCutOverMapping.entries , profileConfig.getDefaultConfiguration(), isSystem = true,equipHashMap = defaultSystemEquip)
+
+        val entityMapper = EntityMapper(model)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+
+        val cmDevice = hayStack.readEntity("cm and device")
+        if (cmDevice.isNotEmpty()) {
+            CcuLog.d(Domain.LOG_TAG, "Deleting cm device")
+            hayStack.deleteEntityTree(cmDevice["id"].toString())
+        }
+
+        CcuLog.i(Domain.LOG_TAG, " buildDeviceAndPoints")
+        deviceBuilder.buildDeviceAndPoints(
+            profileConfig.getActiveConfiguration(),
+            deviceModel,
+            equipId,
+            hayStack.site!!.id,
+            deviceDis
+        )
     }
 
     private fun removeDuplicateBuildingAndSystemPoints() {
@@ -3477,6 +3526,43 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 "Error while updating order key data type for modbus points",
                 exception
             )
+        }
+    }
+
+    private fun deleteRedundantOaoPointsBasedOnCurrentSystemProfile() {
+        try {
+            hayStack.readId("domainName==\"${DomainName.smartnodeOAO}\"")?.let { oaoEquipId ->
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "OAO Equip Found. ID: $oaoEquipId")
+                hayStack.readHDict(CommonQueries.SYSTEM_PROFILE)?.let { systemEquipDict ->
+                    CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Deleting redundant OAO points for equip: $oaoEquipId")
+                    if(systemEquipDict.has(Tags.VAV)) {
+                        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "VAV System Equip found")
+                        hayStack.readAllHDictByQuery("${Tags.DAB} and equipRef == \"$oaoEquipId\"")?.forEach { oaoDabPointHDict ->
+                            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Deleting DAB based OAO point: ${oaoDabPointHDict.dis()} for id: ${oaoDabPointHDict.id()}")
+                            hayStack.deleteEntityItem(oaoDabPointHDict.id().toString())
+                            hayStack.deleteWritableArray(oaoDabPointHDict.id().toString())
+                        }
+                    } else if (systemEquipDict.has(Tags.DAB)) {
+                        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "DAB System Equip found")
+                        hayStack.readAllHDictByQuery("${Tags.VAV} and equipRef == \"$oaoEquipId\"")?.forEach { oaoVavPointHDict ->
+                            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Deleting VAV based OAO point: ${oaoVavPointHDict.dis()} for id: ${oaoVavPointHDict.id()}")
+                            hayStack.deleteEntityItem(oaoVavPointHDict.id().toString())
+                            hayStack.deleteWritableArray(oaoVavPointHDict.id().toString())
+                        }
+                    } else {
+                        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "No VAV or DAB System Equip found, Skipping operation.")
+                        // Do Nothing
+                    }
+                }
+            }
+            setMigrateDeleteRedundantOaoPointsBySystemEquip()
+        } catch (exception: Exception) {
+            CcuLog.e(
+                TAG_CCU_MIGRATION_UTIL,
+                "Error while deleting redundant OAO points based on current system profile",
+                exception
+            )
+            exception.printStackTrace()
         }
     }
 }

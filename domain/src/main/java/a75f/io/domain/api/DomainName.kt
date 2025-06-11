@@ -1286,6 +1286,7 @@ object DomainName {
     const val homeAppVersion = "homeAppVersion"
     const val otaStatusCCU = "otaStatusCCU"
     const val otaStatusCM = "otaStatusCM"
+    const val modbusSerialConnection = "modbusSerialConnection"
 
 
     // CCU Specific points
@@ -1391,5 +1392,6 @@ object DomainName {
     const val disableTouch = "disableTouch"
     const val enableBrightness = "enableBrightness"
     const val enableCo2Display = "enableCo2Display"
+    const val defaultSystemEquip = "defaultSystemEquip"
 }
 

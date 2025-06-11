@@ -105,7 +105,9 @@ import a75f.io.logic.migration.modbus.correctEnumsForCorruptModbusPoints
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.util.PreferenceUtil
+import a75f.io.logic.util.PreferenceUtil.getMigrateDeleteRedundantOaoPointsBySystemEquip
 import a75f.io.logic.util.PreferenceUtil.getModbusKvtagsDataTypeUpdated
+import a75f.io.logic.util.PreferenceUtil.setMigrateDeleteRedundantOaoPointsBySystemEquip
 import a75f.io.logic.util.PreferenceUtil.setModbusKvtagsDataTypeUpdate
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.NETWORK_INTERFACE
@@ -430,6 +432,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if(!getModbusKvtagsDataTypeUpdated()) {
             correctDataTypeForKVPairsInModbus()
             setModbusKvtagsDataTypeUpdate()
+        }
+
+        if(!getMigrateDeleteRedundantOaoPointsBySystemEquip()) {
+            deleteRedundantOaoPointsBasedOnCurrentSystemProfile()
         }
 
         hayStack.scheduleSync()
@@ -3520,6 +3526,43 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 "Error while updating order key data type for modbus points",
                 exception
             )
+        }
+    }
+
+    private fun deleteRedundantOaoPointsBasedOnCurrentSystemProfile() {
+        try {
+            hayStack.readId("domainName==\"${DomainName.smartnodeOAO}\"")?.let { oaoEquipId ->
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "OAO Equip Found. ID: $oaoEquipId")
+                hayStack.readHDict(CommonQueries.SYSTEM_PROFILE)?.let { systemEquipDict ->
+                    CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Deleting redundant OAO points for equip: $oaoEquipId")
+                    if(systemEquipDict.has(Tags.VAV)) {
+                        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "VAV System Equip found")
+                        hayStack.readAllHDictByQuery("${Tags.DAB} and equipRef == \"$oaoEquipId\"")?.forEach { oaoDabPointHDict ->
+                            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Deleting DAB based OAO point: ${oaoDabPointHDict.dis()} for id: ${oaoDabPointHDict.id()}")
+                            hayStack.deleteEntityItem(oaoDabPointHDict.id().toString())
+                            hayStack.deleteWritableArray(oaoDabPointHDict.id().toString())
+                        }
+                    } else if (systemEquipDict.has(Tags.DAB)) {
+                        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "DAB System Equip found")
+                        hayStack.readAllHDictByQuery("${Tags.VAV} and equipRef == \"$oaoEquipId\"")?.forEach { oaoVavPointHDict ->
+                            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Deleting VAV based OAO point: ${oaoVavPointHDict.dis()} for id: ${oaoVavPointHDict.id()}")
+                            hayStack.deleteEntityItem(oaoVavPointHDict.id().toString())
+                            hayStack.deleteWritableArray(oaoVavPointHDict.id().toString())
+                        }
+                    } else {
+                        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "No VAV or DAB System Equip found, Skipping operation.")
+                        // Do Nothing
+                    }
+                }
+            }
+            setMigrateDeleteRedundantOaoPointsBySystemEquip()
+        } catch (exception: Exception) {
+            CcuLog.e(
+                TAG_CCU_MIGRATION_UTIL,
+                "Error while deleting redundant OAO points based on current system profile",
+                exception
+            )
+            exception.printStackTrace()
         }
     }
 }

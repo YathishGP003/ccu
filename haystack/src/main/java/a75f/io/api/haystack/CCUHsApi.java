@@ -1424,7 +1424,7 @@ public class CCUHsApi
         HashMap<Object,Object> entity = CCUHsApi.getInstance().readMapById(id);
         CcuLog.d(TAG_CCU_HS, "deleteEntity " + entity.toString());
         tagsDb.tagsMap.remove(id.replace("@", ""));
-        EntityDBUtilKt.deleteEntitywithId(id,this.context);
+        EntityDBUtilKt.deleteEntitywithId(id.replace("@", ""), this.context);
         syncStatusService.addDeletedEntity(id, true);
         tagsDb.clearHistory(HRef.copy(id));
         HisItemCache.getInstance().delete(id);

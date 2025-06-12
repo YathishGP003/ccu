@@ -1514,21 +1514,47 @@ public class CCUTagsDb extends HServer {
         b.addCol("who");
         b.addCol("duration");
         b.addCol("lastModifiedDateTime");
-        
+        boolean isdelete = false;
         for (int i = 0; i < 17; ++i) {
-            
             if (array.duration[i] != 0 && array.duration[i] < System.currentTimeMillis()) {
-              deletePointArrayLevel(rec.id(),i+1);
+                deletePointArrayLevel(rec.id(), i + 1);
+                isdelete = true;
+                b.addRow(new HVal[]{
+                        HNum.make(i + 1),
+                        HStr.make("" + (i + 1)),
+                        null,
+                        HStr.make(array.who[i]),
+                        HNum.make(array.duration[i] > System.currentTimeMillis() ? array.duration[i] : 0),
+                        array.lastModifiedDateTime[i]
+                });
+            } else {
+                b.addRow(new HVal[]{
+                        HNum.make(i + 1),
+                        HStr.make("" + (i + 1)),
+                        array.val[i],
+                        HStr.make(array.who[i]),
+                        HNum.make(array.duration[i] > System.currentTimeMillis() ? array.duration[i] : 0),
+                        array.lastModifiedDateTime[i]
+                });
             }
-            b.addRow(new HVal[]{
-                    HNum.make(i + 1),
-                    HStr.make("" + (i + 1)),
-                    array.val[i],
-                    HStr.make(array.who[i]),
-                    HNum.make(array.duration[i] >  System.currentTimeMillis() ? array.duration[i] : 0),
-                    array.lastModifiedDateTime[i]
+        }
+
+        if(isdelete) {
+            CcuLog.d("CCU_HS","onPointWriteArray: "+rec.id().toVal()+" deleted some levels");
+            HGrid grid = b.toGrid();
+            HVal highestValidVal = HNum.make(0);
+            for (int i = 0; i < 17; i++) {
+                HVal val = grid.row(i).get("val", false);
+                if (val != null) {
+                    highestValidVal = val;
+                    break;
+                }
+            }
+            CcuLog.d("CCU_HS","onPointWriteArray: "+rec.id().toVal()+" highestValidVal: "+highestValidVal);
+            hisWrite(rec.id(), new HHisItem[]{
+                    HHisItem.make(HDateTime.make(System.currentTimeMillis()), highestValidVal)
             });
-            }
+        }
         return b.toGrid();
     }
 

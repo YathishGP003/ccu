@@ -23,10 +23,13 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
+import io.seventyfivef.ph.core.Tags
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import org.projecthaystack.HDict
+import org.projecthaystack.HNum
+import org.projecthaystack.HRef
 
 @SuppressLint("StaticFieldLeak")
 object Domain {
@@ -486,4 +489,37 @@ object Domain {
             )
         }
     }
+
+    @JvmStatic
+    fun pointWriteAndHisWriteById(id: String, value: Double, who: String) {
+        val pointDetails = a75f.io.api.haystack.Point.Builder()
+            .setHashMap(hayStack.readMapById(id))
+            .build()
+
+        val markers = pointDetails.markers
+
+        // Handle writable points
+        if (markers.contains("writable")) {
+            hayStack.pointWrite(
+                HRef.copy(id),
+                8,
+                who,
+                HNum.make(value),
+                HNum.make(0)
+            )
+            CcuLog.d(LOG_TAG, "Updated point write for ID: $id, Value: $value")
+        }
+
+        // Handle historical value writes
+        if (markers.contains("his")) {
+            val priorityVal = if (markers.contains(Tags.WRITABLE)) {
+                hayStack.readPointPriorityVal(id)
+            } else {
+                value
+            }
+            hayStack.writeHisValById(id, priorityVal)
+            CcuLog.d(LOG_TAG, "Updated historical value write for ID: $id, Value: $priorityVal")
+        }
+    }
+
 }

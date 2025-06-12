@@ -12,15 +12,15 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.util.DesiredTempDisplayMode;
-import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.ZoneTempState;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
-import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
+import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.util.ExecutorTask;
 
 public class StandaloneScheduler {
@@ -197,20 +197,7 @@ public class StandaloneScheduler {
                 if(cdb != null && (cdb.get("id") != null)) {
                     String id = cdb.get("id").toString();
                     Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
-                    for (String marker : p.getMarkers()) {
-
-                        if (marker.equals("writable")) {
-                            CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val " + p.getDisplayName() + ": " + val);
-                            CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), TunerConstants.UI_DEFAULT_VAL_LEVEL, HNum.make(val), HNum.make(0));
-                        }
-                    }
-
-                    for (String marker : p.getMarkers()) {
-                        if (marker.equals("his")) {
-                            CcuLog.d(L.TAG_CCU_UI, "Set His Val " + id + ": " + val);
-                            hayStack.writeHisValById(id, val);
-                        }
-                    }
+                    Domain.pointWriteAndHisWriteById(id, val, hayStack.getCCUUserName());
                     if (p.getMarkers().contains("conditioning") && p.getMarkers().contains("userIntent")) {
                         String zoneId = HSUtil.getZoneIdFromEquipId(equipRef);
                         DesiredTempDisplayMode.setModeTypeOnUserIntentChange(zoneId, CCUHsApi.getInstance());

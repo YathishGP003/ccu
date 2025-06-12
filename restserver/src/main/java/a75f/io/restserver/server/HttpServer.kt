@@ -5,6 +5,7 @@ import a75f.io.api.haystack.HisItem
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.util.LevelData
 import a75f.io.api.haystack.util.ReadAllResponse
+import a75f.io.api.haystack.util.hayStack
 import a75f.io.api.haystack.util.retrieveLevelValues
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
@@ -326,9 +327,10 @@ class HttpServer {
                         if(isBacnetClientPoint(id)){
                             level = "8"
                         }
-                        CCUHsApi.getInstance()
-                            .writeHisValById(id, value!!.toDouble())
+
                         val pointGrid = CCUHsApi.getInstance().writePoint(id, level!!.toInt(), who, value!!.toDouble(), duration!!.toInt())
+                        CCUHsApi.getInstance()
+                            .writeHisValById(id, hayStack.readPointPriorityVal(id))
                         if(isBacnetClientPoint(id)){
                             CcuLog.i(HTTP_SERVER, "this is a bacnet client point update ui-->$id")
                             updateZoneUi(id)

@@ -227,6 +227,7 @@ class HyperstatSplitReconfigurationHandler {
                     L.TAG_CCU_PUBNUB,
                     "HS Split: writePointFromJson - level: $level who: $who val: $value  durationDiff: $durationDiff"
                 )
+                hayStack.writePointLocal(configPoint.id, level, who, value, durationDiff)
             } catch (e: Exception) {
                 e.printStackTrace()
                 CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to parse tuner value : " + msgObject + " ; " + e.message)

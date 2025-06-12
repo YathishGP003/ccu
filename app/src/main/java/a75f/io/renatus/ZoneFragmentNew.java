@@ -987,7 +987,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         return gridPosition;
     }
 
-    private void viewTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap,String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout, boolean isZoneAlive)
+    private void viewTemperatureBasedZone(LayoutInflater inflater,
+                                          View rootView, ArrayList<HashMap> zoneMap,String zoneTitle,
+                                          int gridPosition, LinearLayout[] tablerowLayout, boolean isZoneAlive)
     {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.viewTemperatureBasedZone");
         isItemSelectedEvent = false;

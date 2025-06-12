@@ -190,6 +190,402 @@
             android:background="@drawable/dashed_line"
             android:layerType="software" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:id="@+id/mstpConfigLayout"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+            <LinearLayout
+                android:id="@+id/mstpLayoutHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp">
+                <TextView
+                    android:id="@+id/mstpTitleText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:fontFamily="@font/lato_bold"
+                    android:text="@string/title_mstp_config"
+                    android:textColor="@color/secondary"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginStart="70dp"
+                android:paddingTop="5dp"
+                android:layout_marginEnd="50dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="2"
+                    android:layout_marginTop="11dp">
+                    <TextView
+                        android:id="@+id/textBaudRateForMstp"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:layout_weight="0.5"
+                        android:text="@string/txt_mstp_baudRate"
+                        android:textAppearance="@style/title_normal_22" />
+
+                    <Spinner
+                        android:id="@+id/mstpSpinnerBaudRate"
+                        style="@style/customSpinnerDownArrow"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:fontFamily="@font/lato_regular"
+                        android:layout_weight="0.5"
+                        android:entries="@array/mstp_config_baudrate_array"/>
+                    <TextView
+                        android:id="@+id/tvMstpBaudRate"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:paddingTop="12dp"
+                        android:layout_weight="0.5"
+                        android:visibility="gone"
+                        android:maxLines="1"
+                        android:gravity="left"
+                        android:textSize="20sp"
+                        android:fontFamily="@font/lato_regular"
+                        android:textColor="@color/grey_select" />
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="11dp"
+                    android:orientation="horizontal">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="0.5">
+                        <TextView
+                            android:id="@+id/mstpSourceAddress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="11.5dp"
+                            android:paddingBottom="4dp"
+                            android:text="@string/txt_mstp_sourceAddress"
+                            android:textAppearance="@style/title_normal_22" />
+                        <TextView
+                            android:id="@+id/mstpSourceAddressHint"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/txt_mstp_sourceAddress_hint"
+                            android:textAppearance="@style/font_style_hint" />
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/etMstpSourceAddress"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="12dp"
+                        android:hint="@string/hint_mstp_sourceAddress"
+                        android:layout_weight="0.5"
+                        android:maxLines="1"
+                        android:inputType="number"
+                        android:maxLength="3"
+                        android:textColor="@color/grey_select"
+                        android:textAppearance="@style/title_normal_22_grey" />
+
+                    <TextView
+                        android:id="@+id/tvMstpSourceAddress"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="12dp"
+                        android:layout_weight="0.5"
+                        android:visibility="gone"
+                        android:maxLines="1"
+                        android:textColor="@color/grey_select"
+                        android:gravity="left"
+                        android:textSize="22sp"
+                        android:fontFamily="@font/lato_regular" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="11dp"
+                    android:orientation="horizontal">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="0.5">
+                        <TextView
+                            android:id="@+id/mstpMaxMaster"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="11.5dp"
+                            android:paddingBottom="4dp"
+                            android:text="@string/txt_mstp_maxMaster"
+                            android:textAppearance="@style/title_normal_22" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/txt_mstp_maxMaster_hint"
+                            android:textAppearance="@style/font_style_hint" />
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/etMstpMaxMaster"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:paddingTop = "12dp"
+                        android:hint="@string/hint_mstp_maxMaster"
+                        android:layout_weight="0.5"
+                        android:maxLines="1"
+                        android:inputType="number"
+                        android:maxLength="3"
+                        android:textColor="@color/grey_select"
+                        android:textAppearance="@style/title_normal_22_grey" />
+
+                    <TextView
+                        android:id="@+id/tvMstpMaxMaster"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="12dp"
+                        android:layout_weight="0.5"
+                        android:visibility="gone"
+                        android:maxLines="1"
+                        android:textColor="@color/grey_select"
+                        android:gravity="left"
+                        android:textSize="22sp"
+                        android:fontFamily="@font/lato_regular" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="11dp"
+                    android:orientation="horizontal">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="0.5">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="11.5dp"
+                            android:paddingBottom="4dp"
+                            android:text="@string/txt_mstp_maxFrames"
+                            android:textAppearance="@style/title_normal_22" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/txt_mstp_maxFrames_hint"
+                            android:textAppearance="@style/font_style_hint" />
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/etMstpMaxFrame"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="12dp"
+                        android:inputType="number"
+                        android:hint="@string/hint_mstp_maxFrames"
+                        android:layout_weight="0.5"
+                        android:maxLines="1"
+                        android:maxLength="3"
+                        android:textColor="@color/grey_select"
+                        android:textAppearance="@style/title_normal_22_grey" />
+
+                    <TextView
+                        android:id="@+id/tvMstpMaxFrame"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="5dp"
+                        android:layout_weight="0.5"
+                        android:visibility="gone"
+                        android:maxLines="1"
+                        android:textColor="@color/grey_select"
+                        android:gravity="left"
+                        android:textSize="22sp"
+                        android:fontFamily="@font/lato_regular"/>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="11dp"
+                    android:orientation="horizontal">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="0.5">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="11.5dp"
+                            android:paddingBottom="4dp"
+                            android:text="@string/txt_mstp_device_id"
+                            android:textAppearance="@style/title_normal_22" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textAppearance="@style/font_style_hint" />
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/etMstpDeviceId"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="12dp"
+                        android:inputType="number"
+                        android:hint="@string/txt_mstp_hint_device_id"
+                        android:layout_weight="0.5"
+                        android:maxLines="1"
+                        android:maxLength="10"
+                        android:textColor="@color/grey_select"
+                        android:textAppearance="@style/title_normal_22_grey" />
+
+                    <TextView
+                        android:id="@+id/tvMstpDeviceId"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="5dp"
+                        android:layout_weight="0.5"
+                        android:visibility="gone"
+                        android:maxLines="1"
+                        android:textColor="@color/grey_select"
+                        android:gravity="left"
+                        android:textSize="22sp"
+                        android:fontFamily="@font/lato_regular"/>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="2"
+                    android:layout_marginTop="11dp">
+                    <TextView
+                        android:id="@+id/textPortAddressForMstp"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:layout_weight="0.5"
+                        android:text="@string/txt_mstp_port_address"
+                        android:textAppearance="@style/title_normal_22" />
+
+                    <Spinner
+                        android:id="@+id/mstpSpinnerPortAddress"
+                        style="@style/customSpinnerDownArrow"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:visibility="gone"
+                        android:fontFamily="@font/lato_regular"
+                        android:layout_weight="0.5"
+                        android:entries="@array/mstp_config_baudrate_array"/>
+                    <TextView
+                        android:id="@+id/tvMstpPortAddress"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:paddingTop="12dp"
+                        android:layout_weight="0.5"
+                        android:maxLines="1"
+                        android:gravity="left"
+                        android:textSize="20sp"
+                        android:fontFamily="@font/lato_regular"
+                        android:textColor="@color/grey_select" />
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"/>
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginStart="40dp"
+                    android:layout_marginTop="20dp"
+                    android:gravity="end|center_vertical"
+                    android:layout_marginEnd="50dp">
+
+                    <TextView
+                        android:id="@+id/tv_mstp_initialize"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="end"
+                        android:fontFamily="@font/lato_regular"
+                        android:paddingLeft="20dp"
+                        android:paddingTop="10dp"
+                        android:paddingRight="20dp"
+                        android:paddingBottom="10dp"
+                        android:text="@string/txt_mstp_initialise"
+                        android:textColor="?orange_75f"
+                        android:textSize="22sp" />
+
+                    <TextView
+                        android:id="@+id/tv_mstp_disable"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="end"
+                        android:fontFamily="@font/lato_regular"
+                        android:paddingLeft="20dp"
+                        android:paddingTop="10dp"
+                        android:visibility="gone"
+                        android:paddingRight="20dp"
+                        android:paddingBottom="10dp"
+                        android:text="@string/txt_mstp_disable"
+                        android:textColor="?orange_75f"
+                        android:textSize="22sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@drawable/dashed_line"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="30dp"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="120dp"
+            android:layerType="software"/>
+
 
         <LinearLayout
             android:layout_width="match_parent"

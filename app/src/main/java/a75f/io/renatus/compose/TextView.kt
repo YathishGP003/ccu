@@ -100,16 +100,16 @@ fun HeaderTextViewCustom(text: String, padding : Int = 5) {
 }
 
 @Composable
-fun HeaderTextViewNew(text: String, padding : Int = 5) {
+fun HeaderTextViewNew(text: String, padding : Int = 5, fontSize : Int = 22,fontWeight: FontWeight = FontWeight.Bold, color: Color = Color.Black) {
     Text(
         modifier = Modifier
             .wrapContentSize()
             .padding(padding.dp),
         style = TextStyle(
             fontFamily = myFontFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-            color = Color.Black,
+            fontWeight = fontWeight,
+            fontSize = fontSize.sp,
+            color = color,
             textAlign = TextAlign.Center,
         ),
         text = text
@@ -345,7 +345,7 @@ fun TitleTextView(text: String) {
 fun TitleTextViewCustom(text: String, color: Color) {
     Text(
         modifier = Modifier
-            .padding(top = 0.dp, start = 10.dp, end = 10.dp, bottom = 10.dp)
+            .padding(top = 0.dp, start = 0.dp, end = 10.dp, bottom = 10.dp)
             .wrapContentSize(),
         style = TextStyle(
             textAlign = TextAlign.Center,
@@ -513,7 +513,7 @@ fun TextViewWithClickCustom(text: MutableState<String>, onClick: () -> Unit, ena
             onValueChange = { text.value = it },
             enabled = false,
             readOnly = !enableClick,
-            modifier = modifier.fillMaxHeight().width(300.dp),
+            modifier = modifier.fillMaxHeight().width(400.dp),
             maxLines = 1,
             textStyle = TextStyle(
                 fontFamily = myFontFamily,
@@ -543,7 +543,7 @@ fun TextViewWithClickCustom(text: MutableState<String>, onClick: () -> Unit, ena
             },
         )
         Divider(
-            Modifier.width(280.dp).padding(top = 0.dp, start = 0.dp).offset(x = 5.dp, y = (-10).dp))
+            Modifier.width(380.dp).padding(top = 0.dp, start = 10.dp).offset(x = 5.dp, y = (-10).dp))
     }
 }
 

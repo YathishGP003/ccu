@@ -61,6 +61,11 @@ import a75f.io.logic.tuners.TunerUtil
 import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.RxjavaUtil
 import a75f.io.logic.util.bacnet.BacnetConfigConstants
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.DESTINATION_IP
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.DESTINATION_PORT
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.DEVICE_ID
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.DEVICE_NETWORK
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.MAC_ADDRESS
 import android.content.Intent
 import android.preference.PreferenceManager
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -337,15 +342,15 @@ fun mapBacnetPoint(
             val wholeNumber = value.toInt()
             //val bacnetWholeNumber = wholeNumber
             updatePointValueChanges(pointId, haystack, setPointsList, wholeNumber.toDouble())
-            doMakeRequest(getConfig(bacnetConfig), objectId, wholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
+            doMakeRequest(BacnetServicesUtils().getConfig(bacnetConfig), objectId, wholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
         }else if(BacNetConstants.ObjectType.OBJECT_BINARY_VALUE.key == getObjectType(objectType)){
             val wholeNumber = value.toInt()
             //  val bacnetWholeNumber = wholeNumber - 1
             updatePointValueChanges(pointId, haystack, setPointsList, wholeNumber.toDouble())
-            doMakeRequest(getConfig(bacnetConfig), objectId, wholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
+            doMakeRequest(BacnetServicesUtils().getConfig(bacnetConfig), objectId, wholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
         }else{
             updatePointValueChanges(pointId, haystack, setPointsList, value)
-            doMakeRequest(getConfig(bacnetConfig), objectId, value.toString(),getObjectType(objectType), defaultPriority, pointId)
+            doMakeRequest(BacnetServicesUtils().getConfig(bacnetConfig), objectId, value.toString(),getObjectType(objectType), defaultPriority, pointId)
         }
 
     } else {
@@ -368,21 +373,6 @@ private fun getObjectType(objectTypeValue : String) : String{
     return objectType
 }
 
-private fun getConfig(configString: String): MutableMap<String, String> {
-    val pairs: Array<String> =
-        configString.split(",".toRegex()).dropLastWhile { it.isEmpty() }
-            .toTypedArray()
-    val configMap: MutableMap<String, String> = java.util.HashMap()
-    for (pair in pairs) {
-        val keyValue = pair.split(":".toRegex()).dropLastWhile { it.isEmpty() }
-            .toTypedArray()
-        if (keyValue.size != 2) continue  // Skip invalid key value pairs (e.g. "destinationIp:
-        val key = keyValue[0]
-        val value = keyValue[1]
-        configMap[key] = value
-    }
-    return configMap
-}
 fun mapModbusPoint(
     haystack: CCUHsApi,
     query: String,
@@ -1146,11 +1136,6 @@ fun logIt(msg: String) {
     CcuLog.i(L.TAG_CCU_SYSTEM, msg)
 }
 
-private const val DEVICE_ID = "deviceId"
-private const val DESTINATION_IP = "destinationIp"
-private const val DESTINATION_PORT = "destinationPort"
-private const val MAC_ADDRESS = "macAddress"
-private const val DEVICE_NETWORK = "deviceNetwork"
 private fun generateWriteObject(
     configMap: Map<String, String?>,
     objectId: Int,
@@ -1212,13 +1197,13 @@ private fun generateWriteObject(
 }
 private fun doMakeRequest(configMap: Map<String, String?>, objectId : Int, newValue : String,
                           objectType: String, priority: String, pointId: String){
-    val serverIpAddress: String? = getServerIpAddress()
+    val bacnetServicesUtils = BacnetServicesUtils()
+    val serverIpAddress: String? = bacnetServicesUtils.getServerIpAddress()
     if(serverIpAddress != null){
-        val bacnetServicesUtils = BacnetServicesUtils()
         CcuLog.d(TAG_BACNET, "--doMakeRequest-->$objectId<--newValue-->$newValue-->objectType-->$objectType<-pointId->$pointId<---serverIpAddress-->$serverIpAddress")
         bacnetServicesUtils.sendWriteRequest(generateWriteObject(configMap, objectId, newValue,
             objectType, priority),
-            serverIpAddress, remotePointUpdateInterface, newValue, pointId)
+            serverIpAddress, remotePointUpdateInterface, newValue, pointId, false)
     }
 }
 
@@ -1228,19 +1213,3 @@ private val remotePointUpdateInterface =
         //CCUHsApi.getInstance().writeDefaultValById(id, value.toDouble())
         //CCUHsApi.getInstance().writeHisValById(id, value.toDouble())
     }
-
-private fun getServerIpAddress() : String?{
-    var ipAddress : String? = null
-    val bacnetServerConfig = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().applicationContext)
-        .getString(BacnetConfigConstants.BACNET_CONFIGURATION, null)
-    if (bacnetServerConfig != null) {
-        try {
-            val config = JSONObject(bacnetServerConfig)
-            val networkObject = config.getJSONObject("network")
-            ipAddress =  networkObject.getString(BacnetConfigConstants.IP_ADDRESS)
-        } catch (e: JSONException) {
-            e.printStackTrace()
-        }
-    }
-    return ipAddress
-}

@@ -136,6 +136,11 @@ data class WriteResponse(
     val bacappError: BacnetError?,
 )
 
+data class BacnetSubcribeCovResponse(
+    @SerializedName("bacapp_error")
+    val bacappError: BacnetError?
+)
+
 data class WhoIsResponse(
     @SerializedName("Iam_response")
     val whoIsResponseList : MutableList<WhoIsResponseItem>,

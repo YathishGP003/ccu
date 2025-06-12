@@ -2774,16 +2774,29 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 ValueConstraint valueConstraint = bacnetPoint.getValueConstraint();
                 if(objectTypeFromProtocolData.equalsIgnoreCase("MultiStateValue")){
                     objectType = BacNetConstants.ObjectType.OBJECT_MULTI_STATE_VALUE.getKey();
-                }else if(objectTypeFromProtocolData.equalsIgnoreCase("BinaryValue")){
+                } else if(objectTypeFromProtocolData.equalsIgnoreCase("MultiStateInput")){
+                    objectType = BacNetConstants.ObjectType.OBJECT_MULTI_STATE_INPUT.getKey();
+                } else if(objectTypeFromProtocolData.equalsIgnoreCase("MultiStateOutput")){
+                    objectType = BacNetConstants.ObjectType.OBJECT_MULTI_STATE_OUTPUT.getKey();
+                }
+                else if(objectTypeFromProtocolData.equalsIgnoreCase("BinaryValue")){
                     objectType = BacNetConstants.ObjectType.OBJECT_BINARY_VALUE.getKey();
+                } else if(objectTypeFromProtocolData.equalsIgnoreCase("BinaryInput")){
+                    objectType = BacNetConstants.ObjectType.OBJECT_BINARY_INPUT.getKey();
+                } else if(objectTypeFromProtocolData.equalsIgnoreCase("BinaryOutput")){
+                    objectType = BacNetConstants.ObjectType.OBJECT_BINARY_OUTPUT.getKey();
+                } else if(objectTypeFromProtocolData.equalsIgnoreCase("AnalogInput")){
+                    objectType = BacNetConstants.ObjectType.OBJECT_ANALOG_INPUT.getKey();
+                } else if(objectTypeFromProtocolData.equalsIgnoreCase("AnalogOutput")){
+                    objectType = BacNetConstants.ObjectType.OBJECT_ANALOG_OUTPUT.getKey();
                 }else{
                     objectType = BacNetConstants.ObjectType.OBJECT_ANALOG_VALUE.getKey();
                 }
 
                 if(presentationData != null && valueConstraint != null){
                     if(valueConstraint.getMinValue() != null && valueConstraint.getMinValue() != null){
-                        int minValue = valueConstraint.getMinValue();
-                        int maxValue = valueConstraint.getMaxValue();
+                        int minValue = valueConstraint.getMinValue().intValue();
+                        int maxValue = valueConstraint.getMaxValue().intValue();
                             //float step = Float.parseFloat(presentationData.getTagValueIncrement(
                         double step = Double.parseDouble(presentationData.getTagValueIncrement());
                         spinnerValues = generateValuesForSpinner(minValue, maxValue, step);

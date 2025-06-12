@@ -112,8 +112,8 @@ private fun getRegister(rawMap: HashMap<Any, Any>): BacnetPoint {
     if (physicalPoint.incrementVal != null) {
         incrementStep = physicalPoint.incrementVal
         try {
-            val min : Int = physicalPoint.minVal.toDouble().toInt()
-            val max : Int = physicalPoint.maxVal.toDouble().toInt()
+            val min  = physicalPoint.minVal.toDouble()
+            val max  = physicalPoint.maxVal.toDouble()
             valueConstraints = ValueConstraint("NUMERIC", min, max, null)
         }catch (e : Exception){
             e.printStackTrace()

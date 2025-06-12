@@ -14,10 +14,15 @@ import a75f.io.logic.interfaces.ModbusDataInterface
 import a75f.io.logic.interfaces.ZoneDataInterface
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.HTTP_SERVER_STATUS
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED
+import a75f.io.logic.util.bacnet.ObjectType
+import a75f.io.logic.util.bacnet.getBacNetType
 import a75f.io.logic.util.bacnet.reInitialiseBacnetStack
 import a75f.io.logic.util.bacnet.readExternalBacnetJsonFile
+import a75f.io.logic.util.bacnet.sendWriteRequestToMstpEquip
 import a75f.io.logic.util.bacnet.updateBacnetHeartBeat
 import a75f.io.logic.util.bacnet.updateBacnetIpModeConfigurations
+import a75f.io.logic.util.bacnet.updateBacnetMstpLinearAndCovSubscription
+import a75f.io.logic.util.bacnet.updateBacnetMstpHeartBeat
 import a75f.io.logic.util.bacnet.updateBacnetStackInitStatus
 import a75f.io.util.query_parser.modifyKVPairFromFilter
 import android.content.Context
@@ -58,7 +63,6 @@ import org.projecthaystack.UnknownRecException
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
 import java.util.concurrent.TimeUnit
-import java.util.regex.Pattern
 
 class HttpServer {
 
@@ -231,16 +235,37 @@ class HttpServer {
                 get("/bacnet/stackInitStatus") {
                     CcuLog.d(HTTP_SERVER,"called API: /bacnet/stackInitStatus ")
                     val stackStatus = call.request.queryParameters["status"]
-                    if (stackStatus != null) {
-                        updateBacnetStackInitStatus(stackStatus.toBoolean())
-                        updateBacnetIpModeConfigurations(stackStatus.toBoolean())
+                    val stack = call.request.queryParameters["stack"]
+                    if (stackStatus != null && stack != null) {
+                        if (stack == "IP") {
+                            CcuLog.i(HTTP_SERVER, "Bacnet stack: IP stackInitStatus: $stackStatus")
+                            updateBacnetStackInitStatus(stackStatus.toBoolean())
+                            updateBacnetIpModeConfigurations(stackStatus.toBoolean())
+                        } else if (stack == "MSTP") {
+                            CcuLog.i(HTTP_SERVER, "Bacnet stack: MSTP stackInitStatus: $stackStatus")
+                            if (stackStatus.toBoolean()) {
+                                CcuLog.d(L.TAG_CCU_BACNET_MSTP, "BACnet MSTP Stack initialized successfully!!!. Sending COV Subscription....")
+                                updateBacnetMstpLinearAndCovSubscription(isInitProcessRequired = true)
+                            }  else {
+                                CcuLog.d(L.TAG_CCU_BACNET_MSTP, "BACnet MSTP Stack initialization failed. Not sending COV Subscription")
+                            }
+
+                        }
                     }
                     call.respond(HttpStatusCode.OK)
                 }
 
                 get("/bacnet/heartbeat") {
                     CcuLog.i(HTTP_SERVER,"called API: /bacnet/heartbeat ")
-                    updateBacnetHeartBeat()
+                    val stack = call.request.queryParameters["stack"]
+                    if (stack != null) {
+                        CcuLog.i(HTTP_SERVER, "Bacnet stack: --> $stack")
+                        if (stack.toString() == "IP") {
+                            updateBacnetHeartBeat()
+                        } else if (stack.toString() == "MSTP") {
+                            updateBacnetMstpHeartBeat()
+                        }
+                    }
                 }
 
                 post("/watchSub") {
@@ -335,6 +360,15 @@ class HttpServer {
                             CcuLog.i(HTTP_SERVER, "this is a bacnet client point update ui-->$id")
                             updateZoneUi(id)
                         }
+
+                        if (isBacnetMSTPPoint(id)) {
+                            CcuLog.i(HTTP_SERVER, "this is a bacnet mstp point--> $id and updating UI")
+                            updateZoneUi(id)
+                            if (level != null && value != null) {
+                                sendWriteRequestToMstpEquip(id,level!!, value!!)
+                            }
+                        }
+
                         if (pointGrid != null) {
                             if(!pointGrid.isEmpty || !pointGrid.isErr){
                                 call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK))
@@ -344,6 +378,74 @@ class HttpServer {
                                 call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
                         }else{
                             call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
+                        }
+                    }
+                }
+
+                //example call = http://127.0.0.1:5001/pointWrite/mstp?deviceId=1199&level=0&val=75.0&who=bacnet&duration=0&objectId=1&objectType=2
+                get("/pointWrite/mstp") {
+                    val deviceId = call.parameters["deviceId"]
+                    var level = call.parameters["level"]
+                    var value = call.parameters["val"]
+                    val who = call.parameters["who"]
+                    val objectId = call.parameters["objectId"]
+                    val objectType = call.parameters["objectType"]
+                    var duration : String? = call.parameters["duration"]
+
+                    CcuLog.i(HTTP_SERVER, "called API: /pointWrite/mstp -deviceId->$deviceId<--value-->$value<--level-->$level")
+
+                    if(level == null || who == null || duration == null || objectId == null || objectType == null) {
+                        call.respond(HttpStatusCode.NotFound, BaseResponse( "Invalid request"))
+                    } else {
+                        var updatedObjectType = getBacNetType( ObjectType.values()[objectType.toInt()].key.replace("OBJECT_", ""))
+                        CcuLog.i(HTTP_SERVER, "MSTP -> updatedObjectType: $updatedObjectType")
+                        CcuLog.i(HTTP_SERVER, "MSTP -> objectId: $objectId")
+                        val query = "point and bacnetDeviceId == $deviceId and bacnetObjectId==$objectId and bacnetType==\"$updatedObjectType\""
+                        CcuLog.i(HTTP_SERVER, "MSTP -> query: $query")
+                        val id = CCUHsApi.getInstance().read(query)?.get("id")?.toString()
+                        if (id == null) {
+                            CcuLog.e(HTTP_SERVER, "MSTP -> Point not found for deviceId: $deviceId and objectId: $objectId and  objectType: $objectType")
+                            call.respond(
+                                HttpStatusCode.NotFound,
+                                BaseResponse("MSTP -> Point not found for deviceId: $deviceId and objectId: $objectId")
+                            )
+
+                        } else {
+
+                            // if level is coming null ie. user wanted to reset level
+                            if (value == "null") {
+                                value = "0"
+                                duration = "1000"
+                            }
+                            if (isBacnetMSTPPoint(id) /*&& !level.isNullOrEmpty() && level!!.toInt() < 1*/) {
+                                level = "8"
+                            }
+                            val pointGrid = CCUHsApi.getInstance().writePoint(
+                                id,
+                                level!!.toInt(),
+                                who,
+                                value!!.toDouble(),
+                                duration!!.toInt()
+                            )
+                            CCUHsApi.getInstance().writeHisValById(id, CCUHsApi.getInstance().readPointPriorityVal(id))
+                            updateZoneUi(id)
+                            updateHeartBeatPoint(id)
+                            if (pointGrid != null) {
+                                CcuLog.d(HTTP_SERVER, "MSTP -> pointGrid is not null: $pointGrid")
+                                if (!pointGrid.isEmpty || !pointGrid.isErr) {
+                                    call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK))
+                                } else
+                                    call.respond(
+                                        HttpStatusCode.OK,
+                                        BaseResponse(HttpStatusCode.NoContent)
+                                    )
+                            } else {
+                                CcuLog.e(HTTP_SERVER, "MSTP -> pointGrid is null")
+                                call.respond(
+                                    HttpStatusCode.OK,
+                                    BaseResponse(HttpStatusCode.NoContent)
+                                )
+                            }
                         }
                     }
                 }
@@ -539,6 +641,15 @@ class HttpServer {
         return pointMap != null && pointMap["bacnetCur"] != null
     }
 
+    private fun isBacnetMSTPPoint(id: String): Boolean {
+        var pointId = id
+        if(!pointId.startsWith("@")){
+            pointId = "@$pointId"
+        }
+        val pointMap = CCUHsApi.getInstance().readMapById(pointId)
+        return pointMap != null && pointMap["bacnetMstp"] != null
+    }
+
     private fun updateHeartBeatPoint(id: String){
         var pointId = id
         if(!pointId.startsWith("@")){
@@ -546,10 +657,13 @@ class HttpServer {
         }
         val point = CCUHsApi.getInstance().readMapById(pointId)
         val isBacnetClientPoint = point["bacnetCur"]
-        if(isBacnetClientPoint.toString().isNotEmpty()){
-            val equipId = point["equip"]
-            val heartBeatPointId = CCUHsApi.getInstance().readEntity("point and heartbeat and equipRef== \" $equipId \"")["id"]
+        val isBacnetMstpPoint = point["bacnetMstp"]
+        if(isBacnetClientPoint.toString().isNotEmpty() || isBacnetMstpPoint.toString().isNotEmpty()){
+            val equipId = point["equipRef"]
+            CcuLog.i(HTTP_SERVER, "updateHeartBeatPoint for equip: $equipId")
+            val heartBeatPointId = CCUHsApi.getInstance().readEntity("point and heartbeat and equipRef==\"$equipId\"")["id"]
             if(heartBeatPointId.toString().isNotEmpty()){
+                CcuLog.i(HTTP_SERVER, "updateHeartBeatPoint for equip: $equipId with heartBeatPointId: $heartBeatPointId")
                 CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(heartBeatPointId.toString(), 1.0)
             }
             //modbusDataInterface?.refreshScreen(id)

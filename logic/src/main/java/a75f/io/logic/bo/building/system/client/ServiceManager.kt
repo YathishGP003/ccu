@@ -38,4 +38,18 @@ object ServiceManager {
 
         return retrofit!!.create(CcuService::class.java)
     }
+
+    fun makeCcuServiceForMSTP(ipAddress: String): CcuService {
+        val url = "http://$ipAddress:5006"
+
+        if (retrofit == null || retrofit!!.baseUrl().toString() != url) {
+            retrofit = Retrofit.Builder()
+                .baseUrl(url)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(okHttpClient)
+                .build()
+        }
+
+        return retrofit!!.create(CcuService::class.java)
+    }
 }

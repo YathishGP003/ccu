@@ -31,6 +31,7 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
         var isEmr = false
         var isBtu = false
         var isConnect = false
+        var isBacnetMstp = false
         while (rowIterator.hasNext()) {
             val e: HDict.MapEntry = (rowIterator.next() as HDict.MapEntry)
             when (e.value!!) {
@@ -80,6 +81,9 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
             if (e.key.toString() == "equipRef") {
                 extractedEquipRef = e.value.toString()
             }
+            if (e.key.toString() == "bacnetMstp") {
+                isBacnetMstp = true
+            }
         }
             val zoneName = CCUHsApi.getInstance()
                 .readMapById(extractedZoneRef.replace("@" , ""))["dis"].toString().trim()
@@ -92,7 +96,7 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
 
         if (!isSystem || isOaoProfile || isByPassDamper) {
             createFormattedDisName(isVirtualZoneEnabled, isEquip, hDictBuilder, zoneName, extractedGroup,
-                lastLiteralFromDis, bacnetId, extractedEquipRef, profileName)
+                lastLiteralFromDis, bacnetId, extractedEquipRef, profileName,isBacnetMstp)
         } else {
             if (isConnect) {
                 hDictBuilder.add("dis" , "connect-$lastLiteralFromDis")
@@ -102,7 +106,7 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
         }
 
         if(isModbus && !isEquip && isVirtualZoneEnabled){
-            val bacnetIdAfterModification = removeLeadingZeros(removeFirstFourChars(bacnetId)) //removeGroup(extractedGroup, bacnetId)
+            val bacnetIdAfterModification = removeLeadingZeros(removeFirstNumberofChars(bacnetId,4)) //removeGroup(extractedGroup, bacnetId)
             hDictBuilder.add("bacnetId" , bacnetIdAfterModification.toLong())
         }
 
@@ -130,7 +134,7 @@ private fun removeLeadingZeros(formatted: String): String {
 
 private fun createFormattedDisName(isVirtualZoneEnabled: Boolean, isEquip : Boolean, hDictBuilder : HDictBuilder,
                                    zoneName: String, groupName : String, lastLiteralFromDis : String, bacnetId: String,
-                                   extractedEquipRef: String, profileName : String){
+                                   extractedEquipRef: String, profileName : String, isBacnetMstp: Boolean) {
     var extractedGroup = groupName
     if (isVirtualZoneEnabled) {
         if (isEquip) {
@@ -143,7 +147,8 @@ private fun createFormattedDisName(isVirtualZoneEnabled: Boolean, isEquip : Bool
         try {
             if (bacnetId != "0.0") {
                 if (!isEquip) {
-                    val bacnetIdAfterModification = removeFirstFourChars(bacnetId)
+                    val bacnetIdAfterModification = if (isBacnetMstp) removeFirstNumberofChars(bacnetId,3)
+                                                       else removeFirstNumberofChars(bacnetId,4)
                     hDictBuilder.add("bacnetId" , bacnetIdAfterModification.toLong())
                 }
             }
@@ -169,11 +174,11 @@ private fun createFormattedDisName(isVirtualZoneEnabled: Boolean, isEquip : Bool
     }
 }
 
-fun removeFirstFourChars(input: String): String {
-    if(input.length < 4){
+fun removeFirstNumberofChars(input: String,numberOfChar : Int = 4): String {
+    if(input.length < numberOfChar){
         return input
     }
-    return input.substring(4)
+    return input.substring(numberOfChar)
 }
 
 fun removeGroup(group: String, bacnetId: String): String {

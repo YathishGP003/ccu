@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun RadioButtonComposeBacnet(
-    radioTexts: List<String?>,
+    radioTexts: List<Any?>,
     radioOptions: List<Int>,
     default: Int,
     onSelect: (Int) -> Unit
@@ -72,7 +72,7 @@ fun RadioButtonComposeBacnet(
                 )
                 val tValue = radioTexts[label] ?: "-"
                 Text(
-                    text = tValue,
+                    text = tValue.toString(),
                     style = TextStyle(
                         fontFamily = ComposeUtil.myFontFamily,
                         fontSize = 20.sp,

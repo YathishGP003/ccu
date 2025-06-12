@@ -7,6 +7,7 @@ import a75f.io.renatus.compose.ComposeUtil.Companion.greyColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.modbus.util.DEVICE_ID
 import a75f.io.renatus.modbus.util.DEVICE_IP
+import a75f.io.renatus.modbus.util.DEVICE_MAC_ADDRESS
 import a75f.io.renatus.modbus.util.DEVICE_NAME
 import a75f.io.renatus.modbus.util.DEVICE_NETWORK
 import a75f.io.renatus.modbus.util.LOADING
@@ -57,6 +58,7 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
     var itemsList = mutableStateOf(emptyList<BacnetDevice>())
     lateinit var onItemSelect: OnItemSelectBacnetDevice
     lateinit var placeholder: String
+    private var isMstpView: Boolean = false
 
     companion object {
         val ID: String = BacnetDeviceSelectionFragment::class.java.simpleName
@@ -64,12 +66,14 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
         fun newInstance(
             items: MutableState<List<BacnetDevice>>,
             onItemSelect: OnItemSelectBacnetDevice,
-            placeholder: String
+            placeholder: String,
+            isMstpView: Boolean = false
         ): BacnetDeviceSelectionFragment {
             val fragment = BacnetDeviceSelectionFragment()
             fragment.itemsList = items
             fragment.onItemSelect = onItemSelect
             fragment.placeholder = placeholder
+            fragment.isMstpView = isMstpView
             return fragment
         }
     }
@@ -148,14 +152,26 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
             ) {
 
                 LazyColumn {
-                    item {
-                        DeviceListItemHeader()
-                    }
-                    items(itemsList.value.size) { index ->
-                        DeviceListItem(
-                            device = itemsList.value[index],
-                            isEven = index % 2 == 0, index
-                        )
+                    if (isMstpView) {
+                        item {
+                            MstpDeviceListItemHeader()
+                        }
+                        items(itemsList.value.size) { index ->
+                            MstpDeviceListItem(
+                                device = itemsList.value[index],
+                                isEven = index % 2 == 0, index
+                            )
+                        }
+                    } else {
+                        item {
+                            DeviceListItemHeader()
+                        }
+                        items(itemsList.value.size) { index ->
+                            DeviceListItem(
+                                device = itemsList.value[index],
+                                isEven = index % 2 == 0, index
+                            )
+                        }
                     }
                 }
             }
@@ -291,6 +307,115 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
                     color = Color.Black
                 )
             )
+            Text(
+                text = DEVICE_NAME,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(16.dp),
+                style = TextStyle(
+                    fontFamily = ComposeUtil.myFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = Color.Black
+                ),
+            )
+        }
+    }
+
+    @Composable
+    fun MstpDeviceListItem(device: BacnetDevice, isEven: Boolean, index: Int) {
+        val backgroundColor = if (isEven) Color(0xFFF9F9F9) else Color.White
+        Row(
+            modifier = Modifier
+                //.padding(16.dp)
+                .fillMaxWidth()
+                .background(backgroundColor)
+                .clickable(onClick = {
+                    onItemSelect.onItemSelected(index, device)
+                    dismiss()
+                }),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "${device.deviceId}",
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(16.dp),
+                style = TextStyle(
+                    fontFamily = ComposeUtil.myFontFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 22.sp,
+                    color = Color.Black
+                )
+            )
+            Text(
+                text = "${device.deviceMacAddress}",
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(16.dp),
+                style = TextStyle(
+                    fontFamily = ComposeUtil.myFontFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 22.sp,
+                    color = Color.Black
+                )
+            )
+
+            Text(
+                text = "${device.deviceName}",
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(16.dp),
+                style = TextStyle(
+                    fontFamily = ComposeUtil.myFontFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 22.sp,
+                    color = Color.Black
+                ),
+            )
+        }
+    }
+
+    @Composable
+    fun MstpDeviceListItemHeader() {
+        Row(
+            modifier = Modifier
+                //.padding(16.dp)
+                .fillMaxWidth()
+                .background(Color(0xFFEBECED)),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = DEVICE_ID,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(16.dp),
+                style = TextStyle(
+                    fontFamily = ComposeUtil.myFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = Color.Black
+                )
+            )
+            Text(
+                text = DEVICE_MAC_ADDRESS,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(16.dp),
+                style = TextStyle(
+                    fontFamily = ComposeUtil.myFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = Color.Black
+                )
+            )
+
             Text(
                 text = DEVICE_NAME,
                 modifier = Modifier

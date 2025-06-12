@@ -74,6 +74,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import a75f.io.api.haystack.bacnet.parser.BacnetRequestProcessor;
 import a75f.io.api.haystack.util.DatabaseAction;
 import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.api.haystack.util.DbStrings;
@@ -2012,6 +2013,8 @@ public class CCUTagsDb extends HServer {
             intent.putExtra("level", level);
             intent.putExtra("val", val);
             appContext.sendBroadcast(intent);
+
+
         }
     }
 

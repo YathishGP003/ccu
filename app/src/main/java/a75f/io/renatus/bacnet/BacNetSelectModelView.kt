@@ -5,21 +5,28 @@ import a75f.io.api.haystack.bacnet.parser.BacnetSelectedValue
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.util.bacnet.BacnetConfigConstants
+import a75f.io.logic.util.bacnet.isValidMstpMacAddress
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.bacnet.models.BacnetModel
 import a75f.io.renatus.bacnet.models.BacnetPointState
 import a75f.io.renatus.bacnet.util.BACNET
+import a75f.io.renatus.bacnet.util.CONFIGURATION_TYPE
 import a75f.io.renatus.bacnet.util.CONST_AUTO_DISCOVERY
+import a75f.io.renatus.bacnet.util.IP_CONFIGURATION
 import a75f.io.renatus.bacnet.util.LOADING
+import a75f.io.renatus.bacnet.util.MAC_ADDRESS
+import a75f.io.renatus.bacnet.util.MAC_ADDRESS_INFO
+import a75f.io.renatus.bacnet.util.MODEL
+import a75f.io.renatus.bacnet.util.MSTP_CONFIGURATION
 import a75f.io.renatus.bacnet.util.SELECTED_MODEL
-import a75f.io.renatus.bacnet.util.SELECT_MODEL
-import a75f.io.renatus.compose.EditableTextFieldWhiteBgUnderline
-import a75f.io.renatus.compose.EditableTextFieldWhiteBgUnderlineOnlyNumbers
+import a75f.io.renatus.compose.ComposeUtil
+import a75f.io.renatus.compose.ComposeUtil.Companion.secondaryColor
 import a75f.io.renatus.compose.HeaderLeftAlignedTextViewNew
 import a75f.io.renatus.compose.HeaderTextView
 import a75f.io.renatus.compose.HeaderTextViewCustom
+import a75f.io.renatus.compose.HeaderTextViewNew
 import a75f.io.renatus.compose.ImageViewComposable
 import a75f.io.renatus.compose.LabelTextView
 import a75f.io.renatus.compose.RadioButtonComposeBacnet
@@ -42,7 +49,9 @@ import a75f.io.renatus.modbus.util.RE_FETCH
 import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.modbus.util.SEARCH_DEVICE
 import a75f.io.renatus.modbus.util.SEARCH_MODEL
+import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
+import a75f.io.renatus.util.ErrorToastMessage
 import a75f.io.renatus.util.ProgressDialogUtils
 import android.content.Context
 import android.os.Bundle
@@ -52,12 +61,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -65,8 +77,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -77,21 +94,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import org.json.JSONException
 import org.json.JSONObject
 
 
-class BacNetSelectModelView : BaseDialogFragment() {
+class BacNetSelectModelView : BaseDialogFragment(), OnPairingCompleteListener {
     private lateinit var viewModel: BacNetConfigViewModel
 
     private val TAG = "BacNetSelectModelView"
     private var isBacNetInitialized = false
+    private var isBacnetMstpInitialized = false
 
     companion object {
         val ID: String = ModelSelectionFragment::class.java.simpleName
@@ -132,10 +154,12 @@ class BacNetSelectModelView : BaseDialogFragment() {
                 this@BacNetSelectModelView.closeAllBaseDialogFragments()
             }
         }
+        viewModel.setOnPairingCompleteListener(this)
         viewModel.deviceIp = getDataFromSf(requireContext(), BacnetConfigConstants.IP_ADDRESS)
         CcuLog.d(TAG, "device ip--->${viewModel.deviceIp}")
         viewModel.devicePort = getDataFromSf(requireContext(), BacnetConfigConstants.PORT)
         isBacNetInitialized = isBacNetInitialized(requireContext())
+        isBacnetMstpInitialized = isBacnetMstpInitialized(requireContext())
         if (!isBacNetInitialized) {
             Toast.makeText(requireContext(), "CCU BacNet Server is not initialized", Toast.LENGTH_SHORT).show()
         }
@@ -172,7 +196,8 @@ class BacNetSelectModelView : BaseDialogFragment() {
                 showDialogFragment(
                     BacnetDeviceSelectionFragment.newInstance(
                         viewModel.connectedDevices,
-                        viewModel.onBacnetDeviceSelect, SEARCH_DEVICE
+                        viewModel.onBacnetDeviceSelect, SEARCH_DEVICE,
+                        viewModel.configurationType.value == MSTP_CONFIGURATION
                     ), BacnetDeviceSelectionFragment.ID
                 )
                 ProgressDialogUtils.hideProgressDialog()
@@ -204,15 +229,20 @@ class BacNetSelectModelView : BaseDialogFragment() {
                         )
                     }
 
-                  Column(modifier = Modifier.padding(start = 20.dp)) {
+                  Column(modifier = Modifier.padding(start = 20.dp, top = 20.dp)) {
                       Box(
                           modifier = Modifier.fillMaxWidth(),
                           contentAlignment = Alignment.Center
                       ) { TitleTextViewCustom(BACNET, Color.Black) }
                       ModelSelected()
-                      DeviceDetailsReadOnly()
-                      PortDetailsReadOnlyUpdate()
-                      DeviceNetworkDetailsReadOnlyUpdate()
+                      ConfigurationTypeSelected()
+                      if (viewModel.configurationType.value == IP_CONFIGURATION) {
+                          DeviceDetailsReadOnly()
+                          PortDetailsReadOnlyUpdate()
+                          DeviceNetworkDetailsReadOnlyUpdate()
+                      } else {
+                          MstpMacAddressDetailsViewMode()
+                      }
                   }
 
                 }
@@ -265,41 +295,58 @@ class BacNetSelectModelView : BaseDialogFragment() {
                             onClose = { viewModel.disablePasteConfiguration() }
                         )
                     }
-                    Column(modifier = Modifier.padding(start = 20.dp)) {
+                    Column(modifier = Modifier.padding(start = 20.dp, top = 20.dp)) {
                     Box(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) { TitleTextViewCustom(BACNET, Color.Black) }
                     ModelSelection()
-                    BacnetDeviceSelectionModes()
+                        if(viewModel.modelName.value == "Select Model" || viewModel.modelName.value.isEmpty()){
+                            // Create a view that mention select the model to proceed
+                            Box(
+                                modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(top = 100.dp, bottom = 100.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                SubTitle(text = "Select a model to proceed with configuration.", fontSizeCustom = 20.0)
+                            }
+                        } else {
+                            ConfigurationTypeSelection()
+                            if (viewModel.configurationType.value == IP_CONFIGURATION) {
+                                // show ip configuration
+                                BacnetIpDeviceSelectionModes()
+                                if (viewModel.deviceSelectionMode.value == 0) {
+                                    // manual mode
+                                    DeviceDetails()
+                                    PortDetails()
+                                    DeviceNetworkDetails()
+                                } else {
+                                    DeviceDetailsReadOnly()
+                                    PortDetailsReadOnly()
+                                    DeviceNetworkDetailsReadOnly()
+                                }
+                            } else if (viewModel.configurationType.value == MSTP_CONFIGURATION) {
+                                // show mstp configuration
+                                BacnetMSTPDeviceSelectionModes()
+                                MstpMacAddressDetails()
+                            }
 
-                    if(viewModel.deviceSelectionMode.value == 0){
-                        // manual mode
-                        DeviceDetails()
-                        PortDetails()
-                        DeviceNetworkDetails()
-                    }else{
-                        DeviceDetailsReadOnly()
-                        PortDetailsReadOnly()
-                        DeviceNetworkDetailsReadOnly()
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(PaddingValues(bottom = 20.dp, top = 20.dp)),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                HeaderLeftAlignedTextViewNew(
+                                    if (viewModel.bacnetModel.value.equipDevice.value!!.name.isNullOrEmpty()) "" else getName(
+                                        viewModel.bacnetModel.value.equipDevice.value!!.name
+                                    ), 22, Modifier.padding(start = 20.dp)
+                                )
+
+                            }
+                            Row(modifier = Modifier.padding(start = 10.dp)) { ParameterLabel() }
+                        }
                     }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(PaddingValues(bottom = 20.dp, top = 20.dp)),
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        HeaderLeftAlignedTextViewNew(
-                            if (viewModel.bacnetModel.value.equipDevice.value!!.name.isNullOrEmpty()) "" else getName(
-                                viewModel.bacnetModel.value.equipDevice.value!!.name
-                            ), 22, Modifier.padding(start = 20.dp)
-                        )
-
-                    }
-                    Row(modifier = Modifier.padding(start = 10.dp)) { ParameterLabel() }
-                }
                 }
                 item { ParametersListView(data = viewModel.bacnetModel) }
 
@@ -314,6 +361,7 @@ class BacNetSelectModelView : BaseDialogFragment() {
                     }
                 }
                 item {
+                    var showToast by remember { mutableStateOf(false) }
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
@@ -322,11 +370,19 @@ class BacNetSelectModelView : BaseDialogFragment() {
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        var isEnabledFetch = false
-                        if(viewModel.deviceId.value.isNotEmpty()
-                            && viewModel.destinationIp.value.isNotEmpty()
-                            && viewModel.destinationPort.value.isNotEmpty()) {
-                            isEnabledFetch = true
+                        val isEnabledFetch = when (viewModel.configurationType.value) {
+                            MSTP_CONFIGURATION -> {
+                                viewModel.destinationMacAddress.value.trim().isNotEmpty() &&
+                                        isValidMstpMacAddress(viewModel.destinationMacAddress.value.trim())
+                            }
+                            IP_CONFIGURATION -> {
+                                viewModel.destinationIp.value.isNotEmpty() &&
+                                        viewModel.destinationPort.value.isNotEmpty() &&
+                                        viewModel.deviceId.value.isNotEmpty()
+                            }
+                            else -> {
+                                false
+                            }
                         }
 
                         SaveTextView(CANCEL) { dismiss() }
@@ -339,19 +395,30 @@ class BacNetSelectModelView : BaseDialogFragment() {
                         if(viewModel.bacnetPropertiesFetched.value){
                             fetchButtonText = RE_FETCH
                         }
-
                         SaveTextView(fetchButtonText, isEnabledFetch) {
-                            if(viewModel.destinationIp.value.isNullOrEmpty() ){
-                                Toast.makeText(requireContext(), "Please input ip address", Toast.LENGTH_SHORT).show()
-                            }else if(viewModel.destinationPort.value.isNullOrEmpty()){
-                                Toast.makeText(requireContext(), "Please input port number", Toast.LENGTH_SHORT).show()
-                            }else if(viewModel.deviceId.value.isNullOrEmpty()){
-                                Toast.makeText(requireContext(), "Please input deviceId number", Toast.LENGTH_SHORT).show()
-                            }else{
-                                if(isBacNetInitialized){
-                                    viewModel.fetchData()
-                                }else{
-                                    Toast.makeText(requireContext(), "BacNet is not initialized", Toast.LENGTH_SHORT).show()
+                            if(viewModel.configurationType.value == IP_CONFIGURATION) {
+                                if (viewModel.destinationIp.value.isNullOrEmpty()) {
+                                    Toast.makeText(requireContext(), "Please input ip address", Toast.LENGTH_SHORT).show()
+                                } else if (viewModel.destinationPort.value.isNullOrEmpty()) {
+                                    Toast.makeText(requireContext(), "Please input port number", Toast.LENGTH_SHORT).show()
+                                } else if (viewModel.deviceId.value.isNullOrEmpty()) {
+                                    Toast.makeText(requireContext(), "Please input deviceId number", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    if (isBacNetInitialized) {
+                                        viewModel.fetchData()
+                                    } else {
+                                        Toast.makeText(requireContext(), "BacNet is not initialized", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            } else if (viewModel.configurationType.value == MSTP_CONFIGURATION) {
+                                if (viewModel.destinationMacAddress.value.isNullOrEmpty()) {
+                                    Toast.makeText(requireContext(), "Please input mac address", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    if (isBacnetMstpInitialized) {
+                                        viewModel.fetchData()
+                                    } else {
+                                       showToast
+                                    }
                                 }
                             }
                         }
@@ -361,16 +428,35 @@ class BacNetSelectModelView : BaseDialogFragment() {
                                 .height(40.dp)
                                 .width(1.dp))
                             SaveTextView(SAVE) {
-                                if(viewModel.destinationIp.value.isNullOrEmpty() ){
-                                    Toast.makeText(requireContext(), "Please input ip address", Toast.LENGTH_SHORT).show()
-                                }else if(viewModel.destinationPort.value.isNullOrEmpty()){
-                                    Toast.makeText(requireContext(), "Please input port number", Toast.LENGTH_SHORT).show()
-                                }else if(viewModel.deviceId.value.isNullOrEmpty()){
-                                    Toast.makeText(requireContext(), "Please input deviceId number", Toast.LENGTH_SHORT).show()
-                                }else{
-                                    viewModel.save()
+                                if(viewModel.configurationType.value == IP_CONFIGURATION) {
+                                    if (viewModel.destinationIp.value.isEmpty()) {
+                                        Toast.makeText(requireContext(), "Please input ip address", Toast.LENGTH_SHORT).show()
+                                    } else if (viewModel.destinationPort.value.isEmpty()) {
+                                        Toast.makeText(requireContext(), "Please input port number", Toast.LENGTH_SHORT).show()
+                                    } else if (viewModel.deviceId.value.isEmpty()) {
+                                        Toast.makeText(requireContext(), "Please input deviceId number", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        viewModel.save()
+                                    }
+                                } else {
+                                    if (viewModel.destinationMacAddress.value.trim().isEmpty()) {
+                                        Toast.makeText(requireContext(), "Please input mac address", Toast.LENGTH_SHORT).show()
+                                    } else if (!isValidMstpMacAddress(viewModel.destinationMacAddress.value.trim())) {
+                                        Toast.makeText(requireContext(), "Please input valid mac address", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        viewModel.save()
+                                    }
                                 }
                             }
+                        }
+                    }
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        // Actual toast
+                        if (showToast) {
+                            ErrorToastMessage(
+                                message = "BACnet - MSTP Configuration is not initialized.",
+                                onDismiss = { showToast = false }
+                            )
                         }
                     }
 
@@ -489,9 +575,6 @@ class BacNetSelectModelView : BaseDialogFragment() {
                                             viewModel.updateSelectAll(it, item)
                                         }
                                     }
-                                    //Box(modifier = Modifier.width(50.dp)) { }
-                                    //val pointDisplayValue = "${item.defaultValue} ${item.defaultUnit}"
-                                    //Box(modifier = Modifier.weight(1f)) { LabelTextView(pointDisplayValue, fontSize = 22) }
                                 }
 
                                 if (item.displayInEditor.value) {
@@ -511,22 +594,34 @@ class BacNetSelectModelView : BaseDialogFragment() {
     fun ModelSelected() {
         Box(
             modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.CenterStart
         ) {
             Row {
-                Box(
-                    modifier = Modifier
-                        .padding(top = 20.dp, bottom = 0.dp, start = 15.dp, end = 10.dp)
+                Box(modifier = Modifier
+                    .weight(1f)
                 ) {
+                }
+                Box(modifier = Modifier
+                    .weight(1f)
+                    .padding(top = 10.dp, bottom = 0.dp, start = 15.dp, end = 10.dp)) {
                     HeaderTextViewCustom(SELECTED_MODEL)
+                }
+                Box(modifier = Modifier
+                    .weight(1f)
+                ) {
                 }
             }
         }
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
             Row {
+                Box(modifier = Modifier
+                    .weight(1f)
+                ) {
+                }
                 Box(
                     modifier = Modifier
-                        .padding(top = 0.dp, bottom = 10.dp)
+                        .weight(1f)
+                        .padding(top = 0.dp, bottom = 10.dp, start = 7.dp)
                 ) {
 
                     TextViewWithClickCustom(
@@ -535,10 +630,13 @@ class BacNetSelectModelView : BaseDialogFragment() {
                         enableClick = false,
                         isCompress = false
                     )
-
-                    /*LabelTextView(
-                        text = viewModel.modelName.value, 600, fontSize = 22, TextAlign.Center
-                    )*/
+                }
+                Box(modifier = Modifier
+                    .weight(1f)
+                ) {
+                    if (viewModel.bacnetModel.value.version.value.isNotEmpty()) {
+                        HeaderTextView("V${viewModel.bacnetModel.value.version.value}")
+                    }
                 }
             }
         }
@@ -558,7 +656,7 @@ class BacNetSelectModelView : BaseDialogFragment() {
                 Box(modifier = Modifier
                     .weight(1f)
                     .padding(top = 10.dp, bottom = 0.dp, start = 15.dp, end = 10.dp)) {
-                    HeaderTextViewCustom(SELECT_MODEL)
+                    HeaderTextViewCustom(MODEL)
                 }
                 Box(modifier = Modifier
                     .weight(1f)
@@ -574,7 +672,7 @@ class BacNetSelectModelView : BaseDialogFragment() {
                 }
                 Box(modifier = Modifier
                     .weight(1f)
-                    .padding(top = 0.dp, bottom = 10.dp)) {
+                    .padding(top = 0.dp, bottom = 10.dp, start = 7.dp)) {
                     if (viewModel.bacnetModel.value.isDevicePaired) {
                         TextViewWithClickCustom(
                             text = viewModel.modelName,
@@ -599,6 +697,142 @@ class BacNetSelectModelView : BaseDialogFragment() {
                     }
                 }
                 Box(modifier = Modifier
+                    .weight(1f), contentAlignment = Alignment.BottomStart
+                ) {
+                    if (viewModel.bacnetModel.value.version.value.isNotEmpty()) {
+                        HeaderTextView("V${viewModel.bacnetModel.value.version.value}", padding = 10, fontSize = 20)
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun ConfigurationTypeSelected() {
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Row {
+                Box(modifier = Modifier
+                    .weight(1f)
+                ) {
+                }
+                Box(modifier = Modifier
+                    .weight(1f)
+                    .padding(top = 5.dp, bottom = 0.dp, start = 15.dp, end = 10.dp)) {
+                    HeaderTextViewCustom(CONFIGURATION_TYPE)
+                }
+                Box(modifier = Modifier
+                    .weight(1f)
+                ) {
+                }
+            }
+        }
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
+            Row {
+                Box(modifier = Modifier
+                    .weight(1f)
+                ) {
+                }
+                Box(modifier = Modifier
+                    .weight(1f)
+                    .padding(top = 0.dp, bottom = 10.dp, start = 7.dp)) {
+                    TextViewWithClickCustom(
+                        text = viewModel.configurationType,
+                        onClick = { },
+                        enableClick = false,
+                        isCompress = false
+                    )
+                }
+                Box(modifier = Modifier
+                    .weight(1f)
+                ) {
+                }
+            }
+        }
+    }
+    @Composable
+    fun ConfigurationTypeSelection() {
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Row {
+                Box(modifier = Modifier
+                    .weight(1f)
+                ) {
+                }
+                Box(modifier = Modifier
+                    .weight(1f)
+                    .padding(top = 5.dp, bottom = 0.dp, start = 15.dp, end = 10.dp)) {
+                    HeaderTextViewCustom(CONFIGURATION_TYPE)
+                }
+                Box(modifier = Modifier
+                    .weight(1f)
+                ) {
+                }
+            }
+        }
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
+            Row {
+                Box(modifier = Modifier
+                    .weight(1f)
+                ) {
+                }
+                Box(modifier = Modifier
+                    .weight(1f)
+                    .padding(top = 0.dp, bottom = 10.dp, start = 7.dp)) {
+                    var expanded by remember { mutableStateOf(false) }
+                    if (viewModel.bacnetModel.value.isDevicePaired) {
+                        TextViewWithClickCustom(
+                            text = viewModel.configurationType,
+                            onClick = { },
+                            enableClick = false,
+                            isCompress = false
+                        )
+                    } else {
+                        TextViewWithClickCustom(
+                            text = viewModel.configurationType,
+                            onClick = { expanded = true },
+                            enableClick = true, isCompress = false
+                        )
+                        val configurationTypes = listOf(
+                            MSTP_CONFIGURATION,
+                            IP_CONFIGURATION
+                        )
+
+                        var selectedIndex by remember { mutableStateOf(-1) }
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                            modifier = Modifier
+                                .width(280.dp)
+                                .height(120.dp)
+                                .background(Color.White)
+                                .border(0.5.dp, Color.LightGray)
+                                .shadow(1.dp, shape = RoundedCornerShape(2.dp))
+
+                        ) {
+                            LazyColumn(modifier = Modifier
+                                    .width(280.dp)
+                                    .height(120.dp)) {
+
+                                itemsIndexed(configurationTypes) { index, s ->
+                                    DropdownMenuItem(onClick = {
+                                        selectedIndex = index
+                                        expanded = false
+                                        viewModel.configurationType.value = s
+                                         }, text = { Text(text = s, style = TextStyle(fontSize = 22.sp)) },
+                                        modifier = Modifier.background(if (index == selectedIndex) secondaryColor else Color.White),
+                                        contentPadding = PaddingValues(10.dp),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                Box(modifier = Modifier
                     .weight(1f)
                 ) {
                 }
@@ -607,7 +841,7 @@ class BacNetSelectModelView : BaseDialogFragment() {
     }
 
     @Composable
-    fun BacnetDeviceSelectionModes() {
+    fun BacnetIpDeviceSelectionModes() {
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.CenterStart
@@ -668,6 +902,129 @@ class BacNetSelectModelView : BaseDialogFragment() {
                 }
             }
         }
+    }
+
+    @Composable
+    fun BacnetMSTPDeviceSelectionModes() {
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Row {
+                Box(modifier = Modifier
+                    .weight(1f)
+                ) {
+                }
+                Box(modifier = Modifier
+                    .weight(1f)
+                    .padding(top = 0.dp, bottom = 0.dp, start = 15.dp, end = 0.dp)) {
+                    HeaderTextViewCustom("Select device")
+                }
+                Box(modifier = Modifier
+                    .weight(1f)
+                ) {
+                }
+            }
+        }
+        var showToast by remember { mutableStateOf(false) }
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterStart
+        ) {
+
+            Row {
+                Box(modifier = Modifier
+                    .weight(1f)
+                ) {
+                }
+                Box(modifier = Modifier
+                    .weight(1f)
+                    /*.padding(top = 5.dp, bottom = 10.dp)*/) {
+                    //RadioButtonComposeSelectModel()
+                    val radioOptions = listOf("Slave", "Master")
+                    RadioButtonComposeSelectModelCustom(
+                        radioOptions, viewModel.mstpDeviceSelectionMode.value
+                    ) {
+                        when (it) {
+                            "Slave" -> {
+                                viewModel.mstpDeviceSelectionMode.value = 0
+                            }
+
+                            "Master" -> {
+                                viewModel.mstpDeviceSelectionMode.value = 1
+                                if (!isBacnetMstpInitialized) {
+                                    showToast = true
+                                } else {
+                                    showToast = false
+                                    viewModel.searchDevices()
+
+                                    ProgressDialogUtils.showProgressDialog(context, CONST_AUTO_DISCOVERY)
+                                    CcuLog.d(TAG, "searching devices ${viewModel.isConnectedDevicesSearchFinished.value}")
+                                }
+                            }
+                        }
+                    }
+                }
+                Box(modifier = Modifier
+                    .weight(1f)
+                ) {
+                }
+            }
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Actual toast
+            if (showToast) {
+                ErrorToastMessage(
+                    message = "BACnet - MSTP Configuration is not initialized.",
+                    onDismiss = { showToast = false }
+                )
+            }
+        }
+    }
+
+    @Composable
+    fun MstpMacAddressDetails() {
+        Row {
+            Column(modifier = Modifier.width(200.dp)) {
+                HeaderTextViewNew(MAC_ADDRESS, fontWeight = FontWeight.Normal)
+                HeaderTextViewNew(text = MAC_ADDRESS_INFO,
+                               fontWeight = FontWeight.Normal,
+                               color = ComposeUtil.greyColor,
+                               fontSize = 18)
+            }
+            Box(modifier = Modifier.width(250.dp)) {
+                if (viewModel.mstpDeviceSelectionMode.value == 0) {
+                    UnderlinedInput(
+                        onTextChanged = {
+                            viewModel.destinationMacAddress.value = it
+                            CcuLog.d("BacNetSelectModelView", "device id-->$it")
+                        },
+                        placeholder = "Enter Mac Address",
+                    )
+                } else {
+                    LabelTextView(viewModel.destinationMacAddress.value, fontSize = 22)
+                }
+            }
+        }
+
+    }
+
+    @Composable
+    fun MstpMacAddressDetailsViewMode() {
+        Row {
+            Column(modifier = Modifier.width(200.dp)) {
+                HeaderTextViewNew(MAC_ADDRESS, fontWeight = FontWeight.Normal)
+                HeaderTextViewNew(text = MAC_ADDRESS_INFO,
+                    fontWeight = FontWeight.Normal,
+                    color = ComposeUtil.greyColor,
+                    fontSize = 18)
+            }
+            Box(modifier = Modifier.width(250.dp)) {
+                    LabelTextView(viewModel.destinationMacAddress.value, fontSize = 22)
+            }
+        }
+
     }
 
     @Composable
@@ -879,7 +1236,7 @@ class BacNetSelectModelView : BaseDialogFragment() {
                         modifier = Modifier
                             .weight(1f)
                     ) {
-                        LabelTextView("Mac Address", fontSize = 22)
+                        LabelTextView(MAC_ADDRESS, fontSize = 22)
                     }
 
                     Box(
@@ -1338,6 +1695,15 @@ class BacNetSelectModelView : BaseDialogFragment() {
     private fun isBacNetInitialized(context: Context): Boolean {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         return sharedPreferences.getBoolean(BacnetConfigConstants.IS_BACNET_INITIALIZED, false)
+    }
+
+    private fun isBacnetMstpInitialized(context: Context): Boolean {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        return sharedPreferences.getBoolean(BacnetConfigConstants.IS_BACNET_MSTP_INITIALIZED, false)
+    }
+
+    override fun onPairingComplete() {
+        this.closeAllBaseDialogFragments()
     }
 
 }

@@ -708,7 +708,7 @@ public class Globals {
     }
 
     public String getSmartNodeBand() {
-        HashMap<Object, Object> device = CCUHsApi.getInstance().readEntity("device and node and addr");
+        HashMap<Object, Object> device = CCUHsApi.getInstance().readEntity("device and node and addr and not bacnet");
         CcuLog.i(Domain.LOG_TAG, "Deviceband " + device);
         if (device != null && device.size() > 0 && device.get("modbus") == null && device.get("addr") != null) {
             String nodeAdd = device.get("addr").toString();

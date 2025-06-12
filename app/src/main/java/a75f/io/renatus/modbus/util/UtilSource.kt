@@ -224,6 +224,7 @@ const val
         DEVICE_IP = "Device IP/ PORT"
 const val DEVICE_NETWORK = "Device Network"
 const val DEVICE_NAME = "Device Name"
+const val DEVICE_MAC_ADDRESS = "Device MAC Address"
 
 const val DESTINATION_IP = "Destination IP"
 const val DESTINATION_PORT = "PORT"

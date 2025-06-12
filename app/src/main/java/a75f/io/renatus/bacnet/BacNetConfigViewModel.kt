@@ -9,6 +9,8 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.bacnet.BacnetProfile
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.system.BacnetMstpSubscribeCov
+import a75f.io.logic.bo.building.system.BacnetMstpSubscribeCovRequest
 import a75f.io.logic.bo.building.system.BacnetReadRequestMultiple
 import a75f.io.logic.bo.building.system.BacnetWhoIsRequest
 import a75f.io.logic.bo.building.system.BroadCast
@@ -18,6 +20,7 @@ import a75f.io.logic.bo.building.system.PropertyReference
 import a75f.io.logic.bo.building.system.ReadRequestMultiple
 import a75f.io.logic.bo.building.system.RpmRequest
 import a75f.io.logic.bo.building.system.WhoIsRequest
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_DEVICE_ID
 import a75f.io.logic.util.bacnet.buildBacnetModel
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants
@@ -27,11 +30,15 @@ import a75f.io.logic.bo.building.system.client.MultiReadResponse
 import a75f.io.logic.bo.building.system.client.RpResponseMultiReadItem
 import a75f.io.logic.bo.building.system.client.ServiceManager
 import a75f.io.logic.bo.building.system.client.WhoIsResponseItem
+import a75f.io.logic.util.bacnet.getDetailsFromObjectLayout
+import a75f.io.logic.util.bacnet.isValidMstpMacAddress
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
 import a75f.io.renatus.bacnet.models.BacnetDevice
 import a75f.io.renatus.bacnet.models.BacnetModel
 import a75f.io.renatus.bacnet.models.BacnetPointState
+import a75f.io.renatus.bacnet.util.IP_CONFIGURATION
+import a75f.io.renatus.bacnet.util.MSTP_CONFIGURATION
 import a75f.io.renatus.compose.ModelMetaData
 import a75f.io.renatus.compose.getModelListFromJson
 import a75f.io.renatus.modbus.util.BACNET_DEVICE_LIST_NOT_FOUND
@@ -50,12 +57,14 @@ import a75f.io.renatus.modbus.util.isAllParamsSelectedBacNet
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.profiles.CopyConfiguration.Companion.getSelectedBacNetModel
+import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.util.ProgressDialogUtils
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.MutableState
@@ -79,6 +88,7 @@ import kotlin.properties.Delegates
 class BacNetConfigViewModel(application: Application) : AndroidViewModel(application) {
 
     var deviceSelectionMode = mutableStateOf(0)
+    var mstpDeviceSelectionMode = mutableStateOf(0) // 0 is Slave
     val TAG = "BacNetConfigViewModel"
     var deviceList = mutableStateOf(emptyList<String>())
     var connectedDevices = mutableStateOf(emptyList<BacnetDevice>())
@@ -103,6 +113,8 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     var isDeviceValueSelected = mutableStateOf(false)
 
     var modelName = mutableStateOf("Select Model")
+    var configurationType = mutableStateOf("Select Configuration Type")
+    private lateinit var pairingCompleteListener: OnPairingCompleteListener
 
     private lateinit var bacnetProfile: BacnetProfile
     private lateinit var filer: String
@@ -144,7 +156,8 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
             destinationIp.value = item.deviceIp
             deviceId.value = item.deviceId
             destinationPort.value = item.devicePort
-            destinationMacAddress.value = item.deviceMacAddress?.let { macAddressToByteArray(it) } ?: ""
+            destinationMacAddress.value = if(configurationType.value == IP_CONFIGURATION) item.deviceMacAddress?.let { macAddressToByteArray(it) } ?: ""
+                                          else item.deviceMacAddress?:""
             dnet.value = item.deviceNetwork
         }
     }
@@ -193,8 +206,17 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                         val configParam = it.split(":")
                         when (configParam[0]) {
                             "modelName" -> modelName.value = configParam[1]
+                            "version" -> {
+                                bacnetModel.value.version.value = configParam[1]
+                            }
                         }
                     }
+                }
+                val isConfigAsMstp = isValidMstpMacAddress(destinationMacAddress.value)
+                if (isConfigAsMstp) {
+                    configurationType.value = MSTP_CONFIGURATION
+                } else {
+                    configurationType.value = IP_CONFIGURATION
                 }
             }
             isCopiedConfigurationAvailable()
@@ -238,12 +260,14 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                     }
                 } catch (e: Exception) {
                     showErrorDialog(context, NO_INTERNET, true)
+                    CcuLog.d("MSTP", "error in parsing json-- $e")
                 }
                 ProgressDialogUtils.hideProgressDialog()
             }
 
             override fun onErrorResponse(response: String?) {
                 showErrorDialog(context, NO_INTERNET, true)
+                CcuLog.d("MSTP", "error in parsing json response -- $response")
                 ProgressDialogUtils.hideProgressDialog()
             }
         })
@@ -287,6 +311,10 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                 ProgressDialogUtils.hideProgressDialog()
             }
         })
+    }
+
+    fun setOnPairingCompleteListener(completeListener: OnPairingCompleteListener) {
+        this.pairingCompleteListener = completeListener
     }
 
     private fun getModelIdByName(name: String): String {
@@ -338,6 +366,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
 
     private fun updateConfiguration(){
         bacnetProfile.updateBacnetEquip(bacnetProfile.equip.id, bacnetModel.value.equipDevice.value.points)
+        pairingCompleteListener.onPairingComplete()
     }
 
     fun save(){
@@ -355,6 +384,9 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                         // Perform background tasks
                         CCUHsApi.getInstance().resetCcuReady()
                         setUpBacnetProfile()
+                        if (configurationType.value == MSTP_CONFIGURATION) {
+                            sendCovSubscription()
+                        }
                         L.saveCCUState()
                         CCUHsApi.getInstance().setCcuReady()
                     }
@@ -364,11 +396,58 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                     context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
                     showToast(SAVED, context)
                     _isDialogOpen.value = false
+                    pairingCompleteListener.onPairingComplete()
                 } catch (e: Exception) {
                     // Handle exceptions if needed
                     ProgressDialogUtils.hideProgressDialog()
                     showToast("Error saving configuration: ${e.message}", context)
+                    e.printStackTrace()
                 }
+            }
+        }
+    }
+
+     fun sendCovSubscription() {
+
+        val destination = DestinationMultiRead(destinationIp.value, destinationPort.value, deviceId.value, dnet.value, destinationMacAddress.value)
+
+        var objectIdentifierList = mutableListOf<ObjectIdentifierBacNet>()
+        bacnetModel.value.points.forEach {
+            val objectId = it.protocolData?.bacnet?.objectId
+            val objectType = it.protocolData?.bacnet?.objectType
+
+            val objectIdentifier = getDetailsFromObjectLayout(objectType!!, objectId.toString())
+            objectIdentifierList.add(objectIdentifier)
+        }
+
+
+        val subscribeCovRequest = BacnetMstpSubscribeCov(
+            destination,
+            BacnetMstpSubscribeCovRequest(objectIdentifierList)
+        )
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = service.subscribeCov(subscribeCovRequest)
+                val resp = BaseResponse(response)
+                ProgressDialogUtils.hideProgressDialog()
+                if (response.isSuccessful) {
+                    val result = resp.data
+                    if (result != null) {
+                        val readResponse = result.body()
+                        CcuLog.d(TAG, "received response->${readResponse}")
+                    } else {
+                        CcuLog.d(TAG, "--null response--")
+                    }
+                } else {
+                    CcuLog.d(TAG, "--error--${resp.error}")
+                }
+            } catch (e: SocketTimeoutException) {
+                CcuLog.d(TAG, "--SocketTimeoutException--${e.message}")
+            } catch (e: ConnectException) {
+                CcuLog.d(TAG, "--ConnectException--${e.message}")
+            } catch (e: java.lang.Exception) {
+                CcuLog.d(TAG, "--connection time out--${e.message}")
             }
         }
     }
@@ -393,16 +472,16 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     }*/
 
     private fun setUpBacnetProfile() {
-        val groupId = L.generateSmartNodeAddress()
+        val groupId = L.generateBacnetNodeAddres()
         CcuLog.d(TAG, "setUpBacnetProfile node address $groupId")
 
             bacnetProfile = BacnetProfile()
             val configParam = "deviceId:${deviceId.value},destinationIp:${destinationIp.value},destinationPort:${destinationPort.value},macAddress:${destinationMacAddress.value},deviceNetwork:${dnet.value}"
-            val modelConfig = "modelName:${modelName.value},modelId:${getModelIdByName(modelName.value)}"
+            val modelConfig = "modelName:${modelName.value},modelId:${getModelIdByName(modelName.value)},version:${bacnetModel.value.version.value}"
             bacnetProfile.addBacAppEquip(configParam, modelConfig, deviceId.value,
                 groupId.toString(), floorRef, zoneRef,
                 bacnetModel.value.equipDevice.value,
-                profileType,moduleLevel,bacnetModel.value.version.value, false)
+                profileType,moduleLevel,bacnetModel.value.version.value,configurationType.value, destinationMacAddress.value, false)
 
             L.ccu().zoneProfiles.add(bacnetProfile)
             L.saveCCUState()
@@ -430,18 +509,34 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
 
     fun fetchData(){
 
-        isDeviceIdValid.value = !isDeviceIdAlreadyInUse(deviceId.value)
+        if(configurationType.value == IP_CONFIGURATION) {
+            isDeviceIdValid.value = !isDeviceIdAlreadyInUse(deviceId.value)
+            isDestinationIpValid.value = isValidIpAddress(destinationIp.value)
+            CcuLog.d(TAG, "--------------fetchData--isDestinationIpInvalidValid-----$isDestinationIpValid--------")
+            if(isDestinationIpValid.value.not()){
+                return
+            }
+        } else if (configurationType.value == MSTP_CONFIGURATION) {
+               if (destinationMacAddress.value.trim().isEmpty() || destinationMacAddress.value.trim() == "0") {
+                   CcuLog.d(TAG,"Mac Address is empty or invalid")
+                   return
+               } else {
+                destinationIp.value = destinationMacAddress.value.trim() + ".00.00.00"
+               }
 
-        isDestinationIpValid.value = isValidIpAddress(destinationIp.value)
-        CcuLog.d(TAG, "--------------fetchData--isDestinationIpInvalidValid-----$isDestinationIpValid--------")
-        if(isDestinationIpValid.value.not()){
+        } else {
+            showToastMessage("Please select configuration type")
             return
         }
 
         deviceValue.value = false
         bacnetPropertiesFetched.value = false
         CcuLog.d(TAG, "--------------fetchData--isDestinationIpInvalidValid-----$deviceIp--------")
-        service = ServiceManager.makeCcuService(ipAddress = deviceIp)
+        service = if (configurationType.value == MSTP_CONFIGURATION) {
+            ServiceManager.makeCcuServiceForMSTP(ipAddress = deviceIp)
+        } else {
+            ServiceManager.makeCcuService(ipAddress = deviceIp)
+        }
         val destination =
             DestinationMultiRead(destinationIp.value, destinationPort.value, deviceId.value, dnet.value, destinationMacAddress.value)
         val readAccessSpecification = mutableListOf<ReadRequestMultiple>()
@@ -472,7 +567,11 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
             if(it.deviceMacAddress != null && it.deviceMacAddress.trim().isNotEmpty()){
                 destinationMacAddress = macAddressToByteArray(it.deviceMacAddress)
             }
-            service = ServiceManager.makeCcuService(ipAddress = deviceIp)
+            service = if(configurationType.value == MSTP_CONFIGURATION) {
+                ServiceManager.makeCcuServiceForMSTP(ipAddress = deviceIp)
+            } else {
+                ServiceManager.makeCcuService(ipAddress = deviceIp)
+            }
             val destination = DestinationMultiRead(
                 it.deviceIp,
                 it.devicePort,
@@ -596,13 +695,6 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    private fun getDetailsFromObjectLayout(objectType : String, objectId: String): ObjectIdentifierBacNet {
-        return ObjectIdentifierBacNet(
-            BacNetConstants.ObjectType.valueOf("OBJECT_$objectType").value,
-            objectId
-        )
-    }
-
     private fun getDetailsOfProperties(
         listOfProperties: MutableList<BacnetProperty>?,
         bacnetPointState: BacnetPointState
@@ -616,16 +708,16 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                 )
             )
         }
-        if(bacnetPointState.equipTagNames.contains("writable")){
-            for (i in 1..16) {
-                list.add(
-                    PropertyReference(
-                        87,
-                        i
-                    )
-                )
-            }
-        }
+//        if(bacnetPointState.equipTagNames.contains("writable")){
+//            for (i in 1..16) {
+//                list.add(
+//                    PropertyReference(
+//                        87,
+//                        i
+//                    )
+//                )
+//            }
+//        }
         return list
     }
 
@@ -645,24 +737,44 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         }
         connectedDevices = mutableStateOf(emptyList())
         connectedDevices.value = list
-        fetchDeviceNames()
+        if (configurationType.value == IP_CONFIGURATION) {
+            fetchDeviceNames()
+        }
     }
 
     private fun fetchConnectedDeviceGlobally() {
-        service = ServiceManager.makeCcuService(deviceIp)
+        service = if (configurationType.value == MSTP_CONFIGURATION) {
+            ServiceManager.makeCcuServiceForMSTP(deviceIp)
+        } else {
+            ServiceManager.makeCcuService(deviceIp)
+        }
         CcuLog.d(TAG, "fetchConnectedDevice for ${deviceId.value} -- ${destinationIp.value} -- ${destinationPort.value} -- ${destinationMacAddress.value} -- ${dnet.value}")
         try {
             val broadCastValue = "global"
 
-            val bacnetWhoIsRequest = BacnetWhoIsRequest(
-                WhoIsRequest(
-                    "",
-                    ""
-                ),
-                BroadCast(broadCastValue),
-                devicePort,
-                deviceIp
-            )
+           val srcDeviceID = PreferenceManager.getDefaultSharedPreferences(context).getInt(PREF_MSTP_DEVICE_ID,0).toString()
+            val bacnetWhoIsRequest = if(configurationType.value == IP_CONFIGURATION) {
+                BacnetWhoIsRequest(
+                    WhoIsRequest(
+                        "",
+                        ""
+                    ),
+                    BroadCast(broadCastValue),
+                    devicePort,
+                    deviceIp
+                )
+            } else {
+                BacnetWhoIsRequest(
+                    WhoIsRequest(
+                        "",
+                        ""
+                    ),
+                    BroadCast(broadCastValue),
+                    devicePort,
+                    deviceIp,
+                    srcDeviceId = srcDeviceID
+                )
+            }
             val request = Gson().toJson(
                 bacnetWhoIsRequest
             )
@@ -741,13 +853,14 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                         item.results.forEach() {
                             if(it.propertyIdentifier == "87"){
                                 if(it.propertyValue != null && it.propertyValue.type == "34"){
-                                    val key = "${item.objectIdentifier.objectInstance}-${it.propertyIdentifier}"
+                                    val key = "${item.objectIdentifier.objectInstance}-${item.objectIdentifier.objectType}-${it.propertyIdentifier}"
                                     bacNetItemsMap.putIfAbsent(key, item)
                                     //bacNetItemsMap[key] = item
                                 }
                             }else{
-                                val key = "${item.objectIdentifier.objectInstance}-${it.propertyIdentifier}"
+                                val key = "${item.objectIdentifier.objectInstance}-${item.objectIdentifier.objectType}-${it.propertyIdentifier}"
                                 bacNetItemsMap[key] = item
+                                CcuLog.d(TAG, "key is -->$key and value is -->${bacNetItemsMap[key]}")
                             }
                         }
                     }
@@ -767,7 +880,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         bacnetModel.value.points.forEach { point ->
             var isChangeInProperty = false
             point.displayInEditor.value = false
-            val writableLevelKey = "${point.protocolData?.bacnet?.objectId}-87"
+            val writableLevelKey = "${point.protocolData?.bacnet?.objectId}-${BacNetConstants.ObjectType.valueOf("OBJECT_"+point.protocolData?.bacnet?.objectType).value}-87"
             if(bacNetItemsMap[writableLevelKey] != null){
                 val results = bacNetItemsMap[writableLevelKey]?.results
                 if (results != null) {
@@ -783,10 +896,10 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                 }
             }
             point.bacnetProperties?.forEach { bacnetProperty ->
-                val key = "${point.protocolData?.bacnet?.objectId}-${bacnetProperty.id}"
+                val key = "${point.protocolData?.bacnet?.objectId}-${BacNetConstants.ObjectType.valueOf("OBJECT_"+point.protocolData?.bacnet?.objectType).value}-${bacnetProperty.id}"
                 bacnetProperty.fetchedValue =
                     bacNetItemsMap[key]?.results?.get(0)?.propertyValue?.value ?: "NA"
-
+                CcuLog.d(TAG, "Fetching key is -->$key and value is -->${bacNetItemsMap[key]} and fetched value is ${bacnetProperty.fetchedValue} and default value is ${bacnetProperty.defaultValue}")
                 if(bacnetProperty.defaultValue != bacnetProperty.fetchedValue && !isChangeInProperty){
                     point.displayInEditor.value = true
                     isChangeInProperty = true

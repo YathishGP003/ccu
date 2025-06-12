@@ -6,23 +6,17 @@ data class BacnetModelDetailResponse(
     @SerializedName("id") var id: String,
     @SerializedName("domainName") val domainName: String,
     @SerializedName("name") var name: String,
-    @SerializedName("displayName") val displayName: String,
-    @SerializedName("modelType") var modelType: String,
+    @SerializedName("displayName") val displayName: String? = null,
+    @SerializedName("description") val description: String? = null, // added
+    @SerializedName("modelType") var modelType: String? = null,
     @SerializedName("tagNames") var equipTagNames: MutableList<String>,
     @SerializedName("tags") var equipTagsList: MutableList<TagItem>,
     @SerializedName("points") var points: MutableList<BacnetPoint>,
     @SerializedName("bacnetConfig") var bacnetConfig: String? = null,
     @SerializedName("modelConfig") var modelConfig: String? = null,
 ) {
-    constructor() : this("", "", "", "", "", mutableListOf(), mutableListOf(), mutableListOf())
+    constructor() : this("","", "", "", "", "", mutableListOf(), mutableListOf(), mutableListOf())
 }
-
-data class TagItem(
-    @SerializedName("name") val name: String,
-    @SerializedName("kind") val kind: String,
-    @SerializedName("defaultValue") val defaultValue: String?,
-    @SerializedName("valueEnum") val valueEnum: MutableList<String>?,
-)
 
 data class BacnetZoneViewItem(
     val disName: String,
@@ -64,16 +58,12 @@ data class BacnetPoint(
 }
 
 data class PresentationData(
-    @SerializedName("tagValueIncrement") val tagValueIncrement: String
+    @SerializedName("tagValueIncrement") val tagValueIncrement: String?
 )
-
-//constraintType - MULTI_STATE | NUMERIC
-// multi_state will have allowedValues
-// numeric will have minValue, maxValue
 data class ValueConstraint(
     @SerializedName("constraintType") val constraintType: String,
-    @SerializedName("minValue") val minValue: Int?,
-    @SerializedName("maxValue") val maxValue: Int?,
+    @SerializedName("minValue") val minValue: Double?,
+    @SerializedName("maxValue") val maxValue: Double?,
     @SerializedName("allowedValues") val allowedValues: MutableList<AllowedValues>?,
 
     //@SerializedName("allowedValues") val unit: MutableList<AllowedValues>?,
@@ -85,12 +75,19 @@ data class AllowedValues(
     @SerializedName("dis") val dis: String?,
 )
 
+data class TagItem(
+    @SerializedName("name") val name: String,
+    @SerializedName("kind") val kind: String,
+    @SerializedName("defaultValue") val defaultValue: Any?,
+    @SerializedName("valueEnum") val valueEnum: MutableList<String>?
+)
+
 data class BacnetProperty(
     @SerializedName("name") val name: String,
     @SerializedName("id") val id: Int,
     @SerializedName("displayName") val displayName: String,
     @SerializedName("dataType") val dataType: String? = null,
-    @SerializedName("defaultValue") val defaultValue: String? = null,
+    @SerializedName("defaultValue") val defaultValue: Any? = null,
     @SerializedName("permission") val permission: String,
     @SerializedName("fetchedValue") var fetchedValue: String? = null,
     @SerializedName("selectedValue") var selectedValue: Int = 0,

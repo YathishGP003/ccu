@@ -18,9 +18,9 @@ public class BacnetProfile extends ZoneProfile {
     BacnetEquip bacnetEquip;
 
     public void addBacAppEquip(String configParam, String modelConfig, String deviceId, String slaveId, String floorRef, String roomRef, BacnetModelDetailResponse equipmentDevice,
-                               ProfileType profileType, String moduleLevel,String modelVersion, boolean isSystemEquip) {
+                               ProfileType profileType, String moduleLevel,String modelVersion,String configurationType, String macAddress, boolean isSystemEquip) {
         bacnetEquip = new BacnetEquip(profileType, Long.parseLong(slaveId));
-        bacnetEquip.createEntities(configParam, modelConfig, deviceId, slaveId, floorRef, roomRef, equipmentDevice,null, moduleLevel, modelVersion, isSystemEquip);
+        bacnetEquip.createEntities(configParam, modelConfig, deviceId, slaveId, floorRef, roomRef, equipmentDevice,null, moduleLevel, modelVersion, configurationType, macAddress, isSystemEquip);
     }
 
     public void addBacAppEquip(long slaveId, ProfileType profileType) {

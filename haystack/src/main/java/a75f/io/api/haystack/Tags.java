@@ -217,6 +217,7 @@ public class Tags
     public static final String MONITORING = "monitoring";
     public static final String CUR_STATUS = "curStatus";
     public static final String BACNET_ID = "bacnetId";
+    public static final String BACNET_OBJECT_ID = "bacnetObjectId";
     public static final String BACNET_TYPE = "bacnetType";
     public static final String MIN_VAL = "minVal";
     public static final String MAX_VAL = "maxVal";

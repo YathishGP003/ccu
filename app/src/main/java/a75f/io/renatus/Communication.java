@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.L.BAC_APP_PACKAGE_NAME;
+import static a75f.io.logic.L.TAG_CCU_BACNET_MSTP;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.APDU_SEGMENT_TIMEOUT;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.APDU_TIMEOUT;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_BBMD_CONFIGURATION;
@@ -10,6 +12,7 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_NORMAL;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_FD_AUTO_STATE;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_FD_CONFIGURATION;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_MSTP_CONFIGURATION;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_CONFIGURATION_TYPE;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_START;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_STOP;
@@ -19,6 +22,7 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_ADDRESS;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_MSTP_INITIALIZED;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.LOCAL_NETWORK_NUMBER;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.LOCATION;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.NETWORK_INTERFACE;
@@ -30,6 +34,12 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.NUMBER_OF_SCHEDULE
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.NUMBER_OF_TREND_LOG_OBJECTS;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PASSWORD;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PORT;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_BAUD_RATE;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_MAX_FRAME;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_MAX_MASTER;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_DEVICE_ID;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_PORT_ADDRESS;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_SOURCE_ADDRESS;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.VIRTUAL_NETWORK_NUMBER;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.ZONE_TO_VIRTUAL_DEVICE_MAPPING;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.sendBroadCast;
@@ -44,6 +54,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Editable;
@@ -76,6 +87,8 @@ import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
@@ -99,6 +112,8 @@ import a75f.io.renatus.util.DataBbmd;
 import a75f.io.renatus.util.DataBbmdObj;
 import a75f.io.renatus.util.DataFd;
 import a75f.io.renatus.util.DataFdObj;
+import a75f.io.renatus.util.DataMstp;
+import a75f.io.renatus.util.DataMstpObj;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.restserver.server.HttpServer;
@@ -119,6 +134,10 @@ public class Communication extends Fragment {
     private int bacnetConfigSelectedPosition = 2; // Default value mapped to Normal
 
     @BindView(R.id.spinnerBaudRate) Spinner spinnerBaudRate;
+
+    @BindView(R.id.mstpSpinnerPortAddress) Spinner mstpSpinnerPortAddress;
+
+    @BindView(R.id.tvMstpPortAddress) TextView tvMstpPortAddress;
     
     @BindView(R.id.spinnerParity) Spinner spinnerParity;
     
@@ -127,6 +146,34 @@ public class Communication extends Fragment {
     @BindView(R.id.spinnerStopBits) Spinner spinnerStopbits;
     
     @BindView(R.id.btnRestart) Button btnRestart;
+
+    @BindView(R.id.mstpSpinnerBaudRate) Spinner mstpSpinnerBaudRate;
+
+    @BindView(R.id.tvMstpBaudRate) TextView tvMstpBaudRate;
+
+    @BindView(R.id.etMstpSourceAddress) EditText etMstpSourceAddress;
+
+    @BindView(R.id.tvMstpSourceAddress) TextView tvMstpSourceAddress;
+
+    @BindView(R.id.etMstpMaxMaster) EditText etMstpMaxMaster;
+
+    @BindView(R.id.etMstpDeviceId) EditText etMstpDeviceId;
+
+    @BindView(R.id.tvMstpDeviceId) TextView tvMstpDeviceId;
+
+    @BindView(R.id.tvMstpMaxMaster) TextView tvMstpMaxMaster;
+
+    @BindView(R.id.etMstpMaxFrame) EditText etMstpMaxFrame;
+
+    @BindView(R.id.tvMstpMaxFrame) TextView tvMstpMaxFrame;
+
+    @BindView(R.id.tv_mstp_initialize) TextView btnMstpInitialize;
+
+    @BindView(R.id.tv_mstp_disable) TextView btnMstpDisable;
+
+    @BindView(R.id.imageUSBSerial) ImageView usbSerial;
+
+    @BindView(R.id.mstpConfigLayout) LinearLayout mstpConfigLayout;
 
     @BindView(R.id.tv1IPDeviceObjectName) TextView tvIPDeviceObjectName;
 
@@ -244,7 +291,11 @@ public class Communication extends Fragment {
 
     boolean isZoneToVirtualDeviceErrorShowing = false;
 
+    boolean isUSBSerialPortAvailable = false;
+
     private CustomSelectionAdapter<String> spinnerBacnetConfigAdapter;
+
+    private String portAddress = "/dev/ttyUSB0";
 
     public Communication() {
     
@@ -271,9 +322,48 @@ public class Communication extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         this.rootView = view;
+        runChmodUsbDevices();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
         String selectedDeviceType = sharedPreferences.getString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_NORMAL);
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            mstpConfigLayout.setVisibility(View.VISIBLE);
+        } else {
+            mstpConfigLayout.setVisibility(View.GONE);
+        }
+
+        ArrayList<String> usbSerialPorts = getPortAddressMstpDevices();
+        ArrayAdapter<String> spinnerMstpPortAdapter = getAdapterValue(usbSerialPorts);
+        mstpSpinnerPortAddress.setAdapter(spinnerMstpPortAdapter);
+
+        mstpSpinnerPortAddress.setSelection(((ArrayAdapter<String>)mstpSpinnerPortAddress.getAdapter())
+                .getPosition(String.valueOf(readStringPref(PREF_MSTP_PORT_ADDRESS, portAddress))));
+        mstpSpinnerPortAddress.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                portAddress = (String) parent.getItemAtPosition(position);
+                writeStringPref(PREF_MSTP_PORT_ADDRESS, portAddress);
+                CcuLog.d(TAG_CCU_BACNET_MSTP, "Selected Port: " + portAddress);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Optional: Handle case when nothing is selected
+            }
+        });
+        tvMstpPortAddress.setText(usbSerialPorts.get(0));
+
+        if(!usbSerialPorts.isEmpty() && usbSerialPorts.get(0).contains("USB")) {
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "USB Serial Ports found: " + usbSerialPorts);
+            usbSerial.setImageResource(android.R.drawable.checkbox_on_background);
+            isUSBSerialPortAvailable = true;
+        } else {
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "No USB Serial Ports found");
+            usbSerial.setImageResource(android.R.drawable.checkbox_off_background);
+            isUSBSerialPortAvailable = false;
+        }
 
         ArrayAdapter<String> spinnerBaudRateAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.mb_config_baudrate_array))));
         spinnerBaudRate.setAdapter(spinnerBaudRateAdapter);
@@ -353,6 +443,102 @@ public class Communication extends Fragment {
             CcuLog.d(TAG_CCU_BACNET,"Config data: "+config+", Error message: "+e.getMessage());
             e.printStackTrace();
         }
+
+        // Setting up the MSTP configuration
+        ArrayAdapter<String> mstpSpinnerBaudRateAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.mstp_config_baudrate_array))));
+        mstpSpinnerBaudRate.setAdapter(mstpSpinnerBaudRateAdapter);
+        mstpSpinnerBaudRate.setSelection(((ArrayAdapter<String>)mstpSpinnerBaudRate.getAdapter())
+                .getPosition(String.valueOf(readIntPref(PREF_MSTP_BAUD_RATE, 38400))));
+        mstpSpinnerBaudRate.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                writeIntPref(PREF_MSTP_BAUD_RATE, Integer.parseInt(mstpSpinnerBaudRate.getSelectedItem().toString()));
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        etMstpSourceAddress.setText(String.valueOf(readIntPref(PREF_MSTP_SOURCE_ADDRESS, 0)));
+        etMstpMaxMaster.setText(String.valueOf(readIntPref(PREF_MSTP_MAX_MASTER, 127)));
+        etMstpMaxFrame.setText(String.valueOf(readIntPref(PREF_MSTP_MAX_FRAME, 1)));
+        etMstpDeviceId.setText(String.valueOf(readIntPref(PREF_MSTP_DEVICE_ID, 1)));
+
+
+        etMstpSourceAddress.addTextChangedListener(new EditTextWatcher(etMstpSourceAddress));
+        etMstpMaxMaster.addTextChangedListener(new EditTextWatcher(etMstpMaxMaster));
+        etMstpMaxFrame.addTextChangedListener(new EditTextWatcher(etMstpMaxFrame));
+        etMstpDeviceId.addTextChangedListener(new EditTextWatcher(etMstpDeviceId));
+
+        if( isMstpConfigValid()) {
+            btnMstpInitialize.setEnabled(true);
+            btnMstpInitialize.setClickable(true);
+            if (CCUUiUtil.isCarrierThemeEnabled(context)) {
+                btnMstpInitialize.setTextColor(ContextCompat.getColor(context, R.color.carrier_75f));
+            } else if (CCUUiUtil.isAiroverseThemeEnabled(context)) {
+                btnMstpInitialize.setTextColor(ContextCompat.getColor(context, R.color.airoverse_primary));
+            } else {
+                btnMstpInitialize.setTextColor(ContextCompat.getColor(context, R.color.renatus_75F_accent));
+            }
+        } else {
+            btnMstpInitialize.setEnabled(false);
+            btnMstpInitialize.setClickable(false);
+            btnMstpInitialize.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
+        }
+
+        if (sharedPreferences.getBoolean(IS_BACNET_MSTP_INITIALIZED, false)) {
+            hideMstpConfigView();
+        } else {
+            enableMstpConfigView();
+        }
+
+        btnMstpInitialize.setOnClickListener(v -> {
+            writeIntPref(PREF_MSTP_BAUD_RATE, Integer.parseInt(mstpSpinnerBaudRate.getSelectedItem().toString()));
+            writeIntPref(PREF_MSTP_SOURCE_ADDRESS, Integer.parseInt(etMstpSourceAddress.getText().toString()));
+            writeIntPref(PREF_MSTP_MAX_MASTER, Integer.parseInt(etMstpMaxMaster.getText().toString()));
+            writeIntPref(PREF_MSTP_MAX_FRAME, Integer.parseInt(etMstpMaxFrame.getText().toString()));
+            writeIntPref(PREF_MSTP_DEVICE_ID, Integer.parseInt(etMstpDeviceId.getText().toString()));
+
+            if (!HttpServer.Companion.getInstance(context).isServerRunning()) {
+                startRestServer();
+            }
+
+            DataMstpObj dataMstpObj = new DataMstpObj();
+            dataMstpObj.setDataMstp(new DataMstp(
+                    Integer.parseInt(mstpSpinnerBaudRate.getSelectedItem().toString()),
+                    Integer.parseInt(etMstpSourceAddress.getText().toString()),
+                    Integer.parseInt(etMstpMaxMaster.getText().toString()),
+                    Integer.parseInt(etMstpMaxFrame.getText().toString()),
+                    Integer.parseInt(etMstpDeviceId.getText().toString()),
+                    portAddress
+            ));
+
+            String jsonString = new Gson().toJson(dataMstpObj);
+            CcuLog.d(TAG_CCU_BACNET, "MSTP output-->" + jsonString);
+            sharedPreferences.edit().putString(BACNET_MSTP_CONFIGURATION, jsonString).apply();
+            sharedPreferences.edit().putBoolean(IS_BACNET_MSTP_INITIALIZED, true).apply();
+
+            hideMstpConfigView();
+            if (BacnetUtilKt.isAppRunning(BAC_APP_PACKAGE_NAME)) {
+                Intent intent = new Intent("MSTP_CONFIGURATION");
+                intent.putExtra("message", "MSTP");
+                intent.putExtra("data", jsonString);
+                context.sendBroadcast(intent);
+            } else {
+                BacnetUtilKt.launchBacApp(context, BROADCAST_BACNET_APP_START, "Start BACnet App", ipDeviceInstanceNumber.getText().toString(),true);
+            }
+
+            displayCustomToastMessageOnSuccess("BACnet - MSTP Configuration initialized successfully");
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "MSTP configuration initialized");
+
+        });
+
+        btnMstpDisable.setOnClickListener(v -> {
+            sharedPreferences.edit().putBoolean(IS_BACNET_MSTP_INITIALIZED, false).apply();
+            Intent intent = new Intent("MSTP_STOP");
+            context.sendBroadcast(intent);
+            enableMstpConfigView();
+        });
+
+        ////////////////////
 
         spinnerBacnetConfigAdapter =  new CustomSelectionAdapter<>(getContext(), R.layout.custom_textview, Arrays.asList(getResources().getStringArray(R.array.bacnet_config_array)),false);
         bacnetConfigSpinner.setAdapter(spinnerBacnetConfigAdapter);
@@ -447,11 +633,85 @@ public class Communication extends Fragment {
         RenatusLandingActivity.isBacnetConfigStateChanged = false;
     }
 
+    private void enableMstpConfigView() {
+        mstpSpinnerBaudRate.setVisibility(View.VISIBLE);
+        tvMstpBaudRate.setVisibility(View.GONE);
+        btnMstpInitialize.setVisibility(View.VISIBLE);
+        btnMstpDisable.setVisibility(View.GONE);
+        etMstpSourceAddress.setVisibility(View.VISIBLE);
+        tvMstpSourceAddress.setVisibility(View.GONE);
+        etMstpMaxMaster.setVisibility(View.VISIBLE);
+        tvMstpMaxMaster.setVisibility(View.GONE);
+        etMstpMaxFrame.setVisibility(View.VISIBLE);
+        tvMstpMaxFrame.setVisibility(View.GONE);
+        etMstpDeviceId.setVisibility(View.VISIBLE);
+        tvMstpDeviceId.setVisibility(View.GONE);
+    }
+
+    private void hideMstpConfigView() {
+        mstpSpinnerBaudRate.setVisibility(View.GONE);
+        tvMstpBaudRate.setText(String.valueOf(readIntPref(PREF_MSTP_BAUD_RATE, 38400)));
+        tvMstpBaudRate.setVisibility(View.VISIBLE);
+        hideView(etMstpSourceAddress,tvMstpSourceAddress);
+        hideView(etMstpMaxMaster,tvMstpMaxMaster);
+        hideView(etMstpMaxFrame,tvMstpMaxFrame);
+        hideView(etMstpDeviceId,tvMstpDeviceId);
+        btnMstpInitialize.setVisibility(View.GONE);
+        btnMstpDisable.setVisibility(View.VISIBLE);
+    }
+
+    private boolean isMstpConfigValid() {
+        if (etMstpSourceAddress.getText().toString().isEmpty() || !CCUUiUtil.isValidNumber(Integer.parseInt(etMstpSourceAddress.getText().toString()), 0, 127, 1)) {
+            return false;
+        }
+
+        if (etMstpMaxMaster.getText().toString().isEmpty() || !CCUUiUtil.isValidNumber(Integer.parseInt(etMstpMaxMaster.getText().toString()), 1, 127, 1)) {
+            return false;
+        }
+        if (etMstpMaxFrame.getText().toString().isEmpty() || !CCUUiUtil.isValidNumber(Integer.parseInt(etMstpMaxFrame.getText().toString()), 1, 255, 1)) {
+            return false;
+        }
+        if(etMstpDeviceId.getText().toString().isEmpty() || !CCUUiUtil.isValidNumber(Integer.parseInt(etMstpDeviceId.getText().toString()), 1, 4194303, 1)) {
+            return false;
+        }
+        return isUSBSerialPortAvailable;
+    }
+
+    private void validateAndUpdateMstpConfig(EditText view, String key, String value, int min, int max, int multiplier, String errorMessage) {
+
+           if (view.getText().toString().isEmpty() || !CCUUiUtil.isValidNumber(Integer.parseInt(view.getText().toString()), min, max, multiplier)) {
+               view.setError(errorMessage);
+               btnMstpInitialize.setEnabled(false);
+               btnMstpInitialize.setClickable(false);
+               btnMstpInitialize.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
+           } else {
+               view.setError(null);
+
+               if (isMstpConfigValid()) {
+                   btnMstpInitialize.setEnabled(true);
+                   btnMstpInitialize.setClickable(true);
+                   if (CCUUiUtil.isCarrierThemeEnabled(context)) {
+                       btnMstpInitialize.setTextColor(ContextCompat.getColor(context, R.color.carrier_75f));
+                   } else if (CCUUiUtil.isDaikinEnvironment(context)) {
+                       btnMstpInitialize.setTextColor(ContextCompat.getColor(context, R.color.daikin_75f));
+                   } else if (CCUUiUtil.isAiroverseThemeEnabled(context)) {
+                       btnMstpInitialize.setTextColor(ContextCompat.getColor(context, R.color.airoverse_primary));
+                   } else {
+                       btnMstpInitialize.setTextColor(ContextCompat.getColor(context, R.color.renatus_75F_accent));
+                   }
+               } else {
+                   btnMstpInitialize.setEnabled(false);
+                   btnMstpInitialize.setClickable(false);
+                   btnMstpInitialize.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
+               }
+           }
+    }
+
     private void saveBacnetConfiguration(int selectedOrdinal) {
         switch (selectedOrdinal) {
             case 0:
                 if (validateBbmdData("")) {
-                    displayCustomToastMessageOnSuccess(false, false);
+                    displayCustomToastMessageOnSuccess("Configuration updated successfully.");
                     try {
                         DataBbmdObj dataBbmdObj = new DataBbmdObj();
                         for (int i = 0; i < bbmdInputViews.getChildCount(); i++) {
@@ -487,7 +747,7 @@ public class Communication extends Fragment {
                 break;
             case 1:
                 if (validateFdData()) {
-                    displayCustomToastMessageOnSuccess(false, false);
+                    displayCustomToastMessageOnSuccess("Configuration updated successfully.");
                     try {
                         DataFdObj dataFdObj = new DataFdObj();
 
@@ -523,7 +783,7 @@ public class Communication extends Fragment {
                 sharedPreferences.edit().remove(BACNET_BBMD_CONFIGURATION).apply(); // Clearing BBMD configuration if any
                 sendBroadCast(context, BROADCAST_BACNET_APP_CONFIGURATION_TYPE, "Normal");
                 spinnerBacnetConfigAdapter.setConfiguredIndex(BACnetConfigurationType.NORMAL.ordinal());
-                displayCustomToastMessageOnSuccess(false,false);
+                displayCustomToastMessageOnSuccess("Configuration updated successfully.");
                 break;
         }
     }
@@ -741,7 +1001,9 @@ public class Communication extends Fragment {
             etOffsetValues.setVisibility(View.VISIBLE);
             tvOffsetValue.setVisibility(View.GONE);
             ipAddressSpinner.setEnabled(true);
-            if (!DashboardUtilKt.isDashboardConfig(context)) {
+
+            boolean isMstpInitialized = sharedPreferences.getBoolean(IS_BACNET_MSTP_INITIALIZED, false);
+            if (!DashboardUtilKt.isDashboardConfig(context) && !isMstpInitialized) {
                 stopRestServer();
             }
             sharedPreferences.edit().putBoolean(IS_BACNET_INITIALIZED, false).apply();
@@ -829,6 +1091,18 @@ public class Communication extends Fragment {
         SharedPreferences.Editor editor = spDefaultPrefs.edit();
         editor.putInt(key, val);
         editor.apply();
+    }
+
+    public void writeStringPref(String key, String val) {
+        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = spDefaultPrefs.edit();
+        editor.putString(key, val);
+        editor.apply();
+    }
+
+    public String readStringPref(String key, String defaultVal) {
+        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        return spDefaultPrefs.getString(key, defaultVal);
     }
     
 
@@ -981,6 +1255,19 @@ public class Communication extends Fragment {
                     }
                     updateBacnetConfigStateChanged(true);
                     break;
+
+                case R.id.etMstpSourceAddress:
+                    validateAndUpdateMstpConfig(etMstpSourceAddress, PREF_MSTP_SOURCE_ADDRESS, etMstpSourceAddress.getText().toString(), 0, 127, 1, getString(R.string.err_txt_mstp_source_address));
+                    break;
+                case R.id.etMstpMaxMaster:
+                    validateAndUpdateMstpConfig(etMstpMaxMaster, PREF_MSTP_MAX_MASTER, etMstpMaxMaster.getText().toString(), 1, 127, 1, getString(R.string.err_txt_mstp_max_master));
+                    break;
+                case R.id.etMstpMaxFrame:
+                    validateAndUpdateMstpConfig(etMstpMaxFrame, PREF_MSTP_MAX_FRAME, etMstpMaxFrame.getText().toString(), 1, 255, 1, getString(R.string.err_txt_mstp_max_frame));
+                    break;
+                case R.id.etMstpDeviceId:
+                    validateAndUpdateMstpConfig(etMstpDeviceId, PREF_MSTP_DEVICE_ID, etMstpDeviceId.getText().toString(), 1, 4194303, 1, getString(R.string.err_txt_mstp_device_id));
+                    break;
             }
         }
 
@@ -1090,7 +1377,7 @@ public class Communication extends Fragment {
                 startRestServer();
             }
             sharedPreferences.edit().putBoolean(IS_BACNET_INITIALIZED, true).apply();
-            BacnetUtilKt.launchBacApp(context, BROADCAST_BACNET_APP_START, "Start BACnet App", ipDeviceInstanceNumber.getText().toString());
+            BacnetUtilKt.launchBacApp(context, BROADCAST_BACNET_APP_START, "Start BACnet App", ipDeviceInstanceNumber.getText().toString(),false);
             performConfigFileBackup();
         }
     }
@@ -1409,7 +1696,7 @@ public class Communication extends Fragment {
                 if(isUpdateBBMD) {
                     DataBbmd dataBbmd = new DataBbmd(ipAddress, Integer.parseInt(port), Integer.parseInt(mask));
                     fillBbmdView(dataBbmd, bbmdInputViews.indexOfChild(bbmdView));
-                    displayCustomToastMessageOnSuccess(true,true);
+                    displayCustomToastMessageOnSuccess("BBMD updated successfully.");
                 }
                 else {
                     tvBbmdIp.setText(ipAddress);
@@ -1417,7 +1704,7 @@ public class Communication extends Fragment {
                     tvBbmdMask.setText(mask);
                     bbmdInputViews.addView(bbmdView);
                     updateBbmdListView();
-                    displayCustomToastMessageOnSuccess(true,false);
+                    displayCustomToastMessageOnSuccess("BBMD added successfully.");
                 }
                 updateBacnetConfigStateChanged(true);
                 // Close the dialog after processing the input
@@ -1451,7 +1738,7 @@ public class Communication extends Fragment {
             }
         }
     }
-    private void displayCustomToastMessageOnSuccess(boolean isBBMD, boolean isUpdate) {
+    private void displayCustomToastMessageOnSuccess(String message) {
         Toast toast = new Toast(Globals.getInstance().getApplicationContext());
         toast.setGravity(Gravity.BOTTOM, 50, 50);
         View toastSuccess = getLayoutInflater().inflate(R.layout.custom_toast_bacnet_configuration,
@@ -1459,17 +1746,7 @@ public class Communication extends Fragment {
         toast.setView(toastSuccess);
 
         TextView textView = toast.getView().findViewById(R.id.custom_toast_message_detail);
-        if (isBBMD) {
-            if (isUpdate) {
-                textView.setText("BBMD updated successfully.");
-            }
-            else {
-                textView.setText("BBMD added successfully.");
-            }
-        }
-        else {
-            textView.setText("Configuration updated successfully.");
-        }
+        textView.setText(message);
         textView.setTextSize(21);
 
         TextView textViewTitle = toast.getView().findViewById(R.id.custom_toast_message_success);
@@ -1617,6 +1894,53 @@ public class Communication extends Fragment {
             }
         } catch (JSONException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private ArrayList<String> getPortAddressMstpDevices(){
+        ArrayList<String> usbSerialPorts = new ArrayList<>();
+
+        File devDirectory = new File("/dev");
+        File[] files = devDirectory.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                String fileName = file.getName();
+                if (fileName.startsWith("ttyUSB")) {
+                    usbSerialPorts.add("/dev/" + fileName);
+                }
+            }
+        }
+
+        if (usbSerialPorts.isEmpty()) {
+            usbSerialPorts.add("Port not available");
+        }
+        return usbSerialPorts;
+    }
+
+    private void runChmodUsbDevices() {
+        try {
+            // Start root shell
+            Process process = Runtime.getRuntime().exec("su");
+
+            // Command to run
+            String command = "chmod 666 /dev/bus/usb/*\n";
+
+            // Write the command to the process's output stream
+            DataOutputStream os = new DataOutputStream(process.getOutputStream());
+            os.writeBytes(command);
+            os.writeBytes("exit\n");
+            os.flush();
+
+            // Wait for the command to complete
+            process.waitFor();
+
+            // Optional: log result
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "chmod executed with exit code: " + process.exitValue());
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            CcuLog.e(TAG_CCU_BACNET_MSTP, "Error executing chmod", e);
         }
     }
 }

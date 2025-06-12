@@ -1256,14 +1256,37 @@
     </string-array>
 
 
-    <string name="title_mb_config">MODBUS CONFIG</string>
+    <string name="title_mb_config">Modbus Configuration</string>
     <string name="txt_mb_baudRate">BaudRate</string>
     <string name="txt_mb_parity">Parity</string>
     <string name="txt_mb_dataBits">Data Bits</string>
     <string name="txt_mb_stopBits">Stop Bits</string>
 
+    <string name="title_mstp_config">BACnet - MSTP Configuration</string>
+    <string name="txt_mstp_baudRate">Baud Rate</string>
+    <string name="txt_mstp_sourceAddress">Source Address</string>
+    <string name="hint_mstp_sourceAddress">Enter Port</string>
+    <string name="txt_mstp_maxMaster">Max Master</string>
+    <string name="hint_mstp_maxMaster">Enter Max Master</string>
+    <string name="txt_mstp_maxFrames">Max Frames</string>
+    <string name="hint_mstp_maxFrames">Enter Max Frames</string>
+    <string name="txt_mstp_sourceAddress_hint">In between 0 to 127</string>
+    <string name="txt_mstp_maxMaster_hint">In between 1 to 127</string>
+    <string name="txt_mstp_maxFrames_hint">In between 1 to 255</string>
+    <string name="txt_mstp_initialise">INITIALIZE</string>
+    <string name="txt_mstp_disable">DISABLE</string>
 
-    <string name="title_bacnet_config">BACnet CONFIG</string>
+    <string name="err_txt_mstp_max_frame">Please enter valid max frame</string>
+    <string name="err_txt_mstp_max_master">Please enter valid max master</string>
+    <string name="err_txt_mstp_source_address">Please enter valid source address</string>
+    <string name="err_txt_mstp_device_id">Please enter valid device id</string>
+
+    <string-array name="mstp_config_baudrate_array">
+        <item>  38400 </item>
+        <item>  76800 </item>
+    </string-array>
+
+    <string name="title_bacnet_config">BACnet - IP Configuration</string>
     <string name="title_bacapp_version">BACapp Version - </string>
     <string name="title_bacnet_initialize">INITIALIZE BACNET</string>
     <string name="title_disable_bacnet">DISABLE BACNET</string>
@@ -1812,4 +1835,7 @@
     <string name="txt_global">Global</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="txt_mstp_device_id">Device Id</string>
+    <string name="txt_mstp_port_address">PortAddress</string>
+    <string name="txt_mstp_hint_device_id">Enter Device Id</string>
 </resources>

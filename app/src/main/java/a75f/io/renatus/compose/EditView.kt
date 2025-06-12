@@ -634,3 +634,52 @@ fun EditableTextField(errorMessage: String? = null) {
         }
     }
 }
+
+@Composable
+fun UnderlinedInput(
+    modifier: Modifier = Modifier,
+    placeholder: String = "",
+    onTextChanged: (String) -> Unit,
+    underlineColor: Color = Color.Gray,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default.copy(),
+    inputText: String = ""
+) {
+    var textValue by remember { mutableStateOf(TextFieldValue()) }
+    if (inputText.isNotEmpty()) {
+        textValue = TextFieldValue(inputText)
+    }
+
+    Column(modifier = modifier) {
+        BasicTextField(
+            value = textValue,
+            textStyle = TextStyle(
+                fontFamily = ComposeUtil.myFontFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 22.sp,
+                color = Color.Black,),
+            onValueChange = { textValue = it
+                onTextChanged(it.text)
+            },
+            keyboardOptions = keyboardOptions,
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth(),
+            decorationBox = { innerTextField ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    if (textValue.text.isEmpty()) {
+                        Text(text = placeholder, color = Color.Gray, fontSize = 22.sp)
+                    }
+                    innerTextField()
+                }
+            }
+        )
+        Divider(
+            color = underlineColor,
+            thickness = 1.dp,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}

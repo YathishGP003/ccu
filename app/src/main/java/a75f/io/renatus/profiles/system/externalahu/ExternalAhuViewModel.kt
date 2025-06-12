@@ -43,6 +43,7 @@ import a75f.io.logic.bo.building.system.vav.VavExternalAhu
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.bacnet.BacnetConfigConstants
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_CONFIGURATION
 import a75f.io.logic.util.bacnet.buildBacnetModelSystem
 import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants
 import a75f.io.renatus.FloorPlanFragment
@@ -1242,7 +1243,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         CcuLog.d(TAG_BACNET, "------addBacAppEquip-----")
         bacnetProfile.addBacAppEquip(configParam, modelConfig, deviceId.value, deviceId.value, "SYSTEM", "SYSTEM",
                 bacnetModel.value.equipDevice.value,
-                profileType,"system",bacnetModel.value.version.value, true)
+                profileType,"system",bacnetModel.value.version.value,IP_CONFIGURATION,"", true)
 
             //L.ccu().zoneProfiles.add(bacnetProfile)
             //L.saveCCUState()

@@ -1727,8 +1727,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 				if(presentationData != null && valueConstraint != null){
 					if(valueConstraint.getMinValue() != null && valueConstraint.getMinValue() != null){
-						int minValue = valueConstraint.getMinValue();
-						int maxValue = valueConstraint.getMaxValue();
+						int minValue = valueConstraint.getMinValue().intValue();
+						int maxValue = valueConstraint.getMaxValue().intValue();
 						//float step = Float.parseFloat(presentationData.getTagValueIncrement(
 						double step = Double.parseDouble(presentationData.getTagValueIncrement());
 						spinnerValues = generateValuesForSpinner(minValue, maxValue, step);

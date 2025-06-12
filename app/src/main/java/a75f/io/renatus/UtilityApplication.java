@@ -4,6 +4,7 @@ import static java.lang.Thread.sleep;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
 import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
 import static a75f.io.logic.util.PreferenceUtil.getSyncStartTime;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_MSTP_INITIALIZED;
 
 import android.app.Application;
 import android.content.Context;
@@ -55,6 +56,7 @@ import javax.inject.Inject;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.bacnet.parser.BacnetRequestProcessor;
 import a75f.io.api.haystack.util.DatabaseAction;
 import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.device.DeviceUpdateJob;
@@ -65,6 +67,7 @@ import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.system.BacnetServicesUtils;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
@@ -122,7 +125,7 @@ public abstract class UtilityApplication extends Application implements Globals.
                 startRestServer();
             }
         } else {
-            if (!isBACnetIntialized()) {
+            if (!isBACnetIntialized() && !isBacnetMstpInitialized()) {
                 stopRestServer();
             }
         }
@@ -205,6 +208,12 @@ public abstract class UtilityApplication extends Application implements Globals.
         CcuLog.i("CCU_DB", "postProcessingInit - end");
         scheduleAlertCleanUpJob();
         Globals.getInstance().registerLandingActivityListener(this);
+
+        // Initialize the BacnetServicesUtils callback implementation
+        CcuLog.i(L.TAG_CCU_INIT, "Initializing BacnetServicesUtils callback implementation");
+        BacnetServicesUtils callbackImpl = new BacnetServicesUtils();
+        BacnetRequestProcessor.setCallback(callbackImpl);
+
     }
 
     private void scheduleAlertCleanUpJob() {
@@ -622,6 +631,10 @@ public abstract class UtilityApplication extends Application implements Globals.
     }
 
     public static boolean isBACnetIntialized() { return prefs.getBoolean(IS_BACNET_INITIALIZED); }
+
+    public static boolean isBacnetMstpInitialized() {
+        return prefs.getBoolean(IS_BACNET_MSTP_INITIALIZED);
+    }
 
     public static void stopRestServer() {
         HttpServer.Companion.getInstance(context).stopServer();

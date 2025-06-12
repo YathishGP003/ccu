@@ -31,6 +31,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.bacnet.parser.BacnetRequestProcessor;
 import a75f.io.api.haystack.sync.PointWriteCache;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -89,6 +90,16 @@ public class UpdatePointHandler implements MessageHandler
 
         Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(pointUid)).build();
         CcuLog.d(L.TAG_CCU_PUBNUB, " handleMessage for" + Arrays.toString(localPoint.getMarkers().toArray()));
+
+
+        if (localPoint.getMarkers().contains("bacnetMstp")) {
+            CcuLog.d(L.TAG_CCU_BACNET, "Message Handler -> Mstp bacnet point, share this with mstp app id is ->"+localPoint.getId());
+            String value = msgObject.get(WRITABLE_ARRAY_VAL).getAsString();
+            if (value.isEmpty()) {
+                value = String.valueOf(hayStack.readPointPriorityVal(localPoint.getId()));
+            }
+            BacnetRequestProcessor.sendCallBackMstpWriteRequest(localPoint.getId(), String.valueOf(pointLevel), value);
+        }
 
         //move this class to a separate file
         if(HSUtil.isPhysicalPointUpdate(localPoint)){

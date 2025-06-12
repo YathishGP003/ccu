@@ -101,6 +101,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                         CcuLog.e(L.TAG_CCU_DEVICE, "Device update skipped , buildingProcess not running");
                     }
                     BacnetUtilKt.checkBacnetHealth();
+                    BacnetUtilKt.updateBacnetMstpLinearAndCovSubscription(false);
                     modbusNetwork.sendMessage();
                     CcuLog.d(L.TAG_CCU_JOB, "<-DeviceUpdateJob ");
             }

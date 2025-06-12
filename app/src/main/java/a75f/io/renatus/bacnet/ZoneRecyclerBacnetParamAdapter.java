@@ -2,6 +2,9 @@ package a75f.io.renatus.bacnet;
 
 import static a75f.io.logic.bo.building.bacnet.BacnetEquip.TAG_BACNET;
 
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.decodeBacnetId;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.isValidMstpMacAddress;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
@@ -43,6 +46,7 @@ import a75f.io.logic.bo.building.system.client.RemotePointUpdateInterface;
 import a75f.io.logic.util.bacnet.BacnetConfigConstants;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.interfaces.ModbusDataInterface;
+import a75f.io.logic.util.bacnet.ObjectType;
 import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants;
 import a75f.io.renatus.R;
@@ -181,44 +185,55 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
         }*/
 
         int objectId = bacnetZoneViewItem.getBacnetObj().getProtocolData().getBacnet().getObjectId();
+        String objectType = bacnetZoneViewItem.getObjectType();
+         objectId = decodeBacnetId(objectId,ObjectType.valueOf(objectType).getValue());
+        boolean isMstpEquip = isValidMstpMacAddress(Objects.requireNonNull(configMap.getOrDefault(MAC_ADDRESS, "")));
         BacnetServicesUtils bacnetServicesUtils = new BacnetServicesUtils();
         if(bacnetZoneViewItem.getBacnetObj().isSystem()){
             CcuLog.d(TAG_BACNET, "--this is a system point, subtract 110000 from objectId--"+objectId);
             int originalBacnetId = objectId - 1100000;
             bacnetServicesUtils.sendWriteRequest(generateWriteObject(configMap, originalBacnetId, selectedValue,
-                            bacnetZoneViewItem.getObjectType(), bacnetZoneViewItem.getBacnetObj().getDefaultWriteLevel()),
-                    serverIpAddress, remotePointUpdateInterface, selectedValue, bacnetZoneViewItem.getBacnetObj().getId());
+                            bacnetZoneViewItem.getObjectType(), bacnetZoneViewItem.getBacnetObj().getDefaultWriteLevel(), isMstpEquip),
+                    serverIpAddress, remotePointUpdateInterface, selectedValue, bacnetZoneViewItem.getBacnetObj().getId(), isMstpEquip);
         }else{
             CcuLog.d(TAG_BACNET, "--this is a normal bacnet client point");
             bacnetServicesUtils.sendWriteRequest(generateWriteObject(configMap, objectId, selectedValue,
-                            bacnetZoneViewItem.getObjectType(), bacnetZoneViewItem.getBacnetObj().getDefaultWriteLevel()),
-                    serverIpAddress, remotePointUpdateInterface, selectedValue, bacnetZoneViewItem.getBacnetObj().getId());
+                            bacnetZoneViewItem.getObjectType(), bacnetZoneViewItem.getBacnetObj().getDefaultWriteLevel(), isMstpEquip),
+                    serverIpAddress, remotePointUpdateInterface, selectedValue, bacnetZoneViewItem.getBacnetObj().getId(), isMstpEquip);
         }
 
 
     }
 
-    private BacnetWriteRequest generateWriteObject(Map<String, String> configMap, int objectId, String selectedValue, String objectType, String priority) {
+    private BacnetWriteRequest generateWriteObject(Map<String, String> configMap, int objectId, String selectedValue, String objectType, String priority, boolean isMstpEquip) {
 
         String macAddress = "";
         if(configMap.get(MAC_ADDRESS) != null) {
             macAddress = configMap.get(MAC_ADDRESS);
         }
         //OBJECT_MULTI_STATE_VALUE
-        DestinationMultiRead destinationMultiRead = new DestinationMultiRead(Objects.requireNonNull(configMap.get(DESTINATION_IP)),
-                Objects.requireNonNull(configMap.get(DESTINATION_PORT)), Objects.requireNonNull(configMap.get(DEVICE_ID)),
+        DestinationMultiRead destinationMultiRead = new DestinationMultiRead(Objects.requireNonNull(configMap.getOrDefault(DESTINATION_IP,"")),
+                Objects.requireNonNull(configMap.getOrDefault(DESTINATION_PORT, "0")), Objects.requireNonNull(configMap.getOrDefault(DEVICE_ID,"0")),
                 Objects.requireNonNull(configMap.get(DEVICE_NETWORK)), macAddress);
 
         int dataType;
         String selectedValueAsPerType;
-        if(BacNetConstants.ObjectType.valueOf(objectType).getValue() == 2){
+        if(BacNetConstants.ObjectType.valueOf(objectType).getValue() == ObjectType.OBJECT_ANALOG_VALUE.getValue() ||
+                BacNetConstants.ObjectType.valueOf(objectType).getValue() == ObjectType.OBJECT_ANALOG_INPUT.getValue() ||
+                BacNetConstants.ObjectType.valueOf(objectType).getValue() == ObjectType.OBJECT_ANALOG_OUTPUT.getValue()) {
             dataType = BacNetConstants.DataTypes.BACNET_DT_REAL.ordinal()+1;
             selectedValueAsPerType = selectedValue;
-        }else if(BacNetConstants.ObjectType.valueOf(objectType).getValue() == 5){
+        }else if(BacNetConstants.ObjectType.valueOf(objectType).getValue() == ObjectType.OBJECT_BINARY_VALUE.getValue() ||
+                BacNetConstants.ObjectType.valueOf(objectType).getValue() == ObjectType.OBJECT_BINARY_INPUT.getValue() ||
+                BacNetConstants.ObjectType.valueOf(objectType).getValue() == ObjectType.OBJECT_BINARY_OUTPUT.getValue()) {
             dataType = BacNetConstants.DataTypes.BACNET_DT_ENUM.ordinal()+1;
             selectedValueAsPerType = selectedValue; //String.valueOf(Integer.parseInt(selectedValue)+1);
         }else {
-            dataType = BacNetConstants.DataTypes.BACNET_DT_UNSIGNED.ordinal()+1;
+            if (isMstpEquip) {
+                dataType = BacNetConstants.DataTypes.BACNET_DT_UNSIGNED32.ordinal() + 1;
+            } else {
+                dataType = BacNetConstants.DataTypes.BACNET_DT_UNSIGNED.ordinal() + 1;
+            }
             selectedValueAsPerType = String.valueOf(Integer.parseInt(selectedValue)+1);
         }
 

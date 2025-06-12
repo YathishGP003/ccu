@@ -63,6 +63,7 @@ public class L
     public static final String TAG_SCHEDULABLE = "CCU_SCHEDULABLE";
     public static final String TAG_DESIRED_TEMP_MODE = "DESIRED_TEMP_MODE";
     public static final String TAG_CCU_BACNET = "CCU_BACNET";
+    public static final String TAG_CCU_BACNET_MSTP = "CCU_BACNET_MSTP";
     public static final String TAG_CCU_DOWNLOAD = "CCU_DOWNLOAD";
     public static final String CCU_REMOTE_ACCESS = "CCU_REMOTE_ACCESS";
     public static final String TAG_CCU_DR_MODE = "CCU_DR_MODE";
@@ -153,7 +154,7 @@ public class L
     public static short generateSmartNodeAddress()
     {
         short currentBand = L.ccu().getAddressBand();
-        ArrayList<HashMap<Object,Object>> nodes = CCUHsApi.getInstance().readAllEntities("device and node");
+        ArrayList<HashMap<Object,Object>> nodes = CCUHsApi.getInstance().readAllEntities("device and node and not bacnet");
         if (nodes.size() == 0) {
             return currentBand;
         }
@@ -165,6 +166,32 @@ public class L
             for (HashMap<Object,Object> node : nodes)
             {
                 if (node.get("addr").toString().equals(String.valueOf(nextAddr))) {
+                    nextAddr++;
+                    addrUsed = true;
+                    break;
+                } else {
+                    addrUsed = false;
+                }
+            }
+        }
+        return nextAddr;
+    }
+
+    public static short generateBacnetNodeAddres() {
+
+        short currentBand = 500;
+        ArrayList<HashMap<Object,Object>> nodes = CCUHsApi.getInstance().readAllEntities("bacnet and equip");
+        if (nodes.size() == 0) {
+            return currentBand;
+        }
+
+        boolean addrUsed = true;
+        short nextAddr = currentBand;
+        while (addrUsed)
+        {
+            for (HashMap<Object,Object> node : nodes)
+            {
+                if (node.get("group").toString().equals(String.valueOf(nextAddr))) {
                     nextAddr++;
                     addrUsed = true;
                     break;

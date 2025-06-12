@@ -18,6 +18,20 @@ data class BacnetReadRequestMultiple(
     private val rpmRequest: RpmRequest
 )
 
+data class BacnetMstpSubscribeCov(
+    @SerializedName("destination")
+    private val destination: DestinationMultiRead,
+
+    @SerializedName("subscribe_cov_request")
+    private val subscribeCovRequest: BacnetMstpSubscribeCovRequest
+)
+
+data class BacnetMstpSubscribeCovRequest(
+    @SerializedName("object_identifier")
+    private val objectIdentifiers :MutableList<ObjectIdentifierBacNet>
+)
+
+
 
 data class BacnetWriteRequest(
     @SerializedName("destination")
@@ -41,7 +55,10 @@ data class BacnetWhoIsRequest(
     private val port: String,
 
     @SerializedName("ip_address")
-    private val deviceId: String
+    private val deviceId: String,
+
+    @SerializedName("deviceId")
+    private val srcDeviceId:String = ""
 
 )
 

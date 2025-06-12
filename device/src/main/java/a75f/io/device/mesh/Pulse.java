@@ -1311,6 +1311,9 @@ public class Pulse
 						updateDesiredTemp(nodeAddr, desiredTemp);
 						CcuLog.d(L.TAG_CCU_DEVICE,
 								"updateSetTempFromSmartNode : desiredTemp updated" + curValue + "->" + desiredTemp);
+					} else {
+						CcuLog.d(L.TAG_CCU_DEVICE, "No change in desired temp SetTempFromSmartNode : desiredTemp not updated" + curValue + "->" + desiredTemp);
+						sendSetTemperatureAck(nodeAddr);
 					}
 				}
 			}

@@ -35,14 +35,14 @@ import a75f.io.renatus.registration.UpdateCCUFragment;
 public class AppInstaller
 {
 
-    static final String CCU_APK_FILE_NAME = "Renatus_new.apk";
+    public static String CCU_APK_FILE_NAME = "Renatus_new.apk";
 
     public static final String DOWNLOAD_BASE_URL = "https://updates.75f.io/";
     static final String CCU_DOWNLOAD_FILE = "Renatus_Prod_Rv.apk";
 
-    static final int CCUAPP_INSTALL_CODE = 100;
-    static final int HOMEAPP_INSTALL_CODE = 200;
-    static final int HOMEAPP_AND_CCUAPP_INSTALL_CODE = 300;
+    public static int CCUAPP_INSTALL_CODE = 100;
+    public static int HOMEAPP_INSTALL_CODE = 200;
+    public static int HOMEAPP_AND_CCUAPP_INSTALL_CODE = 300;
     static AppInstaller mSelf = null;
     private long mCCUAppDownloadId = -1;
     private long mHomeAppDownloadId = -1;
@@ -221,19 +221,19 @@ public class AppInstaller
     
     public void install(Activity activity, boolean bInstallHomeApp, boolean bInstallCCUApp, boolean bSilent) {
         if (bInstallHomeApp && bInstallCCUApp) {
-            invokeInstallerIntent(activity, mHomeAppDownloadId, HOMEAPP_AND_CCUAPP_INSTALL_CODE, bSilent);
+            invokeInstallerIntent(activity, mHomeAppDownloadId, HOMEAPP_AND_CCUAPP_INSTALL_CODE, bSilent, true);
         }
         else if (bInstallHomeApp) {
-            invokeInstallerIntent(activity, mHomeAppDownloadId, HOMEAPP_INSTALL_CODE, bSilent);
+            invokeInstallerIntent(activity, mHomeAppDownloadId, HOMEAPP_INSTALL_CODE, bSilent, true);
         }
         else if (bInstallCCUApp) {
             CcuLog.d(L.TAG_CCU_DOWNLOAD, "Install AppInstall===>>>");
-            invokeInstallerIntent(activity, mCCUAppDownloadId, CCUAPP_INSTALL_CODE, bSilent);
+            invokeInstallerIntent(activity, mCCUAppDownloadId, CCUAPP_INSTALL_CODE, bSilent, true);
         }
     }
     
     
-    private void invokeInstallerIntent(Activity activity, long downloadId, int requestCode, boolean bSilent) {
+    public void invokeInstallerIntent(Activity activity, long downloadId, int requestCode, boolean bSilent, boolean restartRequested) {
         try
         {
             DownloadManager manager =
@@ -261,7 +261,7 @@ public class AppInstaller
 
                     CcuLog.d(L.TAG_CCU_DOWNLOAD, "Install AppInstall silent invokeInstallerIntent===>>>"+sFilePath+","+file.getAbsolutePath());
                     CCUHsApi.getInstance().resetCcuReady();
-                    RenatusApp.executeAsRoot(commands, null, true, false);
+                    RenatusApp.executeAsRoot(commands, null, restartRequested, false);
                     OtaStatusDiagPoint.Companion.updateCCUOtaStatus(OtaStatus.OTA_SUCCEEDED);
                     Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
                 }

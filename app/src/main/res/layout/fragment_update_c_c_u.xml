@@ -65,6 +65,155 @@
                 </TextView>
                 <LinearLayout
                     android:paddingTop="6dp"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/homeappcurrentVersionLayout"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/lato"
+                        android:textSize="20sp"
+                        android:text="@string/current_home_version">
+                    </TextView>
+                    <TextView
+                        android:fontFamily="@font/lato_bold"
+                        android:id="@+id/currentHomeVersion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        style="@style/text_label_bold_secondary">
+                    </TextView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:paddingTop="6dp"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/homeappRecommendedVersionLayout"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/lato"
+                        android:textSize="20sp"
+                        android:text="@string/recommended_home_version">
+                    </TextView>
+                    <TextView
+                        android:fontFamily="@font/lato_bold"
+                        android:id="@+id/recommendedHomeVersion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        style="@style/text_label_bold_secondary">
+                    </TextView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:paddingTop="6dp"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/remoteappcurrentVersionLayout"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/lato"
+                        android:textSize="20sp"
+                        android:text="@string/current_remote_version">
+                    </TextView>
+                    <TextView
+                        android:fontFamily="@font/lato_bold"
+                        android:id="@+id/currentRemoteVersion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        style="@style/text_label_bold_secondary">
+                    </TextView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:paddingTop="6dp"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/remoteappRecommendedVersionLayout"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/lato"
+                        android:textSize="20sp"
+                        android:text="@string/recommended_remote_version">
+                    </TextView>
+                    <TextView
+                        android:fontFamily="@font/lato_bold"
+                        android:id="@+id/recommendedRemoteVersion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        style="@style/text_label_bold_secondary">
+                    </TextView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:paddingTop="6dp"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/bacappappcurrentVersionLayout"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/lato"
+                        android:textSize="20sp"
+                        android:text="@string/current_bacapp_version">
+                    </TextView>
+                    <TextView
+                        android:fontFamily="@font/lato_bold"
+                        android:id="@+id/currentBacAppVersion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        style="@style/text_label_bold_secondary">
+                    </TextView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:paddingTop="6dp"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/bacappappRecommendedVersionLayout"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/lato"
+                        android:textSize="20sp"
+                        android:text="@string/recommended_bacapp_version">
+                    </TextView>
+                    <TextView
+                        android:fontFamily="@font/lato_bold"
+                        android:id="@+id/recommendedBacAppVersion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        style="@style/text_label_bold_secondary">
+                    </TextView>
+                </LinearLayout>
+                <LinearLayout
+                    android:paddingTop="6dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/currentVersionLayout"
@@ -87,6 +236,7 @@
                     </TextView>
                 </LinearLayout>
                 <LinearLayout
+                    android:id="@+id/recommendedVersionLayout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">

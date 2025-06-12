@@ -9,14 +9,17 @@ import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.updateBundleOta
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.updateBundleVersion
 import a75f.io.logic.util.PreferenceUtil
 import a75f.io.renatus.BuildConfig
+import a75f.io.renatus.ENGG.AppInstaller
 import a75f.io.renatus.ENGG.AppInstaller.DOWNLOAD_BASE_URL
 import a75f.io.renatus.RenatusApp
+import a75f.io.renatus.registration.UpdateCCUFragment
 import a75f.io.renatus.util.remotecommand.bundle.exception.DownloadFailedException
 import a75f.io.renatus.util.remotecommand.bundle.models.APKVersion
 import a75f.io.renatus.util.remotecommand.bundle.models.ArtifactDTO
 import a75f.io.renatus.util.remotecommand.bundle.models.BundleDTO
 import a75f.io.renatus.util.remotecommand.bundle.models.UpgradeBundle
 import a75f.io.renatus.util.remotecommand.bundle.service.VersionManagementService
+import android.app.Activity
 import android.app.DownloadManager
 import android.content.Context
 import android.content.pm.PackageInfo
@@ -26,6 +29,11 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import com.google.gson.Gson
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import java.io.File
 import java.lang.Thread.sleep
@@ -1050,4 +1058,203 @@ class BundleInstallManager: BundleInstallListener {
         }
         return null
     }
+
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun startApkDownloads(
+        activity: Activity,
+        apkList: List<String>,
+        bSilent: Boolean,
+        currentFragment: UpdateCCUFragment
+    ) {
+        val downloadIds = mutableMapOf<Long, File>()
+        val successfulDownloads = mutableSetOf<Long>()
+        val context = activity.applicationContext
+        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        val finishedDownloads = mutableSetOf<Long>()
+        apkList.forEach { apkFile ->
+            val file = File(context.getExternalFilesDir(null), apkFile)
+            val url = "$DOWNLOAD_BASE_URL$apkFile"
+
+            val request = DownloadManager.Request(Uri.parse(url)).apply {
+                setTitle("Downloading $apkFile")
+                setDescription("Downloading $apkFile")
+                setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                setDestinationInExternalFilesDir(context, null, apkFile)
+            }
+
+            val downloadId = downloadManager.enqueue(request)
+            downloadIds[downloadId] = file
+            CcuLog.d(L.TAG_CCU_DOWNLOAD, " Started download for $apkFile (ID: $downloadId)")
+
+            // Check download status until it completes
+            while (true) {
+                sleep(1000)
+
+                val query = DownloadManager.Query().setFilterById(downloadId)
+                downloadManager.query(query)?.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        val status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
+                        val reason = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_REASON))
+                        val fileName = file.name
+                        val columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
+
+                        when (status) {
+                            DownloadManager.STATUS_SUCCESSFUL -> {
+                                val totalSizeBytes = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
+                                val downloadSizeMB = if (totalSizeBytes > 0) {
+                                    String.format("%.2f", totalSizeBytes.toDouble() / (1024 * 1024)).toDouble()
+                                } else 0.0
+
+                                CcuLog.i(L.TAG_CCU_REPLACE, " Success: $fileName")
+                                successfulDownloads.add(downloadId)
+                                finishedDownloads.add(downloadId)
+
+                                currentFragment.setReplaceProgress(
+                                    100,
+                                    downloadId,
+                                    cursor.getInt(columnIndex),
+                                    downloadSizeMB,
+                                    currentFragment
+                                )
+                                return@forEach
+                            }
+
+                            DownloadManager.STATUS_FAILED -> {
+                                val reasonText = getDownloadFailureReason(reason)
+                                CcuLog.e(L.TAG_CCU_REPLACE, " Failed: $fileName. Reason: $reasonText")
+                                finishedDownloads.add(downloadId)
+                                return@forEach
+                            }
+
+                            DownloadManager.STATUS_PENDING,
+                            DownloadManager.STATUS_PAUSED -> {
+                                val reasonText = getPendingOrPausedReason(reason)
+                                CcuLog.w(L.TAG_CCU_REPLACE, " Waiting: $fileName. Reason: $reasonText. Retrying in 5s.")
+                                sleep(5000)
+                            }
+
+                            else -> {
+                                val bytesDownloaded = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
+                                val bytesTotal = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
+
+                                val progressPercent = if (bytesTotal > 0) (bytesDownloaded * 100L / bytesTotal).toInt() else 0
+                                val downloadSizeMB = if (bytesTotal > 0) {
+                                    String.format("%.2f", bytesTotal.toDouble() / (1024 * 1024)).toDouble()
+                                } else 0.0
+                                val downloadedMB = String.format("%.2f", bytesDownloaded.toDouble() / (1024 * 1024))
+
+                                CcuLog.i(
+                                    L.TAG_CCU_REPLACE,
+                                    " Downloaded: ${downloadedMB} MB / ${downloadSizeMB} MB ($progressPercent%) for $fileName (ID: $downloadId)"
+                                )
+
+                                if (progressPercent > 0 || downloadSizeMB > 0.0) {
+                                    currentFragment.setReplaceProgress(
+                                        progressPercent,
+                                        downloadId,
+                                        status,
+                                        downloadSizeMB,
+                                        currentFragment
+                                    )
+                                }
+                                sleep(2000)
+                            }
+                        }
+                    } else {
+                        CcuLog.w(L.TAG_CCU_REPLACE, " No download info for ID: $downloadId")
+                        finishedDownloads.add(downloadId)
+                        return@forEach
+                    }
+                }
+            }
+
+        }
+
+        CcuLog.i(
+            L.TAG_CCU_REPLACE,
+            "Download process completed. " +
+                    "Total downloads: ${downloadIds.size}," +
+                    " Successful: ${successfulDownloads.size}," +
+                    " Finished: ${finishedDownloads.size}"
+        )
+
+        val allDownloadsDone = downloadIds.keys.size == finishedDownloads.size
+        val hasSuccessfulDownload = successfulDownloads.isNotEmpty()
+
+        if (allDownloadsDone && hasSuccessfulDownload) {
+            val allEntries = successfulDownloads.map { id ->
+                id to downloadIds[id]
+            }
+
+            var isHomeAppPresent = false
+            var homeAppName = ""
+            allEntries.forEachIndexed { index, (id, file) ->
+                val apkName = file?.name ?: "Unknown"
+                if (apkName.contains("HomeApp")) {
+                    return@forEachIndexed
+                }
+                AppInstaller.CCU_APK_FILE_NAME = apkName
+                CcuLog.i(L.TAG_CCU_REPLACE, "Installing.... $apkName (ID: $id)")
+                AppInstaller().invokeInstallerIntent(
+                    activity,
+                    id,
+                    AppInstaller.CCUAPP_INSTALL_CODE,
+                    bSilent,
+                    false
+                )
+            }
+
+            for ((index, entry) in allEntries.withIndex()) {
+                val (id, file) = entry
+                val apkName = file?.name ?: "Unknown"
+                isHomeAppPresent = apkName.contains("HomeApp")
+                if (isHomeAppPresent) {
+                    homeAppName = apkName
+                    break
+                }
+            }
+
+            CcuLog.i(L.TAG_CCU_REPLACE,"Home app present: $isHomeAppPresent - fileName $homeAppName")
+            GlobalScope.launch(Dispatchers.Main) {
+                if (isHomeAppPresent) {
+                    HomeApp(homeAppName).installApp()
+                    delay(3000)
+                    RenatusApp.rebootTablet()
+                } else {
+                    delay(3000)
+                    RenatusApp.restartApp()
+                }
+            }
+
+        }
+    }
+
+    private fun getDownloadFailureReason(reason: Int): String {
+        return when (reason) {
+            DownloadManager.ERROR_CANNOT_RESUME -> "Cannot resume"
+            DownloadManager.ERROR_DEVICE_NOT_FOUND -> "Device not found"
+            DownloadManager.ERROR_FILE_ALREADY_EXISTS -> "File exists"
+            DownloadManager.ERROR_FILE_ERROR -> "File error"
+            DownloadManager.ERROR_HTTP_DATA_ERROR -> "HTTP data error"
+            DownloadManager.ERROR_INSUFFICIENT_SPACE -> "No space"
+            DownloadManager.ERROR_TOO_MANY_REDIRECTS -> "Too many redirects"
+            DownloadManager.ERROR_UNHANDLED_HTTP_CODE -> "Unhandled HTTP"
+            DownloadManager.ERROR_UNKNOWN -> "Unknown error"
+            else -> "Code: $reason"
+        }
+    }
+
+    private fun getPendingOrPausedReason(reason: Int): String {
+        return when (reason) {
+            DownloadManager.PAUSED_QUEUED_FOR_WIFI -> "Queued for WiFi"
+            DownloadManager.PAUSED_WAITING_FOR_NETWORK -> "Waiting for network"
+            DownloadManager.PAUSED_WAITING_TO_RETRY -> "Waiting to retry"
+            DownloadManager.PAUSED_UNKNOWN -> "Paused: Unknown reason"
+            else -> "Reason code: $reason"
+        }
+    }
 }
+
+
+

@@ -8,49 +8,44 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.gson.JsonObject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRow;
 import org.projecthaystack.io.HZincReader;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
-import a75f.io.api.haystack.sync.HttpUtil;
-import a75f.io.constants.HttpConstants;
 import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.ccu.restore.CCU;
-import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.registration.CCUSelect;
 import a75f.io.renatus.registration.UpdateCCUFragment;
 import a75f.io.renatus.util.remotecommand.bundle.BundleInstallManager;
-import a75f.io.renatus.util.remotecommand.bundle.models.ArtifactDTO;
+import a75f.io.renatus.util.remotecommand.bundle.models.BundleDTO;
 import a75f.io.renatus.util.remotecommand.bundle.models.UpgradeBundle;
 import a75f.io.util.ExecutorTask;
 
 public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView> {
 
-    private List<CCU> ccuList;
-    private Context context;
-    private CCUSelect callBack;
+    private final List<CCU> ccuList;
+    private final Context context;
+    private final CCUSelect callBack;
     private boolean isCCUUpgradeRequired = false;
-    private androidx.fragment.app.FragmentManager fragmentManager;
+    String selectedCCUId = null;
+    private final androidx.fragment.app.FragmentManager fragmentManager;
     public CCUListAdapter(List<CCU> ccuList, Context context, CCUSelect callBack, androidx.fragment.app.FragmentManager parentFragmentManager){
         this.ccuList = ccuList;
         this.context = context;
@@ -73,12 +68,6 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
             return false;
         }
         return (!ccuList.get(position).isOnline());
-    }
-
-    private boolean isCCUVersionMatchingWithReplacingCCU(int position) {
-        String ccuCurrVersion = CCUUiUtil.getCurrentCCUVersion();
-        String ccuVersion = ccuList.get(position).getVersion();
-        return  (ccuCurrVersion.contains(ccuVersion));
     }
 
     @Override
@@ -110,51 +99,150 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
 
     private void checkBundleVersionPointPresent(List<CCU> ccuList, int position) {
         ExecutorTask.executeAsync(
-                ()-> ProgressDialogUtils.showProgressDialog(context, "Checking for Bundle Version"),
-                ()-> {
-                    isCCUUpgradeRequired = false;
+                () -> ProgressDialogUtils.showProgressDialog(context, "Checking for Bundle Version"),
+                () -> {
+                    selectedCCUId = ccuList.get(position).getCcuId().replace("@", "");
+                    UpgradeBundle recommendedBundle = new BundleInstallManager().getRecommendedUpgradeBundle(true);
 
-                    String bundleVersion = getBundleVersionPoint(ccuList, position);
-                    UpgradeBundle bundle = new BundleInstallManager().getUpgradeBundleByName(bundleVersion, true);
+                    String cloudCcuVersion = CCUHsApi.getInstance()
+                            .readDefaultStrValueRemote("(diag and app and version) and ccuRef == @" + selectedCCUId);
+                    String cloudBacAppVersion = CCUHsApi.getInstance()
+                            .readDefaultStrValueRemote("(diag and bacnet and version) and ccuRef == @" + selectedCCUId);
+                    String cloudRemoteAppVersion = CCUHsApi.getInstance()
+                            .readDefaultStrValueRemote("(diag and remote and version) and ccuRef == @" + selectedCCUId);
+                    String cloudHomeAppVersion = CCUHsApi.getInstance()
+                            .readDefaultStrValueRemote("(diag and home and version) and  ccuRef == @" + selectedCCUId);
 
-                    CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point"+bundle);
 
-                    //Check if replace bundle required
-                    if(bundleVersion != null && bundle != null && bundle.getUpgradeOkay() && bundle.getComponentsToUpgrade().size() > 0){
-                        isCCUUpgradeRequired = true;
-                        double size = 0;
-                        for (ArtifactDTO artifactDTO : bundle.getComponentsToUpgrade()) {
-                            size += Double.parseDouble(artifactDTO.getFileSize());
-                            CcuLog.d(L.TAG_CCU_BUNDLE, "Upgradable ArtifactDTO name "+artifactDTO.getFileName() + " version "+artifactDTO.getVersion() + " size "+artifactDTO.getFileSize());
+                    String localCcuVersion = CCUUiUtil.getCurrentCCUVersion();
+                    String localBacAppVersion = CCUUiUtil.getAppVersion(context, "io.seventyfivef.bacapp");
+                    String localRemoteAppVersion = CCUUiUtil.getAppVersion(context, "io.seventyfivef.remoteaccess");
+                    String localHomeAppVersion = CCUUiUtil.getAppVersion(context, "com.x75frenatus.home");
 
-                        }
-                        CcuLog.d(L.TAG_CCU_BUNDLE, "Update UI with Bundle Version Point"+bundleVersion);
-                        try {
-                            updateCCUFragment(fragmentManager, null, String.valueOf(size),
-                                    true, bundle.getBundle().getBundleName(), bundle);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
+                    if (localHomeAppVersion != null) {
+                        String[] splitVersion = localHomeAppVersion.split("_");
+                        localHomeAppVersion = splitVersion[splitVersion.length - 1];
                     }
-                    // If replace bundle is not allowed due to bundleVersion point not present or point is empty
-                    // so replace CCU only
-                    else if (!isCCUVersionMatchingWithReplacingCCU(position)) {
-                        isCCUUpgradeRequired = true;
-                        CCU ccu = ccuList.get(position);
-                        try {
-                            String fileSize = getFileSize(ccu.getVersion());
-                            updateCCUFragment(fragmentManager, ccu, fileSize, false, null, bundle);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
 
+                    if (localBacAppVersion != null) {
+                        String[] splitVersion = localBacAppVersion.split("_");
+                        localBacAppVersion = splitVersion[splitVersion.length - 1];
+                    }
+
+                    if (localRemoteAppVersion != null) {
+                        String[] splitVersion = localRemoteAppVersion.split("_");
+                        localRemoteAppVersion = splitVersion[splitVersion.length - 1];
+                    }
+
+                    CcuLog.d(L.TAG_CCU_REPLACE, "Cloud CCU Version: " + cloudCcuVersion + ", Local CCU Version: " + localCcuVersion
+                            + ",\n Cloud BACnet App Version: " + cloudBacAppVersion + ", Local BACnet App Version: " + localBacAppVersion
+                            + ",\n Cloud Remote Access App Version: " + cloudRemoteAppVersion + ", Local Remote Access App Version: " + localRemoteAppVersion
+                            + ",\n Cloud Home App Version: " + cloudHomeAppVersion + ", Local Home App Version: " + localHomeAppVersion);
+
+
+                    String buildType = BuildConfig.BUILD_TYPE;
+                    CCU ccu = ccuList.get(position);
+                    HashMap<String, String> recommendedAppNameVersion = new HashMap<>();
+                    HashMap<String, String> appNameVersion = new HashMap<>();
+                    ArrayList<String> apkNames = new ArrayList<>();
+                    assert recommendedBundle != null;
+                    BundleDTO bto = recommendedBundle.getBundle();
+                    // Check if the cloud version is different from the local version
+                    if (cloudCcuVersion != null && !cloudCcuVersion.contains(localCcuVersion)) {
+                        isCCUUpgradeRequired = true;
+                        apkNames.add("CCU_" + buildType + "_" + cloudCcuVersion + ".apk");
+                    }
+
+                    // Check if the cloud BACnet app version is different from the local version
+                    if (cloudBacAppVersion == null) {
+                        if (getArtifactVersionString(bto, "bacapp") != null) {
+                            if(localBacAppVersion == null ||
+                                    !localBacAppVersion.equals(bto.getBACArtifact().getVersion())){
+                                String name = "NONE";
+                                if(localBacAppVersion != null){
+                                    name = localBacAppVersion;
+                                }
+                                CcuLog.d(L.TAG_CCU_REPLACE, "updating recommended Bundle BACnet app");
+                                apkNames.add("BACapp_" + buildType + "_" + bto.getBACArtifact().getVersion() + ".apk");
+                                appNameVersion.put("bacAppVersion", name);
+                                recommendedAppNameVersion.put("recommendedBacAppVersion", bto.getBACArtifact().getVersion());
+                            }
+                        }
+                    } else if (localBacAppVersion == null) {
+                        apkNames.add("BACapp_" + buildType + "_" + cloudBacAppVersion + ".apk");
+                        appNameVersion.put("bacAppVersion", "NONE");
+                        recommendedAppNameVersion.put("recommendedBacAppVersion", cloudBacAppVersion);
+                    } else if (!localBacAppVersion.contains(cloudBacAppVersion)) {
+                        apkNames.add("BACapp_" + buildType + "_" + cloudBacAppVersion + ".apk");
+                        appNameVersion.put("bacAppVersion", localBacAppVersion);
+                        recommendedAppNameVersion.put("recommendedBacAppVersion", cloudBacAppVersion);
+                    }
+
+                    // Check if the cloud Home app version is different from the local version
+                    if (cloudHomeAppVersion == null) {
+                        if (getArtifactVersionString(bto, "homeapp") != null) {
+                            if(localHomeAppVersion == null ||
+                                    !localHomeAppVersion.equals(bto.getHomeArtifact().getVersion())) {
+                                String name = "NONE";
+                                if(localHomeAppVersion != null){
+                                    name = localHomeAppVersion;
+                                }
+                                CcuLog.d(L.TAG_CCU_REPLACE, "updating recommended Bundle home app");
+                                apkNames.add("HomeApp_" + buildType + "_" + bto.getHomeArtifact().getVersion() + ".apk");
+                                appNameVersion.put("homeAppVersion", name);
+                                recommendedAppNameVersion.put("recommendedHomeAppVersion", bto.getHomeArtifact().getVersion());
+                            }
+                        }
+                    } else if (localHomeAppVersion == null) {
+                        apkNames.add("HomeApp_" + buildType + "_" + cloudHomeAppVersion + ".apk");
+                        appNameVersion.put("homeAppVersion", "NONE");
+                        recommendedAppNameVersion.put("recommendedHomeAppVersion", cloudHomeAppVersion);
+                    } else if (!localHomeAppVersion.contains(cloudHomeAppVersion)) {
+                        apkNames.add("HomeApp_" + buildType + "_" + cloudHomeAppVersion + ".apk");
+                        appNameVersion.put("homeAppVersion", localHomeAppVersion);
+                        recommendedAppNameVersion.put("recommendedHomeAppVersion", cloudHomeAppVersion);
+                    }
+
+                    if (cloudRemoteAppVersion == null) {
+                        if (getArtifactVersionString(bto, "remoteapp") != null) {
+                            if(localRemoteAppVersion == null ||
+                                    !localRemoteAppVersion.equals(bto.getRemoteArtifact().getVersion())) {
+                                String name = "NONE";
+                                if(localRemoteAppVersion != null){
+                                    name = localRemoteAppVersion;
+                                }
+                                CcuLog.d(L.TAG_CCU_REPLACE, "updating recommended Bundle remote app");
+                                apkNames.add("RemoteApp_" + buildType + "_" + bto.getRemoteArtifact().getVersion() + ".apk");
+                                appNameVersion.put("remoteAppVersion", name);
+                                recommendedAppNameVersion.put("recommendedRemoteAppVersion", bto.getRemoteArtifact().getVersion());
+                            }
+                        }
+                    } else if (localRemoteAppVersion == null) {
+                        apkNames.add("RemoteApp_" + buildType + "_" + cloudRemoteAppVersion + ".apk");
+                        appNameVersion.put("remoteAppVersion", "NONE");
+                        recommendedAppNameVersion.put("recommendedRemoteAppVersion", cloudRemoteAppVersion);
+                    } else if (!localRemoteAppVersion.contains(cloudRemoteAppVersion)) {
+                        apkNames.add("RemoteApp_" + buildType + "_" + cloudRemoteAppVersion + ".apk");
+                        appNameVersion.put("remoteAppVersion", localRemoteAppVersion);
+                        recommendedAppNameVersion.put("recommendedRemoteAppVersion", cloudRemoteAppVersion);
+                    }
+
+                    // proceed with replace
+                    if (apkNames.isEmpty()) {
+                        return;
+                    }
+
+                    try {
+                        CcuLog.d(L.TAG_CCU_REPLACE, "to be downloaded apks: " + apkNames);
+                        isCCUUpgradeRequired = true;
+                        updateCCUFragment(fragmentManager, ccu, apkNames, appNameVersion, recommendedAppNameVersion);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
                     }
                 },
-                ()->{
+                () -> {
                     ProgressDialogUtils.hideProgressDialog();
-                    // Everything is fine, proceed with CCU selection
-                    if(!isCCUUpgradeRequired) {
+                    if (!isCCUUpgradeRequired) {
                         callBack.onCCUSelect(ccuList.get(position));
                     }
                 });
@@ -162,8 +250,8 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
 
     private String getBundleVersionPoint(List<CCU> ccuList, int position) {
 
-        String ccuId = ccuList.get(position).getCcuId().replace("@", "");
-        String query = ("domainName == \"" + DomainName.bundleVersion + "\" and ccuRef == \"" + ccuId + "\"");
+        String ccuId = ccuList.get(position).getCcuId();
+        String query = ("domainName == @" + DomainName.bundleVersion + " and ccuRef == " + ccuId );
 
         String response = CCUHsApi.getInstance().fetchRemoteEntityByQuery(query);
 
@@ -199,45 +287,22 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
         return null;
     }
 
-    private void updateCCUFragment(FragmentManager parentFragmentManager, CCU ccu, String fileSize,
-                                   boolean isBundleUpdate, String bundleName, UpgradeBundle bundle) throws JSONException {
+    private void updateCCUFragment(FragmentManager parentFragmentManager, CCU ccu,
+                                   ArrayList<String> apkNames, HashMap<String, String> appNameVersion,
+           HashMap<String, String> recommendedAppNameVersion) throws JSONException {
         String currentAppVersionWithPatch = getCurrentAppVersionWithPatch();
         FragmentTransaction ft = parentFragmentManager.beginTransaction();
-        Fragment previousFragment = parentFragmentManager.findFragmentByTag("popup");
-        UpdateCCUFragment newFragment;
-        if (previousFragment != null) {
-            ft.remove(previousFragment);
-        }
-        if (isBundleUpdate) {
-            newFragment = new UpdateCCUFragment().showBundleUpdateScreenFromReplaceCCU(true,
-                    true, bundleName, fileSize, currentAppVersionWithPatch, bundle);
-        } else {
-            newFragment = new UpdateCCUFragment().showUiForReplaceCCU(currentAppVersionWithPatch,
-                    ccu, fileSize, true);
-        }
-        newFragment.show(ft, "popup");
-    }
-
-    private static String getFileSize(String currentCCUVersion) throws JSONException {
-        JsonObject body = new JsonObject();
-        String[] currentVersionComponents = currentCCUVersion.split("\\.");
-        body.addProperty("majorVersion", currentVersionComponents[0]);
-        body.addProperty("minorVersion", currentVersionComponents[1]);
-        body.addProperty("patchVersion", currentVersionComponents[2]);
-
-        String response = HttpUtil.executeJson(
-                RenatusServicesEnvironment.getInstance().getUrls().getGetCCUFileSize(),
-                body.toString(),
-                a75f.io.api.haystack.BuildConfig.HAYSTACK_API_KEY,
+        UpdateCCUFragment newFragment = new UpdateCCUFragment().showUiForReplaceCCU(
+                currentAppVersionWithPatch,
+                ccu,
+                "",
                 true,
-                HttpConstants.HTTP_METHOD_POST
-        );
-        if (response != null) {
-            JSONObject jsonResponse = new JSONObject(response);
-            return jsonResponse.get("size").toString();
-        } else {
-            return "0";
-        }
+                apkNames,
+                appNameVersion,
+                recommendedAppNameVersion
+                );
+        newFragment.show(ft, "popup");
+
     }
 
     private String getCurrentAppVersionWithPatch() {
@@ -263,5 +328,39 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
             status = itemView.findViewById(R.id.ccu_status);
             version = itemView.findViewById(R.id.ccu_version);
         }
+    }
+
+    public String getArtifactVersionString(BundleDTO bto, String artifactName) {
+        String isArtifactEmpty = null;
+        switch (artifactName) {
+            case "homeapp":
+                if (bto.getHomeArtifact() != null
+                        && bto.getHomeArtifact().getVersion() != null) {
+                    if (!bto.getHomeArtifact().getVersion().isEmpty()) {
+                        CcuLog.d(L.TAG_CCU_REPLACE, "Recommended Bundle home app is not empty, hence not updating");
+                        isArtifactEmpty = bto.getHomeArtifact().getVersion();
+                    }
+                }
+                break;
+            case "bacapp":
+                if (bto.getBACArtifact() != null
+                        && bto.getBACArtifact().getVersion() != null) {
+                    if (!bto.getBACArtifact().getVersion().isEmpty()) {
+                        CcuLog.d(L.TAG_CCU_REPLACE, "Recommended Bundle bac app is not empty, hence not updating");
+                        isArtifactEmpty = bto.getBACArtifact().getVersion();
+                    }
+                }
+                break;
+            case "remoteapp":
+                if (bto.getRemoteArtifact() != null
+                        || bto.getRemoteArtifact().getVersion() != null) {
+                    if (!bto.getRemoteArtifact().getVersion().isEmpty()) {
+                        CcuLog.d(L.TAG_CCU_REPLACE, "Recommended Bundle Remote app is not empty, hence not updating");
+                        isArtifactEmpty = bto.getRemoteArtifact().getVersion();
+                    }
+                }
+                break;
+        }
+        return isArtifactEmpty;
     }
 }

@@ -182,7 +182,7 @@ public class RenatusApp extends UtilityApplication
 	public static void restartApp() {
 		AlertManager.getInstance().clearAlertsWhenAppClose();
 		AlertManager.getInstance().getRepo().setRestartAppToTrue();
-		Domain.diagEquip.getAppRestart().writeHisVal(1.0);
+		if(Domain.diagEquip != null) Domain.diagEquip.getAppRestart().writeHisVal(1.0);
 		closeApp();
 	}
 

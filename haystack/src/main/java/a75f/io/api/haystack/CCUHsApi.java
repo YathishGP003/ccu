@@ -3441,4 +3441,23 @@ public class CCUHsApi
     public void setPreconfigInProgress(boolean progress) {
         preconfigInProgress = progress;
     }
+
+    public String readDefaultStrValueRemote(String query) {
+        HDict hDict = CCUHsApi.getInstance().readRemotePoint(query);
+        HGrid pointGrid = readPointArrRemote(hDict.id().toString());
+        if (pointGrid == null) {
+            CcuLog.d(TAG_CCU_HS, "readDefaultStrValueRemote: pointGrid is empty");
+            return null;
+        }
+        Iterator it = pointGrid.iterator();
+        while (it.hasNext()) {
+            HRow r = (HRow) it.next();
+            if (Integer.parseInt(r.get("level").toString()) == 8) {
+                CcuLog.d(TAG_CCU_HS, "Point found value is " + r.get("val").toString());
+                return r.get("val").toString();
+            }
+        }
+        return null;
+    }
+
 }

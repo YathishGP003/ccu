@@ -1721,7 +1721,13 @@
     <string name="exit_safe_mode">EXIT SAFE MODE</string>
     <string name="updateAppToRecommendedVersion">Please update the App to continue.. </string>
     <string name="server_down_string">Operation cannot be performed till CCU is connected to server </string>
-    <string name="current_version">Current CCU Version: </string>
+    <string name="current_version">Current CCU App Version: </string>
+    <string name="current_home_version">Current HOME App Version: </string>
+    <string name="current_remote_version">Current REMOTE App Version: </string>
+    <string name="current_bacapp_version">Current BACAPP App Version: </string>
+    <string name="recommended_bacapp_version">Recommended BACAPP App Version: </string>
+    <string name="recommended_home_version">Recommended HOME App Version: </string>
+    <string name="recommended_remote_version">Recommended REMOTE App Version: </string>
     <string name="recommended">Recommended: </string>
     <string name="recommended_software">Recommended Software: </string>
     <string name="latest_version">Latest Version: </string>

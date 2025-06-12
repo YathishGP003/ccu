@@ -1,6 +1,8 @@
 package a75f.io.renatus.registration;
 
 import static android.content.Context.DOWNLOAD_SERVICE;
+import static android.view.View.GONE;
+
 import android.app.DownloadManager;
 import android.app.Dialog;
 import android.content.Context;
@@ -30,6 +32,7 @@ import org.json.JSONObject;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.sync.HttpUtil;
@@ -52,7 +55,6 @@ import a75f.io.renatus.util.remotecommand.bundle.BundleInstallManager;
 import a75f.io.renatus.util.remotecommand.bundle.models.ArtifactDTO;
 import a75f.io.renatus.util.remotecommand.bundle.models.UpgradeBundle;
 import a75f.io.util.ExecutorTask;
-import butterknife.BindView;
 
 public class UpdateCCUFragment extends DialogFragment implements BundleInstallListener {
 
@@ -70,7 +72,7 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
     TextView ccuName;
     TextView recommendedVersionOfCCU;
     TextView latestVersionText;
-    TextView fileSize;
+    public TextView fileSize;
     TextView cancel;
     TextView updateApp;
     TextView downloadedSizeText;
@@ -79,7 +81,7 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
     LinearProgressIndicator progressBar;
     LinearLayout linearLayout;
     LinearLayout progressLayout;
-    Long downloadTd;
+    public Long downloadTd;
     LinearLayout cancel_update;
     LinearLayout update_details;
     LinearLayout update_details_parent;
@@ -98,6 +100,27 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
     LinearLayout error_message_layout;
     LinearLayout error_image_layout;
     private View toastLayout;
+    ArrayList<String> apkNames = new ArrayList<>();
+    LinearLayout homeDetailsLayout;
+    LinearLayout remoteDetailsLayout;
+    LinearLayout bacAppDetailsLayout;
+    LinearLayout recommendedBacAppDetailsLayout;
+    LinearLayout recommendedRemoteAppDetailsLayout;
+    LinearLayout recommendedHomeAppDetailsLayout;
+    TextView homeAppVersion;
+    TextView remoteAppVersion;
+    TextView bacAppVersion;
+    TextView recommendedHomeAppVersion;
+    TextView recommendedRemoteAppVersion;
+    TextView recommendedBacAppVersion;
+    String homeAppVersionString = null;
+    String remoteAppVersionString = null;
+    String bacAppVersionString = null;
+    String recommendedHomeAppVersionString = null;
+    String recommendedRemoteAppVersionString = null;
+    String recommendedBacAppVersionString = null;
+    LinearLayout currentVersionLayout;
+    LinearLayout recommendedVersionLayout;
 
     public UpdateCCUFragment showServerDownLayout(Boolean isServerDown) {
         this.isServerDown = isServerDown;
@@ -149,7 +172,16 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
         PreferenceUtil.setStringPreference("UPDATE_CCU_NEW_CONFIGURATION",config.toString());
         return this;
     }
-    public UpdateCCUFragment showUiForReplaceCCU(String currentVersionOfCCU, CCU ccu, String fileSize, boolean isReplace) throws JSONException {
+
+    public UpdateCCUFragment showUiForReplaceCCU(
+            String currentVersionOfCCU,
+            CCU ccu,
+            String fileSize,
+            boolean isReplace,
+            ArrayList<String> apkNames,
+            HashMap<String, String> appNameVersion,
+            HashMap<String, String> recommendedAppNameVersion
+    ) throws JSONException {
         this.currentVersionOfCCUString = currentVersionOfCCU;
         this.fileSizeString = fileSize + " MB";
         this.recommendedVersionOfCCUString = ccu.getVersion();
@@ -165,29 +197,17 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
         config.put("recommendedVersionOfCCUString", ccu.getVersion());
         config.put("versionLabelString", getReplaceCCUApk(ccu.getName()));
         config.put("replacingCCUName", ccu.getName());
-
-        PreferenceUtil.setStringPreference("UPDATE_CCU_REPLACE_CONFIGURATION",config.toString());
+        this.apkNames = apkNames;
+        this.homeAppVersionString = appNameVersion.get("homeAppVersion");
+        this.remoteAppVersionString = appNameVersion.get("remoteAppVersion");
+        this.bacAppVersionString = appNameVersion.get("bacAppVersion");
+        this.recommendedHomeAppVersionString = recommendedAppNameVersion.get("recommendedHomeAppVersion");
+        this.recommendedRemoteAppVersionString = recommendedAppNameVersion.get("recommendedRemoteAppVersion");
+        this.recommendedBacAppVersionString = recommendedAppNameVersion.get("recommendedBacAppVersion");
+        PreferenceUtil.setStringPreference("UPDATE_CCU_REPLACE_CONFIGURATION", config.toString());
         return this;
     }
 
-    public UpdateCCUFragment showBundleUpdateScreenFromReplaceCCU(boolean isReplace, boolean isBundleUpdate, String bundleName,
-                             String fileSize, String currentAppVersionWithPatch, UpgradeBundle bundle
-                                                                  ) throws JSONException {
-        this.currentVersionOfCCUString = currentAppVersionWithPatch;
-        this.recommendedVersionOfCCUString = bundleName;
-        this.replacingCCUName = bundleName;
-        this.isReplace = isReplace;
-        this.isBundleUpdate = isBundleUpdate;
-        this.isServerDown = false;
-        this.isNotFirstInvocation = false;
-        this.resumeUpdateCCU = false;
-        this.fileSizeString = fileSize + " MB";
-        this.bundle = bundle;
-        config = new JSONObject();
-        config.put("recommendedVersionOfCCUString", bundleName);
-        PreferenceUtil.setStringPreference("UPDATE_CCU_REPLACE_CONFIGURATION",config.toString());
-        return this;
-    }
     public static void abortCCUDownloadProcess() {
         CcuLog.i(L.TAG_CCU_BUNDLE, "Aborting CCU download and installation process in Utility class");
         UpdateCCUFragment.stopAllDownloads();
@@ -300,7 +320,12 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
         PreferenceUtil.startUpdateCCU();
         showProgressBar();
         if (isBundleUpdate) {
-            RxjavaUtil.executeBackgroundWithDisposable(() -> bundleInstallManager.initiateBundleUpgrade(bundle, this));        } else {
+            RxjavaUtil.executeBackgroundWithDisposable(() -> bundleInstallManager.initiateBundleUpgrade(bundle, this));        }
+        else if(isReplace){
+            RxjavaUtil.executeBackgroundWithDisposable(() ->
+                    bundleInstallManager.startApkDownloads(requireActivity(), apkNames, true, this)
+            );
+        } else {
             if (versionLabelString != null) {
                 RemoteCommandHandlerUtil.updateCCU(versionLabelString, UpdateCCUFragment.this, getActivity());
             }
@@ -337,9 +362,24 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
         currentVersionOfCCU.setText(currentVersionOfCCUString);
         recommendedVersionOfCCU.setText(recommendedVersionOfCCUString);
         fileSize.setText(fileSizeString);
+        if(isReplace) fileSize.setVisibility(GONE);
     }
 
     private void updateDialog(View view) {
+        homeDetailsLayout = view.findViewById(R.id.homeappcurrentVersionLayout);
+        remoteDetailsLayout = view.findViewById(R.id.remoteappcurrentVersionLayout);
+        bacAppDetailsLayout = view.findViewById(R.id.bacappappcurrentVersionLayout);
+        recommendedHomeAppDetailsLayout = view.findViewById(R.id.homeappRecommendedVersionLayout);
+        recommendedRemoteAppDetailsLayout = view.findViewById(R.id.remoteappRecommendedVersionLayout);
+        recommendedBacAppDetailsLayout = view.findViewById(R.id.bacappappRecommendedVersionLayout);
+        homeAppVersion = view.findViewById(R.id.currentHomeVersion);
+        remoteAppVersion = view.findViewById(R.id.currentRemoteVersion);
+        bacAppVersion = view.findViewById(R.id.currentBacAppVersion);
+        recommendedHomeAppVersion = view.findViewById(R.id.recommendedHomeVersion);
+        recommendedRemoteAppVersion = view.findViewById(R.id.recommendedRemoteVersion);
+        recommendedBacAppVersion = view.findViewById(R.id.recommendedBacAppVersion);
+        currentVersionLayout = view.findViewById(R.id.currentVersionLayout);
+        recommendedVersionLayout = view.findViewById(R.id.recommendedVersionLayout);
         header = view.findViewById(R.id.header);
         ccuName = view.findViewById(R.id.ccu_name);
         currentVersionOfCCU = view.findViewById(R.id.currentVersion);
@@ -352,7 +392,8 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
         downloadedSizeText = view.findViewById(R.id.downloaded_size);
         totalSize = view.findViewById(R.id.file_size);
         downloadingText = view.findViewById(R.id.downloading_text);
-        totalSize.setText(fileSizeString);
+        if (!isReplace) totalSize.setText(fileSizeString);
+        if (isReplace) totalSize.setVisibility(View.GONE);
         progressBar.setIndeterminate(false);
         linearLayout = view.findViewById(R.id.layoutId);
         progressLayout = view.findViewById(R.id.progress_layout);
@@ -362,8 +403,15 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
         fragment_layout = view.findViewById(R.id.update_ccu_fragment_layout);
         server_down_layout = view.findViewById(R.id.server_down_layout);
         connectivityIssues = view.findViewById(R.id.connectivityIssues);
-        currentVersionOfCCU.setText(currentVersionOfCCUString);
-        recommendedVersionOfCCU.setText(recommendedVersionOfCCUString);
+        if(isReplace && currentVersionOfCCUString.equals(recommendedVersionOfCCUString)){
+            currentVersionLayout.setVisibility(View.GONE);
+            recommendedVersionLayout.setVisibility(View.GONE);
+        }else{
+            currentVersionLayout.setVisibility(View.VISIBLE);
+            recommendedVersionLayout.setVisibility(View.VISIBLE);
+            currentVersionOfCCU.setText(currentVersionOfCCUString);
+            recommendedVersionOfCCU.setText(recommendedVersionOfCCUString);
+        }
         fileSize.setText(fileSizeString);
         downloadPerc = view.findViewById(R.id.download_perc);
         downloadSizeText = view.findViewById(R.id.downloadSizeText);
@@ -371,9 +419,34 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
         error_image_layout = view.findViewById(R.id.error_image_layout);
         if (isReplace & !isBundleUpdate) {
             downloadSizeText.setVisibility(View.VISIBLE);
+            if(isReplace) downloadSizeText.setVisibility(View.GONE);
             header.setText("Do you want to replace");
             latestVersionText.setText("Replacing CCU's version:");
             updateApp.setText("UPDATE & CONTINUE");
+            if(homeAppVersionString != null) {
+                homeDetailsLayout.setVisibility(View.VISIBLE);
+                recommendedHomeAppDetailsLayout.setVisibility(View.VISIBLE);
+                homeAppVersion.setText(homeAppVersionString);
+                recommendedHomeAppVersion.setText(recommendedHomeAppVersionString);
+            } else {
+                homeDetailsLayout.setVisibility(View.GONE);
+            }
+            if(remoteAppVersionString != null) {
+                remoteDetailsLayout.setVisibility(View.VISIBLE);
+                recommendedRemoteAppDetailsLayout.setVisibility(View.VISIBLE);
+                remoteAppVersion.setText(remoteAppVersionString);
+                recommendedRemoteAppVersion.setText(recommendedRemoteAppVersionString);
+            } else {
+                remoteDetailsLayout.setVisibility(View.GONE);
+            }
+            if(bacAppVersionString != null) {
+                bacAppDetailsLayout.setVisibility(View.VISIBLE);
+                recommendedBacAppDetailsLayout.setVisibility(View.VISIBLE);
+                bacAppVersion.setText(bacAppVersionString);
+                recommendedBacAppVersion.setText(recommendedBacAppVersionString);
+            } else {
+                bacAppDetailsLayout.setVisibility(View.GONE);
+            }
         } else if (isReplace && isBundleUpdate) {
             totalSize.setVisibility(View.GONE);
             fileSize.setVisibility(View.GONE);
@@ -399,6 +472,7 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
         if (getActivity() != null) {
             new Handler(Looper.getMainLooper()).post(() -> {
                     downloadedSizeText.setText((downloadedSize));
+                    downloadedSizeText.setVisibility(View.GONE);
                     progressBar.setProgressCompat(value, true);
                     connectivityIssues.setVisibility(View.GONE);
                     if (columnIndex == 4 || columnIndex == 1 && isNotFirstInvocation) {
@@ -595,5 +669,41 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
         }
 
         CcuLog.d(L.TAG_CCU_UI, errorMessages.toString());
+    }
+
+    public void setReplaceProgress(
+            int value,
+            long downloadId,
+            int columnIndex,
+            double fileSize,
+            UpdateCCUFragment currentFragment
+    ) {
+        CcuLog.d(L.TAG_CCU_DOWNLOAD,
+                "setReplaceProgress fileSize: " + fileSize + " , " +
+                        "value: " + value + ", " +
+                        "downloadId: " + downloadId + ", " +
+                        "columnIndex: " + columnIndex);
+
+        currentFragment.downloadTd = downloadId;
+        CcuLog.i(L.TAG_CCU_DOWNLOAD, "progress " + value);
+        DecimalFormat df = new DecimalFormat("#.##");
+        double downloadSize = Double.parseDouble(df.format(value * .01 * fileSize));
+        String downloadedSize = downloadSize + " MB/ " + fileSize + " MB";
+
+        if (getActivity() != null) {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                currentFragment.downloadedSizeText.setText((downloadedSize));
+                currentFragment.progressBar.setProgressCompat(value, true);
+                currentFragment.connectivityIssues.setVisibility(GONE);
+                if (columnIndex == 4 || columnIndex == 1 && isNotFirstInvocation) {
+                    currentFragment.connectivityIssues.setVisibility(View.VISIBLE);
+                }
+                currentFragment.isNotFirstInvocation = true;
+                if (value == 100) {
+                    PreferenceUtil.stopUpdateCCU();
+                    PreferenceUtil.installCCU();
+                }
+            });
+        }
     }
 }

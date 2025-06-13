@@ -354,6 +354,8 @@ public class CreateNewSite extends Fragment {
                 String installerOrg = mSiteOrg.getText().toString().trim();
                 String ccuName = mSiteCCU.getText().toString().trim();
                 AtomicBoolean siteRegistered = new AtomicBoolean(false);
+                prefs.setString("temp_ccu_name", ccuName);
+                CcuLog.i(L.TAG_REGISTRATION,"Temp CCU Name: " + prefs.getString("temp_ccu_name"));
                 ExecutorTask.executeAsync(
                         () -> {},
                         () -> {
@@ -370,7 +372,6 @@ public class CreateNewSite extends Fragment {
                             CcuLog.i(L.TAG_REGISTRATION,"Create CCU & Diag Equip ");
                             boolean isCCUDeviceExists = !CCUHsApi.getInstance().readEntity("ccu and device").isEmpty();
                             postSiteCreationSetup(isCCUDeviceExists, siteEntity, ccuName, installerEmail, managerEmail);
-                            prefs.remove("temp_ccu_name");
 
                             try {
                                 CareTakerResponse siteResponse = CCUHsApi.getInstance().registerSite();

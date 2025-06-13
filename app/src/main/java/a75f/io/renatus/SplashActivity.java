@@ -104,6 +104,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
                             () -> CcuLog.i(TAG, "Create CCU & Diag Equip "),
                             () -> {
                                 if (!CCUHsApi.getInstance().isCCURegistered()) {
+                                    CcuLog.i(L.TAG_REGISTRATION, "CCU name from pref file "+prefs.getString("temp_ccu_name"));
                                     CreateNewSite.postSiteCreationSetup(
                                             false, site, prefs.getString("temp_ccu_name"),
                                             site.get(Tags.INSTALLER_EMAIL).toString(),

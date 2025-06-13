@@ -7,3 +7,6 @@ package a75f.io.util
 interface DashboardListener {
     fun onDashboardConfigured(isDashboardConfigured: Boolean)
 }
+interface DashboardRefreshListener {
+    fun refreshDashboard(isDashboardConfigured: Boolean)
+}

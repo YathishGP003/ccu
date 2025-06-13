@@ -8,8 +8,10 @@ import a75f.io.logic.Globals
 import a75f.io.messaging.BuildConfig
 import a75f.io.messaging.MessageHandler
 import a75f.io.messaging.handler.DashboardHandler.Companion.dashboardListener
+import a75f.io.messaging.handler.DashboardHandler.Companion.dashboardRefreshListener
 import a75f.io.util.DASHBOARD
 import a75f.io.util.DashboardListener
+import a75f.io.util.DashboardRefreshListener
 import a75f.io.util.ExecutorTask
 import a75f.io.util.isDashboardConfig
 import a75f.io.util.saveConfigs
@@ -27,6 +29,7 @@ class DashboardHandler: MessageHandler {
 
     companion object {
         var dashboardListener: DashboardListener? = null
+        var dashboardRefreshListener: DashboardRefreshListener? = null
     }
 
     override val command: List<String> = listOf("updateDashboard")
@@ -82,7 +85,8 @@ fun getDashboardConfiguration() {
             }
         }
     }, {
-        DashboardHandler.dashboardListener?.onDashboardConfigured(isConfigured)
+        dashboardListener?.onDashboardConfigured(isConfigured)
+        dashboardRefreshListener?.refreshDashboard(isConfigured)
     })
 }
 

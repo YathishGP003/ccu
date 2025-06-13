@@ -119,6 +119,11 @@ public class TrueCFMVAVConfigHandler {
     }
 
     private static void writePointFromJson(Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
+        String checkValue = msgObject.get("val").getAsString();
+        if(checkValue == null || checkValue.isEmpty()) {
+            CcuLog.d(L.TAG_CCU_PUBNUB, "updateVAVCFM - Message is not handled");
+            return;
+        }
         String who = msgObject.get(HayStackConstants.WRITABLE_ARRAY_WHO).getAsString();
         int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
         double val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsDouble();

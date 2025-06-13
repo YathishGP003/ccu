@@ -9,6 +9,11 @@ import a75f.io.logic.bo.building.vav.VavProfile;
 
 public class VAVZonePriorityHandler {
     public static void updateVAVZonePriority(JsonObject msgObject, Point configPoint) {
+        String checkValue = msgObject.get("val").getAsString();
+        if(checkValue == null || checkValue.isEmpty()) {
+            CcuLog.d(L.TAG_CCU_PUBNUB, "updateVAVZonePriority - Message is not handled");
+            return;
+        }
         double value = msgObject.get("val").getAsDouble();
         if((int)value < 0 || (int)value > 3) {
             CcuLog.d(L.TAG_CCU_PUBNUB, "updateVAVZonePriority - Message is not handled");

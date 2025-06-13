@@ -24,7 +24,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.messaging.handler.DashboardHandler;
 import a75f.io.renatus.util.ProgressDialogUtils;
-import a75f.io.util.DashboardListener;
+import a75f.io.util.DashboardRefreshListener;
 import a75f.io.util.DashboardUtilKt;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -33,7 +33,7 @@ import butterknife.ButterKnife;
  * Created by samjithsadasivan isOn 8/7/17.
  */
 
-public class DashboardFragment extends Fragment implements DashboardListener {
+public class DashboardFragment extends Fragment implements DashboardRefreshListener {
     public DashboardFragment() {
     }
 
@@ -58,7 +58,7 @@ public class DashboardFragment extends Fragment implements DashboardListener {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-		DashboardHandler.Companion.setDashboardListener(this);
+		DashboardHandler.Companion.setDashboardRefreshListener(this);
 		super.onViewCreated(view, savedInstanceState);
         dashboardView();
     }
@@ -106,7 +106,28 @@ public class DashboardFragment extends Fragment implements DashboardListener {
 	}
 
 	@Override
-	public void onDashboardConfigured(boolean isDashboardConfigured) {
+	public void onResume() {
+		super.onResume();
+		DashboardHandler.Companion.setDashboardRefreshListener(this);
+		CcuLog.d(DASHBOARD, "onResume: DashboardFragment");
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		DashboardHandler.Companion.setDashboardRefreshListener(null);
+		CcuLog.d(DASHBOARD, "onPause: DashboardFragment");
+	}
+
+	@Override
+	public  void onStop() {
+		super.onStop();
+		DashboardHandler.Companion.setDashboardRefreshListener(null);
+		CcuLog.d(DASHBOARD, "onStop: DashboardFragment");
+	}
+
+	@Override
+	public void refreshDashboard(boolean isDashboardConfigured) {
 		CcuLog.d(DASHBOARD, "onDashboardConfigured: " + isDashboardConfigured);
 
 		if(DashboardFragment.this.getUserVisibleHint() && DashboardFragment.this.isVisible()) {
@@ -117,25 +138,4 @@ public class DashboardFragment extends Fragment implements DashboardListener {
 			CcuLog.d(DASHBOARD, "onDashboardConfigured: DashboardFragment is not visible");
 		}
 	}
-	@Override
-	public void onResume() {
-		super.onResume();
-		DashboardHandler.Companion.setDashboardListener(this);
-		CcuLog.d(DASHBOARD, "onResume: DashboardFragment");
-	}
-
-	@Override
-	public void onPause() {
-		super.onPause();
-		DashboardHandler.Companion.setDashboardListener(null);
-		CcuLog.d(DASHBOARD, "onPause: DashboardFragment");
-	}
-
-	@Override
-	public  void onStop() {
-		super.onStop();
-		DashboardHandler.Companion.setDashboardListener(null);
-		CcuLog.d(DASHBOARD, "onStop: DashboardFragment");
-	}
-
 }

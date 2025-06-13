@@ -47,10 +47,8 @@ import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.messaging.MessageHandler;
 import a75f.io.messaging.exceptions.MessageHandlingFailed;
-import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_DURATION;
-import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_LEVEL;
+
 import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_VAL;
-import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_WHO;
 import static a75f.io.messaging.handler.MyStatReconfigurationKt.reconfigureMyStat;
 import static a75f.io.messaging.handler.TiReconfigKt.tiReconfiguration;
 
@@ -110,8 +108,7 @@ public class UpdatePointHandler implements MessageHandler
                 //When a level is deleted, it currently generates a message with empty value.
                 //Handle it here.
                 int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
-                hayStack.clearPointArrayLevel(localPoint.getId(), level, true);
-                hayStack.writeHisValById(localPoint.getId(), HSUtil.getPriorityVal(localPoint.getId()));
+                clearPointArrayLevel( localPoint.getId(), level, hayStack);
             } else {
                 writePointFromJson(localPoint.getId(), msgObject, hayStack);
                 hayStack.writeHisValById(localPoint.getId(),Double.parseDouble( value));
@@ -515,11 +512,26 @@ public class UpdatePointHandler implements MessageHandler
                 || localPoint.getMarkers().contains(Tags.TUNER));
     }
     private static void writePointFromJson(String id, JsonObject msgObject, CCUHsApi hayStack) {
+        String value = msgObject.get(WRITABLE_ARRAY_VAL).getAsString();
+        if(value.isEmpty()) {
+            //When a level is deleted, it currently generates a message with empty value.
+            //Handle it here.
+            int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
+            clearPointArrayLevel(id, level, hayStack);
+            return;
+        }
         String who = msgObject.get("who").getAsString();
         double val = msgObject.get("val").getAsDouble();
         int level = msgObject.get("level").getAsInt();
         double durationDiff = MessageUtil.Companion.returnDurationDiff(msgObject);
         hayStack.writePointLocal(id, level, who, val, durationDiff);
         CcuLog.d(L.TAG_CCU_PUBNUB, "updatePoint : writePointFromJson - level: " + level + " who: " + who + " val: " + val  + " durationDiff: " + durationDiff);
+    }
+
+    private static void clearPointArrayLevel(String id, int level, CCUHsApi hayStack) {
+        //When a level is deleted, it currently generates a message with empty value.
+        hayStack.clearPointArrayLevel(id, level, true);
+        hayStack.writeHisValById(id, HSUtil.getPriorityVal(id));
+        CcuLog.d(L.TAG_CCU_PUBNUB, "clearPointArrayLevel - id: " + id + " level: " + level);
     }
 }

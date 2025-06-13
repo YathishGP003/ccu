@@ -498,7 +498,7 @@ public class VavStagedRtu extends VavSystemProfile
                                    SystemMode systemMode, Stage stage) {
     
         double relayState = 0;
-        double currState = getDomainPointForStage(stage).readHisVal();;
+        double currState = getDomainPointForStage(stage).readHisVal();
         double stageThreshold = 0;
         
         if (relayPoint.readDefaultVal() == 0) {

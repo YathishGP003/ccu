@@ -18,16 +18,16 @@ import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hvac.MyStatFanStages
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
-import a75f.io.logic.bo.building.mystat.configs.MyStatConfiguration
-import a75f.io.logic.bo.building.mystat.configs.MyStatCpuConfiguration
-import a75f.io.logic.bo.building.mystat.configs.MyStatHpuConfiguration
-import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2Configuration
-import a75f.io.logic.bo.building.mystat.profiles.MyStatProfile
-import a75f.io.logic.bo.building.mystat.profiles.util.MyStatFanModeCacheStorage
-import a75f.io.logic.bo.building.mystat.profiles.util.MyStatPossibleFanMode
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleFanModeSettings
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatProfile
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
+import a75f.io.logic.bo.building.statprofiles.util.MyStatPossibleFanMode
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.formattedToastMessage
@@ -170,13 +170,13 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
 
         if (possibleFanMode == MyStatPossibleFanMode.OFF) {
             equip.fanOpMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
-            MyStatFanModeCacheStorage().removeFanModeFromCache(equip.equipRef)
+            FanModeCacheStorage.getMyStatFanModeCache().removeFanModeFromCache(equip.equipRef)
             return
         }
 
         if (possibleFanMode == MyStatPossibleFanMode.AUTO) {
             equip.fanOpMode.writePointValue(StandaloneConditioningMode.AUTO.ordinal.toDouble())
-            MyStatFanModeCacheStorage().removeFanModeFromCache(equip.equipRef)
+            FanModeCacheStorage.getMyStatFanModeCache().removeFanModeFromCache(equip.equipRef)
             return
         }
 

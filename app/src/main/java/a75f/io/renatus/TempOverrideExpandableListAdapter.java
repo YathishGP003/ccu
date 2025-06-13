@@ -54,8 +54,6 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfileConfiguration;
-import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringConfiguration;
-import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
@@ -1864,117 +1862,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
                 break;
             case "HYPERSTAT_MONITORING":
-                /*HyperStatMonitoringProfile monitoringProfile = (HyperStatMonitoringProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
-                HyperStatMonitoringConfiguration monitoringConfiguration = (HyperStatMonitoringConfiguration) monitoringProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));
-                ArrayList<String> analogArr = new ArrayList<>();
-                for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
-                    analogArr.add(r.sensorName + " " + r.engineeringUnit);
-                }
-                ArrayList<String> thArr = new ArrayList<>();
-                for (Thermistor m : Thermistor.getThermistorList()) {
-                    thArr.add(m.sensorName + " " + m.engineeringUnit);
-                }
-                if (pointname.equals("Analog1In")) {
-                    if (monitoringConfiguration.isAnalog1Enable)
-                        return analogArr.get(monitoringConfiguration.analog1Sensor);
-                    else return "Not Enabled";
-                }
-                else if (pointname.equals("Analog2In")) {
-                    if (monitoringConfiguration.isAnalog2Enable)
-                        return analogArr.get(monitoringConfiguration.analog2Sensor);
-                    else return "Not Enabled";
-                }
-                else if (pointname.equals("Thermistor1")) {
-                    if (monitoringConfiguration.isTh1Enable)
-                        return thArr.get(monitoringConfiguration.th1Sensor);
-                    else return "Not Enabled";
-                }
-                else if (pointname.equals("Thermistor2")) {
-                    if (monitoringConfiguration.isTh2Enable)
-                        return thArr.get(monitoringConfiguration.th2Sensor);
-                    else return "Not Enabled";
-                }*/
+
                 break;
             case "HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT":
-                /*
-                TODO : Implement the mapping for the Conventional Package Unit
 
-                HyperStatCpuProfile mHSCpuProfile = (HyperStatCpuProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
-
-                CpuV2Equip equip1 = (CpuV2Equip) Domain.INSTANCE.getDomainEquip(mHSCpuProfile.getEquip().getId());
-                CpuConfiguration mHSCpuConfig = (CpuConfiguration) getConfiguration(equip1);
-
-                List<String> analogCpuArr = new ArrayList<>();
-                for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
-                    analogCpuArr.add(r.sensorName + " " + r.engineeringUnit);
-                }
-                List<String> thCpuArr = new ArrayList<>();
-                for (Thermistor m : Thermistor.getThermistorList()) {
-                    thCpuArr.add(m.sensorName + " " + m.engineeringUnit);
-                }
-                if (pointname.equals("Analog1In")) {
-                    if (mHSCpuConfig.getAnalogIn1State().getEnabled())
-                        return mHSCpuConfig.getAnalogIn1State().getAssociation().toString();
-                    else return "Not Enabled";
-                }
-                else if (pointname.equals("Analog2In")) {
-                    if (mHSCpuConfig.getAnalogIn2State().getEnabled())
-                        return mHSCpuConfig.getAnalogIn2State().getAssociation().toString();
-                    else return "Not Enabled";
-                }
-                else if (pointname.equals("Analog-out1")) {
-                    if (mHSCpuConfig.getAnalogOut1State().getEnabled())
-                        return mHSCpuConfig.getAnalogOut1State().getAssociation().toString();
-                    else return "Not Enabled";
-                }
-                else if (pointname.equals("Analog-out2")) {
-                    if (mHSCpuConfig.getAnalogOut2State().getEnabled())
-                        return mHSCpuConfig.getAnalogOut2State().getAssociation().toString();
-                    else return "Not Enabled";
-                }else if (pointname.equals("Analog-out3")) {
-                    if (mHSCpuConfig.getAnalogOut3State().getEnabled())
-                        return mHSCpuConfig.getAnalogOut3State().getAssociation().toString();
-                    else return "Not Enabled";
-                }else if (pointname.equals("relay1")) {
-                    if (mHSCpuConfig.getRelay1State().getEnabled())
-                        return mHSCpuConfig.getRelay1State().getAssociation().toString();
-                    else return "Not Enabled";
-                }
-                else if (pointname.equals("relay2")) {
-                    if (mHSCpuConfig.getRelay2State().getEnabled())
-                        return mHSCpuConfig.getRelay2State().getAssociation().toString();
-                    else return "Not Enabled";
-                }
-                else if (pointname.equals("relay3")) {
-                    if (mHSCpuConfig.getRelay3State().getEnabled())
-                        return mHSCpuConfig.getRelay3State().getAssociation().toString();
-                    else return "Not Enabled";
-                }
-                else if (pointname.equals("relay4")) {
-                    if (mHSCpuConfig.getRelay4State().getEnabled())
-                        return mHSCpuConfig.getRelay4State().getAssociation().toString();
-                    else return "Not Enabled";
-                }
-                else if (pointname.equals("relay5")) {
-                    if (mHSCpuConfig.getRelay5State().getEnabled())
-                        return mHSCpuConfig.getRelay5State().getAssociation().toString();
-                    else return "Not Enabled";
-                }
-                else if (pointname.equals("relay6")) {
-                    if (mHSCpuConfig.getRelay6State().getEnabled())
-                        return mHSCpuConfig.getRelay6State().getAssociation().toString();
-                    else return "Not Enabled";
-                }
-                else if (pointname.equals("Thermistor1")) {
-                    if (mHSCpuConfig.getThermistorIn1State().getEnabled())
-                        return mHSCpuConfig.getThermistorIn1State().getAssociation().toString();
-                    else return "Not Enabled";
-                }
-                else if (pointname.equals("Thermistor2")) {
-                    if (mHSCpuConfig.getThermistorIn2State().getEnabled())
-                        return mHSCpuConfig.getThermistorIn2State().getAssociation().toString();
-                    else return "Not Enabled";
-                }*/
                 break;
         }
         return "Not Used";

@@ -20,8 +20,8 @@ import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.definitions.SmartStatHeatPumpChangeOverType;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
-import a75f.io.logic.bo.building.hyperstat.common.SmartStatFanModeCache;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
@@ -109,7 +109,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             double ssFanOpMode = getOperationalModes("fan and operation", hpuEquip.getId());
             StandaloneOperationalMode opMode = StandaloneOperationalMode.values()[(int) ssOperatingMode];
             StandaloneLogicalFanSpeeds fanSpeed = StandaloneLogicalFanSpeeds.values()[(int) ssFanOpMode];
-            SmartStatFanModeCache fanCacheStorage = new SmartStatFanModeCache();
+            FanModeCacheStorage fanCacheStorage = FanModeCacheStorage.Companion.getSmartStatFanModeCache();
             int fanModeSaved = fanCacheStorage.getFanModeFromCache(hpuEquip.getId());
             if (!occupied && (fanSpeed != StandaloneLogicalFanSpeeds.OFF)) {
                 if ((fanSpeed != StandaloneLogicalFanSpeeds.AUTO) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)) {

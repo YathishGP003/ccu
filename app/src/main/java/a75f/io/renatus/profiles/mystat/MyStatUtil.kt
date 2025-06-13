@@ -1,12 +1,7 @@
 package a75f.io.renatus.profiles.mystat
 
-import a75f.io.api.haystack.RawPoint
-import a75f.io.domain.api.Domain
-import a75f.io.domain.devices.MyStatDevice
-import a75f.io.logger.CcuLog
-import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus
+import a75f.io.logic.bo.building.statprofiles.util.StatZoneStatus
 import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.renatus.R
 import a75f.io.renatus.profiles.mystat.ui.getSupplyDirection
@@ -31,7 +26,6 @@ import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 const val MYSTAT: String = "MyStat"
 const val CPU: String = "Conventional Package Unit"
 const val PIPE2: String = "2 Pipe FCU"
-const val PIPE4: String ="4 Pipe FCU"
 const val HPU: String = "Heat Pump Unit"
 
 var minMaxVoltage = List(11) { Option(it, it.toString()) }
@@ -82,10 +76,10 @@ fun showTextView(viewId: Int, rootView: View, text: String) {
 
 @SuppressLint("DefaultLocale")
 fun showMyStatDischargeConfigIfRequired(dischargeView: View, pointsList: HashMap<String,Any>, rootView: LinearLayout) {
-    if (pointsList.containsKey(HSZoneStatus.DISCHARGE_AIRFLOW.name)) {
-        var dischargeValue = pointsList[HSZoneStatus.DISCHARGE_AIRFLOW.name].toString() + " ℉"
+    if (pointsList.containsKey(StatZoneStatus.DISCHARGE_AIRFLOW.name)) {
+        var dischargeValue = pointsList[StatZoneStatus.DISCHARGE_AIRFLOW.name].toString() + " ℉"
         if (UnitUtils.isCelsiusTunerAvailableStatus()) {
-            val converted = UnitUtils.fahrenheitToCelsiusTwoDecimal(pointsList[HSZoneStatus.DISCHARGE_AIRFLOW.name] as Double)
+            val converted = UnitUtils.fahrenheitToCelsiusTwoDecimal(pointsList[StatZoneStatus.DISCHARGE_AIRFLOW.name] as Double)
             dischargeValue = "${String.format("%.2f", converted)} °C"
         }
         showTextView(R.id.text_airflowValue, dischargeView, dischargeValue)
@@ -98,14 +92,14 @@ fun showMyStatDischargeConfigIfRequired(dischargeView: View, pointsList: HashMap
 
 @SuppressLint("DefaultLocale")
 fun showMyStatSupplyTemp(dischargeView: View, pointsList: HashMap<String,Any>, rootView: LinearLayout, nodeAddress: String) {
-    val profileType = pointsList[HSZoneStatus.PROFILE_TYPE.name] as ProfileType
+    val profileType = pointsList[StatZoneStatus.PROFILE_TYPE.name] as ProfileType
     val textView = dischargeView.findViewById<TextView>(R.id.text_discharge_airflow)
     textView.text = "Supply Water Temperature: "
     if (profileType == ProfileType.MYSTAT_PIPE2) {
-        var supplyTemp = pointsList[HSZoneStatus.SUPPLY_TEMP.name].toString() + " ℉"
+        var supplyTemp = pointsList[StatZoneStatus.SUPPLY_TEMP.name].toString() + " ℉"
         if (UnitUtils.isCelsiusTunerAvailableStatus()) {
             val converted =
-                UnitUtils.fahrenheitToCelsiusTwoDecimal(pointsList[HSZoneStatus.SUPPLY_TEMP.name] as Double)
+                UnitUtils.fahrenheitToCelsiusTwoDecimal(pointsList[StatZoneStatus.SUPPLY_TEMP.name] as Double)
             supplyTemp = "${String.format("%.2f", converted)} °C"
         }
         showTextView(R.id.text_airflowValue, dischargeView, "$supplyTemp (${getSupplyDirection(nodeAddress)})")

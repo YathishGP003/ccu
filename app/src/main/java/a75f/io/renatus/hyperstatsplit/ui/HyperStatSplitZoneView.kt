@@ -13,16 +13,18 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstatsplit.common.FanModeCacheStorage
-import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getActualConditioningMode
-import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getActualFanMode
-import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getFanSelectionMode
-import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getPossibleConditioningModeSettings
-import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getSelectedConditioningMode
-import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitZoneStatus
-import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getSelectedFanLevel
-import a75f.io.logic.bo.building.hyperstatsplit.common.HyperstatSplitProfileNames
-import a75f.io.logic.bo.building.hyperstatsplit.common.PossibleConditioningMode
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getActualConditioningMode
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getActualFanMode
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getFanSelectionMode
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getPossibleConditioningModeSettings
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getSelectedConditioningMode
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getSelectedFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.CPUECON_FULL
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.util.HSSPLIT_CPUECON
+import a75f.io.logic.bo.building.statprofiles.util.HSSPLIT_FULL
+import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
+import a75f.io.logic.bo.building.statprofiles.util.StatZoneStatus
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.logic.util.uiutils.updateUserIntentPoints
@@ -58,21 +60,21 @@ fun loadHyperStatSplitCpuEconProfile(
     val viewMat: View = inflater.inflate(R.layout.zones_item_mat, null)
     setTitleStatusConfig(
         viewTitle, viewStatus, nodeAddress!!,
-        cpuEconEquipPoints[HSSplitZoneStatus.STATUS.name].toString(),
-        HyperstatSplitProfileNames.HSSPLIT_CPUECON.toUpperCase(Locale.ROOT)
+        cpuEconEquipPoints[StatZoneStatus.STATUS.name].toString(),
+        HSSPLIT_CPUECON.toUpperCase(Locale.ROOT)
     )
     setUpConditionFanConfig(viewPointRow1, cpuEconEquipPoints, hssEquip, nodeAddress, context, ProfileType.HYPERSTATSPLIT_CPU)
     setUpHumidifierDeHumidifier(viewPointRow2, cpuEconEquipPoints, hssEquip, context, nodeAddress)
 
-    if (cpuEconEquipPoints.containsKey(HSSplitZoneStatus.DISCHARGE_AIRFLOW.name)) {
+    if (cpuEconEquipPoints.containsKey(StatZoneStatus.DISCHARGE_AIRFLOW.name)) {
         val textAirflowValue = viewSat.findViewById<TextView>(R.id.text_airflowValue)
         if (UnitUtils.isCelsiusTunerAvailableStatus()) {
             textAirflowValue.text = UnitUtils.fahrenheitToCelsiusTwoDecimal(
-                cpuEconEquipPoints[HSSplitZoneStatus.DISCHARGE_AIRFLOW.name].toString()
+                cpuEconEquipPoints[StatZoneStatus.DISCHARGE_AIRFLOW.name].toString()
                     .replace("[^0-9\\.]".toRegex(), "").toFloat().toString().toDouble()
             ).toString() + " \u00B0C"
         } else {
-            textAirflowValue.text = cpuEconEquipPoints[HSSplitZoneStatus.DISCHARGE_AIRFLOW.name].toString()
+            textAirflowValue.text = cpuEconEquipPoints[StatZoneStatus.DISCHARGE_AIRFLOW.name].toString()
         }
         textAirflowValue.visibility = View.VISIBLE
     } else {
@@ -82,16 +84,16 @@ fun loadHyperStatSplitCpuEconProfile(
     val textMatValue = viewMat.findViewById<TextView>(R.id.text_airflowValue)
     if (UnitUtils.isCelsiusTunerAvailableStatus()) {
         textMatValue.text = UnitUtils.fahrenheitToCelsiusTwoDecimal(
-            cpuEconEquipPoints[HSSplitZoneStatus.MIXED_AIR_TEMP.name].toString()
+            cpuEconEquipPoints[StatZoneStatus.MIXED_AIR_TEMP.name].toString()
                 .replace("[^0-9\\.]".toRegex(), "").toFloat().toString().toDouble()
         ).toString() + " \u00B0C"
     } else {
-        textMatValue.text = cpuEconEquipPoints[HSSplitZoneStatus.MIXED_AIR_TEMP.name].toString()
+        textMatValue.text = cpuEconEquipPoints[StatZoneStatus.MIXED_AIR_TEMP.name].toString()
     }
     linearLayoutZonePoints.addView(viewTitle)
     linearLayoutZonePoints.addView(viewStatus)
     linearLayoutZonePoints.addView(viewMat)
-    if (cpuEconEquipPoints.containsKey(HSSplitZoneStatus.DISCHARGE_AIRFLOW.name)) linearLayoutZonePoints.addView(viewSat)
+    if (cpuEconEquipPoints.containsKey(StatZoneStatus.DISCHARGE_AIRFLOW.name)) linearLayoutZonePoints.addView(viewSat)
     linearLayoutZonePoints.addView(viewPointRow2)
     linearLayoutZonePoints.addView(viewPointRow1)
 
@@ -102,7 +104,7 @@ private fun setTitleStatusConfig(
     viewTitle: View, viewStatus: View, nodeAddress: String, status: String, profileName: String
 ) {
     val textViewTitle = viewTitle.findViewById<TextView>(R.id.textProfile)
-    textViewTitle.text = "${HyperstatSplitProfileNames.HSSPLIT_FULL} - ${HyperstatSplitProfileNames.CPUECON_FULL} ( $nodeAddress )"
+    textViewTitle.text = "$HSSPLIT_FULL - $CPUECON_FULL ( $nodeAddress )"
     val textViewModule = viewTitle.findViewById<TextView>(R.id.module_status)
     HeartBeatUtil.moduleStatus(textViewModule, nodeAddress)
     val textViewStatus = viewStatus.findViewById<TextView>(R.id.text_status)
@@ -134,28 +136,28 @@ private fun setUpConditionFanConfig(
     var conditionMode = 0
     var fanMode = 0
     try {
-        conditionMode = cpuEconEquipPoints[HSSplitZoneStatus.CONDITIONING_MODE.name] as Int
-        fanMode = cpuEconEquipPoints[HSSplitZoneStatus.FAN_MODE.name] as Int
+        conditionMode = cpuEconEquipPoints[StatZoneStatus.CONDITIONING_MODE.name] as Int
+        fanMode = cpuEconEquipPoints[StatZoneStatus.FAN_MODE.name] as Int
     } catch (e: Exception) {
         e.printStackTrace()
     }
     var conModeAdapter =  getAdapterValue(context, R.array.smartstat_conditionmode)
 
-    if (cpuEconEquipPoints.containsKey(HSSplitZoneStatus.CONDITIONING_ENABLED.name)) {
-        if (cpuEconEquipPoints[HSSplitZoneStatus.CONDITIONING_ENABLED.name].toString().contains("Cool Only")) {
+    if (cpuEconEquipPoints.containsKey(StatZoneStatus.CONDITIONING_ENABLED.name)) {
+        if (cpuEconEquipPoints[StatZoneStatus.CONDITIONING_ENABLED.name].toString().contains("Cool Only")) {
 
             conModeAdapter = getAdapterValue(context, R.array.smartstat_conditionmode_coolonly)
             if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal)
                 conditionMode = conModeAdapter.count - 1
 
-        } else if (cpuEconEquipPoints[HSSplitZoneStatus.CONDITIONING_ENABLED.name].toString().contains("Heat Only")) {
+        } else if (cpuEconEquipPoints[StatZoneStatus.CONDITIONING_ENABLED.name].toString().contains("Heat Only")) {
 
             conModeAdapter = getAdapterValue(context, R.array.smartstat_conditionmode_heatonly)
             if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal) {
                 conditionMode = conModeAdapter.count - 1
             }
         }
-        if (cpuEconEquipPoints[HSSplitZoneStatus.CONDITIONING_ENABLED.name].toString().contains("Off")) {
+        if (cpuEconEquipPoints[StatZoneStatus.CONDITIONING_ENABLED.name].toString().contains("Off")) {
             conModeAdapter = getAdapterValue(context, R.array.smartstat_conditionmode_off)
             conditionMode = 0
         }
@@ -167,7 +169,7 @@ private fun setUpConditionFanConfig(
         CcuLog.e(L.TAG_CCU_ZONE, "Exception : ${e.message}")
     }
     val fanSpinnerSelectionValues =
-        RelayUtil.getFanOptionByLevel((cpuEconEquipPoints[HSSplitZoneStatus.FAN_LEVEL.name] as Int?)!!)
+        RelayUtil.getFanOptionByLevel((cpuEconEquipPoints[StatZoneStatus.FAN_LEVEL.name] as Int?)!!)
     val fanModeAdapter = getAdapterValue(context, fanSpinnerSelectionValues)
 
     try {
@@ -181,10 +183,10 @@ private fun setUpConditionFanConfig(
         e.printStackTrace()
     }
     setSpinnerListenerForHyperstatSplit(
-        conditioningModeSpinner, HSSplitZoneStatus.CONDITIONING_MODE, hssEquip, profileType
+        conditioningModeSpinner, StatZoneStatus.CONDITIONING_MODE, hssEquip, profileType
     )
     setSpinnerListenerForHyperstatSplit(
-        fanModeSpinner, HSSplitZoneStatus.FAN_MODE, hssEquip, profileType
+        fanModeSpinner, StatZoneStatus.FAN_MODE, hssEquip, profileType
     )
 }
 
@@ -206,23 +208,23 @@ private fun setUpHumidifierDeHumidifier(
         context, R.layout.spinner_dropdown_item, arrayHumidityTargetList
     )
     humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
-    if (cpuEconEquipPoints.containsKey(HSSplitZoneStatus.TARGET_HUMIDITY.name)) {
+    if (cpuEconEquipPoints.containsKey(StatZoneStatus.TARGET_HUMIDITY.name)) {
         textViewLabel3.text = "Target Min Humidity :"
         humiditySpinner.adapter = humidityTargetAdapter
-        val targetHumidity = cpuEconEquipPoints[HSSplitZoneStatus.TARGET_HUMIDITY.name] as Double
+        val targetHumidity = cpuEconEquipPoints[StatZoneStatus.TARGET_HUMIDITY.name] as Double
         humiditySpinner.setSelection(targetHumidity.toInt() - 1, false)
         setSpinnerListenerForHyperstatSplit(
-            humiditySpinner,HSSplitZoneStatus.TARGET_HUMIDITY, hssEquip, ProfileType.HYPERSTATSPLIT_CPU)
+            humiditySpinner, StatZoneStatus.TARGET_HUMIDITY, hssEquip, ProfileType.HYPERSTATSPLIT_CPU)
     } else {
         viewPointRow2.findViewById<View>(R.id.lt_column1).visibility = View.GONE
     }
-    if (cpuEconEquipPoints.containsKey(HSSplitZoneStatus.TARGET_DEHUMIDIFY.name)) {
+    if (cpuEconEquipPoints.containsKey(StatZoneStatus.TARGET_DEHUMIDIFY.name)) {
         textViewLabel4.text = "Target Max Humidity :"
         dehumidifySpinner.adapter = humidityTargetAdapter
-        val targetDeHumidity = cpuEconEquipPoints[HSSplitZoneStatus.TARGET_DEHUMIDIFY.name] as Double
+        val targetDeHumidity = cpuEconEquipPoints[StatZoneStatus.TARGET_DEHUMIDIFY.name] as Double
         dehumidifySpinner.setSelection(targetDeHumidity.toInt() - 1, false)
           setSpinnerListenerForHyperstatSplit(
-                    dehumidifySpinner,HSSplitZoneStatus.TARGET_DEHUMIDIFY, hssEquip, ProfileType.HYPERSTATSPLIT_CPU)
+                    dehumidifySpinner, StatZoneStatus.TARGET_DEHUMIDIFY, hssEquip, ProfileType.HYPERSTATSPLIT_CPU)
         if (viewPointRow2.findViewById<View>(R.id.lt_column1).visibility == View.GONE) {
             textViewLabel4.setPadding(52, 0, 0, 0)
         }
@@ -232,7 +234,7 @@ private fun setUpHumidifierDeHumidifier(
 }
 
 private fun setSpinnerListenerForHyperstatSplit(
-    view: View, spinnerType: HSSplitZoneStatus, hssEquip: HyperStatSplitEquip, profileType: ProfileType
+    view: View, spinnerType: StatZoneStatus, hssEquip: HyperStatSplitEquip, profileType: ProfileType
 ) {
     var userClickCheck = false
     // adding this listener to check the user click or not ,because this OnItemSelectedListener will be called at same times when we refresh the screen
@@ -248,21 +250,25 @@ private fun setSpinnerListenerForHyperstatSplit(
     val onItemSelectedListener: OnItemSelectedListener = object : OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
             when (spinnerType) {
-                HSSplitZoneStatus.CONDITIONING_MODE -> handleConditionMode(
+                StatZoneStatus.CONDITIONING_MODE -> handleConditionMode(
                     position, hssEquip, profileType ,userClickCheck
                 )
-                HSSplitZoneStatus.FAN_MODE -> handleFanMode(
+                StatZoneStatus.FAN_MODE -> handleFanMode(
                     hssEquip, position, profileType,userClickCheck
                 )
-                HSSplitZoneStatus.TARGET_HUMIDITY -> handleHumidityMode(hssEquip, position)
-                HSSplitZoneStatus.TARGET_DEHUMIDIFY -> handleDeHumidityMode(hssEquip, position)
+                StatZoneStatus.TARGET_HUMIDITY -> handleHumidityMode(
+                    hssEquip, position
+                )
+                StatZoneStatus.TARGET_DEHUMIDIFY -> handleDeHumidityMode(
+                    hssEquip, position
+                )
                 else -> {}
             }
         }
 
         override fun onNothingSelected(parent: AdapterView<*>?) {}
     }
-    (view as Spinner).onItemSelectedListener = onItemSelectedListener
+    view.onItemSelectedListener = onItemSelectedListener
 }
 
 private fun handleConditionMode(
@@ -295,7 +301,7 @@ private fun handleFanMode(hssEquip: HyperStatSplitEquip, selectedPosition: Int, 
 
 ) {
     if (userClickCheck) {
-        val cacheStorage = FanModeCacheStorage()
+        val cacheStorage = FanModeCacheStorage.getHyperStatSplitFanModeCache()
         val actualFanMode: Int = when (profileType) {
             ProfileType.HYPERSTATSPLIT_CPU -> {
                 getActualFanMode(hssEquip, selectedPosition)
@@ -339,38 +345,38 @@ fun getHyperStatSplitCPUEconEquipPoints(equipDetails: Equip): HashMap<String, An
     val equipLiveStatus = hssEquip.equipStatusMessage.readDefaultStrVal()
 
     if (equipLiveStatus != null)
-        cpuEconPoints[HSSplitZoneStatus.STATUS.name] = equipLiveStatus
+        cpuEconPoints[StatZoneStatus.STATUS.name] = equipLiveStatus
     else
-        cpuEconPoints[HSSplitZoneStatus.STATUS.name] = "OFF"
+        cpuEconPoints[StatZoneStatus.STATUS.name] = "OFF"
 
     val fanOpModePoint = hssEquip.fanOpMode.readPriorityVal()
     CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, "Saved fan mode $fanOpModePoint")
     val fanPosition = getFanSelectionMode(hssEquip, fanOpModePoint.toInt())
     CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, "converted fan mode $fanPosition")
-    cpuEconPoints[HSSplitZoneStatus.FAN_MODE.name] = fanPosition
+    cpuEconPoints[StatZoneStatus.FAN_MODE.name] = fanPosition
     val conditionModePoint = hssEquip.conditioningMode.readPriorityVal()
     CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, "Saved conditionModePoint mode $conditionModePoint")
     val selectedConditioningMode = getSelectedConditioningMode(hssEquip, conditionModePoint.toInt())
     CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, "converted conditionModePoint mode $selectedConditioningMode")
-    cpuEconPoints[HSSplitZoneStatus.CONDITIONING_MODE.name] = selectedConditioningMode
+    cpuEconPoints[StatZoneStatus.CONDITIONING_MODE.name] = selectedConditioningMode
 
     if (hssEquip.dischargeAirTemperature.pointExists()) {
         val dischargePoint = hssEquip.dischargeAirTemperature.readHisVal()
-        cpuEconPoints[HSSplitZoneStatus.DISCHARGE_AIRFLOW.name] = "$dischargePoint \u2109"
+        cpuEconPoints[StatZoneStatus.DISCHARGE_AIRFLOW.name] = "$dischargePoint \u2109"
     }
 
     val mixedAirPoint = hssEquip.mixedAirTemperature.readHisVal()
-    cpuEconPoints[HSSplitZoneStatus.MIXED_AIR_TEMP.name] = "$mixedAirPoint \u2109"
+    cpuEconPoints[StatZoneStatus.MIXED_AIR_TEMP.name] = "$mixedAirPoint \u2109"
     if (hssEquip.humidifierEnable.pointExists()) {
         val targetHumidity = hssEquip.targetHumidifier.readPriorityVal()
-        cpuEconPoints[HSSplitZoneStatus.TARGET_HUMIDITY.name] = targetHumidity
+        cpuEconPoints[StatZoneStatus.TARGET_HUMIDITY.name] = targetHumidity
     }
     if (hssEquip.dehumidifierEnable.pointExists()) {
         val targetDeHumidity = hssEquip.targetDehumidifier.readPriorityVal()
-        cpuEconPoints[HSSplitZoneStatus.TARGET_DEHUMIDIFY.name] = targetDeHumidity
+        cpuEconPoints[StatZoneStatus.TARGET_DEHUMIDIFY.name] = targetDeHumidity
     }
     val fanLevel = getSelectedFanLevel(hssEquip)
-    cpuEconPoints[HSSplitZoneStatus.FAN_LEVEL.name] = fanLevel
+    cpuEconPoints[StatZoneStatus.FAN_LEVEL.name] = fanLevel
 
     // Add conditioning status
     val status: String
@@ -381,7 +387,7 @@ fun getHyperStatSplitCPUEconEquipPoints(equipDetails: Equip): HashMap<String, An
         PossibleConditioningMode.COOLONLY -> "Cool Only"
         PossibleConditioningMode.HEATONLY -> "Heat Only"
     }
-    cpuEconPoints[HSSplitZoneStatus.CONDITIONING_ENABLED.name] = status
+    cpuEconPoints[StatZoneStatus.CONDITIONING_ENABLED.name] = status
     cpuEconPoints.forEach { (s: String, o: Any) ->
         CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, "Config $s : $o")
     }

@@ -133,6 +133,11 @@ message HyperSplitConfigsCcu_t {
   uint32 heatingStage2FanAnalogVoltage  = 5; // 1/10 of the volts
   uint32 heatingStage3FanAnalogVoltage  = 6; // 1/10 of the volts
   uint32 analogoutAtRecFanAnalogVoltage = 7; // The voltage at which fan should be operated is determined based on configuration parameter called Analog2atRecirc.
+  uint32 compressorStage1FanAnalogVoltage  = 8; // 1/10 of the volts
+  uint32 compressorStage2FanAnalogVoltage  = 9; // 1/10 of the volts
+  uint32 compressorStage3FanAnalogVoltage  = 10; // 1/10 of the volts
+  uint32 auxHeating1Activate  = 11;
+  uint32 auxHeating2Activate  = 12;
 }
 
 message HyperSplitSettingsMessage3_t {
@@ -228,7 +233,15 @@ enum HyperSplitRelayMapping_t {
   HYPERSPLIT_RELAY_DEHUMIDIFIER = 13;
   HYPERSPLIT_RELAY_EXAUST_1 = 14;
   HYPERSPLIT_RELAY_EXAUST_2 = 15;
-  HYPERSPLIT_RELAY_EXAUST_NUM_OF = 16;
+  HYPERSPILT_RELAY_DCV_DAMPER = 16;
+  HYPERSPILT_RELAY_COMPRESSOR_STAGE_1 = 17;
+  HYPERSPILT_RELAY_COMPRESSOR_STAGE_2 = 18;
+  HYPERSPILT_RELAY_COMPRESSOR_STAGE_3 = 19;
+  HYPERSPILT_RELAY_O_ENERGISE_IN_COOLING = 20;
+  HYPERSPILT_RELAY_B_ENERGISE_IN_HEATING = 21;
+  HYPERSPILT_RELAY_AUX_HEATING_1 = 22;
+  HYPERSPILT_RELAY_AUX_HEATING_2 = 23;
+  HYPERSPLIT_RELAY_NUM_OF = 24;
 }
 
 enum HyperSplitUniversalInMapping_t {
@@ -252,7 +265,8 @@ enum HyperSplitUniversalInMapping_t {
   HYPERSPLIT_UIN_PRESSURE_0_10 = 17;
   HYPERSPLIT_UIN_GENERIC_FAULT_NO = 18;
   HYPERSPLIT_UIN_GENERIC_FAULT_NC = 19;
-  HYPERSPLIT_UIN_NUM_OF = 20;
+  HYPERSPLIT_UIN_RUN_FAN_STATUS = 20;
+  HYPERSPLIT_UIN_NUM_OF = 21;
 }
 
 enum HyperSplitSenorBusMapping_t {
@@ -291,7 +305,9 @@ enum HyperSplitAnalogOutMapping_t {
   HYPERSPLIT_AOUT_HEATING = 3;
   HYPERSPLIT_AOUT_OAO_DAMPER = 4;
   HYPERSPLIT_AOUT_STAGED_FAN = 5;
-  HYPERSPLIT_AOUT_NUM_OF = 6;
+  HYPERSPILT_AOUT_COMPRESSOR_SPEED = 6;
+  HYPERSPILT_AOUT_DCV_DAMPER = 7;
+  HYPERSPLIT_AOUT_NUM_OF = 8;
 }
 
 message HyperSplitAnalogOutConfig_t {

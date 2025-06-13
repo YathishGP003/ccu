@@ -1,6 +1,6 @@
 package a75f.io.renatus.profiles.hyperstatv2.viewstates
 
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HsHpuAnalogOutMapping
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsHpuAnalogOutMapping
 import a75f.io.renatus.profiles.hyperstatv2.util.FanSpeedConfig
 import a75f.io.renatus.profiles.hyperstatv2.util.MinMaxConfig
 import androidx.compose.runtime.getValue

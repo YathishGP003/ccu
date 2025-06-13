@@ -6,7 +6,7 @@ import a75f.io.domain.api.DomainName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HsPipe2AnalogOutMapping
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2AnalogOutMapping
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.AOTHConfig
@@ -230,29 +230,29 @@ class HyperStatV2Pipe2Fragment : HyperStatFragmentV2() {
     fun DcvDamperMinMax() {
         (viewModel.viewState.value as Pipe2ViewState).apply {
             if (analogOut1Enabled)
-                ConfigMinMax(analogOut1Association, analogOut1MinMax.dcvDamperConfig, 1, HsPipe2AnalogOutMapping.DCV_DAMPER)
+                ConfigMinMax(analogOut1Association, analogOut1MinMax.dcvDamperConfig, 1, a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2AnalogOutMapping.DCV_DAMPER)
             if (analogOut2Enabled)
-                ConfigMinMax(analogOut2Association, analogOut2MinMax.dcvDamperConfig, 2, HsPipe2AnalogOutMapping.DCV_DAMPER)
+                ConfigMinMax(analogOut2Association, analogOut2MinMax.dcvDamperConfig, 2, a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2AnalogOutMapping.DCV_DAMPER)
             if (analogOut3Enabled)
-                ConfigMinMax(analogOut3Association, analogOut3MinMax.dcvDamperConfig, 3, HsPipe2AnalogOutMapping.DCV_DAMPER)
+                ConfigMinMax(analogOut3Association, analogOut3MinMax.dcvDamperConfig, 3, a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2AnalogOutMapping.DCV_DAMPER)
         }
     }
     @Composable
     fun WaterModulatingMinMax() {
         (viewModel.viewState.value as Pipe2ViewState).apply {
             if (analogOut1Enabled)
-                ConfigMinMax(analogOut1Association, analogOut1MinMax.waterModulatingValue, 1, HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE)
+                ConfigMinMax(analogOut1Association, analogOut1MinMax.waterModulatingValue, 1, a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE)
             if (analogOut2Enabled)
-                ConfigMinMax(analogOut2Association, analogOut2MinMax.waterModulatingValue, 2, HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE)
+                ConfigMinMax(analogOut2Association, analogOut2MinMax.waterModulatingValue, 2, a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE)
             if (analogOut3Enabled)
-                ConfigMinMax(analogOut3Association, analogOut3MinMax.waterModulatingValue, 3, HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE)
+                ConfigMinMax(analogOut3Association, analogOut3MinMax.waterModulatingValue, 3, a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE)
         }
     }
     @Composable
     fun FanConfiguration() {
         @Composable
         fun ConfigFan(enabled: Boolean, association: Int, fanConfig: FanSpeedConfig, analogIndex: Int) {
-            if (enabled && association == HsPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
+            if (enabled && association == a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
 
                 FanLowMediumHighConfigurations(
                     firstLabel = "Analog-out$analogIndex at\n Fan Low",
@@ -281,16 +281,16 @@ class HyperStatV2Pipe2Fragment : HyperStatFragmentV2() {
     fun FanSpeedMinMax() {
         (viewModel.viewState.value as Pipe2ViewState).apply {
             if (analogOut1Enabled)
-                ConfigMinMax(analogOut1Association, analogOut1MinMax.fanSpeedConfig, 1, HsPipe2AnalogOutMapping.FAN_SPEED)
+                ConfigMinMax(analogOut1Association, analogOut1MinMax.fanSpeedConfig, 1, a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2AnalogOutMapping.FAN_SPEED)
             if (analogOut2Enabled)
-                ConfigMinMax(analogOut2Association, analogOut2MinMax.fanSpeedConfig, 2, HsPipe2AnalogOutMapping.FAN_SPEED)
+                ConfigMinMax(analogOut2Association, analogOut2MinMax.fanSpeedConfig, 2, a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2AnalogOutMapping.FAN_SPEED)
             if (analogOut3Enabled)
-                ConfigMinMax(analogOut3Association, analogOut3MinMax.fanSpeedConfig, 3, HsPipe2AnalogOutMapping.FAN_SPEED)
+                ConfigMinMax(analogOut3Association, analogOut3MinMax.fanSpeedConfig, 3, a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2AnalogOutMapping.FAN_SPEED)
         }
     }
 
     @Composable
-    private fun ConfigMinMax(association: Int, minMax: MinMaxConfig, analogIndex: Int, mapping: HsPipe2AnalogOutMapping) {
+    private fun ConfigMinMax(association: Int, minMax: MinMaxConfig, analogIndex: Int, mapping: a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2AnalogOutMapping) {
         if (association == mapping.ordinal) {
             MinMaxConfiguration(
                 minLabel = "Analog-out$analogIndex at Min \n${mapping.displayName}",

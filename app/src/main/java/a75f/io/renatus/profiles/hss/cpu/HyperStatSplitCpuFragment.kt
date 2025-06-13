@@ -8,7 +8,10 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.composables.CancelDialog
 import a75f.io.renatus.composables.DuplicatePointDialog
+import a75f.io.renatus.composables.ErrorDialog
 import a75f.io.renatus.composables.MissingPointDialog
+import a75f.io.renatus.composables.NO_COMPRESSOR
+import a75f.io.renatus.composables.NO_OB_REALLY
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hss.HyperStatSplitFragment
@@ -119,6 +122,13 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
                 missing = "Mixed Air Temperature Sensor, Outside Air Temperature Sensor, or OAO Damper")
         }
 
+        if (viewModel.noOBRelay) {
+            ErrorDialog(NO_OB_REALLY, onDismissRequest = { viewModel.noOBRelay = false })
+        }
+        if (viewModel.noCompressorStages) {
+            ErrorDialog(NO_COMPRESSOR, onDismissRequest = { viewModel.noCompressorStages = false })
+        }
+
         Column {
             LazyColumn(
                 modifier = Modifier
@@ -172,6 +182,8 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
     fun AnalogOutDynamicConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
         CoolingControl(viewModel,modifier)
         HeatingControl(viewModel,modifier)
+        CompressorControl(viewModel,modifier)
+        DcvModulationControl(viewModel,modifier)
         LinearFanControl(viewModel,modifier)
         StagedFanControl(viewModel,modifier)
         OAODamperControl(viewModel,modifier)

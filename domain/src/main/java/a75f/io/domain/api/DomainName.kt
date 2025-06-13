@@ -1108,12 +1108,17 @@ object DomainName {
     const val analog4FanMedium = "analog4FanMedium"
     const val analog4FanHigh = "analog4FanHigh"
 
+    const val analog4MinCompressorSpeed = "analog4MinCompressorSpeed"
+    const val analog4MaxCompressorSpeed = "analog4MaxCompressorSpeed"
+
     const val analog1MinDCVDamper = "analog1MinDCVDamper"
     const val analog1MaxDCVDamper = "analog1MaxDCVDamper"
     const val analog2MinDCVDamper = "analog2MinDCVDamper"
     const val analog2MaxDCVDamper = "analog2MaxDCVDamper"
     const val analog3MinDCVDamper = "analog3MinDCVDamper"
     const val analog3MaxDCVDamper = "analog3MaxDCVDamper"
+    const val analog4MinDCVDamper = "analog4MinDCVDamper"
+    const val analog4MaxDCVDamper = "analog4MaxDCVDamper"
 
 
     const val fanOutRecirculate = "fanOutRecirculate"
@@ -1127,6 +1132,10 @@ object DomainName {
     const val fanOutCoolingStage1 = "fanOutCoolingStage1"
     const val fanOutCoolingStage2 = "fanOutCoolingStage2"
     const val fanOutCoolingStage3 = "fanOutCoolingStage3"
+
+    const val fanOutCompressorStage1 = "fanOutCompressorStage1"
+    const val fanOutCompressorStage2 = "fanOutCompressorStage2"
+    const val fanOutCompressorStage3 = "fanOutCompressorStage3"
 
     const val fanLowSpeed = "fanLowSpeed"
     const val fanMediumSpeed = "fanMediumSpeed"
@@ -1392,6 +1401,7 @@ object DomainName {
     const val disableTouch = "disableTouch"
     const val enableBrightness = "enableBrightness"
     const val enableCo2Display = "enableCo2Display"
+    const val fanRunSensor = "fanRunSensor"
     const val defaultSystemEquip = "defaultSystemEquip"
 }
 

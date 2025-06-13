@@ -13,13 +13,13 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
-import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getHpuFanLevel
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleConditionMode
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleFanModeSettings
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HsHpuRelayMapping
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.hpu.HyperStatHpuProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsHpuRelayMapping
+import a75f.io.logic.bo.building.statprofiles.util.getHpuFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
+import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
 import a75f.io.logic.bo.building.system.logIt
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.FloorPlanFragment
@@ -62,7 +62,7 @@ class HpuV2ViewModel(application: Application) : HyperStatViewModel(application)
         if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is HyperStatHpuProfile) {
             hyperStatProfile = L.getProfile(deviceAddress) as HyperStatHpuProfile
             val equip = (hyperStatProfile as HyperStatHpuProfile).getProfileDomainEquip(deviceAddress.toInt())
-            profileConfiguration = getConfiguration(equip.equipRef)!!.getActiveConfiguration()
+            profileConfiguration = getHsConfiguration(equip.equipRef)!!.getActiveConfiguration()
             equipRef = equip.equipRef
         } else {
             profileConfiguration = HpuConfiguration(
@@ -175,7 +175,7 @@ class HpuV2ViewModel(application: Application) : HyperStatViewModel(application)
         }
         profileConfiguration.apply {
             val possibleConditioningMode = getPossibleConditionMode(profileConfiguration)
-            val possibleFanMode = getPossibleFanModeSettings(getHpuFanLevel(profileConfiguration as HpuConfiguration))
+            val possibleFanMode = getHsPossibleFanModeSettings(getHpuFanLevel(profileConfiguration as HpuConfiguration))
             val equip = HpuV2Equip(equipId)
             modifyFanMode(possibleFanMode.ordinal, equip.fanOpMode)
             modifyConditioningMode(possibleConditioningMode.ordinal, equip.conditioningMode, allStandaloneProfileConditions)

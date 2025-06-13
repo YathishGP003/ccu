@@ -5,9 +5,9 @@ import a75f.io.domain.util.allHSFanModes
 import a75f.io.domain.util.allMSFanModes
 import a75f.io.domain.util.updateConditioningEnums
 import a75f.io.domain.util.updateFanEnums
-import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode
-import a75f.io.logic.bo.building.hyperstat.common.PossibleFanMode
-import a75f.io.logic.bo.building.mystat.profiles.util.MyStatPossibleFanMode
+import a75f.io.logic.bo.building.statprofiles.util.MyStatPossibleFanMode
+import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
+import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode
 
 /**
  * Created by Manjunath K on 29-04-2025.

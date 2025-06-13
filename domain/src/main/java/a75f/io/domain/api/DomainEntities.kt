@@ -143,7 +143,7 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
         }
     }
 
-    fun readHisVal() : Double {
+    open fun readHisVal() : Double {
         requireId()
         return Domain.hayStack.readHisValById(id)
     }

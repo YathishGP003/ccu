@@ -49,6 +49,7 @@ public class L
     public static final String TAG_CCU_MSHPU = "CCU_MSHPU";
     public static final String TAG_CCU_HSHPU = "CCU_HSHPU";
     public static final String TAG_CCU_MSHST = "CCU_MST";
+    public static final String TAG_CCU_LOOP = "CCU_LOOP";
     public static final String TAG_CCU_HSSPLIT_CPUECON = "CCU_HSSPLIT_CPUECON";
     public static final String TAG_CCU_MESSAGING = "CCU_MESSAGING";
     public static final String TAG_CCU_COPY_CONFIGURATION = "CCU_COPY_CONFIGURATION";

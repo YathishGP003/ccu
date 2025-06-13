@@ -5,8 +5,6 @@ import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.mystat.configs.MyStatCpuAnalogOutMapping
-import a75f.io.logic.bo.building.mystat.configs.MyStatCpuRelayMapping
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.composables.MinMaxConfiguration
 import a75f.io.renatus.compose.StagedFanConfiguration
@@ -166,8 +164,8 @@ class MyStatCpuFragment : MyStatFragment() {
             if (analogOut1Enabled) ConfigMinMax(
                 analogOut1Association,
                 analogOut1MinMax.coolingConfig,
-                MyStatCpuAnalogOutMapping.COOLING.displayName,
-                MyStatCpuAnalogOutMapping.COOLING.ordinal
+                a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.COOLING.displayName,
+                a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.COOLING.ordinal
             )
         }
     }
@@ -178,8 +176,8 @@ class MyStatCpuFragment : MyStatFragment() {
             if (analogOut1Enabled) ConfigMinMax(
                 analogOut1Association,
                 analogOut1MinMax.heatingConfig,
-                MyStatCpuAnalogOutMapping.HEATING.displayName,
-                MyStatCpuAnalogOutMapping.HEATING.ordinal
+                a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.HEATING.displayName,
+                a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.HEATING.ordinal
             )
         }
     }
@@ -191,8 +189,8 @@ class MyStatCpuFragment : MyStatFragment() {
             if (analogOut1Enabled) ConfigMinMax(
                 analogOut1Association,
                 analogOut1MinMax.dcvDamperConfig,
-                MyStatCpuAnalogOutMapping.DCV_DAMPER.displayName,
-                MyStatCpuAnalogOutMapping.DCV_DAMPER.ordinal
+                a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.DCV_DAMPER.displayName,
+                a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.DCV_DAMPER.ordinal
             )
         }
     }
@@ -203,8 +201,8 @@ class MyStatCpuFragment : MyStatFragment() {
             if (analogOut1Enabled) ConfigMinMax(
                 analogOut1Association,
                 analogOut1MinMax.linearFanSpeedConfig,
-                MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.displayName,
-                MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal
+                a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.displayName,
+                a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal
             )
         }
     }
@@ -212,11 +210,11 @@ class MyStatCpuFragment : MyStatFragment() {
     @Composable
     fun FanConfiguration() {
         (viewModel.viewState.value as MyStatCpuViewState).apply {
-            if (analogOut1Association == MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal) {
-                val cooling1Enabled = viewModel.isAnyRelayMappedToState(MyStatCpuRelayMapping.COOLING_STAGE_1)
-                val cooling2Enabled = viewModel.isAnyRelayMappedToState(MyStatCpuRelayMapping.COOLING_STAGE_2)
-                val heating1Enabled = viewModel.isAnyRelayMappedToState(MyStatCpuRelayMapping.HEATING_STAGE_1)
-                val heating2Enabled = viewModel.isAnyRelayMappedToState(MyStatCpuRelayMapping.HEATING_STAGE_2)
+            if (analogOut1Association == a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal) {
+                val cooling1Enabled = viewModel.isAnyRelayMappedToState(a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping.COOLING_STAGE_1)
+                val cooling2Enabled = viewModel.isAnyRelayMappedToState(a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping.COOLING_STAGE_2)
+                val heating1Enabled = viewModel.isAnyRelayMappedToState(a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping.HEATING_STAGE_1)
+                val heating2Enabled = viewModel.isAnyRelayMappedToState(a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping.HEATING_STAGE_2)
                 singleOptionConfiguration(minLabel = "Analog-out at \nFan Recirculate",
                     itemList = minMaxVoltage,
                     unit = "V",
@@ -248,8 +246,8 @@ class MyStatCpuFragment : MyStatFragment() {
                     stage2Enabled = heating2Enabled)
             }
 
-            if (analogOut1Enabled && (analogOut1Association == MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal ||
-                        analogOut1Association == MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
+            if (analogOut1Enabled && (analogOut1Association == a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal ||
+                        analogOut1Association == a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
                 MinMaxConfiguration(minLabel = "Analog-out at \nFan Low",
                     maxLabel = "Analog-out at \nFan High",
                     itemList = testVoltage,

@@ -3,6 +3,8 @@ package a75f.io.logic.bo.building.hyperstat.v2.configs
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import io.seventyfivef.domainmodeler.client.ModelTagDef
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsCpuRelayMapping
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.Version

@@ -1,10 +1,10 @@
 package a75f.io.logic.util.uiutils
 
 import a75f.io.logic.bo.building.ZoneTempState
-import a75f.io.logic.bo.building.hvac.AnalogOutput
+import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.hvac.Stage
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HsPipe2RelayMapping
-import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2RelayMapping
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2RelayMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2RelayMapping
 import org.junit.Assert
 import org.junit.Test
 
@@ -172,24 +172,24 @@ class UserIntentStatusUtilKtTest {
 
         val currentStages = HashMap<String, Int>()
 
-        currentStages[AnalogOutput.COOLING.name] = 1
+        currentStages[StatusMsgKeys.COOLING.name] = 1
         val result1 = getAnalogStatus(currentStages)
         println("$expected1 == $result1")
         assert(result1.contentEquals(expected1))
 
-        currentStages[AnalogOutput.HEATING.name] = 1
+        currentStages[StatusMsgKeys.HEATING.name] = 1
 
         val result2 = getAnalogStatus(currentStages)
         println("$expected2 == $result2")
         assert(result2.contentEquals(expected2))
 
-        currentStages[AnalogOutput.FAN_SPEED.name] = 1
+        currentStages[StatusMsgKeys.FAN_SPEED.name] = 1
 
         val result3 = getAnalogStatus(currentStages)
         println("$expected3 == $result3")
         assert(result3.contentEquals(expected3))
 
-        currentStages[AnalogOutput.DCV_DAMPER.name] = 1
+        currentStages[StatusMsgKeys.DCV_DAMPER.name] = 1
 
         val result4 = getAnalogStatus(currentStages)
         println("$expected4 == $result4")
@@ -203,8 +203,8 @@ class UserIntentStatusUtilKtTest {
         val analogOutStages = HashMap<String, Int>()
         val temperatureState = ZoneTempState.NONE
 
-        analogOutStages[AnalogOutput.HEATING.name] = 1
-        analogOutStages[AnalogOutput.FAN_SPEED.name] = 1
+        analogOutStages[StatusMsgKeys.HEATING.name] = 1
+        analogOutStages[StatusMsgKeys.FAN_SPEED.name] = 1
 
         portStages[Stage.HEATING_1.displayName] = 1
         portStages[Stage.FAN_1.displayName] = 1
@@ -263,8 +263,8 @@ class UserIntentStatusUtilKtTest {
         val temperatureState = ZoneTempState.NONE
 
 
-        analogOutStages[AnalogOutput.COOLING.name] = 1
-        analogOutStages[AnalogOutput.FAN_SPEED.name] = 1
+        analogOutStages[StatusMsgKeys.COOLING.name] = 1
+        analogOutStages[StatusMsgKeys.FAN_SPEED.name] = 1
 
         portStages[Stage.COOLING_1.displayName] = 1
         portStages[Stage.FAN_1.displayName] = 1
@@ -367,7 +367,7 @@ class UserIntentStatusUtilKtTest {
     @Test
     fun statusMsgHandlesFanEnabledWithoutAnalogOutputs() {
         val portStages = HashMap<String, Int>()
-        portStages[AnalogOutput.FAN_ENABLED.name] = 1
+        portStages[StatusMsgKeys.FAN_ENABLED.name] = 1
         val analogOutStages = HashMap<String, Int>()
         val temperatureState = ZoneTempState.NONE
         val result = getStatusMsg(portStages, analogOutStages, temperatureState)
@@ -389,8 +389,8 @@ class UserIntentStatusUtilKtTest {
     fun statusMsgHandlesAnalogOutputsOnly() {
         val portStages = HashMap<String, Int>()
         val analogOutStages = HashMap<String, Int>()
-        analogOutStages[AnalogOutput.COOLING.name] = 1
-        analogOutStages[AnalogOutput.HEATING.name] = 1
+        analogOutStages[StatusMsgKeys.COOLING.name] = 1
+        analogOutStages[StatusMsgKeys.HEATING.name] = 1
         val temperatureState = ZoneTempState.NONE
         val result = getStatusMsg(portStages, analogOutStages, temperatureState)
         assert(result == "Cooling Analog ON | Heating Analog ON")
@@ -402,10 +402,10 @@ class UserIntentStatusUtilKtTest {
         portStages[Stage.COOLING_1.displayName] = 1
         portStages[Stage.HEATING_1.displayName] = 1
         portStages["Water Valve"] = 1
-        portStages[AnalogOutput.FAN_ENABLED.name] = 1
+        portStages[StatusMsgKeys.FAN_ENABLED.name] = 1
         val analogOutStages = HashMap<String, Int>()
-        analogOutStages[AnalogOutput.COOLING.name] = 1
-        analogOutStages[AnalogOutput.HEATING.name] = 1
+        analogOutStages[StatusMsgKeys.COOLING.name] = 1
+        analogOutStages[StatusMsgKeys.HEATING.name] = 1
         val temperatureState = ZoneTempState.EMERGENCY
         val result = getStatusMsg(portStages, analogOutStages, temperatureState)
         println(result)
@@ -415,7 +415,7 @@ class UserIntentStatusUtilKtTest {
     @Test
     fun statusMsgHandlesNoFanStagesButFanEnabled() {
         val portStages = HashMap<String, Int>()
-        portStages[AnalogOutput.FAN_ENABLED.name] = 1
+        portStages[StatusMsgKeys.FAN_ENABLED.name] = 1
         val analogOutStages = HashMap<String, Int>()
         val temperatureState = ZoneTempState.NONE
         val result = getStatusMsg(portStages, analogOutStages, temperatureState)

@@ -23,15 +23,14 @@ import a75f.io.domain.equips.mystat.MyStatPipe2Equip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.hvac.MyStatFanStages
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
-import a75f.io.logic.bo.building.mystat.configs.MyStatCpuAnalogOutMapping
-import a75f.io.logic.bo.building.mystat.configs.MyStatCpuRelayMapping
-import a75f.io.logic.bo.building.mystat.configs.MyStatHpuAnalogOutMapping
-import a75f.io.logic.bo.building.mystat.configs.MyStatHpuRelayMapping
-import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2AnalogOutMapping
-import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2RelayMapping
 import a75f.io.logic.bo.building.schedules.Occupancy
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuAnalogOutMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuRelayMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2AnalogOutMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2RelayMapping
+import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.tuners.TunerUtil
 import com.google.protobuf.ByteString
@@ -306,8 +305,8 @@ private fun getRelayConfigs(
         when (equip) {
             is MyStatCpuEquip -> {
                 relayConfig.cpuRelay =  when (associationVal) {
-                    MyStatCpuRelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.CpuRelayMappings_e.CPU_NONE
-                    MyStatCpuRelayMapping.DCV_DAMPER.ordinal -> MyStat.CpuRelayMappings_e.CPU_DCV_DAMPER
+                    a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.CpuRelayMappings_e.CPU_NONE
+                    a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping.DCV_DAMPER.ordinal -> MyStat.CpuRelayMappings_e.CPU_DCV_DAMPER
                     else -> MyStat.CpuRelayMappings_e.values()[associationVal + 1]
                 }
             }

@@ -23,8 +23,8 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
-import a75f.io.logic.bo.building.hyperstat.common.SmartStatFanModeCache;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
@@ -136,7 +136,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             StandaloneOperationalMode opMode = StandaloneOperationalMode.values()[(int) ssOperatingMode];
             StandaloneLogicalFanSpeeds fanSpeed = StandaloneLogicalFanSpeeds.values()[(int) ssFanOpMode];
             SmartStatFanRelayType fanHighType = SmartStatFanRelayType.values()[fanStage2Type];
-            SmartStatFanModeCache fanCacheStorage = new SmartStatFanModeCache();
+            FanModeCacheStorage fanCacheStorage = FanModeCacheStorage.Companion.getSmartStatFanModeCache();
             int fanModeSaved = fanCacheStorage.getFanModeFromCache(cpuEquip.getId());
             boolean isFanSpeedHigh = ((fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) ||
                     (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) ||

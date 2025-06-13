@@ -12,7 +12,7 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration;
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration;
 
 /**
  * Models a HyperStat Split device Haystack entity.
@@ -153,7 +153,7 @@ public class HyperStatSplitDevice {
 
     private ProfileConfiguration getConfigurationFromEquip(Equip equip, PointsUtil pointsUtil) {
         if (equip.getDomainName().equals(DomainName.hyperstatSplitCPU)) {
-            return new HyperStatSplitCpuProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HYPERSTATSPLIT.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.HYPERSTATSPLIT_CPU, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+            return new HyperStatSplitCpuConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HYPERSTATSPLIT.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.HYPERSTATSPLIT_CPU, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else {
             return null;
         }

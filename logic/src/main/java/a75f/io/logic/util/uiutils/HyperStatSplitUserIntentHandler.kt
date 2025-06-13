@@ -6,10 +6,11 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.EpidemicState
 import a75f.io.logic.bo.building.ZoneTempState
-import a75f.io.logic.bo.building.hvac.AnalogOutput
+import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstatsplit.common.BasicSettings
+import a75f.io.logic.bo.building.statprofiles.util.BasicSettings
+
 import a75f.io.logic.interfaces.ZoneDataInterface
 import kotlin.collections.set
 
@@ -44,7 +45,7 @@ class HyperStatSplitUserIntentHandler {
 
             var status = getStatusMsg(portStages, analogOutStages, temperatureState, epidemicState)
             val haystack: CCUHsApi = CCUHsApi.getInstance()
-            if(analogOutStages.containsKey(AnalogOutput.OAO_DAMPER.name)) {
+            if(analogOutStages.containsKey(StatusMsgKeys.OAO_DAMPER.name)) {
                 if(status.isNotBlank()
                     && (status[status.length-2]!=',')
                     && (status[status.length-2]!='|'))
@@ -93,6 +94,9 @@ class HyperStatSplitUserIntentHandler {
                     status += ", "
 
                 status += "Replace Filter"
+            }
+            if (status.endsWith(",")) {
+                status = status.dropLast(1)
             }
 
             if (!hyperStatSplitStatus.containsKey(equipId)

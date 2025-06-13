@@ -2,6 +2,7 @@ package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.BypassDamperEquip
+import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.OAOEquip
 import a75f.io.domain.api.Device
 import a75f.io.domain.api.Domain
@@ -123,6 +124,10 @@ object DomainManager {
                     (it.contains("mystat") && it.contains("cpu")) -> Domain.equips[it["id"].toString()] = MyStatCpuEquip(it["id"].toString())
                     (it.contains("mystat") && it.contains("hpu")) -> Domain.equips[it["id"].toString()] = MyStatHpuEquip(it["id"].toString())
                     (it.contains("mystat") && it.contains("pipe2")) -> Domain.equips[it["id"].toString()] = MyStatPipe2Equip(it["id"].toString())
+                    it.contains("hyperstatsplit") -> {
+                        CcuLog.i(Domain.LOG_TAG, "Build domain hyperstatsplit is addded $it")
+                        Domain.equips[it["id"].toString()] = HyperStatSplitEquip(it["id"].toString())
+                    }
 
                 }
             }
@@ -264,7 +269,7 @@ object DomainManager {
             Domain.ccuDevice = CCUDevice(ccuDevice["id"].toString())
         }
     }
-    fun addDomainEquip(equip: a75f.io.api.haystack.Equip) {
+    fun updateDomainEquip(equip: a75f.io.api.haystack.Equip) {
         when {
             equip.markers.contains("vav") -> Domain.equips[equip.id] = VavEquip(equip.id)
             equip.markers.contains("dab") -> Domain.equips[equip.id] = DabEquip(equip.id)
@@ -289,6 +294,7 @@ object DomainManager {
                     equip.markers.contains("pipe2") -> Domain.equips[equip.id] = MyStatPipe2Equip(equip.id)
                 }
             }
+            equip.markers.contains("hyperstatsplit") -> Domain.equips[equip.id] = HyperStatSplitEquip(equip.id)
         }
     }
 
@@ -371,8 +377,8 @@ object DomainManager {
             val points =
                 hayStack.readAllEntities("point and equipRef == \"$equipId\"")
             points.forEach { point ->
-                val domainName = point["domainName"]
-                domainName?.let {
+                val pointDomainName = point["domainName"]
+                pointDomainName?.let {
                     Domain.site?.ccus?.get(ccuId)?.equips?.get(equipId.toString())?.addPoint(point)
                 }
             }

@@ -8,7 +8,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.EpidemicState
 import a75f.io.logic.bo.building.ZoneTempState
-import a75f.io.logic.bo.building.hvac.AnalogOutput
+import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.util.ExecutorTask
@@ -69,10 +69,10 @@ fun getAuxHeatStatus(portStages: Map<String, Int>): String? {
 
 fun getAnalogStatus(analogOutStages: HashMap<String, Int>): String? {
     val analogs = mutableListOf<String>()
-    if (analogOutStages.containsKey(AnalogOutput.COOLING.name)) analogs.add("Cooling Analog ON")
-    if (analogOutStages.containsKey(AnalogOutput.HEATING.name)) analogs.add("Heating Analog ON")
-    if (analogOutStages.containsKey(AnalogOutput.FAN_SPEED.name)) analogs.add("Fan Analog ON")
-    if (analogOutStages.containsKey(AnalogOutput.DCV_DAMPER.name)) analogs.add("DCV ON")
+    if (analogOutStages.containsKey(StatusMsgKeys.COOLING.name)) analogs.add("Cooling Analog ON")
+    if (analogOutStages.containsKey(StatusMsgKeys.HEATING.name)) analogs.add("Heating Analog ON")
+    if (analogOutStages.containsKey(StatusMsgKeys.FAN_SPEED.name)) analogs.add("Fan Analog ON")
+    if (analogOutStages.containsKey(StatusMsgKeys.DCV_DAMPER.name)) analogs.add("DCV ON")
     return analogs.joinToString(" | ").takeIf { it.isNotEmpty() }
 }
 
@@ -110,7 +110,9 @@ fun getStatusMsg(
         portStages, "Heating", listOf(Stage.HEATING_1, Stage.HEATING_2, Stage.HEATING_3)
     )?.let { statusParts.add(it) }
 
-    if (portStages.containsKey("Water Valve") || portStages.containsKey("WATER_VALVE")) statusParts.add("Water Valve ON")
+    if (portStages.containsKey("Water Valve") || portStages.containsKey("WATER_VALVE")) statusParts.add(
+        "Water Valve ON"
+    )
 
     getAuxHeatStatus(portStages)?.let { statusParts.add(it) }
 
@@ -118,8 +120,8 @@ fun getStatusMsg(
 
 
     // Fallback if no fan stages but fan is enabled
-    if (!statusParts.any { it.contains("Fan") } && !analogOutStages.containsKey(AnalogOutput.FAN_SPEED.name) && portStages.containsKey(
-            AnalogOutput.FAN_ENABLED.name
+    if (!statusParts.any { it.contains("Fan") } && !analogOutStages.containsKey(StatusMsgKeys.FAN_SPEED.name) && portStages.containsKey(
+            StatusMsgKeys.FAN_ENABLED.name
         )) {
         statusParts.add("Fan ON")
     }

@@ -1,6 +1,5 @@
 package a75f.io.renatus;
 
-import static android.app.Activity.RESULT_OK;
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
 import static a75f.io.api.haystack.Tags.BACNET;
 import static a75f.io.api.haystack.Tags.BACNET_POINT_UPDATE;
@@ -22,11 +21,9 @@ import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -124,16 +121,15 @@ import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
-import a75f.io.logic.bo.building.hyperstat.common.SmartStatFanModeCache;
 import a75f.io.logic.bo.building.otn.OTNUtil;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
 import a75f.io.logic.bo.building.system.client.RemotePointUpdateInterface;
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.TemperatureMode;
-import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler;
 import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler;
@@ -3357,7 +3353,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             }
         });
-        SmartStatFanModeCache fanCacheStorage = new SmartStatFanModeCache();
+        FanModeCacheStorage fanCacheStorage = FanModeCacheStorage.Companion.getSmartStatFanModeCache();
         spinnerValue2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -3601,7 +3597,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             }
         });
-        SmartStatFanModeCache fanCacheStorage = new SmartStatFanModeCache();
+        FanModeCacheStorage fanCacheStorage = FanModeCacheStorage.Companion.getSmartStatFanModeCache();
         fanSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -3772,7 +3768,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             }
         });
-        SmartStatFanModeCache fanCacheStorage = new SmartStatFanModeCache();
+        FanModeCacheStorage fanCacheStorage = FanModeCacheStorage.Companion.getSmartStatFanModeCache();
         spinnerValue2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -3917,7 +3913,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         int tempConditionMode = conditionMode;
         int tempFanMode = fanMode;
         isFromPubNub = isPubNub;
-        SmartStatFanModeCache fanCacheStorage = new SmartStatFanModeCache();
+        FanModeCacheStorage fanCacheStorage = FanModeCacheStorage.Companion.getSmartStatFanModeCache();
         spinnerValue1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

@@ -1,0 +1,37 @@
+package a75f.io.logic.bo.building.statprofiles.util
+
+import a75f.io.logic.Globals
+import android.content.Context
+import android.content.SharedPreferences
+
+/**
+ * Created by Manjunath K on 13-08-2021.
+ */
+class FanModeCacheStorage private constructor(prefName: String) {
+
+    companion object {
+        fun getSmartStatFanModeCache() = FanModeCacheStorage("ss_fan_op_mode")
+        fun getHyperStatFanModeCache() = FanModeCacheStorage("HyperstatFanMode")
+        fun getHyperStatSplitFanModeCache() = FanModeCacheStorage("HyperstatSplitFanMode")
+        fun getMyStatFanModeCache() = FanModeCacheStorage("MyStatFanMode")
+    }
+
+    private var sharedPreferences: SharedPreferences = Globals.getInstance()
+        .applicationContext.getSharedPreferences(prefName, Context.MODE_PRIVATE)
+
+    fun saveFanModeInCache(equipId: String, value: Int) {
+        sharedPreferences.edit().putInt(equipId, value).apply()
+    }
+
+    fun getFanModeFromCache(equipId: String): Int {
+        return sharedPreferences.getInt(equipId, 0)
+    }
+
+    fun removeFanModeFromCache(equipId: String) {
+        sharedPreferences.edit().remove(equipId).apply()
+    }
+
+
+
+}
+

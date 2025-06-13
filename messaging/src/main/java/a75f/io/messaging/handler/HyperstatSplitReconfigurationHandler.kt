@@ -19,11 +19,13 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstatsplit.common.FanModeCacheStorage
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfileConfiguration
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusTempAssociation
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuControlType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusTempAssociation
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.messaging.handler.MessageUtil.Companion.returnDurationDiff
 import android.util.Log
@@ -65,7 +67,7 @@ class HyperstatSplitReconfigurationHandler {
                          */
                         if (configPoint.domainName.equals(DomainName.fanOpMode)) {
                             val configVal = HSUtil.getPriorityVal(configPoint.id).toInt() // After clearing the level, update the preference with priority value
-                            val cache = FanModeCacheStorage()
+                            val cache = FanModeCacheStorage.getHyperStatSplitFanModeCache()
                             if (configVal != 0 && (configVal % 3 == 0 || isFanModeCurrentOccupied(configVal) ) ) //Save only Fan occupied period or current Occupied mode alone, else no need.
                                 cache.saveFanModeInCache(configPoint.equipRef, configVal)
                             else cache.removeFanModeFromCache(configPoint.equipRef)
@@ -78,7 +80,7 @@ class HyperstatSplitReconfigurationHandler {
 
                 if (configPoint.domainName.equals(DomainName.fanOpMode)) {
                     val configVal = msgObject["val"].asInt
-                    val cache = FanModeCacheStorage()
+                    val cache = FanModeCacheStorage.getHyperStatSplitFanModeCache()
                     if (configVal != 0 && (configVal % 3 == 0 || isFanModeCurrentOccupied(configVal) )) //Save only Fan occupied period or current Occupied mode alone, else no need.
                         cache.saveFanModeInCache(
                             configPoint.equipRef,
@@ -98,7 +100,6 @@ class HyperstatSplitReconfigurationHandler {
 
             if (isDynamicConfigPoint(configPoint)) handleDynamicConfig(configPoint, hayStack)
 
-            (L.getProfile(configPoint.group.toShort()) as HyperStatSplitCpuEconProfile).refreshEquip()
             hayStack.scheduleSync()
 
         }
@@ -176,7 +177,7 @@ class HyperstatSplitReconfigurationHandler {
 
             val equipModel = ModelLoader.getHyperStatSplitCpuModel() as SeventyFiveFProfileDirective
             val deviceModel = ModelLoader.getHyperStatSplitDeviceModel() as SeventyFiveFDeviceDirective
-            val profileConfiguration = HyperStatSplitCpuProfileConfiguration(
+            val profileConfiguration = HyperStatSplitCpuConfiguration(
                 configPoint.group.toInt(),
                 NodeType.HYPERSTATSPLIT.name,
                 0,
@@ -235,7 +236,7 @@ class HyperstatSplitReconfigurationHandler {
         }
 
         fun mapSensorBusPressureLogicalPoint(
-            config: HyperStatSplitProfileConfiguration,
+            config: HyperStatSplitConfiguration,
             equipRef: String,
             hayStack: CCUHsApi
         ) {
@@ -252,8 +253,8 @@ class HyperstatSplitReconfigurationHandler {
             }
         }
 
-        fun correctSensorBusTempPoints(config: HyperStatSplitProfileConfiguration, hayStack: CCUHsApi) {
-            val device = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
+        fun correctSensorBusTempPoints(config: HyperStatSplitConfiguration, hayStack: CCUHsApi) {
+            val device = hayStack.read("device and addr == \"" + config.nodeAddress + "\"")
 
             if (!isAnySensorBusMapped(config, CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY)) {
                 val deviceOATMap = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.outsideAirTempSensor + "\"")
@@ -287,14 +288,14 @@ class HyperstatSplitReconfigurationHandler {
 
         }
 
-        private fun isAnySensorBusMapped(config: HyperStatSplitProfileConfiguration, type: CpuEconSensorBusTempAssociation): Boolean {
+        private fun isAnySensorBusMapped(config: HyperStatSplitConfiguration, type: CpuEconSensorBusTempAssociation): Boolean {
             return (config.address0Enabled.enabled && config.address0SensorAssociation.temperatureAssociation.associationVal == type.ordinal) ||
                     (config.address1Enabled.enabled && config.address1SensorAssociation.temperatureAssociation.associationVal == type.ordinal) ||
                     (config.address2Enabled.enabled && config.address2SensorAssociation.temperatureAssociation.associationVal == type.ordinal)
         }
 
-        fun setOutputTypes(config: HyperStatSplitProfileConfiguration, hayStack: CCUHsApi) {
-            val device = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
+        fun setOutputTypes(config: HyperStatSplitConfiguration, hayStack: CCUHsApi) {
+            val device = hayStack.read("device and addr == \"" + config.nodeAddress + "\"")
 
             val relay1 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay1 + "\"")
             val relay1Point = RawPoint.Builder().setHDict(relay1).setType("Relay N/O").setEnabled(config.relay1Enabled.enabled)
@@ -441,11 +442,27 @@ class HyperstatSplitReconfigurationHandler {
 
         }
 
-        fun handleNonDefaultConditioningMode(config: HyperStatSplitCpuProfileConfiguration, hayStack: CCUHsApi) {
+        fun handleNonDefaultConditioningMode(config: HyperStatSplitCpuConfiguration, hayStack: CCUHsApi) {
+
+            fun isCoolingExist(): Boolean {
+                return (config.isAnalogCoolingEnabled() || config.isCoolStage1Enabled() ||
+                        config.isCoolStage2Enabled() || config.isCoolStage3Enabled() ||
+                        config.isCompressorStagesAvailable() || config.isAnalogCompressorEnabled()
+                        )
+            }
+
+            fun isHeatingExist(): Boolean {
+                return (config.isAnalogHeatingEnabled() || config.isHeatStage1Enabled() ||
+                        config.isHeatStage2Enabled() || config.isHeatStage3Enabled() ||
+                        config.isCompressorStagesAvailable() || config.isAnalogCompressorEnabled()
+                        )
+            }
+
+
             hayStack.readEntity("point and domainName == \"" + DomainName.conditioningMode + "\" and group == \"" + config.nodeAddress + "\"")["id"]?.let { conditioningModeIdObject ->
                 val conditioningModeId = conditioningModeIdObject.toString()
-                val isCoolingAvailable = config.isAnalogCoolingEnabled() || config.isCoolStage1Enabled() || config.isCoolStage2Enabled() || config.isCoolStage3Enabled()
-                val isHeatingAvailable = config.isAnalogHeatingEnabled() || config.isHeatStage1Enabled() || config.isHeatStage2Enabled() || config.isHeatStage3Enabled()
+                val isCoolingAvailable = isCoolingExist()
+                val isHeatingAvailable = isHeatingExist()
 
                 if (!isCoolingAvailable && !isHeatingAvailable) {
                     // If there are no cooling or heating outputs mapped, set the Conditioning Mode to OFF
@@ -464,7 +481,7 @@ class HyperstatSplitReconfigurationHandler {
             }
         }
 
-        fun handleNonDefaultFanMode(config: HyperStatSplitCpuProfileConfiguration, hayStack: CCUHsApi) {
+        fun handleNonDefaultFanMode(config: HyperStatSplitCpuConfiguration, hayStack: CCUHsApi) {
             val fanModePoint = hayStack.readEntity("point and domainName == \"" + DomainName.fanOpMode + "\" and group == \"" + config.nodeAddress + "\"")
             val fanModeId = fanModePoint["id"].toString()
 
@@ -473,15 +490,15 @@ class HyperstatSplitReconfigurationHandler {
 
             if (config.isFanEnabled() && !isFanEnabledWithAllOptions) {
                 hayStack.writeDefaultValById(fanModeId, 1.0)
-                FanModeCacheStorage().removeFanModeFromCache(fanModePoint["equipRef"].toString())
+                FanModeCacheStorage.getHyperStatSplitFanModeCache().removeFanModeFromCache(fanModePoint["equipRef"].toString())
             }
             else if (!isFanEnabledWithAllOptions)  {
                 hayStack.writeDefaultValById(fanModeId, 0.0)
-                FanModeCacheStorage().removeFanModeFromCache(fanModePoint["equipRef"].toString())
+                FanModeCacheStorage.getHyperStatSplitFanModeCache().removeFanModeFromCache(fanModePoint["equipRef"].toString())
             }
         }
 
-        fun initializePrePurgeStatus(config: HyperStatSplitProfileConfiguration, hayStack: CCUHsApi, value: Double) {
+        fun initializePrePurgeStatus(config: HyperStatSplitConfiguration, hayStack: CCUHsApi, value: Double) {
             if (config.prePurge.enabled) {
                 val prePurgeStatusPoint =
                     hayStack.readEntity("point and domainName == \"" + DomainName.prePurgeStatus + "\" and group == \"" + config.nodeAddress + "\"")
@@ -489,18 +506,6 @@ class HyperstatSplitReconfigurationHandler {
 
                 hayStack.writeHisValById(prePurgeStatusId, value)
             }
-        }
-
-        /**
-         * Following enum class is used to define the control type for the HyperStat Split CPU Profile
-         * This enum list is picked from the model & Need to update when any changes in the model for this enum
-         */
-        enum class CpuControlType {
-            COOLING, LINEAR_FAN, HEATING, OAO_DAMPER, STAGED_FAN, RETURN_DAMPER, EXTERNALLY_MAPPED
-        }
-
-        enum class CpuRelayType {
-            COOLING_STAGE1, COOLING_STAGE2, COOLING_STAGE3, HEATING_STAGE1, HEATING_STAGE2, HEATING_STAGE3, FAN_LOW_SPEED, FAN_MEDIUM_SPEED, FAN_HIGH_SPEED, FAN_ENABLED, OCCUPIED_ENABLED, HUMIDIFIER, DEHUMIDIFIER, EX_FAN_STAGE1, EX_FAN_STAGE2, DCV_DAMPER, EXTERNALLY_MAPPED
         }
 
     }

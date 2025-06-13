@@ -12,15 +12,14 @@ import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
-import a75f.io.logic.bo.building.mystat.configs.MyStatCpuConfiguration
-import a75f.io.logic.bo.building.mystat.configs.MyStatCpuRelayMapping
-import a75f.io.logic.bo.building.mystat.profiles.packageunit.cpu.MyStatCpuProfile
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatConfiguration
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatCpuFanLevel
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleConditionMode
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleFanModeSettings
-import a75f.io.logic.bo.building.mystat.profiles.util.setConditioningMode
-import a75f.io.logic.bo.building.mystat.profiles.util.updateConditioningMode
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.packageunit.cpu.MyStatCpuProfile
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatCpuFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
+import a75f.io.logic.bo.building.statprofiles.util.setConditioningMode
+import a75f.io.logic.bo.building.statprofiles.util.updateConditioningMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
@@ -119,9 +118,9 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
             (myStatProfile as MyStatCpuProfile).addEquip(equipId)
             L.ccu().zoneProfiles.add(myStatProfile)
             val equip = MyStatCpuEquip(equipId)
-            setConditioningMode(profileConfiguration as MyStatCpuConfiguration, equip)
+            setConditioningMode(profileConfiguration as a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration, equip)
             updateFanMode(
-                false, equip, getMyStatCpuFanLevel(profileConfiguration as MyStatCpuConfiguration)
+                false, equip, getMyStatCpuFanLevel(profileConfiguration as a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration)
             )
             CcuLog.i(Domain.LOG_TAG, "MyStatCpu profile added")
         } else {
@@ -133,9 +132,9 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
                 profileConfiguration, deviceModel, equipId, hayStack.site!!.id, getDeviceDis()
             )
             val equip = MyStatCpuEquip(equipId)
-            updateConditioningMode(profileConfiguration as MyStatCpuConfiguration, equip)
+            updateConditioningMode(profileConfiguration as a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration, equip)
             updateFanMode(
-                true, equip, getMyStatCpuFanLevel(profileConfiguration as MyStatCpuConfiguration)
+                true, equip, getMyStatCpuFanLevel(profileConfiguration as a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration)
             )
             universalInUnit(profileConfiguration, deviceRef)
         }
@@ -150,8 +149,8 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
         }
     }
 
-    fun isAnyRelayMappedToState(mapping: MyStatCpuRelayMapping): Boolean {
-        fun enabledAndMapped(enabled: Boolean, association: Int, mapping: MyStatCpuRelayMapping) = enabled && association == mapping.ordinal
+    fun isAnyRelayMappedToState(mapping: a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping): Boolean {
+        fun enabledAndMapped(enabled: Boolean, association: Int, mapping: a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping) = enabled && association == mapping.ordinal
         (viewState.value as MyStatCpuViewState).apply {
             return enabledAndMapped(relay1Config.enabled, relay1Config.association, mapping) || enabledAndMapped(relay2Config.enabled, relay2Config.association, mapping) || enabledAndMapped(relay3Config.enabled, relay3Config.association, mapping) || enabledAndMapped(relay4Config.enabled, relay4Config.association, mapping)
         }

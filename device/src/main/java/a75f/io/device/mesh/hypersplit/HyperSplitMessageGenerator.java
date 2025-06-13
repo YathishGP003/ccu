@@ -1,17 +1,5 @@
 package a75f.io.device.mesh.hypersplit;
 
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_FOUR;
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_THREE;
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_EIGHT;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_FIVE;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_FOUR;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_ONE;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_SEVEN;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_SIX;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_THREE;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_TWO;
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
 import static a75f.io.logic.bo.building.schedules.Occupancy.UNOCCUPIED;
 
@@ -37,10 +25,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
-import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
-import a75f.io.logic.bo.building.hyperstatsplit.common.BasicSettings;
-import a75f.io.logic.bo.building.schedules.Occupancy;
-import a75f.io.logic.bo.util.TemperatureMode;
+import a75f.io.logic.bo.building.statprofiles.util.BasicSettings;
 import a75f.io.logic.tuners.TunerConstants;
 
 public class HyperSplitMessageGenerator {
@@ -169,19 +154,6 @@ public class HyperSplitMessageGenerator {
         if (!device.isEmpty()) {
             DeviceHSUtil.getEnabledCmdPointsWithRefForDevice(device, hayStack).forEach(rawPoint -> {
                 int mappedVal;
-
-                // Points written from CCU algos will fall under this block.
-                // Updating the physical point value based on logical point value is done here.
-//                if (!rawPoint.getMarkers().contains(Tags.WRITABLE)) {
-//
-//                } else {
-//                    // Points written from Sequencer will fall under this block.
-//                    // Sequencer writes directly to the physical point, so we just need to read it here.
-//                    mappedVal = (short) hayStack.readPointPriorityVal(rawPoint.getId());
-//                    CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hs split ##getControlMessage: writable id->"+rawPoint.getId()+"<value:>"+mappedVal);
-//                }
-                //CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE hs split ##getControlMessage: writeHisValById id->"+rawPoint.getId()+"<value:>"+mappedVal);
-
                 double logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
                 CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hs split ##getControlMessage: not writable id->"+rawPoint.getId()+"<logicalVal:>"+logicalVal);
                 if (Globals.getInstance().isTemporaryOverrideMode()) {
@@ -309,7 +281,7 @@ public class HyperSplitMessageGenerator {
         return HyperSplit.HyperSplitAnalogOutputControl_t.newBuilder().setPercent((int) Math.min((Math.max(value, 0)), 100)).build();
     }
 
-    private static HyperSplit.HyperSplitFanSpeed_e getDeviceFanMode(a75f.io.logic.bo.building.hyperstatsplit.common.BasicSettings settings){
+    private static HyperSplit.HyperSplitFanSpeed_e getDeviceFanMode(BasicSettings settings){
         try {
             switch (settings.getFanMode()){
                 case OFF: return HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_OFF;
@@ -435,7 +407,7 @@ public class HyperSplitMessageGenerator {
         return HyperSplitSettingsUtil.Companion.getSetting3Message(address,equipRef,CCUHsApi.getInstance());
     }
     public static HyperSplit.HyperSplitSettingsMessage4_t getSetting4Message(int address, String equipRef){
-        return HyperSplitSettingsUtil.Companion.getSetting4Message(address, equipRef, CCUHsApi.getInstance());
+        return HyperSplitSettingsUtil.Companion.getSetting4Message(equipRef, CCUHsApi.getInstance());
     }
 
     public static HyperSplit.HyperSplitControlsMessage_t getHypersplitRebootControl(int address){

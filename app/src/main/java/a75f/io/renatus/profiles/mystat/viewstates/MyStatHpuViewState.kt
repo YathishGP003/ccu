@@ -1,9 +1,7 @@
 package a75f.io.renatus.profiles.mystat.viewstates
 
-import a75f.io.logic.bo.building.mystat.configs.MyStatHpuAnalogOutMapping
-import a75f.io.logic.bo.building.mystat.configs.MyStatHpuRelayMapping
-import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2AnalogOutMapping
-import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2RelayMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuAnalogOutMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuRelayMapping
 import a75f.io.renatus.profiles.hyperstatv2.util.MinMaxConfig
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.HpuAnalogOutMinMaxConfig
 import androidx.compose.runtime.getValue

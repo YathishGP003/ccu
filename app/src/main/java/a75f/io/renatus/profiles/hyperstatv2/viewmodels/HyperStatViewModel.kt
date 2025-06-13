@@ -14,15 +14,15 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
-import a75f.io.logic.bo.building.hyperstat.common.PossibleFanMode
-import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatProfile
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleFanModeSettings
-import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HyperStatConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.MonitoringConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.HyperStatProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HyperStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.MonitoringConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode
+import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.formattedToastMessage
@@ -277,11 +277,10 @@ open class HyperStatViewModel(application: Application) : AndroidViewModel(appli
     }
 }
 
-
 fun updateFanMode(isReconfigure: Boolean, equip: HyperStatEquip, fanLevel: Int) {
     fun resetFanToOff() = equip.fanOpMode.writePointValue(StandaloneFanStage.OFF.ordinal.toDouble())
-    val possibleFanMode = getPossibleFanModeSettings(fanLevel)
-    val cacheStorage = FanModeCacheStorage()
+    val possibleFanMode = getHsPossibleFanModeSettings(fanLevel)
+    val cacheStorage = FanModeCacheStorage.getHyperStatFanModeCache()
     if (possibleFanMode == PossibleFanMode.OFF) {
         resetFanToOff()
         cacheStorage.removeFanModeFromCache(equip.equipRef)

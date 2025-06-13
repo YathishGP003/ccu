@@ -12,14 +12,14 @@ import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.hvac.MyStatFanStages
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
-import a75f.io.logic.bo.building.mystat.profiles.util.MyStatFanModeCacheStorage
-import a75f.io.logic.bo.building.mystat.profiles.util.MyStatPossibleFanMode
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatConfiguration
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatFanLevel
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatModelByEquipRef
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleFanModeSettings
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
+import a75f.io.logic.bo.building.statprofiles.util.MyStatPossibleFanMode
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatModelByEquipRef
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.messaging.handler.MessageUtil.Companion.returnDurationDiff
 import com.google.gson.JsonObject
@@ -84,7 +84,7 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
 
 fun myStatupdateFanMode(equipRef: String, fanMode: Int) {
     CcuLog.i(L.TAG_CCU_PUBNUB, "updateFanMode $fanMode")
-    val cache = MyStatFanModeCacheStorage()
+    val cache = FanModeCacheStorage.getMyStatFanModeCache()
     if (fanMode != 0  && (fanMode % 3 == 0 || isFanModeCurrentOccupied(fanMode)) ) {
         cache.saveFanModeInCache(equipRef, fanMode)
     } else {

@@ -74,13 +74,8 @@ import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.definitions.ReheatType
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.MonitoringConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuUniInType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
 import a75f.io.logic.bo.building.oao.OAOProfileConfiguration
 import a75f.io.logic.bo.building.otn.OtnProfileConfiguration
 import a75f.io.logic.bo.building.plc.PlcProfileConfig
@@ -88,6 +83,12 @@ import a75f.io.logic.bo.building.plc.addBaseProfileConfig
 import a75f.io.logic.bo.building.plc.doPlcDomainModelCutOverMigration
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.MonitoringConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
 import a75f.io.logic.bo.building.system.DefaultSystemConfig
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
@@ -582,10 +583,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Migrating HyperStat Fan Mode Cache to HyperStatSplit Fan Mode Cache")
         CCUHsApi.getInstance().readAllEntities("equip and hyperstatsplit").forEach { equipMap ->
 
-            val hypertStatFanModeCache = a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage()
+            val hypertStatFanModeCache = FanModeCacheStorage.getHyperStatFanModeCache()
             val fanMode = hypertStatFanModeCache.getFanModeFromCache(equipMap["id"].toString())
             if (fanMode != 0) {
-                val splitFanModeCache = a75f.io.logic.bo.building.hyperstatsplit.common.FanModeCacheStorage()
+                val splitFanModeCache = FanModeCacheStorage.getHyperStatSplitFanModeCache()
                 splitFanModeCache.saveFanModeInCache(equipMap["id"].toString(), fanMode) // Save the fan mode in the HyperStatSplit cache
 
                 hypertStatFanModeCache.removeFanModeFromCache(equipMap["id"].toString()) // Remove the fan mode from the HyperStat cache
@@ -1295,7 +1296,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
             val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
 
-            val profileConfiguration = HyperStatSplitCpuProfileConfiguration(
+            val profileConfiguration = HyperStatSplitCpuConfiguration(
                 Integer.parseInt(it["group"].toString()),
                 NodeType.HYPERSTATSPLIT.name,
                 0,
@@ -2961,7 +2962,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
             val deviceModel = ModelLoader.getHyperStatDeviceModel() as SeventyFiveFDeviceDirective
             val equipModel = getModelForDomainName(equip["domainName"].toString()) as SeventyFiveFProfileDirective
-            val profileConfig: ProfileConfiguration = getConfiguration(equip["id"].toString()) as ProfileConfiguration
+            val profileConfig: ProfileConfiguration = getHsConfiguration(equip["id"].toString()) as ProfileConfiguration
             val vocSensorPoint = hayStack.readEntity("domainName == \"" + DomainName.vocSensor + "\" and  deviceRef == \"" + hyperStatDevice["id"].toString() + "\"")
 
             if (vocSensorPoint.isEmpty()) {
@@ -3150,7 +3151,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
         hyperStatCPUEquip.forEach { equip ->
             val equipId = equip["id"].toString()
-            val config = getConfiguration(equipId)?.getActiveConfiguration()
+            val config = getHsConfiguration(equipId)?.getActiveConfiguration()
             val deviceDis = "${hayStack.siteName}-${deviceModel.name}-${config!!.nodeAddress}"
             equipBuilder.updateEquipAndPoints(
                 config,

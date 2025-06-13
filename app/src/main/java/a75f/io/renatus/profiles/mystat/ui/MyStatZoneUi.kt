@@ -11,24 +11,24 @@ import a75f.io.domain.equips.mystat.MyStatPipe2Equip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hvac.MyStatFanStages
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
-import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus
-import a75f.io.logic.bo.building.mystat.configs.MyStatConfiguration
-import a75f.io.logic.bo.building.mystat.configs.MyStatCpuConfiguration
-import a75f.io.logic.bo.building.mystat.configs.MyStatHpuConfiguration
-import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2Configuration
-import a75f.io.logic.bo.building.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile
-import a75f.io.logic.bo.building.mystat.profiles.util.MyStatFanModeCacheStorage
-import a75f.io.logic.bo.building.mystat.profiles.util.MyStatPossibleConditioningMode
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatActualConditioningMode
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatConfiguration
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatCpuFanLevel
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatHpuFanLevel
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPipe2FanLevel
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleConditionMode
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatSelectedConditioningMode
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatSelectedFanMode
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
+import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
+import a75f.io.logic.bo.building.statprofiles.util.StatZoneStatus
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatActualConditioningMode
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatCpuFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatHpuFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe2FanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatSelectedConditioningMode
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatSelectedFanMode
 import a75f.io.logic.util.uiutils.updateUserIntentPoints
 import a75f.io.renatus.R
 import a75f.io.renatus.profiles.mystat.CPU
@@ -80,26 +80,26 @@ private fun setUpConditionFanConfig(
     var conditionMode = 0
     var fanMode = 0
 
-    if (equipPoints.containsKey(HSZoneStatus.CONDITIONING_MODE.name)) {
-        conditionMode = equipPoints[HSZoneStatus.CONDITIONING_MODE.name] as Int
+    if (equipPoints.containsKey(StatZoneStatus.CONDITIONING_MODE.name)) {
+        conditionMode = equipPoints[StatZoneStatus.CONDITIONING_MODE.name] as Int
     }
-    if (equipPoints.containsKey(HSZoneStatus.FAN_MODE.name)) {
-        fanMode = equipPoints[HSZoneStatus.FAN_MODE.name] as Int
+    if (equipPoints.containsKey(StatZoneStatus.FAN_MODE.name)) {
+        fanMode = equipPoints[StatZoneStatus.FAN_MODE.name] as Int
     }
 
     var conModeAdapter = getMyStatAdapterValue(context, R.array.smartstat_conditionmode)
 
-    if (equipPoints.containsKey(HSZoneStatus.CONDITIONING_ENABLED.name)) {
-        val possibleConditionMode = equipPoints[HSZoneStatus.CONDITIONING_ENABLED.name] as MyStatPossibleConditioningMode
+    if (equipPoints.containsKey(StatZoneStatus.CONDITIONING_ENABLED.name)) {
+        val possibleConditionMode = equipPoints[StatZoneStatus.CONDITIONING_ENABLED.name] as PossibleConditioningMode
         when(possibleConditionMode) {
-            MyStatPossibleConditioningMode.OFF -> {
+            PossibleConditioningMode.OFF -> {
                 conModeAdapter = getMyStatAdapterValue(context, R.array.smartstat_conditionmode_off)
                 conditionMode = 0
             }
-            MyStatPossibleConditioningMode.COOL_ONLY -> {
+            PossibleConditioningMode.COOLONLY -> {
                 conModeAdapter = getMyStatAdapterValue(context, R.array.smartstat_conditionmode_coolonly)
             }
-            MyStatPossibleConditioningMode.HEAT_ONLY -> {
+            PossibleConditioningMode.HEATONLY -> {
                 conModeAdapter = getMyStatAdapterValue(context, R.array.smartstat_conditionmode_heatonly)
             }
             else -> {}
@@ -114,7 +114,7 @@ private fun setUpConditionFanConfig(
         CcuLog.e(L.TAG_CCU_ZONE, "Condition Mode is not in the range falling back to off")
     }
 
-    val fanLevel = equipPoints[HSZoneStatus.FAN_LEVEL.name] as Int
+    val fanLevel = equipPoints[StatZoneStatus.FAN_LEVEL.name] as Int
     val fanSpinnerSelectionValues = RelayUtil.getFanOptionByLevel(fanLevel)
     fanModeSpinner.adapter = getMyStatAdapterValue(context, fanSpinnerSelectionValues)
 
@@ -129,21 +129,21 @@ private fun setUpConditionFanConfig(
     }
     setSpinnerListenerForMyStat(
         conditioningModeSpinner,
-        HSZoneStatus.CONDITIONING_MODE,
+        StatZoneStatus.CONDITIONING_MODE,
         equipId,
         profileType,
         equip,
         configuration
     )
     setSpinnerListenerForMyStat(
-        fanModeSpinner, HSZoneStatus.FAN_MODE, equipId, profileType, equip, configuration
+        fanModeSpinner, StatZoneStatus.FAN_MODE, equipId, profileType, equip, configuration
     )
 }
 
 @SuppressLint("ClickableViewAccessibility")
 private fun setSpinnerListenerForMyStat(
     view: View,
-    spinnerType: HSZoneStatus,
+    spinnerType: StatZoneStatus,
     equipId: String,
     profileType: ProfileType,
     equip: MyStatEquip,
@@ -162,16 +162,16 @@ private fun setSpinnerListenerForMyStat(
     val onItemSelectedListener: OnItemSelectedListener = object : OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
             when (spinnerType) {
-                HSZoneStatus.CONDITIONING_MODE -> handleMyStatConditionMode(
+                StatZoneStatus.CONDITIONING_MODE -> handleMyStatConditionMode(
                     position, equipId, profileType, userClickCheck, configuration, equip.conditioningMode
                 )
 
-                HSZoneStatus.FAN_MODE -> handleMyStatFanMode(
+                StatZoneStatus.FAN_MODE -> handleMyStatFanMode(
                     equipId, position, profileType, userClickCheck, configuration, equip.fanOpMode
                 )
 
-                HSZoneStatus.TARGET_HUMIDITY -> handleMyStatHumidityMode(position, equipId, equip)
-                HSZoneStatus.TARGET_DEHUMIDIFY -> handleMyStatDeHumidityMode(position, equipId, equip)
+                StatZoneStatus.TARGET_HUMIDITY -> handleMyStatHumidityMode(position, equipId, equip)
+                StatZoneStatus.TARGET_DEHUMIDIFY -> handleMyStatDeHumidityMode(position, equipId, equip)
 
                 else -> {}
             }
@@ -222,21 +222,20 @@ private fun handleMyStatFanMode(
     fanMode: Point
 ) {
 
-
+    val cacheStorage = FanModeCacheStorage.getMyStatFanModeCache()
     fun isFanModeCurrentOccupied(position : Int): Boolean {
         val basicSettings = MyStatFanStages.values()[position]
         return (basicSettings == MyStatFanStages.LOW_CUR_OCC || basicSettings == MyStatFanStages.HIGH_CUR_OCC)
     }
 
     fun updateFanModeCache(actualFanMode: Int) {
-        val cacheStorage = MyStatFanModeCacheStorage()
+
         if (selectedPosition != 0 && ( selectedPosition % 3 == 0 || isFanModeCurrentOccupied(selectedPosition))) cacheStorage.saveFanModeInCache(
             equipId, actualFanMode
         ) // while saving the fan mode, we need to save the actual fan mode instead of selected position
         else cacheStorage.removeFanModeFromCache(equipId)
     }
     if (userClickCheck) {
-        val cacheStorage = MyStatFanModeCacheStorage()
         val actualFanMode: Int = when (profileType) {
             ProfileType.MYSTAT_CPU -> {
                 val selectedFanMode = getMyStatSelectedFanMode(
@@ -320,14 +319,14 @@ private fun setUpMyStatHumidifierDeHumidifier(
         context, R.layout.spinner_dropdown_item, arrayHumidityTargetList
     )
     humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
-    if (equipPoints.containsKey(HSZoneStatus.TARGET_HUMIDITY.name)) {
+    if (equipPoints.containsKey(StatZoneStatus.TARGET_HUMIDITY.name)) {
         textViewLabel3.text = "Target Min Humidity :"
         humiditySpinner.adapter = humidityTargetAdapter
-        val targetHumidity = equipPoints[HSZoneStatus.TARGET_HUMIDITY.name] as Double
+        val targetHumidity = equipPoints[StatZoneStatus.TARGET_HUMIDITY.name] as Double
         humiditySpinner.setSelection(targetHumidity.toInt() - 1, false)
         setSpinnerListenerForMyStat(
             humiditySpinner,
-            HSZoneStatus.TARGET_HUMIDITY,
+            StatZoneStatus.TARGET_HUMIDITY,
             equipId,
             profileType,
             equip,
@@ -336,13 +335,13 @@ private fun setUpMyStatHumidifierDeHumidifier(
     } else {
         viewPointRow2.findViewById<View>(R.id.lt_column1).visibility = View.GONE
     }
-    if (equipPoints.containsKey(HSZoneStatus.TARGET_DEHUMIDIFY.name)) {
+    if (equipPoints.containsKey(StatZoneStatus.TARGET_DEHUMIDIFY.name)) {
         textViewLabel4.text = "Target Max Humidity :"
         dehumidifySpinner.adapter = humidityTargetAdapter
-        val targetDeHumidity = equipPoints[HSZoneStatus.TARGET_DEHUMIDIFY.name] as Double
+        val targetDeHumidity = equipPoints[StatZoneStatus.TARGET_DEHUMIDIFY.name] as Double
         dehumidifySpinner.setSelection(targetDeHumidity.toInt() - 1, false)
         setSpinnerListenerForMyStat(
-            dehumidifySpinner, HSZoneStatus.TARGET_DEHUMIDIFY,
+            dehumidifySpinner, StatZoneStatus.TARGET_DEHUMIDIFY,
             equipId, profileType, equip, configuration
         )
         if (viewPointRow2.findViewById<View>(R.id.lt_column1).visibility == View.GONE) {
@@ -361,49 +360,49 @@ fun getMyStatEquipPoints(equipMap: Equip, profileType: ProfileType): HashMap<Str
     var fanLevel = -1
     when (profileType) {
         ProfileType.MYSTAT_PIPE2 -> {
-            equipPoints[HSZoneStatus.EQUIP.name] = equip as MyStatPipe2Equip
-            equipPoints[HSZoneStatus.CONFIG.name] = config as MyStatPipe2Configuration
-            equipPoints[HSZoneStatus.PROFILE_NAME.name] = PIPE2.uppercase(Locale.ROOT)
-            equipPoints[HSZoneStatus.PROFILE_TYPE.name] = ProfileType.MYSTAT_PIPE2
-            equipPoints[HSZoneStatus.SUPPLY_TEMP.name] = equip.leavingWaterTemperature.readHisVal()
+            equipPoints[StatZoneStatus.EQUIP.name] = equip as MyStatPipe2Equip
+            equipPoints[StatZoneStatus.CONFIG.name] = config as MyStatPipe2Configuration
+            equipPoints[StatZoneStatus.PROFILE_NAME.name] = PIPE2.uppercase(Locale.ROOT)
+            equipPoints[StatZoneStatus.PROFILE_TYPE.name] = ProfileType.MYSTAT_PIPE2
+            equipPoints[StatZoneStatus.SUPPLY_TEMP.name] = equip.leavingWaterTemperature.readHisVal()
             fanLevel = getMyStatPipe2FanLevel(config)
         }
 
         ProfileType.MYSTAT_CPU -> {
-            equipPoints[HSZoneStatus.EQUIP.name] = equip as MyStatCpuEquip
-            equipPoints[HSZoneStatus.CONFIG.name] = config as MyStatCpuConfiguration
-            equipPoints[HSZoneStatus.PROFILE_NAME.name] = CPU.uppercase(Locale.ROOT)
-            equipPoints[HSZoneStatus.PROFILE_TYPE.name] = ProfileType.MYSTAT_CPU
+            equipPoints[StatZoneStatus.EQUIP.name] = equip as MyStatCpuEquip
+            equipPoints[StatZoneStatus.CONFIG.name] = config as MyStatCpuConfiguration
+            equipPoints[StatZoneStatus.PROFILE_NAME.name] = CPU.uppercase(Locale.ROOT)
+            equipPoints[StatZoneStatus.PROFILE_TYPE.name] = ProfileType.MYSTAT_CPU
             fanLevel = getMyStatCpuFanLevel(config)
         }
 
         ProfileType.MYSTAT_HPU -> {
-            equipPoints[HSZoneStatus.EQUIP.name] = equip as MyStatHpuEquip
-            equipPoints[HSZoneStatus.CONFIG.name] = config as MyStatHpuConfiguration
-            equipPoints[HSZoneStatus.PROFILE_NAME.name] = HPU.uppercase(Locale.ROOT)
-            equipPoints[HSZoneStatus.PROFILE_TYPE.name] = ProfileType.MYSTAT_HPU
+            equipPoints[StatZoneStatus.EQUIP.name] = equip as MyStatHpuEquip
+            equipPoints[StatZoneStatus.CONFIG.name] = config as MyStatHpuConfiguration
+            equipPoints[StatZoneStatus.PROFILE_NAME.name] = HPU.uppercase(Locale.ROOT)
+            equipPoints[StatZoneStatus.PROFILE_TYPE.name] = ProfileType.MYSTAT_HPU
             fanLevel = getMyStatHpuFanLevel(config)
         }
 
         else -> {}
     }
 
-    equipPoints[HSZoneStatus.FAN_LEVEL.name] = fanLevel
-    equipPoints[HSZoneStatus.CONDITIONING_ENABLED.name] = getMyStatPossibleConditionMode(config)
-    equipPoints[HSZoneStatus.STATUS.name] = equip.equipStatusMessage.readDefaultStrVal()
-    equipPoints[HSZoneStatus.FAN_MODE.name] = equip.fanOpMode.readPriorityVal().toInt()
-    equipPoints[HSZoneStatus.CONDITIONING_MODE.name] = getMyStatSelectedConditioningMode(
+    equipPoints[StatZoneStatus.FAN_LEVEL.name] = fanLevel
+    equipPoints[StatZoneStatus.CONDITIONING_ENABLED.name] = getMyStatPossibleConditionMode(config)
+    equipPoints[StatZoneStatus.STATUS.name] = equip.equipStatusMessage.readDefaultStrVal()
+    equipPoints[StatZoneStatus.FAN_MODE.name] = equip.fanOpMode.readPriorityVal().toInt()
+    equipPoints[StatZoneStatus.CONDITIONING_MODE.name] = getMyStatSelectedConditioningMode(
         config, equip.conditioningMode.readPriorityVal().toInt()
     )
     if (equip.dischargeAirTemperature.pointExists()) {
-        equipPoints[HSZoneStatus.DISCHARGE_AIRFLOW.name] =
+        equipPoints[StatZoneStatus.DISCHARGE_AIRFLOW.name] =
             equip.dischargeAirTemperature.readHisVal()
     }
     if (equip.humidifierEnable.pointExists()) {
-        equipPoints[HSZoneStatus.TARGET_HUMIDITY.name] = equip.targetHumidifier.readPriorityVal()
+        equipPoints[StatZoneStatus.TARGET_HUMIDITY.name] = equip.targetHumidifier.readPriorityVal()
     }
     if (equip.dehumidifierEnable.pointExists()) {
-        equipPoints[HSZoneStatus.TARGET_DEHUMIDIFY.name] =
+        equipPoints[StatZoneStatus.TARGET_DEHUMIDIFY.name] =
             equip.targetDehumidifier.readPriorityVal()
     }
     equipPoints.forEach { CcuLog.i(L.TAG_CCU_MSHST, "MyStat data : ${it.key} : ${it.value}") }
@@ -428,11 +427,11 @@ fun loadMyStatProfile(
     val viewDischarge = inflateView(R.layout.zones_item_discharge)
     val supplyTempSensor = inflateView(R.layout.zones_item_discharge)
 
-    val config = myStatPoints[HSZoneStatus.CONFIG.name] as MyStatConfiguration
-    val equip = myStatPoints[HSZoneStatus.EQUIP.name] as MyStatEquip
-    val profileName = myStatPoints[HSZoneStatus.PROFILE_NAME.name] as String
-    val profileType = myStatPoints[HSZoneStatus.PROFILE_TYPE.name] as ProfileType
-    val status = myStatPoints[HSZoneStatus.STATUS.name] as String
+    val config = myStatPoints[StatZoneStatus.CONFIG.name] as MyStatConfiguration
+    val equip = myStatPoints[StatZoneStatus.EQUIP.name] as MyStatEquip
+    val profileName = myStatPoints[StatZoneStatus.PROFILE_NAME.name] as String
+    val profileType = myStatPoints[StatZoneStatus.PROFILE_TYPE.name] as ProfileType
+    val status = myStatPoints[StatZoneStatus.STATUS.name] as String
 
     setMyStatTitleStatusConfig(viewTitle, viewStatus, nodeAddress, status, profileName)
     setUpConditionFanConfig(viewRow1, myStatPoints, equipId, context, profileType, equip, config)

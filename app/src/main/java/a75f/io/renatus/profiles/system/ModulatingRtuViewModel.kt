@@ -16,9 +16,8 @@ import a75f.io.domain.util.allSystemProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode
+import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
 import a75f.io.logic.bo.building.system.SystemMode
-import a75f.io.logic.bo.building.system.SystemProfile
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile

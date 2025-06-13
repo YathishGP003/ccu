@@ -1,6 +1,6 @@
 package a75f.io.renatus.profiles.hss.cpu
 
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
 import a75f.io.renatus.profiles.hss.HyperStatSplitState
 import a75f.io.renatus.profiles.hss.configAnalogOut
 import a75f.io.renatus.profiles.hss.configMisc
@@ -17,36 +17,36 @@ class HyperStatSplitCpuState : HyperStatSplitState() {
 
     var analogOut1MinMax by mutableStateOf(
         AnalogOutVoltage(
-            0, 10, 0, 10, 0, 10, 0, 10,0, 10, 7, 8, 10
+            0, 10, 0, 10, 0, 10, 0, 10,0, 10,0,10,0,10, 7, 8, 10
         )
     )
 
     var analogOut2MinMax by mutableStateOf(
         AnalogOutVoltage(
-            0, 10, 0, 10, 0, 10, 0, 10,0, 10, 7, 8, 10
+             0, 10, 0, 10,0, 10, 0, 10, 0, 10, 0, 10,0, 10, 7, 8, 10
         )
     )
 
     var analogOut3MinMax by mutableStateOf(
         AnalogOutVoltage(
-            0, 10, 0, 10, 0, 10, 0, 10,0, 10, 7, 8, 10
+            0, 10, 0, 10,0, 10, 0, 10, 0, 10, 0, 10,0, 10, 7, 8, 10
         )
     )
 
     var analogOut4MinMax by mutableStateOf(
         AnalogOutVoltage(
-            0, 10, 0, 10, 0, 10, 0, 10,0, 10, 7, 8, 10
+            0, 10, 0, 10,0, 10, 0, 10, 0, 10, 0, 10,0, 10, 7, 8, 10
         )
     )
 
     var stagedFanVoltages by mutableStateOf(
         StagedFanVoltage(
-            4, 7, 7, 7, 7, 7, 10, 10
+            4, 7, 7,7, 7, 7, 7, 7,10, 10, 10
         )
     )
 
     companion object {
-        fun fromProfileConfigToState(config: HyperStatSplitCpuProfileConfiguration): HyperStatSplitCpuState {
+        fun fromProfileConfigToState(config: HyperStatSplitCpuConfiguration): HyperStatSplitCpuState {
             return HyperStatSplitCpuState().apply {
                 configSensorAddress(config, this)
                 configUniversalIn(config, this)
@@ -57,7 +57,7 @@ class HyperStatSplitCpuState : HyperStatSplitState() {
         }
     }
 
-    fun updateConfigFromViewState (config: HyperStatSplitCpuProfileConfiguration) {
+    fun updateConfigFromViewState (config: HyperStatSplitCpuConfiguration) {
         return updateHyperStatSplitConfigFromState(config, this).apply {
             updateDynamicPoints(config, this@HyperStatSplitCpuState)
         }
@@ -225,6 +225,8 @@ data class AnalogOutVoltage (
     var heatingMinVoltage: Int, var heatingMaxVoltage: Int,
     var oaoDamperMinVoltage: Int, var oaoDamperMaxVoltage: Int,
     var returnDamperMinVoltage: Int, var returnDamperMaxVoltage: Int,
+    var compressorMinVoltage: Int, var compressorMaxVoltage: Int,
+    var dcvModulationMinVoltage: Int, var dcvModulationMaxVoltage: Int,
     var linearFanMinVoltage: Int, var linearFanMaxVoltage: Int,
     var linearFanAtFanLow: Int, var linearFanAtFanMedium: Int,
     var linearFanAtFanHigh: Int
@@ -232,7 +234,7 @@ data class AnalogOutVoltage (
 
 data class StagedFanVoltage (
     var recircVoltage: Int, var economizerVoltage: Int,
-    var heatStage1Voltage: Int, var coolStage1Voltage: Int,
-    var heatStage2Voltage: Int, var coolStage2Voltage: Int,
-    var heatStage3Voltage: Int, var coolStage3Voltage: Int
+    var heatStage1Voltage: Int, var coolStage1Voltage: Int, var compressorStage1Voltage: Int,
+    var heatStage2Voltage: Int, var coolStage2Voltage: Int, var compressorStage2Voltage: Int,
+    var heatStage3Voltage: Int, var coolStage3Voltage: Int, var compressorStage3Voltage: Int,
 )

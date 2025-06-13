@@ -6,8 +6,8 @@ import a75f.io.domain.api.DomainName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HsCpuAnalogOutMapping
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HsCpuRelayMapping
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsCpuAnalogOutMapping
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsCpuRelayMapping
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.AnalogOutConfig
@@ -172,7 +172,8 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
     override fun DrawAnalogOutput() {
         val analogEnum = viewModel.getAllowedValues(DomainName.analog1OutputAssociation, viewModel.equipModel)
 
-        val disabledIndices = if (!viewModel.isConditioningConfigExist()) listOf(HsCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal) else emptyList()
+        val disabledIndices = if (!viewModel.isConditioningConfigExist()) listOf(
+            HsCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal) else emptyList()
 
         repeat(3) { index ->
             val analogOut = "Analog-Out${index + 1}"

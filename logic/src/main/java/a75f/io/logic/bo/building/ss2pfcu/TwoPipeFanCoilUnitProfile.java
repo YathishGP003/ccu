@@ -27,8 +27,8 @@ import a75f.io.logic.bo.building.ZoneTempState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
-import a75f.io.logic.bo.building.hyperstat.common.SmartStatFanModeCache;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
@@ -108,7 +108,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             supplyWaterTempTh2 = twoPfcuDevice.getSupplyWaterTemp();
             String zoneId = HSUtil.getZoneIdFromEquipId(twoPfcuEquip.getId());
             Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
-            SmartStatFanModeCache fanCacheStorage = new SmartStatFanModeCache();
+            FanModeCacheStorage fanCacheStorage = FanModeCacheStorage.Companion.getSmartStatFanModeCache();
             int fanModeSaved = fanCacheStorage.getFanModeFromCache(twoPfcuEquip.getId());
             CcuLog.d(TAG, " smartstat 2pfcu, updates 111=" + heatingThreshold+","+coolingThreshold + "," + setTempHeating + "," + setTempCooling + "," + roomTemp+","+supplyWaterTempTh2);
 

@@ -38,21 +38,22 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode
-import a75f.io.logic.bo.building.hyperstat.common.PossibleFanMode
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile
-import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile
-import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getCpuFanLevel
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getHpuFanLevel
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getPipe2FanLevel
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleConditionMode
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleFanModeSettings
-import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
 import a75f.io.logic.bo.building.sensors.SensorType
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.cpu.HyperStatCpuProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.hpu.HyperStatHpuProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.pipe2.HyperStatPipe2Profile
+
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
+import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode
+import a75f.io.logic.bo.building.statprofiles.util.getCpuFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getHSPipe2FanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getHpuFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
+import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
 import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.interfaces.ZoneDataInterface
 import a75f.io.logic.util.uiutils.updateUserIntentPoints
@@ -123,18 +124,18 @@ private fun updateModes(equip: HyperStatEquip, message: HyperStatLocalControlsOv
 
     when (L.getProfile(nodeAddress.toShort())) {
         is HyperStatCpuProfile -> {
-            val configs = getConfiguration(equip.equipRef) as CpuConfiguration
-            possibleFanMode = getPossibleFanModeSettings(getCpuFanLevel(configs))
+            val configs = getHsConfiguration(equip.equipRef) as CpuConfiguration
+            possibleFanMode = getHsPossibleFanModeSettings(getCpuFanLevel(configs))
             possibleMode = getPossibleConditionMode(configs)
         }
         is HyperStatHpuProfile -> {
-            val configs = getConfiguration(equip.equipRef) as HpuConfiguration
-            possibleFanMode = getPossibleFanModeSettings(getHpuFanLevel(configs))
+            val configs = getHsConfiguration(equip.equipRef) as HpuConfiguration
+            possibleFanMode = getHsPossibleFanModeSettings(getHpuFanLevel(configs))
             possibleMode = getPossibleConditionMode(configs)
         }
-        is HyperStatPipe2Profile-> {
-            val configs = getConfiguration(equip.equipRef) as Pipe2Configuration
-            possibleFanMode = getPossibleFanModeSettings(getPipe2FanLevel(configs))
+        is HyperStatPipe2Profile -> {
+            val configs = getHsConfiguration(equip.equipRef) as Pipe2Configuration
+            possibleFanMode = getHsPossibleFanModeSettings(getHSPipe2FanLevel(configs))
             possibleMode = getPossibleConditionMode(configs)
         }
     }
@@ -237,21 +238,20 @@ private fun updateThermistor(logicalPointId: String, value: Double, equipRef: St
     val logicalDomainName = logicalPoint[Tags.DOMAIN_NAME].toString()
     val logicalValue = when (logicalDomainName) {
         DomainName.doorWindowSensorNCTitle24, DomainName.genericAlarmNC,
-        DomainName.genericAlarmNC_th1, DomainName.genericAlarmNC_th2 -> {
+        DomainName.genericAlarmNC_th1, DomainName.genericAlarmNC_th2, DomainName.fanRunSensor -> {
             if ((value * 10) >= 10000) 1.0 else 0.0
         }
 
         DomainName.genericAlarmNO, DomainName.genericAlarmNO_th1, DomainName.genericAlarmNO_th2 -> {
             if ((value * 10) <= 10000) 1.0 else 0.0
         }
-        /*For Generic(1-100)kohms, CCU just need to convertto kOhms*/
+        /*For Generic(1-100)kohms, CCU just need to convert kOhms*/
         DomainName.airTempSensor100kOhms_th1, DomainName.airTempSensor100kOhms_th2 -> {
             value/100
         }
         DomainName.keyCardSensor -> {
             if ((value * 10) <= 10000) 0.0 else 1.0
         }
-
         else -> {
             CCUUtils.roundToOneDecimal(ThermistorUtil.getThermistorValueToTemp(value * 10))
         }
@@ -343,7 +343,7 @@ fun updateSensorValue(
             CcuLog.e(L.TAG_CCU_DEVICE, "Sensor point already exist for $domainName")
             pointRef = isSensorExist
         } else {
-            pointRef = pointsUtil.createDynamicSensorEquipPoint(equip, domainName, getConfiguration(equipRef)!!)
+            pointRef = pointsUtil.createDynamicSensorEquipPoint(equip, domainName, getHsConfiguration(equipRef)!!)
             if (pointRef == null) {
                 CcuLog.e(L.TAG_CCU_DEVICE, "Unable to create sensor point for $domainName")
                 return

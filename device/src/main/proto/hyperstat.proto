@@ -183,6 +183,8 @@ message HyperStatSettingsMessage3_t {
     HyperStatTunersFcu_t  fcuTuners = 2;
     HyperStatConfigsCpu_t hyperStatConfigsCpu = 3; // When staged fan is enabled in CPU profile these voltages provide the fan speed control
   }
+  uint32 thermistor1 = 4;
+  uint32 thermistor2 = 5;
 }
 
 

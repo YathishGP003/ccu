@@ -27,21 +27,21 @@ import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.hvac.MyStatFanStages
-import a75f.io.logic.bo.building.mystat.configs.MyStatCpuConfiguration
-import a75f.io.logic.bo.building.mystat.configs.MyStatHpuConfiguration
-import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2Configuration
-import a75f.io.logic.bo.building.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile
-import a75f.io.logic.bo.building.mystat.profiles.packageunit.cpu.MyStatCpuProfile
-import a75f.io.logic.bo.building.mystat.profiles.packageunit.hpu.MyStatHpuProfile
-import a75f.io.logic.bo.building.mystat.profiles.util.MyStatPossibleConditioningMode
-import a75f.io.logic.bo.building.mystat.profiles.util.MyStatPossibleFanMode
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatConfiguration
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatCpuFanLevel
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatHpuFanLevel
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPipe2FanLevel
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleConditionMode
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatPossibleFanModeSettings
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.packageunit.cpu.MyStatCpuProfile
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.packageunit.hpu.MyStatHpuProfile
+import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
+import a75f.io.logic.bo.building.statprofiles.util.MyStatPossibleFanMode
+import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatCpuFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatHpuFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe2FanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.interfaces.ZoneDataInterface
 import a75f.io.logic.util.uiutils.updateUserIntentPoints
@@ -163,7 +163,7 @@ private fun updateDesiredTemp(
 private fun updateModes(
     equip: MyStatEquip, message: MyStat.MyStatLocalControlsOverrideMessage_t, nodeAddress: Int
 ) {
-    var possibleMode = MyStatPossibleConditioningMode.OFF
+    var possibleMode = PossibleConditioningMode.OFF
     var possibleFanMode = MyStatPossibleFanMode.OFF
 
     when (L.getProfile(nodeAddress.toShort())) {
@@ -191,16 +191,16 @@ private fun updateModes(
 
 
 private fun updateConditioningMode(
-    possibleMode: MyStatPossibleConditioningMode,
+    possibleMode: PossibleConditioningMode,
     mode: MyStat.MyStatConditioningMode_e,
     equip: MyStatEquip
 ) {
 
     val isValidMode = when (possibleMode) {
-        MyStatPossibleConditioningMode.OFF -> (mode == MyStat.MyStatConditioningMode_e.MYSTAT_CONDITIONING_MODE_OFF)
-        MyStatPossibleConditioningMode.COOL_ONLY -> (mode != MyStat.MyStatConditioningMode_e.MYSTAT_CONDITIONING_MODE_HEATING)
-        MyStatPossibleConditioningMode.HEAT_ONLY -> (mode != MyStat.MyStatConditioningMode_e.MYSTAT_CONDITIONING_MODE_COOLING)
-        MyStatPossibleConditioningMode.BOTH -> true // anything is fine
+        PossibleConditioningMode.OFF -> (mode == MyStat.MyStatConditioningMode_e.MYSTAT_CONDITIONING_MODE_OFF)
+        PossibleConditioningMode.COOLONLY -> (mode != MyStat.MyStatConditioningMode_e.MYSTAT_CONDITIONING_MODE_HEATING)
+        PossibleConditioningMode.HEATONLY -> (mode != MyStat.MyStatConditioningMode_e.MYSTAT_CONDITIONING_MODE_COOLING)
+        PossibleConditioningMode.BOTH -> true // anything is fine
     }
 
     if (!isValidMode) {

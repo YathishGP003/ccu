@@ -16,14 +16,21 @@ import a75f.io.domain.util.allSystemProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode
+import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
 import a75f.io.logic.bo.building.system.SystemMode
-import a75f.io.logic.bo.building.system.util.deleteSystemConnectModule
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
+import a75f.io.logic.bo.haystack.device.ControlMote
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
 import a75f.io.renatus.util.SystemProfileUtil
+import a75f.io.renatus.util.TestSignalManager
+import a75f.io.renatus.util.modifyConditioningMode
 import android.app.Activity
 import android.content.Context
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -32,14 +39,6 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import a75f.io.logic.bo.haystack.device.ControlMote
-import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
-import a75f.io.renatus.util.TestSignalManager
-import a75f.io.renatus.util.modifyConditioningMode
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import kotlin.system.measureTimeMillis
 
 open class StagedRtuProfileViewModel : ViewModel() {

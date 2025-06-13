@@ -1,9 +1,8 @@
 package a75f.io.renatus.profiles.mystat.viewstates
 
-import a75f.io.logic.bo.building.mystat.configs.MyStatConfiguration
-import a75f.io.logic.bo.building.mystat.configs.MyStatCpuConfiguration
-import a75f.io.logic.bo.building.mystat.configs.MyStatHpuConfiguration
-import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
 import a75f.io.renatus.profiles.hyperstatv2.util.ConfigState
 
 /**
@@ -115,7 +114,7 @@ class MyStatViewStateUtil {
             }
         }
 
-        fun cpuConfigToState(config: MyStatCpuConfiguration, viewState: MyStatCpuViewState): MyStatCpuViewState {
+        fun cpuConfigToState(config: a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration, viewState: MyStatCpuViewState): MyStatCpuViewState {
             configToState(config, viewState) as MyStatCpuViewState
             viewState.analogOut1MinMax.apply {
                 coolingConfig.min =
@@ -193,7 +192,7 @@ class MyStatViewStateUtil {
             }
         }
 
-        fun cpuStateToConfig(state: MyStatCpuViewState, configuration: MyStatCpuConfiguration) {
+        fun cpuStateToConfig(state: MyStatCpuViewState, configuration: a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration) {
             stateToConfig(state, configuration)
             configuration.analogOut1MinMaxConfig.apply {
                 cooling.min.currentVal = state.analogOut1MinMax.coolingConfig.min.toDouble()

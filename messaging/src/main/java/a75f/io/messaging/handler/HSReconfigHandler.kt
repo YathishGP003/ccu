@@ -13,13 +13,13 @@ import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
-import a75f.io.logic.bo.building.hyperstat.common.PossibleFanMode
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getHsFanLevel
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getModelByEquipRef
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleFanModeSettings
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HyperStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HyperStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode
+import a75f.io.logic.bo.building.statprofiles.util.getHSModelByEquipRef
+import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getHsFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.messaging.handler.MessageUtil.Companion.returnDurationDiff
 import com.google.gson.JsonObject
@@ -32,14 +32,14 @@ fun reconfigureHSV2(msgObject: JsonObject, configPoint: Point) {
     val hayStack = CCUHsApi.getInstance()
     
     val hyperStatEquip = hayStack.readEntity("equip and id == "+configPoint.equipRef)
-    val model = getModelByEquipRef(configPoint.equipRef)
+    val model = getHSModelByEquipRef(configPoint.equipRef)
 
     if (model == null) {
         CcuLog.e(L.TAG_CCU_PUBNUB, "model is null for $configPoint")
         return
     }
 
-    val config = getConfiguration(configPoint.equipRef)?.getActiveConfiguration()
+    val config = getHsConfiguration(configPoint.equipRef)?.getActiveConfiguration()
     val equipBuilder = ProfileEquipBuilder(hayStack)
     val deviceModel = ModelLoader.getHyperStatDeviceModel() as SeventyFiveFDeviceDirective
     val entityMapper = EntityMapper(model as SeventyFiveFProfileDirective)
@@ -51,7 +51,7 @@ fun reconfigureHSV2(msgObject: JsonObject, configPoint: Point) {
     if(pointNewValue == null || pointNewValue.asString.isEmpty()){
         CcuLog.e(L.TAG_CCU_PUBNUB, "point is null $config")
     } else {
-        updateConfiguration(configPoint.domainName, pointNewValue.asDouble, config!!)
+        updateConfiguration(configPoint.domainName, pointNewValue.asDouble, config)
         equipBuilder.updateEquipAndPoints(config, model , hayStack.getSite()!!.id, hyperStatEquip["dis"].toString(), true)
         if (configPoint.domainName == DomainName.fanOpMode) {
             updateFanModeCache(configPoint.equipRef, pointNewValue.asInt)
@@ -85,7 +85,7 @@ fun reconfigureHSV2(msgObject: JsonObject, configPoint: Point) {
 
 fun updateFanModeCache(equipRef: String, fanMode: Int) {
     CcuLog.i(L.TAG_CCU_PUBNUB, "updateFanMode $fanMode")
-    val cache = FanModeCacheStorage()
+    val cache = FanModeCacheStorage.getHyperStatFanModeCache()
     if (fanMode != 0  && (fanMode % 3 == 0 || isFanModeCurrentOccupied(fanMode)) ) {
         cache.saveFanModeInCache(equipRef, fanMode)
     }
@@ -105,7 +105,7 @@ fun updateFanMode(equipId: String, config: HyperStatConfiguration) {
     val fanLevel = getHsFanLevel(config)
     val equip = HyperStatEquip(equipId)
     fun resetFanToOff() = equip.fanOpMode.writePointValue(StandaloneFanStage.OFF.ordinal.toDouble())
-    val possibleFanMode = getPossibleFanModeSettings(fanLevel)
+    val possibleFanMode = getHsPossibleFanModeSettings(fanLevel)
     val currentFanMode = StandaloneFanStage.values()[equip.fanOpMode.readPriorityVal().toInt()]
     fun isWithinLow(): Boolean {
         return (currentFanMode.ordinal in listOf(

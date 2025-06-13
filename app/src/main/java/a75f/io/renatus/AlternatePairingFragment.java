@@ -133,8 +133,8 @@ public class AlternatePairingFragment extends BaseDialogFragment {
             int topMargin;
 
             if (mNodeType == NodeType.HYPER_STAT ) {
-                leftMargin = 507;
-                topMargin = 295;
+                leftMargin = 525;
+                topMargin = 250;
             } else if (mNodeType == NodeType.MYSTAT) {
                 leftMargin = 490;
                 topMargin = 255;

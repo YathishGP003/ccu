@@ -41,10 +41,10 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
-import a75f.io.logic.bo.building.hyperstatsplit.common.PossibleConditioningMode;
-import a75f.io.logic.bo.building.hyperstatsplit.common.PossibleFanMode;
-import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil;
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil;
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
+import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode;
+import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode;
 import a75f.io.logic.bo.haystack.device.HyperStatSplitDevice;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.TemperatureMode;
@@ -114,8 +114,8 @@ public class HyperSplitMsgReceiver {
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_DEVICE, "handleRegularUpdate: "+regularUpdateMessage.toString());
         }
-        HashMap device = hayStack.read("device and addr == \"" + nodeAddress + "\"");
-        String equipRef = (String)device.get("equipRef");
+        HashMap device = hayStack.readEntity("device and addr == \"" + nodeAddress + "\"");
+        String equipRef = device.get("equipRef").toString();
 
         Pulse.mDeviceUpdate.put((short) nodeAddress, Calendar.getInstance().getTimeInMillis());
         if(Globals.getInstance().isTemporaryOverrideMode()) {
@@ -140,7 +140,7 @@ public class HyperSplitMsgReceiver {
     private static void handleOverrideMessage(HyperSplit.HyperSplitLocalControlsOverrideMessage_t message, int nodeAddress,
                                               CCUHsApi hayStack) {
 
-        HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+nodeAddress+"\"");
+        HashMap equipMap = CCUHsApi.getInstance().readEntity("equip and group == \""+nodeAddress+"\"");
         Equip hsEquip = new Equip.Builder().setHashMap(equipMap).build();
 
         // HyperSplit and HyperStat local controls override messages share an index.
@@ -529,7 +529,8 @@ public class HyperSplitMsgReceiver {
             DomainName.filterStatusNC,
             DomainName.condensateStatusNC,
             DomainName.emergencyShutoffNC,
-            DomainName.genericAlarmNC
+            DomainName.genericAlarmNC,
+            DomainName.fanRunSensor
     );
 
     /*
@@ -795,7 +796,7 @@ public class HyperSplitMsgReceiver {
 
         if(equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_CPU.name())){
             possibleConditioningMode = HSSplitHaystackUtil.Companion.getPossibleConditioningModeSettings(nodeAddress);
-            possibleFanMode = HSSplitHaystackUtil.Companion.getPossibleFanModeSettings(nodeAddress);
+            possibleFanMode = HSSplitHaystackUtil.Companion.getSplitPossibleFanModeSettings(nodeAddress);
         }
         
         updateFanMode(equipId,fanMode,possibleFanMode);

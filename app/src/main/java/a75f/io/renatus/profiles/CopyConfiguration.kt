@@ -10,27 +10,26 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.bacnet.BacnetProfile
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile
-import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile
-import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.MonitoringConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
-import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatV2MonitoringProfile
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.monitoring.HyperStatV2MonitoringProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
 import a75f.io.logic.bo.building.modbus.ModbusProfile
-import a75f.io.logic.bo.building.mystat.configs.MyStatCpuConfiguration
-import a75f.io.logic.bo.building.mystat.configs.MyStatHpuConfiguration
-import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2Configuration
-import a75f.io.logic.bo.building.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile
-import a75f.io.logic.bo.building.mystat.profiles.packageunit.cpu.MyStatCpuProfile
-import a75f.io.logic.bo.building.mystat.profiles.packageunit.hpu.MyStatHpuProfile
-import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.otn.OtnProfileConfiguration
 import a75f.io.logic.bo.building.plc.PlcProfileConfig
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.cpu.HyperStatCpuProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.hpu.HyperStatHpuProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.pipe2.HyperStatPipe2Profile
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.MonitoringConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.packageunit.cpu.MyStatCpuProfile
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.packageunit.hpu.MyStatHpuProfile
+import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
+
 import a75f.io.logic.bo.building.vav.AcbProfileConfiguration
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.bo.util.CCUUtils
@@ -275,7 +274,7 @@ class CopyConfiguration {
 
         private fun loadActiveHyperStatSplitConfiguration(address: Int, equip: HashMap<Any, Any>) {
             equipModel = ModelLoader.getHyperStatSplitCpuModel() as SeventyFiveFProfileDirective
-            config = HyperStatSplitCpuProfileConfiguration(
+            config = HyperStatSplitCpuConfiguration(
                 address,
                 nodeType.toString(),
                 0,
@@ -289,16 +288,16 @@ class CopyConfiguration {
         private fun loadActiveHyperStatProfilesConfiguration(address: Int, equip: HashMap<Any, Any>) {
             when (L.getProfile(address.toShort())) {
                 is HyperStatCpuProfile -> {
-                    config = getConfiguration(equip["id"].toString()) as CpuConfiguration
+                    config = getHsConfiguration(equip["id"].toString()) as CpuConfiguration
                 }
                 is HyperStatHpuProfile -> {
-                    config = getConfiguration(equip["id"].toString()) as HpuConfiguration
+                    config = getHsConfiguration(equip["id"].toString()) as HpuConfiguration
                 }
                 is HyperStatPipe2Profile -> {
-                    config = getConfiguration(equip["id"].toString()) as Pipe2Configuration
+                    config = getHsConfiguration(equip["id"].toString()) as a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
                 }
                 is HyperStatV2MonitoringProfile -> {
-                    config = getConfiguration(equip["id"].toString()) as MonitoringConfiguration
+                    config = getHsConfiguration(equip["id"].toString()) as MonitoringConfiguration
                 }
             }
         }
@@ -306,7 +305,7 @@ class CopyConfiguration {
         private fun loadActiveMStatProfilesConfiguration(address: Int, equip: HashMap<Any, Any>) {
             when (L.getProfile(address.toShort())) {
                 is MyStatCpuProfile -> {
-                    config = getMyStatConfiguration(equip["id"].toString()) as MyStatCpuConfiguration
+                    config = getMyStatConfiguration(equip["id"].toString()) as a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
                 }
                 is MyStatHpuProfile -> {
                     config = getMyStatConfiguration(equip["id"].toString()) as MyStatHpuConfiguration

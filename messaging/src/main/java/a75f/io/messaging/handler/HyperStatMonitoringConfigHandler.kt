@@ -9,11 +9,9 @@ import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
-import a75f.io.domain.util.ModelLoader.getModelForDomainName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
-import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatV2MonitoringProfile
+import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
 import a75f.io.messaging.handler.MessageUtil.Companion.returnDurationDiff
 import com.google.gson.JsonObject
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
@@ -36,16 +34,15 @@ internal object HyperStatMonitoringConfigHandler {
         val equipBuilder = ProfileEquipBuilder(hayStack)
         val entityMapper = EntityMapper(profileModel)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
-        val config =
-            getConfiguration(configPoint.equipRef)?.getActiveConfiguration()//make it common for all
+        val config = getHsConfiguration(configPoint.equipRef)?.getActiveConfiguration()//make it common for all
 
         val deviceDis = "${hayStack.siteName}-${deviceModel.name}-${config!!.nodeAddress}"
 
         val pointNewValue = msgObject["val"].asDouble
-        updateConfiguration(configPoint.domainName, pointNewValue, config!!)
+        updateConfiguration(configPoint.domainName, pointNewValue, config)
 
         equipBuilder.updateEquipAndPoints(
-            config!!,
+            config,
             profileModel,
             hayStack.getSite()!!.id,
             hyperStatMonitoringEquip["dis"].toString(),
@@ -72,7 +69,7 @@ internal object HyperStatMonitoringConfigHandler {
                 hayStack.writeHisValById(configPoint.id, HSUtil.getPriorityVal(configPoint.id))
                 return
             }
-            val durationDiff = returnDurationDiff(msgObject);
+            val durationDiff = returnDurationDiff(msgObject)
             hayStack.writePointLocal(configPoint.id, level, who, value.toDouble(), durationDiff)
             CcuLog.d(
                 L.TAG_CCU_PUBNUB,

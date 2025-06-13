@@ -66,7 +66,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         giving issue while displaying the schedule type in the UI zone page
          **/
         updateScheduleTypeBasedOnExistingEquip(hayStack, hayStackEquip)
-        DomainManager.addDomainEquip(hayStackEquip)
+        DomainManager.updateDomainEquip(hayStackEquip)
         DomainManager.addEquip(hayStackEquip)
         return equipId
     }

@@ -18,7 +18,6 @@ import static a75f.io.logic.bo.building.schedules.Occupancy.UNOCCUPIED;
 import static a75f.io.logic.bo.building.schedules.Occupancy.VACATION;
 import static a75f.io.logic.bo.building.schedules.Occupancy.WINDOW_OPEN;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
-import static a75f.io.logic.bo.building.schedules.ScheduleUtil.isAHUServedZone;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.isCurrentMinuteUnderSpecialSchedule;
 
 import android.content.Intent;
@@ -35,8 +34,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -56,7 +53,7 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.erm.EmrProfile;
-import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatV2MonitoringProfile;
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.monitoring.HyperStatV2MonitoringProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse;

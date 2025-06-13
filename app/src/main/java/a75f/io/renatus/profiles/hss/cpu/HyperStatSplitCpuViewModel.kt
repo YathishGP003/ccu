@@ -13,18 +13,26 @@ import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.NodeType
-import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfileConfiguration
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusTempAssociation
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getPossibleConditioningModeSettings
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getSplitPossibleFanModeSettings
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuControlType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusTempAssociation
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuUniInType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.getSchedule
-import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler
+import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.correctSensorBusTempPoints
+import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultConditioningMode
+import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultFanMode
+import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus
+import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.mapSensorBusPressureLogicalPoint
+import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.setOutputTypes
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
+import a75f.io.renatus.profiles.hss.ConfigState
 import a75f.io.renatus.profiles.hss.HyperStatSplitViewModel
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
@@ -51,18 +59,18 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
 
         if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is HyperStatSplitCpuEconProfile) {
             hssProfile = L.getProfile(deviceAddress) as HyperStatSplitCpuEconProfile
-            profileConfiguration = HyperStatSplitCpuProfileConfiguration(
+            profileConfiguration = HyperStatSplitCpuConfiguration(
                 deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef, profileType, equipModel
             ).getActiveConfiguration()
         } else {
-            profileConfiguration = HyperStatSplitCpuProfileConfiguration(
+            profileConfiguration = HyperStatSplitCpuConfiguration(
                 deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef, profileType, equipModel
             ).getDefaultConfiguration()
         }
 
-        viewState.value = HyperStatSplitCpuState.fromProfileConfigToState(profileConfiguration as HyperStatSplitCpuProfileConfiguration)
+        viewState.value = HyperStatSplitCpuState.fromProfileConfigToState(profileConfiguration as HyperStatSplitCpuConfiguration)
 
         this.context = context
         this.hayStack = hayStack
@@ -90,14 +98,16 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
         zonePM2p5TargetList = getListByDomainName(DomainName.pm25Target, equipModel)
     }
 
-    fun isCoolingAOEnabled() = isAnyAnalogMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuControlType.COOLING)
-    fun isHeatingAOEnabled() = isAnyAnalogMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuControlType.HEATING)
-    fun isLinearFanAOEnabled() = isAnyAnalogMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuControlType.LINEAR_FAN)
-    fun isOAODamperAOEnabled() = isAnyAnalogMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuControlType.OAO_DAMPER)
-    fun isStagedFanAOEnabled() = isAnyAnalogMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuControlType.STAGED_FAN)
-    fun isReturnDamperAOEnabled() = isAnyAnalogMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuControlType.RETURN_DAMPER)
+    fun isCoolingAOEnabled() = isAnyAnalogMappedToControl(CpuControlType.COOLING)
+    fun isHeatingAOEnabled() = isAnyAnalogMappedToControl(CpuControlType.HEATING)
+    fun isLinearFanAOEnabled() = isAnyAnalogMappedToControl(CpuControlType.LINEAR_FAN)
+    fun isOAODamperAOEnabled() = isAnyAnalogMappedToControl(CpuControlType.OAO_DAMPER)
+    fun isStagedFanAOEnabled() = isAnyAnalogMappedToControl(CpuControlType.STAGED_FAN)
+    fun isReturnDamperAOEnabled() = isAnyAnalogMappedToControl(CpuControlType.RETURN_DAMPER)
+    fun isCompressorAOEnabled() = isAnyAnalogMappedToControl(CpuControlType.COMPRESSOR_SPEED)
+    fun isDamperModulationAOEnabled() = isAnyAnalogMappedToControl(CpuControlType.DCV_MODULATING_DAMPER)
 
-    private fun isAnyAnalogMappedToControl(type: HyperstatSplitReconfigurationHandler.Companion.CpuControlType): Boolean {
+    private fun isAnyAnalogMappedToControl(type: CpuControlType): Boolean {
         return (
                 (this.viewState.value.analogOut1Enabled && this.viewState.value.analogOut1Association == type.ordinal) ||
                 (this.viewState.value.analogOut2Enabled && this.viewState.value.analogOut2Association == type.ordinal) ||
@@ -152,43 +162,85 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
         return nInstances > 1
     }
 
-    fun isHeatStage1RelayEnabled() = isAnyRelayMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuRelayType.HEATING_STAGE1)
-    fun isHeatStage2RelayEnabled() = isAnyRelayMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuRelayType.HEATING_STAGE2)
-    fun isHeatStage3RelayEnabled() = isAnyRelayMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuRelayType.HEATING_STAGE3)
-    fun isCoolStage1RelayEnabled() = isAnyRelayMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuRelayType.COOLING_STAGE1)
-    fun isCoolStage2RelayEnabled() = isAnyRelayMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuRelayType.COOLING_STAGE2)
-    fun isCoolStage3RelayEnabled() = isAnyRelayMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuRelayType.COOLING_STAGE3)
+    fun isHeatStage1RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.HEATING_STAGE1)
+    fun isHeatStage2RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.HEATING_STAGE2)
+    fun isHeatStage3RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.HEATING_STAGE3)
+    fun isCoolStage1RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.COOLING_STAGE1)
+    fun isCoolStage2RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.COOLING_STAGE2)
+    fun isCoolStage3RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.COOLING_STAGE3)
+    fun isFanLowRelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.FAN_LOW_SPEED)
+    fun isFanMediumRelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.FAN_MEDIUM_SPEED)
+    fun isFanHighRelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.FAN_HIGH_SPEED)
+    fun isCompressorStage1RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.COMPRESSOR_STAGE1)
+    fun isCompressorStage2RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.COMPRESSOR_STAGE2)
+    fun isCompressorStage3RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.COMPRESSOR_STAGE3)
+    fun isCompressorMappedWithAnyRelay(): Boolean {
+       return (isAnyRelayMappedToControl(CpuRelayType.COMPRESSOR_STAGE1)||
+        isAnyRelayMappedToControl(CpuRelayType.COMPRESSOR_STAGE2)||
+        isAnyRelayMappedToControl(CpuRelayType.COMPRESSOR_STAGE3))
+    }
+    fun isChangeOverCoolingMapped(ignoreConfig: ConfigState) = isAnyRelayMappedToControl(CpuRelayType.CHANGE_OVER_O_COOLING, ignoreConfig)
+    fun isChangeOverHeatingMapped(ignoreConfig: ConfigState) = isAnyRelayMappedToControl(CpuRelayType.CHANGE_OVER_B_HEATING, ignoreConfig)
 
     fun isAO1MappedToFan() : Boolean {
         return this.viewState.value.analogOut1Enabled &&
-                (this.viewState.value.analogOut1Association == HyperstatSplitReconfigurationHandler.Companion.CpuControlType.LINEAR_FAN.ordinal ||
-                        this.viewState.value.analogOut1Association == HyperstatSplitReconfigurationHandler.Companion.CpuControlType.STAGED_FAN.ordinal)
+                (this.viewState.value.analogOut1Association == CpuControlType.LINEAR_FAN.ordinal ||
+                        this.viewState.value.analogOut1Association == CpuControlType.STAGED_FAN.ordinal)
     }
     fun isAO2MappedToFan() : Boolean {
         return this.viewState.value.analogOut2Enabled &&
-                (this.viewState.value.analogOut2Association == HyperstatSplitReconfigurationHandler.Companion.CpuControlType.LINEAR_FAN.ordinal ||
-                        this.viewState.value.analogOut2Association == HyperstatSplitReconfigurationHandler.Companion.CpuControlType.STAGED_FAN.ordinal)
+                (this.viewState.value.analogOut2Association == CpuControlType.LINEAR_FAN.ordinal ||
+                        this.viewState.value.analogOut2Association == CpuControlType.STAGED_FAN.ordinal)
     }
     fun isAO3MappedToFan() : Boolean {
         return this.viewState.value.analogOut3Enabled &&
-                (this.viewState.value.analogOut3Association == HyperstatSplitReconfigurationHandler.Companion.CpuControlType.LINEAR_FAN.ordinal ||
-                        this.viewState.value.analogOut3Association == HyperstatSplitReconfigurationHandler.Companion.CpuControlType.STAGED_FAN.ordinal)
+                (this.viewState.value.analogOut3Association == CpuControlType.LINEAR_FAN.ordinal ||
+                        this.viewState.value.analogOut3Association == CpuControlType.STAGED_FAN.ordinal)
     }
     fun isAO4MappedToFan() : Boolean {
         return this.viewState.value.analogOut4Enabled &&
-                (this.viewState.value.analogOut4Association == HyperstatSplitReconfigurationHandler.Companion.CpuControlType.LINEAR_FAN.ordinal ||
-                        this.viewState.value.analogOut4Association == HyperstatSplitReconfigurationHandler.Companion.CpuControlType.STAGED_FAN.ordinal)
+                (this.viewState.value.analogOut4Association == CpuControlType.LINEAR_FAN.ordinal ||
+                        this.viewState.value.analogOut4Association == CpuControlType.STAGED_FAN.ordinal)
     }
 
     fun isPrePurgeEnabled() : Boolean {
         return this.viewState.value.prePurge
     }
 
-    private fun isAnyRelayMappedToControl(type: HyperstatSplitReconfigurationHandler.Companion.CpuRelayType): Boolean {
-        return ((this.viewState.value.relay1Config.enabled && this.viewState.value.relay1Config.association == type.ordinal) || (this.viewState.value.relay2Config.enabled && this.viewState.value.relay2Config.association == type.ordinal) || (this.viewState.value.relay3Config.enabled && this.viewState.value.relay3Config.association == type.ordinal) || (this.viewState.value.relay4Config.enabled && this.viewState.value.relay4Config.association == type.ordinal) || (this.viewState.value.relay5Config.enabled && this.viewState.value.relay5Config.association == type.ordinal) || (this.viewState.value.relay6Config.enabled && this.viewState.value.relay6Config.association == type.ordinal) || (this.viewState.value.relay7Config.enabled && this.viewState.value.relay7Config.association == type.ordinal) || (this.viewState.value.relay8Config.enabled && this.viewState.value.relay8Config.association == type.ordinal))
+
+    private fun isAnyRelayMappedToControl(type: CpuRelayType): Boolean {
+
+        fun isEnabledAndMapped(configState: ConfigState): Boolean {
+            return (configState.enabled && configState.association == type.ordinal)
+        }
+        return (isEnabledAndMapped(this.viewState.value.relay1Config) ||
+                isEnabledAndMapped(this.viewState.value.relay2Config) ||
+                isEnabledAndMapped(this.viewState.value.relay3Config) ||
+                isEnabledAndMapped(this.viewState.value.relay4Config) ||
+                isEnabledAndMapped(this.viewState.value.relay5Config) ||
+                isEnabledAndMapped(this.viewState.value.relay6Config) ||
+                isEnabledAndMapped(this.viewState.value.relay7Config) ||
+                isEnabledAndMapped(this.viewState.value.relay8Config))
     }
 
-    fun isAnalogEnabledAndMapped(type: HyperstatSplitReconfigurationHandler.Companion.CpuControlType, enabled: Boolean, association: Int) =
+    fun isAnyRelayMappedToControl(
+        type: CpuRelayType,
+        ignoreConfig: ConfigState
+    ): Boolean {
+        fun isEnabledAndMapped(configState: ConfigState): Boolean {
+            return (configState != ignoreConfig && configState.enabled && configState.association == type.ordinal)
+        }
+        return (isEnabledAndMapped(this.viewState.value.relay1Config) ||
+                isEnabledAndMapped(this.viewState.value.relay2Config) ||
+                isEnabledAndMapped(this.viewState.value.relay3Config) ||
+                isEnabledAndMapped(this.viewState.value.relay4Config) ||
+                isEnabledAndMapped(this.viewState.value.relay5Config) ||
+                isEnabledAndMapped(this.viewState.value.relay6Config) ||
+                isEnabledAndMapped(this.viewState.value.relay7Config) ||
+                isEnabledAndMapped(this.viewState.value.relay8Config))
+    }
+
+    fun isAnalogEnabledAndMapped(type: CpuControlType, enabled: Boolean, association: Int) =
         (enabled && association == type.ordinal)
 
     override fun saveConfiguration() {
@@ -232,8 +284,25 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
      */
     private fun validateProfileConfig(): Boolean {
 
+
+        val isCompressorMapped = (isCompressorMappedWithAnyRelay() || isCompressorAOEnabled())
+        val isChangeOverIsMapped =
+            (isAnyRelayMappedToControl(CpuRelayType.CHANGE_OVER_B_HEATING) || isAnyRelayMappedToControl(
+                CpuRelayType.CHANGE_OVER_O_COOLING
+            ))
+
+        if (isCompressorMapped && !isChangeOverIsMapped) {
+            noOBRelay = true
+            return false
+        }
+
+        if (isChangeOverIsMapped && !isCompressorMapped) {
+            noCompressorStages = true
+            return false
+        }
+
         if (viewState.value.enableOutsideAirOptimization && (
-                !isAnyAnalogMappedToControl(HyperstatSplitReconfigurationHandler.Companion.CpuControlType.OAO_DAMPER) ||
+                !isAnyAnalogMappedToControl(CpuControlType.OAO_DAMPER) ||
                 !(isAnyUniversalInMapped(CpuUniInType.OUTSIDE_AIR_TEMPERATURE)  || isAnySensorBusMapped(CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY)) ||
                 !(isAnyUniversalInMapped(CpuUniInType.MIXED_AIR_TEMPERATURE) || isAnySensorBusMapped(CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY))
             )
@@ -346,24 +415,24 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
     fun cancelConfirm() {
         if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is HyperStatSplitCpuEconProfile) {
             hssProfile = L.getProfile(deviceAddress) as HyperStatSplitCpuEconProfile
-            profileConfiguration = HyperStatSplitCpuProfileConfiguration(
+            profileConfiguration = HyperStatSplitCpuConfiguration(
                 deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef, profileType, equipModel
             ).getActiveConfiguration()
         } else {
-            profileConfiguration = HyperStatSplitCpuProfileConfiguration(
+            profileConfiguration = HyperStatSplitCpuConfiguration(
                 deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef, profileType, equipModel
             ).getDefaultConfiguration()
         }
 
-        viewState.value = HyperStatSplitCpuState.fromProfileConfigToState(profileConfiguration as HyperStatSplitCpuProfileConfiguration)
+        viewState.value = HyperStatSplitCpuState.fromProfileConfigToState(profileConfiguration as HyperStatSplitCpuConfiguration)
 
         openCancelDialog = false
     }
 
     private fun setUpHyperStatSplitProfile() {
-        (viewState.value as HyperStatSplitCpuState).updateConfigFromViewState(profileConfiguration as HyperStatSplitCpuProfileConfiguration)
+        (viewState.value as HyperStatSplitCpuState).updateConfigFromViewState(profileConfiguration as HyperStatSplitCpuConfiguration)
 
         val equipBuilder = ProfileEquipBuilder(hayStack)
         val equipDis = hayStack.siteName + "-cpuecon-" + profileConfiguration.nodeAddress
@@ -380,34 +449,34 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
             CoroutineScope(highPriorityDispatcher).launch {
                 runBlocking {
 
-                    HyperstatSplitReconfigurationHandler.Companion.correctSensorBusTempPoints(
+                    correctSensorBusTempPoints(
                         profileConfiguration,
                         hayStack
                     )
-                    HyperstatSplitReconfigurationHandler.Companion.mapSensorBusPressureLogicalPoint(
+                    mapSensorBusPressureLogicalPoint(
                         profileConfiguration,
                         equipId,
                         hayStack
                     )
-                    HyperstatSplitReconfigurationHandler.Companion.setOutputTypes(
+                    setOutputTypes(
                         profileConfiguration,
                         hayStack
                     )
                     setScheduleType(profileConfiguration)
-                    HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultConditioningMode(
-                        profileConfiguration as HyperStatSplitCpuProfileConfiguration,
+                    handleNonDefaultConditioningMode(
+                        profileConfiguration as HyperStatSplitCpuConfiguration,
                         hayStack
                     )
-                    HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultFanMode(
-                        profileConfiguration as HyperStatSplitCpuProfileConfiguration,
+                    handleNonDefaultFanMode(
+                        profileConfiguration as HyperStatSplitCpuConfiguration,
                         hayStack
                     )
-                    HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus(
+                    initializePrePurgeStatus(
                         profileConfiguration,
                         hayStack,
                         1.0
                     )
-                    HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus(
+                    initializePrePurgeStatus(
                         profileConfiguration,
                         hayStack,
                         0.0
@@ -433,45 +502,44 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
             CoroutineScope(highPriorityDispatcher).launch {
                 runBlocking {
 
-                    HyperstatSplitReconfigurationHandler.Companion.correctSensorBusTempPoints(
+                    correctSensorBusTempPoints(
                         profileConfiguration,
                         hayStack
                     )
-                    HyperstatSplitReconfigurationHandler.Companion.mapSensorBusPressureLogicalPoint(
+                    mapSensorBusPressureLogicalPoint(
                         profileConfiguration,
                         equipId,
                         hayStack
                     )
-                    HyperstatSplitReconfigurationHandler.Companion.setOutputTypes(
+                    setOutputTypes(
                         profileConfiguration,
                         hayStack
                     )
                     setScheduleType(profileConfiguration)
-                    HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultConditioningMode(
-                        profileConfiguration as HyperStatSplitCpuProfileConfiguration,
+                    handleNonDefaultConditioningMode(
+                        profileConfiguration as HyperStatSplitCpuConfiguration,
                         hayStack
                     )
-                    HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultFanMode(
-                        profileConfiguration as HyperStatSplitCpuProfileConfiguration,
+                    handleNonDefaultFanMode(
+                        profileConfiguration as HyperStatSplitCpuConfiguration,
                         hayStack
                     )
-                    HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus(
+                    initializePrePurgeStatus(
                         profileConfiguration,
                         hayStack,
                         1.0
                     )
-                    HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus(
+                    initializePrePurgeStatus(
                         profileConfiguration,
                         hayStack,
                         0.0
                     )
-                    hssProfile.refreshEquip()
                 }
             }
         }
 
-        val possibleConditioningMode = HSSplitHaystackUtil.Companion.getPossibleConditioningModeSettings(hssProfile.hssEquip)
-        val possibleFanMode = HSSplitHaystackUtil.Companion.getPossibleFanModeSettings(profileConfiguration.nodeAddress)
+        val possibleConditioningMode = getPossibleConditioningModeSettings(hssProfile.hssEquip)
+        val possibleFanMode = getSplitPossibleFanModeSettings(profileConfiguration.nodeAddress)
         modifyFanMode(possibleFanMode.ordinal, hssProfile.hssEquip.fanOpMode)
         modifyConditioningMode(possibleConditioningMode.ordinal, hssProfile.hssEquip.conditioningMode, allStandaloneProfileConditions)
     }
@@ -509,7 +577,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
 
     }
 
-    private fun setScheduleType(config: HyperStatSplitProfileConfiguration) {
+    private fun setScheduleType(config: HyperStatSplitConfiguration) {
         hayStack.readEntity("point and domainName == \"" + DomainName.scheduleType + "\" and group == \"" + config.nodeAddress + "\"")["id"]?.let { scheduleTypeId ->
             val roomSchedule = getSchedule(zoneRef, floorRef)
             if(roomSchedule.isZoneSchedule) {
@@ -522,7 +590,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
 
     override fun hasUnsavedChanges() : Boolean {
         return try {
-            !HyperStatSplitCpuState.fromProfileConfigToState(profileConfiguration as HyperStatSplitCpuProfileConfiguration).equalsViewState(viewState.value as HyperStatSplitCpuState)
+            !HyperStatSplitCpuState.fromProfileConfigToState(profileConfiguration as HyperStatSplitCpuConfiguration).equalsViewState(viewState.value as HyperStatSplitCpuState)
         } catch (e: Exception) {
             false
         }

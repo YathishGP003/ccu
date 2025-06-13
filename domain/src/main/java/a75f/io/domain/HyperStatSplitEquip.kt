@@ -1,10 +1,32 @@
 package a75f.io.domain
 
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.DomainEquip
+import a75f.io.domain.util.CalibratedPoint
+import a75f.io.logger.CcuLog
 
-open class HyperStatSplitEquip (equipRef : String) : DomainEquip(equipRef) {
+class HyperStatSplitEquip (equipRef : String) : DomainEquip(equipRef) {
+
+
+    var nodeAddress = -1
+    var floorRef: String? = null
+    var roomRef: String? = null
+
+    init {
+        try {
+            val equipDetails = CCUHsApi.getInstance().readMapById(equipRef)
+            nodeAddress = equipDetails[Tags.GROUP].toString().toInt()
+            floorRef = equipDetails[Tags.FLOORREF] as String
+            roomRef = equipDetails[Tags.ROOMREF] as String
+        } catch (e: Exception) {
+            CcuLog.e("CCU_HST", "Error in reading equip details")
+        }
+    }
+
+
 
     val currentTemp = Point(DomainName.currentTemp, equipRef)
     val zoneHumidity = Point(DomainName.zoneHumidity, equipRef)
@@ -125,6 +147,24 @@ open class HyperStatSplitEquip (equipRef : String) : DomainEquip(equipRef) {
     val analog4AtMinReturnDamper = Point(DomainName.analog4MinReturnDamper, equipRef)
     val analog4AtMaxReturnDamper = Point(DomainName.analog4MaxReturnDamper, equipRef)
 
+    val analog1AtMinCompressorSpeed = Point(DomainName.analog1MinCompressorSpeed, equipRef)
+    val analog1AtMaxCompressorSpeed = Point(DomainName.analog1MaxCompressorSpeed, equipRef)
+    val analog2AtMinCompressorSpeed = Point(DomainName.analog2MinCompressorSpeed, equipRef)
+    val analog2AtMaxCompressorSpeed = Point(DomainName.analog2MaxCompressorSpeed, equipRef)
+    val analog3AtMinCompressorSpeed = Point(DomainName.analog3MinCompressorSpeed, equipRef)
+    val analog3AtMaxCompressorSpeed = Point(DomainName.analog3MaxCompressorSpeed, equipRef)
+    val analog4AtMinCompressorSpeed = Point(DomainName.analog4MinCompressorSpeed, equipRef)
+    val analog4AtMaxCompressorSpeed = Point(DomainName.analog4MaxCompressorSpeed, equipRef)
+
+    val analog1AtMinDcvModulation = Point(DomainName.analog1MinDCVDamper, equipRef)
+    val analog1AtMaxDcvModulation = Point(DomainName.analog1MaxDCVDamper, equipRef)
+    val analog2AtMinDcvModulation = Point(DomainName.analog2MinDCVDamper, equipRef)
+    val analog2AtMaxDcvModulation = Point(DomainName.analog2MaxDCVDamper, equipRef)
+    val analog3AtMinDcvModulation = Point(DomainName.analog3MinDCVDamper, equipRef)
+    val analog3AtMaxDcvModulation = Point(DomainName.analog3MaxDCVDamper, equipRef)
+    val analog4AtMinDcvModulation = Point(DomainName.analog4MinDCVDamper, equipRef)
+    val analog4AtMaxDcvModulation = Point(DomainName.analog4MaxDCVDamper, equipRef)
+
     val analog1FanLow = Point(DomainName.analog1FanLow, equipRef)
     val analog1FanMedium = Point(DomainName.analog1FanMedium, equipRef)
     val analog1FanHigh = Point(DomainName.analog1FanHigh, equipRef)
@@ -144,6 +184,9 @@ open class HyperStatSplitEquip (equipRef : String) : DomainEquip(equipRef) {
     val fanOutHeatingStage1 = Point(DomainName.fanOutHeatingStage1, equipRef)
     val fanOutHeatingStage2 = Point(DomainName.fanOutHeatingStage2, equipRef)
     val fanOutHeatingStage3 = Point(DomainName.fanOutHeatingStage3, equipRef)
+    val fanOutCompressorStage1 = Point(DomainName.fanOutCompressorStage1, equipRef)
+    val fanOutCompressorStage2 = Point(DomainName.fanOutCompressorStage2, equipRef)
+    val fanOutCompressorStage3 = Point(DomainName.fanOutCompressorStage3, equipRef)
     val fanOutRecirculate = Point(DomainName.fanOutRecirculate, equipRef)
     val fanOutEconomizer = Point(DomainName.fanOutEconomizer, equipRef)
     
@@ -291,8 +334,37 @@ open class HyperStatSplitEquip (equipRef : String) : DomainEquip(equipRef) {
     val prePurgeOutsideDamperOpen = Point(DomainName.prePurgeOutsideDamperOpen, equipRef)
     val minFanRuntimePostConditioning = Point(DomainName.minFanRuntimePostConditioning, equipRef)
 
+    val auxHeating1Activate = Point(DomainName.auxHeating1Activate, equipRef)
+    val auxHeating2Activate = Point(DomainName.auxHeating2Activate, equipRef)
+    val compressorLoopOutput = Point(DomainName.compressorLoopOutput, equipRef)
+    val compressorSpeed = Point(DomainName.compressorSpeed, equipRef)
+    val dcvDamperModulating = Point(DomainName.dcvDamperModulating, equipRef)
+    val compressorStage1 = Point(DomainName.compressorStage1, equipRef)
+    val compressorStage2 = Point(DomainName.compressorStage2, equipRef)
+    val compressorStage3 = Point(DomainName.compressorStage3, equipRef)
+    val auxHeatingStage1 = Point(DomainName.auxHeatingStage1, equipRef)
+    val auxHeatingStage2 = Point(DomainName.auxHeatingStage2, equipRef)
+    val changeOverCooling = Point(DomainName.changeOverCooling, equipRef)
+    val changeOverHeating = Point(DomainName.changeOverHeating, equipRef)
     val otaStatusHyperLite = Point(DomainName.otaStatusHyperlite, equipRef)
     val otaStatusConnectModule = Point(DomainName.otaStatusConnectModule, equipRef)
 
+    val relayStages = HashMap<String, Int>()
+    val analogOutStages = HashMap<String, Int>()
+
+    val derivedFanLoopOutput = CalibratedPoint(DomainName.fanLoopOutput ,equipRef,0.0)
+    val highestCoolingStages = CalibratedPoint("highestCoolingStages" ,equipRef,0.0) // This is dynamically going to change based
+    val highestCompressorStages = CalibratedPoint("highestCompressorStages" ,equipRef,0.0) // This is dynamically going to change based
+    val isEconAvailable: CalibratedPoint = CalibratedPoint("economizingAvailable", "", 0.0)
+
+    fun getInCalibratedPointPoint(data: Int): CalibratedPoint {
+        return CalibratedPoint(
+            "InCalibratedPoint", // dummy name
+            "",
+            data.toDouble()
+        )
+    }
+
+    fun isCondensateTripped(): Boolean = condensateStatusNC.readHisVal() > 0.0 || condensateStatusNO.readHisVal() > 0.0
 
 }

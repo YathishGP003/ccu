@@ -1,53 +1,31 @@
 package a75f.io.renatus.profiles.hss
 
+import a75f.io.domain.api.DomainName
 import a75f.io.logger.CcuLog
+import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuControlType
 import a75f.io.renatus.BASE.BaseDialogFragment
-import a75f.io.renatus.composables.rememberPickerState
-import a75f.io.renatus.compose.SaveTextView
-import a75f.io.renatus.compose.SubTitle
-import a75f.io.renatus.compose.TitleTextView
-import a75f.io.renatus.compose.ToggleButtonStateful
-import a75f.io.renatus.modbus.util.CANCEL
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material3.Divider
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-
-import a75f.io.domain.api.DomainName
-import a75f.io.logic.Globals
-import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.TempOffsetPicker
+import a75f.io.renatus.composables.rememberPickerState
 import a75f.io.renatus.compose.BoldStyledTextView
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.compose.ComposeUtil.Companion.greyDropDownColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
+import a75f.io.renatus.compose.SaveTextView
 import a75f.io.renatus.compose.StyledTextView
+import a75f.io.renatus.compose.SubTitle
+import a75f.io.renatus.compose.TitleTextView
 import a75f.io.renatus.compose.ToggleButton
+import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.compose.dropDownHeight
 import a75f.io.renatus.compose.noOfItemsDisplayInDropDown
 import a75f.io.renatus.compose.simpleVerticalScrollbar
+import a75f.io.renatus.modbus.util.CANCEL
 import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.modbus.util.showToast
-import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuState
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuViewModel
 import a75f.io.renatus.util.TestSignalManager
@@ -55,11 +33,22 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -67,22 +56,31 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 open class HyperStatSplitFragment : BaseDialogFragment() {
 
@@ -138,7 +136,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     ToggleButtonStateful(
                         defaultSelection = viewModel.viewState.value.autoForceOccupied,
-                        onEnabled = { it -> viewModel.viewState.value.autoForceOccupied = it }
+                        onEnabled = { viewModel.viewState.value.autoForceOccupied = it }
                     )
                 }
                 Spacer(modifier = Modifier.width(375.dp))
@@ -150,7 +148,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     ToggleButtonStateful(
                         defaultSelection = viewModel.viewState.value.autoAway,
-                        onEnabled = { it -> viewModel.viewState.value.autoAway = it }
+                        onEnabled = { viewModel.viewState.value.autoAway = it }
                     )
                 }
             }
@@ -166,7 +164,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     ToggleButton(
                         defaultSelection = viewModel.viewState.value.enableOutsideAirOptimization,
-                        onEnabled = { it ->
+                        onEnabled = {
                             if (!it && viewModel.isOAODamperAOEnabled()) {
                                 showToast("To disable Outside Air Optimization, disable all OAO Damper analog outputs first.", requireContext())
                             } else if (!it && viewModel.isPrePurgeEnabled()) {
@@ -187,7 +185,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     ToggleButton(
                         defaultSelection = viewModel.viewState.value.prePurge,
-                        onEnabled = { it ->
+                        onEnabled = {
                             if (viewModel.viewState.value.enableOutsideAirOptimization) {
                                 viewModel.viewState.value.prePurge = it
                             } else {
@@ -416,10 +414,42 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun RelayConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
-        val relayEnums = viewModel.getAllowedValues(DomainName.relay1OutputAssociation, viewModel.equipModel)
+    fun RelayConfig(viewModel: HyperStatSplitCpuViewModel, modifier: Modifier = Modifier) {
+        val relayEnums =
+            viewModel.getAllowedValues(DomainName.relay1OutputAssociation, viewModel.equipModel)
 
-        SubTitle("HS CONNECT",modifier)
+        fun getDisabledIndices(relayConfig: ConfigState): List<HyperStatSplitViewModel.Option> {
+
+            val enabledEnums = mutableListOf<HyperStatSplitViewModel.Option>()
+
+            if (viewModel.isCompressorMappedWithAnyRelay()) {
+                if (viewModel.isChangeOverCoolingMapped(relayConfig)) {
+                    relayEnums.forEach {
+                        if (it.value != DomainName.changeOverHeating) {
+                            enabledEnums.add(it)
+                        }
+                    }
+                } else if (viewModel.isChangeOverHeatingMapped(relayConfig)) {
+                    relayEnums.forEach {
+                        if (it.value != DomainName.changeOverCooling) {
+                            enabledEnums.add(it)
+                        }
+                    }
+                } else {
+                    enabledEnums.addAll(relayEnums)
+                }
+            } else {
+                relayEnums.forEach {
+                    if (it.value != DomainName.changeOverCooling && it.value != DomainName.changeOverHeating) {
+                        enabledEnums.add(it)
+                    }
+                }
+            }
+            return enabledEnums
+        }
+
+
+        SubTitle("HS CONNECT", modifier)
         Row(
             modifier = modifier.fillMaxWidth()
         ) {
@@ -457,17 +487,25 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         onEnabledChanged = { enabled -> relayConfig.enabled = enabled },
                         association = relayEnums[relayConfig.association],
                         unit = "",
+
                         relayEnums = relayEnums,
+                        enabledItems = getDisabledIndices(relayConfig),
                         isEnabled = relayConfig.enabled,
                         onAssociationChanged = { associationIndex ->
                             relayConfig.association = associationIndex.index
                         },
-                        onTestActivated = { isChecked -> viewModel.handleTestRelayChanged(index, isChecked) }
+                        onTestActivated = { isChecked ->
+                            viewModel.handleTestRelayChanged(
+                                index,
+                                isChecked
+                            )
+                        }
                     )
                 }
             }
         }
     }
+
 
     @Composable
     fun RelayConfiguration(
@@ -476,6 +514,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         onEnabledChanged: (Boolean) -> Unit,
         association: HyperStatSplitViewModel.Option,
         relayEnums: List<HyperStatSplitViewModel.Option>,
+        enabledItems: List<HyperStatSplitViewModel.Option>,
         unit: String,
         isEnabled: Boolean,
         onAssociationChanged: (HyperStatSplitViewModel.Option) -> Unit,
@@ -500,7 +539,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 SearchSpinnerElement(
                     default = association,
                     allItems = relayEnums,
-                    enabledItems = relayEnums,
+                    enabledItems = enabledItems,
                     unit = unit,
                     onSelect = { onAssociationChanged(it) },
                     width = 350,
@@ -659,10 +698,10 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     defaultSelection = enabled,
                 ) {
                     if (!it || viewModel.viewState.value.enableOutsideAirOptimization || !(
-                            (analogOutName.contains("1") && viewModel.viewState.value.analogOut1Association == HyperstatSplitReconfigurationHandler.Companion.CpuControlType.OAO_DAMPER.ordinal) ||
-                            (analogOutName.contains("2") && viewModel.viewState.value.analogOut2Association == HyperstatSplitReconfigurationHandler.Companion.CpuControlType.OAO_DAMPER.ordinal) ||
-                            (analogOutName.contains("3") && viewModel.viewState.value.analogOut3Association == HyperstatSplitReconfigurationHandler.Companion.CpuControlType.OAO_DAMPER.ordinal) ||
-                            (analogOutName.contains("4") && viewModel.viewState.value.analogOut4Association == HyperstatSplitReconfigurationHandler.Companion.CpuControlType.OAO_DAMPER.ordinal)
+                            (analogOutName.contains("1") && viewModel.viewState.value.analogOut1Association == CpuControlType.OAO_DAMPER.ordinal) ||
+                            (analogOutName.contains("2") && viewModel.viewState.value.analogOut2Association == CpuControlType.OAO_DAMPER.ordinal) ||
+                            (analogOutName.contains("3") && viewModel.viewState.value.analogOut3Association == CpuControlType.OAO_DAMPER.ordinal) ||
+                            (analogOutName.contains("4") && viewModel.viewState.value.analogOut4Association == CpuControlType.OAO_DAMPER.ordinal)
                         )
                     ) {
                         onEnabledChanged(it)
@@ -810,7 +849,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         val selectedItem = remember { mutableStateOf(defaultSelection) }
         val lazyListState = rememberLazyListState()
         var selectedIndex by remember { mutableStateOf(items.indexOf(defaultSelection)) }
-        var expanded = remember { mutableStateOf(false) }
+        val expanded = remember { mutableStateOf(false) }
         Box(
             modifier = Modifier
                 .wrapContentSize()
@@ -888,7 +927,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         }
     }
 
-    fun getDefaultSelectionIndex(items: List<HyperStatSplitViewModel.Option>, defaultSelection: String):Int {
+    private fun getDefaultSelectionIndex(items: List<HyperStatSplitViewModel.Option>, defaultSelection: String):Int {
         var selectedIndex = 0
         if (items.isEmpty()) {
             return -1
@@ -1212,13 +1251,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     fun CoolingControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
         Column(modifier = modifier) {
             if (viewModel.isCoolingAOEnabled()) {
-                EnableCoolingVoltage(viewModel, HyperstatSplitReconfigurationHandler.Companion.CpuControlType.COOLING)
+                EnableCoolingVoltage(viewModel, CpuControlType.COOLING)
             }
         }
     }
 
     @Composable
-    fun EnableCoolingVoltage(viewModel: HyperStatSplitCpuViewModel, type: HyperstatSplitReconfigurationHandler.Companion.CpuControlType) {
+    fun EnableCoolingVoltage(viewModel: HyperStatSplitCpuViewModel, type: CpuControlType) {
         if (viewModel.isAnalogEnabledAndMapped(
                 type,
                 viewModel.viewState.value.analogOut1Enabled,
@@ -1304,13 +1343,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     fun HeatingControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
         Column(modifier = modifier) {
             if (viewModel.isHeatingAOEnabled()) {
-                EnableHeatingVoltage(viewModel, HyperstatSplitReconfigurationHandler.Companion.CpuControlType.HEATING)
+                EnableHeatingVoltage(viewModel, CpuControlType.HEATING)
             }
         }
     }
 
     @Composable
-    fun EnableHeatingVoltage(viewModel: HyperStatSplitCpuViewModel, type: HyperstatSplitReconfigurationHandler.Companion.CpuControlType) {
+    fun EnableHeatingVoltage(viewModel: HyperStatSplitCpuViewModel, type: CpuControlType) {
         if (viewModel.isAnalogEnabledAndMapped(
                 type,
                 viewModel.viewState.value.analogOut1Enabled,
@@ -1394,16 +1433,202 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun LinearFanControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
-        Column(modifier =  modifier) {
-            if (viewModel.isLinearFanAOEnabled()) {
-                EnableLinearFanVoltage(viewModel, HyperstatSplitReconfigurationHandler.Companion.CpuControlType.LINEAR_FAN)
+    fun CompressorControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+        Column(modifier = modifier) {
+            if (viewModel.isCompressorAOEnabled()) {
+                EnableCompressorVoltage(viewModel, CpuControlType.COMPRESSOR_SPEED)
             }
         }
     }
 
     @Composable
-    fun EnableLinearFanVoltage(viewModel: HyperStatSplitCpuViewModel, type: HyperstatSplitReconfigurationHandler.Companion.CpuControlType) {
+    fun EnableCompressorVoltage(viewModel: HyperStatSplitCpuViewModel, type: CpuControlType) {
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut1Enabled,
+                viewModel.viewState.value.analogOut1Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out1 at Min \nCompressor Speed",
+                "Analog-out1 at Max \nCompressor Speed",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.compressorMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.compressorMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.compressorMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.compressorMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut2Enabled,
+                viewModel.viewState.value.analogOut2Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out2 at Min \nCompressor Speed",
+                "Analog-out2 at Max \nCompressor Speed",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.compressorMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.compressorMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.compressorMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.compressorMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut3Enabled,
+                viewModel.viewState.value.analogOut3Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out3 at Min \nCompressor Speed",
+                "Analog-out3 at Max \nCompressor Speed",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.compressorMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.compressorMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.compressorMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.compressorMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut4Enabled,
+                viewModel.viewState.value.analogOut4Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out4 at Min \nCompressor Speed",
+                "Analog-out4 at Max \nCompressor Speed",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.compressorMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.compressorMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.compressorMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.compressorMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+    }
+
+    @Composable
+    fun DcvModulationControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+        Column(modifier = modifier) {
+            if (viewModel.isDamperModulationAOEnabled()) {
+                EnableDcvModulationVoltage(viewModel, CpuControlType.DCV_MODULATING_DAMPER)
+            }
+        }
+    }
+
+    @Composable
+    fun EnableDcvModulationVoltage(viewModel: HyperStatSplitCpuViewModel, type: CpuControlType) {
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut1Enabled,
+                viewModel.viewState.value.analogOut1Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out1 at Min \nDcv Modulation Damper",
+                "Analog-out1 at Max \nDcv Modulation Damper",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.dcvModulationMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.dcvModulationMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.dcvModulationMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.dcvModulationMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut2Enabled,
+                viewModel.viewState.value.analogOut2Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out2 at Min \nDcv Modulation Damper",
+                "Analog-out2 at Max \nDcv Modulation Damper",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.dcvModulationMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.dcvModulationMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.dcvModulationMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.dcvModulationMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut3Enabled,
+                viewModel.viewState.value.analogOut3Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out3 at Min \nDcv Modulation Damper",
+                "Analog-out3 at Max \nDcv Modulation Damper",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.dcvModulationMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.dcvModulationMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.dcvModulationMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.dcvModulationMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut4Enabled,
+                viewModel.viewState.value.analogOut4Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out4 at Min \nDcv Modulation Damper",
+                "Analog-out4 at Max \nDcv Modulation Damper",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.dcvModulationMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.dcvModulationMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.dcvModulationMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.dcvModulationMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+    }
+
+    @Composable
+    fun LinearFanControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+        Column(modifier =  modifier) {
+            if (viewModel.isLinearFanAOEnabled()) {
+                EnableLinearFanVoltage(viewModel, CpuControlType.LINEAR_FAN)
+            }
+        }
+    }
+
+    @Composable
+    fun EnableLinearFanVoltage(viewModel: HyperStatSplitCpuViewModel, type: CpuControlType) {
         if (viewModel.isAnalogEnabledAndMapped(
                 type,
                 viewModel.viewState.value.analogOut1Enabled,
@@ -1490,13 +1715,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     fun StagedFanControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
         Column(modifier = modifier) {
             if (viewModel.isStagedFanAOEnabled()) {
-                EnableStagedFanVoltage(viewModel, HyperstatSplitReconfigurationHandler.Companion.CpuControlType.STAGED_FAN)
+                EnableStagedFanVoltage(viewModel)
             }
         }
     }
 
     @Composable
-    fun EnableStagedFanVoltage(viewModel:HyperStatSplitCpuViewModel, type: HyperstatSplitReconfigurationHandler.Companion.CpuControlType) {
+    fun EnableStagedFanVoltage(viewModel: HyperStatSplitCpuViewModel) {
         if (viewModel.isStagedFanAOEnabled()) {
             CpuStagedFanConfiguration("Fan Out\nduring Recirc",
                 "Fan Out\nduring Economizer",
@@ -1506,6 +1731,9 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 "Fan Out\nduring Cool Stage 1",
                 "Fan Out\nduring Cool Stage 2",
                 "Fan Out\nduring Cool Stage 3",
+                "Fan Out\nduring Compressor Stage 1",
+                "Fan Out\nduring Compressor Stage 2",
+                "Fan Out\nduring Compressor Stage 3",
                 viewModel.minMaxVoltage,
                 "V",
                 recircDefault = (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.recircVoltage.toString(),
@@ -1516,6 +1744,9 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 coolStage1Default = (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.coolStage1Voltage.toString(),
                 coolStage2Default = (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.coolStage2Voltage.toString(),
                 coolStage3Default = (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.coolStage3Voltage.toString(),
+                compressor1Default = (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.compressorStage1Voltage.toString(),
+                compressor2Default = (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.compressorStage2Voltage.toString(),
+                compressor3Default = (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.compressorStage3Voltage.toString(),
                 onRecircSelected = {
                     (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.recircVoltage = it.value.toInt()
                 },
@@ -1540,7 +1771,15 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 onCoolStage3Selected = {
                     (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.coolStage3Voltage = it.value.toInt()
                 },
-                (viewModel as HyperStatSplitCpuViewModel)
+                onCompressor1Selected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.compressorStage1Voltage = it.value.toInt()
+                },
+                onCompressor2Selected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.compressorStage2Voltage = it.value.toInt()
+                },
+                onCompressor3Selected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.compressorStage3Voltage = it.value.toInt()
+                }, viewModel
             )
         }
     }
@@ -1549,13 +1788,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     fun OAODamperControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
         Column(modifier = modifier) {
             if (viewModel.isOAODamperAOEnabled()) {
-                EnableOAODamperVoltage(viewModel, HyperstatSplitReconfigurationHandler.Companion.CpuControlType.OAO_DAMPER)
+                EnableOAODamperVoltage(viewModel, CpuControlType.OAO_DAMPER)
             }
         }
     }
 
     @Composable
-    fun EnableOAODamperVoltage(viewModel:HyperStatSplitCpuViewModel, type: HyperstatSplitReconfigurationHandler.Companion.CpuControlType) {
+    fun EnableOAODamperVoltage(viewModel:HyperStatSplitCpuViewModel, type: CpuControlType) {
         if (viewModel.isAnalogEnabledAndMapped(
                 type,
                 viewModel.viewState.value.analogOut1Enabled,
@@ -1650,13 +1889,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     fun ReturnDamperControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
         Column(modifier = modifier) {
             if (viewModel.isReturnDamperAOEnabled()) {
-                EnableReturnDamperVoltage(viewModel, HyperstatSplitReconfigurationHandler.Companion.CpuControlType.RETURN_DAMPER)
+                EnableReturnDamperVoltage(viewModel, CpuControlType.RETURN_DAMPER)
             }
         }
     }
 
     @Composable
-    fun EnableReturnDamperVoltage(viewModel: HyperStatSplitCpuViewModel, type: HyperstatSplitReconfigurationHandler.Companion.CpuControlType) {
+    fun EnableReturnDamperVoltage(viewModel: HyperStatSplitCpuViewModel, type: CpuControlType) {
         if (viewModel.isAnalogEnabledAndMapped(
                 type,
                 viewModel.viewState.value.analogOut1Enabled,
@@ -1795,6 +2034,9 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         coolStage1Label: String,
         coolStage2Label: String,
         coolStage3Label: String,
+        compressor1Label: String,
+        compressor2Label: String,
+        compressor3Label: String,
         itemList: List<HyperStatSplitViewModel.Option>,
         unit: String,
         recircDefault: String,
@@ -1805,6 +2047,9 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         coolStage1Default: String,
         coolStage2Default: String,
         coolStage3Default: String,
+        compressor1Default: String,
+        compressor2Default: String,
+        compressor3Default: String,
         onRecircSelected: (HyperStatSplitViewModel.Option) -> Unit = {},
         onEconomizerSelected: (HyperStatSplitViewModel.Option) -> Unit = {},
         onHeatStage1Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
@@ -1813,6 +2058,9 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         onCoolStage1Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
         onCoolStage2Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
         onCoolStage3Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
+        onCompressor1Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
+        onCompressor2Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
+        onCompressor3Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
         viewModel: HyperStatSplitCpuViewModel
     ) {
         FlowRow(
@@ -1952,6 +2200,54 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         items = itemList,
                         unit = unit,
                         itemSelected = { onCoolStage3Selected(it) })
+                }
+            }
+            if (viewModel.isCompressorStage1RelayEnabled()) {
+                nEntries++
+                Box(modifier = Modifier
+                    .weight(2f)
+                    .padding(top = 10.dp, bottom = 10.dp)) {
+                    StyledTextView(
+                        compressor1Label, fontSize = 20, textAlignment = TextAlign.Left
+                    )
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    SpinnerElementOption(defaultSelection = compressor1Default,
+                        items = itemList,
+                        unit = unit,
+                        itemSelected = { onCompressor1Selected(it) })
+                }
+            }
+            if (viewModel.isCompressorStage2RelayEnabled()) {
+                nEntries++
+                Box(modifier = Modifier
+                    .weight(2f)
+                    .padding(top = 10.dp, bottom = 10.dp)) {
+                    StyledTextView(
+                        compressor2Label, fontSize = 20, textAlignment = TextAlign.Left
+                    )
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    SpinnerElementOption(defaultSelection = compressor2Default,
+                        items = itemList,
+                        unit = unit,
+                        itemSelected = { onCompressor2Selected(it) })
+                }
+            }
+            if (viewModel.isCompressorStage3RelayEnabled()) {
+                nEntries++
+                Box(modifier = Modifier
+                    .weight(2f)
+                    .padding(top = 10.dp, bottom = 10.dp)) {
+                    StyledTextView(
+                        compressor3Label, fontSize = 20, textAlignment = TextAlign.Left
+                    )
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    SpinnerElementOption(defaultSelection = compressor3Default,
+                        items = itemList,
+                        unit = unit,
+                        itemSelected = { onCompressor3Selected(it) })
                 }
             }
 
@@ -2384,7 +2680,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     ToggleButton(
                         defaultSelection = viewModel.viewState.value.displayHumidity,
-                        onEnabled = { it ->
+                        onEnabled = {
                             if (it && viewModel.getDeviceDisplayCount() > 1) {
                                 showToast("Max of 2 parameters can be displayed at once", requireContext())
                             } else {
@@ -2402,7 +2698,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     ToggleButton(
                         defaultSelection = viewModel.viewState.value.displayCO2,
-                        onEnabled = { it ->
+                        onEnabled = {
                             if (it && viewModel.getDeviceDisplayCount() > 1) {
                                 showToast("Max of 2 parameters can be displayed at once", requireContext())
                             } else {
@@ -2424,7 +2720,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     ToggleButton(
                         defaultSelection = viewModel.viewState.value.displayPM2p5,
-                        onEnabled = { it ->
+                        onEnabled = {
                             if (it && viewModel.getDeviceDisplayCount() > 1) {
                                 showToast("Max of 2 parameters can be displayed at once", requireContext())
                             } else {

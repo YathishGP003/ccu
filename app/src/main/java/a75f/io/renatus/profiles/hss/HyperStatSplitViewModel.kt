@@ -7,9 +7,9 @@ import a75f.io.device.serial.MessageType
 import a75f.io.logic.Globals
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfile
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfileConfiguration
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.formattedToastMessage
@@ -45,7 +45,7 @@ open class HyperStatSplitViewModel : ViewModel() {
     protected var deviceAddress by Delegates.notNull<Short>()
 
     protected lateinit var hssProfile: HyperStatSplitProfile
-    lateinit var profileConfiguration: HyperStatSplitProfileConfiguration
+    lateinit var profileConfiguration: HyperStatSplitConfiguration
 
     lateinit var equipModel : SeventyFiveFProfileDirective
     lateinit var deviceModel : SeventyFiveFDeviceDirective
@@ -59,6 +59,8 @@ open class HyperStatSplitViewModel : ViewModel() {
     var openDuplicateDialog by mutableStateOf(false)
     var openMissingDialog by mutableStateOf(false)
     var openCancelDialog by mutableStateOf(false)
+    var noOBRelay by mutableStateOf(false)
+    var noCompressorStages by mutableStateOf(false)
 
     lateinit var temperatureOffsetsList: List<String>
     lateinit var fanLowMedHighSpeedsList: List<String>
@@ -215,7 +217,7 @@ open class HyperStatSplitViewModel : ViewModel() {
     }
 
     fun applyCopiedConfiguration() {
-        viewState.value = HyperStatSplitCpuState.fromProfileConfigToState(CopyConfiguration.getCopiedConfiguration() as HyperStatSplitCpuProfileConfiguration)
+        viewState.value = HyperStatSplitCpuState.fromProfileConfigToState(CopyConfiguration.getCopiedConfiguration() as HyperStatSplitCpuConfiguration)
         reloadUiRequired()
         disablePasteConfiguration()
         formattedToastMessage(context.getString(R.string.Toast_Success_Message_paste_Configuration), context)

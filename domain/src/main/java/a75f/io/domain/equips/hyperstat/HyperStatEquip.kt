@@ -5,6 +5,7 @@ import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.DomainEquip
+import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logger.CcuLog
 
 /**
@@ -94,6 +95,7 @@ open class HyperStatEquip(equipRef : String) : DomainEquip(equipRef) {
     val occupiedEnable = Point(DomainName.occupiedEnable, equipRef)
     val humidifierEnable = Point(DomainName.humidifierEnable, equipRef)
     val dehumidifierEnable = Point(DomainName.dehumidifierEnable, equipRef)
+    val dcvDamper = Point(DomainName.dcvDamper, equipRef)
     val dcvDamperModulating = Point(DomainName.dcvDamperModulating, equipRef)
     val targetHumidifier = Point(DomainName.targetHumidifier, equipRef)
     val targetDehumidifier = Point(DomainName.targetDehumidifier, equipRef)
@@ -107,7 +109,8 @@ open class HyperStatEquip(equipRef : String) : DomainEquip(equipRef) {
     val enablePm25Display = Point(DomainName.enablePm25Display, equipRef)
     val disableTouch = Point(DomainName.disableTouch, equipRef)
     val enableBrightness = Point(DomainName.enableBrightness, equipRef)
-
+    val auxHeating1Activate = Point(DomainName.auxHeating1Activate, equipRef)
+    val auxHeating2Activate = Point(DomainName.auxHeating2Activate, equipRef)
     val standaloneTemperatureProportionalRange = Point(DomainName.standaloneTemperatureProportionalRange, equipRef)
     val standaloneTemperatureIntegralTime = Point(DomainName.standaloneTemperatureIntegralTime, equipRef)
     val constantTempAlertTime = Point(DomainName.constantTempAlertTime, equipRef)
@@ -126,6 +129,7 @@ open class HyperStatEquip(equipRef : String) : DomainEquip(equipRef) {
     val demandResponseSetback = Point(DomainName.demandResponseSetback, equipRef)
     val heatingLoopOutput = Point(DomainName.heatingLoopOutput, equipRef)
     val fanLoopOutput = Point(DomainName.fanLoopOutput, equipRef)
+    val dcvLoopOutput = Point(DomainName.dcvLoopOutput, equipRef)
     val fanEnable = Point(DomainName.fanEnable, equipRef)
     val dischargeAirTemperature = Point(DomainName.dischargeAirTemperature, equipRef)
     val airFlowSensor = Point(DomainName.airFlowSensor, equipRef)
@@ -156,5 +160,10 @@ open class HyperStatEquip(equipRef : String) : DomainEquip(equipRef) {
     val analog2MaxDCVDamper = Point(DomainName.analog2MaxDCVDamper, equipRef)
     val analog3MaxDCVDamper = Point(DomainName.analog3MaxDCVDamper, equipRef)
 
+    val relayStages = HashMap<String, Int>()
+    val analogOutStages = HashMap<String, Int>()
+
+    val derivedFanLoopOutput = CalibratedPoint(DomainName.fanLoopOutput ,equipRef,0.0)
+    var zoneOccupancyState = CalibratedPoint(DomainName.zoneOccupancy, equipRef, 0.0)
 
 }

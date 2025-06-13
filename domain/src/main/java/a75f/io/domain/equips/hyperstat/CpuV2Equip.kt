@@ -53,4 +53,7 @@ class CpuV2Equip(equipRef: String) : HyperStatEquip(equipRef) {
     val analog2FanRecirculate = Point(DomainName.analog2FanRecirculate, equipRef)
     val analog3FanRecirculate = Point(DomainName.analog3FanRecirculate, equipRef)
 
+
+
+
 }

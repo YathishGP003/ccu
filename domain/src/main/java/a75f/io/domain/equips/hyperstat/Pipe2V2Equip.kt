@@ -2,6 +2,7 @@ package a75f.io.domain.equips.hyperstat
 
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.util.CalibratedPoint
 
 /**
  * Created by Manjunath K on 26-09-2024.
@@ -35,4 +36,6 @@ class Pipe2V2Equip(equipRef : String) : HyperStatEquip(equipRef){
 
     var lastWaterValveTurnedOnTime: Long = System.currentTimeMillis()
     var waterSamplingStartTime: Long = 0
+    var waterValveLoop = CalibratedPoint(DomainName.waterValve, equipRef,0.0)
+
 }

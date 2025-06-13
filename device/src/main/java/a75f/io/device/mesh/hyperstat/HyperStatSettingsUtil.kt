@@ -20,7 +20,7 @@ import a75f.io.domain.equips.hyperstat.HpuV2Equip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.hyperstat.MonitoringEquip
 import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HsCpuAnalogOutMapping
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsCpuAnalogOutMapping
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.tuners.TunerUtil
 
@@ -270,6 +270,18 @@ fun getHyperStatSettings3Message(equipRef: String): HyperStatSettingsMessage3_t 
             is CpuV2Equip -> hyperStatConfigsCpu = getStagedFanDetails(hyperStatEquip)
             is HpuV2Equip -> fcuTuners = getHpuTunerDetails(equipRef)
             is Pipe2V2Equip -> fcuTuners = getFcuTunerDetails(equipRef)
+        }
+        if (hyperStatEquip.thermistor1InputEnable.readDefaultVal() == 1.0) {
+            thermistor1 = hyperStatEquip.thermistor1InputAssociation.readDefaultVal().toInt()
+        }
+        if (hyperStatEquip is Pipe2V2Equip) {
+            if (hyperStatEquip.thermistor2InputEnable.readDefaultVal() == 1.0) {
+                thermistor2 = 1 // it is always mapped to supply watter temperature
+            }
+        } else {
+            if (hyperStatEquip.thermistor2InputEnable.readDefaultVal() == 1.0) {
+                thermistor2 = hyperStatEquip.thermistor2InputAssociation.readDefaultVal().toInt()
+            }
         }
     }.build()
 }

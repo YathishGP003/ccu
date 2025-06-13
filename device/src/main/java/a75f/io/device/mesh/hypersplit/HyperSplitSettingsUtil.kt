@@ -8,11 +8,11 @@ import a75f.io.device.HyperSplit.HyperSplitSettingsMessage4_t
 import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.api.DomainName
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuControlType
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconAnalogOutAssociation
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuRelayType
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuSensorBusType
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuControlType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuEconAnalogOutAssociation
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuSensorBusType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuUniInType
 import a75f.io.logic.tuners.TunerUtil
 
 
@@ -104,7 +104,7 @@ class HyperSplitSettingsUtil {
          * @param nodeAddress
          * return HyperStatSettingsMessage4_t
          */
-        fun getSetting4Message(nodeAddress: Int, equipRef: String, hsApi: CCUHsApi): HyperSplitSettingsMessage4_t {
+        fun getSetting4Message(equipRef: String, hsApi: CCUHsApi): HyperSplitSettingsMessage4_t {
             val settings4 = HyperSplitSettingsMessage4_t.newBuilder()
 
             settings4.setOutsideDamperMinOpenDuringRecirculation(getOutsideDamperMinOpenDuringRecirculation(hsApi, equipRef))
@@ -354,6 +354,13 @@ class HyperSplitSettingsUtil {
             else if (intAssociation == CpuRelayType.EX_FAN_STAGE2.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_EXAUST_2
             else if (intAssociation == CpuRelayType.DCV_DAMPER.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED // This will display as NONE in Connect Module UI
             else if (intAssociation == CpuRelayType.EXTERNALLY_MAPPED.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED // This will display as NONE in Connect Module UI
+            else if (intAssociation == CpuRelayType.COMPRESSOR_STAGE1.ordinal +1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_COMPRESSOR_STAGE_1
+            else if (intAssociation == CpuRelayType.COMPRESSOR_STAGE2.ordinal +1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_COMPRESSOR_STAGE_2
+            else if (intAssociation == CpuRelayType.COMPRESSOR_STAGE3.ordinal +1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_COMPRESSOR_STAGE_3
+            else if (intAssociation == CpuRelayType.CHANGE_OVER_O_COOLING.ordinal +1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_O_ENERGISE_IN_COOLING
+            else if (intAssociation == CpuRelayType.CHANGE_OVER_B_HEATING.ordinal +1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_B_ENERGISE_IN_HEATING
+            else if (intAssociation == CpuRelayType.AUX_HEATING_STAGE1.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_AUX_HEATING_1
+            else if (intAssociation == CpuRelayType.AUX_HEATING_STAGE2.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_AUX_HEATING_2
 
             // This should never happen
             else { return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED }
@@ -470,7 +477,8 @@ class HyperSplitSettingsUtil {
             else if (intAssociation == CpuControlType.STAGED_FAN.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_STAGED_FAN
             else if (intAssociation == CpuControlType.RETURN_DAMPER.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED // This will display as NONE in Connect Module UI
             else if (intAssociation == CpuControlType.EXTERNALLY_MAPPED.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED // This will display as NONE in Connect Module UI
-
+            else if (intAssociation == CpuControlType.COMPRESSOR_SPEED.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPILT_AOUT_COMPRESSOR_SPEED
+            else if (intAssociation == CpuControlType.DCV_MODULATING_DAMPER.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPILT_AOUT_DCV_DAMPER
             // This should never happen
             else { return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED }
 
@@ -583,7 +591,7 @@ class HyperSplitSettingsUtil {
                 CpuUniInType.EMERGENCY_SHUTOFF_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
                 CpuUniInType.GENERIC_ALARM_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
                 CpuUniInType.GENERIC_ALARM_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-                CpuUniInType.DOOR_WINDOW_SENSOR_NC.ordinal, -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                CpuUniInType.DOOR_WINDOW_SENSOR_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
                 CpuUniInType.DOOR_WINDOW_SENSOR_TITLE24_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
 
                 CpuUniInType.SUPPLY_AIR_TEMPERATURE.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_SAT
@@ -751,6 +759,12 @@ class HyperSplitSettingsUtil {
             val heatingStage2Query = "domainName == \"" + DomainName.fanOutHeatingStage2 + "\" and $equipRefQuery"
             val heatingStage3Query = "domainName == \"" + DomainName.fanOutHeatingStage3 + "\" and $equipRefQuery"
             val aOutAtRecircQuery = "domainName == \"" + DomainName.fanOutRecirculate + "\" and $equipRefQuery"
+            val compressorStage1Query = "domainName == \"" + DomainName.fanOutCompressorStage1 + "\" and $equipRefQuery"
+            val compressorStage2Query = "domainName == \"" + DomainName.fanOutCompressorStage2 + "\" and $equipRefQuery"
+            val compressorStage3Query = "domainName == \"" + DomainName.fanOutCompressorStage3 + "\" and $equipRefQuery"
+
+            val auxHeating1Activate = "domainName == \"" + DomainName.auxHeating1Activate + "\" and $equipRefQuery"
+            val auxHeating2Activate = "domainName == \"" + DomainName.auxHeating2Activate + "\" and $equipRefQuery"
 
             if (ccuHsApi.readEntity(coolingStage1Query).isNotEmpty()) {
                 stagedFanVoltages.coolingStage1FanAnalogVoltage =
@@ -779,7 +793,26 @@ class HyperSplitSettingsUtil {
             if (ccuHsApi.readEntity(aOutAtRecircQuery).isNotEmpty()) {
                 stagedFanVoltages.analogoutAtRecFanAnalogVoltage = (ccuHsApi.readPointPriorityValByQuery(aOutAtRecircQuery) * 10).toInt()
             }
-
+            if (ccuHsApi.readEntity(compressorStage1Query).isNotEmpty()) {
+                stagedFanVoltages.compressorStage1FanAnalogVoltage =
+                    (10 * ccuHsApi.readPointPriorityValByQuery(compressorStage1Query)).toInt()
+            }
+            if (ccuHsApi.readEntity(compressorStage2Query).isNotEmpty()) {
+                stagedFanVoltages.compressorStage2FanAnalogVoltage =
+                    (10 * ccuHsApi.readPointPriorityValByQuery(compressorStage2Query)).toInt()
+            }
+            if (ccuHsApi.readEntity(compressorStage3Query).isNotEmpty()) {
+                stagedFanVoltages.compressorStage3FanAnalogVoltage =
+                    (10 * ccuHsApi.readPointPriorityValByQuery(compressorStage3Query)).toInt()
+            }
+            if (ccuHsApi.readEntity(auxHeating1Activate).isNotEmpty()) {
+                stagedFanVoltages.auxHeating1Activate =
+                    TunerUtil.readTunerValByQuery(auxHeating1Activate).toInt()
+            }
+            if (ccuHsApi.readEntity(auxHeating2Activate).isNotEmpty()) {
+                stagedFanVoltages.auxHeating2Activate =
+                    TunerUtil.readTunerValByQuery(auxHeating2Activate).toInt()
+            }
             return stagedFanVoltages.build()
         }
 

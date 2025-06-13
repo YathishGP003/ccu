@@ -16,7 +16,7 @@ import a75f.io.domain.util.allSystemProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode
+import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
 import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig

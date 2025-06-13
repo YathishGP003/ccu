@@ -23,27 +23,21 @@ class HyperStatUserIntentHandler {
             return hyperStatStatus[equipRef] ?: "OFF"
         }
 
-        fun updateHyperStatStatus(
-            equipId: String,
-            portStages: HashMap<String, Int>,
-            analogOutStages: HashMap<String, Int>,
-            temperatureState: ZoneTempState,
-            equip: HyperStatEquip
-        ) {
-            val equipStatusMsg = getStatusMsg(portStages, analogOutStages, temperatureState)
+        fun updateHyperStatStatus(temperatureState: ZoneTempState, equip: HyperStatEquip, logTag: String) {
 
-            if (!hyperStatStatus.containsKey(equipId) || !getHyperStatStatusString(equipId).contentEquals(
-                    equipStatusMsg
-                )
+            val equipStatusMsg =
+                getStatusMsg(equip.relayStages, equip.analogOutStages, temperatureState)
+
+            if (!hyperStatStatus.containsKey(equip.equipRef)
+                || !getHyperStatStatusString(equip.equipRef).contentEquals(equipStatusMsg)
             ) {
-                if (hyperStatStatus.containsKey(equipId)) hyperStatStatus.remove(equipId)
-                hyperStatStatus[equipId] = equipStatusMsg
+                if (hyperStatStatus.containsKey(equip.equipRef)) hyperStatStatus.remove(equip.equipRef)
+                hyperStatStatus[equip.equipRef] = equipStatusMsg
 
                 equip.equipStatusMessage.writeDefaultVal(equipStatusMsg)
                 MyStatUserIntentHandler.zoneDataInterface?.refreshScreen("", false)
             }
-            CcuLog.i(L.TAG_CCU_HSHST, "Equip status message : $equipStatusMsg")
-
+            CcuLog.i(logTag, "Equip status message : $equipStatusMsg")
         }
 
     }

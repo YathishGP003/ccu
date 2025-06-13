@@ -10,7 +10,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.Tags;
-import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringUtil;
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.monitoring.HyperStatMonitoringUtil;
 import a75f.io.logic.bo.building.plc.PlcRelayConfigHandler;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;

@@ -1,14 +1,12 @@
 package a75f.io.renatus.profiles.hyperstatv2.util
 
-import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuMinMaxConfig
-import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuStagedConfig
-import a75f.io.logic.bo.building.hyperstat.v2.configs.FanConfig
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HyperStatConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuMinMaxConfig
-import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2MinMaxConfig
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuMinMaxConfig
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuStagedConfig
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuMinMaxConfig
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HyperStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.FanConfig
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.CpuAnalogOutMinMaxConfig
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.CpuViewState
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.HpuAnalogOutMinMaxConfig
@@ -319,7 +317,7 @@ class HyperStatViewStateUtil {
             }
         }
 
-        fun pipe2ConfigToState(configuration: Pipe2Configuration): Pipe2ViewState {
+        fun pipe2ConfigToState(configuration: a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration): Pipe2ViewState {
             val pipe2ViewState = hyperStatConfigToState(configuration, Pipe2ViewState()) as Pipe2ViewState
             pipe2ViewState.apply {
                 configMinMaxToStatePipe2(analogOut1MinMax, configuration.analogOut1MinMaxConfig)
@@ -335,7 +333,7 @@ class HyperStatViewStateUtil {
             return pipe2ViewState
         }
 
-        private fun configMinMaxToStatePipe2(minMaxState: Pipe2AnalogOutMinMaxConfig, minMaxConfig: Pipe2MinMaxConfig) {
+        private fun configMinMaxToStatePipe2(minMaxState: Pipe2AnalogOutMinMaxConfig, minMaxConfig: a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2MinMaxConfig) {
             minMaxState.apply {
                 waterModulatingValue.min = minMaxConfig.waterModulatingValue.min.currentVal.toInt()
                 waterModulatingValue.max = minMaxConfig.waterModulatingValue.max.currentVal.toInt()
@@ -345,7 +343,7 @@ class HyperStatViewStateUtil {
                 fanSpeedConfig.max = minMaxConfig.fanSpeedConfig.max.currentVal.toInt()
             }
         }
-        fun pipe2StateToConfig(state: Pipe2ViewState, configuration: Pipe2Configuration) {
+        fun pipe2StateToConfig(state: Pipe2ViewState, configuration: a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration) {
             hyperStatStateToConfig(state, configuration)
             configuration.apply {
                 minMaxConfigFromStatePipe2(analogOut1MinMaxConfig, state.analogOut1MinMax)
@@ -359,7 +357,7 @@ class HyperStatViewStateUtil {
 
             }
         }
-        private fun minMaxConfigFromStatePipe2(minMaxConfig: Pipe2MinMaxConfig, minMaxState: Pipe2AnalogOutMinMaxConfig) {
+        private fun minMaxConfigFromStatePipe2(minMaxConfig: a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2MinMaxConfig, minMaxState: Pipe2AnalogOutMinMaxConfig) {
             minMaxConfig.apply {
                 waterModulatingValue.min.currentVal = minMaxState.waterModulatingValue.min.toDouble()
                 waterModulatingValue.max.currentVal = minMaxState.waterModulatingValue.max.toDouble()

@@ -11,8 +11,8 @@ import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.hyperstat.v2.configs.MonitoringConfiguration
-import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatV2MonitoringProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.monitoring.HyperStatV2MonitoringProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.MonitoringConfiguration
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.getSchedule
 import a75f.io.renatus.FloorPlanFragment

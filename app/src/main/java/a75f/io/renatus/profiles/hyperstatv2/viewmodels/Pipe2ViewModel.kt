@@ -13,12 +13,12 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
-import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getPipe2FanLevel
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleConditionMode
-import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleFanModeSettings
-import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.pipe2.HyperStatPipe2Profile
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.util.getHSPipe2FanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
+import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
@@ -57,12 +57,17 @@ class Pipe2ViewModel(application: Application) : HyperStatViewModel(application)
         if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is HyperStatPipe2Profile) {
             hyperStatProfile = (L.getProfile(deviceAddress) as HyperStatPipe2Profile)
             val equip = (hyperStatProfile as HyperStatPipe2Profile).getProfileDomainEquip(deviceAddress.toInt())
-            profileConfiguration = getConfiguration(equip.equipRef)!!.getActiveConfiguration()
+            profileConfiguration = getHsConfiguration(equip.equipRef)!!.getActiveConfiguration()
             equipRef = equip.equipRef
         } else {
             profileConfiguration = Pipe2Configuration(
-                nodeAddress = deviceAddress.toInt(), nodeType = nodeType.name, priority = 0,
-                roomRef = zoneRef, floorRef = floorRef, profileType = profileType, model = equipModel
+                nodeAddress = deviceAddress.toInt(),
+                nodeType = nodeType.name,
+                priority = 0,
+                roomRef = zoneRef,
+                floorRef = floorRef,
+                profileType = profileType,
+                model = equipModel
             ).getDefaultConfiguration()
         }
 
@@ -111,7 +116,7 @@ class Pipe2ViewModel(application: Application) : HyperStatViewModel(application)
             L.ccu().zoneProfiles.add(hyperStatProfile)
             val equip = Pipe2V2Equip(equipId)
             equip.conditioningMode.writePointValue(StandaloneConditioningMode.AUTO.ordinal.toDouble())
-            updateFanMode(false,equip, getPipe2FanLevel(profileConfiguration as Pipe2Configuration))
+            updateFanMode(false,equip, getHSPipe2FanLevel(profileConfiguration as Pipe2Configuration))
             CcuLog.i(Domain.LOG_TAG, "Pipe2 profile added")
         } else {
             equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, getEquipDis(), true)
@@ -120,11 +125,11 @@ class Pipe2ViewModel(application: Application) : HyperStatViewModel(application)
             CcuLog.i(Domain.LOG_TAG, " updateDeviceAndPoints")
             deviceBuilder.updateDeviceAndPoints(profileConfiguration, deviceModel, equipId, hayStack.site!!.id, getDeviceDis())
             val equip = Pipe2V2Equip(equipId)
-            updateFanMode(true, equip, getPipe2FanLevel(profileConfiguration as Pipe2Configuration))
+            updateFanMode(true, equip, getHSPipe2FanLevel(profileConfiguration as Pipe2Configuration))
         }
         profileConfiguration.apply {
             val possibleConditioningMode = getPossibleConditionMode(profileConfiguration)
-            val possibleFanMode = getPossibleFanModeSettings(getPipe2FanLevel(profileConfiguration as Pipe2Configuration))
+            val possibleFanMode = getHsPossibleFanModeSettings(getHSPipe2FanLevel(profileConfiguration as Pipe2Configuration))
             val equip = Pipe2V2Equip(equipId)
             modifyFanMode(possibleFanMode.ordinal, equip.fanOpMode)
             modifyConditioningMode(possibleConditioningMode.ordinal, equip.conditioningMode, allStandaloneProfileConditions)

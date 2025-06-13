@@ -1489,7 +1489,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                          */
                                         if (scheduleHashmap.isEmpty()) {
                                             DefaultSchedules.setDefaultCoolingHeatingTemp();
-                                            DefaultSchedules.generateDefaultSchedule(true, zone.getId());
+                                            DefaultSchedules.generateDefaultZoneSchedule(zone.getId());
                                         }
                                     }
 
@@ -1979,7 +1979,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                            if (schedule.isEmpty()) {
                                DefaultSchedules.setDefaultCoolingHeatingTemp();
-                               DefaultSchedules.generateDefaultSchedule(true, zone.getId());
+                               DefaultSchedules.generateDefaultZoneSchedule(zone.getId());
                            }
                        }
                         HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and " +

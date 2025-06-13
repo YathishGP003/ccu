@@ -30,7 +30,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -935,7 +934,7 @@ public class FloorPlanFragment extends Fragment {
                 SchedulabeLimits.Companion.addSchedulableLimits(false,zoneId,hsZone.getDisplayName());
                 hsZone.setId(zoneId);
                 DefaultSchedules.setDefaultCoolingHeatingTemp();
-                String zoneSchedule = DefaultSchedules.generateDefaultSchedule(true, zoneId);
+                String zoneSchedule = DefaultSchedules.generateDefaultZoneSchedule(zoneId);
                 hsZone.setScheduleRef(zoneSchedule);
                 HashMap<Object, Object> defaultNamedSchedule =  CCUHsApi.getInstance().readEntity
                         ("named and schedule and default and siteRef == "+CCUHsApi.getInstance().getSiteIdRef().toString());

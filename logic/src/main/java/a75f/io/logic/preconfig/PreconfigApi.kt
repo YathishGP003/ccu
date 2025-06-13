@@ -309,7 +309,7 @@ fun doZoneConfig(hsZone: Zone ) {
     addSchedulableLimits(false, hsZone.id, hsZone.displayName)
     hsZone.setId(hsZone.getId())
     DefaultSchedules.setDefaultCoolingHeatingTemp()
-    val zoneSchedule = DefaultSchedules.generateDefaultSchedule(true, hsZone.id)
+    val zoneSchedule = DefaultSchedules.generateDefaultZoneSchedule(hsZone.id)
     hsZone.scheduleRef = zoneSchedule
 
     val bacnetId = generateBacnetIdForRoom(hsZone.getId())

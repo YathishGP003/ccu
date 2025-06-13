@@ -981,10 +981,13 @@ public class CreateNewSite extends Fragment {
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         String localSiteId = ccuHsApi.addSite(s75f);
 
-
         ExecutorTask.executeBackground(() -> {
-
             CCUHsApi.getInstance().setPrimaryCcu(true);
+            HashMap<Object, Object> buildingOccupancy =
+                    CCUHsApi.getInstance().readEntity(Queries.BUILDING_OCCUPANCY);
+            if (buildingOccupancy.isEmpty() && CCUHsApi.getInstance().isPrimaryCcu()) {
+                BuildingOccupancy.buildDefaultBuildingOccupancy();
+            }
 
             TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
 
@@ -992,11 +995,6 @@ public class CreateNewSite extends Fragment {
             CcuLog.i(TAG, "LocalSiteID: " + localSiteId);
             ccuHsApi.log();
             prefs.setString("SITE_ID", localSiteId);
-            HashMap<Object, Object> buildingOccupancy =
-                    CCUHsApi.getInstance().readEntity(Queries.BUILDING_OCCUPANCY);
-            if (buildingOccupancy.isEmpty() && CCUHsApi.getInstance().isPrimaryCcu()) {
-                BuildingOccupancy.buildDefaultBuildingOccupancy();
-            }
 
             CCUHsApi.getInstance().importNamedScheduleWithOrg(
                     new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS), org);

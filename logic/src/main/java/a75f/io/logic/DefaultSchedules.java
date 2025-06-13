@@ -31,15 +31,7 @@ public class DefaultSchedules {
     public static double DEFAULT_COOLING_TEMP = 74.0F;
     public static double DEFAULT_HEATING_TEMP = 70.0F;
 
-    public static String generateDefaultSchedule(boolean zone, String zoneId) {
-
-        if (!zone) {
-            ArrayList<Schedule> buildingSchedules = CCUHsApi.getInstance().getSystemSchedule(false);
-            if (!buildingSchedules.isEmpty()) {
-                Schedule buildingSchedule = buildingSchedules.get(0);
-                return buildingSchedule.getId();
-            }
-        }
+    public static String generateDefaultZoneSchedule(String zoneId) {
         HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
 
         HDict[] days = new HDict[7];
@@ -49,10 +41,8 @@ public class DefaultSchedules {
         days[2] = getDefaultForDay(DAYS.WEDNESDAY.ordinal(), zoneId);
         days[3] = getDefaultForDay(DAYS.THURSDAY.ordinal(), zoneId);
         days[4] = getDefaultForDay(DAYS.FRIDAY.ordinal(), zoneId);
-        if(zone){
-            days[5] = getDefaultForDay(DAYS.SATURDAY.ordinal(), zoneId);
-            days[6] = getDefaultForDay(DAYS.SUNDAY.ordinal(), zoneId);
-        }
+        days[5] = getDefaultForDay(DAYS.SATURDAY.ordinal(), zoneId);
+        days[6] = getDefaultForDay(DAYS.SUNDAY.ordinal(), zoneId);
 
         HList hList = HList.make(days);
 
@@ -60,12 +50,12 @@ public class DefaultSchedules {
         HDictBuilder defaultSchedule = new HDictBuilder()
                 .add("id", localId)
                 .add("kind", "Number")
-                .add(zone ? "zone":"building")
+                .add("zone")
                 .add("temp")
                 .add("schedule")
                 .add("heating")
                 .add("cooling")
-                .add("dis", zone ? "Zone Schedule" : "Building Schedule")
+                .add("dis", "Zone Schedule")
                 .add("days", hList)
                 .add("createdDateTime", HDateTime.make(System.currentTimeMillis()))
                 .add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()))

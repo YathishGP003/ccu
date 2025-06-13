@@ -779,7 +779,7 @@ public class MigrationUtil {
                             "not special and not vacation and roomRef " + "== " + room.get("id"));
             if (scheduleHashmap.size() == 0) {
 
-                String scheduleRef = DefaultSchedules.generateDefaultSchedule(true, room.get("id").toString());
+                String scheduleRef = DefaultSchedules.generateDefaultZoneSchedule(room.get("id").toString());
                 Double scheduleType = ccuHsApi.readPointPriorityValByQuery("scheduleType and roomRef == \""
                         + room.get("id") +"\"");
                 if( scheduleType == null || scheduleType == ScheduleType.ZONE.ordinal()){
@@ -800,7 +800,7 @@ public class MigrationUtil {
                             "not special and not vacation and roomRef " + "== " + room.get("id"));
             if(scheduleHashmap.size() > 0 && !scheduleHashmap.containsKey("unoccupiedZoneSetback")){
                 String oldZoneScheduleId =  scheduleHashmap.get("id").toString();
-                String newZoneScheduleId = DefaultSchedules.generateDefaultSchedule(true,
+                String newZoneScheduleId = DefaultSchedules.generateDefaultZoneSchedule(
                         scheduleHashmap.get("roomRef").toString());
                 Schedule newZoneSchedule = ccuHsApi.getScheduleById(newZoneScheduleId);
                 newZoneSchedule.setId(oldZoneScheduleId);

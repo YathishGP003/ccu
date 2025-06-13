@@ -198,7 +198,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                             {
                                 CcuLog.d(L.TAG_CCU_UI," Zone does not have Schedule : Shouldn't happen");
                                 DefaultSchedules.setDefaultCoolingHeatingTemp();
-                                zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
+                                zone.setScheduleRef(DefaultSchedules.generateDefaultZoneSchedule(zone.getId()));
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
                                 HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
                                         "not vacation and roomRef == " +zone.getId());

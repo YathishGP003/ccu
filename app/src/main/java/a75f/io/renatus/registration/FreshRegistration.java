@@ -1277,10 +1277,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         buttonNext.setEnabled(false);
 
         ExecutorTask.executeBackground(() -> {
-            if (!Globals.getInstance().siteAlreadyCreated()) {
-                DefaultSchedules.generateDefaultSchedule(false, null);
-            }
-
             prefs.setBoolean(PreferenceConstants.CCU_SETUP, true);
             prefs.setBoolean(PreferenceConstants.PROFILE_SETUP, true);
         });
@@ -1378,9 +1374,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         buttonNext.setEnabled(false);
 
         CcuLog.i(L.TAG_REGISTRATION, "registerCCU");
-        if (!Globals.getInstance().siteAlreadyCreated()) {
-            DefaultSchedules.generateDefaultSchedule(false, null);
-        }
         prefs.setBoolean(PreferenceConstants.CCU_SETUP, true);
         prefs.setBoolean(PreferenceConstants.PROFILE_SETUP, true);
         boolean isNetworkAvailable = pingCloudServer();
@@ -1424,9 +1417,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         CcuLog.i(L.TAG_REGISTRATION, "updateCCURegistrationInfo with delay "+delay);
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             CcuLog.i(L.TAG_REGISTRATION, "updateCCURegistrationInfo");
-            if (!Globals.getInstance().siteAlreadyCreated()) {
-                DefaultSchedules.generateDefaultSchedule(false, null);
-            }
             prefs.setBoolean(PreferenceConstants.CCU_SETUP, true);
             prefs.setBoolean(PreferenceConstants.PROFILE_SETUP, true);
             ProgressDialogUtils.hideProgressDialog();

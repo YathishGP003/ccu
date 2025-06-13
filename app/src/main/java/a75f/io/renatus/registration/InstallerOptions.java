@@ -976,7 +976,6 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
                         //BuildingTuners.getInstance();
                         //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
                         DefaultSchedules.setDefaultCoolingHeatingTemp();
-//                    DefaultSchedules.generateDefaultSchedule(false, null);
                     }
 
                     L.saveCCUState();

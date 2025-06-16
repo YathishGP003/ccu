@@ -598,13 +598,13 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
         return (isDoorOpen && (occupancyStatus == Occupancy.WINDOW_OPEN))
     }
 
-    private fun isFanGoodRun(): Boolean {
-        return if (heatingLoopOutput > 0 && supplyWaterTempTh2 > coolingThreshold) {
+    private fun isFanGoodRun(isDoorWindowOpen: Boolean): Boolean {
+        return if (isDoorWindowOpen || heatingLoopOutput > 0 && supplyWaterTempTh2 > coolingThreshold) {
             // If current direction is heating then check allow only when valve or heating is available
             (isConfigPresent(HsPipe2RelayMapping.WATER_VALVE)
                     || isConfigPresent(HsPipe2RelayMapping.AUX_HEATING_STAGE1)
                     || isConfigPresent(HsPipe2RelayMapping.AUX_HEATING_STAGE2))
-        } else if (coolingLoopOutput > 0 && supplyWaterTempTh2 < coolingThreshold) {
+        } else if (isDoorWindowOpen || coolingLoopOutput > 0 && supplyWaterTempTh2 < coolingThreshold) {
             isConfigPresent(HsPipe2RelayMapping.WATER_VALVE)
         } else {
             false
@@ -661,7 +661,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
                             port, analogOutConfig.fanSpeed.low.currentVal.toInt(),
                             analogOutConfig.fanSpeed.medium.currentVal.toInt(),
                             analogOutConfig.fanSpeed.high.currentVal.toInt(),
-                            equip, basicSettings, fanLoopOutput, isFanGoodRun()
+                            equip, basicSettings, fanLoopOutput, isFanGoodRun(doorWindowSensorOpenStatus)
                         )
                     }
 
@@ -744,7 +744,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
                     }
                 }
 
-                val isFanGoodToRun = isFanGoodRun()
+                val isFanGoodToRun = isFanGoodRun(doorWindowSensorOpenStatus)
 
                 fun isStageActive(
                     stage: Int, currentState: Boolean, isLowestStageActive: Boolean

@@ -556,7 +556,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						DAYS.values()[daysElement.getDay()], daysElement.isIntersection());
 			}
 		};
-		systemFragmentHandler.post(runnable);
+		if(systemFragmentHandler != null) {
+			systemFragmentHandler.post(runnable);
+		}
 	}
 
 	private void hasTextViewChildren() {
@@ -702,7 +704,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					.setGravity(Gravity.TOP)
 					.setText(toolTipValue)
 					.show();
-			systemFragmentHandler.postDelayed(intrinsicScheduleToolTip::dismiss, TOOLTIP_TIME);
+			if(systemFragmentHandler != null) {
+				systemFragmentHandler.postDelayed(intrinsicScheduleToolTip::dismiss, TOOLTIP_TIME);
+			}
 		});
 	}
 	private String convertIntHourMinsToString(int hour, int minute){
@@ -827,7 +831,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						}
 					}
 				};
-				systemFragmentHandler.postDelayed(myRunnable, 100);
+				if(systemFragmentHandler != null) {
+					systemFragmentHandler.postDelayed(myRunnable, 100);
+				}
 			}
 		});
 
@@ -1408,7 +1414,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			if (getActivity() != null){
 				getActivity().unregisterReceiver(occupancyReceiver);
 			}
-			systemFragmentHandler.removeCallbacksAndMessages(null);
+			if (systemFragmentHandler != null) {
+				systemFragmentHandler.removeCallbacksAndMessages(null);
+			}
 		}catch (Exception e){
 			CcuLog.e(L.TAG_CCU_UI, "onDestroyView: ", e);
 		}

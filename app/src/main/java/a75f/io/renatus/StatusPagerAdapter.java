@@ -4,7 +4,10 @@ import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
+
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import a75f.io.logger.CcuLog;
 import a75f.io.renatus.schedules.ScheduleGroupFragment;
@@ -74,5 +77,26 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 	public void destroyItem(ViewGroup container, int position, Object object) {
 		CcuLog.i("UI_PROFILING", "destroyItem: " + position + " " + object.toString());
 		//super.destroyItem(container, position, object);
+	}
+
+	public void destroyAllItems(ViewGroup container) {
+		List<Fragment> fragmentList = Collections.emptyList();
+		try {
+			Field field = FragmentStatePagerAdapter.class.getDeclaredField("mFragments");
+			field.setAccessible(true);
+			fragmentList = (ArrayList<Fragment>) field.get(this);
+		} catch (Exception e) {
+			CcuLog.e("UI_PROFILING", "Error accessing mFragments field in PagerAdapter", e);
+		}
+		if(fragmentList != null) {
+			for (int i = 0; i < fragmentList.size(); i++) {
+				CcuLog.i("UI_PROFILING", "StatusPagerAdapter.destroyAllItems: " + i + " " + fragmentList.get(i).toString());
+				Fragment fragment = fragmentList.get(i);
+				if (fragments.get(i) != null) {
+					super.destroyItem(container, i, fragment);
+				}
+			}
+			finishUpdate(container);
+		}
 	}
 }

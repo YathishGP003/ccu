@@ -80,12 +80,11 @@ public class EntityParser
                 } else if (map.get("device") != null) {
                     devices.add(new Device.Builder().setHashMap(map).build());
                 } else if (map.get("point") != null && map.get("physical") != null) {
-                    HDict hDict = new HDictBuilder().toHDict(map);
-                    phyPoints.add(new RawPoint.Builder().setHDict(hDict).build());
+                    phyPoints.add(new RawPoint.Builder().setHashMap(map).build());
                 } else if (map.get("point") != null && map.get("setting") != null) {
                     settingPoints.add(new SettingPoint.Builder().setHashMap(map).build());
                 } else if (map.get("point") != null ) {
-                    points.add(new Point.Builder().setHDict(new HDictBuilder().toHDict(map)).build());
+                    points.add(new Point.Builder().setHashMap(map).build());
                 } else if (map.get("schedule") != null) {
                     schedules.add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
                 }
@@ -115,11 +114,11 @@ public class EntityParser
         } else if (m.get("device") != null) {
             return new Device.Builder().setHashMap(m).build();
         } else if (m.get("point") != null && m.get("physical") != null) {
-            return new RawPoint.Builder().setHDict(new HDictBuilder().toHDict(m)).build();
+            return new RawPoint.Builder().setHashMap(m).build();
         } else if (m.get("point") != null && m.get("setting") != null) {
             return new SettingPoint.Builder().setHashMap(m).build();
         } else if (m.get("point") != null ) {
-            return new Point.Builder().setHDict(new HDictBuilder().toHDict(m)).build();
+            return new Point.Builder().setHashMap(m).build();
         }
         
         return null;

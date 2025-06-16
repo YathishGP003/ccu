@@ -79,7 +79,7 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
             tunerPointsGrid?.dump()
 
             val pointMaps = haystack.HGridToList(tunerPointsGrid)
-            pointMaps.forEach {remotePoints.add(Point.Builder().setHDict(HDictBuilder().toHDict(it)).build())}
+            pointMaps.forEach {remotePoints.add(Point.Builder().setHashMap(it).build())}
 
         } catch (e: UnknownRecException) {
             e.printStackTrace()

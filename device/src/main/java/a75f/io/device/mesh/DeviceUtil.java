@@ -34,8 +34,6 @@ import static a75f.io.logic.bo.building.definitions.Port.SENSOR_VOC;
 import static a75f.io.logic.bo.building.definitions.Port.TH1_IN;
 import static a75f.io.logic.bo.building.definitions.Port.TH2_IN;
 
-import org.projecthaystack.HDict;
-
 import java.util.HashMap;
 import java.util.List;
 
@@ -388,16 +386,16 @@ public class DeviceUtil {
         }
 
         equipsInZone.forEach( equip -> {
-            HDict coolDT = hayStack.readHDict("point and temp and desired and cooling and equipRef == \""
+            HashMap<Object,Object> coolDT = hayStack.readEntity("point and temp and desired and cooling and equipRef == \""
                     + equip.get("id").toString() + "\"");
-            HDict heatDT = hayStack.readHDict("point and temp and desired and heating and equipRef == \""
+            HashMap<Object,Object> heatDT = hayStack.readEntity("point and temp and desired and heating and equipRef == \""
                     + equip.get("id").toString() + "\"");
-            HDict avgDT = hayStack.readHDict("point and temp and desired and (avg or average) and equipRef == \""
+            HashMap<Object,Object> avgDT = hayStack.readEntity("point and temp and desired and (avg or average) and equipRef == \""
                     + equip.get("id").toString() + "\"");
 
-            Point coolDtPoint = new Point.Builder().setHDict(coolDT).build();
-            Point heatDtPoint = new Point.Builder().setHDict(heatDT).build();
-            Point avgDtPoint = new Point.Builder().setHDict(avgDT).build();
+            Point coolDtPoint = new Point.Builder().setHashMap(coolDT).build();
+            Point heatDtPoint = new Point.Builder().setHashMap(heatDT).build();
+            Point avgDtPoint = new Point.Builder().setHashMap(avgDT).build();
             CcuLog.i(L.TAG_CCU_DEVICE,"updateDesiredTempFromDevice for : "+equip+", "+coolVal+" "+heatVal);
             SystemScheduleUtil.handleManualDesiredTempUpdate(coolDtPoint, heatDtPoint, avgDtPoint, coolVal, heatVal,
                     avgVal, who);

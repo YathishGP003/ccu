@@ -13,7 +13,6 @@ import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
-import org.projecthaystack.HDict
 
 open class TIConfiguration(
     nodeAddress: Int,
@@ -94,9 +93,9 @@ open class TIConfiguration(
             val logicalPoint = Point(logicalDomainName, equipRef)
             if (logicalPoint.pointExists()) {
                 val physicalPoint =
-                    Domain.hayStack.readHDict("point and domainName == \"$physicalPointDomain\" and deviceRef == \"$deviceRef\"")
-                if (physicalPoint.isEmpty) {
-                    val rowPoint = RawPoint.Builder().setHDict(physicalPoint as HDict)
+                    Domain.hayStack.readEntity("point and domainName == \"$physicalPointDomain\" and deviceRef == \"$deviceRef\"")
+                if (physicalPoint.isNotEmpty()) {
+                    val rowPoint = RawPoint.Builder().setHashMap(physicalPoint as HashMap)
                     rowPoint.setPointRef(logicalPoint.id)
                     rowPoint.setEnabled(portEnabled)
                     rowPoint.setPort(port)

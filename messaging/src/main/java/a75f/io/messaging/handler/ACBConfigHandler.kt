@@ -76,8 +76,8 @@ class ACBConfigHandler {
 
         fun updateCondensateSensor(hayStack: CCUHsApi, config: AcbProfileConfiguration) {
             val device = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
-            val th2In = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.th2In + "\"")
-            val th2InPoint = RawPoint.Builder().setHDict(th2In)
+            val th2In = hayStack.readEntity("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.th2In + "\"")
+            val th2InPoint = RawPoint.Builder().setHashMap(th2In)
 
             if (config.condensateSensorType.enabled) {
                 // N/C Condensation Sensor
@@ -97,8 +97,8 @@ class ACBConfigHandler {
 
         fun updateRelayAssociation(hayStack: CCUHsApi, config: AcbProfileConfiguration) {
             val device = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
-            val relay1Map = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay1 + "\"")
-            val relay1 = RawPoint.Builder().setHDict(relay1Map)
+            val relay1Map = hayStack.readEntity("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay1 + "\"")
+            val relay1 = RawPoint.Builder().setHashMap(relay1Map)
 
             if (config.relay1Association.associationVal > 0) {
                 // N/O Valve
@@ -127,12 +127,12 @@ class ACBConfigHandler {
                 val maxCoolingCfm = vavEquip.maxCFMCooling.readDefaultVal()
                 val maxReheatingCfm = vavEquip.maxCFMReheating.readDefaultVal()
 
-                val minCoolingCfmMap = hayStack.readHDict("point and domainName == \"" + DomainName.minCFMCooling + "\"" + " and equipRef == \"" + vavEquip.equipRef + "\"")
-                val minCoolingCfmPoint = Point.Builder().setHDict(minCoolingCfmMap).setMaxVal(maxCoolingCfm.toString()).build()
+                val minCoolingCfmMap = hayStack.readEntity("point and domainName == \"" + DomainName.minCFMCooling + "\"" + " and equipRef == \"" + vavEquip.equipRef + "\"")
+                val minCoolingCfmPoint = Point.Builder().setHashMap(minCoolingCfmMap).setMaxVal(maxCoolingCfm.toString()).build()
                 hayStack.updatePoint(minCoolingCfmPoint, minCoolingCfmMap["id"].toString())
 
-                val minReheatingCfmMap = hayStack.readHDict("point and domainName == \"" + DomainName.minCFMReheating + "\"" + " and equipRef == \"" + vavEquip.equipRef + "\"")
-                val minReheatingCfmPoint = Point.Builder().setHDict(minReheatingCfmMap).setMaxVal(maxReheatingCfm.toString()).build()
+                val minReheatingCfmMap = hayStack.readEntity("point and domainName == \"" + DomainName.minCFMReheating + "\"" + " and equipRef == \"" + vavEquip.equipRef + "\"")
+                val minReheatingCfmPoint = Point.Builder().setHashMap(minReheatingCfmMap).setMaxVal(maxReheatingCfm.toString()).build()
                 hayStack.updatePoint(minReheatingCfmPoint, minReheatingCfmMap["id"].toString())
             }
 

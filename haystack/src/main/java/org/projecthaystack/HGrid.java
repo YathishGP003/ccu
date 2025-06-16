@@ -94,6 +94,7 @@ public class HGrid extends HVal
   {
     HCol col = (HCol)colsByName.get(name);
     if (col != null) return col;
+    if (checked) throw new UnknownNameException(name);
     return null;
   }
 

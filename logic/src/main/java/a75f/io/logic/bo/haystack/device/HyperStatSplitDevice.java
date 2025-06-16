@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.haystack.device;
 
-import org.projecthaystack.HDict;
-
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -146,8 +144,8 @@ public class HyperStatSplitDevice {
             return ;
         }
 
-        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+domainName+"\"");
-        RawPoint p = new RawPoint.Builder().setHDict(point).build();
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+domainName+"\"");
+        RawPoint p = new RawPoint.Builder().setHashMap(point).build();
         p.setPointRef(pointRef);
         CCUHsApi.getInstance().updatePoint(p,p.getId());
 

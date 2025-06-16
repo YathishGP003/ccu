@@ -7,13 +7,11 @@ import static a75f.io.logic.L.TAG_CCU_DEVICE;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
 import org.javolution.io.Struct;
-import org.projecthaystack.HDict;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -714,13 +712,13 @@ public class LSmartNode
 
         if (device != null && !device.isEmpty())
         {
-            List<HDict> physicalOpPoints= hayStack.readAllHDictByQuery("point and physical and cmd and deviceRef == \""+device.get("id")+"\"");
+            ArrayList<HashMap> physicalOpPoints= hayStack.readAll("point and physical and cmd and deviceRef == \""+device.get("id")+"\"");
 
-            for (HDict opPoint : physicalOpPoints)
+            for (HashMap opPoint : physicalOpPoints)
             {
                 if (opPoint.get("portEnabled").toString().equals("true"))
                 {
-                    RawPoint p = new RawPoint.Builder().setHDict(opPoint).build();
+                    RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
                     HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
                     if (logicalOpPoint.isEmpty()) {
                         CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+p.getDisplayName());
@@ -830,9 +828,9 @@ public class LSmartNode
                         CcuLog.d(L.TAG_CCU_DEVICE, "Unknown port info for "+p.getDisplayName());
                     }
 
-                } else if (opPoint.has(Tags.WRITABLE) ||
-                        (opPoint.has(Tags.WRITABLE) && opPoint.has(Tags.UNUSED))) {
-                    RawPoint p = new RawPoint.Builder().setHDict(opPoint).build();
+                } else if (opPoint.containsKey(Tags.WRITABLE) ||
+                        (opPoint.containsKey(Tags.WRITABLE) && opPoint.containsKey(Tags.UNUSED))) {
+                    RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
                     double rawPointValue = hayStack.readPointPriorityVal(opPoint.get("id").toString());
                     CcuLog.d(TAG_CCU_DEVICE, " Raw Point: " + p.getDisplayName() +
                             " is unused port and has value: " +rawPointValue);
@@ -1190,13 +1188,13 @@ public class LSmartNode
 
         if (device != null && !device.isEmpty())
         {
-            List<HDict> physicalOpPoints= hayStack.readAllHDictByQuery("point and physical and cmd and deviceRef == \""+device.get("id")+"\"");
+            ArrayList<HashMap<Object, Object>> physicalOpPoints= hayStack.readAllEntities("point and physical and cmd and deviceRef == \""+device.get("id")+"\"");
 
-            for (HDict opPoint : physicalOpPoints)
+            for (HashMap<Object,Object> opPoint : physicalOpPoints)
             {
                 if (opPoint.get("portEnabled").toString().equals("true"))
                 {
-                    RawPoint p = new RawPoint.Builder().setHDict(opPoint).build();
+                    RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
                     HashMap<Object,Object> logicalOpPoint = hayStack.readEntity("point and id == " + p.getPointRef());
                     if (logicalOpPoint.isEmpty()) {
                         CcuLog.d(TAG_CCU_DEVICE, " Logical point does not exist for "+opPoint.get("dis"));

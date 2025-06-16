@@ -2008,9 +2008,9 @@ public class CCUHsApi
     }
 
     private void updateCcuRefForDiagPoints(Equip diagEquip){
-        List<HDict> equipPoints = readAllHDictByQuery("point and equipRef == \"" + diagEquip.getId()+"\"");
-        for(HDict equipPoint : equipPoints){
-            Point point = new Point.Builder().setHDict(equipPoint).build();
+        ArrayList<HashMap<Object, Object>> equipPoints = readAllEntities("point and equipRef == \"" + diagEquip.getId()+"\"");
+        for(HashMap<Object, Object> equipPoint : equipPoints){
+            Point point = new Point.Builder().setHashMap(equipPoint).build();
             updatePoint(point, point.getId());
         }
     }
@@ -2694,13 +2694,13 @@ public class CCUHsApi
     }
 
     public void updateTimeZone(String newTz) {
-        List<HDict> allPoints = readAllHDictByQuery("point");
-        for (HDict point : allPoints ) {
-            if (point.has("physical")) {
-                RawPoint updatedPoint = new RawPoint.Builder().setHDict(point).setTz(newTz).build();
+        ArrayList<HashMap<Object, Object>> allPoints = readAllEntities("point");
+        for (HashMap<Object, Object> point : allPoints ) {
+            if (point.containsKey("physical")) {
+                RawPoint updatedPoint = new RawPoint.Builder().setHashMap(point).setTz(newTz).build();
                 updatePoint(updatedPoint, updatedPoint.getId());
             } else {
-                Point updatedPoint = new Point.Builder().setHDict(point).setTz(newTz).build();
+                Point updatedPoint = new Point.Builder().setHashMap(point).setTz(newTz).build();
                 updatePoint(updatedPoint, updatedPoint.getId());
             }
 
@@ -2976,7 +2976,7 @@ public class CCUHsApi
             CCUHsApi ccuHsApi = CCUHsApi.getInstance();
             List<HashMap> pointMaps = ccuHsApi.HGridToList(zoneScheduleGrid);
             ArrayList<Point> points = new ArrayList<>();
-            pointMaps.forEach(m -> points.add(new Point.Builder().setHDict(new HDictBuilder().toHDict(m)).build()));
+            pointMaps.forEach(m -> points.add(new Point.Builder().setHashMap(m).build()));
 
             for (Point p : points) {
                 if(isZone) p.setCcuRef(getCcuId());
@@ -3309,11 +3309,11 @@ public class CCUHsApi
         }
     }
     public boolean isBuildingTunerPoint(String id) {
-        HDict point = readHDictById(id);
+        HashMap<Object, Object> point = readMapById(id);
         if (point.isEmpty()) {
             return false;
         }
-        return isBuildingTunerPoint(new Point.Builder().setHDict(point).build());
+        return isBuildingTunerPoint(new Point.Builder().setHashMap(point).build());
     }
     public int getCacheSyncFrequency() {
         return context.getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)

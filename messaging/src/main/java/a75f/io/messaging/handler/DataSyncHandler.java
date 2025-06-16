@@ -501,7 +501,7 @@ public class DataSyncHandler {
         CCUHsApi.getInstance().deletePointArray(pointRef);
         ccuHsApi.writePointLocal(pointRef, level,
                 who, Double.parseDouble(value), 0);
-        Point desiredTempPoint = new Point.Builder().setHDict(new HDictBuilder().toHDict(pointHash)).build();
+        Point desiredTempPoint = new Point.Builder().setHashMap(pointHash).build();
         SystemScheduleUtil.handleDesiredTempUpdate(desiredTempPoint, false, 0);
     }
 
@@ -510,7 +510,7 @@ public class DataSyncHandler {
         CCUHsApi.getInstance().deletePointArray(pointRef);
         ccuHsApi.writePointLocal(pointRef, level,
                 who, Double.parseDouble(value), 0);
-        Point scheduleTypePoint = new Point.Builder().setHDict(new HDictBuilder().toHDict(pointHash)).build();
+        Point scheduleTypePoint = new Point.Builder().setHashMap(pointHash).build();
         SystemScheduleUtil.handleScheduleTypeUpdate(scheduleTypePoint);
     }
     /*

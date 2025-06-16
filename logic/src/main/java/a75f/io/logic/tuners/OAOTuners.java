@@ -1,10 +1,18 @@
 package a75f.io.logic.tuners;
 
-import org.projecthaystack.HDict;
+import android.util.Log;
+
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.domain.api.DomainName;
+import a75f.io.logic.L;
 
 public class OAOTuners
 {
@@ -477,10 +485,10 @@ public class OAOTuners
         
     }
     private static boolean verifyPointsAvailability(String defaulttuner, String tags, String equipref){
-        HDict verifyablePoint = CCUHsApi.getInstance().readHDict("point and tuner and "+defaulttuner+" and oao and "+tags+" and equipRef == \"" + equipref + "\"");
+        HashMap verifyablePoint = CCUHsApi.getInstance().read("point and tuner and "+defaulttuner+" and oao and "+tags+" and equipRef == \"" + equipref + "\"");
         if (verifyablePoint != null && verifyablePoint.size() > 0) {
             if(defaulttuner.equals("not default")) {
-                Point p = new Point.Builder().setHDict(verifyablePoint).build();
+                Point p = new Point.Builder().setHashMap(verifyablePoint).build();
                 if (!p.getMarkers().contains("system"))
                     p.getMarkers().add("system");
             }

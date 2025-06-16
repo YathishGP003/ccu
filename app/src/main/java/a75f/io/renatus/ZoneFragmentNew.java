@@ -4130,9 +4130,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         ExecutorTask.executeBackground( () -> {
             CCUHsApi hayStack = CCUHsApi.getInstance();
-            Point coolpoint = new Point.Builder().setHDict(hayStack.readHDictById(coolid)).build();
-            Point heatpoint = new Point.Builder().setHDict(hayStack.readHDictById(heatid)).build();
-            Point avgpoint = new Point.Builder().setHDict(hayStack.readHDictById(avgid)).build();
+            Point coolpoint = new Point.Builder().setHashMap(hayStack.readMapById(coolid)).build();
+            Point heatpoint = new Point.Builder().setHashMap(hayStack.readMapById(heatid)).build();
+            Point avgpoint = new Point.Builder().setHashMap(hayStack.readMapById(avgid)).build();
 
             if (coolpoint.getMarkers().contains("writable")) {
                 CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val " + coolpoint.getDisplayName() + ": " + coolid + "," + heatpoint.getDisplayName() + "," + heatval + "," + avgpoint.getDisplayName());
@@ -4307,7 +4307,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private void setScheduleType(String id, ScheduleType schedule, ArrayList<HashMap> zoneMap) {
             CcuLog.d("CCU_UI", " Set Schedule type " + schedule.ordinal());
             CCUHsApi.getInstance().writeHisValById(id, (double) schedule.ordinal());
-            Point p = new Point.Builder().setHDict(CCUHsApi.getInstance().readHDictById(id)).build();
+            Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build();
             if (zoneMap.size() > 1) {
                 for (int i = 0; i < zoneMap.size(); i++) {
                     Equip equip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();

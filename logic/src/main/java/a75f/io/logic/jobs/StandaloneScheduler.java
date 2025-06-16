@@ -196,7 +196,7 @@ public class StandaloneScheduler {
                 HashMap cdb = hayStack.read("point and standalone and "+cmd+" and equipRef == \""+equipRef+"\"");
                 if(cdb != null && (cdb.get("id") != null)) {
                     String id = cdb.get("id").toString();
-                    Point p = new Point.Builder().setHDict(hayStack.readHDictById(id)).build();
+                    Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
                     Domain.pointWriteAndHisWriteById(id, val, hayStack.getCCUUserName());
                     if (p.getMarkers().contains("conditioning") && p.getMarkers().contains("userIntent")) {
                         String zoneId = HSUtil.getZoneIdFromEquipId(equipRef);

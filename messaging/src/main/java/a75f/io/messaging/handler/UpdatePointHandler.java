@@ -86,7 +86,7 @@ public class UpdatePointHandler implements MessageHandler
             TunerUtil.refreshEquipTuners();
         }
 
-        Point localPoint = new Point.Builder().setHDict(CCUHsApi.getInstance().readHDictById(pointUid)).build();
+        Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(pointUid)).build();
         CcuLog.d(L.TAG_CCU_PUBNUB, " handleMessage for" + Arrays.toString(localPoint.getMarkers().toArray()));
 
 

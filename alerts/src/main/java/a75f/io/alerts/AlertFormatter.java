@@ -126,9 +126,9 @@ public class AlertFormatter
         CCUHsApi hs = CCUHsApi.getInstance();
         Point p = null;
         if ( c != null || point != null) {
-            p = new Point.Builder().setHDict(c != null ? hs.readHDict(c.key) : hs.readHDictById(point)).build();
+            p = new Point.Builder().setHashMap(c != null ? hs.read(c.key) : hs.readMapById(point)).build();
             if (p.getId() != null && point != null && !p.getId().equals(point)) {
-                p = new Point.Builder().setHDict(hs.readHDictById(point)).build();
+                p = new Point.Builder().setHashMap(hs.readMapById(point)).build();
             }
         }
         switch (getEntity(token)) {

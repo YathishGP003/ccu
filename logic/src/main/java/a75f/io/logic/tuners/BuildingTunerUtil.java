@@ -24,7 +24,7 @@ public class BuildingTunerUtil {
     public static void updateTunerLevels(String tunerPointId, String zoneRef, CCUHsApi hayStack) {
     
         Point tunerPoint = new Point.Builder()
-                                   .setHDict(hayStack.readHDictById(tunerPointId))
+                                   .setHashMap(hayStack.readMapById(tunerPointId))
                                    .build();
         
         ArrayList<String> markersFiltered = tunerPoint.getMarkers();

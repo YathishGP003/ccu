@@ -27,8 +27,6 @@ import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
 import android.content.Intent;
 
 import java.util.ArrayList;
-import org.projecthaystack.HDict;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -811,7 +809,7 @@ public class DabStagedRtu extends DabSystemProfile
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and association and " + config, val);
     
         Stage curstage = Stage.values()[(int)curConfigVal];
-        HDict cmd = null;
+        HashMap cmd = null;
         Point newCmdPoint = null;
         Point oldPoint = null;
         Stage updatedStage = Stage.values()[(int)val];
@@ -854,8 +852,8 @@ public class DabStagedRtu extends DabSystemProfile
                 case COOLING_5:
                     if (!isStageEnabled(curstage)) {
                     curStageNum = curstage.ordinal() + 1;
-                    cmd = CCUHsApi.getInstance().readHDict("point and system and cmd and cooling and stage" + curStageNum);
-                    oldPoint = new Point.Builder().setHDict(cmd).build();
+                    cmd = CCUHsApi.getInstance().read("point and system and cmd and cooling and stage" + curStageNum);
+                    oldPoint = new Point.Builder().setHashMap(cmd).build();
                     }
                     break;
                 case HEATING_1:
@@ -865,8 +863,8 @@ public class DabStagedRtu extends DabSystemProfile
                 case HEATING_5:
                     if (!isStageEnabled(curstage)) {
                         curStageNum = curstage.ordinal() - COOLING_5.ordinal();
-                        cmd = CCUHsApi.getInstance().readHDict("point and system and cmd and heating and stage" + curStageNum);
-                        oldPoint = new Point.Builder().setHDict(cmd).build();
+                        cmd = CCUHsApi.getInstance().read("point and system and cmd and heating and stage" + curStageNum);
+                        oldPoint = new Point.Builder().setHashMap(cmd).build();
                     }
                     break;
                 case FAN_1:
@@ -876,20 +874,20 @@ public class DabStagedRtu extends DabSystemProfile
                 case FAN_5:
                     if (!isStageEnabled(curstage)) {
                         curStageNum = curstage.ordinal() - HEATING_5.ordinal();
-                        cmd = CCUHsApi.getInstance().readHDict("point and system and cmd and fan and stage" + curStageNum);
-                        oldPoint = new Point.Builder().setHDict(cmd).build();
+                        cmd = CCUHsApi.getInstance().read("point and system and cmd and fan and stage" + curStageNum);
+                        oldPoint = new Point.Builder().setHashMap(cmd).build();
                     }
                     break;
                 case HUMIDIFIER:
                     if (!isStageEnabled(curstage)) {
-                        cmd = CCUHsApi.getInstance().readHDict("point and system and cmd and humidifier");
-                        oldPoint = new Point.Builder().setHDict(cmd).build();
+                        cmd = CCUHsApi.getInstance().read("point and system and cmd and humidifier");
+                        oldPoint = new Point.Builder().setHashMap(cmd).build();
                     }
                     break;
                 case DEHUMIDIFIER:
                     if (!isStageEnabled(curstage)) {
-                        cmd = CCUHsApi.getInstance().readHDict("point and system and cmd and dehumidifier");
-                        oldPoint = new Point.Builder().setHDict(cmd).build();
+                        cmd = CCUHsApi.getInstance().read("point and system and cmd and dehumidifier");
+                        oldPoint = new Point.Builder().setHashMap(cmd).build();
                     }
                     break;
             }

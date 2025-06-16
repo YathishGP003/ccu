@@ -2,8 +2,6 @@ package a75f.io.logic.tuners;
 
 import android.util.Log;
 
-import org.projecthaystack.HDict;
-
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -23,9 +21,9 @@ class TunerMigration {
             if (m.getKey().equalsIgnoreCase(shortDis)) {
                 ValueObj valueObj = m.getValue();
                 boolean isUpdated = false;
-                HDict tunerMap = CCUHsApi.getInstance().readHDictById(id);
-                Point tunerPoint = new Point.Builder().setHDict(tunerMap).build();
-                Point.Builder pointBuilder = new Point.Builder().setHDict(tunerMap);
+                HashMap<Object, Object> tunerMap = CCUHsApi.getInstance().readMapById(id);
+                Point tunerPoint = new Point.Builder().setHashMap(tunerMap).build();
+                Point.Builder pointBuilder = new Point.Builder().setHashMap(tunerMap);
 
                 if (!tunerPoint.getMaxVal().equals(valueObj.getMaxVal())) {
                     pointBuilder.setMaxVal(valueObj.maxVal);

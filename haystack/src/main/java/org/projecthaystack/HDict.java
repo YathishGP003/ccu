@@ -195,7 +195,8 @@ public abstract class HDict extends HVal
     {
       HVal val = (HVal)map.get(name);
       if (val != null) return val;
-      return null;
+      if (!checked) return null;
+      throw new UnknownNameException(name);
     }
 
     public Iterator iterator() { return map.entrySet().iterator(); }

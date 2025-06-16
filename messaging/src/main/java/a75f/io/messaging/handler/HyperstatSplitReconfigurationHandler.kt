@@ -245,8 +245,8 @@ class HyperstatSplitReconfigurationHandler {
                 if (hssEquip.ductStaticPressureSensor1_2.pointExists()) {
                     hssEquip.ductStaticPressureSensor1_2.id.let {
                         val deviceMap = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
-                        val pressureSensorPhysMap = hayStack.readHDict("point and domainName == \"" + DomainName.ductStaticPressureSensor + "\" and deviceRef == \"" + deviceMap["id"].toString() + "\"")
-                        val pressureSensorPhysPoint = RawPoint.Builder().setHDict(pressureSensorPhysMap).setEnabled(true).setPointRef(it).build()
+                        val pressureSensorPhysMap = hayStack.readEntity("point and domainName == \"" + DomainName.ductStaticPressureSensor + "\" and deviceRef == \"" + deviceMap["id"].toString() + "\"")
+                        val pressureSensorPhysPoint = RawPoint.Builder().setHashMap(pressureSensorPhysMap).setEnabled(true).setPointRef(it).build()
                         hayStack.updatePoint(pressureSensorPhysPoint, pressureSensorPhysMap["id"].toString())
                     }
                 }

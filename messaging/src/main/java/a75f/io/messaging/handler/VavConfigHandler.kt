@@ -97,12 +97,12 @@ class VavConfigHandler {
                 val maxCoolingCfm = vavEquip.maxCFMCooling.readDefaultVal()
                 val maxReheatingCfm = vavEquip.maxCFMReheating.readDefaultVal()
 
-                val minCoolingCfmMap = hayStack.readHDict("point and domainName == \"" + DomainName.minCFMCooling + "\"" + " and equipRef == \"" + vavEquip.equipRef + "\"")
-                val minCoolingCfmPoint = Point.Builder().setHDict(minCoolingCfmMap).setMaxVal(maxCoolingCfm.toString()).build()
+                val minCoolingCfmMap = hayStack.readEntity("point and domainName == \"" + DomainName.minCFMCooling + "\"" + " and equipRef == \"" + vavEquip.equipRef + "\"")
+                val minCoolingCfmPoint = Point.Builder().setHashMap(minCoolingCfmMap).setMaxVal(maxCoolingCfm.toString()).build()
                 hayStack.updatePoint(minCoolingCfmPoint, minCoolingCfmMap["id"].toString())
 
-                val minReheatingCfmMap = hayStack.readHDict("point and domainName == \"" + DomainName.minCFMReheating + "\"" + " and equipRef == \"" + vavEquip.equipRef + "\"")
-                val minReheatingCfmPoint = Point.Builder().setHDict(minReheatingCfmMap).setMaxVal(maxReheatingCfm.toString()).build()
+                val minReheatingCfmMap = hayStack.readEntity("point and domainName == \"" + DomainName.minCFMReheating + "\"" + " and equipRef == \"" + vavEquip.equipRef + "\"")
+                val minReheatingCfmPoint = Point.Builder().setHashMap(minReheatingCfmMap).setMaxVal(maxReheatingCfm.toString()).build()
                 hayStack.updatePoint(minReheatingCfmPoint, minReheatingCfmMap["id"].toString())
             }
 

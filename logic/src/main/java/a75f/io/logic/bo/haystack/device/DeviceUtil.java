@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.haystack.device;
 
-import org.projecthaystack.HDict;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,11 +24,11 @@ public class DeviceUtil {
         }
         String portName = UtilKt.getPortName(port);
 
-        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \""
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \""
                 + device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
         if (!point.get("analogType" ).equals(type))
         {
-            RawPoint p = new RawPoint.Builder().setHDict(point).build();
+            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
             p.setType(type);
             CCUHsApi.getInstance().updatePoint(p,p.getId());
         }
@@ -46,30 +44,12 @@ public class DeviceUtil {
         }
         String portName = UtilKt.getPortName(port);
 
-        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \""
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \""
                 + device.get("id").toString() + "\"" + " and (port == \"" + port + "\" or port == \"" + portName + "\")");
-        RawPoint p = new RawPoint.Builder().setHDict(point).build();
+        RawPoint p = new RawPoint.Builder().setHashMap(point).build();
         p.setPointRef(pointRef);
         CCUHsApi.getInstance().updatePoint(p,p.getId());
 
-    }
-
-    public static void updatePhysicalPointUnit(int addr, String port, String unit) {
-        CcuLog.d(L.TAG_CCU," Update Physical point "+port+" "+unit);
-
-        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
-        if (device == null)
-        {
-            return ;
-        }
-
-        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
-        if (!point.get("unit" ).equals(unit))
-        {
-            RawPoint p = new RawPoint.Builder().setHDict(point).build();
-            p.setUnit(unit);
-            CCUHsApi.getInstance().updatePoint(p,p.getId());
-        }
     }
 
     public static void setPointEnabled(int addr, String port, boolean enabled) {
@@ -81,11 +61,11 @@ public class DeviceUtil {
         }
         String portName = UtilKt.getPortName(port);
 
-        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \""
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \""
                 + device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
         if (point != null && !point.isEmpty())
         {
-            RawPoint p = new RawPoint.Builder().setHDict(point).build();
+            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
             p.setEnabled(enabled);
             CCUHsApi.getInstance().updatePoint(p,p.getId());
             CCUHsApi.getInstance().writeHisValById(p.getId(), 0.0);
@@ -102,23 +82,23 @@ public class DeviceUtil {
 
         String portName = UtilKt.getPortName(port);
 
-        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \""
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \""
                 + device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
         if (point != null && !point.isEmpty())
         {
-            return new RawPoint.Builder().setHDict(point).build();
+            return new RawPoint.Builder().setHashMap(point).build();
         }
         return null;
     }
 
     public static List<RawPoint> getEnabledCmdPointsWithRefForDevice(HashMap device, CCUHsApi hayStack) {
-        List<HDict> rawPoints = hayStack.readAllHDictByQuery("point and physical and cmd and deviceRef == \"" +
+        ArrayList<HashMap> rawPoints = hayStack.readAll("point and physical and cmd and deviceRef == \"" +
                 device.get("id") + "\"");
 
         return rawPoints.stream()
                 .filter( p -> p.get("pointRef") != null)
                 .filter(p -> p.get("portEnabled").toString().equals("true"))
-                .map(p -> new RawPoint.Builder().setHDict(p).build())
+                .map(p -> new RawPoint.Builder().setHashMap(p).build())
                 .collect(Collectors.toList());
 
     }
@@ -126,11 +106,11 @@ public class DeviceUtil {
     public static List<RawPoint> getPortsForDevice(Short deviceAddress, CCUHsApi hayStack) {
         HashMap<Object, Object> device = hayStack.readEntity("device and addr == \""+deviceAddress+"\"");
         if(!device.isEmpty()) {
-            List<HDict> rawPoints = hayStack.readAllHDictByQuery("point and physical" +
+            ArrayList<HashMap<Object, Object>> rawPoints = hayStack.readAllEntities("point and physical" +
                     " and not version and deviceRef == \"" + device.get("id").toString() + "\"");
 
             return rawPoints.stream()
-                    .map(p -> new RawPoint.Builder().setHDict(p).build())
+                    .map(p -> new RawPoint.Builder().setHashMap(p).build())
                     .collect(Collectors.toList());
         } else {
             return null;

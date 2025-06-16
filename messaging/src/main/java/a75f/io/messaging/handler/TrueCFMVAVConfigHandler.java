@@ -2,8 +2,6 @@ package a75f.io.messaging.handler;
 
 import com.google.gson.JsonObject;
 
-import org.projecthaystack.HDict;
-
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -70,9 +68,9 @@ public class TrueCFMVAVConfigHandler {
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         double maxCfmValue = msgObject.get("val").getAsDouble();
         Double minCfmValue = CCUHsApi.getInstance().readDefaultVal("point and domainName == \"" + DomainName.minCFMCooling + "\" and equipRef == \""+equip.getId()+"\"");
-        HDict entity = CCUHsApi.getInstance().readHDict("point and domainName == \"" + DomainName.minCFMCooling + "\" and equipRef == \""+equip.getId()+"\"");
+        HashMap<Object,Object> entity = CCUHsApi.getInstance().readEntity("point and domainName == \"" + DomainName.minCFMCooling + "\" and equipRef == \""+equip.getId()+"\"");
         String maxValForMinCFM = String.valueOf(maxCfmValue);
-        Point updatedPoint = new Point.Builder().setHDict(entity).setMaxVal(maxValForMinCFM).build();
+        Point updatedPoint = new Point.Builder().setHashMap(entity).setMaxVal(maxValForMinCFM).build();
         CCUHsApi.getInstance().updatePointWithoutUpdatingLastModifiedTime(updatedPoint, updatedPoint.getId());
         if (minCfmValue > maxCfmValue) {
             if (equip.getDomainName().contains("VAV")) {
@@ -104,9 +102,9 @@ public class TrueCFMVAVConfigHandler {
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         double maxHeatingCfmValue = msgObject.get("val").getAsDouble();
         Double minHeatingCfmValue = CCUHsApi.getInstance().readDefaultVal("point and domainName == \"" + DomainName.minCFMReheating + "\" and equipRef == \""+equip.getId()+"\"");
-        HDict entity = CCUHsApi.getInstance().readHDict("point and domainName == \"" + DomainName.minCFMReheating + "\" and equipRef == \""+equip.getId()+"\"");
+        HashMap<Object,Object> entity = CCUHsApi.getInstance().readEntity("point and domainName == \"" + DomainName.minCFMReheating + "\" and equipRef == \""+equip.getId()+"\"");
         String minHeatingCFMValue = String.valueOf(maxHeatingCfmValue);
-        Point updatedPoint = new Point.Builder().setHDict(entity).setMaxVal(minHeatingCFMValue).build();
+        Point updatedPoint = new Point.Builder().setHashMap(entity).setMaxVal(minHeatingCFMValue).build();
         CCUHsApi.getInstance().updatePointWithoutUpdatingLastModifiedTime(updatedPoint, updatedPoint.getId());
         if (minHeatingCfmValue > maxHeatingCfmValue) {
             if (equip.getDomainName().contains("VAV")) {

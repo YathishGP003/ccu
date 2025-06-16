@@ -7,7 +7,6 @@ import static a75f.io.logic.migration.firmware.FirmwareVersionPointMigration.ini
 import static a75f.io.logic.migration.firmware.FirmwareVersionPointMigration.initRemoteFirmwareVersionPointMigration;
 import static a75f.io.logic.util.PreferenceUtil.FIRMWARE_VERSION_POINT_MIGRATION;
 
-import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRow;
@@ -491,9 +490,9 @@ public class MigrationUtil {
                 "and (hyperstat or hyperstatsplit)");
         for (HashMap<Object, Object> hsEquip : hsEquips) {
             String equipRef = hsEquip.get("id").toString();
-            HDict equipStatusMessagePointMap = ccuHsApi.readHDict(
+            HashMap<Object, Object> equipStatusMessagePointMap = ccuHsApi.readEntity(
                     "message and status and his and equipRef == \"" + equipRef + "\"");
-            Point equipStatusMessagePoint = new Point.Builder().setHDict(equipStatusMessagePointMap).build();
+            Point equipStatusMessagePoint = new Point.Builder().setHashMap(equipStatusMessagePointMap).build();
             if(equipStatusMessagePoint.getMarkers().contains(Tags.HIS)){
                 equipStatusMessagePoint.getMarkers().remove(Tags.HIS);
                 ccuHsApi.updatePoint(equipStatusMessagePoint, equipStatusMessagePoint.getId());
@@ -560,7 +559,7 @@ public class MigrationUtil {
 
 
     private static void migrateAirFlowTunerPoints(CCUHsApi ccuHsApi) {
-        List<HDict> allSnTuners = ccuHsApi.readAllHDictByQuery("sn and tuner");
+        ArrayList<HashMap<Object, Object>> allSnTuners = ccuHsApi.readAllEntities("sn and tuner");
         allSnTuners.forEach(snTuner -> {
             String pointName = snTuner.get(Tags.DIS).toString();
             /* Remove "sn" tag and change display name from siteName-roomName-profile-nodeAddress-snCoolingAirflowTemp
@@ -569,7 +568,7 @@ public class MigrationUtil {
             String modifiedDisplayName = pointName.substring(0, snIndex) +
                     Character.toLowerCase(pointName.charAt(snIndex + 2)) +
                     pointName.substring(snIndex + 3);
-            Point modifiedPoint  = new Point.Builder().setHDict(snTuner).removeMarker("sn")
+            Point modifiedPoint  = new Point.Builder().setHashMap(snTuner).removeMarker("sn")
                     .setDisplayName(modifiedDisplayName).build();
             ccuHsApi.updatePoint(modifiedPoint, modifiedPoint.getId());
         });
@@ -581,10 +580,10 @@ public class MigrationUtil {
         if (!tiEquips.isEmpty()) {
             for (HashMap<Object, Object> equipMap : tiEquips) {
                 Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-                HDict roomTemperatureTypePoint = ccuHsApi.readHDict("point and " +
+                HashMap<Object, Object> roomTemperatureTypePoint = ccuHsApi.readEntity("point and " +
                         "temp and ti and space and type and equipRef == \"" + equip.getId() + "\"");
                 if (!roomTemperatureTypePoint.get("enum").toString().contains("Sensor Bus Temperature")) {
-                    Point enumUpdatedRoomTempTypePoint = new Point.Builder().setHDict(roomTemperatureTypePoint).build();
+                    Point enumUpdatedRoomTempTypePoint = new Point.Builder().setHashMap(roomTemperatureTypePoint).build();
                     enumUpdatedRoomTempTypePoint.setEnums(RoomTempSensor.getEnumStringDefinition());
                     CCUHsApi.getInstance().updatePoint(enumUpdatedRoomTempTypePoint, enumUpdatedRoomTempTypePoint.getId());
                 }
@@ -659,9 +658,9 @@ public class MigrationUtil {
         equips.forEach(equip -> {
             Equip actualEquip = new Equip.Builder().setHashMap(equip).build();
 
-            List<HDict> pressureSensors = haystack.readAllHDictByQuery("pressure and sensor and equipRef ==\""+actualEquip.getId()+"\"");
+            ArrayList<HashMap<Object, Object>> pressureSensors = haystack.readAllEntities("pressure and sensor and equipRef ==\""+actualEquip.getId()+"\"");
             pressureSensors.forEach( pressureSensor -> {
-                Point pressureSensorPoint = new Point.Builder().setHDict(pressureSensor).setUnit(Consts.PRESSURE_UNIT).build();
+                Point pressureSensorPoint = new Point.Builder().setHashMap(pressureSensor).setUnit(Consts.PRESSURE_UNIT).build();
                 haystack.updatePoint(pressureSensorPoint, pressureSensor.get("id").toString());
             });
         });
@@ -690,36 +689,36 @@ public class MigrationUtil {
     private static void migrateHyperStatMonitoringGenericFaultEnum(CCUHsApi hayStack) {
         ArrayList<HashMap<Object, Object>> hsEquips = hayStack.readAllEntities("equip and hyperstat and monitoring");
         hsEquips.forEach(equip -> {
-            List<HDict> faultPointsMap = hayStack.readAllHDictByQuery("point and generic and (normallyOpen or normallyClosed) and equipRef == \"" + equip.get("id") + "\"");
+            ArrayList<HashMap<Object, Object>> faultPointsMap = hayStack.readAllEntities("point and generic and (normallyOpen or normallyClosed) and equipRef == \"" + equip.get("id") + "\"");
             faultPointsMap.forEach(faultPointMap -> {
-                Point faultPoint = new Point.Builder().setHDict(faultPointMap).setEnums("Normal,Fault").build();
+                Point faultPoint = new Point.Builder().setHashMap(faultPointMap).setEnums("Normal,Fault").build();
                 hayStack.updatePoint(faultPoint, faultPointMap.get("id").toString());
             });
         });
     }
 
     private static void migrateSenseToMonitoring(CCUHsApi ccuHsApi) {
-        List<HDict> listOfSenseEquips = ccuHsApi.readAllHDictByQuery("sense and equip and not device");
-        List<HDict> listOfSenseDevices = ccuHsApi.readAllHDictByQuery("sense and not equip and device");
-        List<HDict> listOfSensePoints = ccuHsApi.readAllHDictByQuery("sense and not equip and not device");
-        for (HDict sensePoint: listOfSensePoints) {
+        ArrayList<HashMap<Object, Object>> listOfSenseEquips = ccuHsApi.readAllEntities("sense and equip and not device");
+        ArrayList<HashMap<Object, Object>> listOfSenseDevices = ccuHsApi.readAllEntities("sense and not equip and device");
+        ArrayList<HashMap<Object, Object>> listOfSensePoints = ccuHsApi.readAllEntities("sense and not equip and not device");
+        for (HashMap<Object, Object> sensePoint: listOfSensePoints) {
             String displayNameOfSensePoint = sensePoint.get(Tags.DIS).toString();
             String modifiedDisplayNameOfSensePoint = displayNameOfSensePoint.replace("SENSE", Tags.MONITORING);
-            Point newSensePoint = new Point.Builder().setHDict(sensePoint).addMarker(Tags.MONITORING)
+            Point newSensePoint = new Point.Builder().setHashMap(sensePoint).addMarker(Tags.MONITORING)
                     .removeMarker(Tags.SENSE).setDisplayName(modifiedDisplayNameOfSensePoint).build();
             ccuHsApi.updatePoint(newSensePoint, newSensePoint.getId());
         }
-        for(HDict senseEquipMap : listOfSenseEquips){
+        for(HashMap<Object, Object> senseEquipMap : listOfSenseEquips){
             String displayNameOfSenseEquip = senseEquipMap.get(Tags.DIS).toString();
             String modifiedDisplayNameOfSenseEquip = displayNameOfSenseEquip.replace("SENSE", Tags.MONITORING);
-            Equip senseEquip = new Equip.Builder().setHDict(senseEquipMap).setDisplayName(modifiedDisplayNameOfSenseEquip)
+            Equip senseEquip = new Equip.Builder().setHashMap(senseEquipMap).setDisplayName(modifiedDisplayNameOfSenseEquip)
                     .addMarker(Tags.MONITORING).removeMarker(Tags.SENSE).setProfile("HYPERSTAT_MONITORING").build();
             ccuHsApi.updateEquip(senseEquip, senseEquip.getId());
         }
-        for(HDict senseDeviceMap : listOfSenseDevices){
+        for(HashMap<Object, Object> senseDeviceMap : listOfSenseDevices){
             String displayNameOfSenseDevice = senseDeviceMap.get(Tags.DIS).toString();
             String modifiedDisplayNameOfSenseDevice = displayNameOfSenseDevice.replace("SENSE", Tags.MONITORING);
-            Device senseEquip = new Device.Builder().setHDict(senseDeviceMap).setDisplayName(modifiedDisplayNameOfSenseDevice)
+            Device senseEquip = new Device.Builder().setHashMap(senseDeviceMap).setDisplayName(modifiedDisplayNameOfSenseDevice)
                     .addMarker(Tags.MONITORING).removeMarker(Tags.SENSE).build();
             ccuHsApi.updateDevice(senseEquip, senseEquip.getId());
         }
@@ -763,10 +762,10 @@ public class MigrationUtil {
 
         equips.forEach(equip -> {
             Equip hssEquip = new Equip.Builder().setHashMap(equip).build();
-            HDict outsideDamperMinOpen = haystack.readHDict("outside and damper and min and open and equipRef ==\""+hssEquip.getId()+"\"");
+            HashMap<Object, Object> outsideDamperMinOpen = haystack.readEntity("outside and damper and min and open and equipRef ==\""+hssEquip.getId()+"\"");
 
             if (!outsideDamperMinOpen.isEmpty()) {
-                Point modifiedPoint  = new Point.Builder().setHDict(outsideDamperMinOpen).addMarker("his").build();
+                Point modifiedPoint  = new Point.Builder().setHashMap(outsideDamperMinOpen).addMarker("his").build();
                 haystack.updatePoint(modifiedPoint, modifiedPoint.getId());
             }
         });
@@ -930,10 +929,10 @@ public class MigrationUtil {
                 " dab or dualDuct)");
         for(HashMap<Object, Object> equipMap : equipList){
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-            List<HDict> configPointList = haystack.readAllHDictByQuery("point and " +
+            ArrayList<HashMap<Object, Object>> configPointList = haystack.readAllEntities("point and " +
                     "equipRef== \""+ equip.getId() +"\"");
-            for( HDict configPointMap : configPointList){
-                Point equipPoint = new Point.Builder().setHDict(configPointMap).build();
+            for( HashMap<Object, Object> configPointMap : configPointList){
+                Point equipPoint = new Point.Builder().setHashMap(configPointMap).build();
                 if(equipPoint.getFloorRef().replace("@","").equalsIgnoreCase("SYSTEM") ||
                         (equipPoint.getRoomRef().replace("@","").equalsIgnoreCase("SYSTEM"))) {
                     equipPoint.setFloorRef(equip.getFloorRef());
@@ -951,8 +950,8 @@ public class MigrationUtil {
     private static void updateDisForPointsDabToVvt(CCUHsApi haystack){
         findDabEquipsAndUpdate(haystack, "equip and dab");
         findDabEquipsAndUpdate(haystack, "equip and tuner");
-        findDabPointsAndUpdate(haystack, haystack.readAllHDictByQuery("dab and purge"));
-        findDabPointsAndUpdate(haystack, haystack.readAllHDictByQuery("dab and oao"));
+        findDabPointsAndUpdate(haystack, haystack.readAllEntities("dab and purge"));
+        findDabPointsAndUpdate(haystack, haystack.readAllEntities("dab and oao"));
     }
 
     private static void findDabEquipsAndUpdate(CCUHsApi haystack, String query){
@@ -966,15 +965,15 @@ public class MigrationUtil {
                 haystack.updateEquip(tempEquip, tempEquip.getId());
             }
 
-            List<HDict> configPointList = haystack.readAllHDictByQuery("point and " +
+            ArrayList<HashMap<Object, Object>> configPointList = haystack.readAllEntities("point and " +
                     "equipRef== \""+ equip.getId() +"\"");
             findDabPointsAndUpdate(haystack, configPointList);
         }
     }
 
-    private static void findDabPointsAndUpdate(CCUHsApi haystack, List<HDict> configPointList){
-        for( HDict configPointMap : configPointList){
-            Point equipPoint = new Point.Builder().setHDict(configPointMap).build();
+    private static void findDabPointsAndUpdate(CCUHsApi haystack, ArrayList<HashMap<Object, Object>> configPointList){
+        for( HashMap<Object, Object> configPointMap : configPointList){
+            Point equipPoint = new Point.Builder().setHashMap(configPointMap).build();
             if(equipPoint.getDisplayName().toLowerCase().contains("dab")){
                 equipPoint.setDisplayName(equipPoint.getDisplayName().replaceAll("(?i)dab", "VVT"));
                 haystack.updatePoint(equipPoint, equipPoint.getId());

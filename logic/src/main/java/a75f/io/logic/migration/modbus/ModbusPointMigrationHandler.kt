@@ -63,9 +63,9 @@ import a75f.io.logic.L
                 modelList.forEach { vendorModelPair ->
                     val modbusEquip = hayStack.readAllEntities("equip and modbus and model == \"${vendorModelPair.second}\" and vendor == \"${vendorModelPair.first}\"")
                     modbusEquip.forEach { modbusEquipMap ->
-                        val statusPoints = hayStack.readAllHDictByQuery("$statusQuery and equipRef == \"${modbusEquipMap["id"].toString()}\"")
+                        val statusPoints = hayStack.readAllEntities("$statusQuery and equipRef == \"${modbusEquipMap["id"].toString()}\"")
                         statusPoints.forEach { pointMap ->
-                            val point = Point.Builder().setHDict(pointMap).build()
+                            val point = Point.Builder().setHashMap(pointMap).build()
                             if(!point.enums.isNullOrEmpty() && (point.enums.contains("rfdead") || point.enums.contains("demandresponseoccupied"))) {
                                 point.enums = getEnumsByShortDis(vendorModelPair.second, point.shortDis)
                                 hayStack.updatePoint(point, point.id)

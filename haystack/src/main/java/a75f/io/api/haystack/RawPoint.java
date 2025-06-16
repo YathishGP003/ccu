@@ -493,6 +493,166 @@ public class RawPoint extends Entity
             return p;
         }
 
+        public Builder setHashMap(HashMap site)
+        {
+            Iterator it = site.entrySet().iterator();
+            while (it.hasNext())
+            {
+                Map.Entry pair = (Map.Entry) it.next();
+                //System.out.println(pair.getKey() + " = " + pair.getValue());
+                if (pair.getKey().equals("id"))
+                {
+                    this.id = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("dis"))
+                {
+                    this.displayName = pair.getValue().toString();
+                }
+                else if(pair.getValue().toString().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
+                {
+                    this.markers.add(pair.getKey().toString()/*pair.getValue().toString()*/);
+                }
+                else if (pair.getKey().equals("siteRef"))
+                {
+                    this.siteRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("floorRef"))
+                {
+                    this.floorRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("roomRef"))
+                {
+                    this.roomRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("deviceRef"))
+                {
+                    this.deviceRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("pointRef"))
+                {
+                    this.pointRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("port"))
+                {
+                    this.port = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("analogType"))
+                {
+                    this.type = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("unit"))
+                {
+                    this.unit = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("kind"))
+                {
+                    String value = pair.getValue().toString();
+
+                    // support old values if needed for migration.
+                    if (value.equalsIgnoreCase("string")) {
+                        this.kind = Kind.STRING;
+                    }
+                    else {
+                        this.kind = Kind.parse(value);
+                    }
+                }
+                else if (pair.getKey().equals("portEnabled"))
+                {
+                    // we could/should say = pair.getValue == HBool.TRUE, but will hold off for now (warroom & keep code consistent)
+                    this.enabled = Boolean.parseBoolean(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("tz"))
+                {
+                    this.tz = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("shortDis"))
+                {
+                    this.shortDis = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("maxVal"))
+                {
+                    this.maxVal = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("minVal"))
+                {
+                    this.minVal = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("registerAddress"))
+                {
+                    this.registerAddress = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("registerNumber"))
+                {
+                    this.registerNumber = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("startBit"))
+                {
+                    this.startBit = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("endBit"))
+                {
+                    this.endBit = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("registerType"))
+                {
+                    this.registerType = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("parameterId"))
+                {
+                    this.parameterId = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("ccuRef"))
+                {
+                    this.ccuRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("createdDateTime"))
+                {
+                    this.createdDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedDateTime"))
+                {
+                    this.lastModifiedDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedBy"))
+                {
+                    this.lastModifiedBy = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("domainName"))
+                {
+                    this.domainName = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("hisInterpolate"))
+                {
+                    this.hisInterpolate = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("incrementVal"))
+                {
+                    this.incrementVal = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("enum"))
+                {
+                    this.enums = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("sourcePoint"))
+                {
+                    this.sourcePoint = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("inputType"))
+                {
+                    this.inputType = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("outputType"))
+                {
+                    this.outputType = pair.getValue().toString();
+                }
+                else {
+                    this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());
+                }
+
+            }
+            return this;
+        }
+
         public Builder setHDict(HDict pointDict)
         {
             Iterator it = pointDict.iterator();

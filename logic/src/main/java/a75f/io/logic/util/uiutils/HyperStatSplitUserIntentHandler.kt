@@ -1,7 +1,6 @@
 package a75f.io.logic.util.uiutils
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.Point
 import a75f.io.domain.api.DomainName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
@@ -11,12 +10,8 @@ import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.statprofiles.util.BasicSettings
-import a75f.io.logic.bo.util.DesiredTempDisplayMode
+
 import a75f.io.logic.interfaces.ZoneDataInterface
-import a75f.io.logic.tuners.TunerConstants
-import a75f.io.util.ExecutorTask
-import org.projecthaystack.HNum
-import org.projecthaystack.HRef
 import kotlin.collections.set
 
 
@@ -150,46 +145,5 @@ class HyperStatSplitUserIntentHandler {
 
             return (isAlreadyFanOff || isAlreadyFanAuto || isAlreadyFanLow || isAlreadyFanMedium || isAlreadyFanHigh)
         }
-
-        fun updateHyperStatSplitUIPoints(equipRef: String, command: String, value: Double, who: String) {
-
-            val haystack: CCUHsApi = CCUHsApi.getInstance()
-            ExecutorTask.executeAsync(
-                { },
-                {
-                    val currentData = haystack.readEntity(
-                        "point and $command and equipRef == \"$equipRef\""
-                    )
-                    if (currentData?.get("id") != null) {
-
-                        val id: String = currentData["id"].toString()
-                        val pointDetails = Point.Builder().setHDict(haystack.readHDictById(id)).build()
-
-                        if(pointDetails.markers.contains("writable")){
-                            CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, " updated point write $id")
-                            haystack.pointWrite(
-                                HRef.copy(id),
-                                TunerConstants.UI_DEFAULT_VAL_LEVEL,
-                                who,
-                                HNum.make(value),
-                                HNum.make(0)
-                            )
-                        }
-                        if(pointDetails.markers.contains("his")){
-                            CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, " updated his write $id")
-                            haystack.writeHisValById(id, value)
-                        }
-                        DesiredTempDisplayMode.setModeType(pointDetails.roomRef, CCUHsApi.getInstance())
-                    }
-                    CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, " update HyperStat Split UI Points work done")
-
-                },
-                {
-
-                }
-            )
-
-        }
-
     }
 }

@@ -114,6 +114,7 @@ public class PreferenceUtil {
     private static final String NON_DM_POINTS_REMOVE_STATUS = "nonDmPointsRemoveStatus";
     private static final String FLOOR_REF_UPDATE_STATUS = "floorRefUpdateStatus";
     private static final String MODBUS_KVTAGS_DATA_TYPE_UPDATED = "modbusKVTagsDataTypeUpdated";
+    private static final String CLEAR_UNSYNCED_LIST = "clearUnSyncedList";
 
 
     public static final String SELECTED_PROFILE_WITH_AHU = "selectedProfileWithAhu";
@@ -958,6 +959,14 @@ public class PreferenceUtil {
 
     public static void setModbusKvtagsDataTypeUpdate() {
         setBooleanPreference(MODBUS_KVTAGS_DATA_TYPE_UPDATED, true);
+    }
+
+    public static void setClearUnSyncedList() {
+        setBooleanPreference(CLEAR_UNSYNCED_LIST, true);
+    }
+
+    public static boolean getClearUnSyncedList() {
+        return getBooleanPreference(CLEAR_UNSYNCED_LIST);
     }
 
     public static boolean getMigrateDeleteRedundantOaoPointsBySystemEquip() {

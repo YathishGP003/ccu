@@ -158,7 +158,11 @@ public class SyncStatusService {
     }
     public void clearSyncStatus() {
         CcuLog.i(HayStackConstants.LOG_TAG,"clearSyncStatus");
-        unsyncedIdList.clear();
+        if (unsyncedIdList.size() > 100) {
+            preferences.edit().remove(PREFS_ID_LIST_UNSYNCED).apply();
+        } else {
+            unsyncedIdList.clear();
+        }
         saveSyncStatus();
     }
 

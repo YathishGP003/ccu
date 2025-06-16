@@ -282,7 +282,9 @@ public class FloorPlanFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        refreshScreen();
+        if(FloorPlanFragment.this.getUserVisibleHint()) {
+            refreshScreen();
+        }
     }
 
 

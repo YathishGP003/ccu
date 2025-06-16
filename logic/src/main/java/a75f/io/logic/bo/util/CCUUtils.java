@@ -69,21 +69,36 @@ public class CCUUtils
         return (hisItem == null) ? null : hisItem.getDate();
     }
 
-    public static Date getLastReceivedTimeForModBus(String slaveId){
+    public static Date getLastReceivedTimeForModBusAndBacnet(String slaveId){
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        List<HashMap<Object, Object>> equipList =
-                hayStack.readAllEntities("equip and modbus and group == \"" + slaveId + "\"");
-        if(equipList.size() == 0){
-            return null;
-        }
-        for(HashMap<Object, Object> equip : equipList) {
-            if(isModbusHeartbeatRequired(equip, hayStack)) {
-                HashMap<Object, Object> heartBeatPoint =
-                        hayStack.readEntity("point and (heartbeat or heartBeat) and equipRef == \"" + equip.get("id") + "\"");
-                if(heartBeatPoint.size() > 0) {
-                    HisItem heartBeatHisItem = hayStack.curRead(heartBeatPoint.get("id").toString());
-                    return (heartBeatHisItem == null) ? null : heartBeatHisItem.getDate();
+        // Check if the slaveId is a valid Modbus slave ID (1-256) or Bacnet device ID (500-999)
+        if (!slaveId.isEmpty() && Integer.getInteger(slaveId) != null && Integer.parseInt(slaveId) <= 256) {
+            List<HashMap<Object, Object>> equipList =
+                    hayStack.readAllEntities("equip and modbus and group == \"" + slaveId + "\"");
+            if (equipList.size() == 0) {
+                return null;
+            }
+            for (HashMap<Object, Object> equip : equipList) {
+                if (isModbusHeartbeatRequired(equip, hayStack)) {
+                    HashMap<Object, Object> heartBeatPoint =
+                            hayStack.readEntity("point and (heartbeat or heartBeat) and equipRef == \"" + equip.get("id") + "\"");
+                    if (heartBeatPoint.size() > 0) {
+                        HisItem heartBeatHisItem = hayStack.curRead(heartBeatPoint.get("id").toString());
+                        return (heartBeatHisItem == null) ? null : heartBeatHisItem.getDate();
+                    }
                 }
+            }
+        } else if (!slaveId.isEmpty() && Integer.getInteger(slaveId) != null && Integer.parseInt(slaveId) >= 500 && Integer.parseInt(slaveId) <= 999) {
+            HashMap<Object, Object> equip = hayStack.readEntity("equip and bacnet and group == \"" + slaveId + "\"");
+            if (equip.isEmpty()) {
+                return null;
+            }
+
+            HashMap<Object, Object> heartBeatPoint =
+                    hayStack.readEntity("point and (heartbeat or heartBeat) and equipRef == \"" + equip.get("id") + "\"");
+            if (!heartBeatPoint.isEmpty()) {
+                HisItem heartBeatHisItem = hayStack.curRead(heartBeatPoint.get("id").toString());
+                return (heartBeatHisItem == null) ? null : heartBeatHisItem.getDate();
             }
         }
         return null;

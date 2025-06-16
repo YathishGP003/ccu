@@ -85,6 +85,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -125,6 +126,7 @@ import a75f.io.logic.bo.building.otn.OTNUtil;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
+import a75f.io.logic.bo.building.system.BacnetServicesUtils;
 import a75f.io.logic.bo.building.system.client.RemotePointUpdateInterface;
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
@@ -894,9 +896,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\"" + roomMap.get("id").toString() + "\"");
         if (equips.size() > 0) {// zones has devices paired
             boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equips);
-            if(equips.get(0).get("profile").toString().contains(ProfileType.BACNET_DEFAULT.name())) {
-                isZoneAlive = true;
-            }
             HashMap<String, ArrayList<HashMap>> zoneData = new HashMap<String, ArrayList<HashMap>>();
             for (HashMap zoneModel : equips) {
                 if (zoneData.containsKey(zoneModel.get("roomRef").toString())) {
@@ -2692,6 +2691,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             ll_status.setVisibility(View.GONE);
                             ll_schedule.setVisibility(View.GONE);
 
+                            View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
+                            TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
+                            TextView textViewUpdatedTimeHeading =
+                                    zoneDetails.findViewById(R.id.last_updated);
+                            TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
+                            textViewModule.setVisibility(View.VISIBLE);
+                            textViewUpdatedTimeHeading.setVisibility(View.VISIBLE);
+                            textViewUpdatedTime.setVisibility(View.VISIBLE);
+                            HeartBeatUtil.moduleStatus(textViewModule,nonTempEquip.getGroup());
+                            textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nonTempEquip.getGroup()));
+
                             List<BacnetModelDetailResponse> list = buildBacnetModel(nonTempEquip.getRoomRef());
 
 
@@ -2704,10 +2714,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 CcuLog.d(BACNET, "bacNetPointsList: " + bacNetPointsList.size());
                             }
 
-                            View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
                             TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
+                            BacnetServicesUtils bacnetServicesUtils = new BacnetServicesUtils();
+                            Map<String,String> config = bacnetServicesUtils.getConfig(nonTempEquip.getTags().get("bacnetConfig").toString());
+                            String macAddr = config.get("macAddress");
+                            if (macAddr == null || macAddr.isEmpty()) {
+                                macAddr = "NA";
+                            }
+                            String bacnetDeviceId = config.get("deviceId");
                             String deviceId = nonTempEquip.getGroup();
-                            tvEquipmentType.setText(equipName+" - "+deviceId);
+                            tvEquipmentType.setText(equipName+" ( "+deviceId+" | Device ID: "+bacnetDeviceId+" | MAC Addr: "+macAddr+" )");
                             bacnetRecyclerView = zoneDetails.findViewById(R.id.recyclerParams);
 
                             int spanCount = 2;

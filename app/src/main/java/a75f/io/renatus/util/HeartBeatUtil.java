@@ -43,7 +43,7 @@ public class HeartBeatUtil {
         Date updatedTime = null;
         double zoneDeadTime = 0;
         if(StringUtils.length(nodeAddress)<4){
-            updatedTime = CCUUtils.getLastReceivedTimeForModBus(nodeAddress);
+            updatedTime = CCUUtils.getLastReceivedTimeForModBusAndBacnet(nodeAddress);
         }
         else{
             updatedTime = CCUUtils.getLastReceivedTimeForRssi(nodeAddress);
@@ -73,7 +73,7 @@ public class HeartBeatUtil {
             updatedTime = CCUUtils.getLastReceivedTimeForCloudConnectivity();
         }
         else if(StringUtils.length(nodeAddress)<4){
-            updatedTime = CCUUtils.getLastReceivedTimeForModBus(nodeAddress);
+            updatedTime = CCUUtils.getLastReceivedTimeForModBusAndBacnet(nodeAddress);
         }
         else{
             updatedTime = CCUUtils.getLastReceivedTimeForRssi(nodeAddress);

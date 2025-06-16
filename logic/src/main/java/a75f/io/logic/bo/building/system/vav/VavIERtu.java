@@ -32,6 +32,9 @@ import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
+
+import org.projecthaystack.HDict;
+
 /**
  * System profile to handle AHU via IE gateways.
  *
@@ -636,8 +639,8 @@ public class VavIERtu extends VavSystemProfile
     }
     public void setConfigEnabled(String tags, double val) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+tags);
-        Point configEnabledPt = new Point.Builder().setHashMap(configPoint).build();
+        HDict configPoint = hayStack.readHDict("point and system and config and output and enabled and "+tags);
+        Point configEnabledPt = new Point.Builder().setHDict(configPoint).build();
         double curConfig = hayStack.readPointPriorityVal(configEnabledPt.getId());
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+tags, val);
         if(curConfig != val){

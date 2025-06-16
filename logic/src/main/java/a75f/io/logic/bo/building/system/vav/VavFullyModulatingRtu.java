@@ -12,6 +12,9 @@ import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForVav;
 import android.content.Intent;
 
 import java.util.ArrayList;
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -742,7 +745,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                 if(cmd != null && (cmd.size() > 0)) {
                     HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                     String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
-                    Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("humidifier").removeMarker("runtime").addMarker("dehumidifier").setEnums("off,on").setDisplayName(equipDis + "-dehumidifier")
+                    Point cmdPoint = new Point.Builder().setHDict(new HDictBuilder().toHDict(cmd)).removeMarker("humidifier").removeMarker("runtime").addMarker("dehumidifier").setEnums("off,on").setDisplayName(equipDis + "-dehumidifier")
                             .setBacnetId(BacnetIdKt.DEHUMIDIFIERENABLEDID).build();
                     CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + cmdPoint.getDisplayName());
                     CCUHsApi.getInstance().deleteEntityTree(cmd.get("id").toString());
@@ -755,7 +758,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                 if(cmd != null && cmd.size() > 0) {
                     HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                     String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
-                    Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("dehumidifier").removeMarker("runtime").addMarker("humidifier").setEnums("off,on").setDisplayName(equipDis + "-humidifier")
+                    Point cmdPoint = new Point.Builder().setHDict(new HDictBuilder().toHDict(cmd)).removeMarker("dehumidifier").removeMarker("runtime").addMarker("humidifier").setEnums("off,on").setDisplayName(equipDis + "-humidifier")
                             .setBacnetId(BacnetIdKt.HUMIDIFIERENABLEDID).build();
                     CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + cmdPoint.getDisplayName());
                     CCUHsApi.getInstance().deleteEntityTree(cmd.get("id").toString());
@@ -779,8 +782,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     }
     public void setConfigEnabled(String tags, double val) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+tags);
-        Point configEnabledPt = new Point.Builder().setHashMap(configPoint).build();
+        HDict configPoint = hayStack.readHDict("point and system and config and output and enabled and "+tags);
+        Point configEnabledPt = new Point.Builder().setHDict(configPoint).build();
         double curConfig = hayStack.readPointPriorityVal(configEnabledPt.getId());
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+tags, val);
         if(curConfig != val){

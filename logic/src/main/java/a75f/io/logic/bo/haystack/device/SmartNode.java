@@ -497,11 +497,11 @@ public class SmartNode
         }
         String portName = UtilKt.getPortName(port);
 
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \""
+        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \""
                 + device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
         if (!point.get("analogType" ).equals(type))
         {
-            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            RawPoint p = new RawPoint.Builder().setHDict(point).build();
             p.setType(type);
             CCUHsApi.getInstance().updatePoint(p,p.getId());
         }
@@ -534,9 +534,9 @@ public class SmartNode
             return ;
         }
         String portName = UtilKt.getPortName(port);
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \""
+        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \""
                 + device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
-        RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+        RawPoint p = new RawPoint.Builder().setHDict(point).build();
         p.setPointRef(pointRef);
         CCUHsApi.getInstance().updatePoint(p,p.getId());
        
@@ -551,8 +551,8 @@ public class SmartNode
             return ;
         }
 
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+domainName+"\"");
-        RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+domainName+"\"");
+        RawPoint p = new RawPoint.Builder().setHDict(point).build();
         p.setPointRef(pointRef);
         CCUHsApi.getInstance().updatePoint(p,p.getId());
 
@@ -567,14 +567,14 @@ public class SmartNode
         }
 
         String portName = UtilKt.getPortName(port.name());
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \""
+        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \""
                 + device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
 
         if (point.isEmpty()) {
-            point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+getDomainNameFromPort(port)+"\"");
+            point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+getDomainNameFromPort(port)+"\"");
         }
 
-        RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+        RawPoint p = new RawPoint.Builder().setHDict(point).build();
         p.setPointRef(pointRef);
         CcuLog.i(L.TAG_CCU_DEVICE, "setting point ref for " + port + " to " + pointRef);
         CCUHsApi.getInstance().updatePoint(p,p.getId());
@@ -584,17 +584,17 @@ public class SmartNode
     public static void setPointEnabled(int addr, String port, boolean enabled) {
         CcuLog.d(L.TAG_CCU_DEVICE," Enabled Physical point "+port+" "+enabled);
         
-        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
+        HDict device = CCUHsApi.getInstance().readHDict("device and addr == \""+addr+"\"");
         if (device.isEmpty())
         {
             return ;
         }
         String portName = UtilKt.getPortName(port);
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \""
+        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \""
                 + device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
         if (point != null && !point.isEmpty())
         {
-            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            RawPoint p = new RawPoint.Builder().setHDict(point).build();
             p.setEnabled(enabled);
             CCUHsApi.getInstance().updatePoint(p,p.getId());
             CCUHsApi.getInstance().writeHisValById(p.getId(), 0.0);
@@ -609,10 +609,10 @@ public class SmartNode
             return ;
         }
 
-        HashMap<Object, Object> point = hayStack.readEntity("point and physical and" +
+        HDict point = hayStack.readHDict("point and physical and" +
                 " deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+domainName+"\"");
         if (point != null && !point.isEmpty()) {
-            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            RawPoint p = new RawPoint.Builder().setHDict(point).build();
             p.setEnabled(enabled);
             if(enabled && p.getMarkers().contains(Tags.WRITABLE)) {
                 p.getMarkers().remove(Tags.WRITABLE);
@@ -632,11 +632,11 @@ public class SmartNode
             return null;
         }
         String portName = UtilKt.getPortName(port);
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" +
+        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \"" +
                 device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
         if (point != null && !point.isEmpty())
         {
-            return new RawPoint.Builder().setHashMap(point).build();
+            return new RawPoint.Builder().setHDict(point).build();
         }
         return null;
     }

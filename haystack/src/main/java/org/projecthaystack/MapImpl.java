@@ -17,8 +17,7 @@ public class MapImpl<K,V> extends HDict
     {
         HVal val = (HVal)map.get(name);
         if (val != null) return val;
-        if (!checked) return null;
-        throw new UnknownNameException(name);
+        return null;
     }
     
     public Iterator iterator() { return map.entrySet().iterator(); }

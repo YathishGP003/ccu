@@ -141,9 +141,9 @@ private fun updateDesiredTemp(
     equip.desiredTemp.writePointValue(avgDesiredTemp)
     val haystack = CCUHsApi.getInstance()
 
-    val coolingPoint = Point.Builder().setHashMap(haystack.readMapById(equip.desiredTempCooling.id)).build()
-    val heatingPoint = Point.Builder().setHashMap(haystack.readMapById(equip.desiredTempHeating.id)).build()
-    val desiredPoint = Point.Builder().setHashMap(haystack.readMapById(equip.desiredTemp.id)).build()
+    val coolingPoint = Point.Builder().setHDict(haystack.readHDictById(equip.desiredTempCooling.id)).build()
+    val heatingPoint = Point.Builder().setHDict(haystack.readHDictById(equip.desiredTempHeating.id)).build()
+    val desiredPoint = Point.Builder().setHDict(haystack.readHDictById(equip.desiredTemp.id)).build()
     CcuLog.d(
         L.TAG_CCU_DEVICE,
         "device overriding CoolingDesiredTemp: $coolingDesiredTemp HeatingDesiredTemp: $heatingDesiredTemp AvgDesiredTemp: $avgDesiredTemp"

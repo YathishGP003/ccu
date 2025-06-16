@@ -3,6 +3,7 @@ package a75f.io.device.mesh;
 import android.util.Log;
 
 import org.javolution.io.Struct;
+import org.projecthaystack.HDict;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -10,6 +11,7 @@ import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -202,10 +204,10 @@ public class LSmartStat {
         controls.fanSpeed.set(getOperationalMode("fan",equipId));
         controls.conditioningMode.set(SmartStatConditioningMode_t.values()[(int) getTempConditioningMode("temp and conditioning",equipId)]);
         if (device != null && device.size() > 0) {
-            ArrayList<HashMap> physicalOpPoints = hayStack.readAll("point and physical and cmd and deviceRef == \"" + device.get("id") + "\"");
-            for (HashMap opPoint : physicalOpPoints) {
+            List<HDict> physicalOpPoints = hayStack.readAllHDictByQuery("point and physical and cmd and deviceRef == \"" + device.get("id") + "\"");
+            for (HDict opPoint : physicalOpPoints) {
                 if (opPoint.get("portEnabled").toString().equals("true")) {
-                    RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
+                    RawPoint p = new RawPoint.Builder().setHDict(opPoint).build();
                     HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
                     Log.d("LSmartStat", "getCtrlMsgs=" + p.getDisplayName() + "," + p.getPointRef() + "," + logicalOpPoint.get("id") + "," + p.getType());
                     if (logicalOpPoint.get("id") != null) {
@@ -411,10 +413,10 @@ public class LSmartStat {
            controlsMessage.controls.fanSpeed.set(getOperationalMode("fan",equipRef));
            controlsMessage.controls.conditioningMode.set(SmartStatConditioningMode_t.values()[(int) getTempConditioningMode("temp and conditioning",equipRef)]);
 
-           ArrayList<HashMap<Object,Object>> physicalOpPoints = hayStack.readAllEntities("point and physical and cmd and deviceRef == \"" + device.get("id") + "\"");
-            for (HashMap<Object,Object> opPoint : physicalOpPoints) {
+           List<HDict> physicalOpPoints = hayStack.readAllHDictByQuery("point and physical and cmd and deviceRef == \"" + device.get("id") + "\"");
+            for (HDict opPoint : physicalOpPoints) {
                 if (opPoint.get("portEnabled").toString().equals("true")) {
-                    RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
+                    RawPoint p = new RawPoint.Builder().setHDict(opPoint).build();
                     HashMap<Object,Object> logicalOpPoint = hayStack.readEntity("point and id == " + p.getPointRef());
                     if (logicalOpPoint.get("id") != null) {
                         double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());

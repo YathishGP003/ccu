@@ -12,6 +12,7 @@ import a75f.io.api.haystack.modbus.LogicalPointTags
 import a75f.io.api.haystack.modbus.Parameter
 import a75f.io.api.haystack.modbus.Register
 import a75f.io.api.haystack.modbus.UserIntentPointTags
+import org.projecthaystack.HDict
 
 /**
  * Created by Manjunath K on 31-07-2023.
@@ -122,18 +123,18 @@ private fun buildEquipModel(parentMap: HashMap<Any, Any>, parentEquipRef: String
  * @param equipId
  * return all the register map list for the the equip
  */
-private fun getRegistersMap(equipId: String): ArrayList<HashMap<Any, Any>> {
+private fun getRegistersMap(equipId: String): List<HDict> {
     val hsApi = CCUHsApi.getInstance()
     val deviceId = hsApi.readId("device and modbus and equipRef == \"$equipId\"")
-    return hsApi.readAllEntities("physical and point and deviceRef == \"$deviceId\"")
+    return hsApi.readAllHDictByQuery("physical and point and deviceRef == \"$deviceId\"")
 }
 
 /**
  * @param rawMap
  * returns register object with all the register details
  */
-private fun getRegister(rawMap: HashMap<Any, Any>): Register {
-    val physicalPoint = RawPoint.Builder().setHashMap(rawMap).build()
+private fun getRegister(rawMap: HDict): Register {
+    val physicalPoint = RawPoint.Builder().setHDict(rawMap).build()
     val register = Register()
     register.registerNumber = physicalPoint.registerNumber
     register.registerAddress = physicalPoint.registerAddress.toInt()
@@ -151,10 +152,10 @@ private fun getRegister(rawMap: HashMap<Any, Any>): Register {
  * @param rawMap
  * returns Parameter object with all the parameter details
  */
-private fun getParameter(physicalPoint: RawPoint, rawMap: HashMap<Any, Any>): Parameter {
+private fun getParameter(physicalPoint: RawPoint, rawMap: HDict): Parameter {
     val param = getBasicParamData(physicalPoint,rawMap)
-    val logicalPointMap = CCUHsApi.getInstance().readMapById(physicalPoint.pointRef)
-    val logicalPoint = Point.Builder().setHashMap(logicalPointMap).build()
+    val logicalPointMap = CCUHsApi.getInstance().readHDictById(physicalPoint.pointRef)
+    val logicalPoint = Point.Builder().setHDict(logicalPointMap).build()
     param.isDisplayInUI = logicalPoint.markers.contains(DISPLAY_UI)
     val isWritable = logicalPoint.markers.contains(Tags.WRITABLE)
     logicalPoint.markers.forEach { marker ->
@@ -188,14 +189,14 @@ private fun getParameter(physicalPoint: RawPoint, rawMap: HashMap<Any, Any>): Pa
  * @param rawMap
  * returns Parameter object with basic parameter details
  */
-private fun getBasicParamData(physicalPoint: RawPoint, rawMap: HashMap<Any, Any>): Parameter {
+private fun getBasicParamData(physicalPoint: RawPoint, rawMap: HDict): Parameter {
     val param = Parameter()
     param.parameterId = physicalPoint.parameterId
     param.name = physicalPoint.shortDis
     param.startBit = physicalPoint.startBit.toInt()
     param.endBit = physicalPoint.endBit.toInt()
     param.bitParamRange = getValue(rawMap, BIT_PARAM_RANGE)
-    param.bitParam = if (rawMap.containsKey(BIT_PARAM)) strToDouble(rawMap[BIT_PARAM].toString()) else 0
+    param.bitParam = if (rawMap.has(BIT_PARAM)) strToDouble(rawMap[BIT_PARAM].toString()) else 0
     param.logicalPointTags = mutableListOf<LogicalPointTags>()
     param.userIntentPointTags = mutableListOf<UserIntentPointTags>()
     return param
@@ -308,8 +309,8 @@ private fun strToDouble(str: String?): Int {
 /**
  * Function returns map value if key exist
  */
-private fun getValue(map: HashMap<Any, Any>, key: String): String? {
-    return if(map.containsKey(key)) map[key].toString() else null
+private fun getValue(map: HDict, key: String): String? {
+    return if(map.has(key)) map[key].toString() else null
 }
 
 /**

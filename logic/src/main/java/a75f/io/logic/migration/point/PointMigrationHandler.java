@@ -2,6 +2,8 @@ package a75f.io.logic.migration.point;
 
 import android.os.Bundle;
 
+import org.projecthaystack.HDict;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +33,7 @@ public class PointMigrationHandler {
                 String equipId = senseEquip.get(Tags.ID).toString();
                 String equipDis = siteDis + "-MONITORING-" + senseEquip.get(Tags.GROUP).toString() + "-";
 
-                HashMap<Object, Object> senseAnalog1InputPoint = CCUHsApi.getInstance().readEntity("sense and " +
+                HDict senseAnalog1InputPoint = CCUHsApi.getInstance().readHDict("sense and " +
                         analog+" and unit and equipRef == \""+ equipId +"\"");
                 if(!senseAnalog1InputPoint.isEmpty()) {
                     int configVal = CCUHsApi.getInstance().readDefaultVal("sense and "+analog+" and point and " +
@@ -39,7 +41,7 @@ public class PointMigrationHandler {
                             " and equipRef == \"" + equipId + "\"").intValue();
                     Bundle bundle = HyperStatMonitoringUtil.getAnalogBundle(configVal);
                     String shortDis = bundle.getString(Tags.SHORTDIS);
-                    Point updatePoint = new Point.Builder().setHashMap(senseAnalog1InputPoint)
+                    Point updatePoint = new Point.Builder().setHDict(senseAnalog1InputPoint)
                             .setDisplayName(equipDis + shortDis)
                             .setShortDis(shortDis)
                             .build();
@@ -59,7 +61,7 @@ public class PointMigrationHandler {
                 String equipId = piLoopEquip.get(Tags.ID).toString();
                 String equipDis = siteDis + "-PID-" + piLoopEquip.get(Tags.GROUP).toString();
 
-                HashMap<Object, Object> piLoopAnalog1InputPoint = CCUHsApi.getInstance().readEntity("pid and " +
+                HDict piLoopAnalog1InputPoint = CCUHsApi.getInstance().readHDict("pid and " +
                         " process and variable and equipRef == \""+ equipId +"\"");
                 if(!piLoopAnalog1InputPoint.isEmpty()) {
                     int configVal = CCUHsApi.getInstance().readDefaultVal("pid and analog1 and point and " +
@@ -67,7 +69,7 @@ public class PointMigrationHandler {
                             " and equipRef == \"" + equipId + "\"").intValue();
                     Bundle bundle = PlcRelayConfigHandler.getAnalog1Bundle(configVal);
                     String shortDis = bundle.getString(Tags.SHORTDIS);
-                    Point updatePoint = new Point.Builder().setHashMap(piLoopAnalog1InputPoint)
+                    Point updatePoint = new Point.Builder().setHDict(piLoopAnalog1InputPoint)
                             .setDisplayName(equipDis + "-processVariable- " + shortDis)
                             .setShortDis(shortDis)
                             .build();
@@ -84,7 +86,7 @@ public class PointMigrationHandler {
 
                 String equipId = piLoopEquip.get(Tags.ID).toString();
 
-                HashMap<Object, Object>piLoopAnalog2InputPoint = CCUHsApi.getInstance().readEntity("pid and " +
+                HDict piLoopAnalog2InputPoint = CCUHsApi.getInstance().readHDict("pid and " +
                         " dynamic and target and equipRef == \""+ equipId +"\"");
                 if(!piLoopAnalog2InputPoint.isEmpty()) {
                     List<Sensor> sensorList =  SensorManager.getInstance().getExternalSensorList();
@@ -94,7 +96,7 @@ public class PointMigrationHandler {
                         if(dynamicTargetDisName.contains(sensorName)){
                             String sensorNameWithColon = sensorName.replace("-", ":");
                             String modifiedDisplayName = dynamicTargetDisName.replace(sensorName, sensorNameWithColon);
-                            Point updatePoint = new Point.Builder().setHashMap(piLoopAnalog2InputPoint)
+                            Point updatePoint = new Point.Builder().setHDict(piLoopAnalog2InputPoint)
                                     .setDisplayName(modifiedDisplayName)
                                     .build();
                             CCUHsApi.getInstance().updatePoint(updatePoint, updatePoint.getId());

@@ -304,7 +304,7 @@ public class HaystackExplorer extends Fragment
         CCUHsApi hayStack = CCUHsApi.getInstance();
         StringBuilder val = new StringBuilder();
         try {
-            Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
+            Point p = new Point.Builder().setHDict(hayStack.readHDictById(id)).build();
             for (String marker : p.getMarkers()) {
                 if (marker.equals("writable")) {
                     ArrayList values = hayStack.readPoint(id);

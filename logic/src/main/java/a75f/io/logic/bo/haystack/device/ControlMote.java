@@ -1,6 +1,10 @@
 package a75f.io.logic.bo.haystack.device;
+import org.projecthaystack.HDict;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.RawPoint;
@@ -450,10 +454,10 @@ public class ControlMote
         }
 
         String portName = UtilKt.getPortName(port);
-        HashMap<Object,Object> point = CCUHsApi.getInstance().readEntity(
+        HDict point = CCUHsApi.getInstance().readHDict(
                 "point and physical and deviceRef == \""
                         + device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
-        RawPoint p = new RawPoint.Builder().setHashMap(point).setPointRef(pointRef).build();
+        RawPoint p = new RawPoint.Builder().setHDict(point).setPointRef(pointRef).build();
         CCUHsApi.getInstance().updatePoint(p,p.getId());
     }
 
@@ -466,12 +470,12 @@ public class ControlMote
             return ;
         }
         String portName = UtilKt.getPortName(port);
-        HashMap<Object,Object> point = CCUHsApi.getInstance().readEntity(
+        HDict point = CCUHsApi.getInstance().readHDict(
                 "point and physical and deviceRef == \"" + device.get("id").toString() +
                         "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
         if (point != null && !point.isEmpty())
         {
-            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            RawPoint p = new RawPoint.Builder().setHDict(point).build();
             p.setEnabled(enabled);
             CCUHsApi.getInstance().updatePoint(p,p.getId());
             CCUHsApi.getInstance().writeHisValById(p.getId(), 0.0);
@@ -484,11 +488,11 @@ public class ControlMote
        HashMap device = hsApi.readEntity("device and cm");
        if(device == null || device.isEmpty()) return;
        String  deviceId = device.get("id").toString();
-       ArrayList<HashMap<Object, Object>> points = hsApi.readAllEntities("point and deviceRef == \"" + deviceId + "\"");
+       List<HDict> points = hsApi.readAllHDictByQuery("point and deviceRef == \"" + deviceId + "\"");
        String siteName = hsApi.readEntity("site").get("dis").toString();
 
-        for (HashMap rawPoint : points) {
-            RawPoint.Builder point = new RawPoint.Builder().setHashMap(rawPoint);
+        for (HDict rawPoint : points) {
+            RawPoint.Builder point = new RawPoint.Builder().setHDict(rawPoint);
             String dis = rawPoint.get("dis").toString();
             String[] tokens = dis.split("-");
             if(tokens.length == 2)  point.setDisplayName(siteName+"-"+tokens[1]);
@@ -507,11 +511,11 @@ public class ControlMote
             return ;
         }
 
-        HashMap<Object,Object> point = CCUHsApi.getInstance().readEntity(
+        HDict point = CCUHsApi.getInstance().readHDict(
                 "point and th1 and physical and deviceRef == \"" + device.get("id").toString() + "\"");
         if (point != null && !point.isEmpty())
         {
-            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            RawPoint p = new RawPoint.Builder().setHDict(point).build();
             p.setEnabled(enabled);
             CCUHsApi.getInstance().updatePoint(p,p.getId());
             CCUHsApi.getInstance().writeHisValById(p.getId(), 0.0);

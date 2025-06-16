@@ -364,7 +364,7 @@ public class HSUtil {
     }
 
     public static boolean isHyperStatConfig(String id, CCUHsApi hayStack) {
-        Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build();
+        Point localPoint = new Point.Builder().setHDict(CCUHsApi.getInstance().readHDictById(id)).build();
         HashMap equip = hayStack.readMapById(localPoint.getEquipRef());
         return equip.containsKey(Tags.HYPERSTAT) &&
                 (equip.containsKey(Tags.CPU) || equip.containsKey(Tags.PIPE2)
@@ -372,7 +372,7 @@ public class HSUtil {
     }
 
     public static boolean isHyperStatSplitConfig(String id, CCUHsApi hayStack) {
-        Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build();
+        Point localPoint = new Point.Builder().setHDict(CCUHsApi.getInstance().readHDictById(id)).build();
         HashMap equip = hayStack.readMapById(localPoint.getEquipRef());
         return equip.containsKey(Tags.HYPERSTATSPLIT) && equip.containsKey(Tags.CPU);
     }
@@ -617,7 +617,7 @@ public class HSUtil {
         }
 
         Point tunerPoint = new Point.Builder()
-                .setHashMap(hayStack.readMapById(id))
+                .setHDict(hayStack.readHDictById(id))
                 .build();
 
         return (tunerPoint.getMarkers().contains("building") && tunerPoint.getMarkers().contains("limit") &&
@@ -727,7 +727,7 @@ public class HSUtil {
             Map.Entry entry = (Map.Entry) it.next();
             map.put(entry.getKey().toString(), entry.getValue().toString());
         }
-        Point point = new Point.Builder().setHashMap(map).build();
+        Point point = new Point.Builder().setHDict(new HDictBuilder().toHDict(map)).build();
         CCUHsApi.getInstance().addPoint(point);
     }
 

@@ -11,6 +11,8 @@ import static a75f.io.logic.BacnetUtilKt.SOUND;
 import static a75f.io.logic.BacnetUtilKt.VOC;
 import static a75f.io.logic.BacnetUtilKt.addBacnetTags;
 
+import org.projecthaystack.HDict;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -378,9 +380,9 @@ public class HyperStatDevice {
     
     
     public RawPoint getRawPoint(Port p) {
-        HashMap sensorPoint = CCUHsApi.getInstance().read("point and sensor and physical and deviceRef == \""+deviceRef+"\""
+        HDict sensorPoint = CCUHsApi.getInstance().readHDict("point and sensor and physical and deviceRef == \""+deviceRef+"\""
                                                           +" and port == \""+p.toString()+"\"");
-        return sensorPoint.size() > 0 ? new RawPoint.Builder().setHashMap(sensorPoint).build() : null;
+        return sensorPoint.size() > 0 ? new RawPoint.Builder().setHDict(sensorPoint).build() : null;
     }
     
     public void addPointsToDb() {

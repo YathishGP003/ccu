@@ -451,7 +451,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
         ExecutorTask.executeBackground(() -> {
             CCUHsApi.getInstance().writeDefaultValById(id, (double) schedule.ordinal());
             CCUHsApi.getInstance().writeHisValById(id, (double) schedule.ordinal());
-            SystemScheduleUtil.handleScheduleTypeUpdate(new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build());
+            SystemScheduleUtil.handleScheduleTypeUpdate(new Point.Builder().setHDict(CCUHsApi.getInstance().readHDictById(id)).build());
         });
     }
     

@@ -7,6 +7,8 @@ import static a75f.io.logic.util.uiutils.UserIntentStatusUtilKt.updateUserIntent
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import org.projecthaystack.HDict;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -126,8 +128,8 @@ public class HyperSplitMsgReceiver {
                 .forEach(point -> writePortInputsToHaystackDatabase(point, regularUpdateMessage, hayStack, equipRef));
         // PM2.5 sensor is the only DYNAMIC_SENSOR point for HSS
         if (regularUpdateMessage.getRegularUpdateCommon().getPm2P5() > 0.0) {
-            HashMap<Object, Object> pm25PhyPoint = hayStack.readEntity("point and domainName == \"" + DomainName.pm25Sensor + "\" and deviceRef == \"" + device.get("id").toString() + "\"");
-            RawPoint sp = new RawPoint.Builder().setHashMap(pm25PhyPoint).build();
+            HDict pm25PhyPoint = hayStack.readHDict("point and domainName == \"" + DomainName.pm25Sensor + "\" and deviceRef == \"" + device.get("id").toString() + "\"");
+            RawPoint sp = new RawPoint.Builder().setHDict(pm25PhyPoint).build();
 
             if (sp.getPointRef() == null || sp.getPointRef().isEmpty()) {
                 HyperStatSplitDevice stat = new HyperStatSplitDevice();
@@ -689,7 +691,7 @@ public class HyperSplitMsgReceiver {
         if(currentHeatingDesiredTemp != heatingDesiredTemp || currentCoolingDesiredTemp != coolingDesiredTemp) {
             double averageDesiredTemp = (coolingDesiredTemp + heatingDesiredTemp)/2;
 
-            HashMap coolingDtPoint = hayStack.readEntity("point and domainName == \"" + DomainName.desiredTempCooling + "\" and equipRef == \""
+            HDict coolingDtPoint = hayStack.readHDict("point and domainName == \"" + DomainName.desiredTempCooling + "\" and equipRef == \""
                     + hsEquip.getId() + "\"");
             if (!coolingDtPoint.isEmpty() && temperatureMode == TemperatureMode.COOLING) {
                 CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
@@ -697,7 +699,7 @@ public class HyperSplitMsgReceiver {
                 CcuLog.e(L.TAG_CCU_DEVICE, "coolingDtPoint does not exist: " + hsEquip.getDisplayName());
             }
 
-            HashMap heatingDtPoint = hayStack.read("point and domainName == \"" + DomainName.desiredTempHeating + "\" and equipRef == \""
+            HDict heatingDtPoint = hayStack.readHDict("point and domainName == \"" + DomainName.desiredTempHeating + "\" and equipRef == \""
                     + hsEquip.getId() + "\"");
             if (!heatingDtPoint.isEmpty() && temperatureMode == TemperatureMode.HEATING) {
                 CCUHsApi.getInstance().writeHisValById(heatingDtPoint.get("id").toString(), heatingDesiredTemp);
@@ -705,7 +707,7 @@ public class HyperSplitMsgReceiver {
                 CcuLog.e(L.TAG_CCU_DEVICE, "heatingDtPoint does not exist: " + hsEquip.getDisplayName());
             }
 
-            HashMap dtPoint = hayStack.read("point and domainName == \"" + DomainName.desiredTemp + "\" and equipRef == \""
+            HDict dtPoint = hayStack.readHDict("point and domainName == \"" + DomainName.desiredTemp + "\" and equipRef == \""
                     + hsEquip.getId() + "\"");
             if (!dtPoint.isEmpty()) {
                 CCUHsApi.getInstance().writeHisValById(dtPoint.get("id").toString(), (double) message.getSetTempCooling());
@@ -716,21 +718,21 @@ public class HyperSplitMsgReceiver {
 
             switch (temperatureMode) {
                 case DUAL:
-                    DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
-                            new Point.Builder().setHashMap(heatingDtPoint).build(),
-                            new Point.Builder().setHashMap(dtPoint).build(),
+                    DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHDict(coolingDtPoint).build(),
+                            new Point.Builder().setHDict(heatingDtPoint).build(),
+                            new Point.Builder().setHDict(dtPoint).build(),
                             coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp, hayStack,  WhoFiledConstants.HYPERSTAT_SPLIT_WHO);
                     break;
                 case COOLING:
-                    DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
-                            new Point.Builder().setHashMap(heatingDtPoint).build(),
-                            new Point.Builder().setHashMap(dtPoint).build(),
+                    DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHDict(coolingDtPoint).build(),
+                            new Point.Builder().setHDict(heatingDtPoint).build(),
+                            new Point.Builder().setHDict(dtPoint).build(),
                             coolingDesiredTemp, 0, averageDesiredTemp, hayStack,  WhoFiledConstants.HYPERSTAT_SPLIT_WHO);
                     break;
                 case HEATING:
-                    DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
-                            new Point.Builder().setHashMap(heatingDtPoint).build(),
-                            new Point.Builder().setHashMap(dtPoint).build(),
+                    DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHDict(coolingDtPoint).build(),
+                            new Point.Builder().setHDict(heatingDtPoint).build(),
+                            new Point.Builder().setHDict(dtPoint).build(),
                             0, heatingDesiredTemp, averageDesiredTemp, hayStack,  WhoFiledConstants.HYPERSTAT_SPLIT_WHO);
                     break;
             }

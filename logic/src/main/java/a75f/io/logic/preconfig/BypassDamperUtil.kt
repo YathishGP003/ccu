@@ -70,10 +70,10 @@ fun setPressureSensorRef(config: BypassDamperProfileConfiguration, hayStack: CCU
     val device = hayStack.read("device and addr == \"" + config.nodeAddress + "\"")
     val equip = hayStack.read("equip and group == \"" + config.nodeAddress + "\"")
 
-    val physPressureSensor = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.pressureSensor + "\"")
-    val physPressureSensorPoint = RawPoint.Builder().setHashMap(physPressureSensor)
-    val analogIn1 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog1In + "\"")
-    val analogIn1Point = RawPoint.Builder().setHashMap(analogIn1)
+    val physPressureSensor = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.pressureSensor + "\"")
+    val physPressureSensorPoint = RawPoint.Builder().setHDict(physPressureSensor)
+    val analogIn1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog1In + "\"")
+    val analogIn1Point = RawPoint.Builder().setHDict(analogIn1)
     val logPressureSensor = hayStack.read("point and equipRef == \""+equip.get("id")+"\" and domainName == \"" + DomainName.ductStaticPressureSensor + "\"")
 
     if (config.pressureSensorType.currentVal > 0.0) {
@@ -97,8 +97,8 @@ fun setOutputTypes(config: BypassDamperProfileConfiguration, hayStack: CCUHsApi)
 fun setDamperFeedback(config: BypassDamperProfileConfiguration, hayStack: CCUHsApi) {
     val device = hayStack.read("device and addr == \"" + config.nodeAddress + "\"")
 
-    var analogIn2 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2In + "\"")
-    var analogIn2Point = RawPoint.Builder().setHashMap(analogIn2)
+    var analogIn2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2In + "\"")
+    var analogIn2Point = RawPoint.Builder().setHDict(analogIn2)
     hayStack.updatePoint(analogIn2Point.setType(getDamperTypeString(config)).build(), analogIn2.get("id").toString())
 }
 

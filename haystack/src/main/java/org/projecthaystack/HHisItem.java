@@ -59,8 +59,7 @@ public class HHisItem extends HDict
   {
     if (name.equals("ts")) return ts;
     if (name.equals("val")) return val;
-    if (!checked) return null;
-    throw new UnknownNameException(name);
+    return null;
   }
 
   public Iterator iterator() { return new FixedIterator(); }

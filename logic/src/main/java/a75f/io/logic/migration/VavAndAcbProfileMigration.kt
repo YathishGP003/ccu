@@ -188,8 +188,8 @@ class VavAndAcbProfileMigration {
                         )
                         // This is wrapped in a pointExists check because getID() will not re-check an empty point ID on its own. pointExists() will force a re-check.
                         if (acbEquip.chilledWaterValveIsolationCmdPointNC.pointExists()) {
-                            val relay1 = hayStack.readEntity("point and deviceRef == \"" + device["id"].toString() + "\" and domainName == \"" + DomainName.relay1 + "\"")
-                            val relay1Point = RawPoint.Builder().setHashMap(relay1).setPointRef(acbEquip.chilledWaterValveIsolationCmdPointNC.id).build()
+                            val relay1 = hayStack.readHDict("point and deviceRef == \"" + device["id"].toString() + "\" and domainName == \"" + DomainName.relay1 + "\"")
+                            val relay1Point = RawPoint.Builder().setHDict(relay1).setPointRef(acbEquip.chilledWaterValveIsolationCmdPointNC.id).build()
                             hayStack.updatePoint(relay1Point, relay1Point.id)
                         }
                     }
@@ -209,8 +209,8 @@ class VavAndAcbProfileMigration {
                         )
                         // This is wrapped in a pointExists check because getID() will not re-check an empty point ID on its own. pointExists() will force a re-check.
                         if (acbEquip.chilledWaterValveIsolationCmdPointNO.pointExists()) {
-                            val relay1 = hayStack.readEntity("point and deviceRef == \"" + device["id"].toString() + "\" and domainName == \"" + DomainName.relay1 + "\"")
-                            val relay1Point = RawPoint.Builder().setHashMap(relay1).setPointRef(acbEquip.chilledWaterValveIsolationCmdPointNO.id).build()
+                            val relay1 = hayStack.readHDict("point and deviceRef == \"" + device["id"].toString() + "\" and domainName == \"" + DomainName.relay1 + "\"")
+                            val relay1Point = RawPoint.Builder().setHDict(relay1).setPointRef(acbEquip.chilledWaterValveIsolationCmdPointNO.id).build()
                             hayStack.updatePoint(relay1Point, relay1Point.id)
                         }
                     }
@@ -257,8 +257,8 @@ class VavAndAcbProfileMigration {
                         )
                         // This is wrapped in a pointExists check because getID() will not re-check an empty point ID on its own. pointExists() will force a re-check.
                         if (acbEquip.chilledWaterValveIsolationCmdPointNC.pointExists()) {
-                            val relay1 = hayStack.readEntity("point and deviceRef == \"" + device["id"].toString() + "\" and domainName == \"" + DomainName.relay1 + "\"")
-                            val relay1Point = RawPoint.Builder().setHashMap(relay1).setPointRef(acbEquip.chilledWaterValveIsolationCmdPointNC.id).build()
+                            val relay1 = hayStack.readHDict("point and deviceRef == \"" + device["id"].toString() + "\" and domainName == \"" + DomainName.relay1 + "\"")
+                            val relay1Point = RawPoint.Builder().setHDict(relay1).setPointRef(acbEquip.chilledWaterValveIsolationCmdPointNC.id).build()
                             hayStack.updatePoint(relay1Point, relay1Point.id)
                         }
                     }
@@ -278,8 +278,8 @@ class VavAndAcbProfileMigration {
                         )
                         // This is wrapped in a pointExists check because getID() will not re-check an empty point ID on its own. pointExists() will force a re-check.
                         if (acbEquip.chilledWaterValveIsolationCmdPointNO.pointExists()) {
-                            val relay1 = hayStack.readEntity("point and deviceRef == \"" + device["id"].toString() + "\" and domainName == \"" + DomainName.relay1 + "\"")
-                            val relay1Point = RawPoint.Builder().setHashMap(relay1).setPointRef(acbEquip.chilledWaterValveIsolationCmdPointNO.id).build()
+                            val relay1 = hayStack.readHDict("point and deviceRef == \"" + device["id"].toString() + "\" and domainName == \"" + DomainName.relay1 + "\"")
+                            val relay1Point = RawPoint.Builder().setHDict(relay1).setPointRef(acbEquip.chilledWaterValveIsolationCmdPointNO.id).build()
                             hayStack.updatePoint(relay1Point, relay1Point.id)
                         }
                     }
@@ -785,8 +785,8 @@ class VavAndAcbProfileMigration {
             hnAcbEquips.forEach {
                 val acbEquip = VavAcbEquip(it["id"].toString())
                 val device = hayStack.readEntity("device and equipRef == \"" + it["id"].toString() + "\"")
-                val th2In = hayStack.readEntity("point and deviceRef == \"" + device["id"].toString() + "\" and domainName == \"" + DomainName.th2In + "\"")
-                val th2InPoint = RawPoint.Builder().setHashMap(th2In)
+                val th2In = hayStack.readHDict("point and deviceRef == \"" + device["id"].toString() + "\" and domainName == \"" + DomainName.th2In + "\"")
+                val th2InPoint = RawPoint.Builder().setHDict(th2In)
                 if (acbEquip.thermistor2Type.readPriorityVal() > 0) {
                     if (acbEquip.condensateNC.pointExists()) {
                         hayStack.updatePoint(th2InPoint.setPointRef(acbEquip.condensateNC.id).build(), th2In["id"].toString())
@@ -801,8 +801,8 @@ class VavAndAcbProfileMigration {
             snAcbEquips.forEach {
                 val acbEquip = VavAcbEquip(it["id"].toString())
                 val device = hayStack.readEntity("device and equipRef == \"" + it["id"].toString() + "\"")
-                val th2In = hayStack.readEntity("point and deviceRef == \"" + device["id"].toString() + "\" and domainName == \"" + DomainName.th2In + "\"")
-                val th2InPoint = RawPoint.Builder().setHashMap(th2In)
+                val th2In = hayStack.readHDict("point and deviceRef == \"" + device["id"].toString() + "\" and domainName == \"" + DomainName.th2In + "\"")
+                val th2InPoint = RawPoint.Builder().setHDict(th2In)
                 if (acbEquip.thermistor2Type.readPriorityVal() > 0) {
                     if (acbEquip.condensateNC.pointExists()) {
                         hayStack.updatePoint(th2InPoint.setPointRef(acbEquip.condensateNC.id).build(), th2In["id"].toString())
@@ -973,8 +973,8 @@ class VavAndAcbProfileMigration {
             }
 
             pointsToDeleteDuplicates.forEach { domainName ->
-                val pointMaps = hayStack.readAllEntities("point and equipRef == \"${equip["id"]}\" and domainName == \"$domainName\"")
-                val points = pointMaps.map { Point.Builder().setHashMap(it).build() }
+                val pointMaps = hayStack.readAllHDictByQuery("point and equipRef == \"${equip["id"]}\" and domainName == \"$domainName\"")
+                val points = pointMaps.map { Point.Builder().setHDict(it).build() }
 
                 if (points.size > 1) {
                     var sortedPoints = points.sortedBy { it.createdDateTime }

@@ -493,7 +493,7 @@ object Domain {
     @JvmStatic
     fun pointWriteAndHisWriteById(id: String, value: Double, who: String) {
         val pointDetails = a75f.io.api.haystack.Point.Builder()
-            .setHashMap(hayStack.readMapById(id))
+            .setHDict(hayStack.readHDictById(id))
             .build()
 
         val markers = pointDetails.markers

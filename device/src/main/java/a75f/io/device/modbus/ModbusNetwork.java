@@ -6,6 +6,8 @@ import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquip
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import org.projecthaystack.HDict;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -134,13 +136,13 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
     }
 
     public void writeRegister(String id ) {
-        HashMap<Object, Object> writablePoint = CCUHsApi.getInstance().readMapById(id);
+        HDict writablePoint = CCUHsApi.getInstance().readHDictById(id);
         if (writablePoint.isEmpty()) {
             CcuLog.e(L.TAG_CCU_MODBUS, "Cant find the point to update "+id);
             return;
         }
 
-        Point point = new Point.Builder().setHashMap(writablePoint).build();
+        Point point = new Point.Builder().setHDict(writablePoint).build();
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(point.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
 

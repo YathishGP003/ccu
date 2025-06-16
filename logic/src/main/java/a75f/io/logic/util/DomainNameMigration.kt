@@ -5,6 +5,7 @@ import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import org.projecthaystack.HDictBuilder
 import java.util.ArrayList
 
 
@@ -31,7 +32,7 @@ private fun updateEntityWithNewDomain(entityMap: HashMap<Any, Any>, newDomainNam
         if (entityMap.containsKey(Tags.DOMAIN_NAME) && entityMap.containsKey(Tags.ID)) {
             val pointId = entityMap[Tags.ID].toString()
             val modifiedPoint =
-                Point.Builder().setHashMap(entityMap).setDomainName(newDomainName).build()
+                Point.Builder().setHDict(HDictBuilder().toHDict(entityMap)).setDomainName(newDomainName).build()
             CCUHsApi.getInstance().updatePoint(modifiedPoint, pointId)
             CcuLog.i(L.TAG_CCU_DOMAIN,"domainName migrated for $newDomainName = $pointId")
         }

@@ -573,10 +573,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun updateUnoccupiedSetbackMax() {
         try {
-            val listOfUnoccupiedPoints = hayStack.readAllEntities("unoccupied and setback and not domainName")
+            val listOfUnoccupiedPoints = hayStack.readAllHDictByQuery("unoccupied and setback and not domainName")
             CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Total points found ${listOfUnoccupiedPoints.size}")
             listOfUnoccupiedPoints.forEach {
-                val unoccupiedPoint = Point.Builder().setHashMap(it).setMaxVal("60").build()
+                val unoccupiedPoint = Point.Builder().setHDict(it).setMaxVal("60").build()
                 hayStack.updatePoint(unoccupiedPoint, unoccupiedPoint.id)
                 CcuLog.d(TAG_CCU_MIGRATION_UTIL, "${unoccupiedPoint.id} Updated unoccupied setback max value")
             }
@@ -743,14 +743,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         listOfZones.forEach { zoneMap ->
             val zone = Zone.Builder().setHashMap(zoneMap).build()
             val zoneId = zone.id
-            val heatingDeadBandPoint = hayStack.readEntity("schedulable and heating and deadband and roomRef == \"$zoneId\"")
-            val coolingDeadBandPoint = hayStack.readEntity("schedulable and cooling and deadband and roomRef == \"$zoneId\"")
-            if (heatingDeadBandPoint.isNotEmpty()) {
-                val deadBand = Point.Builder().setHashMap(heatingDeadBandPoint).setMinVal(minDeadBandVal).build()
+            val heatingDeadBandPoint = hayStack.readHDict("schedulable and heating and deadband and roomRef == \"$zoneId\"")
+            val coolingDeadBandPoint = hayStack.readHDict("schedulable and cooling and deadband and roomRef == \"$zoneId\"")
+            if (!heatingDeadBandPoint.isEmpty) {
+                val deadBand = Point.Builder().setHDict(heatingDeadBandPoint).setMinVal(minDeadBandVal).build()
                 hayStack.updatePoint(deadBand, deadBand.id)
             }
-            if (coolingDeadBandPoint.isNotEmpty()) {
-                val deadBand = Point.Builder().setHashMap(coolingDeadBandPoint).setMinVal(minDeadBandVal).build()
+            if (!coolingDeadBandPoint.isEmpty) {
+                val deadBand = Point.Builder().setHDict(coolingDeadBandPoint).setMinVal(minDeadBandVal).build()
                 hayStack.updatePoint(deadBand, deadBand.id)
             }
         }
@@ -833,10 +833,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
 
     private fun migrateEquipStatusEnums() {
-        val equipStatusPointList = hayStack.readAllEntities("status and not ota and not message" +
+        val equipStatusPointList = hayStack.readAllHDictByQuery("status and not ota and not message" +
                 " and zone and his and enum and not modbus")
         equipStatusPointList.forEach{equipStatusMap ->
-            val equipStatusPoint = Point.Builder().setHashMap(equipStatusMap).build()
+            val equipStatusPoint = Point.Builder().setHDict(equipStatusMap).build()
             if (!equipStatusPoint.enums.toString().contains("rfdead")) {
                 equipStatusPoint.enums = "deadband,cooling,heating,tempdead,rfdead"
                 hayStack.updatePoint(equipStatusPoint, equipStatusPoint.id)
@@ -1356,14 +1356,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
 
             if (hssEquip.standalonePrePurgeOccupiedTimeOffsetTuner.pointExists()) {
-                val prePurgeOffsetMap = hayStack.readMapById(hssEquip.standalonePrePurgeOccupiedTimeOffsetTuner.id)
-                val prePurgeOffsetPoint = Point.Builder().setHashMap(prePurgeOffsetMap).addMarker("tuner").build()
+                val prePurgeOffsetMap = hayStack.readHDictById(hssEquip.standalonePrePurgeOccupiedTimeOffsetTuner.id)
+                val prePurgeOffsetPoint = Point.Builder().setHDict(prePurgeOffsetMap).addMarker("tuner").build()
                 hayStack.updatePoint(prePurgeOffsetPoint, prePurgeOffsetPoint.id)
             }
 
             if (hssEquip.standalonePrePurgeFanSpeedTuner.pointExists()) {
-                val prePurgeFanSpeedMap = hayStack.readMapById(hssEquip.standalonePrePurgeFanSpeedTuner.id)
-                val prePurgeFanSpeedPoint = Point.Builder().setHashMap(prePurgeFanSpeedMap).addMarker("tuner").build()
+                val prePurgeFanSpeedMap = hayStack.readHDictById(hssEquip.standalonePrePurgeFanSpeedTuner.id)
+                val prePurgeFanSpeedPoint = Point.Builder().setHDict(prePurgeFanSpeedMap).addMarker("tuner").build()
                 hayStack.updatePoint(prePurgeFanSpeedPoint, prePurgeFanSpeedPoint.id)
             }
 

@@ -59,8 +59,8 @@ class TunerUpdateHandler {
      */
     private static void propagateTunerByTags(String pointId, JsonObject msgObject, CCUHsApi hayStack) {
     
-        HashMap<Object, Object> pointMap = CCUHsApi.getInstance().readMapById(pointId);
-        Point tunerPoint = new Point.Builder().setHashMap(pointMap).build();
+        HDict pointMap = CCUHsApi.getInstance().readHDictById(pointId);
+        Point tunerPoint = new Point.Builder().setHDict(pointMap).build();
         
         tunerPoint.getMarkers().remove(Tags.DEFAULT);
         HSUtil.removeGenericMarkerTags(tunerPoint.getMarkers());

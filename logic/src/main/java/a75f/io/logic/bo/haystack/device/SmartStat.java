@@ -1,6 +1,8 @@
 package a75f.io.logic.bo.haystack.device;
 
 
+import org.projecthaystack.HDict;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -286,9 +288,9 @@ public class SmartStat {
 	
     
     public RawPoint getRawPoint(Port p) {
-        HashMap sensorPoint = CCUHsApi.getInstance().read("point and sensor and physical and deviceRef == \""+deviceRef+"\""
+        HDict sensorPoint = CCUHsApi.getInstance().readHDict("point and sensor and physical and deviceRef == \""+deviceRef+"\""
                                                      +" and port == \""+p.toString()+"\"");
-        return sensorPoint.size() > 0 ? new RawPoint.Builder().setHashMap(sensorPoint).build() : null;
+        return sensorPoint.size() > 0 ? new RawPoint.Builder().setHDict(sensorPoint).build() : null;
     }
     public void addPointsToDb() {
         CCUHsApi.getInstance().addPoint(analog1In);
@@ -315,10 +317,10 @@ public class SmartStat {
             return ;
         }
 
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
         if (!point.get("analogType").equals(type))
         {
-            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            RawPoint p = new RawPoint.Builder().setHDict(point).build();
             p.setType(type);
             CCUHsApi.getInstance().updatePoint(p,p.getId());
         }
@@ -332,8 +334,8 @@ public class SmartStat {
             return ;
         }
         
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
-        RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        RawPoint p = new RawPoint.Builder().setHDict(point).build();
         p.setPointRef(pointRef);
         CCUHsApi.getInstance().updatePoint(p,p.getId());
        
@@ -347,10 +349,10 @@ public class SmartStat {
             return ;
         }
 
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
         if (point != null && point.size() > 0)
         {
-            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            RawPoint p = new RawPoint.Builder().setHDict(point).build();
             p.setEnabled(enabled);
             CCUHsApi.getInstance().updatePoint(p,p.getId());
         }
@@ -364,10 +366,10 @@ public class SmartStat {
             return null;
         }
 
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
         if (point != null && point.size() > 0)
         {
-            return new RawPoint.Builder().setHashMap(point).build();
+            return new RawPoint.Builder().setHDict(point).build();
         }
         return null;
     }

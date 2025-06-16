@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.sse;
 
 import static a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile.TAG;
 
+import org.projecthaystack.HDict;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -522,16 +523,16 @@ public class SingleStageEquiptobeDeleted {
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap<Object, Object> analogInPoint;
+        HDict analogInPoint;
 
         if (analogInAssociation == InputActuatorType.ZERO_TO_50A_CURRENT_TRANSFORMER) {
-            analogInPoint = hayStack.readEntity("point and transformer50 and sensor and " +
+            analogInPoint = hayStack.readHDict("point and transformer50 and sensor and " +
                     "equipRef == \""+equip.getId()+"\"");
         } else if (analogInAssociation == InputActuatorType.ZERO_TO_20A_CURRENT_TRANSFORMER) {
-            analogInPoint = hayStack.readEntity("point and transformer20 and sensor and " +
+            analogInPoint = hayStack.readHDict("point and transformer20 and sensor and " +
                     "equipRef == \""+equip.getId()+"\"");
         } else {
-            analogInPoint = hayStack.readEntity("point and transformer and sensor and " +
+            analogInPoint = hayStack.readHDict("point and transformer and sensor and " +
                     "equipRef == \""+equip.getId()+"\"");
         }
 
@@ -544,10 +545,10 @@ public class SingleStageEquiptobeDeleted {
 
     }
 
-    private static void updateMarker(HashMap<Object, Object> point) {
+    private static void updateMarker(HDict point) {
 
-        if (!point.containsKey("standalone") || !point.containsKey("sse")) {
-            Point point1 = new Point.Builder().setHashMap(point).addMarker("standalone").addMarker("sse").build();
+        if (!point.has("standalone") || !point.has("sse")) {
+            Point point1 = new Point.Builder().setHDict(point).addMarker("standalone").addMarker("sse").build();
             CCUHsApi.getInstance().updatePoint(point1, point.get("id").toString());
         }
 
@@ -577,19 +578,19 @@ public class SingleStageEquiptobeDeleted {
             ScheduleUtil.resetOccupancyDetection(CCUHsApi.getInstance(),equipRef);
         }
 
-        HashMap enableRelay1Map =
-                CCUHsApi.getInstance().read("point and config and enable and relay1 and group == \""+nodeAddr+ "\"");
-        Point enableRelay1 = new Point.Builder().setHashMap(enableRelay1Map).build();
+        HDict enableRelay1Map =
+                CCUHsApi.getInstance().readHDict("point and config and enable and relay1 and group == \""+nodeAddr+ "\"");
+        Point enableRelay1 = new Point.Builder().setHDict(enableRelay1Map).build();
         SingleStageEquipUtil.updateRelay1Config(config.enableRelay1, enableRelay1);
 
-        HashMap enableRelay2Map =
-                CCUHsApi.getInstance().read("point and config and enable and relay2 and group == \""+nodeAddr+ "\"");
-        Point enableRelay2 = new Point.Builder().setHashMap(enableRelay2Map).build();
+        HDict enableRelay2Map =
+                CCUHsApi.getInstance().readHDict("point and config and enable and relay2 and group == \""+nodeAddr+ "\"");
+        Point enableRelay2 = new Point.Builder().setHDict(enableRelay2Map).build();
         SingleStageEquipUtil.updateRelay2Config(config.enableRelay2, enableRelay2);
 
-        HashMap analogInAssociationMap =
-                CCUHsApi.getInstance().read("point and config and analog1 and input and association and group == \""+nodeAddr+ "\"");
-        Point analogInAssociation = new Point.Builder().setHashMap(analogInAssociationMap).build();
+        HDict analogInAssociationMap =
+                CCUHsApi.getInstance().readHDict("point and config and analog1 and input and association and group == \""+nodeAddr+ "\"");
+        Point analogInAssociation = new Point.Builder().setHDict(analogInAssociationMap).build();
         SingleStageEquipUtil.updateAnalogIn1Config(config.analogInAssociation, analogInAssociation, config.analogIn1);
 
         setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);

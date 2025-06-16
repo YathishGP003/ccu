@@ -22,6 +22,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.tooltip.Tooltip;
 
+import org.projecthaystack.HDict;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -279,8 +281,8 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
 
     @Override
     public void refreshScreen(String id ) {
-        HashMap<Object, Object> pointMap = CCUHsApi.getInstance().readMapById(id);
-        Point point = new Point.Builder().setHashMap(pointMap).build();
+        HDict pointMap = CCUHsApi.getInstance().readHDictById(id);
+        Point point = new Point.Builder().setHDict(pointMap).build();
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(point.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
         double value = readVal(id);
@@ -341,12 +343,12 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                     + configParams.getRegisterAddress() + " and device " + deviceRef);
             return null;
         }
-        HashMap logPoint = CCUHsApi.getInstance().read("point and id == " + phyPoint.get("pointRef"));
+        HDict logPoint = CCUHsApi.getInstance().readHDict("point and id == " + phyPoint.get("pointRef"));
         
         if (logPoint.isEmpty()) {
             return null;
         }
-        return new Point.Builder().setHashMap(logPoint).build();
+        return new Point.Builder().setHDict(logPoint).build();
     }
 
     public double readVal(String id) {

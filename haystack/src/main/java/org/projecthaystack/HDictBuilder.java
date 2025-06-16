@@ -116,8 +116,7 @@ public class HDictBuilder
   {
       HVal val = (HVal)map.get(name);
       if (val != null) return val;
-      if (!checked) return null;
-      throw new UnknownNameException(name);
+      else return null;
   }
 
   public Object remove(String name) {
@@ -128,4 +127,8 @@ public class HDictBuilder
   public HashMap getMap() {
     return map;
   }
+
+    public HDict toHDict(HashMap map) {
+        return new MapImpl<>(map);
+    }
 }

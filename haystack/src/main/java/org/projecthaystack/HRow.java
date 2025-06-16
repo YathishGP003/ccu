@@ -41,7 +41,6 @@ public class HRow extends HDict
       HVal val = cells[col.index];
       if (val != null) return val;
     }
-    if (checked) throw new UnknownNameException(name);
     return null;
   }
 
@@ -51,7 +50,6 @@ public class HRow extends HDict
   {
     HVal val = cells[col.index];
     if (val != null) return val;
-    if (checked) throw new UnknownNameException(col.name());
     return null;
   }
 

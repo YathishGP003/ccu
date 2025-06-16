@@ -57,6 +57,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
 import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.interfaces.ZoneDataInterface
 import a75f.io.logic.util.uiutils.updateUserIntentPoints
+import org.projecthaystack.HDict
 
 /**
  * Created by Manjunath K on 22-10-2024.
@@ -111,9 +112,9 @@ private fun updateDesiredTemp(equip: HyperStatEquip, message: HyperStatLocalCont
     equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
     equip.desiredTemp.writePointValue(avgDesiredTemp)
 
-    val coolingPoint = Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(equip.desiredTempCooling.id)).build()
-    val heatingPoint = Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(equip.desiredTempHeating.id)).build()
-    val desiredPoint = Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(equip.desiredTemp.id)).build()
+    val coolingPoint = Point.Builder().setHDict(CCUHsApi.getInstance().readHDictById(equip.desiredTempCooling.id)).build()
+    val heatingPoint = Point.Builder().setHDict(CCUHsApi.getInstance().readHDictById(equip.desiredTempHeating.id)).build()
+    val desiredPoint = Point.Builder().setHDict(CCUHsApi.getInstance().readHDictById(equip.desiredTemp.id)).build()
     CcuLog.d(L.TAG_CCU_DEVICE, "device overriding CoolingDesiredTemp: $coolingDesiredTemp HeatingDesiredTemp: $heatingDesiredTemp AvgDesiredTemp: $avgDesiredTemp")
     DeviceUtil.updateDesiredTempFromDevice(coolingPoint, heatingPoint, desiredPoint, coolingDesiredTemp, heatingDesiredTemp, avgDesiredTemp, hayStack, WhoFiledConstants.HYPERSTAT_WHO)
 }
@@ -350,7 +351,7 @@ fun updateSensorValue(
             }
         }
         CcuLog.e(L.TAG_CCU_DEVICE, "Dynamic sensor created for $domainName : id : $pointRef")
-        val rowPoint = (RawPoint.Builder().setHashMap(physicalPoint.domainName.readPhysicalPoint(physicalPoint.deviceRef) as HashMap)).setPointRef(pointRef).build()
+        val rowPoint = (RawPoint.Builder().setHDict(physicalPoint.domainName.readPhysicalPoint(physicalPoint.deviceRef) as HDict)).setPointRef(pointRef).build()
         CCUHsApi.getInstance().updatePoint(rowPoint, rowPoint.id)
         CCUHsApi.getInstance().scheduleSync()
     }

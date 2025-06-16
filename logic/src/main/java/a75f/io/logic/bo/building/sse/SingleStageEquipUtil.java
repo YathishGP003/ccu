@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.sse;
 
+import org.projecthaystack.HDict;
+
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -247,16 +249,16 @@ public class SingleStageEquipUtil {
     private static void mapLogicalPointWithConfigPoint(String equipId, InputActuatorType analogInAssociation, int nodeAddr) {
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap<Object, Object> analogInPoint;
+        HDict analogInPoint;
 
         if (analogInAssociation == InputActuatorType.ZERO_TO_50A_CURRENT_TRANSFORMER) {
-            analogInPoint = hayStack.readEntity("point and transformer50 and sensor and " +
+            analogInPoint = hayStack.readHDict("point and transformer50 and sensor and " +
                     "equipRef == \""+equipId+"\"");
         } else if (analogInAssociation == InputActuatorType.ZERO_TO_20A_CURRENT_TRANSFORMER) {
-            analogInPoint = hayStack.readEntity("point and transformer20 and sensor and " +
+            analogInPoint = hayStack.readHDict("point and transformer20 and sensor and " +
                     "equipRef == \""+equipId+"\"");
         } else {
-            analogInPoint = hayStack.readEntity("point and transformer and sensor and " +
+            analogInPoint = hayStack.readHDict("point and transformer and sensor and " +
                     "equipRef == \""+equipId+"\"");
         }
 
@@ -319,10 +321,10 @@ public class SingleStageEquipUtil {
         }
     }
 
-    private static void updateMarker(HashMap<Object, Object> point) {
+    private static void updateMarker(HDict point) {
 
-        if (!point.containsKey("standalone") || !point.containsKey("sse")) {
-            Point point1 = new Point.Builder().setHashMap(point).addMarker("standalone").addMarker("sse").build();
+        if (!point.has("standalone") || !point.has("sse")) {
+            Point point1 = new Point.Builder().setHDict(point).addMarker("standalone").addMarker("sse").build();
             CCUHsApi.getInstance().updatePoint(point1, Objects.requireNonNull(point.get("id")).toString());
         }
 

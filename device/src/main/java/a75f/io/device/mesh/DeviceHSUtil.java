@@ -1,5 +1,7 @@
 package a75f.io.device.mesh;
 
+import org.projecthaystack.HDict;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,35 +17,35 @@ import a75f.io.logic.L;
 public class DeviceHSUtil {
     
     public static Point getLogicalPointForRawPoint(RawPoint rawPoint, CCUHsApi hayStack) {
-        HashMap<Object, Object> logPoint = hayStack.readMapById(rawPoint.getPointRef());
+        HDict logPoint = hayStack.readHDictById(rawPoint.getPointRef());
         if (logPoint.isEmpty()) {
             CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for " + rawPoint.getDisplayName());
             return null;
         }
         return new Point.Builder()
-                   .setHashMap(logPoint)
+                   .setHDict(logPoint)
                    .build();
     }
     
     public static List<RawPoint> getEnabledSensorPointsWithRefForDevice(HashMap device, CCUHsApi hayStack) {
         
-        ArrayList<HashMap> rawPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" +
+        List<HDict> rawPoints = hayStack.readAllHDictByQuery("point and physical and sensor and deviceRef == \"" +
                                                         device.get("id") + "\"");
         return rawPoints.stream()
                         .filter( p -> p.get("pointRef") != null)
-                        .map( p -> new RawPoint.Builder().setHashMap(p).build())
+                        .map( p -> new RawPoint.Builder().setHDict(p).build())
                         .collect(Collectors.toList());
         
     }
     
     public static List<RawPoint> getEnabledCmdPointsWithRefForDevice(HashMap device, CCUHsApi hayStack) {
-        ArrayList<HashMap> rawPoints = hayStack.readAll("point and physical and cmd and deviceRef == \"" +
+        List<HDict> rawPoints = hayStack.readAllHDictByQuery("point and physical and cmd and deviceRef == \"" +
                                                         device.get("id") + "\"");
         
         return rawPoints.stream()
-                        .filter( p -> p.get("pointRef") != null || p.containsKey(Tags.WRITABLE))
+                        .filter( p -> p.get("pointRef") != null || p.has(Tags.WRITABLE))
                         .filter(p -> p.get("portEnabled").toString().equals("true"))
-                        .map(p -> new RawPoint.Builder().setHashMap(p).build())
+                        .map(p -> new RawPoint.Builder().setHDict(p).build())
                         .collect(Collectors.toList());
         
     }

@@ -269,11 +269,11 @@ public class CCUUtils
 
     public static void updateZoneOccupancyPointWithUpdatedCcuRef(CCUHsApi ccuHsApi, boolean isCcuReregistration) {
         CcuLog.d(TAG_CCU_REF,"Executing updateZoneOccupancyPointWithUpdatedCcuRef");
-        ArrayList<HashMap<Object, Object>> zoneOccupancyPointList = ccuHsApi.readAllEntities("zone and occupancy and " +
+        List<HDict> zoneOccupancyPointList = ccuHsApi.readAllHDictByQuery("zone and occupancy and " +
                 "state");
 
-        for(HashMap<Object, Object> zoneOccupancyPoint : zoneOccupancyPointList){
-            Point point = new Point.Builder().setHashMap(zoneOccupancyPoint).build();
+        for(HDict zoneOccupancyPoint : zoneOccupancyPointList){
+            Point point = new Point.Builder().setHDict(zoneOccupancyPoint).build();
             if(point != null && (isCcuReregistration || point.getCcuRef() == null)) {
                 ccuHsApi.updatePoint(point, point.getId());
             }
@@ -308,10 +308,10 @@ public class CCUUtils
             if(device != null && (isCcuReregistration || device.getCcuRef() == null)) {
                 ccuHsApi.updateDevice(device, device.getId());
             }
-            ArrayList<HashMap<Object, Object>> devicePoints =
-                    ccuHsApi.readAllEntities("point and deviceRef == \"" + device.getId()+"\"");
-            for(HashMap<Object, Object> devicePoint : devicePoints){
-                RawPoint point = new RawPoint.Builder().setHashMap(devicePoint).build();
+            List<HDict> devicePoints =
+                    ccuHsApi.readAllHDictByQuery("point and deviceRef == \"" + device.getId()+"\"");
+            for(HDict devicePoint : devicePoints){
+                RawPoint point = new RawPoint.Builder().setHDict(devicePoint).build();
                 if(point != null && (isCcuReregistration || point.getCcuRef() == null)) {
                     ccuHsApi.updatePoint(point, point.getId());
                 }
@@ -382,9 +382,9 @@ public class CCUUtils
 
     private static void updateZoneSchedulablePointsWithUpdatedCcuRef(CCUHsApi ccuHsApi, boolean isCcuReregistration, String ccuId) {
         CcuLog.d(TAG_CCU_REF,"Executing updateZoneSchedulablePointsWithUpdatedCcuRef");
-        ArrayList<HashMap<Object, Object>> zoneSchedulePointList = CCUHsApi.getInstance().readAllEntities("point and zone and (schedulable or hvacMode) and not tuner and ccuRef and ccuRef!=\""+ccuId+"\"");
-        for(HashMap<Object, Object> zoneSchedulePoint: zoneSchedulePointList) {
-            Point point = new Point.Builder().setHashMap(zoneSchedulePoint).build();
+        List<HDict> zoneSchedulePointList = CCUHsApi.getInstance().readAllHDictByQuery("point and zone and (schedulable or hvacMode) and not tuner and ccuRef and ccuRef!=\""+ccuId+"\"");
+        for(HDict zoneSchedulePoint: zoneSchedulePointList) {
+            Point point = new Point.Builder().setHDict(zoneSchedulePoint).build();
             if(point != null && (isCcuReregistration || point.getCcuRef() == null)) {
                 ccuHsApi.updatePoint(point, point.getId());
             }

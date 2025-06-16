@@ -76,7 +76,6 @@ public abstract class HServer extends HProj
     // lookup
     HOp op = (HOp)opsByName.get(name);
     if (op != null) return op;
-    if (checked) throw new UnknownNameException(name);
     return null;
   }
 

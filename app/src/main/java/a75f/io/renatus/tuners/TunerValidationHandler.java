@@ -29,7 +29,7 @@ public class TunerValidationHandler {
             if (id != null && val != null && level != null) {
                 if (Integer.parseInt(level.toString()) == 16) {
                     Point updatedPoint = new Point.Builder()
-                            .setHashMap(hayStack.readMapById(id.toString())).build();
+                            .setHDict(hayStack.readHDictById(id.toString())).build();
                     List<String> markers = updatedPoint.getMarkers();
                     double pointVal = Double.parseDouble(val.toString());
                     if (markers.contains("deadband") && markers.contains("base") && markers.contains("cooling")

@@ -12,6 +12,7 @@ import a75f.io.api.haystack.bacnet.parser.PresentationData
 import a75f.io.api.haystack.bacnet.parser.ProtocolData
 import a75f.io.api.haystack.bacnet.parser.ValueConstraint
 import a75f.io.logger.CcuLog
+import org.projecthaystack.HDict
 import org.projecthaystack.HStr
 
 
@@ -80,19 +81,19 @@ private fun buildEquipModel(parentMap: HashMap<Any, Any>, parentEquipRef: String
  * @param equipId
  * return all the register map list for the the equip
  */
-private fun getRegistersMap(equipId: String): ArrayList<HashMap<Any, Any>> {
+private fun getRegistersMap(equipId: String): List<HDict> {
     val hsApi = CCUHsApi.getInstance()
     //val deviceId = hsApi.readId("device and bacnet and equipRef == \"$equipId\"")
     //return hsApi.readAllEntities("physical and point and deviceRef == \"$deviceId\"")
-    return hsApi.readAllEntities("logical and point and equipRef == \"$equipId\" and not heartbeat")
+    return hsApi.readAllHDictByQuery("logical and point and equipRef == \"$equipId\" and not heartbeat")
 }
 
 /**
  * @param rawMap
  * returns register object with all the register details
  */
-private fun getRegister(rawMap: HashMap<Any, Any>): BacnetPoint {
-    val physicalPoint = RawPoint.Builder().setHashMap(rawMap).build()
+private fun getRegister(rawMap: HDict): BacnetPoint {
+    val physicalPoint = RawPoint.Builder().setHDict(rawMap).build()
     var isDisplayInUiEnabled = false
     var isSystem = physicalPoint.markers.contains("system")
     for (marker in physicalPoint.markers) {

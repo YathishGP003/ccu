@@ -2,9 +2,10 @@ package a75f.io.domain.api
 
 import a75f.io.api.haystack.RawPoint
 import a75f.io.logger.CcuLog
+import org.projecthaystack.HDict
+import org.projecthaystack.UnknownNameException
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef
-import org.projecthaystack.UnknownNameException
 import java.util.Objects
 
 /**
@@ -375,7 +376,7 @@ fun String.readPoint(equipRef: String) : Map <Any, Any>{
     return Domain.hayStack.readEntity("point and domainName == \"$this\" and equipRef == \"$equipRef\"")
 }
 
-fun String.readPhysicalPoint(deviceRef: String) : Map <Any, Any>{
-    return Domain.hayStack.readEntity("point and domainName == \"$this\" and deviceRef == \"$deviceRef\"")
+fun String.readPhysicalPoint(deviceRef: String) : HDict{
+    return Domain.hayStack.readHDict("point and domainName == \"$this\" and deviceRef == \"$deviceRef\"")
 }
 

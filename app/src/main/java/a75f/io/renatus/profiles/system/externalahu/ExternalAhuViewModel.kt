@@ -121,6 +121,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     var modelName = mutableStateOf("Select Model")
 
     var configType = mutableStateOf(ConfigType.BACNET)
+    var configTypeRadioOption = mutableStateOf(ConfigType.BACNET)
     lateinit var deviceModelList: List<ModelMetaData>
     lateinit var profileModelDefinition: SeventyFiveFProfileDirective
     private var selectedSlaveId by Delegates.notNull<Short>()
@@ -244,9 +245,38 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-    fun isBacNetEnabled() {
+    fun isBacNetEnabled(source : String) {
         val defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
         isBacntEnabled.value = defaultSharedPrefs.getBoolean("isBACnetinitialized", false)
+        CcuLog.d(TAG_BACNET, "-source--$source-isBacntEnabled--${isBacntEnabled.value} --isModbusSystemProfileEnabled()--${isModbusSystemProfileEnabled().size} --iBacnetSystemProfileEnabled()--${iBacnetSystemProfileEnabled().size}")
+        if(isBacntEnabled.value){
+            // bacnet is enabled
+            if(PreferenceUtil.getSelectedProfileWithAhu() != "") {
+                if(PreferenceUtil.getSelectedProfileWithAhu() == "bacnet" && iBacnetSystemProfileEnabled().size > 0){
+                    configTypeRadioOption.value = ConfigType.BACNET
+                    configType.value = ConfigType.BACNET
+                }else if(PreferenceUtil.getSelectedProfileWithAhu() == "modbus" && isModbusSystemProfileEnabled().size > 0){
+                    configTypeRadioOption.value = ConfigType.MODBUS
+                    configType.value = ConfigType.MODBUS
+                }
+            }else{
+                configTypeRadioOption.value = ConfigType.BACNET
+            }
+        }else{
+            // bacnet is disabled
+            if(PreferenceUtil.getSelectedProfileWithAhu() != "") {
+                if(PreferenceUtil.getSelectedProfileWithAhu() == "bacnet" && iBacnetSystemProfileEnabled().size > 0){
+                    configTypeRadioOption.value = ConfigType.BACNET
+                    configType.value = ConfigType.BACNET
+                }else if(PreferenceUtil.getSelectedProfileWithAhu() == "modbus" && isModbusSystemProfileEnabled().size > 0){
+                    configTypeRadioOption.value = ConfigType.MODBUS
+                    configType.value = ConfigType.MODBUS
+                }
+            }else{
+                configTypeRadioOption.value = ConfigType.MODBUS
+                configType.value = ConfigType.MODBUS
+            }
+        }
     }
 
     private fun isBacnetSystemProfileEnabled(): HashMap<Any, Any> {
@@ -254,9 +284,14 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             .readEntity("system and equip and bacnet and external")
     }
 
-    private fun isModbusSystemProfileEnabled(): Boolean {
+    private fun isModbusSystemProfileEnabled(): HashMap<Any, Any> {
         return CCUHsApi.getInstance()
-            .readEntity("system and equip and modbus and not emr and not btu") != null
+            .readEntity("system and equip and modbus and not emr and not btu and not bacnet")
+    }
+
+    private fun iBacnetSystemProfileEnabled(): HashMap<Any, Any> {
+        return CCUHsApi.getInstance()
+            .readEntity("system and equip and bacnet and external and not emr and not btu and not modbus")
     }
 
 
@@ -274,6 +309,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
 
         if (modbusEquip != null && modbusEquip.isNotEmpty()) {
             configType.value = ConfigType.MODBUS
+            configTypeRadioOption.value = ConfigType.MODBUS
             modbusProfile = ModbusProfile()
             val address: Short = modbusEquip["group"].toString().toShort()
             modbusProfile.addMbEquip(address, profileType)
@@ -312,6 +348,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         if (PreferenceUtil.getIsNewExternalAhu()) bacnetSystemEquip.clear()
         if(bacnetSystemEquip != null && bacnetSystemEquip.isNotEmpty()){
             configType.value = ConfigType.BACNET
+            configTypeRadioOption.value = ConfigType.BACNET
             configModelDefinitionBacnet(context, bacnetSystemEquip)
         }
 
@@ -1541,8 +1578,10 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     fun getExternalProfileSelected(){
         if(PreferenceUtil.getSelectedProfileWithAhu() == "bacnet"){
             configType.value = ConfigType.BACNET
+            configTypeRadioOption.value = ConfigType.BACNET
         }else if(PreferenceUtil.getSelectedProfileWithAhu() == "modbus"){
             configType.value = ConfigType.MODBUS
+            configTypeRadioOption.value = ConfigType.MODBUS
         }
     }
 

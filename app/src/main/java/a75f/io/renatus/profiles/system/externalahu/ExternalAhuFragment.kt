@@ -579,13 +579,14 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                 disabledOptions = listOf()
                             }
                             RadioButtonCompose(
-                                radioOptions, viewModel.configType.value.ordinal,
+                                radioOptions, viewModel.configTypeRadioOption.value.ordinal,
                                 disabledOptions = disabledOptions
                             ) {
                                 when (it) {
                                     BACNET -> {
                                         viewModel.configType.value =
                                             ExternalAhuViewModel.ConfigType.BACNET
+                                        viewModel.configTypeRadioOption.value = ExternalAhuViewModel.ConfigType.BACNET
                                         setStateChanged()
                                         resetModelName()
                                     }
@@ -593,6 +594,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                     MODBUS -> {
                                         viewModel.configType.value =
                                             ExternalAhuViewModel.ConfigType.MODBUS
+                                        viewModel.configTypeRadioOption.value = ExternalAhuViewModel.ConfigType.MODBUS
                                         setStateChanged()
                                         resetModelName()
                                     }
@@ -601,7 +603,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                         }
                     }
                     item {
-                        if (viewModel.configType.value == ExternalAhuViewModel.ConfigType.MODBUS) {
+                        if (viewModel.configTypeRadioOption.value == ExternalAhuViewModel.ConfigType.MODBUS) {
                             ModbusConfig()
                         } else {
                             BacnetConfig()
@@ -625,9 +627,6 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
         CcuLog.d("TAG", "device ip--->${viewModel.deviceIp}")
         viewModel.devicePort = getDataFromSf(requireContext(), BacnetConfigConstants.PORT)
         isBacNetInitialized = isBacNetInitialized(requireContext())
-        if (!isBacNetInitialized) {
-            //Toast.makeText(requireContext(), "CCU BacNet Server is not initialized", Toast.LENGTH_SHORT).show()
-        }
     }
 
     private fun getDataFromSf(context: Context, key: String) :String {
@@ -662,6 +661,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             requireContext(), profileType
         )
         if (PreferenceUtil.getIsNewExternalAhu()) resetScreen()
+
+        viewModel.isBacNetEnabled("init")
     }
 
     private fun isNewProfile() {
@@ -822,7 +823,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                 }else if(viewModel.deviceId.value.isNullOrEmpty()){
                     Toast.makeText(requireContext(), "Please input deviceId number", Toast.LENGTH_SHORT).show()
                 }else{
-                    if(isBacNetInitialized){
+                    if(viewModel.isBacntEnabled.value){
                         viewModel.fetchData()
                     }else{
                         Toast.makeText(requireContext(), "BacNet is not initialized", Toast.LENGTH_SHORT).show()
@@ -1875,7 +1876,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
     }
 
     fun onOpenFragment(){
-        viewModel.isBacNetEnabled()
+        viewModel.isBacNetEnabled("dynamic")
         CcuLog.d(TAG_BACNET, "--externalAhuFragment--onOpenFragment --isBacnetEnabled-->${viewModel.isBacntEnabled}")
     }
 

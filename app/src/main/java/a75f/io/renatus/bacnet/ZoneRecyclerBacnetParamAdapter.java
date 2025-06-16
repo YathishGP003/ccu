@@ -110,7 +110,7 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
 
         CcuLog.d(TAG,"onBindViewHolder -->"+title);
         viewHolder.tvParamLabel.setText(title);
-        viewHolder.tvParamValue.setText(bacnetZoneViewItem.getValue());
+
         if(bacnetZoneViewItem.isWritable()) {
             viewHolder.spValue.setVisibility(View.VISIBLE);
             viewHolder.tvParamValue.setVisibility(View.GONE);
@@ -127,9 +127,18 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
             CcuLog.d(TAG, "onBindViewHolder:: " + bacnetZoneViewItem.getSpinnerValues() + " searching for-> " + String.valueOf(Double.parseDouble(bacnetZoneViewItem.getValue())) + "<--found at index-->" + itemIndex);
             viewHolder.spValue.setSelection(itemIndex);
         } else {
+
+            String enumValues = (String) CCUHsApi.getInstance().readMapById(bacnetZoneViewItem.getBacnetObj().getId()).get("enum");
+            if(enumValues != null){
+                CcuLog.d(TAG,"onBindViewHolder bacnetZoneViewItem-->"+bacnetZoneViewItem.getBacnetObj().getId()+"--"+enumValues);
+                String key = searchKeyForValue(enumValues, String.valueOf((int)Double.parseDouble(bacnetZoneViewItem.getValue())));
+                viewHolder.tvParamValue.setText(key);
+            }else{
+                viewHolder.tvParamValue.setText(bacnetZoneViewItem.getValue());
+            }
+
             viewHolder.tvParamValue.setVisibility(View.VISIBLE);
             viewHolder.spValue.setVisibility(View.GONE);
-            //viewHolder.spinnerLayout.setVisibility(View.INVISIBLE);
         }
 
         AtomicBoolean isUserInteraction = new AtomicBoolean(false);
@@ -310,5 +319,34 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
             }
         }
         return index;
+    }
+
+    private String searchKeyForValue(String enumString,
+                                                   String inputValue) {
+        CcuLog.d(TAG_BACNET, "---------searchRealValueForOperatingMode------one----" + enumString
+                + "<--inputValue-->" + inputValue);
+        try {
+            Map<String, String> reverseMapOne = getStringReverseMap(enumString);
+            return reverseMapOne.get(inputValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return inputValue;
+    }
+
+    @NonNull
+    private static Map<String, String> getStringReverseMap(String enumString) {
+        Map<String, String> mapOne = new HashMap<>();
+        for (String part : enumString.split(",")) {
+            String[] keyValue = part.split("=");
+            if (keyValue.length == 2) {
+                mapOne.put(keyValue[0], keyValue[1]);
+            }
+        }
+        Map<String, String> reverseMapOne = new HashMap<>();
+        for (Map.Entry<String, String> entry : mapOne.entrySet()) {
+            reverseMapOne.put(entry.getValue(), entry.getKey());
+        }
+        return reverseMapOne;
     }
 }

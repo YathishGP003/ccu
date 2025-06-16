@@ -1023,7 +1023,7 @@ fun getSetPoint(domainName: String): String {
 
 fun getOperatingMode(equipName: String): String {
     val systemEquip = Domain.getSystemEquipByDomainName(equipName)
-    val mode = getDefaultValueByDomain(systemEquip!!, operatingMode).toInt()
+    val mode = getHisValueByDomain(systemEquip!!, operatingMode).toInt()
     return when (SystemController.State.values()[mode]) {
         SystemController.State.COOLING -> " Cooling"
         SystemController.State.HEATING -> " Heating"
@@ -1046,6 +1046,12 @@ fun getConfigByDomainName(equip: Equip, domainName: String): Boolean {
 fun getDefaultValueByDomain(equip: Equip, domainName: String): Double {
     val config = getPointByDomain(equip, domainName)
     config?.let { return config.readDefaultVal() }
+    return 0.0
+}
+
+fun getHisValueByDomain(equip: Equip, domainName: String): Double {
+    val config = getPointByDomain(equip, domainName)
+    config?.let { return config.readHisVal() }
     return 0.0
 }
 

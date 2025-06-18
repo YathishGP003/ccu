@@ -11,6 +11,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.bo.building.modbus.ModbusEquip;
 
 public class ModbusHandler {
 
@@ -36,14 +37,14 @@ public class ModbusHandler {
         //If duration shows it has already expired, then just write 1ms to force-expire it locally.
         duration = (durationRemote == 0 ? 0 : (durationRemote - System.currentTimeMillis()) > 0 ? (durationRemote - System.currentTimeMillis()) : 1);
 
-        if(msgObject.get("val").getAsDouble()!=msgObject.get("val").getAsInt()) {
-            CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(configPoint.getId()), msgObject.get("level").getAsInt(),
-                    CCUHsApi.getInstance().getCCUUserName(), HNum.make(msgObject.get("val").getAsDouble()),
-                    HNum.make(duration), lastModifiedDateTime );
-        } else {
+        if (ModbusEquip.isInt(msgObject.get("val").toString())) {
             CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(configPoint.getId()), msgObject.get("level").getAsInt(),
                     CCUHsApi.getInstance().getCCUUserName(), HNum.make(msgObject.get("val").getAsInt()),
-                    HNum.make(duration), lastModifiedDateTime );
+                    HNum.make(duration), lastModifiedDateTime);
+        } else {
+            CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(configPoint.getId()), msgObject.get("level").getAsInt(),
+                    CCUHsApi.getInstance().getCCUUserName(), HNum.make(msgObject.get("val").getAsDouble()),
+                    HNum.make(duration), lastModifiedDateTime);
         }
     }
 }

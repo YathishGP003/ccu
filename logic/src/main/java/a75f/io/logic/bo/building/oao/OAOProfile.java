@@ -616,14 +616,18 @@ public class OAOProfile
         double dcvCalculatedMinDamper = 0;
         boolean usePerRoomCO2Sensing = oaoEquip.getUsePerRoomCO2Sensing().readDefaultVal() > 0;
         boolean isCo2levelUnderThreshold = true;
+        double co2WeightedAvgCo2 = systemProfile.getWeightedAverageCO2();
+        double co2Threshold = oaoEquip.getCo2Threshold().readDefaultVal();
+        oaoEquip.getCo2WeightedAverage().writeHisVal(co2WeightedAvgCo2);
         if (usePerRoomCO2Sensing)
         {
             dcvCalculatedMinDamper = systemProfile.getCo2LoopOp();
             CcuLog.d(L.TAG_CCU_OAO,"usePerRoomCO2Sensing dcvCalculatedMinDamper "+dcvCalculatedMinDamper);
-            
+            if (co2WeightedAvgCo2 > co2Threshold) {
+                isCo2levelUnderThreshold = false;
+            }
         } else {
             double returnAirCO2  = oaoEquip.getReturnAirCo2().readHisVal();
-            double co2Threshold = oaoEquip.getCo2Threshold().readDefaultVal();
             double co2DamperOpeningRate = oaoEquip.getCo2DamperOpeningRate().readPriorityVal();
             
             if (returnAirCO2 > co2Threshold) {
@@ -632,7 +636,6 @@ public class OAOProfile
             }
             CcuLog.d(L.TAG_CCU_OAO," dcvCalculatedMinDamper "+dcvCalculatedMinDamper+" returnAirCO2 "+returnAirCO2+" co2Threshold "+co2Threshold);
         }
-        oaoEquip.getCo2WeightedAverage().writeHisVal(systemProfile.getWeightedAverageCO2());
         Occupancy systemOccupancy = ScheduleManager.getInstance().getSystemOccupancy();
         switch (systemOccupancy) {
             case OCCUPIED:

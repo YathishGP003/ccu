@@ -72,7 +72,7 @@ public class CCUUtils
     public static Date getLastReceivedTimeForModBusAndBacnet(String slaveId){
         CCUHsApi hayStack = CCUHsApi.getInstance();
         // Check if the slaveId is a valid Modbus slave ID (1-256) or Bacnet device ID (500-999)
-        if (!slaveId.isEmpty() && Integer.getInteger(slaveId) != null && Integer.parseInt(slaveId) <= 256) {
+        if (!slaveId.isEmpty() && Integer.parseInt(slaveId) <= 256) {
             List<HashMap<Object, Object>> equipList =
                     hayStack.readAllEntities("equip and modbus and group == \"" + slaveId + "\"");
             if (equipList.size() == 0) {
@@ -88,7 +88,7 @@ public class CCUUtils
                     }
                 }
             }
-        } else if (!slaveId.isEmpty() && Integer.getInteger(slaveId) != null && Integer.parseInt(slaveId) >= 500 && Integer.parseInt(slaveId) <= 999) {
+        } else if (!slaveId.isEmpty() && Integer.parseInt(slaveId) >= 500 && Integer.parseInt(slaveId) <= 999) {
             HashMap<Object, Object> equip = hayStack.readEntity("equip and bacnet and group == \"" + slaveId + "\"");
             if (equip.isEmpty()) {
                 return null;

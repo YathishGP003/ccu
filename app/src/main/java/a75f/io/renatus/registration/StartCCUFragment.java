@@ -1,5 +1,7 @@
 package a75f.io.renatus.registration;
 
+import static a75f.io.renatus.util.CCUUiUtil.getCurrentCCUVersion;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
@@ -7,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import a75f.io.renatus.R;
 
@@ -51,6 +54,7 @@ public class StartCCUFragment extends Fragment {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -58,6 +62,8 @@ public class StartCCUFragment extends Fragment {
         //((FreshRegistration)getActivity()).showIcons(false);
         View view = inflater.inflate(R.layout.fragment_startccu, container, false);
         RelativeLayout view_ccunext = view.findViewById(R.id.startCCU);
+        TextView ccuVersion = view.findViewById(R.id.textVersion);
+        ccuVersion.setText("Ver "+getCurrentCCUVersion());
         view_ccunext.setOnClickListener(v -> {
             // TODO Auto-generated method stub
             ((FreshRegistration)getActivity()).selectItem(1);

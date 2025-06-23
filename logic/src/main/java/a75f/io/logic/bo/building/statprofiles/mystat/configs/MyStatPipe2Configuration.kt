@@ -164,13 +164,12 @@ class MyStatPipe2Configuration(nodeAddress: Int, nodeType: String, priority: Int
         return MyStatPipe2RelayMapping.values()[lowestSelected]
     }
 
-    fun getHighestFanSelected(): MyStatPipe2RelayMapping? {
-        val highestSelected = getHighestStage(MyStatPipe2RelayMapping.FAN_LOW_SPEED.ordinal,  MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal)
-        if (highestSelected == -1) {
-            return null
-        }
+    private fun getHighestFanSelected(): MyStatPipe2RelayMapping {
+        val highestSelected = getHighestStage(MyStatPipe2RelayMapping.FAN_LOW_SPEED.ordinal, MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal)
         return MyStatPipe2RelayMapping.values()[highestSelected]
     }
+
+    fun getHighestFanStageCount() = getHighestFanSelected().ordinal + 1
 }
 
 

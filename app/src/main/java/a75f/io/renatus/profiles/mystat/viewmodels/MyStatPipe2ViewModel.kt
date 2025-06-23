@@ -14,7 +14,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
-import a75f.io.logic.bo.building.statprofiles.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe2Profile
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe2FanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode

@@ -15,7 +15,7 @@ import a75f.io.logic.bo.building.ZonePriority
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuRelayMapping
-import a75f.io.logic.bo.building.statprofiles.mystat.profiles.packageunit.hpu.MyStatHpuProfile
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatHpuProfile
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatHpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode

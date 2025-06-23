@@ -11,8 +11,6 @@ const val HSSPLIT_FULL: String = "HyperStat Split"
 const val CPUECON_FULL: String = "CPU & Economiser"
 
 const val TRUE = "true"
-const val FALSE = "false"
-//const val OFF = "off"
 const val ON = "on"
 const val COOLING = "cooling"
 const val HEATING = "heating"
@@ -28,6 +26,4 @@ const val OAO_DAMPER = "oaoDamper"
 
 const val HYPERSTAT: String = "HyperStat"
 const val HSCPU: String = "Conventional Package Unit"
-const val HSPIPE2: String = "pipe2"
-const val HSPIPE4: String ="pipe4"
-const val HSHPU: String = "hpu"
+

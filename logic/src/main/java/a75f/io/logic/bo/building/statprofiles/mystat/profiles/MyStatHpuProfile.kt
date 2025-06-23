@@ -1,12 +1,11 @@
-package a75f.io.logic.bo.building.statprofiles.mystat.profiles.packageunit.hpu
+package a75f.io.logic.bo.building.statprofiles.mystat.profiles
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
-import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.Point
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
-import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
@@ -14,17 +13,19 @@ import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage
+import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.schedules.Occupancy
-import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatFanConfig
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuAnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuRelayMapping
-import a75f.io.logic.bo.building.statprofiles.mystat.profiles.packageunit.MyStatPackageUnitProfile
+import a75f.io.logic.bo.building.statprofiles.statcontrollers.MyStatControlFactory
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.MyStatBasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
 import a75f.io.logic.bo.building.statprofiles.util.MyStatTuners
@@ -37,16 +38,21 @@ import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatHpuAnalogOutputPoints
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatHpuRelayOutputPoints
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatLogicalPointList
+import a75f.io.logic.bo.building.statprofiles.util.isMyStatHighUserIntentFanMode
+import a75f.io.logic.bo.building.statprofiles.util.isMyStatLowUserIntentFanMode
+import a75f.io.logic.bo.building.statprofiles.util.logMsResults
 import a75f.io.logic.bo.building.statprofiles.util.updateLogicalPoint
 import a75f.io.logic.bo.building.statprofiles.util.updateLoopOutputs
 import a75f.io.logic.bo.building.statprofiles.util.updateOperatingMode
+import a75f.io.logic.controlcomponents.controls.Controller
+import a75f.io.logic.controlcomponents.util.ControllerNames
 import a75f.io.logic.util.uiutils.MyStatUserIntentHandler
 
 /**
  * Created by Manjunath K on 16-01-2025.
  */
 
-class MyStatHpuProfile : MyStatPackageUnitProfile() {
+class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
 
     private val hpuDeviceMap: MutableMap<Int, MyStatHpuEquip> = mutableMapOf()
 
@@ -61,7 +67,7 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
     override fun updateZonePoints() {
         hpuDeviceMap.forEach { (nodeAddress, equip) ->
             hpuDeviceMap[nodeAddress] = Domain.getDomainEquip(equip.equipRef) as MyStatHpuEquip
-            CcuLog.d(L.TAG_CCU_MSHPU, "Process HPU: equipRef =  ${equip.nodeAddress}")
+            logIt( "Process HPU: equipRef =  ${equip.nodeAddress}")
             processHpuProfile(equip)
         }
     }
@@ -69,7 +75,7 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
     fun processHpuProfile(equip: MyStatHpuEquip) {
 
         if (Globals.getInstance().isTestMode) {
-            CcuLog.d(L.TAG_CCU_MSHPU, "Test mode is on: ${equip.equipRef}")
+            logIt( "Test mode is on: ${equip.equipRef}")
             return
         }
         if (mInterface != null) mInterface.refreshView()
@@ -82,13 +88,9 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
             return
         }
 
-        val relayOutputStatus = HashMap<String, Int>()
-        val analogOutputStatus = HashMap<String, Int>()
-
         val config = getMyStatConfiguration(equip.equipRef) as MyStatHpuConfiguration
 
         logicalPointsList = getMyStatLogicalPointList(equip, config)
-
         relayLogicalPoints = getMyStatHpuRelayOutputPoints(equip)
         analogLogicalPoints = getMyStatHpuAnalogOutputPoints(equip)
 
@@ -101,36 +103,30 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
         val fanModeSaved = FanModeCacheStorage.getMyStatFanModeCache().getFanModeFromCache(equip.equipRef)
         val basicSettings = fetchMyStatBasicSettings(equip)
 
-        CcuLog.d(
-            L.TAG_CCU_MSHPU,
+        logIt(
             "Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}"
         )
         val updatedFanMode = fallBackFanMode(equip, equip.equipRef, fanModeSaved, basicSettings)
         basicSettings.fanMode = updatedFanMode
-        CcuLog.d(
-            L.TAG_CCU_MSHPU,
+        logIt(
             "After fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}"
         )
 
+
+
         myStatLoopController.initialise(tuners = myStatTuners)
         myStatLoopController.dumpLogs()
-        handleChangeOfDirection(userIntents, myStatLoopController)
+        handleChangeOfDirection(currentTemp, userIntents)
+        updateOperatingMode(currentTemp, averageDesiredTemp, basicSettings.conditioningMode, equip.operatingMode)
 
-        coolingLoopOutput = 0
-        heatingLoopOutput = 0
-        fanLoopOutput = 0
-        compressorLoopOutput = 0
-        dcvLoopOutput = 0
-
-        val currentOperatingMode = equip.occupancyMode.readHisVal().toInt()
-        evaluateLoopOutputs(userIntents, myStatLoopController)
-        deriveFanLoopOutput(basicSettings, myStatTuners)
-        calculateDcvLoop(equip, config.co2Threshold.currentVal, config.co2DamperOpeningRate.currentVal)
+        resetEquip(equip)
+        evaluateLoopOutputs(userIntents, basicSettings, myStatTuners, config, equip)
         updateOccupancyDetection(equip)
 
-        doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip, analogOutputStatus, relayOutputStatus)
+
+        doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip)
         runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(userIntents)
-        if (occupancyStatus == Occupancy.WINDOW_OPEN) resetLoops()
+        if (occupancyStatus == Occupancy.WINDOW_OPEN) resetLoopOutputs()
         runForKeyCardSensor(config, equip)
 
         updateLoopOutputs(
@@ -140,16 +136,25 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
             dcvLoopOutput, equip.dcvLoopOutput,
             true, compressorLoopOutput, equip.compressorLoopOutput
         )
+        if (basicSettings.fanMode != MyStatFanStages.OFF) {
+            operateRelays(config,  basicSettings, equip)
+            operateAnalogOutputs(config, equip, basicSettings, equip.analogOutStages, relayLogicalPoints)
+            if (basicSettings.fanMode == MyStatFanStages.AUTO) {
+                runFanOperationBasedOnAuxStages(equip.relayStages, equip.analogOutStages, config, relayLogicalPoints, analogLogicalPoints)
+            }
+        } else {
+            resetLogicalPoints()
+        }
 
-        CcuLog.i(
-            L.TAG_CCU_MSHPU,
+        equip.equipStatus.writeHisVal(curState.ordinal.toDouble())
+        logIt(
             "Fan speed multiplier:  ${myStatTuners.analogFanSpeedMultiplier} " +
                     "AuxHeating1Activate: ${myStatTuners.auxHeating1Activate} " +
                     "waterValveSamplingOnTime: ${myStatTuners.waterValveSamplingOnTime}" +
                     "  waterValveSamplingWaitTime : ${myStatTuners.waterValveSamplingWaitTime} \n" +
                     "waterValveSamplingDuringLoopDeadbandOnTime: ${myStatTuners.waterValveSamplingDuringLoopDeadbandOnTime} " +
                     " waterValveSamplingDuringLoopDeadbandWaitTime : ${myStatTuners.waterValveSamplingDuringLoopDeadbandWaitTime} \n"
-                    + "Current Occupancy: ${Occupancy.values()[currentOperatingMode]} \n" + "Fan Mode : ${basicSettings.fanMode} " +
+                    + "Current Occupancy: ${Occupancy.values()[equip.occupancyMode.readHisVal().toInt()]} \n" + "Fan Mode : ${basicSettings.fanMode} " +
                     "Conditioning Mode ${basicSettings.conditioningMode} \n"
                     + "Current Temp : $currentTemp Desired (Heating: ${userIntents.heatingDesiredTemp}"
                     + " Cooling: ${userIntents.coolingDesiredTemp})\n"
@@ -157,249 +162,186 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
                     " $coolingLoopOutput Fan Loop: $fanLoopOutput  Compressor Loop : $compressorLoopOutput dcvLoopOutput : $dcvLoopOutput)" +
                     " \n"
         )
-
-        if (basicSettings.fanMode != MyStatFanStages.OFF) {
-            operateRelays(
-                config, myStatTuners, userIntents, basicSettings,
-                relayOutputStatus, analogOutputStatus, relayLogicalPoints, equip
-            )
-            operateAnalogOutputs(config, equip, basicSettings, analogOutputStatus, relayLogicalPoints)
-            if (basicSettings.fanMode == MyStatFanStages.AUTO) {
-                runFanOperationBasedOnAuxStages(
-                    relayOutputStatus, analogOutputStatus, config,
-                    relayLogicalPoints, analogLogicalPoints
-                )
-            }
-        } else {
-            resetLogicalPoints()
-        }
-
-        updateOperatingMode(currentTemp, averageDesiredTemp, basicSettings.conditioningMode, equip.operatingMode)
-        equip.equipStatus.writeHisVal(curState.ordinal.toDouble())
-        showOutputStatus()
+        logMsResults(config, L.TAG_CCU_MSHPU, logicalPointsList)
         var temperatureState = ZoneTempState.NONE
         if (buildingLimitMinBreached() || buildingLimitMaxBreached()) temperatureState = ZoneTempState.EMERGENCY
         MyStatUserIntentHandler.updateMyStatStatus(
-            equip.equipRef,
-            relayOutputStatus,
-            analogOutputStatus,
             temperatureState,
-            equip
+            equip, L.TAG_CCU_MSHPU
         )
         if (occupancyStatus != Occupancy.WINDOW_OPEN) occupancyBeforeDoorWindow = occupancyStatus
-        CcuLog.i(L.TAG_CCU_MSHPU, "----------------------------------------------------------")
+        logIt(  "----------------------------------------------------------")
+    }
 
+    private fun evaluateLoopOutputs(
+        userIntents: UserIntents,
+        basicSettings: MyStatBasicSettings,
+        hyperStatTuners: MyStatTuners,
+        config: MyStatConfiguration,
+        equip: MyStatEquip
+    ) {
+        resetLoopOutputs()
+
+        when (state) {
+            ZoneState.COOLING -> evaluateCoolingLoop(userIntents)
+            ZoneState.HEATING -> evaluateHeatingLoop(userIntents)
+            else -> logIt("Zone is in deadband")
+        }
+        evaluateFanOutput(basicSettings, hyperStatTuners)
+        evaluateDcvLoop(equip, config)
     }
 
     private fun operateRelays(
-        config: MyStatHpuConfiguration, tuner: MyStatTuners,
-        userIntents: UserIntents, basicSettings: MyStatBasicSettings,
-        relayStages: HashMap<String, Int>, analogOutStages: HashMap<String, Int>, relayOutputPoints: HashMap<Int, String>,
-        equip: MyStatHpuEquip
+        config: MyStatHpuConfiguration, basicSettings: MyStatBasicSettings, equip: MyStatHpuEquip
     ) {
-        config.apply {
-            listOf(
-                Triple(relay1Enabled.enabled, relay1Association.associationVal, Port.RELAY_ONE),
-                Triple(relay2Enabled.enabled, relay2Association.associationVal, Port.RELAY_TWO),
-                Triple(relay3Enabled.enabled, relay3Association.associationVal, Port.RELAY_THREE),
-                Triple(relay4Enabled.enabled, relay4Association.associationVal, Port.RELAY_FOUR)
-            ).forEach { (enabled, association, port) ->
-                if (enabled) {
-                    handleRelayState(
-                        association, config, port, tuner, userIntents,
-                        basicSettings, relayStages, analogOutStages, relayOutputPoints, equip
+        val controllerFactory = MyStatControlFactory(equip)
+        controllerFactory.addControllers(config)
+        runControllers(equip, basicSettings, config)
+    }
+
+    private fun runControllers(equip: MyStatHpuEquip, basicSettings: MyStatBasicSettings, config: MyStatHpuConfiguration) {
+        equip.derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
+        equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+        equip.controllers.forEach { (controllerName, value) ->
+            val controller = value as Controller
+            val result = controller.runController()
+            updateRelayStatus(controllerName, result, equip, basicSettings, config)
+        }
+    }
+
+    private fun updateRelayStatus(
+        controllerName: String,
+        result: Any,
+        equip: MyStatHpuEquip,
+        basicSettings: MyStatBasicSettings,
+        config: MyStatHpuConfiguration
+    ) {
+
+        fun updateRelayStage(stageName: String, isActive: Boolean, point: Point) {
+            if (point.pointExists()) {
+                val status = if (isActive) 1.0 else 0.0
+                if (isActive) {
+                    equip.relayStages[stageName] = status.toInt()
+                } else {
+                    equip.relayStages.remove(stageName)
+                }
+                point.writeHisVal(status)
+            }
+        }
+
+        fun updateStatus(point: Point, result: Any, status: String? = null) {
+            point.writeHisVal(if (result as Boolean) 1.0 else 0.0)
+            if (status != null && result) {
+                equip.relayStages[status] = 1
+            } else {
+                equip.relayStages.remove(status)
+            }
+        }
+
+        when (controllerName) {
+            ControllerNames.COMPRESSOR_RELAY_CONTROLLER -> {
+                val compressorStages = result as List<Pair<Int, Boolean>>
+                compressorStages.forEach {
+                    val (stage, isActive) = Pair(
+                        it.first,
+                        if (basicSettings.conditioningMode != StandaloneConditioningMode.OFF) it.second else false
                     )
+                    when (stage) {
+                        0 -> updateRelayStage(
+                            if (coolingLoopOutput > 0) Stage.COOLING_1.displayName else Stage.HEATING_1.displayName,
+                            isActive,
+                            equip.compressorStage1
+                        )
+
+                        1 -> updateRelayStage(
+                            if (coolingLoopOutput > 0) Stage.COOLING_2.displayName else Stage.HEATING_2.displayName,
+                            isActive,
+                            equip.compressorStage2
+                        )
+                    }
                 }
             }
-        }
+            ControllerNames.FAN_SPEED_CONTROLLER -> {
+                runTitle24Rule(config)
 
-    }
+                fun checkUserIntentAction(stage: Int): Boolean {
+                    val mode = equip.fanOpMode
+                    return when (stage) {
+                        0 -> isMyStatHighUserIntentFanMode(mode) || isMyStatLowUserIntentFanMode(mode)
+                        2 -> isMyStatLowUserIntentFanMode(mode)
+                        else -> false
+                    }
+                }
 
+                fun isStageActive(
+                    stage: Int, currentState: Boolean, isLowestStageActive: Boolean
+                ): Boolean {
+                    val mode = equip.fanOpMode.readPriorityVal().toInt()
+                    return if (mode == StandaloneFanStage.AUTO.ordinal) {
+                        (basicSettings.conditioningMode != StandaloneConditioningMode.OFF) &&
+                                (currentState || (fanEnabledStatus && fanLoopOutput > 0 && isLowestStageActive)
+                                || (isLowestStageActive && runFanLowDuringDoorWindow))
+                    } else {
+                        checkUserIntentAction(stage)
+                    }
+                }
 
-    private fun handleRelayState(
-        association: Int,
-        config: MyStatHpuConfiguration,
-        port: Port,
-        tuner: MyStatTuners,
-        userIntents: UserIntents,
-        basicSettings: MyStatBasicSettings,
-        relayStages: HashMap<String, Int>,
-        analogOutStages: HashMap<String, Int>,
-        relayOutputPoints: HashMap<Int, String>,
-        equip: MyStatHpuEquip
-    ) {
-        val relayMapping = MyStatHpuRelayMapping.values().find { it.ordinal == association }
-        when (relayMapping) {
-            MyStatHpuRelayMapping.COMPRESSOR_STAGE1, MyStatHpuRelayMapping.COMPRESSOR_STAGE2 -> {
-                if (basicSettings.conditioningMode != StandaloneConditioningMode.OFF && compressorLoopOutput != 0) {
-                    runRelayForCompressor(relayMapping, port, tuner, relayStages)
-                } else {
-                    resetPort(port)
+                val fanStages = result as List<Pair<Int, Boolean>>
+                fanStages.forEach {
+                    val (stage, isActive) = Pair(it.first, it.second)
+                    when (stage) {
+                        0 -> updateRelayStage(
+                            Stage.FAN_1.displayName,
+                            isStageActive(stage, isActive, lowestStageFanLow),
+                            equip.fanLowSpeed
+                        )
+
+                        2 -> updateRelayStage(
+                            Stage.FAN_3.displayName,
+                            isStageActive(stage, isActive, lowestStageFanHigh),
+                            equip.fanHighSpeed
+                        )
+                    }
                 }
             }
 
-            MyStatHpuRelayMapping.AUX_HEATING_STAGE1 -> {
-                runAuxHeatingStages(
-                    port, userIntents, basicSettings, relayStages, tuner.auxHeating1Activate
-                )
-            }
-
-            MyStatHpuRelayMapping.FAN_LOW_SPEED, MyStatHpuRelayMapping.FAN_HIGH_SPEED -> {
-                runRelayForFanSpeed(
-                    relayMapping, port, config, tuner, relayStages, basicSettings, relayOutputPoints
-                )
-            }
-
-            MyStatHpuRelayMapping.CHANGE_OVER_O_COOLING -> {
-                if (coolingLoopOutput > 0) {
-                    updateLogicalPoint(logicalPointsList[port]!!, 1.0)
-                    relayStages[MyStatHpuRelayMapping.CHANGE_OVER_O_COOLING.name] = 1
-                } else {
-                    updateLogicalPoint(logicalPointsList[port]!!, 0.0)
-                    relayStages.remove(MyStatHpuRelayMapping.CHANGE_OVER_O_COOLING.name)
+            ControllerNames.AUX_HEATING_STAGE1 -> {
+                var status = result as Boolean
+                if (basicSettings.conditioningMode != StandaloneConditioningMode.AUTO
+                    && basicSettings.conditioningMode != StandaloneConditioningMode.HEAT_ONLY) {
+                    status = false
                 }
+                updateStatus(equip.auxHeatingStage1, status, StatusMsgKeys.AUX_HEATING_STAGE1.name)
             }
 
-            MyStatHpuRelayMapping.CHANGE_OVER_B_HEATING -> {
-                if (heatingLoopOutput > 0) {
-                    updateLogicalPoint(logicalPointsList[port]!!, 1.0)
-                    relayStages[MyStatHpuRelayMapping.CHANGE_OVER_B_HEATING.name] = 1
-                } else {
-                    updateLogicalPoint(logicalPointsList[port]!!, 0.0)
-                    relayStages.remove(MyStatHpuRelayMapping.CHANGE_OVER_B_HEATING.name)
+            ControllerNames.CHANGE_OVER_O_COOLING -> {
+                var status = result as Boolean
+                if (basicSettings.conditioningMode == StandaloneConditioningMode.OFF) {
+                    status = false
                 }
+                updateStatus(equip.changeOverCooling, status)
             }
 
-            /**
-             * intentionally we are sending analogOutStages for dcv to handle status message
-             */
-            MyStatHpuRelayMapping.DCV_DAMPER -> doDcvDamperOperation(equip, port, tuner.relayActivationHysteresis, analogOutStages, config.co2Threshold.currentVal, false)
-            MyStatHpuRelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput, relayStages)
-            MyStatHpuRelayMapping.OCCUPIED_ENABLED -> doOccupiedEnabled(port)
-            MyStatHpuRelayMapping.HUMIDIFIER -> doHumidifierOperation(
-                port, tuner.humidityHysteresis,
-                userIntents.targetMinHumidity,
-                equip.zoneHumidity.readHisVal()
-            )
+            ControllerNames.CHANGE_OVER_B_HEATING -> {
+                var status = result as Boolean
+                if (basicSettings.conditioningMode == StandaloneConditioningMode.OFF) {
+                    status = false
+                }
+                updateStatus(equip.changeOverHeating, status)
+            }
 
-            MyStatHpuRelayMapping.DEHUMIDIFIER -> doDeHumidifierOperation(
-                port, tuner.humidityHysteresis,
-                userIntents.targetMaxHumidity,
-                equip.zoneHumidity.readHisVal()
-            )
-
-            else -> {}
+            ControllerNames.FAN_ENABLED -> updateStatus(equip.fanEnable, result)
+            ControllerNames.OCCUPIED_ENABLED -> updateStatus(equip.occupiedEnable, result)
+            ControllerNames.HUMIDIFIER_CONTROLLER -> updateStatus(equip.humidifierEnable, result)
+            ControllerNames.DEHUMIDIFIER_CONTROLLER -> updateStatus(equip.dehumidifierEnable, result)
+            ControllerNames.DAMPER_RELAY_CONTROLLER -> updateStatus(equip.dcvDamper, result)
+            else -> {
+                logIt( "Unknown controller: $controllerName")
+            }
         }
     }
 
-    private fun runAuxHeatingStages(
-        port: Port,
-        userIntents: UserIntents,
-        basicSettings: MyStatBasicSettings,
-        relayStages: HashMap<String, Int>,
-        auxHeatingActivateTuner: Double
-    ) {
 
-        fun isEligibleForAuxHeatingStage(): Boolean {
-            return heatingLoopOutput != 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
-                    || basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY)
-        }
-
-        if (isEligibleForAuxHeatingStage()) {
-            if (currentTemp < (userIntents.heatingDesiredTemp - auxHeatingActivateTuner)) {
-                updateLogicalPoint(logicalPointsList[port]!!, 1.0)
-                relayStages[MyStatHpuRelayMapping.AUX_HEATING_STAGE1.name] = 1
-            } else if (currentTemp >= (userIntents.heatingDesiredTemp - (auxHeatingActivateTuner - 1))) {
-                updateLogicalPoint(logicalPointsList[port]!!, 0.0)
-                relayStages.remove(MyStatHpuRelayMapping.AUX_HEATING_STAGE1.name)
-            } else if (hayStack.readHisValById(logicalPointsList[port]!!) == 1.0) {
-                relayStages[MyStatHpuRelayMapping.AUX_HEATING_STAGE1.name] = 1
-            }
-
-        } else {
-            updateLogicalPoint(logicalPointsList[port]!!, 0.0)
-            relayStages.remove(MyStatHpuRelayMapping.AUX_HEATING_STAGE1.name)
-        }
-    }
-
-    private fun runRelayForCompressor(
-        association: MyStatHpuRelayMapping,
-        whichPort: Port,
-        tuner: MyStatTuners,
-        relayStages: HashMap<String, Int>
-    ) {
-        when (association) {
-            MyStatHpuRelayMapping.COMPRESSOR_STAGE1 -> {
-                doCompressorStage1(
-                    whichPort, compressorLoopOutput, tuner.relayActivationHysteresis,
-                    relayStages,getZoneMode()
-                )
-            }
-
-            MyStatHpuRelayMapping.COMPRESSOR_STAGE2 -> {
-                doCompressorStage2(
-                    whichPort, compressorLoopOutput, tuner.relayActivationHysteresis,
-                    50, relayStages, getZoneMode()
-                )
-            }
-
-            else -> {}
-        }
-
-        if (getCurrentPortStatus(whichPort) == 1.0) curState = ZoneState.COOLING
-    }
-
-    private fun runRelayForFanSpeed(
-        relayAssociation: MyStatHpuRelayMapping,
-        whichPort: Port,
-        config: MyStatHpuConfiguration,
-        tuner: MyStatTuners,
-        relayStages: HashMap<String, Int>,
-        basicSettings: MyStatBasicSettings,
-        relayOutputPoints: HashMap<Int, String>
-    ) {
-        if (basicSettings.fanMode == MyStatFanStages.AUTO && basicSettings.conditioningMode == StandaloneConditioningMode.OFF) {
-            CcuLog.i(L.TAG_CCU_MSHPU, "Cond is Off , Fan is Auto   ")
-            resetPort(whichPort)
-            return
-        }
-
-        val lowestStage = config.getLowestFanSelected()
-        resetFanLowestFanStatus()
-
-        when (lowestStage) {
-            MyStatHpuRelayMapping.FAN_LOW_SPEED -> setFanLowestFanLowStatus(true)
-            MyStatHpuRelayMapping.FAN_HIGH_SPEED -> setFanLowestFanHighStatus(true)
-            else -> {}
-        }
-
-        when (relayAssociation) {
-            MyStatHpuRelayMapping.FAN_LOW_SPEED -> {
-                doFanLowSpeed(
-                    logicalPointsList[whichPort]!!,
-                    basicSettings.fanMode,
-                    fanLoopOutput,
-                    tuner.relayActivationHysteresis,
-                    relayStages,
-                    runFanLowDuringDoorWindow
-                )
-            }
-
-            MyStatHpuRelayMapping.FAN_HIGH_SPEED -> {
-                if (isAuxAvailableAndActive(relayOutputPoints) && basicSettings.fanMode == MyStatFanStages.AUTO) return
-                doFanHighSpeed(
-                    logicalPointsList[whichPort]!!,
-                    basicSettings.fanMode,
-                    fanLoopOutput,
-                    tuner.relayActivationHysteresis,
-                    relayStages,
-                    runFanLowDuringDoorWindow
-                )
-            }
-
-            else -> {}
-        }
-    }
 
     private fun isAuxAvailableAndActive(relayOutputPoints: HashMap<Int, String>): Boolean {
         return (relayOutputPoints.containsKey(MyStatHpuRelayMapping.AUX_HEATING_STAGE1.ordinal) && getCurrentLogicalPointStatus(
@@ -407,6 +349,17 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
         ) == 1.0)
     }
 
+    private fun runTitle24Rule(config: MyStatHpuConfiguration) {
+        resetFanLowestFanStatus()
+        fanEnabledStatus =
+            config.isAnyRelayEnabledAssociated(association = MyStatCpuRelayMapping.FAN_ENABLED.ordinal)
+        val lowestStage = config.getLowestFanSelected()
+        when (lowestStage) {
+            MyStatHpuRelayMapping.FAN_LOW_SPEED -> lowestStageFanLow = true
+            MyStatHpuRelayMapping.FAN_HIGH_SPEED -> lowestStageFanHigh = true
+            else -> {}
+        }
+    }
 
     private fun operateAnalogOutputs(
         config: MyStatHpuConfiguration,
@@ -432,7 +385,6 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
 
                     MyStatHpuAnalogOutMapping.FAN_SPEED -> {
                         if (isAuxAvailableAndActive(relayOutputPoints)) return
-
                         doAnalogFanAction(
                             Port.ANALOG_OUT_ONE,
                             analogOut1FanSpeedConfig.low.currentVal.toInt(),
@@ -454,14 +406,6 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
 
                     else -> {}
                 }
-                if (logicalPointsList.containsKey(Port.ANALOG_OUT_ONE)) {
-                    CcuLog.i(
-                        L.TAG_CCU_MSHPU,
-                        "${Port.ANALOG_OUT_ONE} = $analogMapping : ${
-                            getCurrentLogicalPointStatus(logicalPointsList[Port.ANALOG_OUT_ONE]!!)
-                        }"
-                    )
-                }
             }
         }
     }
@@ -476,8 +420,7 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
         val aux1AvailableAndActive = isAuxAvailableAndActive(relayOutputPoints)
         val isAnalogFanAvailable = analogOutputPoints.containsKey(MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal)
 
-        CcuLog.i(
-            L.TAG_CCU_MSHPU,
+        logIt(
             "Aux Based fan : aux1AvailableAndActive $aux1AvailableAndActive isAnalogFanAvailable $isAnalogFanAvailable"
         )
         if (aux1AvailableAndActive) operateAuxBasedOnFan(relayStages, relayOutputPoints, isAnalogFanAvailable)
@@ -516,7 +459,7 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
                 && analogOut1Association.associationVal == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal && fanSpeed != MyStatFanSpeed.OFF
             ) {
                 val percentage = getPercent(analogOut1FanSpeedConfig, fanSpeed)
-                CcuLog.i(L.TAG_CCU_MSHPU, "Fan Speed : $percentage")
+                logIt(  "Fan Speed : $percentage")
                 updateLogicalPoint(
                     analogOutputPoints[MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal]!!, percentage
                 )
@@ -562,7 +505,7 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
 
         val stage = deriveFanStage()
         val fanStatusMessage = getFanStage(stage)
-        CcuLog.i(L.TAG_CCU_MSHPU, "operateAuxBasedOnFan: derived mode is $stage")
+        logIt( "operateAuxBasedOnFan: derived mode is $stage")
         // operate specific fan  (low, medium, high) based on derived stage order
         if (fanStatusMessage != null) {
             updateLogicalPoint(relayOutputPoints[stage.ordinal]!!, 1.0)
@@ -596,7 +539,7 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
             }
 
             else -> {
-                CcuLog.i(L.TAG_CCU_MSHPU, "operateAuxBasedOnFan: Relay fan mapping is not available")
+                logIt( "operateAuxBasedOnFan: Relay fan mapping is not available")
             }
         }
     }
@@ -619,20 +562,15 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
         }
     }
 
-    private fun runForDoorWindowSensor(
-        config: MyStatConfiguration,
-        equip: MyStatEquip,
-        analogOutStages: HashMap<String, Int>,
-        relayStages: HashMap<String, Int>
-    ): Boolean {
+    private fun runForDoorWindowSensor(config: MyStatConfiguration, equip: MyStatEquip): Boolean {
 
         val isDoorOpen = isDoorOpenState(config, equip)
-        CcuLog.d(L.TAG_CCU_MSHPU, " is Door Open ? $isDoorOpen")
+        logIt( " is Door Open ? $isDoorOpen")
         if (isDoorOpen) {
-            resetLoops()
+            resetLoopOutputs()
             resetLogicalPoints()
-            analogOutStages.clear()
-            relayStages.clear()
+            equip.analogOutStages.clear()
+            equip.relayStages.clear()
         }
         return isDoorOpen
     }
@@ -641,47 +579,6 @@ class MyStatHpuProfile : MyStatPackageUnitProfile() {
         val isKeyCardEnabled = (config.universalIn1Enabled.enabled
                 && config.universalIn1Association.associationVal == MyStatConfiguration.UniversalMapping.KEY_CARD_SENSOR.ordinal)
         keyCardIsInSlot((if (isKeyCardEnabled) 1.0 else 0.0), if (equip.keyCardSensor.readHisVal() > 0) 1.0 else 0.0, equip)
-    }
-
-
-
-    private fun deriveFanLoopOutput(basicSettings: MyStatBasicSettings, tuners: MyStatTuners) {
-        if (coolingLoopOutput > 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY || basicSettings.conditioningMode == StandaloneConditioningMode.AUTO)) {
-            fanLoopOutput =
-                ((coolingLoopOutput * tuners.analogFanSpeedMultiplier).toInt()).coerceAtMost(100)
-            compressorLoopOutput = coolingLoopOutput
-        } else if (heatingLoopOutput > 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY || basicSettings.conditioningMode == StandaloneConditioningMode.AUTO)) {
-            fanLoopOutput =
-                ((heatingLoopOutput * tuners.analogFanSpeedMultiplier).toInt()).coerceAtMost(100)
-            compressorLoopOutput = heatingLoopOutput
-        }
-    }
-
-    private fun showOutputStatus() {
-        logicalPointsList.toSortedMap().forEach { (port, logicalPointId) ->
-            var mapping: String? = null
-            when (port) {
-                Port.RELAY_ONE, Port.RELAY_TWO, Port.RELAY_THREE, Port.RELAY_FOUR -> {
-                    val enumPos =
-                        relayLogicalPoints.entries.find { it.value.contentEquals(logicalPointId) }?.key
-                    mapping = MyStatHpuRelayMapping.values().find { it.ordinal == enumPos }?.name
-                }
-
-                Port.ANALOG_OUT_ONE -> {
-                    val enumPos =
-                        analogLogicalPoints.entries.find { it.value.contentEquals(logicalPointId) }?.key
-                    mapping =
-                        MyStatHpuAnalogOutMapping.values().find { it.ordinal == enumPos }?.name
-                }
-
-                else -> {}
-            }
-
-            CcuLog.i(
-                L.TAG_CCU_MSHPU,
-                "$port = $mapping : ${getCurrentLogicalPointStatus(logicalPointsList[port]!!)}"
-            )
-        }
     }
 
     fun addEquip(equipRef: String) {

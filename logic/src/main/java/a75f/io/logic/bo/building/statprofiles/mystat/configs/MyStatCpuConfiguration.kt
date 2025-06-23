@@ -134,26 +134,10 @@ class MyStatCpuConfiguration(nodeAddress: Int, nodeType: String, priority: Int, 
 
     override fun getRelayMap(): Map<String, Boolean> {
         val relays = mutableMapOf<String, Boolean>()
-        relays[DomainName.relay1] =
-            isRelayExternalMapped(
-                relay1Enabled,
-                relay1Association
-            )
-        relays[DomainName.relay2] =
-            isRelayExternalMapped(
-                relay2Enabled,
-                relay2Association
-            )
-        relays[DomainName.relay3] =
-            isRelayExternalMapped(
-                relay3Enabled,
-                relay3Association
-            )
-        relays[DomainName.relay4] =
-            isRelayExternalMapped(
-                relay4Enabled,
-                relay4Association
-            )
+        relays[DomainName.relay1] = isRelayExternalMapped(relay1Enabled, relay1Association)
+        relays[DomainName.relay2] = isRelayExternalMapped(relay2Enabled, relay2Association)
+        relays[DomainName.relay3] = isRelayExternalMapped(relay3Enabled, relay3Association)
+        relays[DomainName.relay4] = isRelayExternalMapped(relay4Enabled, relay4Association)
         return relays
     }
 
@@ -258,12 +242,30 @@ class MyStatCpuConfiguration(nodeAddress: Int, nodeType: String, priority: Int, 
         return MyStatCpuRelayMapping.values()[lowestSelected]
     }
 
-    fun getHighestFanSelected(): MyStatCpuRelayMapping? {
-        val highestSelected = getHighestStage(MyStatCpuRelayMapping.FAN_LOW_SPEED.ordinal,  MyStatCpuRelayMapping.FAN_HIGH_SPEED.ordinal)
-        if (highestSelected == -1) {
-            return null
-        }
+    private fun getHighestCoolingStage(): MyStatCpuRelayMapping {
+        val highestSelected = getHighestStage(MyStatCpuRelayMapping.COOLING_STAGE_1.ordinal, MyStatCpuRelayMapping.COOLING_STAGE_2.ordinal)
         return MyStatCpuRelayMapping.values()[highestSelected]
+    }
+
+    private fun getHighestHeatingStage(): MyStatCpuRelayMapping {
+        val highestSelected = getHighestStage(MyStatCpuRelayMapping.HEATING_STAGE_1.ordinal, MyStatCpuRelayMapping.HEATING_STAGE_2.ordinal)
+        return MyStatCpuRelayMapping.values()[highestSelected]
+    }
+
+    fun getHighestCoolingStageCount() = getHighestCoolingStage().ordinal + 1
+
+    fun getHighestHeatingStageCount() = getHighestHeatingStage().ordinal - 1
+
+    fun getHighestFanStageCount(): Int {
+        val found = getHighestStage(
+            MyStatCpuRelayMapping.FAN_LOW_SPEED.ordinal,
+            MyStatCpuRelayMapping.FAN_HIGH_SPEED.ordinal
+        )
+        return when (found) {
+            MyStatCpuRelayMapping.FAN_LOW_SPEED.ordinal -> 1
+            MyStatCpuRelayMapping.FAN_HIGH_SPEED.ordinal -> 3
+            else -> 0
+        }
     }
 }
 

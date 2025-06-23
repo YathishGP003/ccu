@@ -3,7 +3,6 @@ package a75f.io.logic.bo.building.statprofiles.statcontrollers
 import a75f.io.domain.equips.hyperstat.HpuV2Equip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
-import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
@@ -12,6 +11,7 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsHpuRelayMap
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2RelayMapping
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HyperStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.util.getInCalibratedPointPoint
 import a75f.io.logic.controlcomponents.controls.ControllerFactory
 import a75f.io.logic.controlcomponents.util.ControllerNames
 
@@ -34,12 +34,7 @@ class HyperStatControlFactory(
         }
     }
 
-    private fun getInCalibratedPointPoint(data: Int): CalibratedPoint {
-        return CalibratedPoint(
-            "InCalibratedPoint", // dummy name
-            "", data.toDouble()
-        )
-    }
+
 
     private fun addHsCpuControllers(config: CpuConfiguration) {
         val mappings = config.getRelayEnabledAssociations() // only enabled mappings

@@ -33,8 +33,9 @@ class DcvDamperController(
     }
 
     override fun runController(): Boolean {
-        CcuLog.d(logTag, "Running DcvDamperController")
-        return controller.getActiveControl()
+        val status = controller.getActiveControl()
+        CcuLog.d(logTag, "Running DcvDamperController $status loop ${dcvLoopOutput.readHisVal()} hysteresis ${hysteresis.readPriorityVal()} occupancy $currentOccupancy")
+        return status
     }
 
     fun addOnConstraint(constraint: Constraint) {

@@ -13,7 +13,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
-import a75f.io.logic.bo.building.statprofiles.mystat.profiles.packageunit.cpu.MyStatCpuProfile
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatCpuProfile
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatCpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode

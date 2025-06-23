@@ -110,30 +110,31 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
         }
 
         val config = getHsConfiguration(equip.equipRef)
-
-        logicalPointsList = getHSLogicalPointList(equip, config!!)
-        relayLogicalPoints = getHSRelayOutputPoints(equip)
-        analogLogicalPoints = getHSAnalogOutputPoints(equip)
-        curState = ZoneState.DEADBAND
-        occupancyStatus = equipOccupancyHandler.currentOccupiedMode
-
         val hyperStatTuners = fetchHyperStatTuners(equip) as HyperStatProfileTuners
         val userIntents = fetchUserIntents(equip)
         val averageDesiredTemp = getAverageTemp(userIntents)
         val fanModeSaved = FanModeCacheStorage.getHyperStatFanModeCache().getFanModeFromCache(equip.equipRef)
         val basicSettings = fetchBasicSettings(equip)
 
+        logicalPointsList = getHSLogicalPointList(equip, config!!)
+        relayLogicalPoints = getHSRelayOutputPoints(equip)
+        analogLogicalPoints = getHSAnalogOutputPoints(equip)
+        curState = ZoneState.DEADBAND
+        occupancyStatus = equipOccupancyHandler.currentOccupiedMode
+        heatingThreshold = hyperStatTuners.heatingThreshold
+        coolingThreshold = hyperStatTuners.coolingThreshold
+        equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+
         logIt("Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
         val updatedFanMode = fallBackFanMode(equip, equip.equipRef, fanModeSaved, basicSettings)
         basicSettings.fanMode = updatedFanMode
         logIt("After fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
 
-        heatingThreshold = hyperStatTuners.heatingThreshold
-        coolingThreshold = hyperStatTuners.coolingThreshold
-
         loopController.initialise(tuners = hyperStatTuners)
         loopController.dumpLogs()
         handleChangeOfDirection(currentTemp, userIntents)
+        updateOperatingMode(currentTemp, averageDesiredTemp, basicSettings.conditioningMode, equip.operatingMode)
+
         resetEquip(equip)
         evaluateLoopOutputs(userIntents, basicSettings, hyperStatTuners, config, equip)
         updateOccupancyDetection(equip)
@@ -159,7 +160,6 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
 
         runForKeyCardSensor(config, equip)
 
-        updateOperatingMode(currentTemp, averageDesiredTemp, basicSettings.conditioningMode, equip.operatingMode)
         equip.equipStatus.writeHisVal(curState.ordinal.toDouble())
         var temperatureState = ZoneTempState.NONE
         if (buildingLimitMinBreached() || buildingLimitMaxBreached()) temperatureState =
@@ -733,6 +733,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
 
             ControllerNames.FAN_SPEED_CONTROLLER -> {
 
+                runTitle24Rule(config)
 
                 fun checkUserIntentAction(stage: Int): Boolean {
                     val mode = equip.fanOpMode
@@ -751,13 +752,14 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
                 ): Boolean {
                     val mode = equip.fanOpMode.readPriorityVal().toInt()
                     return if (isFanGoodToRun && mode == StandaloneFanStage.AUTO.ordinal) {
-                        (basicSettings.fanMode != StandaloneFanStage.OFF &&
-                                (currentState || (isLowestStageActive && runFanLowDuringDoorWindow)))
+                        (basicSettings.fanMode != StandaloneFanStage.OFF && (currentState ||
+                                        (fanEnabledStatus && fanLoopOutput > 0 && isLowestStageActive)
+                                        || (isLowestStageActive && runFanLowDuringDoorWindow)))
                     } else {
                         checkUserIntentAction(stage)
                     }
                 }
-                runTitle24Rule(config)
+
 
 
                 val fanStages = result as List<Pair<Int, Boolean>>

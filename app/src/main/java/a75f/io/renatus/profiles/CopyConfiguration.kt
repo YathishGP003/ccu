@@ -24,9 +24,9 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfigurat
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.MonitoringConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
-import a75f.io.logic.bo.building.statprofiles.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile
-import a75f.io.logic.bo.building.statprofiles.mystat.profiles.packageunit.cpu.MyStatCpuProfile
-import a75f.io.logic.bo.building.statprofiles.mystat.profiles.packageunit.hpu.MyStatHpuProfile
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe2Profile
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatCpuProfile
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatHpuProfile
 import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
 

@@ -16,7 +16,7 @@ import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
-import a75f.io.logic.bo.building.statprofiles.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe2Profile
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
@@ -118,7 +118,6 @@ private fun setUpConditionFanConfig(
     val fanSpinnerSelectionValues = RelayUtil.getFanOptionByLevel(fanLevel)
     fanModeSpinner.adapter = getMyStatAdapterValue(context, fanSpinnerSelectionValues)
 
-    CcuLog.e(L.TAG_CCU_MSHST, "received $fanMode")
     val actualFanMode  = getMyStatSelectedFanMode(fanLevel, fanMode)
 
     if (actualFanMode >= 0 && actualFanMode < fanModeSpinner.adapter.count) {

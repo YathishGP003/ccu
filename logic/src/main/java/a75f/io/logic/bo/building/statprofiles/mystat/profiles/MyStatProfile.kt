@@ -8,16 +8,17 @@ import a75f.io.logic.bo.building.ZoneProfile
 import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.bo.building.definitions.Port
+import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.MyStatBasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
+import a75f.io.logic.bo.building.statprofiles.util.MyStatTuners
 import a75f.io.logic.bo.building.statprofiles.util.StatLoopController
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
 import a75f.io.logic.bo.building.statprofiles.util.updateLogicalPoint
-import a75f.io.logic.bo.building.statprofiles.util.updateLoopOutputs
 import a75f.io.logic.util.uiutils.MyStatUserIntentHandler
 import a75f.io.logic.util.uiutils.MyStatUserIntentHandler.Companion.myStatStatus
 import a75f.io.logic.util.uiutils.updateUserIntentPoints
@@ -26,13 +27,17 @@ import a75f.io.logic.util.uiutils.updateUserIntentPoints
  * Created by Manjunath K on 16-01-2025.
  */
 
-abstract class MyStatProfile: ZoneProfile() {
+abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
+
+    var fanEnabledStatus = false
+    var lowestStageFanLow = false
+    var lowestStageFanHigh = false
+
     var logicalPointsList = HashMap<Port, String>()
-    open var occupancyStatus: Occupancy = Occupancy.OCCUPIED
+    open var occupancyStatus: Occupancy = Occupancy.NONE
     private val haystack = CCUHsApi.getInstance()
 
-
-    var occupancyBeforeDoorWindow = Occupancy.UNOCCUPIED
+    var occupancyBeforeDoorWindow = Occupancy.NONE
     var doorWindowSensorOpenStatus = false
     var runFanLowDuringDoorWindow = false
 
@@ -42,106 +47,156 @@ abstract class MyStatProfile: ZoneProfile() {
     var dcvLoopOutput = 0
     var compressorLoopOutput = 0 // used in HPU
 
-    fun doFanEnabled(currentState: ZoneState, whichPort: Port, fanLoopOutput: Int, relayStages: HashMap<String, Int>, isFanLoopCounterEnabled : Boolean = false) {
-        // Then Relay will be turned On when the zone is in occupied mode Or
-        // any conditioning is happening during an unoccupied schedule
-        CcuLog.d(L.TAG_CCU_MSCPU," Relay : $whichPort ,  isFanLoopCounterEnabled $isFanLoopCounterEnabled ")
-        if (isOccupancyModeIsOccupied(occupancyStatus) || fanLoopOutput > 0) {
-            updateLogicalPoint(logicalPointsList[whichPort]!!, 1.0)
-            relayStages[StatusMsgKeys.FAN_ENABLED.name] = 1
-        } else if (occupancyStatus != Occupancy.OCCUPIED || (currentState == ZoneState.COOLING || currentState == ZoneState.HEATING)) {
-            // In order to protect the fan, persist the fan for few cycles when there is a sudden change in
-            // occupancy and decrease in fan loop output
-            if (isFanLoopCounterEnabled ) {
-                updateLogicalPoint(logicalPointsList[whichPort]!!, 1.0)
-                return
+    val loopController = StatLoopController()
+
+    fun evaluateCoolingLoop(userIntents: UserIntents) {
+        coolingLoopOutput = loopController.calculateCoolingLoopOutput(
+            currentTemp, userIntents.coolingDesiredTemp
+        ).toInt().coerceAtLeast(0)
+    }
+
+    fun evaluateHeatingLoop(userIntents: UserIntents) {
+        heatingLoopOutput = loopController.calculateHeatingLoopOutput(
+            userIntents.heatingDesiredTemp, currentTemp
+        ).toInt().coerceAtLeast(0)
+    }
+
+    open fun evaluateFanOutput(
+        basicSettings: MyStatBasicSettings,
+        tuners: MyStatTuners
+    ) {
+        val mode = basicSettings.conditioningMode
+        val multiplier = tuners.analogFanSpeedMultiplier
+
+        fanLoopOutput = when {
+            coolingLoopOutput > 0 &&
+                    (mode == StandaloneConditioningMode.COOL_ONLY || mode == StandaloneConditioningMode.AUTO) -> {
+                compressorLoopOutput = coolingLoopOutput
+                (coolingLoopOutput * multiplier).toInt().coerceAtMost(100)
             }
-            updateLogicalPoint(logicalPointsList[whichPort]!!, 0.0)
+
+            heatingLoopOutput > 0 &&
+                    (mode == StandaloneConditioningMode.HEAT_ONLY || mode == StandaloneConditioningMode.AUTO) -> {
+                compressorLoopOutput = heatingLoopOutput
+                (heatingLoopOutput * multiplier).toInt().coerceAtMost(100)
+            }
+
+            else -> 0
         }
     }
 
-    fun doOccupiedEnabled(relayPort: Port) {
-        // Relay will be turned on when module is in occupied state
-        updateLogicalPoint(logicalPointsList[relayPort]!!, if (isOccupancyModeIsOccupied(occupancyStatus)) 1.0 else 0.0)
+    fun evaluateDcvLoop(equip: MyStatEquip, config: MyStatConfiguration) {
+        val rawCo2 = equip.zoneCo2.readHisVal().toInt()
+        val deltaCo2 = rawCo2 - config.co2Threshold.currentVal
+        dcvLoopOutput = (deltaCo2 / config.co2DamperOpeningRate.currentVal).toInt().coerceIn(0, 100)
     }
 
-    fun doHumidifierOperation(
-        relayPort: Port,
-        humidityHysteresis: Int,
-        targetMinInsideHumidity: Double,
-        currentHumidity: Double
-    ) {
-        // The humidifier is turned on whenever the humidity level drops below the targetMinInsideHumidty.
-        // The humidifier will be turned off after being turned on when humidity goes humidityHysteresis above
-        // the targetMinInsideHumidity. turns off when it drops 5% below threshold
-        val currentPortStatus = haystack.readHisValById(logicalPointsList[relayPort]!!)
-        logIt(
-            "doHumidifierOperation: currentHumidity : $currentHumidity " +
-                    "currentPortStatus : $currentPortStatus " +
-                    "targetMinInsideHumidity : $targetMinInsideHumidity " +
-                    "Hysteresis : $humidityHysteresis \n"
-        )
-
-        var relayStatus = 0.0
-        if (currentHumidity > 0 && isOccupancyModeIsOccupied(occupancyStatus)) {
-            if (currentHumidity < targetMinInsideHumidity) {
-                relayStatus = 1.0
-            } else if (currentPortStatus > 0) {
-                relayStatus =
-                    if (currentHumidity > (targetMinInsideHumidity + humidityHysteresis)) 0.0 else 1.0
-            }
-        } else relayStatus = 0.0
-        updateLogicalPoint(logicalPointsList[relayPort]!!, relayStatus)
+    fun resetLoopOutputs() {
+        coolingLoopOutput = 0
+        heatingLoopOutput = 0
+        fanLoopOutput = 0
+        dcvLoopOutput = 0
+        compressorLoopOutput = 0
     }
 
-    fun doDeHumidifierOperation(
-        relayPort: Port, humidityHysteresis: Int,
-        targetMaxInsideHumidity: Double, currentHumidity: Double
-    ) {
-        // If the dehumidifier is turned on whenever the humidity level goes above the targetMaxInsideHumidity.
-        // The humidifier will be turned off after being turned on when humidity drops humidityHysteresis below
-        // the targetMaxInsideHumidity. Turns off when it crosses over 5% above the threshold
-
-        val currentPortStatus = haystack.readHisValById(logicalPointsList[relayPort]!!)
-        logIt(
-            "doDeHumidifierOperation currentHumidity : $currentHumidity " +
-                    "| currentPortStatus : $currentPortStatus targetMaxInsideHumidity : $targetMaxInsideHumidity  Hysteresis : $humidityHysteresis \n"
-        )
-        var relayStatus = 0.0
-        if (currentHumidity > 0 && isOccupancyModeIsOccupied(occupancyStatus)) {
-            if (currentHumidity > targetMaxInsideHumidity) {
-                relayStatus = 1.0
-            } else if (currentPortStatus > 0) {
-                relayStatus =
-                    if (currentHumidity < (targetMaxInsideHumidity - humidityHysteresis)) 0.0 else 1.0
-            }
-        } else relayStatus = 0.0
-        updateLogicalPoint(logicalPointsList[relayPort]!!, relayStatus)
+    fun resetFanLowestFanStatus() {
+        lowestStageFanLow = false
+        lowestStageFanHigh = false
+        fanEnabledStatus = false
     }
 
-    fun doDcvDamperOperation(
-        equip: MyStatEquip,
+    fun handleChangeOfDirection(currentTemp: Double, userIntents: UserIntents) {
+        if (currentTemp > userIntents.coolingDesiredTemp && state != ZoneState.COOLING) {
+            loopController.resetCoolingControl()
+            state = ZoneState.COOLING
+        } else if (currentTemp < userIntents.heatingDesiredTemp && state != ZoneState.HEATING) {
+            loopController.resetHeatingControl()
+            state = ZoneState.HEATING
+        }
+    }
+
+    fun doAnalogCooling(
         port: Port,
-        relayActivationHysteresis: Int,
-        relayStages: HashMap<String, Int>,
-        cO2Threshold: Double,
-        isDoorOpen: Boolean,
+        conditioningMode: StandaloneConditioningMode,
+        analogOutStages: HashMap<String, Int>,
+        coolingLoopOutput: Int
     ) {
-        var relayState = -1.0
-        val co2Value = equip.zoneCo2.readHisVal()
+        if (conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal || conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal) {
+            updateLogicalPoint(logicalPointsList[port]!!, coolingLoopOutput.toDouble())
+            if (coolingLoopOutput > 0) analogOutStages[StatusMsgKeys.COOLING.name] =
+                coolingLoopOutput
+        } else {
+            updateLogicalPoint(logicalPointsList[port]!!, 0.0)
+        }
+    }
 
-        if (isDcvEligibleToOn(co2Value, cO2Threshold, occupancyStatus, isDoorOpen)) {
-            if (dcvLoopOutput > relayActivationHysteresis) {
-                relayState = 1.0
+    fun doAnalogHeating(
+        port: Port,
+        conditioningMode: StandaloneConditioningMode,
+        analogOutStages: HashMap<String, Int>,
+        heatingLoopOutput: Int
+    ) {
+        if (conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal || conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal) {
+            updateLogicalPoint(logicalPointsList[port]!!, heatingLoopOutput.toDouble())
+            if (heatingLoopOutput > 0) analogOutStages[StatusMsgKeys.HEATING.name] =
+                heatingLoopOutput
+        } else {
+            updateLogicalPoint(logicalPointsList[port]!!, 0.0)
+        }
+    }
+
+    fun doAnalogCompressorSpeed(
+        port: Port,
+        conditioningMode: StandaloneConditioningMode,
+        analogOutStages: HashMap<String, Int>,
+        compressorLoopOutput: Int,
+        zoneMode: ZoneState
+    ) {
+        if (conditioningMode != StandaloneConditioningMode.OFF) {
+            updateLogicalPoint(logicalPointsList[port]!!, compressorLoopOutput.toDouble())
+            if (compressorLoopOutput > 0) {
+                if (zoneMode == ZoneState.COOLING) analogOutStages[StatusMsgKeys.COOLING.name] =
+                    compressorLoopOutput
+                if (zoneMode == ZoneState.HEATING) analogOutStages[StatusMsgKeys.HEATING.name] =
+                    compressorLoopOutput
             }
-        } else if (isDcvEligibleToOff(co2Value, cO2Threshold, isDoorOpen)) {
-            relayState = 0.0
+        } else {
+            updateLogicalPoint(logicalPointsList[port]!!, 0.0)
         }
-        if (relayState != -1.0) {
-            updateLogicalPoint(logicalPointsList[port]!!, relayState)
-        }
-        if (getCurrentLogicalPointStatus(logicalPointsList[port]!!) == 1.0) {
-            relayStages[StatusMsgKeys.DCV_DAMPER.name] = 1
+    }
+
+    fun doAnalogFanAction(
+        port: Port,
+        fanLowPercent: Int,
+        fanHighPercent: Int,
+        fanMode: MyStatFanStages,
+        conditioningMode: StandaloneConditioningMode,
+        fanLoopOutput: Int,
+        analogOutStages: HashMap<String, Int>,
+        isFanGoodToRUn: Boolean = true
+    ) {
+        if (fanMode != MyStatFanStages.OFF) {
+            var fanLoopForAnalog = 0
+            if (isFanGoodToRUn && fanMode == MyStatFanStages.AUTO) {
+                if (conditioningMode == StandaloneConditioningMode.OFF) {
+                    updateLogicalPoint(logicalPointsList[port]!!, 0.0)
+                    return
+                }
+                fanLoopForAnalog = fanLoopOutput
+            } else {
+                when {
+                    (fanMode == MyStatFanStages.LOW_CUR_OCC || fanMode == MyStatFanStages.LOW_OCC || fanMode == MyStatFanStages.LOW_ALL_TIME) -> {
+                        fanLoopForAnalog = fanLowPercent
+                    }
+
+                    (fanMode == MyStatFanStages.HIGH_CUR_OCC || fanMode == MyStatFanStages.HIGH_OCC || fanMode == MyStatFanStages.HIGH_ALL_TIME) -> {
+                        fanLoopForAnalog = fanHighPercent
+                    }
+                }
+            }
+            if (fanLoopForAnalog > 0) analogOutStages[StatusMsgKeys.FAN_SPEED.name] =
+                1 else analogOutStages.remove(StatusMsgKeys.FAN_SPEED.name)
+            updateLogicalPoint(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
         }
     }
 
@@ -151,11 +206,10 @@ abstract class MyStatProfile: ZoneProfile() {
         cO2Threshold: Double,
         damperOpeningRate: Double,
         isDoorOpen: Boolean,
-        equip: MyStatEquip,
+        equip: MyStatEquip
     ) {
         val co2Value = equip.zoneCo2.readHisVal()
-        CcuLog.d(
-            L.TAG_CCU_MSHST,
+        logIt(
             "doAnalogDCVAction: co2Value : $co2Value zoneCO2Threshold: $cO2Threshold zoneCO2DamperOpeningRate $damperOpeningRate"
         )
         if (isDcvEligibleToOn(co2Value, cO2Threshold, occupancyStatus, isDoorOpen)) {
@@ -174,7 +228,10 @@ abstract class MyStatProfile: ZoneProfile() {
     }
 
     private fun isDcvEligibleToOn(
-        co2Value: Double, zoneCO2Threshold: Double, currentOccupancyMode: Occupancy, isDoorOpen: Boolean
+        co2Value: Double,
+        zoneCO2Threshold: Double,
+        currentOccupancyMode: Occupancy,
+        isDoorOpen: Boolean
     ): Boolean {
         return (co2Value > 0 && co2Value > zoneCO2Threshold && dcvLoopOutput > 0 && !isDoorOpen
                 && (isOccupancyModeIsOccupied(currentOccupancyMode)))
@@ -190,60 +247,17 @@ abstract class MyStatProfile: ZoneProfile() {
         equip.keyCardSensorInput.writePointValue(keycardSensor)
     }
 
-    fun resetPort(port: Port){
-        updateLogicalPoint(logicalPointsList[port]!!,0.0)
-    }
 
     fun resetLogicalPoint(pointId: String?) {
         if (pointId != null) {
             updateLogicalPoint(pointId, 0.0)
-        } else {
-            logIt("resetLogicalPoint: But point id is null !!")
         }
-    }
-
-    fun getCurrentPortStatus(port: Port): Double {
-        return haystack.readHisValById(logicalPointsList[port]!!)
     }
 
     fun getCurrentLogicalPointStatus(pointId: String): Double = haystack.readHisValById(pointId)
 
-    fun resetLogicalPoints(){
+    fun resetLogicalPoints() {
         logicalPointsList.forEach { (_, pointId) -> haystack.writeHisValById(pointId, 0.0) }
-    }
-
-    fun handleChangeOfDirection(userIntents: UserIntents, myStatLoopController: StatLoopController) {
-        if (currentTemp > userIntents.coolingDesiredTemp && state != ZoneState.COOLING) {
-            myStatLoopController.resetCoolingControl()
-            state = ZoneState.COOLING
-            CcuLog.d(L.TAG_CCU_MSHST, "Resetting cooling")
-        } else if (currentTemp < userIntents.heatingDesiredTemp && state != ZoneState.HEATING) {
-            myStatLoopController.resetHeatingControl()
-            state = ZoneState.HEATING
-            CcuLog.d(L.TAG_CCU_MSHST, "Resetting heating")
-        }
-    }
-
-    fun evaluateLoopOutputs(userIntents: UserIntents, myStatLoopController: StatLoopController) {
-        when (state) {
-            //Update coolingLoop when the zone is in cooling or it was in cooling and no change over happened yet.
-            ZoneState.COOLING -> coolingLoopOutput =
-                myStatLoopController.calculateCoolingLoopOutput(
-                    currentTemp, userIntents.coolingDesiredTemp).toInt().coerceAtLeast(0)
-
-            //Update heatingLoop when the zone is in heating or it was in heating and no change over happened yet.
-            ZoneState.HEATING -> heatingLoopOutput =
-                myStatLoopController.calculateHeatingLoopOutput(
-                    userIntents.heatingDesiredTemp, currentTemp
-                ).toInt().coerceAtLeast(0)
-
-            else -> CcuLog.d(L.TAG_CCU_MSHST, " Zone is in deadband")
-        }
-    }
-
-    fun calculateDcvLoop(equip: MyStatEquip, zoneCO2Threshold: Double, zoneCO2DamperOpeningRate: Double) {
-        val co2Value = equip.zoneCo2.readHisVal().toInt()
-        dcvLoopOutput = ((co2Value - zoneCO2Threshold) / zoneCO2DamperOpeningRate).toInt().coerceIn(0, 100)
     }
 
     fun fallBackFanMode(
@@ -252,13 +266,16 @@ abstract class MyStatProfile: ZoneProfile() {
         logIt("FanModeSaved in Shared Preference $fanModeSaved")
         val currentOccupancy = equip.occupancyMode.readHisVal().toInt()
         // If occupancy is unoccupied and the fan mode is current occupied then remove the fan mode from cache
-        if ((occupancyStatus == Occupancy.UNOCCUPIED || occupancyStatus == Occupancy.DEMAND_RESPONSE_UNOCCUPIED ) && isFanModeCurrentOccupied(fanModeSaved)) {
+        if ((occupancyStatus == Occupancy.UNOCCUPIED || occupancyStatus == Occupancy.DEMAND_RESPONSE_UNOCCUPIED) && isFanModeCurrentOccupied(
+                fanModeSaved
+            )
+        ) {
             FanModeCacheStorage.getMyStatFanModeCache().removeFanModeFromCache(equipRef)
         }
 
-        logIt("Fall back fan mode " + basicSettings.fanMode + " conditioning mode " + basicSettings.conditioningMode)
-        logIt("Fan Details :$occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved")
-        if (isEligibleToAuto(basicSettings,currentOccupancy)) {
+        logIt("Fall back fan mode " + basicSettings.fanMode + " conditioning mode " + basicSettings.conditioningMode
+                +"\n Fan Details :$occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved")
+        if (isEligibleToAuto(basicSettings, currentOccupancy)) {
             logIt("Resetting the Fan status back to  AUTO: ")
             updateUserIntentPoints(
                 equipRef = equipRef,
@@ -274,7 +291,8 @@ abstract class MyStatProfile: ZoneProfile() {
                     || occupancyStatus == Occupancy.FORCEDOCCUPIED
                     || Occupancy.values()[currentOccupancy] == Occupancy.PRECONDITIONING
                     || occupancyStatus == Occupancy.DEMAND_RESPONSE_OCCUPIED)
-            && basicSettings.fanMode == MyStatFanStages.AUTO && fanModeSaved != 0) {
+            && basicSettings.fanMode == MyStatFanStages.AUTO && fanModeSaved != 0
+        ) {
             logIt("Resetting the Fan status back to ${MyStatFanStages.values()[fanModeSaved]}")
             updateUserIntentPoints(
                 equipRef = equipRef,
@@ -287,12 +305,15 @@ abstract class MyStatProfile: ZoneProfile() {
         return MyStatFanStages.values()[equip.fanOpMode.readPriorityVal().toInt()]
     }
 
-    private fun isFanModeCurrentOccupied(value : Int): Boolean {
+    private fun isFanModeCurrentOccupied(value: Int): Boolean {
         val basicSettings = MyStatFanStages.values()[value]
         return (basicSettings == MyStatFanStages.LOW_CUR_OCC || basicSettings == MyStatFanStages.HIGH_CUR_OCC)
     }
 
-    private fun isEligibleToAuto(basicSettings: MyStatBasicSettings, currentOperatingMode: Int): Boolean {
+    private fun isEligibleToAuto(
+        basicSettings: MyStatBasicSettings,
+        currentOperatingMode: Int
+    ): Boolean {
         return (occupancyStatus != Occupancy.OCCUPIED
                 && occupancyStatus != Occupancy.AUTOFORCEOCCUPIED
                 && occupancyStatus != Occupancy.FORCEDOCCUPIED
@@ -305,7 +326,8 @@ abstract class MyStatProfile: ZoneProfile() {
                 )
     }
 
-    fun getAverageTemp(userIntents: UserIntents) = (userIntents.coolingDesiredTemp + userIntents.heatingDesiredTemp) / 2.0
+    fun getAverageTemp(userIntents: UserIntents) =
+        (userIntents.coolingDesiredTemp + userIntents.heatingDesiredTemp) / 2.0
 
     fun handleRFDead(equip: MyStatEquip) {
         state = ZoneState.RFDEAD
@@ -313,7 +335,7 @@ abstract class MyStatProfile: ZoneProfile() {
         equip.equipStatus.writeHisVal(state.ordinal.toDouble())
         equip.equipStatusMessage.writeDefaultVal(RFDead)
         myStatStatus[equip.equipRef] = RFDead
-        CcuLog.d(L.TAG_CCU_MSHST, "RF Signal is Dead ${equip.nodeAddress}")
+        logIt("RF Signal is Dead ${equip.nodeAddress}")
     }
 
     fun handleDeadZone(equip: MyStatEquip) {
@@ -326,27 +348,20 @@ abstract class MyStatProfile: ZoneProfile() {
     }
 
     private fun resetPoints(equip: MyStatEquip) {
-        updateLoopOutputs(
-            0, equip.coolingLoopOutput,
-            0, equip.heatingLoopOutput,
-            0, equip.fanLoopOutput,
-            0, equip.dcvLoopOutput,
-        )
+        this.resetLoopOutputs()
         resetLogicalPoints()
-        MyStatUserIntentHandler.updateMyStatStatus(equip.equipRef, HashMap(), HashMap(), ZoneTempState.TEMP_DEAD, equip)
+        MyStatUserIntentHandler.updateMyStatStatus(
+            ZoneTempState.TEMP_DEAD,
+            equip, L.TAG_CCU_MSHST
+        )
     }
 
     fun updateOccupancyDetection(equip: MyStatEquip) {
-        if (equip.zoneOccupancy.readHisVal() > 0) equip.occupancyDetection.writeHisValueByIdWithoutCOV(1.0)
+        if (equip.zoneOccupancy.readHisVal() > 0) equip.occupancyDetection.writeHisValueByIdWithoutCOV(
+            1.0
+        )
     }
 
-    fun resetLoops() {
-        CcuLog.d(L.TAG_CCU_MSHST, "Resetting all the loop output values: ")
-        coolingLoopOutput = 0
-        heatingLoopOutput = 0
-        fanLoopOutput = 0
-        compressorLoopOutput = 0
-    }
 
     fun checkFanOperationAllowedDoorWindow(userIntents: UserIntents): Boolean {
         return if (currentTemp < userIntents.coolingDesiredTemp && currentTemp > userIntents.heatingDesiredTemp) {
@@ -359,23 +374,25 @@ abstract class MyStatProfile: ZoneProfile() {
         }
     }
 
-
     open fun isDoorOpenState(config: MyStatConfiguration, equip: MyStatEquip): Boolean {
         var isDoorWindowMapped = 0.0
-        var doorWindowSensorValue =  0.0
+        var doorWindowSensorValue = 0.0
 
         if (config.universalIn1Enabled.enabled) {
-            val universalMapping = MyStatConfiguration.UniversalMapping.values().find { it.ordinal == config.universalIn1Association.associationVal }
+            val universalMapping = MyStatConfiguration.UniversalMapping.values()
+                .find { it.ordinal == config.universalIn1Association.associationVal }
             when (universalMapping) {
                 MyStatConfiguration.UniversalMapping.DOOR_WINDOW_SENSOR_NC_TITLE24 -> {
                     isDoorWindowMapped = 1.0
                     doorWindowSensorValue = equip.doorWindowSensorNCTitle24.readHisVal()
                 }
+
                 MyStatConfiguration.UniversalMapping.DOOR_WINDOW_SENSOR_TITLE24 -> {
                     isDoorWindowMapped = 1.0
                     doorWindowSensorValue = equip.doorWindowSensorTitle24.readHisVal()
                 }
-                else -> { }
+
+                else -> {}
             }
         }
         doorWindowIsOpen(isDoorWindowMapped, doorWindowSensorValue, equip)
@@ -384,11 +401,16 @@ abstract class MyStatProfile: ZoneProfile() {
 
 
     enum class MyStatFanSpeed {
-        OFF,LOW,HIGH
+        OFF, LOW, HIGH
     }
 
     fun logIt(msg: String) {
-        CcuLog.d(L.TAG_CCU_MSHST, msg)
+        CcuLog.d(logTag, msg)
+    }
+
+    fun resetEquip(equip: MyStatEquip) {
+        equip.relayStages.clear()
+        equip.analogOutStages.clear()
     }
 }
 

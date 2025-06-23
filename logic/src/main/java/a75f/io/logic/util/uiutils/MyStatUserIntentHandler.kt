@@ -24,30 +24,24 @@ class MyStatUserIntentHandler {
         }
 
         fun updateMyStatStatus(
-            equipId: String,
-            portStages: HashMap<String, Int>,
-            analogOutStages: HashMap<String, Int>,
-            temperatureState: ZoneTempState,
-            equip: MyStatEquip
+            temperatureState: ZoneTempState, equip: MyStatEquip, logTag: String
         ) {
-            var equipStatusMsg = getStatusMsg(portStages, analogOutStages, temperatureState)
+            var equipStatusMsg =
+                getStatusMsg(equip.relayStages, equip.analogOutStages, temperatureState)
             equipStatusMsg = equipStatusMsg.replace("Aux Heating 1 ON", "Aux Heating ON")
 
-            if (!myStatStatus.containsKey(equipId) || !getMyStatStatusString(equipId).contentEquals(
+            if (!myStatStatus.containsKey(equip.equipRef) || !getMyStatStatusString(equip.equipRef).contentEquals(
                     equipStatusMsg
                 )
             ) {
-                if (myStatStatus.containsKey(equipId)) myStatStatus.remove(equipId)
-                myStatStatus[equipId] = equipStatusMsg
+                if (myStatStatus.containsKey(equip.equipRef)) myStatStatus.remove(equip.equipRef)
+                myStatStatus[equip.equipRef] = equipStatusMsg
 
                 equip.equipStatusMessage.writeDefaultVal(equipStatusMsg)
                 zoneDataInterface?.refreshScreen("", false)
             }
-            CcuLog.i(L.TAG_CCU_MSHST, "Equip status message : $equipStatusMsg")
-
+            CcuLog.i(logTag, "Equip status message : $equipStatusMsg")
         }
-
-
 
     }
 }

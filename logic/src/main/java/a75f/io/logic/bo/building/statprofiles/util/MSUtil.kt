@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.statprofiles.util
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.Point
 import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
@@ -11,6 +12,7 @@ import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
+import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
@@ -353,4 +355,75 @@ fun getMyStatModelByEquipRef(equipRef: String): ModelDirective? {
         is MyStatPipe2Equip -> ModelLoader.getMyStatPipe2Model()
         else -> null
     }
+}
+
+fun isMyStatLowUserIntentFanMode(fanOpMode: Point): Boolean {
+    val fanMode = fanOpMode.readPriorityVal().toInt()
+    return fanMode == MyStatFanStages.LOW_CUR_OCC.ordinal
+            || fanMode == MyStatFanStages.LOW_OCC.ordinal
+            || fanMode == MyStatFanStages.LOW_ALL_TIME.ordinal
+}
+
+fun isMyStatHighUserIntentFanMode(fanOpMode: Point): Boolean {
+    val fanMode = fanOpMode.readPriorityVal().toInt()
+    return fanMode == MyStatFanStages.HIGH_CUR_OCC.ordinal
+            || fanMode == MyStatFanStages.HIGH_OCC.ordinal
+            || fanMode == MyStatFanStages.HIGH_ALL_TIME.ordinal
+}
+
+
+
+fun logMsResults(config: MyStatConfiguration, tag: String, logicalPointsList: HashMap<Port, String>) {
+    val haystack = CCUHsApi.getInstance()
+    listOf(
+        Triple(config.relay1Enabled.enabled, config.relay1Association.associationVal, Port.RELAY_ONE),
+        Triple(config.relay2Enabled.enabled, config.relay2Association.associationVal, Port.RELAY_TWO),
+        Triple(config.relay3Enabled.enabled, config.relay3Association.associationVal, Port.RELAY_THREE),
+        Triple(config.relay4Enabled.enabled, config.relay4Association.associationVal, Port.RELAY_FOUR)
+    ).forEach { (enabled, association, port) ->
+        if (enabled) {
+            when (config) {
+                is MyStatCpuConfiguration -> CcuLog.d(
+                    tag,
+                    "$port = ${MyStatCpuRelayMapping.values()[association]} : ${
+                        haystack.readHisValById(
+                            logicalPointsList[port]!!
+                        )
+                    }"
+                )
+
+                is MyStatPipe2Configuration -> CcuLog.d(
+                    tag,
+                    "$port = ${MyStatPipe2RelayMapping.values()[association]} : ${
+                        haystack.readHisValById(
+                            logicalPointsList[port]!!
+                        )
+                    }"
+                )
+
+                is MyStatHpuConfiguration -> CcuLog.d(
+                    tag,
+                    "$port = ${MyStatHpuRelayMapping.values()[association]} : ${
+                        haystack.readHisValById(
+                            logicalPointsList[port]!!
+                        )
+                    }"
+                )
+            }
+        }
+    }
+
+    val analogOutValue = haystack.readHisValById(logicalPointsList[Port.ANALOG_OUT_ONE]!!)
+
+    val mapping = when (config) {
+        is MyStatCpuConfiguration -> MyStatCpuAnalogOutMapping.values()[config.analogOut1Association.associationVal]
+        is MyStatHpuConfiguration -> MyStatHpuAnalogOutMapping.values()[config.analogOut1Association.associationVal]
+        is MyStatPipe2Configuration -> MyStatPipe2AnalogOutMapping.values()[config.analogOut1Association.associationVal]
+        else -> null
+    }
+
+    mapping?.let {
+        CcuLog.d(tag, "${Port.ANALOG_OUT_ONE} = $it : $analogOutValue")
+    }
+
 }

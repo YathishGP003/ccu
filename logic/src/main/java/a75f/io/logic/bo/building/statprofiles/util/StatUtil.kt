@@ -163,3 +163,10 @@ fun fetchUserIntents(equip: DomainEquip): UserIntents {
         }
     }
 }
+
+fun getInCalibratedPointPoint(data: Int): CalibratedPoint {
+    return CalibratedPoint(
+        "InCalibratedPoint", // dummy name
+        "", data.toDouble()
+    )
+}

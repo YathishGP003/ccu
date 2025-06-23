@@ -95,20 +95,17 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
         }
 
         val config = getHsConfiguration(equip.equipRef)
-
-        logicalPointsList = getHSLogicalPointList(equip, config!!)
-
         val relayOutputPoints = getHSRelayStatus(equip)
         val analogOutputPoints = getHSAnalogOutputPoints(equip)
-
-        curState = ZoneState.DEADBAND
-        occupancyStatus = equipOccupancyHandler.currentOccupiedMode
-
         val hyperStatTuners = fetchHyperStatTuners(equip) as HyperStatProfileTuners
         val userIntents = fetchUserIntents(equip)
         val averageDesiredTemp = getAverageTemp(userIntents)
         val fanModeSaved = FanModeCacheStorage.getHyperStatFanModeCache().getFanModeFromCache(equip.equipRef)
         val basicSettings = fetchBasicSettings(equip)
+
+        logicalPointsList = getHSLogicalPointList(equip, config!!)
+        curState = ZoneState.DEADBAND
+        occupancyStatus = equipOccupancyHandler.currentOccupiedMode
 
         logIt("Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
         val updatedFanMode = fallBackFanMode(equip, equip.equipRef, fanModeSaved, basicSettings)
@@ -117,8 +114,8 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
 
         loopController.initialise(tuners = hyperStatTuners)
         loopController.dumpLogs()
-
         handleChangeOfDirection(currentTemp, userIntents)
+
         resetEquip(equip)
         evaluateLoopOutputs(userIntents, basicSettings, hyperStatTuners, config, equip)
         updateOccupancyDetection(equip)

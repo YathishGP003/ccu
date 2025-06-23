@@ -30,9 +30,9 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
-import a75f.io.logic.bo.building.statprofiles.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile
-import a75f.io.logic.bo.building.statprofiles.mystat.profiles.packageunit.cpu.MyStatCpuProfile
-import a75f.io.logic.bo.building.statprofiles.mystat.profiles.packageunit.hpu.MyStatHpuProfile
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe2Profile
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatCpuProfile
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatHpuProfile
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
 import a75f.io.logic.bo.building.statprofiles.util.MyStatPossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
@@ -156,7 +156,7 @@ private fun updateDesiredTemp(
         heatingDesiredTemp,
         avgDesiredTemp,
         hayStack,
-        WhoFiledConstants.HYPERSTAT_WHO
+        WhoFiledConstants.MYSTAT_WHO
     )
 }
 

@@ -300,9 +300,7 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
 
         if (mInterface != null) mInterface.refreshView()
 
-        val config = getHsConfiguration(equip.equipRef)
 
-        logicalPointsList = getHSLogicalPointList(equip, config!!)
 
         if (isRFDead) {
             handleRFDead(equip)
@@ -311,16 +309,18 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
             handleDeadZone(equip)
             return
         }
-        curState = ZoneState.DEADBAND
-        occupancyStatus = equipOccupancyHandler.currentOccupiedMode
-        equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
 
         val hyperStatTuners = fetchHyperStatTuners(equip) as HyperStatProfileTuners
         val userIntents = fetchUserIntents(equip)
         val averageDesiredTemp = getAverageTemp(userIntents)
-
         val fanModeSaved = FanModeCacheStorage.getHyperStatFanModeCache().getFanModeFromCache(equip.equipRef)
         val basicSettings = fetchBasicSettings(equip)
+        val config = getHsConfiguration(equip.equipRef)
+
+        logicalPointsList = getHSLogicalPointList(equip, config!!)
+        curState = ZoneState.DEADBAND
+        occupancyStatus = equipOccupancyHandler.currentOccupiedMode
+        equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
 
         logIt( "Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
         val updatedFanMode = fallBackFanMode(equip, equip.equipRef, fanModeSaved, basicSettings)
@@ -334,13 +334,11 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
 
         resetEquip(equip)
         evaluateLoopOutputs(userIntents, basicSettings, hyperStatTuners, config, equip)
-
         updateOccupancyDetection(equip)
 
         doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip)
         runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(userIntents)
-        // Updating the occupancy status happens one cycle later after update of doorWindowSensorOpenStatus.
-        // Once it is detected then reset the loop output values
+
         if (occupancyStatus == Occupancy.WINDOW_OPEN) resetLoopOutputs()
         runForKeyCardSensor(config, equip)
         updateLoopOutputs(

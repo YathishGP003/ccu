@@ -57,21 +57,27 @@ fun logResults(config: HyperStatConfiguration, tag: String, logicalPointsList: H
         Triple(config.relay4Enabled.enabled, config.relay4Association.associationVal, Port.RELAY_FOUR),
         Triple(config.relay5Enabled.enabled, config.relay5Association.associationVal, Port.RELAY_FIVE),
         Triple(config.relay6Enabled.enabled, config.relay6Association.associationVal, Port.RELAY_SIX)
-    ).forEach { (_, association, port) ->
+    ).forEach { (enabled, association, port) ->
+        if (enabled) {
+            when (config) {
+                is CpuConfiguration -> CcuLog.d(
+                    tag, "$port = ${HsCpuRelayMapping.values()[association]} : ${
+                        haystack.readHisValById(logicalPointsList[port]!!)
+                    }"
+                )
 
-        when (config) {
-            is CpuConfiguration -> CcuLog.d(
-                tag,
-                "$port = ${HsCpuRelayMapping.values()[association]} : ${haystack.readHisValById(logicalPointsList[port]!!)}"
-            )
-            is HpuConfiguration -> CcuLog.d(
-                tag,
-                "$port = ${HsHpuRelayMapping.values()[association]} : ${haystack.readHisValById(logicalPointsList[port]!!)}"
-            )
-            is Pipe2Configuration -> CcuLog.d(
-                tag,
-                "$port = ${HsPipe2RelayMapping.values()[association]} : ${haystack.readHisValById(logicalPointsList[port]!!)}"
-            )
+                is HpuConfiguration -> CcuLog.d(
+                    tag, "$port = ${HsHpuRelayMapping.values()[association]} : ${
+                        haystack.readHisValById(logicalPointsList[port]!!)
+                    }"
+                )
+
+                is Pipe2Configuration -> CcuLog.d(
+                    tag, "$port = ${HsPipe2RelayMapping.values()[association]} : ${
+                        haystack.readHisValById(logicalPointsList[port]!!)
+                    }"
+                )
+            }
         }
     }
 
@@ -79,20 +85,27 @@ fun logResults(config: HyperStatConfiguration, tag: String, logicalPointsList: H
         Triple(config.analogOut1Enabled.enabled, config.analogOut1Association.associationVal, Port.ANALOG_OUT_ONE),
         Triple(config.analogOut2Enabled.enabled, config.analogOut2Association.associationVal, Port.ANALOG_OUT_TWO),
         Triple(config.analogOut3Enabled.enabled, config.analogOut3Association.associationVal, Port.ANALOG_OUT_THREE)
-    ).forEach { (_, association, port) ->
-        when (config) {
-            is CpuConfiguration -> CcuLog.d(
-                tag,
-                "$port = ${HsCpuAnalogOutMapping.values()[association]} : ${haystack.readHisValById(logicalPointsList[port]!!)}"
-            )
-            is HpuConfiguration -> CcuLog.d(
-                tag,
-                "$port = ${HsHpuAnalogOutMapping.values()[association]} : ${haystack.readHisValById(logicalPointsList[port]!!)}"
-            )
-            is Pipe2Configuration -> CcuLog.d(
-                tag,
-                "$port = ${HsPipe2AnalogOutMapping.values()[association]} : ${haystack.readHisValById(logicalPointsList[port]!!)}"
-            )
+    ).forEach { (enabled, association, port) ->
+        if (enabled) {
+            when (config) {
+                is CpuConfiguration -> CcuLog.d(
+                    tag, "$port = ${HsCpuAnalogOutMapping.values()[association]} : ${
+                        haystack.readHisValById(logicalPointsList[port]!!)
+                    }"
+                )
+
+                is HpuConfiguration -> CcuLog.d(
+                    tag, "$port = ${HsHpuAnalogOutMapping.values()[association]} : ${
+                        haystack.readHisValById(logicalPointsList[port]!!)
+                    }"
+                )
+
+                is Pipe2Configuration -> CcuLog.d(
+                    tag, "$port = ${HsPipe2AnalogOutMapping.values()[association]} : ${
+                        haystack.readHisValById(logicalPointsList[port]!!)
+                    }"
+                )
+            }
         }
     }
 }

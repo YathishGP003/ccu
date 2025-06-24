@@ -792,6 +792,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			heatingAvailable = L.ccu().systemProfile.isHeatingAvailable();
 		}
 
+		CcuLog.d(L.TAG_CCU_UI, "SystemFragment coolingAvailable: " + coolingAvailable + ", heatingAvailable: " + heatingAvailable);
 		
 		modesAvailable.add(SystemMode.OFF.displayName);
 		if (coolingAvailable && heatingAvailable) {

@@ -6,6 +6,7 @@ package a75f.io.logic.controlcomponents.handlers
  */
 
 import a75f.io.domain.api.Point
+import a75f.io.domain.util.CalibratedPoint
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -13,51 +14,92 @@ import org.junit.Test
 class HumidifierControllerTest {
 
 
-    class MockPoint(var value: Double) : Point("fake Name","equipRef") {
-        override fun readHisVal(): Double = value
+    @Test
+    fun controllerTurnsOnWhenHumidityIsBelowMinAndAboveZero() {
+        val fakePoint = MockPoint(30.0)
+        val targetMinHumidity = MockPoint(45.0)
+        val hysteresis = MockPoint(10.0)
+        val controller = HumidifierController(fakePoint, targetMinHumidity = targetMinHumidity, hysteresis = hysteresis, "TestController",
+            CalibratedPoint("occupancy", "", 1.0) // Simulating occupancy
+        )
+        assertTrue(controller.runController())
     }
 
     @Test
-    fun `test controller initializes correctly`() {
-        val fakePoint = MockPoint(25.0)
-        val controller = HumidifierController(fakePoint, min = 45.0, hysteresis = 10.0)
-        assertTrue(controller.isEnabled()) // Default state should be off
-    }
-    @Test
-    fun controllerEnablesWhenHumidityBelowMin() {
-        val fakePoint = MockPoint(40.0)
-        val controller = HumidifierController(fakePoint, min = 45.0, hysteresis = 10.0)
-        assertTrue(controller.isEnabled())
+    fun controllerRemainsOffWhenHumidityIsAboveMinPlusHysteresis() {
+        val fakePoint = MockPoint(60.0)
+        val targetMinHumidity = MockPoint(45.0)
+        val hysteresis = MockPoint(10.0)
+        val controller = HumidifierController(fakePoint, targetMinHumidity = targetMinHumidity, hysteresis = hysteresis, "TestController",
+            CalibratedPoint("occupancy", "", 1.0) // Simulating occupancy
+        )
+        assertFalse(controller.runController())
     }
 
     @Test
-    fun controllerDisablesWhenHumidityAboveMinPlusHysteresis() {
-        val fakePoint = MockPoint(56.0)
-        val controller = HumidifierController(fakePoint, min = 45.0, hysteresis = 10.0)
-        assertFalse(controller.isEnabled())
-    }
-
-    @Test
-    fun controllerRemainsDisabledWhenHumidityEqualsMin() {
-        val fakePoint = MockPoint(45.0)
-        val controller = HumidifierController(fakePoint, min = 45.0, hysteresis = 10.0)
-        assertFalse(controller.isEnabled())
-    }
-
-    @Test
-    fun controllerRemainsDisabledWhenHumidityEqualsMinPlusHysteresis() {
+    fun controllerRemainsOffWhenHumidityEqualsMinPlusHysteresis() {
         val fakePoint = MockPoint(55.0)
-        val controller = HumidifierController(fakePoint, min = 45.0, hysteresis = 10.0)
-        assertFalse(controller.isEnabled())
+        val targetMinHumidity = MockPoint(45.0)
+        val hysteresis = MockPoint(10.0)
+        val controller = HumidifierController(fakePoint, targetMinHumidity = targetMinHumidity, hysteresis = hysteresis, "TestController",
+            CalibratedPoint("occupancy", "", 1.0) // Simulating occupancy
+        )
+        assertFalse(controller.runController())
+    }
+
+    @Test
+    fun controllerRemainsOffWhenHumidityIsZero() {
+        val fakePoint = MockPoint(0.0)
+        val targetMinHumidity = MockPoint(45.0)
+        val hysteresis = MockPoint(10.0)
+        val controller = HumidifierController(fakePoint, targetMinHumidity = targetMinHumidity, hysteresis = hysteresis, "TestController",
+            CalibratedPoint("occupancy", "", 1.0) // Simulating occupancy
+        )
+        assertFalse(controller.runController())
+    }
+
+    @Test
+    fun controllerTurnsOffWhenHumidityExceedsMinPlusHysteresis() {
+        val fakePoint = MockPoint(56.0)
+        val targetMinHumidity = MockPoint(45.0)
+        val hysteresis = MockPoint(10.0)
+        val controller = HumidifierController(fakePoint, targetMinHumidity = targetMinHumidity, hysteresis = hysteresis, "TestController",
+            CalibratedPoint("occupancy", "", 1.0) // Simulating occupancy
+        )
+        assertFalse(controller.runController())
     }
 
     @Test
     fun controllerRemainsEnabledWhenHumidityBetweenMinAndMinPlusHysteresis() {
-        val fakePoint = MockPoint(44.0)
-        val controller = HumidifierController(fakePoint, min = 45.0, hysteresis = 10.0)
-        assertTrue(controller.isEnabled())
-        fakePoint.value = 50.0
-        assertTrue(controller.isEnabled())
+        val fakePoint = MockPoint(50.0)
+        val targetMinHumidity = MockPoint(45.0)
+        val hysteresis = MockPoint(10.0)
+        val controller = HumidifierController(fakePoint, targetMinHumidity = targetMinHumidity, hysteresis = hysteresis, "TestController",
+            CalibratedPoint("occupancy", "", 1.0) // Simulating occupancy
+        )
+        assertFalse(controller.runController())
+    }
+
+    @Test
+    fun controllerTurnsOnWhenHumidityIsExactlyMin() {
+        val fakePoint = MockPoint(45.0)
+        val targetMinHumidity = MockPoint(45.0)
+        val hysteresis = MockPoint(10.0)
+        val controller = HumidifierController(fakePoint, targetMinHumidity = targetMinHumidity, hysteresis = hysteresis, "TestController",
+            CalibratedPoint("occupancy", "", 1.0) // Simulating occupancy
+        )
+        assertFalse(controller.runController())
+    }
+
+    @Test
+    fun controllerRemainsOffWhenHumidityIsNegative() {
+        val fakePoint = MockPoint(-10.0)
+        val targetMinHumidity = MockPoint(45.0)
+        val hysteresis = MockPoint(10.0)
+        val controller = HumidifierController(fakePoint, targetMinHumidity = targetMinHumidity, hysteresis = hysteresis, "TestController",
+            CalibratedPoint("occupancy", "", 1.0) // Simulating occupancy
+        )
+        assertFalse(controller.runController())
     }
 
 

@@ -21,25 +21,5 @@ open class DabStagedSystemEquip(equipRef : String) : DabSystemEquip(equipRef) {
     val relay6OutputAssociation = Point(DomainName.relay6OutputAssociation ,equipRef)
     val relay7OutputAssociation = Point(DomainName.relay7OutputAssociation ,equipRef)
 
-    val coolingStage1 = Point(DomainName.coolingStage1 ,equipRef)
-    val coolingStage2 = Point(DomainName.coolingStage2 ,equipRef)
-    val coolingStage3 = Point(DomainName.coolingStage3 ,equipRef)
-    val coolingStage4 = Point(DomainName.coolingStage4 ,equipRef)
-    val coolingStage5 = Point(DomainName.coolingStage5 ,equipRef)
-
-    val heatingStage1 = Point(DomainName.heatingStage1 ,equipRef)
-    val heatingStage2 = Point(DomainName.heatingStage2 ,equipRef)
-    val heatingStage3 = Point(DomainName.heatingStage3 ,equipRef)
-    val heatingStage4 = Point(DomainName.heatingStage4 ,equipRef)
-    val heatingStage5 = Point(DomainName.heatingStage5 ,equipRef)
-
-    val fanStage1 = Point(DomainName.fanStage1 ,equipRef)
-    val fanStage2 = Point(DomainName.fanStage2 ,equipRef)
-    val fanStage3 = Point(DomainName.fanStage3 ,equipRef)
-    val fanStage4 = Point(DomainName.fanStage4 ,equipRef)
-    val fanStage5 = Point(DomainName.fanStage5 ,equipRef)
-
-    val humidifierEnable = Point(DomainName.humidifierEnable ,equipRef)
-    val dehumidifierEnable = Point(DomainName.dehumidifierEnable ,equipRef)
-
+    val conditioningStages = ConditioningStages(equipRef)
 }

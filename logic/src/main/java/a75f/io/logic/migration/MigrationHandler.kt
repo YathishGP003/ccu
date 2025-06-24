@@ -60,7 +60,10 @@ import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.MODEL_SN_OAO
 import a75f.io.domain.util.ModelCache
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.ModelLoader.getCMDeviceModel
+import a75f.io.domain.util.ModelLoader.getDabStagedVfdRtuModelDef
 import a75f.io.domain.util.ModelLoader.getModelForDomainName
+import a75f.io.domain.util.ModelLoader.getVavStagedVfdRtuModelDef
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
@@ -75,8 +78,6 @@ import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.definitions.ReheatType
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuUniInType
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
 import a75f.io.logic.bo.building.oao.OAOProfileConfiguration
 import a75f.io.logic.bo.building.otn.OtnProfileConfiguration
 import a75f.io.logic.bo.building.plc.PlcProfileConfig
@@ -84,11 +85,13 @@ import a75f.io.logic.bo.building.plc.addBaseProfileConfig
 import a75f.io.logic.bo.building.plc.doPlcDomainModelCutOverMigration
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration
-import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.MonitoringConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuUniInType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
 import a75f.io.logic.bo.building.system.DefaultSystemConfig
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
@@ -1679,7 +1682,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     AcbProfileConfiguration(
                         device["addr"].toString().toInt(), getNodeType(device).toString(), 0,
                         equip["roomRef"].toString(), equip["floorRef"].toString(),
-                        getProfileType(equip["profile"]?.toString()), model
+                        getProfileType(equip["profile"]?.toString(), device["addr"].toString().toInt()), model
                     ).getActiveConfiguration()
 
                 }
@@ -1688,7 +1691,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     DabProfileConfiguration(
                         device["addr"].toString().toInt(), getNodeType(device).toString(), 0,
                         equip["roomRef"].toString(), equip["floorRef"].toString(),
-                        getProfileType(equip["profile"]?.toString()), model
+                        getProfileType(equip["profile"]?.toString(), device["addr"].toString().toInt()), model
                     ).getActiveConfiguration()
                 }
                 // VAV equip
@@ -1696,7 +1699,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     VavProfileConfiguration(
                         device["addr"].toString().toInt(), getNodeType(device).toString(), 0,
                         equip["roomRef"].toString(), equip["floorRef"].toString(),
-                        getProfileType(equip["profile"]?.toString()), model
+                        getProfileType(equip["profile"]?.toString(), device["addr"].toString().toInt()), model
                     ).getActiveConfiguration()
                 }
             }
@@ -3644,23 +3647,37 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             hayStack.readId("domainName==\"${DomainName.smartnodeOAO}\"")?.let { oaoEquipId ->
                 CcuLog.d(TAG_CCU_MIGRATION_UTIL, "OAO Equip Found. ID: $oaoEquipId")
                 hayStack.readHDict(CommonQueries.SYSTEM_PROFILE)?.let { systemEquipDict ->
-                    CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Deleting redundant OAO points for equip: $oaoEquipId")
-                    if(systemEquipDict.has(Tags.VAV)) {
+                    CcuLog.d(
+                        TAG_CCU_MIGRATION_UTIL,
+                        "Deleting redundant OAO points for equip: $oaoEquipId"
+                    )
+                    if (systemEquipDict.has(Tags.VAV)) {
                         CcuLog.d(TAG_CCU_MIGRATION_UTIL, "VAV System Equip found")
-                        hayStack.readAllHDictByQuery("${Tags.DAB} and equipRef == \"$oaoEquipId\"")?.forEach { oaoDabPointHDict ->
-                            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Deleting DAB based OAO point: ${oaoDabPointHDict.dis()} for id: ${oaoDabPointHDict.id()}")
-                            hayStack.deleteEntityItem(oaoDabPointHDict.id().toString())
-                            hayStack.deleteWritableArray(oaoDabPointHDict.id().toString())
-                        }
+                        hayStack.readAllHDictByQuery("${Tags.DAB} and equipRef == \"$oaoEquipId\"")
+                            ?.forEach { oaoDabPointHDict ->
+                                CcuLog.d(
+                                    TAG_CCU_MIGRATION_UTIL,
+                                    "Deleting DAB based OAO point: ${oaoDabPointHDict.dis()} for id: ${oaoDabPointHDict.id()}"
+                                )
+                                hayStack.deleteEntityItem(oaoDabPointHDict.id().toString())
+                                hayStack.deleteWritableArray(oaoDabPointHDict.id().toString())
+                            }
                     } else if (systemEquipDict.has(Tags.DAB)) {
                         CcuLog.d(TAG_CCU_MIGRATION_UTIL, "DAB System Equip found")
-                        hayStack.readAllHDictByQuery("${Tags.VAV} and equipRef == \"$oaoEquipId\"")?.forEach { oaoVavPointHDict ->
-                            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Deleting VAV based OAO point: ${oaoVavPointHDict.dis()} for id: ${oaoVavPointHDict.id()}")
-                            hayStack.deleteEntityItem(oaoVavPointHDict.id().toString())
-                            hayStack.deleteWritableArray(oaoVavPointHDict.id().toString())
-                        }
+                        hayStack.readAllHDictByQuery("${Tags.VAV} and equipRef == \"$oaoEquipId\"")
+                            ?.forEach { oaoVavPointHDict ->
+                                CcuLog.d(
+                                    TAG_CCU_MIGRATION_UTIL,
+                                    "Deleting VAV based OAO point: ${oaoVavPointHDict.dis()} for id: ${oaoVavPointHDict.id()}"
+                                )
+                                hayStack.deleteEntityItem(oaoVavPointHDict.id().toString())
+                                hayStack.deleteWritableArray(oaoVavPointHDict.id().toString())
+                            }
                     } else {
-                        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "No VAV or DAB System Equip found, Skipping operation.")
+                        CcuLog.d(
+                            TAG_CCU_MIGRATION_UTIL,
+                            "No VAV or DAB System Equip found, Skipping operation."
+                        )
                         // Do Nothing
                     }
                 }
@@ -3674,6 +3691,113 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             )
             exception.printStackTrace()
         }
+    }
+
+    fun doStagedVfdMigration() {
+        val systemEquipDict = hayStack.readHDict(CommonQueries.SYSTEM_PROFILE)
+        if (systemEquipDict.get("domainName").toString().equals(DomainName.dabStagedRtu, ignoreCase = true)) {
+            doStagedVfdMigration(systemEquipDict, getDabStagedVfdRtuModelDef() as SeventyFiveFProfileDirective)
+        } else if (systemEquipDict.get("domainName").toString().equals(DomainName.vavStagedRtu, ignoreCase = true)) {
+            doStagedVfdMigration(systemEquipDict, getVavStagedVfdRtuModelDef() as SeventyFiveFProfileDirective)
+        } else {
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "System equip Staged-Vfd migration not required")
+        }
+        doFanModeMigration()
+    }
+
+    private fun doStagedVfdMigration(systemEquipDict: HDict, vfdModel: SeventyFiveFProfileDirective) {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "DabStagedVfdMigration started")
+
+        val systemEquip = Equip.Builder().setHDict(systemEquipDict).build()
+        val allPoints = hayStack.readAllHDictByQuery("point and equipRef == \"${systemEquip.id}\"")
+        allPoints.forEach { pointDict ->
+            val point = Point.Builder().setHDict(pointDict).build()
+            val migratedDisplayName = if ("StagedRtuVfdFan" in point.displayName) {
+                point.displayName
+            } else {
+                point.displayName.replace("StagedRtu", "StagedRtuVfdFan")
+            }
+            point.displayName = migratedDisplayName
+            hayStack.updatePoint(point, point.id)
+        }
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "DabStagedVfdMigration pointName updated")
+        systemEquip.profile = vfdModel.name
+        systemEquip.domainName = vfdModel.domainName
+        systemEquip.displayName = "${hayStack.siteName}-${vfdModel.name}"
+
+        systemEquip.tags.remove("stage")
+        systemEquip.markers.add("vfd")
+        systemEquip.markers.add("modulatingFanConsumption")
+
+        systemEquip.tags["sourceModel"] = HStr.make(vfdModel.id)
+        systemEquip.tags["sourceModelVersion"] = HStr.make(vfdModel.version.toString())
+
+        hayStack.updateEquip(systemEquip, systemEquip.id)
+
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "StagedVfdMigration completed for system equip: ${systemEquip.displayName}")
+    }
+
+    private fun doFanModeMigration() {
+        if (!PreferenceUtil.getMigrateVfdFanMode()) {
+            val systemEquipDict = hayStack.readHDict(CommonQueries.SYSTEM_PROFILE)
+
+            val vfdModel = if (systemEquipDict.get("domainName").toString().equals(DomainName.dabStagedRtuVfdFan, ignoreCase = true)) {
+                getDabStagedVfdRtuModelDef() as SeventyFiveFProfileDirective
+            } else if (systemEquipDict.get("domainName").toString().equals(DomainName.vavStagedRtuVfdFan, ignoreCase = true)) {
+                getVavStagedVfdRtuModelDef() as SeventyFiveFProfileDirective
+            } else {
+                CcuLog.e(TAG_CCU_MIGRATION_UTIL, "System equip Fan Mode migration not required")
+                PreferenceUtil.setMigrateVfdFanMode()
+                return
+            }
+            doFanModeMigration(vfdModel)
+            PreferenceUtil.setMigrateVfdFanMode()
+        } else {
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Fan Mode Migration not required")
+        }
+    }
+
+    private fun doFanModeMigration(vfdModel: SeventyFiveFProfileDirective) {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "FanMode Migration started")
+        val systemEquipDict = hayStack.readHDict(CommonQueries.SYSTEM_PROFILE)
+        val systemEquip = Equip.Builder().setHDict(systemEquipDict).build()
+
+        val fanEnablePoint = hayStack.readEntity(
+            "point and domainName == \"${DomainName.fanEnable}\" and equipRef == \"${systemEquip.id}\""
+        )
+        if (fanEnablePoint.isNotEmpty()) {
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Fan Enable migration skipped $fanEnablePoint")
+            return
+        }
+        val deviceModel = getCMDeviceModel() as SeventyFiveFDeviceDirective
+        val config = StagedVfdRtuProfileConfig(vfdModel).getActiveConfiguration()
+        config.getAssociationConfigs().forEach { associationConfig ->
+            if (associationConfig.associationVal == 10) {
+                associationConfig.associationVal = 24
+            } else if (associationConfig.associationVal in 11..14) {
+                associationConfig.associationVal -= 1
+            }
+        }
+
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val entityMapper = EntityMapper(vfdModel)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+
+        equipBuilder.updateEquipAndPoints(
+            config,
+            vfdModel,
+            hayStack.site!!.id,
+            systemEquip.displayName,
+            true
+        )
+        deviceBuilder.updateDeviceAndPoints(
+            config, deviceModel, systemEquip.id, hayStack.site!!
+                .id, hayStack.siteName + "-" + deviceModel.name, null
+        )
+        CcuLog.d(
+            TAG_CCU_MIGRATION_UTIL,
+            "FanMode Migration completed for system equip: ${systemEquip.displayName}"
+        )
     }
      fun updateAhuRefDiagEquip() {
         val diagEquip = hayStack.readHDict("domainName==\"${DomainName.diagEquip}\"")

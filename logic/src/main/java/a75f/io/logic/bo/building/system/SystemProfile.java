@@ -6,6 +6,9 @@ import static a75f.io.logic.bo.building.system.SystemProfileUtilKt.isAdvanceV2;
 import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.getConnectEquip;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import static a75f.io.logic.controlcomponents.util.ControllerNames.COOLING_STAGE_CONTROLLER;
+import static a75f.io.logic.controlcomponents.util.ControllerNames.FAN_SPEED_CONTROLLER;
+import static a75f.io.logic.controlcomponents.util.ControllerNames.HEATING_STAGE_CONTROLLER;
 
 import android.content.Context;
 
@@ -37,6 +40,7 @@ import a75f.io.domain.config.AssociationConfig;
 import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.domain.devices.CCUDevice;
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip;
+import a75f.io.domain.equips.DomainEquip;
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip;
 import a75f.io.domain.equips.ConnectModuleEquip;
 import a75f.io.domain.logic.CCUBaseConfigurationBuilder;
@@ -66,6 +70,7 @@ import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig;
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig;
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig;
 import a75f.io.logic.bo.util.DemandResponseMode;
+import a75f.io.logic.controlcomponents.handlers.StageControlHandler;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
@@ -94,12 +99,14 @@ public abstract class SystemProfile
     public double systemHeatingLoopOp;
     public double systemFanLoopOp;
     public double systemCo2LoopOp;
-
+    public double systemCompressorLoop;
+    public double systemDcvLoopOp;
     private boolean isBypassCoolingLockoutActive;
     private boolean isBypassHeatingLockoutActive;
 
     private boolean mechanicalCoolingAvailable;
     private boolean mechanicalHeatingAvailable;
+
 
     private Timer bypassHeatingLockoutTimer;
     private Timer bypassCoolingLockoutTimer;
@@ -1095,4 +1102,24 @@ public abstract class SystemProfile
                 (isHeatingLockoutActive() && getSystemController().getSystemState() == HEATING));
     }
 
+    public enum AnalogMapping {
+        FAN_SPEED,
+        COMPRESSOR_SPEED,
+        DCV_MODULATION
+    }
+
+    public void resetControllers(SystemControllerFactory factory, DomainEquip systemEquip) {
+        StageControlHandler coolingController = factory.getController(COOLING_STAGE_CONTROLLER, systemEquip);
+        if (coolingController != null) {
+            coolingController.resetController();
+        }
+        StageControlHandler heatingController = factory.getController(HEATING_STAGE_CONTROLLER, systemEquip);
+        if (heatingController != null) {
+            heatingController.resetController();
+        }
+        StageControlHandler fanController = factory.getController(FAN_SPEED_CONTROLLER, systemEquip);
+        if (fanController != null) {
+            fanController.resetController();
+        }
+    }
 }

@@ -1,12 +1,16 @@
 package a75f.io.renatus.compose
 
-import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.renatus.R
 import a75f.io.renatus.compose.ComposeUtil.Companion.myFontFamily
+import a75f.io.renatus.modbus.util.ALERT
+import a75f.io.renatus.modbus.util.OK
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
 import a75f.io.renatus.profiles.system.advancedahu.Option
 import a75f.io.renatus.util.CCUUiUtil
+import android.content.Context
+import android.text.Spanned
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,9 +29,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshots.SnapshotMutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,9 +47,6 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -261,6 +262,18 @@ fun StagedFanConfiguration(
             }
         }
     }
+}
+
+fun showErrorDialog(context: Context, message: Spanned) {
+    val builder = AlertDialog.Builder(context)
+    builder.setTitle(ALERT)
+    builder.setIcon(R.drawable.ic_warning)
+    builder.setMessage(message)
+    builder.setCancelable(false)
+    builder.setPositiveButton(OK) { dialog, _ ->
+        dialog.dismiss()
+    }
+    builder.create().show()
 }
 
 @Composable

@@ -315,6 +315,7 @@ public class Globals {
                 Watchdog.getInstance().start();
 
                 migrationHandler.initAddressBand();
+                migrationHandler.doStagedVfdMigration();
                 migrationHandler.updateAhuRefDiagEquip();
             } catch (Exception e) {
                 //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
@@ -358,7 +359,7 @@ public class Globals {
         try {
             String modelsPath = mApplicationContext.getFilesDir().getAbsolutePath() + "/models";
             DiffManger diffManger = new DiffManger(getApplicationContext());
-            if (migrationHandler.isMigrationRequired() && CCUHsApi.getInstance().isCCURegistered()) {
+            if (/*migrationHandler.isMigrationRequired() &&*/ CCUHsApi.getInstance().isCCURegistered()) {
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                 modelSharedPref = Globals.getInstance().mApplicationContext
                         .getSharedPreferences(DOMAIN_MODEL_SF, Context.MODE_PRIVATE);

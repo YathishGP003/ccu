@@ -1,15 +1,15 @@
 package a75f.io.logic.controlcomponents.controlimpls
 
+import a75f.io.domain.api.Point
 import a75f.io.domain.util.CalibratedPoint
-import a75f.io.logger.CcuLog
 import a75f.io.logic.controlcomponents.controls.Constraint
 import a75f.io.logic.controlcomponents.controls.StagedBooleanController
 import a75f.io.logic.controlcomponents.util.logIt
 
 class StagedBooleanControllerImpl(
     private val totalStages: CalibratedPoint,
-    private val stageUpTimer: CalibratedPoint,
-    private val stageDownTimer: CalibratedPoint,
+    private val stageUpTimer: Point,
+    private val stageDownTimer: Point,
     val logTag: String
 ) : StagedBooleanController {
 
@@ -33,7 +33,7 @@ class StagedBooleanControllerImpl(
         onConstraints.toSortedMap().forEach { (stage, constraints) ->
             logIt(logTag, "onConstraints $stage : ${constraints.toList()}")
             val shouldTurnOn = constraints.any { it() }
-            if (stageUpTimer.data > 0) {
+            if (stageUpTimer.readPriorityVal() > 0) {
                 if (shouldTurnOn && !isStageUpTimerActive() && !currentStages.getOrDefault(stage, false)) {
                     activateStageUpTimer()
                     currentStages[stage] = true
@@ -52,7 +52,7 @@ class StagedBooleanControllerImpl(
                 return@forEach
             }
             val shouldTurnOff = constraints.any { it() }
-            if (stageDownTimer.data > 0) {
+            if (stageDownTimer.readPriorityVal() > 0) {
                 if (shouldTurnOff && !isStageDownTimerActive() && currentStages.getOrDefault(stage, false)) {
                     if (stage != 0 && currentStages.getOrDefault(stage - 1, false) && !isStageUpTimerActive()) {
                         activateStageDownTimer()
@@ -70,13 +70,14 @@ class StagedBooleanControllerImpl(
     }
 
     private fun activateStageUpTimer() {
-        logIt(logTag, "Activated Stage UP Timer")
-        upTimer = stageUpTimer.data.toInt() + 1
+        logIt(logTag, "Activated Stage UP Timer ${stageUpTimer.readPriorityVal().toInt()}")
+        upTimer = stageUpTimer.readPriorityVal().toInt() + 1
     }
 
     private fun activateStageDownTimer() {
-        logIt(logTag, "Activated Stage DOWN Timer")
-        downTimer = stageDownTimer.data.toInt() + 1
+        logIt(logTag, "Activated Stage DOWN Timer ${stageDownTimer
+            .readPriorityVal().toInt()}")
+        downTimer = stageDownTimer.readPriorityVal().toInt() + 1
     }
 
     private fun isStageUpTimerActive() = upTimer > 0
@@ -114,4 +115,12 @@ class StagedBooleanControllerImpl(
         return offConstraints[index]
     }
 
+    fun resetStagesAndTimers() {
+        upTimer = 0
+        downTimer = 0
+        currentStages.forEach { (stage, _) ->
+            currentStages[stage] = false
+        }
+        logIt(logTag, "Timers reset to => up: $upTimer, down: $downTimer")
+    }
 }

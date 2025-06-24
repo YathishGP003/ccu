@@ -8,24 +8,24 @@ import a75f.io.logic.controlcomponents.controls.Constraint
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.util.isOccupiedDcvHumidityControl
 
-class HumidifierController(
-    private val humidityPoint: Point, val targetMinHumidity: Point, hysteresis: Point, private val logTag: String, val occupancy : CalibratedPoint
+class DehumidifierController (
+    private val humidityPoint: Point, val targetMaxHumidity: Point, hysteresis: Point, private val logTag: String, val occupancy : CalibratedPoint
 ) : Controller {
     private val controller = GenericBooleanControllerImpl()
 
     init {
         controller.setOnConstraints(listOf(Constraint {
-            humidityPoint.readHisVal() > 0 && humidityPoint.readHisVal() < targetMinHumidity.readPriorityVal() && isOccupiedDcvHumidityControl(occupancy)
+            humidityPoint.readHisVal() > 0 && humidityPoint.readHisVal() > targetMaxHumidity.readPriorityVal() && isOccupiedDcvHumidityControl(occupancy)
         }))
         controller.setOffConstraints(listOf(Constraint {
-            humidityPoint.readHisVal() > 0 && humidityPoint.readHisVal() > (targetMinHumidity.readPriorityVal() + hysteresis.readPriorityVal())
-                    || isOccupiedDcvHumidityControl(occupancy).not()
+            (humidityPoint.readHisVal() < (targetMaxHumidity.readPriorityVal() - hysteresis.readPriorityVal())
+                    || isOccupiedDcvHumidityControl(occupancy).not())
         }))
     }
 
     override fun runController(): Boolean {
-        CcuLog.d(logTag, "Running HumidifierController" +
-                " ${humidityPoint.readHisVal()} , targetMinHumidity ${targetMinHumidity.readPriorityVal()} Status = ${controller.getActiveControl()}" +
+        CcuLog.d(logTag, "Running DeHumidifierController" +
+                " ${humidityPoint.readHisVal()} , targetMinHumidity ${targetMaxHumidity.readPriorityVal()} Status = ${controller.getActiveControl()}" +
                 " Occupancy = ${occupancy.readHisVal()}")
 
         return controller.getActiveControl()

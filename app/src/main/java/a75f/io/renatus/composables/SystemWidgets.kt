@@ -66,15 +66,15 @@ fun SystemRelayMappingView( relayText : String, relayState :Boolean = false, onR
         },
             colors = buttonColors(
                 contentColor = when(buttonState) {
-                    true -> ComposeUtil.primaryColor
-                    false -> ComposeUtil.greyColor
+                    true -> primaryColor
+                    false -> greyColor
                 },
                 containerColor = Color.Transparent
             ),
             shape = RoundedCornerShape(5.dp),
             border = BorderStroke(1.dp, when(buttonState) {
-                true -> ComposeUtil.primaryColor
-                false -> ComposeUtil.greyColor
+                true -> primaryColor
+                false -> greyColor
             }),
             modifier = Modifier
                 .width(72.dp)
@@ -94,6 +94,45 @@ fun SystemRelayMappingView( relayText : String, relayState :Boolean = false, onR
 
     }
 }
+
+
+@Composable
+fun SystemAnalogOutMappingDropDown(
+    analogName: String,
+    analogOutState: Boolean = false,
+    onAnalogOutEnabled: (Boolean) -> Unit,
+    mapping: List<String>,
+    onMappingChanged: (Int) -> Unit,
+    mappingSelection: Int,
+    analogOutValList: List<String>,
+    analogOutVal: Int = 0,
+    dropDownWidthPreview: Int = 160,
+    dropdownWidthExpanded: Int = 160,
+    onAnalogOutChanged: (Int) -> Unit
+) {
+    Row (modifier = Modifier
+        .fillMaxWidth()
+        .padding(start = 20.dp, end = 20.dp), horizontalArrangement = Arrangement.Start){
+        Row {
+            ToggleButtonStateful(defaultSelection = analogOutState, onEnabled = onAnalogOutEnabled )
+            Spacer(modifier = Modifier.width(15.dp))
+            Column {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(text = analogName, fontSize = 20.sp)
+            }
+        }
+        Spacer(modifier=Modifier.width(67.dp))
+
+        DropDownWithLabel(label = "", list = mapping, previewWidth = 280, expandedWidth = 280, spacerLimit = 0,
+            onSelected = onMappingChanged, defaultSelection = mappingSelection, isEnabled = analogOutState)
+
+        Spacer(modifier=Modifier.width(10.dp))
+        DropDownWithLabel(label = "", list = analogOutValList, previewWidth = dropDownWidthPreview, expandedWidth = dropdownWidthExpanded,
+            onSelected = onAnalogOutChanged, defaultSelection = analogOutVal)
+    }
+}
+
+
 
 @Composable
 fun SystemAnalogOutMappingView( analogName : String, analogOutState :Boolean = false, onAnalogOutEnabled: (Boolean) -> Unit,
@@ -205,15 +244,15 @@ fun SystemAnalogOutMappingViewButtonComposable(
         },
             colors = buttonColors(
                 contentColor = when(buttonState) {
-                    true -> ComposeUtil.primaryColor
-                    false -> ComposeUtil.greyColor
+                    true -> primaryColor
+                    false -> greyColor
                 },
                 containerColor = Color.Transparent
             ),
             shape = RoundedCornerShape(5.dp),
             border = BorderStroke(1.dp, when(buttonState) {
-                true -> ComposeUtil.primaryColor
-                false -> ComposeUtil.greyColor
+                true -> primaryColor
+                false -> greyColor
             }),
             modifier = Modifier
                 .width(80.dp)
@@ -228,27 +267,6 @@ fun SystemAnalogOutMappingViewButtonComposable(
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Left,
                 modifier = Modifier.wrapContentSize(Alignment.Center))
-        }
-    }
-}
-
-@Composable
-fun TogglePointView(
-    pointText: String, pointState: Boolean = false, onPointEnabled: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 25.dp, end = 0.dp),
-        horizontalArrangement = Arrangement.Start
-    ) {
-        Row {
-            ToggleButtonStateful(defaultSelection = pointState, onEnabled = onPointEnabled)
-            Spacer(modifier = Modifier.width(30.dp))
-            Column {
-                Spacer(modifier=Modifier.height(6.dp))
-                Text(text = pointText, fontSize = 20.sp)
-            }
         }
     }
 }
@@ -268,7 +286,9 @@ fun SwitchWithLabel(label: String, isChecked: Boolean, onCheckedChange: (Boolean
                 Icon(
                     imageVector = if (isChecked) Icons.Filled.Check else Icons.Filled.Close,
                     contentDescription = null,
-                    modifier = Modifier.size(SwitchDefaults.IconSize).padding(0.dp)
+                    modifier = Modifier
+                        .size(SwitchDefaults.IconSize)
+                        .padding(0.dp)
                 )
             },
             colors = SwitchDefaults.colors(
@@ -297,7 +317,9 @@ fun SimpleSwitch(isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
                 Icon(
                     imageVector = if (isChecked) Icons.Filled.Check else Icons.Filled.Close,
                     contentDescription = null,
-                    modifier = Modifier.size(SwitchDefaults.IconSize).padding(0.dp)
+                    modifier = Modifier
+                        .size(SwitchDefaults.IconSize)
+                        .padding(0.dp)
                 )
             },
             colors = SwitchDefaults.colors(
@@ -326,7 +348,9 @@ fun SwitchWithLabelOnRight(label: String, isChecked: Boolean, onCheckedChange: (
                 Icon(
                     imageVector = if (isChecked) Icons.Filled.Check else Icons.Filled.Close,
                     contentDescription = null,
-                    modifier = Modifier.size(SwitchDefaults.IconSize).padding(0.dp)
+                    modifier = Modifier
+                        .size(SwitchDefaults.IconSize)
+                        .padding(0.dp)
                 )
             },
             colors = SwitchDefaults.colors(
@@ -342,6 +366,46 @@ fun SwitchWithLabelOnRight(label: String, isChecked: Boolean, onCheckedChange: (
         )
         Spacer(modifier = Modifier.padding(16.dp))
         Text(text = label, fontSize = 20.sp, modifier = Modifier.padding(end = 8.dp))
+    }
+}
+
+
+@Composable
+fun AddInputWidget(
+    inputName: String,
+    inputState: Boolean = false,
+    onEnabled: (Boolean) -> Unit,
+    mapping: List<String>,
+    onMappingChanged: (Int) -> Unit,
+    mappingSelection: Int,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp, end = 20.dp), horizontalArrangement = Arrangement.Start
+    ) {
+        Row {
+            ToggleButtonStateful(defaultSelection = inputState, onEnabled = onEnabled)
+            Spacer(modifier = Modifier.width(10.dp))
+            Column {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(text = inputName, fontSize = 20.sp, modifier = Modifier.width(135.dp)  )
+            }
+        }
+        Spacer(modifier = Modifier.width(67.dp))
+
+        DropDownWithLabel(
+            label = "",
+            list = mapping,
+            previewWidth = 280,
+            expandedWidth = 300,
+            spacerLimit = 0,
+            onSelected = onMappingChanged,
+            defaultSelection = mappingSelection,
+            isEnabled = inputState
+        )
+
+        Spacer(modifier = Modifier.width(20.dp))
     }
 }
 

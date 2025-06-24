@@ -48,4 +48,7 @@ class AuxHeatingController(
     fun addOffConstraint(constraint: Constraint) {
         controller.addOffConstraints(constraint)
     }
+    override fun resetController() {
+        CcuLog.d(L.TAG_CCU_SYSTEM, "Resetting $controllerName")
+    }
 }

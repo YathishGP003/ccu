@@ -45,7 +45,7 @@ open class StagedRtuFragment : Fragment() {
                     UnusedPortsModel.setPortState("Relay 2", it, viewModel.profileConfiguration)
             },
             mappingSelection = viewModel.viewState.value.relay2Association,
-            mapping = viewModel.relay2AssociationList,
+            mapping = viewModel.relay1AssociationList,
             onMappingChanged = {
                 viewModel.viewState.value.relay2Association = it
                 viewModel.setStateChanged()
@@ -65,7 +65,7 @@ open class StagedRtuFragment : Fragment() {
                     UnusedPortsModel.setPortState("Relay 3", it, viewModel.profileConfiguration)
             },
             mappingSelection = viewModel.viewState.value.relay3Association,
-            mapping = viewModel.relay3AssociationList,
+            mapping = viewModel.relay1AssociationList,
             onMappingChanged = {
                 viewModel.viewState.value.relay3Association = it
                 viewModel.setStateChanged()
@@ -85,7 +85,7 @@ open class StagedRtuFragment : Fragment() {
                     UnusedPortsModel.setPortState("Relay 4", it, viewModel.profileConfiguration)
             },
             mappingSelection = viewModel.viewState.value.relay4Association,
-            mapping = viewModel.relay4AssociationList,
+            mapping = viewModel.relay1AssociationList,
             onMappingChanged = {
                 viewModel.viewState.value.relay4Association = it
                 viewModel.setStateChanged()
@@ -105,7 +105,7 @@ open class StagedRtuFragment : Fragment() {
                     UnusedPortsModel.setPortState("Relay 5", it, viewModel.profileConfiguration)
             },
             mappingSelection = viewModel.viewState.value.relay5Association,
-            mapping = viewModel.relay5AssociationList,
+            mapping = viewModel.relay1AssociationList,
             onMappingChanged = {
                 viewModel.viewState.value.relay5Association = it
                 viewModel.setStateChanged()
@@ -125,7 +125,7 @@ open class StagedRtuFragment : Fragment() {
                     UnusedPortsModel.setPortState("Relay 6", it, viewModel.profileConfiguration)
             },
             mappingSelection = viewModel.viewState.value.relay6Association,
-            mapping = viewModel.relay6AssociationList,
+            mapping = viewModel.relay1AssociationList,
             onMappingChanged = {
                 viewModel.viewState.value.relay6Association = it
                 viewModel.setStateChanged()
@@ -145,7 +145,7 @@ open class StagedRtuFragment : Fragment() {
                     UnusedPortsModel.setPortState("Relay 7", it, viewModel.profileConfiguration)
             },
             mappingSelection = viewModel.viewState.value.relay7Association,
-            mapping = viewModel.relay7AssociationList,
+            mapping = viewModel.relay1AssociationList,
             onMappingChanged = {
                 viewModel.viewState.value.relay7Association = it
                 viewModel.setStateChanged()

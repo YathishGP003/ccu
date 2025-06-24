@@ -5,6 +5,7 @@ import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_3;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_4;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_5;
+import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.getModulatedOutput;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,53 +62,79 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         }
     }
     
-    @Override
-    public boolean isCoolingAvailable() {
-        return (coolingStages > 0 );
-    }
-    
-    @Override
-    public boolean isHeatingAvailable() {
-        return (heatingStages > 0);
-    }
-    
     public synchronized void updateSystemPoints() {
         super.updateSystemPoints();
         VavStagedVfdSystemEquip vfdSystemEquip = (VavStagedVfdSystemEquip) systemEquip;
+
+        if (vfdSystemEquip.getAnalog2OutputEnable().readDefaultVal() > 0) {
+            handleAnalogOutControl(vfdSystemEquip);
+        } else {
+            CcuLog.d(L.TAG_CCU_SYSTEM, "Analog2 output is disabled, skipping analog mapping.");
+        }
+    }
+
+    public void handleAnalogOutControl(VavStagedVfdSystemEquip vfdSystemEquip) {
+        int association = (int) vfdSystemEquip.getAnalog2OutputAssociation().readDefaultVal();
+        AnalogMapping mapping = AnalogMapping.values()[association];
+        switch (mapping) {
+            case FAN_SPEED:
+                handleFanSpeed(vfdSystemEquip);
+                break;
+            case COMPRESSOR_SPEED:
+                handleCompressorSpeed(vfdSystemEquip);
+                break;
+            case DCV_MODULATION:
+                handleDcvModulation(vfdSystemEquip);
+                break;
+        }
+    }
+
+    private void handleFanSpeed(VavStagedVfdSystemEquip vfdSystemEquip) {
         boolean isEconomizingAvailable = CCUHsApi.getInstance().readHisValByQuery("point and oao and economizing and available") > 0.0;
+
         double epidemicMode = vfdSystemEquip.getEpidemicModeSystemState().readHisVal();
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
         double signal = 0;
         if (vfdSystemEquip.getAnalog2OutputEnable().readDefaultVal() > 0) {
-            if (isCoolingActive()) {
-                if (getDomainPointForStage(COOLING_5).readHisVal() > 0) {
+            if (isCoolingActive() || isCompressorActive()) {
+                if (getDomainPointForStage(COOLING_5).readHisVal() > 0
+                        || getDomainPointForStage(Stage.COMPRESSOR_5).readHisVal() > 0) {
                     signal = vfdSystemEquip.getAnalog2CoolStage5().readDefaultVal();
-                } else if (getDomainPointForStage(COOLING_4).readHisVal() > 0) {
+                } else if (getDomainPointForStage(COOLING_4).readHisVal() > 0
+                        || getDomainPointForStage(Stage.COMPRESSOR_4).readHisVal() > 0) {
                     signal = vfdSystemEquip.getAnalog2CoolStage4().readDefaultVal();
-                } else if (getDomainPointForStage(COOLING_3).readHisVal() > 0) {
+                } else if (getDomainPointForStage(COOLING_3).readHisVal() > 0
+                        || getDomainPointForStage(Stage.COMPRESSOR_3).readHisVal() > 0) {
                     signal = vfdSystemEquip.getAnalog2CoolStage3().readDefaultVal();
-                } else if (getDomainPointForStage(COOLING_2).readHisVal() > 0) {
+                } else if (getDomainPointForStage(COOLING_2).readHisVal() > 0
+                        || getDomainPointForStage(Stage.COMPRESSOR_2).readHisVal() > 0) {
                     signal = vfdSystemEquip.getAnalog2CoolStage2().readDefaultVal();
-                } else if (getDomainPointForStage(COOLING_1).readHisVal() > 0) {
+                } else if (getDomainPointForStage(COOLING_1).readHisVal() > 0
+                        || getDomainPointForStage(Stage.COMPRESSOR_1).readHisVal() > 0) {
                     signal = vfdSystemEquip.getAnalog2CoolStage1().readDefaultVal();
                 }
             }
             else if (isHeatingActive()) {
-                if (getDomainPointForStage(Stage.HEATING_5).readHisVal() > 0) {
+                if (getDomainPointForStage(Stage.HEATING_5).readHisVal() > 0
+                        || getDomainPointForStage(Stage.COMPRESSOR_5).readHisVal() > 0) {
                     signal = vfdSystemEquip.getAnalog2HeatStage5().readDefaultVal();
-                } else if (getDomainPointForStage(Stage.HEATING_4).readHisVal() > 0) {
+                } else if (getDomainPointForStage(Stage.HEATING_4).readHisVal() > 0
+                        || getDomainPointForStage(Stage.COMPRESSOR_4).readHisVal() > 0) {
                     signal = vfdSystemEquip.getAnalog2HeatStage4().readDefaultVal();
-                } else if (getDomainPointForStage(Stage.HEATING_3).readHisVal() > 0) {
+                } else if (getDomainPointForStage(Stage.HEATING_3).readHisVal() > 0
+                        || getDomainPointForStage(Stage.COMPRESSOR_3).readHisVal() > 0) {
                     signal = vfdSystemEquip.getAnalog2HeatStage3().readDefaultVal();
-                } else if (getDomainPointForStage(Stage.HEATING_2).readHisVal() > 0) {
+                } else if (getDomainPointForStage(Stage.HEATING_2).readHisVal() > 0
+                        || getDomainPointForStage(Stage.COMPRESSOR_2).readHisVal() > 0) {
                     signal = vfdSystemEquip.getAnalog2HeatStage2().readDefaultVal();
-                } else if (getDomainPointForStage(Stage.HEATING_1).readHisVal() > 0) {
+                } else if (getDomainPointForStage(Stage.HEATING_1).readHisVal() > 0
+                        || getDomainPointForStage(Stage.COMPRESSOR_1).readHisVal() > 0) {
                     signal = vfdSystemEquip.getAnalog2HeatStage1().readDefaultVal();
                 }
             } else if (isEconomizingAvailable && (systemCoolingLoopOp > 0)){
-                signal = vfdSystemEquip.getAnalog2Economizer().readDefaultVal();//getConfigVal("analog2 and economizer");
+                signal = vfdSystemEquip.getAnalog2Economizer().readDefaultVal();
             }
-            else if (systemEquip.getFanStage1().readHisVal() > 0/*stageStatus[FAN_1.ordinal()] > 0*/) {
+            else if (systemEquip.getConditioningStages().getFanStage1().readHisVal() > 0) {
                 signal = vfdSystemEquip.getAnalog2Recirculate().readDefaultVal();
             }
             else {
@@ -115,7 +142,6 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                 signal = vfdSystemEquip.getAnalog2Default().readDefaultVal();
             }
 
-            //TODO- Part of OAO. Should be moved to domainName after OAO is moved to DM
             if((epidemicState == EpidemicState.PREPURGE) && L.ccu().oaoProfile != null){
                 double smartPrePurgeFanSpeed = L.ccu().oaoProfile.getOAOEquip().getSystemPrePurgeFanSpeedTuner().readPriorityVal();
                 signal = Math.max(signal,smartPrePurgeFanSpeed / ANALOG_SCALE);
@@ -139,7 +165,38 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         signal = Domain.cmBoardDevice.getAnalog2Out().readHisVal();
         CcuLog.d(L.TAG_CCU_SYSTEM, " analog2 Signal : "+ signal);
     }
-    
+    private void handleCompressorSpeed(VavStagedVfdSystemEquip vfdSystemEquip) {
+        double min = vfdSystemEquip.getAnalog2MinCompressorSpeed().readDefaultVal();
+        if ((systemCoolingLoopOp > 0 && isCoolingLockoutActive()) ||
+                (systemHeatingLoopOp > 0 && isHeatingLockoutActive())) {
+            double signal = ANALOG_SCALE * min; // Use minimum value when in lockout
+            vfdSystemEquip.getCompressorSpeed().writeHisVal(signal);
+            Domain.cmBoardDevice.getAnalog2Out().writeHisVal(signal);
+            CcuLog.d(L.TAG_CCU_SYSTEM, " Lockout Active : Compressor speed Signal : " + signal);
+            return;
+        }
+        double max = vfdSystemEquip.getAnalog2MaxCompressorSpeed().readDefaultVal();
+        double signal = ANALOG_SCALE * getModulatedOutput(systemCompressorLoop, min, max);
+        vfdSystemEquip.getCompressorSpeed().writePointValue(signal);
+        signal = vfdSystemEquip.getCompressorSpeed().readHisVal();
+        Domain.cmBoardDevice.getAnalog2Out().writePointValue(signal);
+        CcuLog.d(L.TAG_CCU_SYSTEM, " analog2 Compressor speed Signal : " + signal);
+    }
+
+    private void handleDcvModulation(VavStagedVfdSystemEquip vfdSystemEquip) {
+        double signal;
+        double min = vfdSystemEquip.getAnalog2MinDCVDamper().readDefaultVal();
+        if (isSystemOccupiedForDcv() && vfdSystemEquip.getConditioningMode().readPriorityVal() > 0) {
+            double max = vfdSystemEquip.getAnalog2MaxDCVDamper().readDefaultVal();
+            signal = ANALOG_SCALE * getModulatedOutput(systemCo2LoopOp, min, max);
+        } else {
+            signal = ANALOG_SCALE * min; // Use minimum value when not occupied
+        }
+        vfdSystemEquip.getDamperModulation().writePointValue(signal);
+        signal = vfdSystemEquip.getDamperModulation().readHisVal();
+        Domain.cmBoardDevice.getAnalog2Out().writePointValue(signal);
+        CcuLog.d(L.TAG_CCU_SYSTEM, " analog2 DCV Damper Signal : " + signal);
+    }
     @Override
     public synchronized void deleteSystemEquip() {
 

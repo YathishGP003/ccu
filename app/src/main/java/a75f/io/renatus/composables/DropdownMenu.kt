@@ -61,7 +61,7 @@ fun DropDownWithLabel(
     onSelected: (Int) -> Unit, defaultSelection: Int = 0,spacerLimit:Int=80,paddingLimit:Int=0,heightValue:Int= 435
     , isHeader : Boolean = true, isEnabled : Boolean = true, disabledIndices: List<Int> = emptyList(),labelWidth :Int = 216){
 
-    var modifiedList = ComposeUtil.getModifiedList(list)
+    //var modifiedList = ComposeUtil.getModifiedList(list)
     Row {
         Box(modifier = Modifier.wrapContentWidth(), contentAlignment = Alignment.Center) {
             if (isHeader) {
@@ -86,7 +86,7 @@ fun DropDownWithLabel(
             Column() {
                 Row {
                     Text(
-                        modifiedList[selectedIndex],
+                        list[selectedIndex],
                         modifier = Modifier.width((previewWidth ).dp).height(35.dp)
                             .clickable(onClick = { if(isEnabled) expanded = true }, enabled = isEnabled),
                         fontSize = 22.sp,
@@ -127,7 +127,7 @@ fun DropDownWithLabel(
                                   .width((expandedWidth).dp)
                                   .height((customHeight).dp)) {
 
-                      itemsIndexed(modifiedList) { index, s ->
+                      itemsIndexed(list) { index, s ->
                           DropdownMenuItem(onClick = {
                               selectedIndex = index
                               expanded = false

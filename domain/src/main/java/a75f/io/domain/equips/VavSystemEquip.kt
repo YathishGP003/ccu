@@ -2,6 +2,7 @@ package a75f.io.domain.equips
 
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.util.CalibratedPoint
 
 open class VavSystemEquip(equipRef : String) : SystemEquip(equipRef) {
 
@@ -68,4 +69,5 @@ open class VavSystemEquip(equipRef : String) : SystemEquip(equipRef) {
 
     //others
     val systemPurgeVavMinFanLoopOutput = Point(DomainName.systemPurgeVavMinFanLoopOutput , equipRef)
+    val currentOccupancy = CalibratedPoint(DomainName.occupancyMode , equipRef, 0.0)
 }

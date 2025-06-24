@@ -75,8 +75,8 @@ public class MeshNetwork extends DeviceNetwork
         }
 
         MeshUtil.tSleep(1000);
-        boolean sendControlMessage = (((System.currentTimeMillis() -  HyperStatSettingsUtil.Companion.getCcuControlMessageTimer())/ 1000) / 60)>20;
-        boolean myStatControlMsg = (((System.currentTimeMillis() -  MyStatMsgSender.INSTANCE.getCcuControlMessageTimer())/ 1000) / 60)>20;
+        boolean sendControlMessage = (((System.currentTimeMillis() - HyperStatSettingsUtil.Companion.getCcuControlMessageTimer()) / 1000) / 60) > 20;
+        boolean myStatControlMsg = (((System.currentTimeMillis() - MyStatMsgSender.INSTANCE.getCcuControlMessageTimer()) / 1000) / 60) > 20;
         boolean bSeedMessage = LSerial.getInstance().isReseedMessage();
         CcuLog.i(L.TAG_CCU_DEVICE, "bSeedMessage: "+bSeedMessage);
 

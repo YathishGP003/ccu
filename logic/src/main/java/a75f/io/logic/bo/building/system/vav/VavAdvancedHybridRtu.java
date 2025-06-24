@@ -8,6 +8,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.equips.VavStagedVfdSystemEquip;
 import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
@@ -26,7 +28,13 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
+import a75f.io.logic.util.SystemProfileUtil;
 
+import static a75f.io.logic.bo.building.hvac.Stage.COMPRESSOR_1;
+import static a75f.io.logic.bo.building.hvac.Stage.COMPRESSOR_2;
+import static a75f.io.logic.bo.building.hvac.Stage.COMPRESSOR_3;
+import static a75f.io.logic.bo.building.hvac.Stage.COMPRESSOR_4;
+import static a75f.io.logic.bo.building.hvac.Stage.COMPRESSOR_5;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_3;
@@ -35,6 +43,8 @@ import static a75f.io.logic.bo.building.hvac.Stage.COOLING_5;
 import static a75f.io.logic.bo.building.hvac.Stage.DEHUMIDIFIER;
 import static a75f.io.logic.bo.building.hvac.Stage.FAN_1;
 import static a75f.io.logic.bo.building.hvac.Stage.FAN_2;
+import static a75f.io.logic.bo.building.hvac.Stage.FAN_3;
+import static a75f.io.logic.bo.building.hvac.Stage.FAN_4;
 import static a75f.io.logic.bo.building.hvac.Stage.FAN_5;
 import static a75f.io.logic.bo.building.hvac.Stage.HEATING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.HEATING_2;
@@ -56,7 +66,10 @@ import android.content.Intent;
 public class VavAdvancedHybridRtu extends VavStagedRtu
 {
     private static final int ANALOG_SCALE = 10;
-    
+
+
+    private int[] stageStatus = new int[27];
+
     @Override
     public String getProfileName()
     {
@@ -67,7 +80,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
     public ProfileType getProfileType() {
         return ProfileType.SYSTEM_VAV_HYBRID_RTU;
     }
-    
+
     @Override
     public void addSystemEquip() {
         CCUHsApi hayStack = CCUHsApi.getInstance();
@@ -123,6 +136,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         }
         VavSystemController.getInstance().runVavSystemControlAlgo();
         updateSystemPoints();
+        CcuLog.d(L.TAG_CCU_SYSTEM, "Relays Status: " + Arrays.toString(stageStatus));
         setTrTargetVals();
         if (trSystem != null) {
             trSystem.resetRequests();
@@ -786,6 +800,57 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         return false;
     }
 
+    public String getStatusMessageDeprecated(){
+        StringBuilder status = new StringBuilder();
+
+        status.append((stageStatus[FAN_1.ordinal()] > 0) ? "1":"");
+        status.append((stageStatus[FAN_2.ordinal()] > 0) ? ",2":"");
+        status.append((stageStatus[FAN_3.ordinal()] > 0) ? ",3":"");
+        status.append((stageStatus[FAN_4.ordinal()] > 0) ? ",4":"");
+        status.append((stageStatus[FAN_5.ordinal()] > 0) ? ",5":"");
+
+        if (!status.toString().equals("")) {
+            status.insert(0, "Fan Stage ");
+            status.append(" ON ");
+        }
+        if (isCoolingActive() || (systemCoolingLoopOp > 0 && isCompressorActive())) {
+            status.append("| Cooling Stage ").append((stageStatus[COOLING_1.ordinal()] > 0 || stageStatus[COMPRESSOR_1.ordinal()] > 0) ? "1" : "");
+            status.append((stageStatus[COOLING_2.ordinal()] > 0 || stageStatus[COMPRESSOR_2.ordinal()] > 0) ? ",2" : "");
+            status.append((stageStatus[COOLING_3.ordinal()] > 0 || stageStatus[COMPRESSOR_3.ordinal()] > 0) ? ",3" : "");
+            status.append((stageStatus[COOLING_4.ordinal()] > 0 || stageStatus[COMPRESSOR_4.ordinal()] > 0) ? ",4" : "");
+            status.append((stageStatus[COOLING_5.ordinal()] > 0 || stageStatus[COMPRESSOR_5.ordinal()] > 0) ? ",5 ON " : " ON ");
+        }
+
+        if (isHeatingActive() || (systemHeatingLoopOp > 0 && isCompressorActive())) {
+            status.append("| Heating Stage ").append((stageStatus[HEATING_1.ordinal()] > 0 || stageStatus[COMPRESSOR_1.ordinal()] > 0) ? "1" : "");
+            status.append((stageStatus[HEATING_2.ordinal()] > 0 || stageStatus[COMPRESSOR_2.ordinal()] > 0) ? ",2" : "");
+            status.append((stageStatus[HEATING_3.ordinal()] > 0 || stageStatus[COMPRESSOR_3.ordinal()] > 0) ? ",3" : "");
+            status.append((stageStatus[HEATING_4.ordinal()] > 0 || stageStatus[COMPRESSOR_4.ordinal()] > 0) ? ",4" : "");
+            status.append((stageStatus[HEATING_5.ordinal()] > 0 || stageStatus[COMPRESSOR_5.ordinal()] > 0) ? ",5 ON" : " ON");
+        }
+        if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
+            status.insert(0, "Free Cooling Used | ");
+        }
+        if (L.ccu().systemProfile instanceof VavStagedRtuWithVfd) {
+            VavStagedVfdSystemEquip vfdSystemEquip = (VavStagedVfdSystemEquip) Domain.systemEquip;
+            status.append(vfdSystemEquip.getFanSignal().readHisVal() > 0 ? " Analog Fan ON " : "");
+        }
+
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU) {
+            return status.toString().isEmpty() ? "System OFF" + SystemProfileUtil.isDeHumidifierOn()
+                    + SystemProfileUtil.isHumidifierOn() : status + SystemProfileUtil.isDeHumidifierOn()
+                    + (SystemProfileUtil.isHumidifierOn());
+        }
+
+        String humidifierStatus = getRelayMappingForStage(HUMIDIFIER).isEmpty() ? "" :
+                systemEquip.getConditioningStages().getHumidifierEnable().readHisVal() > 0 ? " | Humidifier ON " : " | Humidifier OFF ";
+        String dehumidifierStatus = getRelayMappingForStage(DEHUMIDIFIER).isEmpty() ? "" :
+                systemEquip.getConditioningStages().getDehumidifierEnable().readHisVal() > 0 ? " | Dehumidifier ON " : " | Dehumidifier OFF ";
+
+        return status.toString().equals("") ? "System OFF" + humidifierStatus + dehumidifierStatus :
+                status + humidifierStatus + dehumidifierStatus;
+    }
+
     @Override
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();
@@ -804,9 +869,9 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         }
         
         if (!status.toString().equals("")) {
-            status.insert(0, super.getStatusMessage()+" | Analog ");
+            status.insert(0, getStatusMessageDeprecated()+" | Analog ");
         } else {
-            status.append(super.getStatusMessage());
+            status.append(getStatusMessageDeprecated());
         }
     
         return status.toString().equals("")? "System OFF" : status.toString();

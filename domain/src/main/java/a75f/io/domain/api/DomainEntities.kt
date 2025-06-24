@@ -152,7 +152,7 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
         Domain.hayStack.writeHisValById(id, hisVal)
     }
 
-    fun readPriorityVal() : Double {
+    open fun readPriorityVal() : Double {
         requireId()
         val priorityVal = Domain.hayStack.readPointPriorityVal(id)
         if (priorityVal == 0.0) {

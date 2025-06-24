@@ -95,6 +95,7 @@ class MyStatControlFactory(
                         equip.zoneHumidity,
                         equip.targetHumidifier,
                         equip.standaloneRelayActivationHysteresis,
+                        occupancy = equip.zoneOccupancyState,
                         logTag = L.TAG_CCU_MSCPU
                     )
                 }
@@ -105,6 +106,7 @@ class MyStatControlFactory(
                         equip.zoneHumidity,
                         equip.targetDehumidifier,
                         equip.standaloneRelayActivationHysteresis,
+                        occupancy = equip.zoneOccupancyState,
                         logTag = L.TAG_CCU_MSCPU
                     )
                 }
@@ -180,6 +182,7 @@ class MyStatControlFactory(
                         equip.zoneHumidity,
                         equip.targetHumidifier,
                         equip.standaloneRelayActivationHysteresis,
+                        occupancy = equip.zoneOccupancyState,
                         logTag = L.TAG_CCU_MSPIPE2
                     )
                 }
@@ -190,6 +193,7 @@ class MyStatControlFactory(
                         equip.zoneHumidity,
                         equip.targetDehumidifier,
                         equip.standaloneRelayActivationHysteresis,
+                        occupancy = equip.zoneOccupancyState,
                         logTag = L.TAG_CCU_MSPIPE2
                     )
                 }
@@ -267,6 +271,7 @@ class MyStatControlFactory(
                         equip.zoneHumidity,
                         equip.targetHumidifier,
                         equip.standaloneRelayActivationHysteresis,
+                        occupancy = equip.zoneOccupancyState,
                         logTag = L.TAG_CCU_MSHPU
                     )
                 }
@@ -277,6 +282,7 @@ class MyStatControlFactory(
                         equip.zoneHumidity,
                         equip.targetDehumidifier,
                         equip.standaloneRelayActivationHysteresis,
+                        occupancy = equip.zoneOccupancyState,
                         logTag = L.TAG_CCU_MSHPU
                     )
                 }

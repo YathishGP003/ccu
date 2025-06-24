@@ -95,6 +95,7 @@ class HyperStatControlFactory(
                         equip.zoneHumidity,
                         equip.targetHumidifier,
                         equip.standaloneRelayActivationHysteresis,
+                        occupancy = equip.zoneOccupancyState,
                         logTag = L.TAG_CCU_HSCPU
                     )
                 }
@@ -105,6 +106,7 @@ class HyperStatControlFactory(
                         equip.zoneHumidity,
                         equip.targetDehumidifier,
                         equip.standaloneRelayActivationHysteresis,
+                        occupancy = equip.zoneOccupancyState,
                         logTag = L.TAG_CCU_HSCPU
                     )
                 }
@@ -195,6 +197,7 @@ class HyperStatControlFactory(
                         equip.zoneHumidity,
                         equip.targetHumidifier,
                         equip.standaloneRelayActivationHysteresis,
+                        occupancy = equip.zoneOccupancyState,
                         logTag = L.TAG_CCU_HSHPU
                     )
                 }
@@ -205,6 +208,7 @@ class HyperStatControlFactory(
                         equip.zoneHumidity,
                         equip.targetDehumidifier,
                         equip.standaloneRelayActivationHysteresis,
+                        occupancy = equip.zoneOccupancyState,
                         logTag = L.TAG_CCU_HSHPU
                     )
                 }
@@ -305,6 +309,7 @@ class HyperStatControlFactory(
                         equip.zoneHumidity,
                         equip.targetHumidifier,
                         equip.standaloneRelayActivationHysteresis,
+                        occupancy = equip.zoneOccupancyState,
                         logTag = L.TAG_CCU_HSPIPE2
                     )
                 }
@@ -315,6 +320,7 @@ class HyperStatControlFactory(
                         equip.zoneHumidity,
                         equip.targetDehumidifier,
                         equip.standaloneRelayActivationHysteresis,
+                        occupancy = equip.zoneOccupancyState,
                         logTag = L.TAG_CCU_HSPIPE2
                     )
                 }

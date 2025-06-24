@@ -11,16 +11,19 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd
 import a75f.io.logic.bo.building.system.setFanTypeToStages
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.BuildConfig
+import a75f.io.renatus.compose.showErrorDialog
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.content.Context
+import android.text.Html
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -55,7 +58,71 @@ class DabStagedVfdRtuViewModel : DabStagedRtuBaseViewModel() {
 
     }
 
+
+    private fun isValidConfiguration(): Boolean {
+        val config = profileConfiguration as StagedVfdRtuProfileConfig
+        val compressorAvailable =
+            config.isAnyRelayEnabledAndMapped(Stage.COMPRESSOR_1.ordinal) ||
+                    config.isAnyRelayEnabledAndMapped(Stage.COMPRESSOR_2.ordinal) ||
+                    config.isAnyRelayEnabledAndMapped(Stage.COMPRESSOR_3.ordinal) ||
+                    config.isAnyRelayEnabledAndMapped(Stage.COMPRESSOR_4.ordinal) ||
+                    config.isAnyRelayEnabledAndMapped(Stage.COMPRESSOR_5.ordinal) ||
+                    config.isAnyAnalogOut2EnabledAndMapped(StagedRTUAnalogOutMappings.COMPRESSOR_SPEED.ordinal)
+
+        val changeOverCooling =
+            profileConfiguration.isAnyRelayEnabledAndMapped(Stage.CHANGE_OVER_COOLING.ordinal)
+        val changeOverHeating =
+            profileConfiguration.isAnyRelayEnabledAndMapped(Stage.CHANGE_OVER_HEATING.ordinal)
+
+        if (compressorAvailable) {
+            if (!changeOverCooling && !changeOverHeating) {
+                showErrorDialog(
+                    context,
+                    Html.fromHtml(
+                        "<b>The compressor is mapped, but the O/B changeover relay is not mapped.</b>",
+                        Html.FROM_HTML_MODE_LEGACY
+                    )
+                )
+                return false
+            }
+            if (changeOverCooling && changeOverHeating) {
+                showErrorDialog(
+                    context,
+                    Html.fromHtml(
+                        "<b>The O/B changeover relay is mapped for both cooling and heating. Please select only one.</b>",
+                        Html.FROM_HTML_MODE_LEGACY
+                    )
+                )
+                return false
+            }
+
+        } else {
+            if (changeOverCooling || changeOverHeating) {
+                showErrorDialog(
+                    context,
+                    Html.fromHtml(
+                        "<b>The O/B changeover relay is mapped, but the compressor is not mapped.</b>",
+                        Html.FROM_HTML_MODE_LEGACY
+                    )
+                )
+                return false
+            }
+        }
+        return true
+    }
+
     override fun saveConfiguration() {
+
+        val vfdViewState = viewState.value as StagedRtuVfdViewState
+        val vfdConfig = profileConfiguration as StagedVfdRtuProfileConfig
+        vfdViewState.updateConfigFromViewState(vfdConfig)
+
+        if (!isValidConfiguration()) {
+            viewState.value.isSaveRequired = true
+            viewState.value.isStateChanged = true
+            return
+        }
+
         hayStack.resetCcuReady()
         var systemEquipId : String? = null
         if(BuildConfig.BUILD_TYPE == CARRIER_PROD){
@@ -67,9 +134,7 @@ class DabStagedVfdRtuViewModel : DabStagedRtuBaseViewModel() {
             val systemEquip = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
             if (systemEquip["profile"].toString() != "dabStagedRtuVfdFan" &&
                 systemEquip["profile"].toString() != ProfileType.SYSTEM_DAB_STAGED_VFD_RTU.name) {
-                val vfdViewState = viewState.value as StagedRtuVfdViewState
-                val vfdConfig = profileConfiguration as StagedVfdRtuProfileConfig
-                vfdViewState.updateConfigFromViewState(vfdConfig)
+
                 CcuLog.d(Tags.ADD_REMOVE_PROFILE, "DabStagedVfdRtuViewModel removing profile with it -->${systemEquip["id"].toString()}")
                 deleteSystemProfile(systemEquip["id"].toString())
                 systemEquipId = createNewEquip(systemEquip["id"].toString())

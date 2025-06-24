@@ -127,7 +127,7 @@ public class PreferenceUtil {
 
     private static final String MIGRATE_DELETE_REDUNDANT_OAO_POINTS_BY_SYSTEM_EQUIP = "migrateDeleteRedundantOaoPointsBySystemEquip";
 
-
+    private static final String MIGRATE_VFD_FAN_MODE = "migrateVfdFanMode";
     public static void setContext(Context c) {
         context= c;
     }
@@ -977,6 +977,13 @@ public class PreferenceUtil {
     }
     public static void setMigrateDeleteRedundantOaoPointsBySystemEquip() {
         setBooleanPreference(MIGRATE_DELETE_REDUNDANT_OAO_POINTS_BY_SYSTEM_EQUIP, true);
+    }
+
+    public static boolean getMigrateVfdFanMode() {
+        return getBooleanPreference(MIGRATE_VFD_FAN_MODE);
+    }
+    public static void setMigrateVfdFanMode() {
+        setBooleanPreference(MIGRATE_VFD_FAN_MODE, true);
     }
 
     public static boolean getCopyModbusPoints() {

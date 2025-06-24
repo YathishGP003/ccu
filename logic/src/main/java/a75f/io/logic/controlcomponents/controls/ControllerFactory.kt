@@ -5,12 +5,12 @@ import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logic.controlcomponents.handlers.AuxHeatingController
 import a75f.io.logic.controlcomponents.handlers.DcvDamperController
+import a75f.io.logic.controlcomponents.handlers.DehumidifierController
 import a75f.io.logic.controlcomponents.handlers.EnableController
 import a75f.io.logic.controlcomponents.handlers.FanEnableController
 import a75f.io.logic.controlcomponents.handlers.HumidifierController
 import a75f.io.logic.controlcomponents.handlers.OccupiedEnabledController
 import a75f.io.logic.controlcomponents.handlers.StageControlHandler
-import a75f.io.logic.controlcomponents.handlers.ThresholdRelayController
 import a75f.io.logic.controlcomponents.handlers.WaterValveController
 import a75f.io.logic.controlcomponents.util.ControllerNames
 import a75f.io.logic.controlcomponents.util.logIt
@@ -30,8 +30,8 @@ open class ControllerFactory {
         activationHysteresis: Point,
         onConstrains: Map<Int, Constraint> = emptyMap(),
         offConstrains: Map<Int, Constraint> = emptyMap(),
-        stageUpTimer: CalibratedPoint = CalibratedPoint("StageUpTimer", "", 0.0),  // Some time these counter will be optional
-        stageDownTimer: CalibratedPoint = CalibratedPoint("StageDownTimer", "", 0.0),
+        stageUpTimer: Point = Point("stageUpTimer", ""),
+        stageDownTimer: Point = Point("stageUpTimer", ""),
         economizingAvailable: CalibratedPoint = CalibratedPoint("economizingAvailable", "", 0.0),
         logTag: String
     ): StageControlHandler {
@@ -112,13 +112,14 @@ open class ControllerFactory {
         zoneHumidity: Point,
         targetHumidifier: Point,
         activationHysteresis: Point,
-        onConstrains: List<Constraint> = emptyList(),
-        offConstrains: List<Constraint> = emptyList(),
+        onConstrains: List<Constraint> = emptyList(), // additional constrains if required
+        offConstrains: List<Constraint> = emptyList(), /// additional constrains if required
+        occupancy: CalibratedPoint,
         logTag: String
     ): HumidifierController {
         if (!equip.controllers.containsKey(ControllerNames.HUMIDIFIER_CONTROLLER)) {
             val controller =
-                HumidifierController(zoneHumidity, targetHumidifier, activationHysteresis, logTag)
+                HumidifierController(zoneHumidity, targetHumidifier, activationHysteresis, logTag, occupancy = occupancy)
             if (onConstrains.isNotEmpty()) {
                 onConstrains.forEach { constraint ->
                     controller.addOnConstraint(constraint)
@@ -142,14 +143,16 @@ open class ControllerFactory {
         activationHysteresis: Point,
         onConstrains: List<Constraint> = emptyList(),
         offConstrains: List<Constraint> = emptyList(),
+        occupancy: CalibratedPoint,
         logTag: String
-    ): ThresholdRelayController {
+    ): DehumidifierController {
         if (!equip.controllers.containsKey(ControllerNames.DEHUMIDIFIER_CONTROLLER)) {
-            val controller = ThresholdRelayController(
+            val controller = DehumidifierController(
                 zoneHumidity,
                 targetDehumidifier,
                 activationHysteresis,
-                logTag
+                logTag,
+                occupancy
             )
             if (onConstrains.isNotEmpty()) {
                 onConstrains.forEach { constraint ->
@@ -164,7 +167,7 @@ open class ControllerFactory {
             equip.controllers[ControllerNames.DEHUMIDIFIER_CONTROLLER] = controller
             logIt(logTag, "Controller added with name: DeHumidifierController")
         }
-        return equip.controllers[ControllerNames.DEHUMIDIFIER_CONTROLLER] as ThresholdRelayController
+        return equip.controllers[ControllerNames.DEHUMIDIFIER_CONTROLLER] as DehumidifierController
     }
 
 

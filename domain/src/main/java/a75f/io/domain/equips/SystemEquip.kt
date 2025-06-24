@@ -2,6 +2,7 @@ package a75f.io.domain.equips
 
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.util.CalibratedPoint
 
 /**
  * Base System Domain Equip.
@@ -57,7 +58,7 @@ open class SystemEquip (equipRef : String) : DomainEquip(equipRef) {
     val averageHumidity = Point(DomainName.averageHumidity, equipRef)
     val cmHumidity = Point(DomainName.cmHumidity, equipRef)
     val averageTemperature = Point(DomainName.averageTemperature, equipRef)
-
+    val relayActivationHysteresis = Point(DomainName.relayActivationHysteresis, equipRef)
     val epidemicModeSystemState = Point(DomainName.epidemicModeSystemState, equipRef)
     val systemPrePurgeEnabled = Point(DomainName.systemPrePurgeEnabled, equipRef)//NA
     val systemPostPurgeEnabled = Point(DomainName.systemPostPurgeEnabled, equipRef)
@@ -81,5 +82,7 @@ open class SystemEquip (equipRef : String) : DomainEquip(equipRef) {
     val heatingLoopOutput = Point(DomainName.heatingLoopOutput, equipRef)
     val fanLoopOutput = Point(DomainName.fanLoopOutput, equipRef)
     val co2LoopOutput = Point(DomainName.co2LoopOutput, equipRef)
-
+    val compressorLoopOutput = Point(DomainName.compressorLoopOutput, equipRef)
+    val economizationAvailable = CalibratedPoint(DomainName.economizingAvailable , equipRef, 0.0)
+    val dcvLoopOutput = Point(DomainName.dcvLoopOutput, equipRef)
 }

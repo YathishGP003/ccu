@@ -52,6 +52,7 @@ import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.api.PhysicalPoint;
 import a75f.io.domain.devices.CmBoardDevice;
 import a75f.io.domain.equips.TIEquip;
 import a75f.io.logger.CcuLog;
@@ -1033,14 +1034,111 @@ public class Pulse
 		}
 	}
 
-	public static void updateDomainCmUpdates(String deviceId, CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t) {
+	public static void updateDomainCmUpdates(String deviceId, CmToCcuOverUsbCmRegularUpdateMessage_t msg) {
 		CmBoardDevice cmBoardDevice = new CmBoardDevice(deviceId);
-		cmBoardDevice.getAnalog1In().writeHisVal(cmRegularUpdateMessage_t.analogSense1.get());
-		cmBoardDevice.getAnalog2In().writeHisVal(cmRegularUpdateMessage_t.analogSense2.get());
-		cmBoardDevice.getTh1In().writeHisVal(cmRegularUpdateMessage_t.thermistor1.get());
-		cmBoardDevice.getTh2In().writeHisVal(cmRegularUpdateMessage_t.thermistor2.get());
-		cmBoardDevice.getCurrentTemp().writeHisVal(cmRegularUpdateMessage_t.roomTemperature.get());
-		cmBoardDevice.getHumiditySensor().writeHisVal(cmRegularUpdateMessage_t.humidity.get());
+		/**Physical point update */
+		cmBoardDevice.getAnalog1In().writeHisVal(msg.analogSense1.get());
+		cmBoardDevice.getAnalog2In().writeHisVal(msg.analogSense2.get());
+		cmBoardDevice.getTh1In().writeHisVal(msg.thermistor1.get());
+		cmBoardDevice.getTh2In().writeHisVal(msg.thermistor2.get());
+		cmBoardDevice.getCurrentTemp().writeHisVal(msg.roomTemperature.get());
+		cmBoardDevice.getHumiditySensor().writeHisVal(msg.humidity.get());
+
+		/**Logical point update*/
+		updateCmThermistors(getLogicalPointDomainName(cmBoardDevice.getTh1In()), cmBoardDevice.getTh1In().readPoint().getPointRef(), msg.thermistor1.get());
+		updateCmThermistors(getLogicalPointDomainName(cmBoardDevice.getTh2In()), cmBoardDevice.getTh2In().readPoint().getPointRef(), msg.thermistor2.get());
+		updateCmAnalogInputs(getLogicalPointDomainName(cmBoardDevice.getAnalog1In()), cmBoardDevice.getAnalog1In().readPoint().getPointRef(), msg.analogSense1.get());
+		updateCmAnalogInputs(getLogicalPointDomainName(cmBoardDevice.getAnalog2In()), cmBoardDevice.getAnalog2In().readPoint().getPointRef(), msg.analogSense2.get());
+	}
+
+	private static String getLogicalPointDomainName(PhysicalPoint point) {
+		String pointRef = point.readPoint().getPointRef();
+		if (pointRef != null) {
+			HashMap<Object, Object> logicalPoint = CCUHsApi.getInstance().readMapById(pointRef);
+			if (!logicalPoint.isEmpty() && logicalPoint.containsKey("domainName")) {
+				return logicalPoint.get("domainName").toString();
+			}
+		}
+		return null;
+	}
+
+	public static void updateCmThermistors(String domainName, String logicalPointId, double rawValue) {
+		if (domainName != null) {
+			double logicalValue;
+			switch (domainName) {
+				case DomainName.thermistorInput:
+					logicalValue = rawValue;
+					break;
+				case DomainName.dischargeAirTemperature:
+					logicalValue = ThermistorUtil.getThermistorValueToTemp(rawValue * 10);
+					break;
+				default:
+					logicalValue = rawValue;
+					break;
+			}
+			CCUHsApi.getInstance().writeHisValById(logicalPointId, logicalValue);
+			CcuLog.d(L.TAG_CCU_DEVICE, "updateCmThermistors : domainName " + domainName + " logicalPointId " + logicalPointId + " rawValue " + rawValue + " logicalValue " + logicalValue);
+		}
+	}
+
+	public static void updateCmAnalogInputs(String domainName, String logicalPointId, double rawValue) {
+		if (domainName != null) {
+			double logicalValue;
+			switch (domainName) {
+				case DomainName.voltageInput:
+					logicalValue = rawValue;
+					break;
+				case DomainName.fanRunSensor:
+					logicalValue = ((rawValue * 10) >= 10000) ? 1.0 : 0.0;
+					break;
+				case DomainName.coolingValvePositionFeedback:
+					logicalValue = getLinearValue(rawValue);
+					break;
+				case DomainName.heatingValvePositionFeedback:
+					logicalValue = getLinearValue(rawValue);
+					break;
+				case DomainName.currentTx10:
+					logicalValue = currentTxValue(rawValue, 10.0);
+					break;
+				case DomainName.currentTx20:
+					logicalValue = currentTxValue(rawValue, 20.0);
+					break;
+				case DomainName.currentTx30:
+					logicalValue = currentTxValue(rawValue, 30.0);
+					break;
+				case DomainName.currentTx50:
+					logicalValue = currentTxValue(rawValue, 50.0);
+					break;
+				case DomainName.currentTx60:
+					logicalValue = currentTxValue(rawValue, 60.0);
+					break;
+				case DomainName.currentTx100:
+					logicalValue = currentTxValue(rawValue, 100.0);
+					break;
+				case DomainName.currentTx120:
+					logicalValue = currentTxValue(rawValue, 120.0);
+					break;
+				case DomainName.currentTx150:
+					logicalValue = currentTxValue(rawValue, 150.0);
+					break;
+				case DomainName.currentTx200:
+					logicalValue = currentTxValue(rawValue, 200.0);
+					break;
+				default:
+					logicalValue = rawValue;
+					break;
+			}
+			CCUHsApi.getInstance().writeHisValById(logicalPointId, logicalValue);
+		}
+	}
+
+
+	public static double getLinearValue(double analogVal) {
+		return (0.0 + analogVal * (100.0 - 0.0) / (10.0 - 0.0));
+	}
+
+	public static double currentTxValue(double analogVal, double maxValue) {
+		return (0.0 + analogVal * (maxValue - 0.0) / (10.0 - 0.0));
 	}
 
 	public static void regularSmartStatUpdate(CmToCcuOverUsbSmartStatRegularUpdateMessage_t smartStatRegularUpdateMessage_t)

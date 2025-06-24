@@ -12,8 +12,8 @@ class StageControlHandler(
     private val loopOutput: Point,
     private val hysteresis: Point,
     private val totalStages: CalibratedPoint,
-    stageUpTimer: CalibratedPoint = CalibratedPoint("StageUpTimer", "", 0.0),  // Some time these counter will be optional
-    stageDownTimer: CalibratedPoint = CalibratedPoint("StageDownTimer", "", 0.0),
+    stageUpTimer: Point = Point("StageUpTimer", ""),
+    stageDownTimer: Point = Point("StageDownTimer", ""),
     private val economizingAvailable: CalibratedPoint = CalibratedPoint("economizingAvailable", "", 0.0),
     private val logTag: String
 ) : Controller {
@@ -89,5 +89,9 @@ class StageControlHandler(
 
     fun addOffConstraint(stage: Int, constraint: Constraint) {
         controller.addOffConstraint(stage, constraint)
+    }
+
+    override fun resetController() {
+        controller.resetStagesAndTimers()
     }
 }

@@ -1,7 +1,9 @@
 package a75f.io.domain.devices
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.RawPoint
-import a75f.io.domain.api.*
+import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.PhysicalPoint
 
 class CmBoardDevice (deviceRef : String) : DomainDevice (deviceRef) {
     val relay1 = PhysicalPoint(DomainName.relay1 ,deviceRef)
@@ -48,4 +50,35 @@ class CmBoardDevice (deviceRef : String) : DomainDevice (deviceRef) {
         portsList[DomainName.th2In] = th2In.readPoint()
         return portsList
     }
+
+    // We can remove this function once default system profile is migrated
+    fun getDefaultSystemProfilePoints() : HashMap<String, RawPoint> {
+        val portsList = HashMap<String, RawPoint>()
+        mutableMapOf(
+            DomainName.relay1 to "relay1",
+            DomainName.relay2 to "relay2",
+            DomainName.relay3 to "relay3",
+            DomainName.relay4 to "relay4",
+            DomainName.relay5 to "relay5",
+            DomainName.relay6 to "relay6",
+            DomainName.relay7 to "relay7",
+            DomainName.relay8 to "relay8",
+            DomainName.analog1Out to "analog1Out",
+            DomainName.analog2Out to "analog2Out",
+            DomainName.analog3Out to "analog3Out",
+            DomainName.analog4Out to "analog4Out",
+            DomainName.analog1In to "analog1In",
+            DomainName.analog2In to "analog2In",
+            DomainName.th1In to "th1In",
+            DomainName.th2In to "th2In"
+        ).forEach { (domainName, portName) ->
+            val point = CCUHsApi.getInstance()
+                .readEntity("point and physical and deviceRef == \"$deviceRef\" and port == \"$portName\"")
+            if (point.isNullOrEmpty()) {
+                portsList[domainName] = RawPoint.Builder().setHashMap(point).build()
+            }
+        }
+        return portsList
+    }
+
 }

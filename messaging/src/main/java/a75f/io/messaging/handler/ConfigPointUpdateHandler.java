@@ -104,7 +104,7 @@ class ConfigPointUpdateHandler {
         SystemProfile systemProfile = L.ccu().systemProfile;
         double val = msgObject.get("val").getAsDouble();
 
-
+        CcuLog.e(L.TAG_CCU_PUBNUB, "System profile "+systemProfile.getClass().getSimpleName() + " configType: " + configType + " val: " + val);
 
         if (systemProfile instanceof DabFullyModulatingRtu) {
             SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getDabModulatingRtuModelDef();
@@ -148,12 +148,9 @@ class ConfigPointUpdateHandler {
                 return;
             }
 
-            boolean isVfd = systemProfile instanceof DabStagedRtuWithVfd;
-            SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) (isVfd ? ModelLoader.INSTANCE.getDabStagedVfdRtuModelDef()
-                    :ModelLoader.INSTANCE.getDabStageRtuModelDef());
+            SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective)ModelLoader.INSTANCE.getDabStagedVfdRtuModelDef();
             SeventyFiveFDeviceDirective deviceModel = (SeventyFiveFDeviceDirective) ModelLoader.INSTANCE.getCMDeviceModel();
-            StagedRtuProfileConfig config = isVfd ? new StagedVfdRtuProfileConfig(model).getActiveConfiguration()
-                    :new StagedRtuProfileConfig(model).getActiveConfiguration();
+            StagedVfdRtuProfileConfig config = new StagedVfdRtuProfileConfig(model).getActiveConfiguration();
 
             if (configPoint.getDomainName().contains(DomainName.relay1OutputEnable)) {
                 config.relay1Enabled.setEnabled(val > 0);
@@ -169,10 +166,10 @@ class ConfigPointUpdateHandler {
                 config.relay6Enabled.setEnabled(val > 0);
             } else if (configPoint.getDomainName().contains(DomainName.relay7OutputEnable)) {
                 config.relay7Enabled.setEnabled(val > 0);
-            }
-            if (isVfd && configPoint.getDomainName().contains(DomainName.analog2OutputEnable)) {
-                StagedVfdRtuProfileConfig vfdRtuProfileConfig = (StagedVfdRtuProfileConfig) config;
-                vfdRtuProfileConfig.analogOut2Enabled.setEnabled(val > 0);
+            } else if (configPoint.getDomainName().contains(DomainName.analog2OutputEnable)) {
+                config.analogOut2Enabled.setEnabled(val > 0);
+            } else if (configPoint.getDomainName().contains(DomainName.analog2OutputAssociation)) {
+                config.analogOut2Association.setAssociationVal((int) val);
             }
 
             CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigAssociation dabStagedRtu"+ config);
@@ -184,11 +181,7 @@ class ConfigPointUpdateHandler {
             deviceBuilder.updateDeviceAndPoints(config, deviceModel, Domain.systemEquip.getEquipRef(), hayStack.getSite().getId(), hayStack.getSiteName() + "-" + deviceModel.getName(), null);
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
             removeWritableTagFromCMDevicePort(configPoint, hayStack, val);
-            if (isVfd) {
-                ((DabStagedRtuWithVfd) systemProfile).updateStagesSelected();
-            } else {
-                ((DabStagedRtu) systemProfile).updateStagesSelected();
-            }
+            ((DabStagedRtuWithVfd) systemProfile).updateStagesSelected();
             DesiredTempDisplayMode.setSystemModeForDab(hayStack);
         } else if (systemProfile instanceof VavFullyModulatingRtu) {
             SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getVavModulatingRtuModelDef();
@@ -221,12 +214,10 @@ class ConfigPointUpdateHandler {
                 ((VavStagedRtu) systemProfile).setConfigEnabled(configType, val);
                 return;
             }
+            CcuLog.i(L.TAG_CCU_PUBNUB, "set analogOut2Association to "+val);
+            SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getVavStagedVfdRtuModelDef();
 
-            boolean isVfd = systemProfile instanceof VavStagedRtuWithVfd;
-            SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) (isVfd ? ModelLoader.INSTANCE.getVavStagedVfdRtuModelDef()
-                                                        :ModelLoader.INSTANCE.getVavStageRtuModelDef());
-            StagedRtuProfileConfig config = isVfd ? new StagedVfdRtuProfileConfig(model).getActiveConfiguration()
-                                                :new StagedRtuProfileConfig(model).getActiveConfiguration();
+            StagedVfdRtuProfileConfig config = new StagedVfdRtuProfileConfig(model).getActiveConfiguration();
 
             if (configPoint.getDomainName().contains(DomainName.relay1OutputEnable)) {
                 config.relay1Enabled.setEnabled(val > 0);
@@ -242,22 +233,19 @@ class ConfigPointUpdateHandler {
                 config.relay6Enabled.setEnabled(val > 0);
             } else if (configPoint.getDomainName().contains(DomainName.relay7OutputEnable)) {
                 config.relay7Enabled.setEnabled(val > 0);
+            } else if (configPoint.getDomainName().contains(DomainName.analog2OutputEnable)) {
+                config.analogOut2Enabled.setEnabled(val > 0);
+            } else if (configPoint.getDomainName().contains(DomainName.analog2OutputAssociation)) {
+                CcuLog.i(L.TAG_CCU_PUBNUB, "set analogOut2Association to "+val);
+                config.analogOut2Association.setAssociationVal((int) val);
             }
-            if (isVfd && configPoint.getDomainName().contains(DomainName.analog2OutputEnable)) {
-                StagedVfdRtuProfileConfig vfdRtuProfileConfig = (StagedVfdRtuProfileConfig) config;
-                vfdRtuProfileConfig.analogOut2Enabled.setEnabled(val > 0);
-            }
-            CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigAssociation vavStagedRtu"+ config);
+            CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigAssociation vavStagedRtu"+ config.toString());
             ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
             HashMap<Object, Object> systemEquip = hayStack.readMapById(Domain.systemEquip.getEquipRef());
             equipBuilder.updateEquipAndPoints(config, model, hayStack.getSite().getId(),systemEquip.get("dis").toString() , true);
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
             removeWritableTagFromCMDevicePort(configPoint, hayStack, val);
-            if (isVfd) {
-                ((VavStagedRtuWithVfd) systemProfile).updateStagesSelected();
-            } else {
-                ((VavStagedRtu) systemProfile).updateStagesSelected();
-            }
+            ((VavStagedRtuWithVfd) systemProfile).updateStagesSelected();
             DesiredTempDisplayMode.setSystemModeForVav(hayStack);
         } else if (isAdvanceAhuV2Profile()) {
             reconfigureAdvanceAhuV2(msgObject, configPoint);
@@ -353,12 +341,9 @@ class ConfigPointUpdateHandler {
                 return;
             }
 
-            boolean isVfd = systemProfile instanceof DabStagedRtuWithVfd;
-            SeventyFiveFProfileDirective equipModel = (SeventyFiveFProfileDirective) (isVfd ? ModelLoader.INSTANCE.getDabStagedVfdRtuModelDef()
-                    :ModelLoader.INSTANCE.getDabStageRtuModelDef());
+            SeventyFiveFProfileDirective equipModel = (SeventyFiveFProfileDirective)ModelLoader.INSTANCE.getDabStagedVfdRtuModelDef();
             SeventyFiveFDeviceDirective deviceModel = (SeventyFiveFDeviceDirective) ModelLoader.INSTANCE.getCMDeviceModel();
-            StagedRtuProfileConfig config = isVfd ? new StagedVfdRtuProfileConfig(equipModel).getActiveConfiguration()
-                    :new StagedRtuProfileConfig(equipModel).getActiveConfiguration();
+            StagedVfdRtuProfileConfig config = new StagedVfdRtuProfileConfig(equipModel).getActiveConfiguration();
 
             if (configPoint.getDomainName().contains(DomainName.relay1OutputAssociation)) {
                 config.relay1Association.setAssociationVal((int) val);
@@ -374,6 +359,9 @@ class ConfigPointUpdateHandler {
                 config.relay6Association.setAssociationVal((int) val);
             } else if (configPoint.getDomainName().contains(DomainName.relay7OutputAssociation)) {
                 config.relay7Association.setAssociationVal((int) val);
+            } else if (configPoint.getDomainName().contains(DomainName.analog2OutputAssociation)) {
+                CcuLog.i(L.TAG_CCU_PUBNUB, "set analogOut2Association to "+val);
+                config.analogOut2Association.setAssociationVal((int) val);
             }
             ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
             EntityMapper entityMapper = new EntityMapper(equipModel);
@@ -382,11 +370,7 @@ class ConfigPointUpdateHandler {
             equipBuilder.updateEquipAndPoints(config, equipModel, hayStack.getSite().getId(),systemEquip.get("dis").toString() , true);
             deviceBuilder.updateDeviceAndPoints(config, deviceModel, Domain.systemEquip.getEquipRef(), hayStack.getSite().getId(), hayStack.getSiteName() + "-" + deviceModel.getName(), null);
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
-            if (isVfd) {
-                ((DabStagedRtuWithVfd) systemProfile).updateStagesSelected();
-            } else {
-                ((DabStagedRtu) systemProfile).updateStagesSelected();
-            }
+            ((DabStagedRtuWithVfd) systemProfile).updateStagesSelected();
             DesiredTempDisplayMode.setSystemModeForDab(hayStack);
         } else if (systemProfile instanceof VavFullyModulatingRtu) {
             SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getVavModulatingRtuModelDef();
@@ -404,11 +388,9 @@ class ConfigPointUpdateHandler {
                 ((VavStagedRtu) systemProfile).setConfigAssociation(relayType, val);
                 return;
             }
-            boolean isVfd = systemProfile instanceof VavStagedRtuWithVfd;
-            SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) (isVfd ? ModelLoader.INSTANCE.getVavStagedVfdRtuModelDef()
-                    :ModelLoader.INSTANCE.getVavStageRtuModelDef());
-            StagedRtuProfileConfig config = isVfd ? new StagedVfdRtuProfileConfig(model).getActiveConfiguration()
-                    :new StagedRtuProfileConfig(model).getActiveConfiguration();
+
+            SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective)ModelLoader.INSTANCE.getVavStagedVfdRtuModelDef();
+            StagedVfdRtuProfileConfig config = new StagedVfdRtuProfileConfig(model).getActiveConfiguration();
 
             if (configPoint.getDomainName().contains(DomainName.relay1OutputAssociation)) {
                 config.relay1Association.setAssociationVal((int) val);
@@ -424,16 +406,15 @@ class ConfigPointUpdateHandler {
                 config.relay6Association.setAssociationVal((int) val);
             } else if (configPoint.getDomainName().contains(DomainName.relay7OutputAssociation)) {
                 config.relay7Association.setAssociationVal((int) val);
+            } else if (configPoint.getDomainName().contains(DomainName.analog2OutputAssociation)) {
+                CcuLog.i(L.TAG_CCU_PUBNUB, "set analogOut2Association to "+val);
+                config.analogOut2Association.setAssociationVal((int) val);
             }
             ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
             HashMap<Object, Object> systemEquip = hayStack.readMapById(Domain.systemEquip.getEquipRef());
             equipBuilder.updateEquipAndPoints(config, model, hayStack.getSite().getId(),systemEquip.get("dis").toString() , true);
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
-            if (isVfd) {
-                ((VavStagedRtuWithVfd) systemProfile).updateStagesSelected();
-            } else {
-                ((VavStagedRtu) systemProfile).updateStagesSelected();
-            }
+            ((VavStagedRtuWithVfd) systemProfile).updateStagesSelected();
             DesiredTempDisplayMode.setSystemModeForVav(hayStack);
         } else if (L.ccu().systemProfile instanceof DabAdvancedAhu
                 || L.ccu().systemProfile instanceof VavAdvancedAhu) {

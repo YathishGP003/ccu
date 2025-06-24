@@ -62,7 +62,7 @@ class VavStagedRtuViewModel : StagedRtuProfileViewModel() {
                 viewState.value.updateConfigFromViewState(profileConfiguration)
                 CcuLog.d(Tags.ADD_REMOVE_PROFILE, "VavStagedRtuViewModel removing profile with it -->${systemEquip["id"].toString()}")
                 deleteSystemProfile(systemEquip["id"].toString())
-                systemEquipId = createNewEquip(systemEquip["id"].toString())
+                systemEquipId = createNewEquip()
                 L.ccu().systemProfile!!.deleteSystemEquip()
                 L.ccu().systemProfile = VavStagedRtu()
                 L.ccu().systemProfile.removeSystemEquipModbus()

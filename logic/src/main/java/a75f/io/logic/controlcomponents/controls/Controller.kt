@@ -6,4 +6,5 @@ package a75f.io.logic.controlcomponents.controls
 
 interface Controller {
     fun runController(): Any
+    fun resetController() {}
 }

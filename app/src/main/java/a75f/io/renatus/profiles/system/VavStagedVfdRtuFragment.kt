@@ -6,8 +6,9 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.util.onLoadingCompleteListener
 import a75f.io.renatus.R
+import a75f.io.renatus.composables.AddInputWidget
 import a75f.io.renatus.composables.DropDownWithLabel
-import a75f.io.renatus.composables.SystemAnalogOutMappingViewVavStagedVfdRtu
+import a75f.io.renatus.composables.SystemAnalogOutMappingDropDown
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.compose.SaveTextView
 import a75f.io.renatus.modbus.util.CANCEL
@@ -41,10 +42,10 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.ui.Alignment
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
@@ -153,19 +154,14 @@ class VavStagedVfdRtuFragment(loadingListener: onLoadingCompleteListener) : Stag
         }
     }
     private fun checkAssociation(associationIndex : Int): Boolean {
-        if((viewState.value.relay1Enabled == true && viewState.value.relay1Association == associationIndex)
-            || (viewState.value.relay2Enabled == true && viewState.value.relay2Association == associationIndex )
-            || (viewState.value.relay3Enabled == true && viewState.value.relay3Association == associationIndex )
-            || (viewState.value.relay4Enabled == true && viewState.value.relay4Association == associationIndex )
-            || (viewState.value.relay5Enabled == true && viewState.value.relay5Association == associationIndex )
-            || (viewState.value.relay6Enabled == true && viewState.value.relay6Association == associationIndex )
-            || (viewState.value.relay7Enabled == true && viewState.value.relay7Association == associationIndex)
-            || (viewState.value.analogOut2Enabled == true && viewState.value.analogOut2Association == associationIndex)) {
-            return true
-        }
-        else {
-            return false
-        }
+        return (viewState.value.relay1Enabled && viewState.value.relay1Association == associationIndex)
+                || (viewState.value.relay2Enabled && viewState.value.relay2Association == associationIndex)
+                || (viewState.value.relay3Enabled && viewState.value.relay3Association == associationIndex)
+                || (viewState.value.relay4Enabled && viewState.value.relay4Association == associationIndex)
+                || (viewState.value.relay5Enabled && viewState.value.relay5Association == associationIndex)
+                || (viewState.value.relay6Enabled && viewState.value.relay6Association == associationIndex)
+                || (viewState.value.relay7Enabled && viewState.value.relay7Association == associationIndex)
+                || (viewState.value.analogOut2Enabled && viewState.value.analogOut2Association == associationIndex)
     }
 
     @Composable
@@ -183,25 +179,25 @@ class VavStagedVfdRtuFragment(loadingListener: onLoadingCompleteListener) : Stag
             .padding(10.dp))
         {
             item {
-            Row(
-                modifier = Modifier
-                    .wrapContentSize()
-                    .padding(10.dp)
-            )
-            {
-                Image(
-                    painter = painterResource(id = R.drawable.input_vavvfd),
-                    contentDescription = "Relays",
+                Row(
                     modifier = Modifier
                         .wrapContentSize()
-                        .padding(top = 80.dp)
+                        .padding(10.dp)
                 )
+                {
+                    Image(
+                        painter = painterResource(id = R.drawable.syswfd),
+                        contentDescription = "Relays",
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .padding(top = 80.dp)
+                    )
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(10.dp),
-                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(10.dp),
+                    ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -211,190 +207,215 @@ class VavStagedVfdRtuFragment(loadingListener: onLoadingCompleteListener) : Stag
                             Spacer(modifier = Modifier.width(282.dp))
                             Text(text = "MAPPING", fontSize = 20.sp, color = ComposeUtil.greyColor)
                             Spacer(modifier = Modifier.width(172.dp))
-                            Text(text = "TEST SIGNAL", fontSize = 20.sp, color = ComposeUtil.greyColor)
+                            Text(
+                                text = "TEST SIGNAL",
+                                fontSize = 20.sp,
+                                color = ComposeUtil.greyColor
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(20.dp))
                         StagedRtuRelayMappingView(viewModel = viewModel)
                         Spacer(modifier = Modifier.height(15.dp))
-                    SystemAnalogOutMappingViewVavStagedVfdRtu(
-                        analogName = "Analog-Out 2",
-                        analogOutState = viewState.analogOut2Enabled,
-                        onAnalogOutEnabled = {
-                            viewState.analogOut2Enabled = it
-                            viewModel.setStateChanged()
-                            viewModel.viewState.value.unusedPortState = UnusedPortsModel.setPortState(
-                                "Analog 2 Output",
-                                it,
-                                viewModel.profileConfiguration
-                            )
-                        },
-                        mappingText = "Fan Speed",
-                        analogOutValList = (0..10).map { it.toString() },
-                        analogOutVal = (0..10).map { it }
-                            .indexOf((viewState.analogOut2FanSpeedTestSignal.toInt()) / 10),
-                        onAnalogOutChanged = {
-                            viewState.analogOut2FanSpeedTestSignal = it.toDouble()
-                            viewModel.sendAnalogTestSignal(it.toDouble())
-                        }
-                    )
+
+                        SystemAnalogOutMappingDropDown(
+                            analogName = "Analog-Out 2",
+                            analogOutState = viewState.analogOut2Enabled,
+                            onAnalogOutEnabled = {
+                                viewState.analogOut2Enabled = it
+                                viewModel.setStateChanged()
+                                viewModel.viewState.value.unusedPortState =
+                                    UnusedPortsModel.setPortState(
+                                        "Analog 2 Output",
+                                        it,
+                                        viewModel.profileConfiguration
+                                    )
+                            },
+                            mapping = viewModel.analog2OutputAssociationList,
+                            onMappingChanged = {
+                                viewState.analogOut2Association = it
+                                viewModel.setStateChanged()
+                            },
+                            mappingSelection = viewState.analogOut2Association,
+                            analogOutValList = (0..10).map { it.toString() },
+                            analogOutVal = (0..10).map { it }
+                                .indexOf((viewState.analogOut2FanSpeedTestSignal.toInt()) / 10),
+                            onAnalogOutChanged = {
+                                viewState.analogOut2FanSpeedTestSignal = it.toDouble()
+                                viewModel.sendAnalogTestSignal(it.toDouble())
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        AddInputWidget(
+                            inputName = "Thermistor 1",
+                            inputState = viewState.thermistor1Enabled,
+                            onEnabled = {
+                                viewState.thermistor1Enabled = it
+                                viewModel.setStateChanged()
+                            },
+                            mapping = viewModel.thermistor1AssociationList,
+                            onMappingChanged = {
+                                viewState.thermistor1Association = it
+                                viewModel.setStateChanged()
+                            },
+                            mappingSelection = viewState.thermistor1Association,
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        AddInputWidget(
+                            inputName = "Thermistor 2",
+                            inputState = viewState.thermistor2Enabled,
+                            onEnabled = {
+                                viewState.thermistor2Enabled = it
+                                viewModel.setStateChanged()
+                            },
+                            mapping = viewModel.thermistor1AssociationList,
+                            onMappingChanged = {
+                                viewState.thermistor2Association = it
+                                viewModel.setStateChanged()
+                            },
+                            mappingSelection = viewState.thermistor2Association,
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        AddInputWidget(
+                            inputName = "Analog-In 1",
+                            inputState = viewState.analogIn1Enabled,
+                            onEnabled = {
+                                viewState.analogIn1Enabled = it
+                                viewModel.setStateChanged()
+                            },
+                            mapping = viewModel.analogIn1AssociationList,
+                            onMappingChanged = {
+                                viewState.analogIn1Association = it
+                                viewModel.setStateChanged()
+                            },
+                            mappingSelection = viewState.analogIn1Association,
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        AddInputWidget(
+                            inputName = "Analog-In 2",
+                            inputState = viewState.analogIn2Enabled,
+                            onEnabled = {
+                                viewState.analogIn2Enabled = it
+                                viewModel.setStateChanged()
+                            },
+                            mapping = viewModel.analogIn1AssociationList,
+                            onMappingChanged = {
+                                viewState.analogIn2Association = it
+                                viewModel.setStateChanged()
+                            },
+                            mappingSelection = viewState.analogIn2Association,
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
                 }
             }
-            }
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 30.dp),
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    DropDownWithLabel(label = "Analog-Out2\nDuring Economizer",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut2Economizer,
-                        onSelected = {viewState.analogOut2Economizer = it
-                            viewModel.setStateChanged()},
-                        previewWidth = 100,
-                        expandedWidth = 100,
-                        spacerLimit = 90 )
-                    Spacer(modifier = Modifier.width(97.dp))
-                    DropDownWithLabel(label = "Analog-Out2\nDuring Recirculate",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut2Recirculate,
-                        onSelected = {viewState.analogOut2Recirculate = it
-                            viewModel.setStateChanged()},
-                        previewWidth = 100,
-                        expandedWidth = 100,
-                        spacerLimit = 179)
+            if (viewState.analogOut2Enabled && viewState.analogOut2Association == StagedRTUAnalogOutMappings.FAN_SPEED.ordinal) {
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 30.dp),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        DropDownWithLabel(
+                            label = "Analog-Out2\nDuring Economizer",
+                            list = (0..10).map { it.toString() }, isHeader = false,
+                            defaultSelection = viewState.analogOut2Economizer,
+                            onSelected = {
+                                viewState.analogOut2Economizer = it
+                                viewModel.setStateChanged()
+                            },
+                            previewWidth = 100,
+                            expandedWidth = 100,
+                            spacerLimit = 90
+                        )
+                        Spacer(modifier = Modifier.width(97.dp))
+                        DropDownWithLabel(
+                            label = "Analog-Out2\nDuring Recirculate",
+                            list = (0..10).map { it.toString() }, isHeader = false,
+                            defaultSelection = viewState.analogOut2Recirculate,
+                            onSelected = {
+                                viewState.analogOut2Recirculate = it
+                                viewModel.setStateChanged()
+                            },
+                            previewWidth = 100,
+                            expandedWidth = 100,
+                            spacerLimit = 179
+                        )
+                    }
                 }
-            }
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 30.dp),
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    DropDownWithLabel(label = "Analog-Out2\nDuring Cool Stage 1",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut2CoolStage1,
-                        onSelected = {viewState.analogOut2CoolStage1 = it
-                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(1)),
-                        previewWidth = 100,
-                        expandedWidth = 100,
-                        spacerLimit = 90)
-                    Spacer(modifier = Modifier.width(97.dp))
-                    DropDownWithLabel(label = "Analog-Out2\nDuring Cool Stage 2",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut2CoolStage2,
-                        onSelected = {viewState.analogOut2CoolStage2 = it
-                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(2)),
-                        previewWidth = 100,
-                        expandedWidth = 100,
-                        spacerLimit = 179)
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 30.dp),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        DropDownWithLabel(
+                            label = "Analog-Out2\nDuring Cool Stage 1",
+                            list = (0..10).map { it.toString() }, isHeader = false,
+                            defaultSelection = viewState.analogOut2CoolStage1,
+                            onSelected = {
+                                viewState.analogOut2CoolStage1 = it
+                                viewModel.setStateChanged()
+                            }, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(1)),
+                            previewWidth = 100,
+                            expandedWidth = 100,
+                            spacerLimit = 90
+                        )
+                        Spacer(modifier = Modifier.width(97.dp))
+                        DropDownWithLabel(
+                            label = "Analog-Out2\nDuring Cool Stage 2",
+                            list = (0..10).map { it.toString() }, isHeader = false,
+                            defaultSelection = viewState.analogOut2CoolStage2,
+                            onSelected = {
+                                viewState.analogOut2CoolStage2 = it
+                                viewModel.setStateChanged()
+                            }, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(2)),
+                            previewWidth = 100,
+                            expandedWidth = 100,
+                            spacerLimit = 179
+                        )
+                    }
                 }
-            }
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 30.dp),
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    DropDownWithLabel(label = "Analog-Out2\nDuring Cool Stage 3",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut2CoolStage3,
-                        onSelected = {viewState.analogOut2CoolStage3 = it
-                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(3) ),
-                        previewWidth = 100,
-                        expandedWidth = 100,
-                        spacerLimit = 90)
-                    Spacer(modifier = Modifier.width(97.dp))
-                    DropDownWithLabel(label = "Analog-Out2\nDuring Cool Stage 4",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut2CoolStage4,
-                        onSelected = {viewState.analogOut2CoolStage5 = it
-                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(4)),
-                        previewWidth = 100,
-                        expandedWidth = 100,
-                        spacerLimit = 179)
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 30.dp),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        DropDownWithLabel(
+                            label = "Analog-Out2\nDuring Cool Stage 3",
+                            list = (0..10).map { it.toString() }, isHeader = false,
+                            defaultSelection = viewState.analogOut2CoolStage3,
+                            onSelected = {
+                                viewState.analogOut2CoolStage3 = it
+                                viewModel.setStateChanged()
+                            }, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(3)),
+                            previewWidth = 100,
+                            expandedWidth = 100,
+                            spacerLimit = 90
+                        )
+                        Spacer(modifier = Modifier.width(97.dp))
+                        DropDownWithLabel(
+                            label = "Analog-Out2\nDuring Cool Stage 4",
+                            list = (0..10).map { it.toString() }, isHeader = false,
+                            defaultSelection = viewState.analogOut2CoolStage4,
+                            onSelected = {
+                                viewState.analogOut2CoolStage5 = it
+                                viewModel.setStateChanged()
+                            }, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(4)),
+                            previewWidth = 100,
+                            expandedWidth = 100,
+                            spacerLimit = 179
+                        )
+                    }
                 }
-            }
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 30.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    DropDownWithLabel(label = "Analog-Out2\nDuring Cool Stage 5",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut2CoolStage5,
-                        onSelected = {viewState.analogOut2CoolStage5 = it
-                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(5)),
-                        previewWidth = 100,
-                        expandedWidth = 100,
-                        spacerLimit = 90)
-                }
-            }
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 30.dp),
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    DropDownWithLabel(label = "Analog-Out2\nDuring Heat Stage 1",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut2HeatStage1,
-                        onSelected = {viewState.analogOut2HeatStage1 = it
-                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(1)),
-                        previewWidth = 100,
-                        expandedWidth = 100,
-                        spacerLimit = 90)
-                    Spacer(modifier = Modifier.width(97.dp))
-                    DropDownWithLabel(label = "Analog-Out2\nDuring Heat Stage 2",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut2HeatStage2,
-                        onSelected = {viewState.analogOut2HeatStage2 = it
-                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(2)),
-                        previewWidth = 100,
-                        expandedWidth = 100,
-                        spacerLimit = 179)
-                }
-            }
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 30.dp),
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    DropDownWithLabel(label = "Analog-Out2\nDuring Heat Stage 3",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut2HeatStage3,
-                        onSelected = {viewState.analogOut2HeatStage3 = it
-                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(3)),
-                        previewWidth = 100,
-                        expandedWidth = 100,
-                        spacerLimit = 90)
-                    Spacer(modifier = Modifier.width(97.dp))
-                    DropDownWithLabel(label = "Analog-Out2\nDuring Heat Stage 4",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut2HeatStage4,
-                        onSelected = {viewState.analogOut2HeatStage4 = it
-                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(4)),
-                        previewWidth = 100,
-                        expandedWidth = 100,
-                        spacerLimit = 179)
-                }
-            }
-            item {
+                item {
                     Spacer(modifier = Modifier.height(20.dp))
                     Row(
                         modifier = Modifier
@@ -402,38 +423,217 @@ class VavStagedVfdRtuFragment(loadingListener: onLoadingCompleteListener) : Stag
                             .padding(end = 30.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        DropDownWithLabel(label = "Analog-Out2\nDuring Heat Stage 5",
+                        DropDownWithLabel(
+                            label = "Analog-Out2\nDuring Cool Stage 5",
                             list = (0..10).map { it.toString() }, isHeader = false,
-                            defaultSelection = viewState.analogOut2HeatStage5,
-                            onSelected = {viewState.analogOut2HeatStage5 = it
-                                viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(5)),
+                            defaultSelection = viewState.analogOut2CoolStage5,
+                            onSelected = {
+                                viewState.analogOut2CoolStage5 = it
+                                viewModel.setStateChanged()
+                            }, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(5)),
                             previewWidth = 100,
                             expandedWidth = 100,
-                            spacerLimit = 90)
+                            spacerLimit = 90
+                        )
+                    }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 30.dp),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        DropDownWithLabel(
+                            label = "Analog-Out2\nDuring Heat Stage 1",
+                            list = (0..10).map { it.toString() }, isHeader = false,
+                            defaultSelection = viewState.analogOut2HeatStage1,
+                            onSelected = {
+                                viewState.analogOut2HeatStage1 = it
+                                viewModel.setStateChanged()
+                            }, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(1)),
+                            previewWidth = 100,
+                            expandedWidth = 100,
+                            spacerLimit = 90
+                        )
+                        Spacer(modifier = Modifier.width(97.dp))
+                        DropDownWithLabel(
+                            label = "Analog-Out2\nDuring Heat Stage 2",
+                            list = (0..10).map { it.toString() }, isHeader = false,
+                            defaultSelection = viewState.analogOut2HeatStage2,
+                            onSelected = {
+                                viewState.analogOut2HeatStage2 = it
+                                viewModel.setStateChanged()
+                            }, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(2)),
+                            previewWidth = 100,
+                            expandedWidth = 100,
+                            spacerLimit = 179
+                        )
+                    }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 30.dp),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        DropDownWithLabel(
+                            label = "Analog-Out2\nDuring Heat Stage 3",
+                            list = (0..10).map { it.toString() }, isHeader = false,
+                            defaultSelection = viewState.analogOut2HeatStage3,
+                            onSelected = {
+                                viewState.analogOut2HeatStage3 = it
+                                viewModel.setStateChanged()
+                            }, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(3)),
+                            previewWidth = 100,
+                            expandedWidth = 100,
+                            spacerLimit = 90
+                        )
+                        Spacer(modifier = Modifier.width(97.dp))
+                        DropDownWithLabel(
+                            label = "Analog-Out2\nDuring Heat Stage 4",
+                            list = (0..10).map { it.toString() }, isHeader = false,
+                            defaultSelection = viewState.analogOut2HeatStage4,
+                            onSelected = {
+                                viewState.analogOut2HeatStage4 = it
+                                viewModel.setStateChanged()
+                            }, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(4)),
+                            previewWidth = 100,
+                            expandedWidth = 100,
+                            spacerLimit = 179
+                        )
+                    }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 30.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        DropDownWithLabel(
+                            label = "Analog-Out2\nDuring Heat Stage 5",
+                            list = (0..10).map { it.toString() }, isHeader = false,
+                            defaultSelection = viewState.analogOut2HeatStage5,
+                            onSelected = {
+                                viewState.analogOut2HeatStage5 = it
+                                viewModel.setStateChanged()
+                            }, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(5)),
+                            previewWidth = 100,
+                            expandedWidth = 100,
+                            spacerLimit = 90
+                        )
                     }
 
                 }
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 30.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        DropDownWithLabel(
+                            label = "Analog-Out2 Default",
+                            list = (0..10).map { it.toString() }, isHeader = false,
+                            defaultSelection = viewState.analogOut2Default,
+                            onSelected = {
+                                viewState.analogOut2Default = it
+                                viewModel.setStateChanged()
+                            },
+                            previewWidth = 100,
+                            expandedWidth = 100, spacerLimit = 90
+                        )
+                    }
 
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 30.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    DropDownWithLabel(label = "Analog-Out2 Default",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut2Default,
-                        onSelected = {viewState.analogOut2Default = it
-                            viewModel.setStateChanged()},
-                        previewWidth = 100,
-                        expandedWidth = 100, spacerLimit = 90)
                 }
-
             }
 
-            if(viewModel.viewState.value.unusedPortState.isNotEmpty()) {
+            if (viewState.analogOut2Enabled && viewState.analogOut2Association == StagedRTUAnalogOutMappings.COMPRESSOR_SPEED.ordinal) {
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 30.dp),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        DropDownWithLabel(
+                            label = "Analog-Out2\nMin Compressor Speed",
+                            list = (0..10).map { it.toString() },
+                            isHeader = false,
+                            defaultSelection = viewState.analogOut2MinCompressor,
+                            onSelected = {
+                                viewState.analogOut2MinCompressor = it
+                                viewModel.setStateChanged()
+                            },
+                            previewWidth = 100,
+                            expandedWidth = 100,
+                            spacerLimit = 90
+                        )
+                        Spacer(modifier = Modifier.width(97.dp))
+                        DropDownWithLabel(
+                            label = "Analog-Out2\nMax Compressor Speed",
+                            list = (0..10).map { it.toString() },
+                            isHeader = false,
+                            defaultSelection = viewState.analogOut2MaxCompressor,
+                            onSelected = {
+                                viewState.analogOut2MaxCompressor = it
+                                viewModel.setStateChanged()
+                            },
+                            previewWidth = 100,
+                            expandedWidth = 100,
+                            spacerLimit = 179
+                        )
+                    }
+                }
+            }
+            if (viewState.analogOut2Enabled && viewState.analogOut2Association == StagedRTUAnalogOutMappings.DAMPER_MODULATION.ordinal) {
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 30.dp),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        DropDownWithLabel(
+                            label = "Analog-Out2\nMin DCV Damper",
+                            list = (0..10).map { it.toString() },
+                            isHeader = false,
+                            defaultSelection = viewState.analogOut2MinDamperModulation,
+                            onSelected = {
+                                viewState.analogOut2MinDamperModulation = it
+                                viewModel.setStateChanged()
+                            },
+                            previewWidth = 100,
+                            expandedWidth = 100,
+                            spacerLimit = 90
+                        )
+                        Spacer(modifier = Modifier.width(97.dp))
+                        DropDownWithLabel(
+                            label = "Analog-Out2\nMax DCV Damper",
+                            list = (0..10).map { it.toString() },
+                            isHeader = false,
+                            defaultSelection = viewState.analogOut2MaxDamperModulation,
+                            onSelected = {
+                                viewState.analogOut2MaxDamperModulation = it
+                                viewModel.setStateChanged()
+                            },
+                            previewWidth = 100,
+                            expandedWidth = 100,
+                            spacerLimit = 179
+                        )
+                    }
+                }
+            }
+
+            if (viewModel.viewState.value.unusedPortState.isNotEmpty()) {
                 item {
                     UnusedPortsFragment.DividerRow()
                 }

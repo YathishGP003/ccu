@@ -53,13 +53,13 @@ fun getActiveSystemConfiguration(systemProfile: String): ProfileConfiguration? {
         return StagedRtuProfileConfig(getVavStageRtuModelDef() as SeventyFiveFProfileDirective)
             .getActiveConfiguration()
     } else if (systemProfile == "vavStagedRtuVfdFan" || ProfileType.SYSTEM_VAV_STAGED_VFD_RTU.name == systemProfile) {
-        return StagedRtuProfileConfig(getVavStagedVfdRtuModelDef() as SeventyFiveFProfileDirective)
+        return StagedVfdRtuProfileConfig(getVavStagedVfdRtuModelDef() as SeventyFiveFProfileDirective)
             .getActiveConfiguration()
     } else if (systemProfile == "dabStagedRtu" || ProfileType.SYSTEM_DAB_STAGED_RTU.name == systemProfile) {
         return StagedRtuProfileConfig(getDabStageRtuModelDef() as SeventyFiveFProfileDirective)
             .getActiveConfiguration()
     } else if (systemProfile == "dabStagedRtuVfdFan" || ProfileType.SYSTEM_DAB_STAGED_VFD_RTU.name == systemProfile) {
-        return StagedRtuProfileConfig(getDabStagedVfdRtuModelDef() as SeventyFiveFProfileDirective)
+        return StagedVfdRtuProfileConfig(getDabStagedVfdRtuModelDef() as SeventyFiveFProfileDirective)
             .getActiveConfiguration()
     } else if (systemProfile == "vavFullyModulatingAhu" || ProfileType.SYSTEM_VAV_ANALOG_RTU.name == systemProfile) {
         return ModulatingRtuProfileConfig(getVavModulatingRtuModelDef() as SeventyFiveFProfileDirective)

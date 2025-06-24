@@ -105,16 +105,15 @@ fun getAirEnthalpy(temp: Double, humidity: Double): Double {
 }
 
 fun isDcvEligibleToOff(currentOccupancy: CalibratedPoint): Boolean {
-    return (currentOccupancy.data.toInt() == Occupancy.AUTOAWAY.ordinal
-            || currentOccupancy.data.toInt() == Occupancy.VACATION.ordinal
-            || currentOccupancy.data.toInt() == Occupancy.DEMAND_RESPONSE_UNOCCUPIED.ordinal
-            || currentOccupancy.data.toInt() == Occupancy.UNOCCUPIED.ordinal)
+    return (currentOccupancy.data.toInt() != Occupancy.OCCUPIED.ordinal
+            && currentOccupancy.data.toInt() != Occupancy.AUTOFORCEOCCUPIED.ordinal
+            && currentOccupancy.data.toInt() != Occupancy.DEMAND_RESPONSE_OCCUPIED.ordinal
+            && currentOccupancy.data.toInt() != Occupancy.FORCEDOCCUPIED.ordinal)
 }
 
 fun isDcvEligibleToOn(currentOccupancy: CalibratedPoint): Boolean {
     return (currentOccupancy.data.toInt() == Occupancy.OCCUPIED.ordinal
             || currentOccupancy.data.toInt() == Occupancy.AUTOFORCEOCCUPIED.ordinal
-            || currentOccupancy.data.toInt() == Occupancy.PRECONDITIONING.ordinal
             || currentOccupancy.data.toInt() == Occupancy.DEMAND_RESPONSE_OCCUPIED.ordinal
             || currentOccupancy.data.toInt() == Occupancy.FORCEDOCCUPIED.ordinal)
 }

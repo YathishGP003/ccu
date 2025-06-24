@@ -29,11 +29,9 @@ import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.renatus.profiles.system.DabModulatingRtuFragment;
-import a75f.io.renatus.profiles.system.DabStagedRtuFragment;
 import a75f.io.renatus.profiles.system.DabStagedVfdRtuFragment;
 import a75f.io.logic.util.onLoadingCompleteListener;
 import a75f.io.renatus.profiles.system.VavModulatingRtuFragment;
-import a75f.io.renatus.profiles.system.VavStagedRtuFragment;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.profiles.system.VavStagedVfdRtuFragment;
@@ -159,18 +157,6 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             if (canAddVAVProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
-                                        .replace(R.id.profileContainer, new VavStagedRtuFragment(dialogListener)).commit();
-                            } else {
-                                Toast.makeText(getActivity(), "Unpair all DAB Zones and try", Toast.LENGTH_LONG).show();
-                                spSystemProfile.setSelection(L.ccu().systemProfile != null ?
-                                        systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
-                            }
-                            break;
-
-                        case 2:
-                            if (canAddVAVProfile()) {
-                                if(!isSystemViewVisible())return;
-                                getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new VavModulatingRtuFragment(dialogListener)).commit();
                             } else {
                                 Toast.makeText(getActivity(), "Unpair all DAB Zones and try", Toast.LENGTH_LONG).show();
@@ -178,7 +164,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                                         systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                             }
                             break;
-                        case 3:
+                        case 2:
                             if (canAddVAVProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -189,7 +175,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                                         systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                             }
                             break;
-                        case 4:
+                        case 3:
                             if (canAddVAVProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -200,7 +186,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                                         systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                             }
                             break;
-                        case 5:
+                        case 4:
                             if (canAddVAVProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -212,22 +198,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                                         systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                             }
                             break;
-                        case 6:
-                            if (canAddDABProfile()) {
-                                if(!isSystemViewVisible())return;
-                                getActivity().getSupportFragmentManager().beginTransaction()
-                                        .replace(R.id.profileContainer, new DabStagedRtuFragment()).commit();
-                                if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
-                                    SystemConfigMenuFragment.SystemConfigMenuFragmentHandler.sendEmptyMessage(1);
-                                }
-                            } else {
-                                Toast.makeText(getActivity(), "Unpair all VAV " +
-                                        " and try", Toast.LENGTH_LONG).show();
-                                spSystemProfile.setSelection(L.ccu().systemProfile != null ?
-                                        systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
-                            }
-                            break;
-                        case 7:
+                        case 5:
                             if (canAddDABProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -241,7 +212,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                                         systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                             }
                             break;
-                        case 8:
+                        case 6:
                             if (canAddDABProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -256,7 +227,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             }
                             break;
 
-                        case 9:
+                        case 7:
                             if (canAddDABProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -270,7 +241,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                                         systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                             }
                             break;
-                        case 10:
+                        case 8:
                             if (canAddDABProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -283,7 +254,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             }
                             break;
 
-                        case 11:
+                        case 9:
                             if (canAddVAVProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -319,18 +290,6 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             if (canAddVAVProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
-                                        .replace(R.id.profileContainer, new VavStagedRtuFragment(dialogListener)).commit();
-                            } else {
-                                Toast.makeText(getActivity(), "Unpair all DAB Zones and try", Toast.LENGTH_LONG).show();
-                                spSystemProfile.setSelection(L.ccu().systemProfile != null ?
-                                        systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
-                            }
-                            break;
-
-                        case 2:
-                            if (canAddVAVProfile()) {
-                                if(!isSystemViewVisible())return;
-                                getActivity().getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.profileContainer, new VavModulatingRtuFragment(dialogListener)).commit();
                             } else {
                                 Toast.makeText(getActivity(), "Unpair all DAB Zones and try", Toast.LENGTH_LONG).show();
@@ -338,7 +297,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                                         systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                             }
                             break;
-                        case 3:
+                        case 2:
                             if (canAddVAVProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -349,7 +308,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                                         systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                             }
                             break;
-                        case 4:
+                        case 3:
                             if (canAddVAVProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -363,7 +322,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                                         systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                             }
                             break;
-                        case 5:
+                        case 4:
                             if (canAddVAVProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -374,7 +333,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                                         systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                             }
                             break;
-                        case 6:
+                        case 5:
                             if (canAddVAVProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -386,22 +345,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                                         systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                             }
                             break;
-                        case 7:
-                            if (canAddDABProfile()) {
-                                if(!isSystemViewVisible())return;
-                                getActivity().getSupportFragmentManager().beginTransaction()
-                                        .replace(R.id.profileContainer, new DabStagedRtuFragment()).commit();
-                                if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
-                                    SystemConfigMenuFragment.SystemConfigMenuFragmentHandler.sendEmptyMessage(1);
-                                }
-                            } else {
-                                Toast.makeText(getActivity(), "Unpair all VAV " +
-                                        " and try", Toast.LENGTH_LONG).show();
-                                spSystemProfile.setSelection(L.ccu().systemProfile != null ?
-                                        systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
-                            }
-                            break;
-                        case 8:
+                        case 6:
                             if (canAddDABProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -415,7 +359,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                                         systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                             }
                             break;
-                        case 9:
+                        case 7:
                             if (canAddDABProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -429,7 +373,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                                         systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                             }
                             break;
-                        case 10:
+                        case 8:
                             if (canAddDABProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -444,7 +388,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             }
                             break;
 
-                        case 11:
+                        case 9:
                             if (canAddDABProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -458,7 +402,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                                         systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                             }
                             break;
-                        case 12:
+                        case 10:
                             if (canAddDABProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -471,7 +415,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                             }
                             break;
 
-                        case 13:
+                        case 11:
                             if (canAddVAVProfile()) {
                                 if(!isSystemViewVisible())return;
                                 getActivity().getSupportFragmentManager().beginTransaction()

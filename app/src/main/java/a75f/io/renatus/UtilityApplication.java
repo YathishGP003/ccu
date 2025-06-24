@@ -504,7 +504,11 @@ public abstract class UtilityApplication extends Application implements Globals.
         crashPreference.edit().putStringSet("crash", timeSet).commit();
 
         if (crashPreference.getStringSet("crash", null).size() >= 3 ) {
-            Domain.diagEquip.getSafeModeStatus().writeHisVal(1.0);
+            if (Domain.diagEquip != null) {
+                Domain.diagEquip.getSafeModeStatus().writeHisVal(1.0);
+            } else {
+                CCUHsApi.getInstance().writeHisValByQuery("domainName == \"safeModeStatus\"", 1.0);
+            }
         } else if (OOMExceptionHandler.isOOMCausedByFragmentation(paramThrowable)) {
             RenatusApp.rebootTablet();
         }

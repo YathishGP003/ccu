@@ -6,6 +6,7 @@ import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.controlcomponents.controlimpls.GenericBooleanControllerImpl
 import a75f.io.logic.controlcomponents.controls.Constraint
 import a75f.io.logic.controlcomponents.controls.Controller
+import a75f.io.logic.controlcomponents.util.isOccupiedDcvHumidityControl
 
 /**
  * Created by Manjunath K on 05-05-2025.
@@ -16,13 +17,13 @@ class OccupiedEnabledController(val occupancy: CalibratedPoint, val logTag: Stri
     private val controller = GenericBooleanControllerImpl()
 
     init {
-        controller.setOnConstraints(listOf(Constraint { occupancy.data.toInt() == Occupancy.OCCUPIED.ordinal }))
-        controller.setOffConstraints(listOf(Constraint { occupancy.data.toInt() != Occupancy.OCCUPIED.ordinal }))
+        controller.setOnConstraints(listOf(Constraint { isOccupiedDcvHumidityControl(occupancy) }))
+        controller.setOffConstraints(listOf(Constraint { isOccupiedDcvHumidityControl(occupancy).not() }))
     }
 
     override fun runController(): Boolean {
         CcuLog.d(logTag, "Running OccupiedEnabledController" +
-                " $occupancy Status = ${controller.getActiveControl()}")
+                " occupancy ${occupancy.data} Status = ${controller.getActiveControl()}")
         return controller.getActiveControl()
     }
 

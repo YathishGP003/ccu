@@ -50,12 +50,9 @@ open class DabStagedRtuBaseViewModel : ViewModel() {
     lateinit var hayStack : CCUHsApi
 
     lateinit var relay1AssociationList : List<String>
-    lateinit var relay2AssociationList : List<String>
-    lateinit var relay3AssociationList : List<String>
-    lateinit var relay4AssociationList : List<String>
-    lateinit var relay5AssociationList : List<String>
-    lateinit var relay6AssociationList : List<String>
-    lateinit var relay7AssociationList : List<String>
+    lateinit var analog2OutputAssociationList : List<String>
+    lateinit var thermistor1AssociationList : List<String>
+    lateinit var analogIn1AssociationList : List<String>
 
     lateinit var equipBuilder : ProfileEquipBuilder
     lateinit var deviceBuilder: DeviceBuilder
@@ -84,13 +81,10 @@ open class DabStagedRtuBaseViewModel : ViewModel() {
     }
 
     private fun initializeLists() {
-        relay1AssociationList = Domain.getListByDomainName(DomainName.relay1OutputAssociation, model)
-        relay2AssociationList = Domain.getListByDomainName(DomainName.relay2OutputAssociation, model)
-        relay3AssociationList = Domain.getListByDomainName(DomainName.relay3OutputAssociation, model)
-        relay4AssociationList = Domain.getListByDomainName(DomainName.relay4OutputAssociation, model)
-        relay5AssociationList = Domain.getListByDomainName(DomainName.relay5OutputAssociation, model)
-        relay6AssociationList = Domain.getListByDomainName(DomainName.relay6OutputAssociation, model)
-        relay7AssociationList = Domain.getListByDomainName(DomainName.relay7OutputAssociation, model)
+        relay1AssociationList = Domain.getListOfDisNameByDomainName(DomainName.relay1OutputAssociation, model)
+        analog2OutputAssociationList = Domain.getListOfDisNameByDomainName(DomainName.analog2OutputAssociation, model)
+        thermistor1AssociationList = Domain.getListOfDisNameByDomainName(DomainName.thermistor1InputAssociation, model)
+        analogIn1AssociationList = Domain.getListOfDisNameByDomainName(DomainName.analog1InputAssociation, model)
     }
 
     fun createNewEquip(id : String) : String{

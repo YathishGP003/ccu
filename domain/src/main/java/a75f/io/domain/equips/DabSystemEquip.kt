@@ -2,6 +2,7 @@ package a75f.io.domain.equips
 
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.util.CalibratedPoint
 
 /**
  * Created by Manjunath K on 07-06-2024.
@@ -19,6 +20,7 @@ open class DabSystemEquip(equipRef: String) : SystemEquip(equipRef) {
     val dabHumidityHysteresis = Point(DomainName.dabHumidityHysteresis, equipRef)
 
     val dabRelayDeactivationHysteresis = Point(DomainName.dabRelayDeactivationHysteresis, equipRef)
+
 
 
     val dabStageUpTimerCounter = Point(DomainName.dabStageUpTimerCounter, equipRef)
@@ -72,4 +74,6 @@ open class DabSystemEquip(equipRef: String) : SystemEquip(equipRef) {
 
     // others
     val systemPurgeVavMinFanLoopOutput = Point(DomainName.systemPurgeVavMinFanLoopOutput , equipRef)
+    val currentOccupancy = CalibratedPoint(DomainName.occupancyMode , equipRef, 0.0)
+
 }

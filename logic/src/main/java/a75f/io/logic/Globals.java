@@ -3,6 +3,8 @@ package a75f.io.logic;
 
 import static a75f.io.api.haystack.Tags.BACNET_DEVICE_JOB;
 import static a75f.io.logic.bo.building.bacnet.BacnetEquip.TAG_BACNET;
+import static a75f.io.logic.util.PreferenceUtil.getClearUnSyncedList;
+import static a75f.io.logic.util.PreferenceUtil.setClearUnSyncedList;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -287,6 +289,10 @@ public class Globals {
             MigrationHandler migrationHandler = new MigrationHandler(CCUHsApi.getInstance());
             try {
                 CcuLog.i(L.TAG_CCU_INIT, "Run Migrations");
+                if(!getClearUnSyncedList()) {
+                    CCUHsApi.getInstance().getSyncStatusService().clearSyncStatus();
+                    setClearUnSyncedList();
+                }
                 ModelCache.INSTANCE.init(mApplicationContext, CCUHsApi.getInstance());
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                 if (!isSafeMode()) {

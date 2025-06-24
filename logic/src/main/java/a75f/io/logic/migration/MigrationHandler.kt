@@ -114,10 +114,8 @@ import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.tuners.TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL
 import a75f.io.logic.util.PreferenceUtil
-import a75f.io.logic.util.PreferenceUtil.getClearUnSyncedList
 import a75f.io.logic.util.PreferenceUtil.getMigrateDeleteRedundantOaoPointsBySystemEquip
 import a75f.io.logic.util.PreferenceUtil.getModbusKvtagsDataTypeUpdated
-import a75f.io.logic.util.PreferenceUtil.setClearUnSyncedList
 import a75f.io.logic.util.PreferenceUtil.setMigrateDeleteRedundantOaoPointsBySystemEquip
 import a75f.io.logic.util.PreferenceUtil.setModbusKvtagsDataTypeUpdate
 import a75f.io.logic.util.addEquipScheduleStatusPoint
@@ -447,10 +445,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if(!getModbusKvtagsDataTypeUpdated()) {
             correctDataTypeForKVPairsInModbus()
             setModbusKvtagsDataTypeUpdate()
-        }
-        if(!getClearUnSyncedList()) {
-            clearUnSyncedList()
-            setClearUnSyncedList()
         }
 
         if(!getMigrateDeleteRedundantOaoPointsBySystemEquip()) {
@@ -3638,9 +3632,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
     }
 
-    private fun clearUnSyncedList() {
-        CCUHsApi.getInstance().syncStatusService.clearSyncStatus()
-    }
 
     private fun deleteRedundantOaoPointsBasedOnCurrentSystemProfile() {
         try {

@@ -544,6 +544,10 @@ public class SystemConfigFragment extends Fragment {
             if (fragment instanceof DABHybridAhuProfile) {
                 goTo(page);
             }
+
+            if (fragment instanceof DefaultSystemProfile) {
+                goTo(page);
+            }
         }
         return true;
     }

@@ -91,6 +91,7 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
     TextView cancelServerDown;
     boolean isNotFirstInvocation ;
     JSONObject config;
+    boolean isCcuAppExistForReplace;
     boolean resumeUpdateCCU;
     boolean isDownloading;
     boolean isInstalling;
@@ -180,7 +181,8 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
             boolean isReplace,
             ArrayList<String> apkNames,
             HashMap<String, String> appNameVersion,
-            HashMap<String, String> recommendedAppNameVersion
+            HashMap<String, String> recommendedAppNameVersion,
+            boolean isCcuAppExistForReplace
     ) throws JSONException {
         this.currentVersionOfCCUString = currentVersionOfCCU;
         this.fileSizeString = fileSize + " MB";
@@ -191,6 +193,7 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
         this.versionLabelString = getReplaceCCUApk(recommendedVersionOfCCUString);
         this.isNotFirstInvocation = false;
         this.resumeUpdateCCU = false;
+        this.isCcuAppExistForReplace = isCcuAppExistForReplace;
         config = new JSONObject();
         config.put("currentVersionOfCCUString", currentVersionOfCCU);
         config.put("fileSizeString", fileSize +" MB");
@@ -362,7 +365,7 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
         currentVersionOfCCU.setText(currentVersionOfCCUString);
         recommendedVersionOfCCU.setText(recommendedVersionOfCCUString);
         fileSize.setText(fileSizeString);
-        if(isReplace) fileSize.setVisibility(GONE);
+        if(isReplace && !isCcuAppExistForReplace) fileSize.setVisibility(GONE);
     }
 
     private void updateDialog(View view) {
@@ -419,7 +422,7 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
         error_image_layout = view.findViewById(R.id.error_image_layout);
         if (isReplace & !isBundleUpdate) {
             downloadSizeText.setVisibility(View.VISIBLE);
-            if(isReplace) downloadSizeText.setVisibility(View.GONE);
+            if(isReplace && !isCcuAppExistForReplace) downloadSizeText.setVisibility(View.GONE);
             header.setText("Do you want to replace");
             latestVersionText.setText("Replacing CCU's version:");
             updateApp.setText("UPDATE & CONTINUE");
@@ -446,6 +449,13 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
                 recommendedBacAppVersion.setText(recommendedBacAppVersionString);
             } else {
                 bacAppDetailsLayout.setVisibility(View.GONE);
+            }
+
+            if (isCcuAppExistForReplace) {
+                fileSize.setVisibility(View.VISIBLE);
+                fileSize.setText(fileSizeString);
+            } else {
+                fileSize.setVisibility(GONE);
             }
         } else if (isReplace && isBundleUpdate) {
             totalSize.setVisibility(View.GONE);

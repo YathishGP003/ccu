@@ -363,6 +363,8 @@ class OtaStatusDiagPoint {
         fun updateCCUOtaStatus(status: OtaStatus) {
             val daigEquip = CCUHsApi.getInstance()
                 .readEntity("equip and diag or domainName == \"${DomainName.diagEquip}\"")
+            if(daigEquip.isEmpty()) return
+
             if (daigEquip["domainName"] != null && daigEquip["domainName"].toString() == DomainName.diagEquip) {
                 Domain.isDiagEquipInitialised();
                 CcuLog.e(L.TAG_CCU_DOWNLOAD, "updateCCUOtaStatus: DM DiagEquip")

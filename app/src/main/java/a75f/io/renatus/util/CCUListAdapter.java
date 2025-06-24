@@ -12,8 +12,11 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.JsonObject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRow;
 import org.projecthaystack.io.HZincReader;
@@ -25,10 +28,13 @@ import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.constants.HttpConstants;
 import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.ccu.restore.CCU;
+import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.registration.CCUSelect;
@@ -134,6 +140,7 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
                         localRemoteAppVersion = splitVersion[splitVersion.length - 1];
                     }
 
+                    String ccuApkFileSize = getFileSize(cloudCcuVersion);
                     CcuLog.d(L.TAG_CCU_REPLACE, "Cloud CCU Version: " + cloudCcuVersion + ", Local CCU Version: " + localCcuVersion
                             + ",\n Cloud BACnet App Version: " + cloudBacAppVersion + ", Local BACnet App Version: " + localBacAppVersion
                             + ",\n Cloud Remote Access App Version: " + cloudRemoteAppVersion + ", Local Remote Access App Version: " + localRemoteAppVersion
@@ -232,10 +239,19 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
                         return;
                     }
 
+                    boolean isCcuAppExistForReplace = false;
+
+                    for (String apkName : apkNames) {
+                        if (apkName.contains("CCU")) {
+                            isCcuAppExistForReplace = true;
+                            break;
+                        }
+                    }
+
                     try {
                         CcuLog.d(L.TAG_CCU_REPLACE, "to be downloaded apks: " + apkNames);
                         isCCUUpgradeRequired = true;
-                        updateCCUFragment(fragmentManager, ccu, apkNames, appNameVersion, recommendedAppNameVersion);
+                        updateCCUFragment(fragmentManager, ccu, apkNames, appNameVersion, recommendedAppNameVersion, ccuApkFileSize, isCcuAppExistForReplace);
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
@@ -289,17 +305,18 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
 
     private void updateCCUFragment(FragmentManager parentFragmentManager, CCU ccu,
                                    ArrayList<String> apkNames, HashMap<String, String> appNameVersion,
-           HashMap<String, String> recommendedAppNameVersion) throws JSONException {
+           HashMap<String, String> recommendedAppNameVersion, String ccuAppFileSize, boolean isCcuAppExistForReplace) throws JSONException {
         String currentAppVersionWithPatch = getCurrentAppVersionWithPatch();
         FragmentTransaction ft = parentFragmentManager.beginTransaction();
         UpdateCCUFragment newFragment = new UpdateCCUFragment().showUiForReplaceCCU(
                 currentAppVersionWithPatch,
                 ccu,
-                "",
+                ccuAppFileSize,
                 true,
                 apkNames,
                 appNameVersion,
-                recommendedAppNameVersion
+                recommendedAppNameVersion,
+                isCcuAppExistForReplace
                 );
         newFragment.show(ft, "popup");
 
@@ -362,5 +379,34 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
                 break;
         }
         return isArtifactEmpty;
+    }
+
+    private static String getFileSize(String currentCCUVersion){
+        JsonObject body = new JsonObject();
+        String[] currentVersionComponents = currentCCUVersion.split("\\.");
+        body.addProperty("majorVersion", currentVersionComponents[0]);
+        body.addProperty("minorVersion", currentVersionComponents[1]);
+        body.addProperty("patchVersion", currentVersionComponents[2]);
+        String response = HttpUtil.executeJson(
+                RenatusServicesEnvironment.getInstance().getUrls().getGetCCUFileSize(),
+                body.toString(),
+                a75f.io.api.haystack.BuildConfig.HAYSTACK_API_KEY,
+                true,
+                HttpConstants.HTTP_METHOD_POST
+        );
+        CcuLog.d(L.TAG_CCU_DOWNLOAD, "Response from getCCUFileSize: " + response);
+        if (response != null) {
+            JSONObject jsonResponse = null;
+            try {
+                jsonResponse = new JSONObject(response);
+                return jsonResponse.get("size").toString();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        } else {
+            return "0";
+        }
+        return "0";
     }
 }

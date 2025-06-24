@@ -358,6 +358,14 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
         // This function runs in timer thread, it will run after 5mins
         BundleInstallManager.Companion.completeBundleInstallIfNecessary();
 
+        if(PreferenceUtil.getIsRebootRequiredAfterReplaceFlag()){
+            PreferenceUtil.setIsRebootRequiredAfterReplaceFlag(false);
+            CcuLog.d(TAG, "restarting after home app install");
+            RenatusApp.rebootTablet();
+        } else{
+            CcuLog.d(TAG, "no restart required after home app install");
+        }
+
         // For Golden Release we need to update all side apps to recommended version
         // But we don't want to do this if CCU is replaced.
         // This function runs in timer thread, it will run after 1min

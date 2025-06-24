@@ -128,6 +128,8 @@ public class PreferenceUtil {
     private static final String MIGRATE_DELETE_REDUNDANT_OAO_POINTS_BY_SYSTEM_EQUIP = "migrateDeleteRedundantOaoPointsBySystemEquip";
 
     private static final String MIGRATE_VFD_FAN_MODE = "migrateVfdFanMode";
+    private static final String IS_REBOOT_REQUIRED_AFTER_REPLACE = "isRebootRequiredAfterReplace";
+
     public static void setContext(Context c) {
         context= c;
     }
@@ -1000,5 +1002,13 @@ public class PreferenceUtil {
 
     public static void setEquipScheduleStatusForZoneExternalEquipDone() {
         setBooleanPreference(EQUIP_SCHEDULESTATUS_FOR_ZONE_EXTERNAL_EQUIP, true);
+    }
+
+    public static boolean getIsRebootRequiredAfterReplaceFlag() {
+        return getBooleanPreference(IS_REBOOT_REQUIRED_AFTER_REPLACE);
+    }
+
+    public static void setIsRebootRequiredAfterReplaceFlag(boolean isRequired) {
+        setBooleanPreferenceByCommitting(IS_REBOOT_REQUIRED_AFTER_REPLACE, isRequired);
     }
 }

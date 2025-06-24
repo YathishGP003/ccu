@@ -1188,12 +1188,23 @@ class BundleInstallManager: BundleInstallListener {
             }
 
             var isHomeAppPresent = false
+            var isCCUAppPresent = false
             var homeAppName = ""
+            var ccuAppName = ""
             allEntries.forEachIndexed { index, (id, file) ->
                 val apkName = file?.name ?: "Unknown"
                 if (apkName.contains("HomeApp")) {
+                    isHomeAppPresent = true
+                    homeAppName = apkName
                     return@forEachIndexed
                 }
+
+                if (apkName.contains("CCU")) {
+                    isCCUAppPresent = true
+                    ccuAppName = apkName
+                    return@forEachIndexed
+                }
+
                 AppInstaller.CCU_APK_FILE_NAME = apkName
                 CcuLog.i(L.TAG_CCU_REPLACE, "Installing.... $apkName (ID: $id)")
                 AppInstaller().invokeInstallerIntent(
@@ -1205,24 +1216,25 @@ class BundleInstallManager: BundleInstallListener {
                 )
             }
 
-            for ((index, entry) in allEntries.withIndex()) {
-                val (id, file) = entry
-                val apkName = file?.name ?: "Unknown"
-                isHomeAppPresent = apkName.contains("HomeApp")
-                if (isHomeAppPresent) {
-                    homeAppName = apkName
-                    break
-                }
-            }
-
-            CcuLog.i(L.TAG_CCU_REPLACE,"Home app present: $isHomeAppPresent - fileName $homeAppName")
+            CcuLog.i(L.TAG_CCU_REPLACE,"Home app present: $isHomeAppPresent - fileName $homeAppName" +
+                    "\nCCU app present: $isCCUAppPresent - fileName $ccuAppName")
             GlobalScope.launch(Dispatchers.Main) {
+                if(isHomeAppPresent && isCCUAppPresent){
+                    CcuLog.i(L.TAG_CCU_REPLACE, "Both Home and CCU apps are present, setting reboot flag")
+                   PreferenceUtil.setIsRebootRequiredAfterReplaceFlag(true);
+                }
                 if (isHomeAppPresent) {
+                    CcuLog.i(L.TAG_CCU_REPLACE, "Installing.... $homeAppName")
                     HomeApp(homeAppName).installApp()
-                    delay(3000)
+                }
+                if (isCCUAppPresent) {
+                    CcuLog.i(L.TAG_CCU_REPLACE, "Installing.... $ccuAppName")
+                    CCUApp(ccuAppName).installApp()
+                }
+                delay(3000)
+                if (isHomeAppPresent) {
                     RenatusApp.rebootTablet()
                 } else {
-                    delay(3000)
                     RenatusApp.restartApp()
                 }
             }

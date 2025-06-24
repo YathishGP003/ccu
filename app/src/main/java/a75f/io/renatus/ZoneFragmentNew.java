@@ -5013,16 +5013,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 .setText(R.string.point_schedule_assigned);
         ImageButton detailedPointScheduleViewButton = zoneDetails.findViewById(R.id.point_schedule_view_button);
         detailedPointScheduleViewButton.setVisibility(View.VISIBLE);
-        CustomScheduleManager customScheduleManager = CustomScheduleManager.Companion.getInstance();
         detailedPointScheduleViewButton.setOnClickListener(view -> {
-            if (customScheduleManager.getActiveEventAvailability().containsKey(roomRef) &&
-                    Boolean.TRUE.equals(customScheduleManager.getActiveEventAvailability().get(roomRef))) {
-                CustomControlDialog dialog = new CustomControlDialog(roomRef);
-                FragmentManager childFragmentManager = getChildFragmentManager();
-                dialog.show(childFragmentManager, "dialog");
-            } else {
-                Toast.makeText(getContext(), "No active recurring schedule or event found", Toast.LENGTH_SHORT).show();
-            }
+            CustomControlDialog dialog = new CustomControlDialog(roomRef);
+            FragmentManager childFragmentManager = getChildFragmentManager();
+            dialog.show(childFragmentManager, "dialog");
         });
     }
 

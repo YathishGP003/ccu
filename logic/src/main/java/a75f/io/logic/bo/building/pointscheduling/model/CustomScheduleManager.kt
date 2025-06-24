@@ -12,6 +12,7 @@ import a75f.io.api.haystack.util.getCurrentDateTime
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.util.getValueByEnum
+import a75f.io.logic.interfaces.ModbusWritableDataInterface
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.joda.time.LocalTime
@@ -27,12 +28,11 @@ import kotlin.system.measureTimeMillis
 class CustomScheduleManager {
 
     val haystack: CCUHsApi = CCUHsApi.getInstance()
-    // this tells the active found for that room or not
-    var activeEventAvailability: HashMap<String, Boolean> = hashMapOf()
 
 
     companion object {
         private var instance: CustomScheduleManager? = null
+        var modbusWritableDataInterface: ModbusWritableDataInterface? = null
         fun getInstance(): CustomScheduleManager {
             if (instance == null) {
                 instance = CustomScheduleManager()
@@ -202,6 +202,7 @@ class CustomScheduleManager {
                 }
             }
         }
+        CCUHsApi.getInstance().syncEntityTree()
     }
 
     fun processPointSchedules() {
@@ -209,7 +210,6 @@ class CustomScheduleManager {
         rooms.forEach { room ->
             val equips = haystack
                 .readAllEntities("equip and (modbus or connect or bacnet or pcn) and roomRef == \"" + room["id"].toString()+"\"")
-            activeEventAvailability[room["id"].toString()] = false
             equips.forEach { equip ->
                 CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "fetched>>>>>>>>> Equip: ${equip["dis"].toString()}")
                 // kumar-to-do  -- below query we need to change - mandate schedulable tag
@@ -237,7 +237,7 @@ class CustomScheduleManager {
                     try {
                         if (point.has(Tags.EVENT_REF)) {
                             val eventProcessTime = measureTimeMillis {
-                                processEvent(point, equipScheduleStatus)
+                                processEvent(point, equipScheduleStatus, equip)
                             }
                             CcuLog.d(
                                 L.TAG_CCU_POINT_SCHEDULE,
@@ -245,14 +245,13 @@ class CustomScheduleManager {
                             )
                         } else if (point.has(Tags.SCHEDULE_REF)) {
                             val recurringScheduleProcessTime = measureTimeMillis {
-                                processRecurringSchedule(point, equipScheduleStatus)
+                                processRecurringSchedule(point, equipScheduleStatus, equip)
                             }
                             CcuLog.d(
                                 L.TAG_CCU_POINT_SCHEDULE,
                                 "Recurring schedule processing time: $recurringScheduleProcessTime" +
                                         " ms for the point ${point.id()}"
                             )
-                            activeEventAvailability[room["id"].toString()] = true
                         } else {
                             CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "No point schedule or event found: $point")
                         }
@@ -271,15 +270,10 @@ class CustomScheduleManager {
                     scheduleStatusMessage
                 )
             }
-
-            CcuLog.d(
-                L.TAG_CCU_POINT_SCHEDULE,
-                "Check active event availability for any point in this room ${room["dis"]}: ${activeEventAvailability[room["id"].toString()]}"
-            )
         }
     }
 
-    private fun processEvent(point: HDict, equipScheduleStatus: StringBuilder) {
+    private fun processEvent(point: HDict, equipScheduleStatus: StringBuilder, equip: HashMap<Any, Any>) {
         val eventRefs = point[Tags.EVENT_REF].toString()
             .replace("[","")
             .replace("]","")
@@ -293,7 +287,7 @@ class CustomScheduleManager {
             CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "No active event found for point: ${point.id()}")
             // if point has eventRef but not actively available then go for point/recurring schedule if available
             if(point.has(Tags.SCHEDULE_REF)) {
-                processRecurringSchedule(point, equipScheduleStatus)
+                processRecurringSchedule(point, equipScheduleStatus, equip)
             }
             return
         }
@@ -373,6 +367,14 @@ class CustomScheduleManager {
                             )
                             haystack.writeDefaultValById(pointId, customValue)
 
+                            if(equip.containsKey("modbus")){
+                                CcuLog.d(
+                                    L.TAG_CCU_POINT_SCHEDULE,
+                                    "Writing value to Modbus for pointId=$pointId, value=$customValue"
+                                )
+                                modbusWritableDataInterface?.writeRegister(pointId)
+                            }
+
                             equipScheduleStatus.append(
                                 (pointDis[pointDis.size - 1]) + " is " + updatedValue + ", and event ends " +
                                         "at ${formatTimeValue(eventSchedule.range.ethh)}:${
@@ -390,6 +392,14 @@ class CustomScheduleManager {
                     if (!valueWritten) {
                         defaultValue = haystack.readPointPriorityVal(pointId)
                         haystack.writeDefaultValById(pointId, defaultValue)
+
+                        if(equip.containsKey("modbus")){
+                            CcuLog.d(
+                                L.TAG_CCU_POINT_SCHEDULE,
+                                "Writing value to Modbus for pointId=$pointId, value=$defaultValue"
+                            )
+                            modbusWritableDataInterface?.writeRegister(pointId)
+                        }
                     }
 
                 }
@@ -442,7 +452,9 @@ class CustomScheduleManager {
     private fun filterEventsByDateTimeRange(
         events: List<HDict>, currentDate: LocalDate, currentTime: LocalTime, point: HDict
     ): List<HDict> {
-        return events.filter { dict ->
+
+        val expiredEventRefs = mutableListOf<String>()
+        val result =  events.filter { dict ->
             val range = dict[Tags.RANGE] as? HDict ?: return@filter false
 
             val startDate = range[Tags.STDT]?.toString()?.let { LocalDate.parse(it) }
@@ -485,7 +497,9 @@ class CustomScheduleManager {
                     L.TAG_CCU_POINT_SCHEDULE,
                     "Event is active for point: ${point[Tags.DIS]} with ID: ${dict["id"]}"
                 )
-                activeEventAvailability[point[Tags.ROOMREF].toString()] = true
+            } else {
+                // its passed event hence removing the eventRef and eventDefinitionRef from the point
+                expiredEventRefs.add(dict["id"].toString())
             }
 
             CcuLog.d(
@@ -497,6 +511,20 @@ class CustomScheduleManager {
             )
             isCurrent
         }
+
+        // its passed event hence removing the eventRef and eventDefinitionRef from the point
+       val removeRefsTime = measureTimeMillis {
+           removeEventRefFromPoint(
+               expiredEventRefs
+           )
+       }
+
+        CcuLog.d(
+            L.TAG_CCU_POINT_SCHEDULE,
+            "Removed expired eventRefs from points in ${removeRefsTime} ms"
+        )
+
+        return result
     }
 
     // Sort the list of events using precedence rules
@@ -575,7 +603,7 @@ class CustomScheduleManager {
         }
     }
 
-    private fun processRecurringSchedule(pointDict: HDict, equipScheduleStatus: StringBuilder) {
+    private fun processRecurringSchedule(pointDict: HDict, equipScheduleStatus: StringBuilder, equip: HashMap<Any, Any>) {
         if (!pointDict.has("pointDefinitionRef") || !pointDict.has("scheduleRef")) {
             CcuLog.d(
                 L.TAG_CCU_POINT_SCHEDULE,
@@ -617,7 +645,13 @@ class CustomScheduleManager {
                     )
 
                     haystack.writeDefaultValById(pointID, value)
-
+                    if(equip.containsKey("modbus")){
+                        CcuLog.d(
+                            L.TAG_CCU_POINT_SCHEDULE,
+                            "Writing value to Modbus for pointId=$pointID, value=$value"
+                        )
+                        modbusWritableDataInterface?.writeRegister(pointID)
+                    }
                     // Converts a value and default value based on enum and unit information,
                     //falling back to the original value if conversion fails or enum is missing.
 
@@ -673,6 +707,14 @@ class CustomScheduleManager {
                                 " at " + formatTimeValue(day?.sthh.toString()) + ":" + formatTimeValue(day?.stmm.toString()) + ";\n"
                     )
                     haystack.writeDefaultValById(pointID, pointDefinition.defaultValue)
+
+                    if (equip.containsKey("modbus")) {
+                        CcuLog.d(
+                            L.TAG_CCU_POINT_SCHEDULE,
+                            "Writing value to Modbus for pointId=$pointID, value=$value"
+                        )
+                        modbusWritableDataInterface?.writeRegister(pointID)
+                    }
                 }
                 CcuLog.d(
                     L.TAG_CCU_POINT_SCHEDULE,

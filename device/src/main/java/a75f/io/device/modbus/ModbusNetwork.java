@@ -21,6 +21,7 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.pointscheduling.model.CustomScheduleManager;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
@@ -33,6 +34,7 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
     public static final int READ_REGISTER_FOUR = 4;
 
     public ModbusNetwork() {
+        CustomScheduleManager.Companion.setModbusWritableDataInterface(this);
         UpdatePointHandler.setModbusWritableDataInterface(this);
         DabExternalAhu.Companion.getInstance().setModbusWritableDataInterface(this);
         VavExternalAhu.Companion.getInstance().setModbusWritableDataInterface(this);

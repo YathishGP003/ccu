@@ -358,7 +358,7 @@ fun mapBacnetPoint(
     }
 }
 
-private fun getObjectType(objectTypeValue : String) : String{
+fun getObjectType(objectTypeValue : String) : String{
     var objectType: String
     if (objectTypeValue.equals("MultiStateValue", ignoreCase = true)) {
         objectType =
@@ -1201,7 +1201,7 @@ private fun generateWriteObject(
     )
     return BacnetWriteRequest(destinationMultiRead!!, writeRequest)
 }
-private fun doMakeRequest(configMap: Map<String, String?>, objectId : Int, newValue : String,
+fun doMakeRequest(configMap: Map<String, String?>, objectId : Int, newValue : String,
                           objectType: String, priority: String, pointId: String){
     val bacnetServicesUtils = BacnetServicesUtils()
     val serverIpAddress: String? = bacnetServicesUtils.getServerIpAddress()

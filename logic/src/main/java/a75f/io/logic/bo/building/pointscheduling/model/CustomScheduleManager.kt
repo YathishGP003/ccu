@@ -11,6 +11,10 @@ import a75f.io.api.haystack.util.TimeUtil
 import a75f.io.api.haystack.util.getCurrentDateTime
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.bacnet.BacnetEquip
+import a75f.io.logic.bo.building.system.BacnetServicesUtils
+import a75f.io.logic.bo.building.system.doMakeRequest
+import a75f.io.logic.bo.building.system.getObjectType
 import a75f.io.logic.bo.util.getValueByEnum
 import a75f.io.logic.interfaces.ModbusWritableDataInterface
 import org.joda.time.LocalDate
@@ -365,15 +369,14 @@ class CustomScheduleManager {
                                 L.TAG_CCU_POINT_SCHEDULE,
                                 "writing value ($customValue) to ${point.id()}, eventScheduleId: $eventScheduleId"
                             )
-                            haystack.writeDefaultValById(pointId, customValue)
-
-                            if(equip.containsKey("modbus")){
-                                CcuLog.d(
-                                    L.TAG_CCU_POINT_SCHEDULE,
-                                    "Writing value to Modbus for pointId=$pointId, value=$customValue"
+                            if (point.has("his")) {
+                                haystack.writeHisValById(
+                                    pointId,
+                                    customValue
                                 )
-                                modbusWritableDataInterface?.writeRegister(pointId)
                             }
+                            haystack.writeDefaultValById(pointId, customValue)
+                            writeToPhysical(equip, point , customValue)
 
                             equipScheduleStatus.append(
                                 (pointDis[pointDis.size - 1]) + " is " + updatedValue + ", and event ends " +
@@ -391,15 +394,14 @@ class CustomScheduleManager {
                     // if no event found for this point, write the default value
                     if (!valueWritten) {
                         defaultValue = haystack.readPointPriorityVal(pointId)
-                        haystack.writeDefaultValById(pointId, defaultValue)
-
-                        if(equip.containsKey("modbus")){
-                            CcuLog.d(
-                                L.TAG_CCU_POINT_SCHEDULE,
-                                "Writing value to Modbus for pointId=$pointId, value=$defaultValue"
+                        if (point.has("his")) {
+                            haystack.writeHisValById(
+                                pointId,
+                                defaultValue
                             )
-                            modbusWritableDataInterface?.writeRegister(pointId)
                         }
+                        haystack.writeDefaultValById(pointId, defaultValue)
+                        writeToPhysical(equip, point , defaultValue)
                     }
 
                 }
@@ -643,15 +645,15 @@ class CustomScheduleManager {
                         L.TAG_CCU_POINT_SCHEDULE,
                         "Point schedule found: pointId=$pointID, value=$value"
                     )
-
-                    haystack.writeDefaultValById(pointID, value)
-                    if(equip.containsKey("modbus")){
-                        CcuLog.d(
-                            L.TAG_CCU_POINT_SCHEDULE,
-                            "Writing value to Modbus for pointId=$pointID, value=$value"
+                    if (pointDict.has("his")) {
+                        haystack.writeHisValById(
+                            pointID,
+                            value
                         )
-                        modbusWritableDataInterface?.writeRegister(pointID)
                     }
+                    haystack.writeDefaultValById(pointID, value)
+                    writeToPhysical(equip, pointDict, value)
+
                     // Converts a value and default value based on enum and unit information,
                     //falling back to the original value if conversion fails or enum is missing.
 
@@ -706,15 +708,14 @@ class CustomScheduleManager {
                         (pointDis[pointDis.size - 1]) + " is " + updatedDefaultVal+ ", and changes to " + updatedValue +
                                 " at " + formatTimeValue(day?.sthh.toString()) + ":" + formatTimeValue(day?.stmm.toString()) + ";\n"
                     )
-                    haystack.writeDefaultValById(pointID, pointDefinition.defaultValue)
-
-                    if (equip.containsKey("modbus")) {
-                        CcuLog.d(
-                            L.TAG_CCU_POINT_SCHEDULE,
-                            "Writing value to Modbus for pointId=$pointID, value=$value"
+                    if (pointDict.has("his")) {
+                        haystack.writeHisValById(
+                            pointID,
+                            pointDefinition.defaultValue
                         )
-                        modbusWritableDataInterface?.writeRegister(pointID)
                     }
+                    haystack.writeDefaultValById(pointID, pointDefinition.defaultValue)
+                    writeToPhysical(equip, pointDict, pointDefinition.defaultValue)
                 }
                 CcuLog.d(
                     L.TAG_CCU_POINT_SCHEDULE,
@@ -729,6 +730,38 @@ class CustomScheduleManager {
                             " actualId=${pointDefinition.id}"
                 )
             }
+        }
+    }
+
+    private fun writeToPhysical(equip: HashMap<Any, Any>, pointDict: HDict, value: Double) {
+        val pointID = pointDict["id"].toString()
+        if (equip.containsKey("modbus")) {
+            CcuLog.d(
+                L.TAG_CCU_POINT_SCHEDULE,
+                "Writing value to Modbus for pointId=${pointID}, value=$value"
+            )
+            modbusWritableDataInterface?.writeRegister(pointID)
+        } else if (equip.containsKey("bacnetConfig")) {
+
+            val configMap = mutableMapOf<String, String>()
+            equip["bacnetConfig"].toString().split(",").forEach { configItem ->
+                val configKeyValueList = configItem.split(":")
+                if (configKeyValueList.size == 2) {
+                    configMap[configKeyValueList[0]] = configKeyValueList[1]
+                }
+            }
+            val bacnetObjectId = pointDict.getInt(Tags.BACNET_OBJECT_ID)
+            val bacnetObjectType = getObjectType(pointDict.getStr(Tags.BACNET_TYPE))
+            val priority = pointDict.getStr("defaultWriteLevel")
+            val bacnetValue = value.toString()
+            doMakeRequest(
+                configMap,
+                bacnetObjectId,
+                bacnetValue,
+                bacnetObjectType,
+                priority,
+                pointID
+            )
         }
     }
 

@@ -1,6 +1,7 @@
 package a75f.io.renatus.profiles
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.device.modbus.buildModbusModel
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.util.ModelLoader
@@ -8,6 +9,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.bacnet.BacnetProfile
+import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.monitoring.HyperStatV2MonitoringProfile
@@ -45,11 +47,13 @@ import a75f.io.renatus.modbus.util.isAllParamsSelectedBacNet
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.ph.core.Tags
 import okhttp3.internal.toImmutableList
 import kotlin.properties.Delegates
 
 class CopyConfiguration {
     companion object {
+        //
         private lateinit var config: ProfileConfiguration
         private val ccuHsApiInstance = CCUHsApi.getInstance()
 
@@ -67,6 +71,8 @@ class CopyConfiguration {
         private lateinit var bacnetProfile: BacnetProfile
         private var selectedBacNetModel: String? = null
 
+        private var equipmentDeviceList: List<EquipmentDevice>? = null
+
 
         fun getCopiedConfiguration(): ProfileConfiguration {
             return config
@@ -77,6 +83,9 @@ class CopyConfiguration {
         }
         fun getCopiedBacnetConfiguration(): MutableState<BacnetModel> {
             return bacnetModel
+        }
+        fun getCopiedConnectNodeConfiguration(): List<EquipmentDevice>? {
+            return equipmentDeviceList
         }
 
         fun getSelectedModbusModel(): String? {
@@ -116,14 +125,17 @@ class CopyConfiguration {
                     ?.substringBefore(",")
             }
 
-            profileType = CCUUtils.getProfileType(equip["profile"]?.toString())
-
+            profileType = CCUUtils.getProfileType(
+                equip["profile"]?.toString(),
+                address
+            )
+            val isConnectNodePaired = ConnectNodeUtil.isZoneContainingConnectNodeWithEquips(address.toString(), ccuHsApiInstance)
             if ((modbusModel == null && selectedBacNetModel == null)) {
                 val device =
                     ccuHsApiInstance.readEntity("device and equipRef ==\"${equip["id"]}\"and addr == \"$address\"")
                 nodeType = getNodeType(device)
 
-                if (nodeType == null) {
+                if (nodeType == null && !isConnectNodePaired) {
                     CcuLog.e(
                         L.TAG_CCU_COPY_CONFIGURATION,
                         " Copy Configuration failed : Address $address ,  Profile Type: $profileType ,  Node Type: $nodeType , ModbusModel $modbusModel "
@@ -143,12 +155,13 @@ class CopyConfiguration {
                 return
             }
             try {
-                processProfileType(address, equip)
+                processProfileType(address, equip, ccuHsApiInstance)
                 CcuLog.i(
                     L.TAG_CCU_COPY_CONFIGURATION,
                     " Copy Configuration completed : Address $address ,  Profile Type: $profileType ,  Node Type: $nodeType , ModbusModel $modbusModel "
                 )
                 floorPlanFragment.enhancedToastMessage(moduleType)
+
             } catch (e: Exception) {
                 CcuLog.e(
                     L.TAG_CCU_COPY_CONFIGURATION,
@@ -158,7 +171,11 @@ class CopyConfiguration {
 
         }
 
-        private fun processProfileType(address: Int, equip: HashMap<Any, Any>) {
+        private fun processProfileType(
+            address: Int,
+            equip: HashMap<Any, Any>,
+            ccuHsApiInstance: CCUHsApi
+        ) {
             when (profileType) {
                 ProfileType.VAV_PARALLEL_FAN,
                 ProfileType.VAV_SERIES_FAN,
@@ -189,8 +206,17 @@ class CopyConfiguration {
                 ProfileType.MYSTAT_CPU,
                 ProfileType.MYSTAT_PIPE2 -> loadActiveMStatProfilesConfiguration(address, equip)
 
+                ProfileType.CONNECTNODE -> loadConnectNodeConfiguration(address, ccuHsApiInstance)
+
                 else -> throw IllegalArgumentException("Unsupported Profile Type: $profileType")
             }
+        }
+
+        private fun loadConnectNodeConfiguration(address: Int, ccuHsApiInstance: CCUHsApi) {
+            val roomRef = ccuHsApiInstance.readEntity("device and addr == \"$address\"")[Tags.ROOM_REF].toString()
+            equipmentDeviceList = buildModbusModel(roomRef)
+                .let { ConnectNodeUtil.reorderEquipments(it) }
+            CcuLog.i(L.TAG_CONNECT_NODE, "Loaded Connect Node Equipments for address: $address, Equipments: $equipmentDeviceList")
         }
 
         private fun loadActiveVavConfiguration(address: Int, equip: HashMap<Any, Any>) {

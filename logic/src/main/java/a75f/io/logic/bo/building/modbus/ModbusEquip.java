@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.modbus;
 
+import static a75f.io.logic.util.NonModelPointUtilKt.addEquipScheduleStatusPoint;
+
 import org.projecthaystack.HDict;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HStr;
@@ -8,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -25,9 +28,11 @@ import a75f.io.api.haystack.modbus.UserIntentPointTags;
 import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.UtilKt;
+import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import kotlin.Pair;
 
 public class ModbusEquip {
     ProfileType profileType;
@@ -54,7 +59,10 @@ public class ModbusEquip {
     }
 
     public String createEntities(String floorRef, String roomRef, EquipmentDevice equipmentInfo,
-                               List<Parameter> configParams, String parentEquipId, boolean isSlaveIdSameAsParent,String modbusLevel,String modelVersion, boolean isSubEquip) {
+                               List<Parameter> configParams, String parentEquipId, boolean isSlaveIdSameAsParent,
+                                 String modbusLevel,String modelVersion, boolean isConnectNode, Map<String,
+                    Pair<String, String>> registerAddressMap, boolean isSubEquip, String modelSuffix,
+                                 String connectNodeAddress, String modelId) {
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -78,7 +86,9 @@ public class ModbusEquip {
         String modbusName = equipmentInfo.getName();
         String equipDis;
         String equipDisplayName = equipmentInfo.getEquipDisplayName();
-        if(equipDisplayName == null || equipDisplayName.isEmpty()){
+        if (isConnectNode) {
+            equipDis = siteDis + "-" + modbusName + modelSuffix;
+        } else if(equipDisplayName == null || equipDisplayName.isEmpty()){
             equipDis = siteDis + "-"+modbusName+"-"+ equipmentInfo.getSlaveId();
         }
         else {
@@ -102,6 +112,11 @@ public class ModbusEquip {
                     .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(equipmentInfo.getSlaveId()));
         if (parentEquipId != null) {
             mbEquip.setEquipRef(parentEquipId);
+        }
+        if (isConnectNode) {
+            mbEquip.addMarker(Tags.CONNECTMODULE);
+            mbEquip.addTag("connectAddress", HStr.make(connectNodeAddress));
+            mbEquip.addTag("modelId", HStr.make(modelId));
         }
         mbEquip.setEquipType(equipmentInfo.getEquipType());
 
@@ -162,21 +177,25 @@ public class ModbusEquip {
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, equipScheduleTypeVal);
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId,equipScheduleTypeVal);
-
-        Device modbusDevice = new Device.Builder()
-                .setDisplayName(modbusEquipType+"-"+equipmentInfo.getSlaveId())
-                .addMarker("network").addMarker("modbus").addMarker(modbusEquipType.toLowerCase())
-                .setAddr(equipmentInfo.getSlaveId())
-                .setSiteRef(siteRef)
-                .setFloorRef(floorRef)
-                .setEquipRef(equipmentRef)
-                .setRoomRef(roomRef)
-                .build();
-        String deviceRef = CCUHsApi.getInstance().addDevice(modbusDevice);
+        String deviceRef;
+        if (!isConnectNode) {
+            Device modbusDevice = new Device.Builder()
+                    .setDisplayName(modbusEquipType + "-" + equipmentInfo.getSlaveId())
+                    .addMarker("network").addMarker("modbus").addMarker(modbusEquipType.toLowerCase())
+                    .setAddr(equipmentInfo.getSlaveId())
+                    .setSiteRef(siteRef)
+                    .setFloorRef(floorRef)
+                    .setEquipRef(equipmentRef)
+                    .setRoomRef(roomRef)
+                    .build();
+            deviceRef = CCUHsApi.getInstance().addDevice(modbusDevice);
+        } else {
+            deviceRef = ConnectNodeUtil.Companion.getConnectNodeForZone(roomRef, hayStack).get("id").toString();
+        }
 
         for(Parameter configParam : configParams){
             Point.Builder logicalParamPoint = new Point.Builder()
-                        .setDisplayName(equipDis+"-"+configParam.getName())
+                        .setDisplayName(equipDis+"-"+configParam.getName()+modelSuffix)
                         .setShortDis(configParam.getName())
                         .setEquipRef(equipmentRef)
                         .setSiteRef(siteRef)
@@ -185,17 +204,18 @@ public class ModbusEquip {
                         .setGroup(String.valueOf(equipmentInfo.getSlaveId()))
                         .setTz(tz);
             logicalParamPoint.addMarker(modbusLevel.toLowerCase().trim());
+
             RawPoint.Builder physicalParamPoint = new RawPoint.Builder()
-                    .setDisplayName("register"+configParam.getRegisterAddress()+"-bits-"+configParam.getStartBit()+"-"+configParam.getEndBit())
+                    .setDisplayName("register" + configParam.getRegisterAddress() + "-bits-" + configParam.getStartBit() + "-" + configParam.getEndBit())
                     .setShortDis(configParam.getName())
                     .setDeviceRef(deviceRef)
                     .setFloorRef(floorRef)
                     .setRoomRef(roomRef)
-                    .setRegisterAddress(String.valueOf(configParam.getRegisterAddress()))
                     .setStartBit(String.valueOf(configParam.getStartBit()))
                     .setEndBit(String.valueOf(configParam.getEndBit()))
-                    .setRegisterNumber(configParam.getRegisterNumber())
                     .setRegisterType(configParam.getRegisterType())
+                    .setRegisterAddress(String.valueOf(configParam.getRegisterAddress()))
+                    .setRegisterNumber(configParam.getRegisterNumber())
                     .setParameterId(configParam.getParameterId())
                     .setSiteRef(siteRef).addMarker("register").addMarker("modbus")
                     .setTz(tz)
@@ -203,11 +223,31 @@ public class ModbusEquip {
                     .addTag("multiplier", HStr.make(configParam.getMultiplier()))
                     .addTag("wordOrder", HStr.make(configParam.getWordOrder()))
                     .addTag("bitParamRange", HStr.make(configParam.getBitParamRange()))
-                    .addTag("bitParam", HStr.make( (configParam.getBitParam() != null) ? configParam.getBitParam().toString() : "0"));
+                    .addTag("bitParam", HStr.make((configParam.getBitParam() != null) ? configParam.getBitParam().toString() : "0"));
 
+            if (isConnectNode) {
+                if(!registerAddressMap.containsKey(configParam.getName())) {
+                    continue;
+                }
+                logicalParamPoint.addTag("registerNumber", HStr.make(registerAddressMap.get(configParam.getName()).getFirst()))
+                        .addTag("registerAddress", HStr.make(registerAddressMap.get(configParam.getName()).getSecond()))
+                        .addTag("registerType", HStr.make("holdingRegister"))
+                        .addTag("parameterDefinitionType", HStr.make("float"));
+            }
             if(configParam.isDisplayInUI()){
                 logicalParamPoint.addMarker("displayInUi");
             }
+
+            if(configParam.getIsSchedulable()) {
+                logicalParamPoint.addMarker(Tags.SCHEDULABLE);
+            } else {
+                logicalParamPoint.removeMarker(Tags.SCHEDULABLE);
+                if(configParam.userIntentPointTags != null) {
+                    configParam.logicalPointTags.removeIf(marker -> marker.getTagName().equals(Tags.SCHEDULABLE));
+                    configParam.userIntentPointTags.removeIf(marker -> marker.getTagName().equals(Tags.SCHEDULABLE));
+                }
+            }
+
             for(LogicalPointTags marker : configParam.getLogicalPointTags()) {
                 if(Objects.nonNull(marker.getTagValue())){
                     if(marker.getTagName().contains("bacnetId")) {
@@ -338,18 +378,53 @@ public class ModbusEquip {
             Point logicalPoint = logicalParamPoint.build();
             String logicalParamId = CCUHsApi.getInstance().addPoint(logicalPoint);
             RawPoint physicalPoint = physicalParamPoint.setPointRef(logicalParamId).build();
-            String physicalParamId = CCUHsApi.getInstance().addPoint(physicalPoint);
+
+            // Do not create physical point if it is connect node
+            if (!isConnectNode) {
+                String physicalParamId = CCUHsApi.getInstance().addPoint(physicalPoint);
+                CCUHsApi.getInstance().writeHisValById(physicalParamId,0.0);
+                if (physicalPoint.getMarkers().contains("writable")) {
+                    CCUHsApi.getInstance().writeDefaultValById(physicalParamId,0.0);
+                }
+            }
             if (configParam.getUserIntentPointTags() != null) {
                 if (configParam.getCommands() != null && !configParam.getCommands().isEmpty()) {
                     CCUHsApi.getInstance().writeHisValById(logicalParamId, Double.parseDouble(configParam.getCommands().get(0).getBitValues()));
                     CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(configParam.getCommands().get(0).getBitValues()));
+                    if (isZonePoint(logicalPoint)) {
+                        CCUHsApi.getInstance().writePoint(
+                                logicalParamId,
+                                17,
+                                CCUHsApi.getInstance().getCCUUserName(),
+                                Double.parseDouble(configParam.getCommands().get(0).getBitValues()),
+                                0
+                        );
+                    }
                 } else {
                     if (logicalPoint.getMinVal() != null) {
                         CCUHsApi.getInstance().writeHisValById(logicalParamId, Double.parseDouble(logicalPoint.getMinVal()));
                         CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(logicalPoint.getMinVal()));
+                        if (isZonePoint(logicalPoint)) {
+                            CCUHsApi.getInstance().writePoint(
+                                    logicalParamId,
+                                    17,
+                                    CCUHsApi.getInstance().getCCUUserName(),
+                                    Double.parseDouble(logicalPoint.getMinVal()),
+                                    0
+                            );
+                        }
                     } else {
                         CCUHsApi.getInstance().writeHisValById(logicalParamId, 0.0);
                         CCUHsApi.getInstance().writeDefaultValById(logicalParamId, 0.0);
+                        if (isZonePoint(logicalPoint)) {
+                            CCUHsApi.getInstance().writePoint(
+                                    logicalParamId,
+                                    17,
+                                    CCUHsApi.getInstance().getCCUUserName(),
+                                    0.0,
+                                    0
+                            );
+                        }
                     }
                 }
 
@@ -358,28 +433,55 @@ public class ModbusEquip {
                     CCUHsApi.getInstance().writeHisValById(logicalParamId, Double.parseDouble(configParam.getConditions().get(0).getBitValues()));
                     if (logicalPoint.getMarkers().contains("writable")) {
                         CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(configParam.getConditions().get(0).getBitValues()));
+                        if (isZonePoint(logicalPoint)) {
+                            CCUHsApi.getInstance().writePoint(
+                                    logicalParamId,
+                                    17,
+                                    CCUHsApi.getInstance().getCCUUserName(),
+                                    Double.parseDouble(configParam.getConditions().get(0).getBitValues()),
+                                    0
+                            );
+                        }
                     }
                 } else {
                     if (logicalPoint.getMinVal() != null) {
                         CCUHsApi.getInstance().writeHisValById(logicalParamId, Double.parseDouble(logicalPoint.getMinVal()));
                         if (logicalPoint.getMarkers().contains("writable")) {
                             CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(logicalPoint.getMinVal()));
+                            if (isZonePoint(logicalPoint)) {
+                                CCUHsApi.getInstance().writePoint(
+                                        logicalParamId,
+                                        17,
+                                        CCUHsApi.getInstance().getCCUUserName(),
+                                        Double.parseDouble(logicalPoint.getMinVal()),
+                                        0
+                                );
+                            }
                         }
                     } else {
                         CCUHsApi.getInstance().writeHisValById(logicalParamId, 0.0);
                         if (logicalPoint.getMarkers().contains("writable")) {
                             CCUHsApi.getInstance().writeDefaultValById(logicalParamId, 0.0);
+                            if (isZonePoint(logicalPoint)) {
+                                CCUHsApi.getInstance().writePoint(
+                                        logicalParamId,
+                                        17,
+                                        CCUHsApi.getInstance().getCCUUserName(),
+                                        0.0,
+                                        0
+                                );
+                            }
                         }
                     }
                 }
             }
 
-            CCUHsApi.getInstance().writeHisValById(physicalParamId,0.0);
-            if (physicalPoint.getMarkers().contains("writable")){
-                CCUHsApi.getInstance().writeDefaultValById(physicalParamId,0.0);
-            }
-
         }
+
+        if(modbusLevel.equals("zone")) {
+            addEquipScheduleStatusPoint(mbEquip.build(), equipmentRef);
+        }
+
         CCUHsApi.getInstance().syncEntityTree();
         return equipmentRef;
     }
@@ -390,60 +492,42 @@ public class ModbusEquip {
 
     public void updateHaystackPoints(String equipRef, List<Parameter> configuredParams) {
         for (Parameter configParams : configuredParams) {
-            //Read all points for this markers
-            StringBuilder tags = new StringBuilder();
-            for (LogicalPointTags marker : configParams.getLogicalPointTags()) {
-                if (!Objects.nonNull(marker.getTagValue())) {
-                    tags.append(" and ").append(marker.getTagName());
-                }
-                else {
-                    if (isValidTagForQuery(marker.getTagName())) {
-                        //if the pointNum tag is there adding the pointNum tag in this format (and pointNum == 4)
-                        if (!marker.getTagName().equalsIgnoreCase("pointNum")) {
-                            tags.append(" and ").append(marker.getTagName()).append(" == \"").append(marker.getTagValue()).append("\"");
-                        } else {
-                            tags.append(" and ").append((marker.getTagName())).append(" == ").append(marker.getTagValue());
-                        }
-                        if (!marker.getTagName().equalsIgnoreCase("pointNum") && (isInt(marker.getTagValue()) || isLong(marker.getTagValue()) || isDouble(marker.getTagValue()))) {
-                            tags.append(" or ").append(marker.getTagName()).append(" == ").append(marker.getTagValue());
-                        }
-                    }
-                }
-            }
+                HDict pointRead = hayStack.readHDictById(configParams.getLogicalId());
+            if(pointRead != null) {
+                Point logicalPoint = new Point.Builder().setHDict(pointRead).build();
+                CcuLog.d("Modbus", "UpdateHaystackPoints: Logical Point -> " + pointRead + " name " + configParams.getName() + " display in UI " + configParams.isDisplayInUI());
 
-            if (tags.length() > 0) {
-                HDict pointRead = CCUHsApi.getInstance().readHDict("point and logical and modbus " + tags + " and equipRef == \"" + equipRef + "\"");
-                if(pointRead != null) {
-                    Point logicalPoint = new Point.Builder().setHDict(pointRead).build();
-                    CcuLog.d("Modbus", "UpdateHaystackPoints: Tags -> " +tags);
-                    CcuLog.d("Modbus", "UpdateHaystackPoints: Logical Point -> " + pointRead +" name "+configParams.getName() +" display in UI "+configParams.isDisplayInUI() );
-
-                    if (configParams.isDisplayInUI()) {
-                        if (!logicalPoint.getMarkers().contains("displayInUi")) {
-                            logicalPoint.getMarkers().add("displayInUi");
-                            CcuLog.d("Modbus", "UpdateHaystackPoints: Add displayUI tag " + logicalPoint.getDisplayName());
-                            if (logicalPoint.getId() != null) {
-                                CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
-                            }
-                        }
-                    } else if (logicalPoint.getMarkers().contains("displayInUi")) {
-                        logicalPoint.getMarkers().remove("displayInUi");
-                        CcuLog.d("Modbus", "UpdateHaystackPoints: Remove displayUI tag " + logicalPoint.getDisplayName());
-                        if (logicalPoint.getId() != null) {
-                            CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
-                        }
+                boolean continuePointUpdate = false;
+                if (configParams.isDisplayInUI()) {
+                    if (!logicalPoint.getMarkers().contains("displayInUi")) {
+                        logicalPoint.getMarkers().add("displayInUi");
+                        CcuLog.d("Modbus", "UpdateHaystackPoints: Add displayUI tag " + logicalPoint.getDisplayName());
+                        continuePointUpdate = true;
                     }
+                } else if (logicalPoint.getMarkers().contains("displayInUi")) {
+                    logicalPoint.getMarkers().remove("displayInUi");
+                    CcuLog.d("Modbus", "UpdateHaystackPoints: Remove displayUI tag " + logicalPoint.getDisplayName());
+                    continuePointUpdate = true;
+                }
+
+                if (configParams.getIsSchedulable()) {
+                    if (!logicalPoint.getMarkers().contains(Tags.SCHEDULABLE)) {
+                        logicalPoint.getMarkers().add(Tags.SCHEDULABLE);
+                        CcuLog.d("Modbus", "UpdateHaystackPoints: Add schedulable tag " + logicalPoint.getDisplayName());
+                        continuePointUpdate = true;
+                    }
+                } else if (logicalPoint.getMarkers().contains(Tags.SCHEDULABLE)) {
+                    logicalPoint.getMarkers().remove(Tags.SCHEDULABLE);
+                    CcuLog.d("Modbus", "UpdateHaystackPoints: Remove schedulable tag " + logicalPoint.getDisplayName());
+                    continuePointUpdate = true;
+                }
+
+                if (continuePointUpdate && logicalPoint.getId() != null) {
+                    hayStack.updatePoint(logicalPoint, logicalPoint.getId());
                 }
             }
         }
-        CCUHsApi.getInstance().syncEntityTree();
-    }
-
-    private boolean isValidTagForQuery(String tagName) {
-        if (tagName.equals("unit") || tagName.equals("hisInterpolate") || tagName.equals("minVal") || tagName.equals("maxVal") || tagName.equals("incrementVal")) {
-            return false;
-        }
-        return true;
+        hayStack.syncEntityTree();
     }
 
     public boolean hasEquipType(ModbusEquipTypes modbusEquipTyp, List<String> modbusEquipTypes) {
@@ -493,5 +577,9 @@ public class ModbusEquip {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    public static boolean isZonePoint(Point point){
+        return point.getMarkers().contains("zone");
     }
 }

@@ -91,6 +91,22 @@ public class HeartBeatUtil {
         }
     }
 
+    public static String getLastUpdatedTimeForCn(String deviceRef) {
+        Date updatedTime = CCUUtils.getLastUpdatedTimeForCN(deviceRef);
+
+        if (updatedTime == null) {
+            return "--";
+        }
+        StringBuffer message = new StringBuffer();
+        Date currTime = new Date();
+        if (currTime.getDate() == updatedTime.getDate()) {
+            return getTimeDifference(currTime, updatedTime, message);
+
+        } else {
+            return getLastUpdatedTime(message, updatedTime);
+        }
+    }
+
     private static String getTimeDifference(Date currTime, Date updatedTime, StringBuffer message){
         long mins = TimeUnit.MILLISECONDS.toMinutes(currTime.getTime() - updatedTime.getTime());
         if(mins < 1){
@@ -166,5 +182,22 @@ public class HeartBeatUtil {
         } else{
             return getLastUpdatedTime(message, updatedTime);
         }
+    }
+
+    public static void moduleStatusForConnectNode(TextView moduleStatus, String deviceRef){
+        if (isConnectNodeAlive(deviceRef)) {
+            moduleStatus.setBackgroundResource(R.drawable.module_alive);
+        } else {
+            moduleStatus.setBackgroundResource(R.drawable.module_dead);
+        }
+    }
+
+    public static boolean isConnectNodeAlive(String deviceRef) {
+        Date updatedTime = CCUUtils.getLastUpdatedTimeForCN(deviceRef);
+        if (updatedTime == null) {
+            return false;
+        }
+        return TimeUnit.MILLISECONDS.toMinutes(new Date().getTime() -
+                updatedTime.getTime()) <= (double) DEFAULT_ZONE_DEAD_TIME_MINUTES;
     }
 }

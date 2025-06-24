@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.L.generateConnectAddrSkipZero;
+
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -97,6 +99,8 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
 
     @BindView(R.id.mystatImageId)
     ImageView myStatImage;
+    @BindView(R.id.cn75_img)
+    ImageView connectNodeImage;
 
     @BindView(R.id.smartNodeId)
     ImageView smartNodeImage;
@@ -177,7 +181,24 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         DialogSmartStatProfiling smartStatProfiling = DialogSmartStatProfiling.newInstance(mNodeAddress, mRoomName, mFloorName);
         showDialogFragment(smartStatProfiling, DialogSmartStatProfiling.ID);
     }
-
+    @OnClick(R.id.rl_cn) void onConnectNodeClick() {
+        if (isModbusPaired()) {
+            return;
+        }
+        if (HSUtil.getEquips(mRoomName).isEmpty()) {
+            if(mNodeAddress % 100 == 0) {
+                // If the last two digits are 00, then it is not allowed since modbus cannot have 00 as last two digits
+                mNodeAddress = generateConnectAddrSkipZero();
+            }
+            showDialogFragment(
+                    FragmentBLEInstructionScreen.getInstance(
+                            mNodeAddress, mRoomName, mFloorName, ProfileType.CONNECTNODE, NodeType.CONNECTNODE
+                    ), FragmentBLEInstructionScreen.ID
+            );
+        } else {
+            Toast.makeText(getContext(),"Please delete other profiles",Toast.LENGTH_LONG).show();
+        }
+    }
 
     @OnClick(R.id.rl_wirelesstemp) void onWTMClick() {
         if (isModbusPaired()) {
@@ -353,6 +374,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
             hyperStatSplit.setImageDrawable(ResourcesCompat.getDrawable(getResources(),R.drawable.hyperstat_split_carrier,null));
             modbus75Image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.modbus_carrier, null));
             myStatImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.mystat_carr, null));
+            connectNodeImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.cn_carrier, null));
         } else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
             ccu75Image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ccu_airoverse, null));
             modbus75Image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.modbus_airoverse, null));

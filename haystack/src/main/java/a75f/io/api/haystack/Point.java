@@ -3,7 +3,8 @@ package a75f.io.api.haystack;
 import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
-import org.projecthaystack.HNum;
+import org.projecthaystack.HList;
+import org.projecthaystack.HRef;
 import org.projecthaystack.HStr;
 import org.projecthaystack.HVal;
 
@@ -43,6 +44,11 @@ public class Point extends Entity
     private String curStatus;
 
     private String domainName;
+    private String scheduleRef;
+    private HRef pointDefinitionRef;
+    HList eventRef;
+    HList eventDefinitions;
+
 
     /**
      * Support for arbitrary KVP. This is only intended for new tags/profiles at this time.
@@ -169,6 +175,31 @@ public class Point extends Entity
     public void setCell(String cell) {
         this.cell = cell;
     }
+
+    public String getScheduleRef() {
+        return scheduleRef;
+    }
+
+    public HRef getPointDefinitionRef() {
+        return pointDefinitionRef;
+    }
+
+    public HList getEventRef() {
+        return eventRef;
+    }
+
+    public void setEventRef(HList eventRef) {
+        this.eventRef = eventRef;
+    }
+
+    public HList getEventDefinitions() {
+        return eventDefinitions;
+    }
+
+    public void setEventDefinitions(HList eventDefinitions) {
+        this.eventDefinitions = eventDefinitions;
+    }
+
     private Point(){
     }
 
@@ -198,6 +229,10 @@ public class Point extends Entity
         private int            bacnetId;
         private String            bacnetType;
         private String curStatus;
+        private String scheduleRef;
+        private HRef pointDefinitionRef;
+        HList eventRef;
+        HList eventDefinitions;
 
         public Builder setKind(Kind kind)
         {
@@ -349,6 +384,26 @@ public class Point extends Entity
             return this;
         }
 
+        public Builder setScheduleRef(String scheduleRef) {
+            this.scheduleRef = scheduleRef;
+            return this;
+        }
+
+        public Builder setPointDefinitionRef(HRef pointDefinitionRef) {
+            this.pointDefinitionRef = pointDefinitionRef;
+            return this;
+        }
+
+        public Builder setEventRef(HList eventRef) {
+            this.eventRef = eventRef;
+            return this;
+        }
+
+        public Builder setEventDefinitions(HList eventDefinitions) {
+            this.eventDefinitions = eventDefinitions;
+            return this;
+        }
+
         public Point build(){
             Point p = new Point();
             p.displayName = this.displayName;
@@ -379,6 +434,10 @@ public class Point extends Entity
             p.bacnetId = this.bacnetId;
             p.bacnetType = this.bacnetType;
             p.curStatus = this.curStatus;
+            p.eventRef = this.eventRef;
+            p.eventDefinitions = this.eventDefinitions;
+            p.scheduleRef = this.scheduleRef;
+            p.pointDefinitionRef = this.pointDefinitionRef;
             return p;
         }
 
@@ -499,6 +558,26 @@ public class Point extends Entity
                 else if (pair.getKey().equals("curStatus"))
                 {
                     this.curStatus = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals(Tags.SCHEDULE_REF))
+                {
+                    this.scheduleRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals(Tags.POINT_DEFINITION_REF))
+                {
+                    this.pointDefinitionRef = HRef.make(pair.getValue().toString().replace("@", ""));
+                }
+                else if (pair.getKey().equals(Tags.EVENT_REF))
+                {
+                    if (pair.getValue() instanceof HList) {
+                        this.eventRef = (HList) pair.getValue();
+                    }
+                }
+                else if (pair.getKey().equals(Tags.EVENT_DEFINITIONS))
+                {
+                    if (pair.getValue() instanceof HList) {
+                        this.eventDefinitions = (HList) pair.getValue();
+                    }
                 }
                 else {
                     this.tags.put(pair.getKey().toString(), HStr.make(pair.getValue().toString()));
@@ -624,6 +703,26 @@ public class Point extends Entity
                 else if (pair.getKey().equals("bacnetType"))
                 {
                     this.bacnetType = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals(Tags.SCHEDULE_REF))
+                {
+                    this.scheduleRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals(Tags.POINT_DEFINITION_REF))
+                {
+                    this.pointDefinitionRef = HRef.make(pair.getValue().toString().replace("@", ""));
+                }
+                else if (pair.getKey().equals(Tags.EVENT_REF))
+                {
+                    if (pair.getValue() instanceof HList) {
+                        this.eventRef = (HList) pair.getValue();
+                    }
+                }
+                else if (pair.getKey().equals(Tags.EVENT_DEFINITIONS))
+                {
+                    if (pair.getValue() instanceof HList) {
+                        this.eventDefinitions = (HList) pair.getValue();
+                    }
                 }
                 else {
                     this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());

@@ -29,5 +29,6 @@ const val MESSAGE_ATTRIBUTE_TARGET_SCOPE = "scope"
 const val MESSAGE_ATTRIBUTE_SOURCE_APPLICATION = "sourceApplication"
 const val MESSAGE_ATTRIBUTE_ROUTING_DETAILS = "routingDetails"
 const val MESSAGE_ATTRIBUTE_SEQUENCE_ID = "sequenceId"
+const val MESSAGE_ATTRIBUTE_APPLIED_DATA = "appliedData"
 const val MESSAGE_ATTRIBUTE_VALUE_DURATION = "duration"
 

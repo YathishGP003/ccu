@@ -12,6 +12,7 @@ import a75f.io.api.haystack.modbus.LogicalPointTags
 import a75f.io.api.haystack.modbus.Parameter
 import a75f.io.api.haystack.modbus.Register
 import a75f.io.api.haystack.modbus.UserIntentPointTags
+import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil
 
 /**
  * Created by Manjunath K on 31-07-2023.
@@ -113,8 +114,9 @@ private fun getChildEquips(parentEquipRef: String): List<EquipmentDevice> {
 private fun buildEquipModel(parentMap: HashMap<Any, Any>, parentEquipRef: String?): EquipmentDevice {
     val equipId = parentMap[ID].toString()
     val equipDevice = getEquipByMap(parentMap, parentEquipRef)
-    val registersMapList = getRegistersMap(equipId)
-    registersMapList.forEach { registerMap -> equipDevice.registers.add(getRegister(registerMap)) }
+    val connectModule = ConnectNodeUtil.getConnectNodeForZone(equipDevice.zoneRef, CCUHsApi.getInstance())
+    val registersMapList = getRegistersMap(equipId, connectModule)
+    registersMapList.forEach { registerMap -> equipDevice.registers.add(getRegister(registerMap, connectModule)) }
     return equipDevice
 }
 
@@ -122,8 +124,11 @@ private fun buildEquipModel(parentMap: HashMap<Any, Any>, parentEquipRef: String
  * @param equipId
  * return all the register map list for the the equip
  */
-private fun getRegistersMap(equipId: String): ArrayList<HashMap<Any, Any>> {
+private fun getRegistersMap(equipId: String, connectModule: HashMap<Any, Any>): ArrayList<HashMap<Any, Any>> {
     val hsApi = CCUHsApi.getInstance()
+    if (connectModule.size > 0) {
+        return hsApi.readAllEntities("registerNumber and point and equipRef == \"$equipId\"")
+    }
     val deviceId = hsApi.readId("device and modbus and equipRef == \"$equipId\"")
     return hsApi.readAllEntities("physical and point and deviceRef == \"$deviceId\"")
 }
@@ -132,7 +137,7 @@ private fun getRegistersMap(equipId: String): ArrayList<HashMap<Any, Any>> {
  * @param rawMap
  * returns register object with all the register details
  */
-private fun getRegister(rawMap: HashMap<Any, Any>): Register {
+private fun getRegister(rawMap: HashMap<Any, Any>, connectModule: HashMap<Any, Any>): Register {
     val physicalPoint = RawPoint.Builder().setHashMap(rawMap).build()
     val register = Register()
     register.registerNumber = physicalPoint.registerNumber
@@ -141,7 +146,7 @@ private fun getRegister(rawMap: HashMap<Any, Any>): Register {
     register.parameterDefinitionType = getValue(rawMap, PARAM_DEFINITION_TYPE)
     register.wordOrder = getValue(rawMap, WORD_ORDER)
     register.multiplier = getValue(rawMap, MULTIPLIER)
-    register.parameters = mutableListOf(getParameter(physicalPoint,rawMap))
+    register.parameters = mutableListOf(getParameter(physicalPoint, rawMap, connectModule))
     return register
 }
 
@@ -151,11 +156,22 @@ private fun getRegister(rawMap: HashMap<Any, Any>): Register {
  * @param rawMap
  * returns Parameter object with all the parameter details
  */
-private fun getParameter(physicalPoint: RawPoint, rawMap: HashMap<Any, Any>): Parameter {
-    val param = getBasicParamData(physicalPoint,rawMap)
-    val logicalPointMap = CCUHsApi.getInstance().readMapById(physicalPoint.pointRef)
-    val logicalPoint = Point.Builder().setHashMap(logicalPointMap).build()
+private fun getParameter(
+    physicalPoint: RawPoint,
+    rawMap: HashMap<Any, Any>,
+    connectModule: HashMap<Any, Any>
+): Parameter {
+    val param = getBasicParamData(physicalPoint, rawMap, connectModule)
+
+    val logicalPoint = if (connectModule.isNotEmpty()) {
+        Point.Builder().setHashMap(rawMap).build()
+    } else {
+        Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(physicalPoint.pointRef)).build()
+    }
+
     param.isDisplayInUI = logicalPoint.markers.contains(DISPLAY_UI)
+    param.logicalId = logicalPoint.id
+    param.isSchedulable = logicalPoint.markers.contains(Tags.SCHEDULABLE)
     val isWritable = logicalPoint.markers.contains(Tags.WRITABLE)
     logicalPoint.markers.forEach { marker ->
         param.logicalPointTags.add(getLogicalPointTags(marker, null))
@@ -188,12 +204,16 @@ private fun getParameter(physicalPoint: RawPoint, rawMap: HashMap<Any, Any>): Pa
  * @param rawMap
  * returns Parameter object with basic parameter details
  */
-private fun getBasicParamData(physicalPoint: RawPoint, rawMap: HashMap<Any, Any>): Parameter {
+private fun getBasicParamData(
+    physicalPoint: RawPoint,
+    rawMap: HashMap<Any, Any>,
+    connectModule: HashMap<Any, Any>
+): Parameter {
     val param = Parameter()
     param.parameterId = physicalPoint.parameterId
     param.name = physicalPoint.shortDis
-    param.startBit = physicalPoint.startBit.toInt()
-    param.endBit = physicalPoint.endBit.toInt()
+    param.startBit = if (connectModule.isEmpty()) physicalPoint.startBit.toInt() else {0}
+    param.endBit = if (connectModule.isEmpty()) physicalPoint.endBit.toInt() else {0}
     param.bitParamRange = getValue(rawMap, BIT_PARAM_RANGE)
     param.bitParam = if (rawMap.containsKey(BIT_PARAM)) strToDouble(rawMap[BIT_PARAM].toString()) else 0
     param.logicalPointTags = mutableListOf<LogicalPointTags>()

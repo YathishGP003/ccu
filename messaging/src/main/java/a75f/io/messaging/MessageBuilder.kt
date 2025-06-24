@@ -1,5 +1,6 @@
 package a75f.io.messaging
 
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_APPLIED_DATA
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_AUTO_CX_STATE
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_AUTO_CX_STOP_TIME
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_BUNDLE
@@ -120,9 +121,12 @@ fun jsonToMessage(msgJson : JsonObject) : Message? {
             val id = bundle.asJsonObject.get(MESSAGE_ATTRIBUTE_ID)?.asString
             messagePojo.bundle_id = id
         }
+        messagePojo.appliedData  = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_APPLIED_DATA)?.toString()
+
         return messagePojo
     } catch (e : Exception) {
        CcuLog.e(L.TAG_CCU_MESSAGING, "Error while parsing message", e)
+        e.printStackTrace()
        return null
     }
 }

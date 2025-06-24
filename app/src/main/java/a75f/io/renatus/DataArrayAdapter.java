@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import a75f.io.api.haystack.Zone;
+import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 
@@ -103,7 +104,8 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 			}
 		}
 
-		if ((nSelectedModules.size() > 0 && nSelectedModules.contains(Long.parseLong(objects.get(position).toString()))) ||
+		if ((nSelectedModules.size() > 0 && nSelectedModules.contains(Long.parseLong(ConnectNodeUtil.Companion.
+				extractNodeAddressIfConnectPaired(objects.get(position).toString())))) ||
 				(nSelectedZones.size() > 0 && isRoomSelected((Zone) objects.get(position)))){
 			textView_Data.setTextColor(getContext().getResources().getColor(R.color.text_color));
 			convertView.setBackgroundColor(getContext().getResources().getColor(R.color.selection_gray));

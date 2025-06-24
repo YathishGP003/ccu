@@ -873,10 +873,12 @@
     <string name="title_ss">SS</string>
     <string name="title_hs">HS</string>
     <string name="title_ms">MS</string>
+    <string name="title_cn">CN</string>
     <string name="title_hssplit">HS Split</string>
     <string name="title_smartstat">Smart Stat</string>
     <string name="title_hyperstat">HyperStat</string>
     <string name="title_mystat">MyStat</string>
+    <string name="title_connectnode">Connect Node</string>
     <string name="title_hyperstatsplit">HyperStat Split</string>
     <string name="title_wtm">WTM</string>
     <string name="title_wirelesstemp">Wireless Temperature Monitor</string>
@@ -1055,6 +1057,8 @@
     <string name="title_pair_hs_manual">HYPER STAT | MANUAL PAIRING STEPS </string>
     <string name="title_pair_hss_manual">HYPER STAT SPLIT| MANUAL PAIRING STEPS </string>
     <string name="title_pair_ms_manual">MYSTAT| MANUAL PAIRING STEPS </string>
+    <string name="title_pair_cn_manual">CONNECTNODE| MANUAL PAIRING STEPS </string>
+
     <string name="button_pair">PAIR</string>
 
     <string name="title_site_id">Site Id</string>
@@ -1333,6 +1337,8 @@
     <string name="txt_offset_values">Offset Value(%) <font color="#e5561a">*</font></string>
     <string name="txt_schedule_objects_hint">In between 0 to 10</string>
     <string name="txt_offset_values_hint">In between 1 to 100</string>
+    <string name="txt_destination_port_value_hint">In between 47808 to 47823</string>
+    <string name="txt_dnet_value_hint">In between 1 to 65535</string>
     <string name="error_notification_class_objects">Notification Class Objects should be within 0 to 10</string>
     <string name="error_trend_log_objects">Trend Log Objects should be within 0 to 10</string>
     <string name="error_schedule_objects">Schedule Objects should be within 0 to 10</string>
@@ -1392,6 +1398,7 @@
     <string name="save_mb">Saving Modbus Configuration</string>
     <string name="save_em_mb">Saving Modbus Energy Meter Configuration</string>
     <string name="save_btu_mb">Saving Modbus BTU Meter Configuration</string>
+    <string name="select_model_to_proceed">Select a model to proceed with configuration.</string>
 
     <string name="usb_permission_priv_app_msg">USB Permission not granted, Renatus App may need to be reinstalled with System Privileges</string>
     <!-- Modbus Module type screen-->
@@ -1425,6 +1432,8 @@
     <string name="analogin2">Analog-in2</string>
     <string name="title_pairhss">HYPERSTAT | PAIRING STEPS </string>
     <string name="title_pair_mystat">MYSTAT | PAIRING STEPS </string>
+    <string name="title_pair_connectnode">CONNECTNODE | PAIRING STEPS </string>
+
     <string name="title_pairhssplit">HYPERSTAT SPLIT | PAIRING STEPS </string>
     <string name="prefs_theme_key">isEnabled</string>
     <string name="prefs_access_local_assests">accessLocalAssetFile</string>
@@ -1844,4 +1853,9 @@
     <string name="txt_mstp_device_id">Device Id</string>
     <string name="txt_mstp_port_address">PortAddress</string>
     <string name="txt_mstp_hint_device_id">Enter Device Id</string>
+
+    <string name="no_point_schedule_assigned">No Schedule Assigned</string>
+    <string name="point_schedule_assigned">Schedule Assigned</string>
+    <string name="schedulable_points_without_point_schedule">The following schedulable points do not have a schedule assigned to them</string>
+    <string name="equip_schedule_status">Equip Schedule Status: </string>
 </resources>

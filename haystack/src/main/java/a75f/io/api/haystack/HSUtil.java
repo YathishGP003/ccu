@@ -713,11 +713,11 @@ public class HSUtil {
 
     }
 
-    public static boolean isSchedulable(String entityId, CCUHsApi hayStack) {
+    public static boolean isDefaultSchedulable(String entityId, CCUHsApi hayStack) {
         HashMap<Object, Object> entityMap = hayStack.readMapById(entityId);
-        return entityMap.containsKey(Tags.SCHEDULABLE) ||
-                (entityMap.containsKey(Tags.BUILDING) && !entityMap.containsKey(Tags.TUNER) &&
-                        (entityMap.containsKey(Tags.LIMIT) || entityMap.containsKey(Tags.DIFF)));
+        return entityMap.containsKey(Tags.DEFAULT) &&
+                (entityMap.containsKey(Tags.TUNER) || entityMap.containsKey(Tags.SCHEDULABLE)) &&
+                !entityMap.containsKey(Tags.CCUREF);
     }
 
     public static void addPointToLocalDB(HDict dict) {

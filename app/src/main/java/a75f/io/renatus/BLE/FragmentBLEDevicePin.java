@@ -51,6 +51,7 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.bluetooth.BLEAction;
 import a75f.io.renatus.bluetooth.BLEProvisionService;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
+import a75f.io.renatus.profiles.connectnode.ConnectNodeFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
@@ -494,7 +495,10 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                     case MYSTAT_HPU:
                         showDialogFragment(MyStatHpuFragment.Companion.newInstance(mPairingAddress, mName, mFloorName, mNodeType, ProfileType.MYSTAT_HPU), MyStatHpuFragment.Companion.getID());
                         break;
-
+                    case CONNECTNODE:
+                        showDialogFragment(ConnectNodeFragment.Companion.newInstance(mPairingAddress, mName,
+                                mFloorName, mNodeType, mProfileType), ConnectNodeFragment.Companion.getIdString());
+                        break;
                 }
                 
             }

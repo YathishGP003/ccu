@@ -8,8 +8,6 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.JsonObject;
 
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -20,14 +18,12 @@ import org.projecthaystack.HRow;
 import org.projecthaystack.io.HZincReader;
 import org.projecthaystack.io.HZincWriter;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.sync.HttpUtil;
@@ -38,7 +34,6 @@ import a75f.io.logic.interfaces.BuildingScheduleListener;
 import a75f.io.logic.interfaces.IntrinsicScheduleListener;
 import a75f.io.logic.util.CommonTimeSlotFinder;
 import a75f.io.messaging.MessageHandler;
-import a75f.io.util.ExecutorTask;
 
 public class UpdateScheduleHandler implements MessageHandler
 {
@@ -145,6 +140,7 @@ public class UpdateScheduleHandler implements MessageHandler
                     ccuHsApi.setSynced("@" + uid);
                     break;
                 }
+
                 Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
                 s.setmSiteId(ccuHsApi.getSiteIdRef().toString());
                 s.setId(uid);

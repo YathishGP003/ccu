@@ -152,8 +152,7 @@ public class RestoreCCU {
         equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
     }
 
-    private HGrid getAllEquips(String ccuId, String siteCode){
-        RetryCountCallback retryCountCallback = retryCount -> CcuLog.d(TAG, "Retry count while restoring all the equips "+ retryCount);
+    private HGrid getAllEquips(String ccuId, String siteCode, RetryCountCallback retryCountCallback){
         String gatewayRef = getGatewayRefFromCCU(ccuId, siteCode, retryCountCallback);
         String ahuRef = getAhuRefFromCCU(ccuId, siteCode, retryCountCallback);
         CcuLog.i("CCU_DEBUG", "getAllEquips: gatewayRef : "+gatewayRef);
@@ -174,32 +173,59 @@ public class RestoreCCU {
     }
 
     public Map<String, Set<String>> getEquipDetailsOfCCU(String ccuId, String siteCode,
-                                                         SharedPreferences.Editor editor, boolean isReplaceClosed){
+                                                         SharedPreferences.Editor editor, boolean isReplaceClosed) {
 
-        HGrid equipGrid = getAllEquips(ccuId, siteCode);
-        if(equipGrid == null){
+        RetryCountCallback retryCountCallback = retryCount -> CcuLog.d(TAG, "Retry count while fetching equip details of CCU " + retryCount);
+        HGrid equipGrid = getAllEquips(ccuId, siteCode, retryCountCallback);
+        if (equipGrid == null) {
             throw new NullHGridException("Null occurred while fetching count of Zone equips.");
         }
         Iterator equipGridIterator = equipGrid.iterator();
         Map<String, Set<String>> floorAndZoneIds = new HashMap<>();
         Set<String> floorRefSet = new HashSet<>();
         Set<String> roomRefSet = new HashSet<>();
-        if(!isReplaceClosed) {
+        if (!isReplaceClosed) {
             initReplaceStatusForSystemEntities(editor);
         }
-        while(equipGridIterator.hasNext()) {
+        while (equipGridIterator.hasNext()) {
             HRow equipRow = (HRow) equipGridIterator.next();
             String equipID = equipRow.get(Tags.ID).toString();
-            if(!isReplaceClosed) {
+            if (!isReplaceClosed) {
                 editor.putString(equipID, ReplaceStatus.PENDING.toString());
             }
-            if(equipRow.has(Tags.ROOMREF) && !equipRow.get(Tags.ROOMREF).toString().contains(SYSTEM)){
+            if (equipRow.has(Tags.ROOMREF) && !equipRow.get(Tags.ROOMREF).toString().contains(SYSTEM)) {
                 roomRefSet.add(equipRow.get(Tags.ROOMREF).toString());
             }
-            if(equipRow.has(Tags.FLOORREF) && !equipRow.get(Tags.FLOORREF).toString().contains(SYSTEM)){
+            if (equipRow.has(Tags.FLOORREF) && !equipRow.get(Tags.FLOORREF).toString().contains(SYSTEM)) {
                 floorRefSet.add(equipRow.get(Tags.FLOORREF).toString());
             }
         }
+
+        // Fetching Connect Node devices and their points -> CN may not not contain equips
+        HGrid connectNodeGrid = restoreCCUHsApi.getAllConnectNodes(ccuId, siteCode, retryCountCallback);
+        Iterator connectNodeDeviceGridIterator = connectNodeGrid.iterator();
+
+        while (connectNodeDeviceGridIterator.hasNext()) {
+            HRow deviceRow = (HRow) connectNodeDeviceGridIterator.next();
+            if (deviceRow.has(Tags.ROOMREF)) {
+                roomRefSet.add(deviceRow.get(Tags.ROOMREF).toString());
+            }
+            if (deviceRow.has(Tags.FLOORREF)) {
+                floorRefSet.add(deviceRow.get(Tags.FLOORREF).toString());
+            }
+
+            String address = deviceRow.get(Tags.ADDR).toString();
+            HGrid deviceGrid = restoreCCUHsApi.getConnectNodeDevice(address, retryCountCallback);
+            if (deviceGrid == null) {
+                throw new NullHGridException("Null occurred while fetching device.");
+            }
+            Iterator deviceGridIterator = deviceGrid.iterator();
+            while (deviceGridIterator.hasNext()) {
+                HRow zoneDeviceRow = (HRow) deviceGridIterator.next();
+                getDeviceAndPoints(zoneDeviceRow, retryCountCallback);
+            }
+        }
+
         floorAndZoneIds.put(Tags.ROOMREF, roomRefSet);
         floorAndZoneIds.put(Tags.FLOORREF, floorRefSet);
         editor.commit();
@@ -297,8 +323,8 @@ public class RestoreCCU {
         if(equipGrid  == null){
             throw new NullHGridException("Null occurred while fetching modbus");
         }
-        if(restoreCCUHsApi.isCCUEquip(equipId, DomainName.ccuConfiguration)){
-            /*For ccu Equip there is no device mapped so just complete the replace process
+        if(restoreCCUHsApi.isCCUEquip(equipId, DomainName.ccuConfiguration)) {
+            /*For ccu Equip and ConnectNode Equip there is no device mapped so just complete the replace process
             * once equip is imported*/
             replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.COMPLETED.toString());
             equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
@@ -358,7 +384,7 @@ public class RestoreCCU {
             while(equipGridIterator.hasNext()){
                 HRow equipRow = (HRow) equipGridIterator.next();
                 getEquipAndPoints(equipRow, retryCountCallback);
-                if(equipRow.has(Tags.MODBUS)){
+                if(equipRow.has(Tags.MODBUS) && !equipRow.has(Tags.CONNECTMODULE)){
                     HGrid subEquipGrid = restoreCCUHsApi.getModBusSubEquips(equipId, retryCountCallback);
                     if(subEquipGrid == null){
                         throw new NullHGridException("Null occurred while fetching subequip details for "+ equipId);
@@ -381,6 +407,11 @@ public class RestoreCCU {
                     }
                 }
                 else if (equipRow.has(Tags.BACNET)) { // For Bacnet Client Equipment we didn't have device.
+                    replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.COMPLETED.toString());
+                    equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
+                    return;
+                } else if(equipRow.has(Tags.CONNECTMODULE)) {
+                    CcuLog.i(TAG, "Connect Node device already downloaded for : " + equipRow.get(Tags.DIS).toString());
                     replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.COMPLETED.toString());
                     equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
                     return;
@@ -427,7 +458,7 @@ public class RestoreCCU {
         restoreCCUHsApi.importNamedSchedule(retryCountCallback);
         restoreCCUHsApi.importZoneSpecialSchedule(roomRefSet, retryCountCallback);
         restoreCCUHsApi.importSchedulablePoints(roomRefSet,retryCountCallback);
-
+        restoreCCUHsApi.importPointScheduleAndEvent(retryCountCallback);
         L.saveCCUState();
         replaceCCUTracker.updateReplaceStatus(RestoreCCU.ZONE_SCHEDULE, ReplaceStatus.COMPLETED.toString());
         equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());

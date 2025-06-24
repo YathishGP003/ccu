@@ -265,6 +265,7 @@ android {
 dependencies {
     implementation project(path: ':modbusbox')
     implementation project(path: ':domain')
+    implementation "androidx.compose.runtime:runtime-android:1.5.4"
     testImplementation 'junit:junit:4.13.1'
     implementation project(':algos')
 

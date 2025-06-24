@@ -105,6 +105,7 @@ import a75f.io.logic.migration.ccuanddiagequipmigration.DiagEquipMigrationHandle
 import a75f.io.logic.migration.modbus.correctEnumsForCorruptModbusPoints
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import a75f.io.logic.tuners.TunerConstants
+import a75f.io.logic.tuners.TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL
 import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.PreferenceUtil.getClearUnSyncedList
 import a75f.io.logic.util.PreferenceUtil.getMigrateDeleteRedundantOaoPointsBySystemEquip
@@ -112,6 +113,7 @@ import a75f.io.logic.util.PreferenceUtil.getModbusKvtagsDataTypeUpdated
 import a75f.io.logic.util.PreferenceUtil.setClearUnSyncedList
 import a75f.io.logic.util.PreferenceUtil.setMigrateDeleteRedundantOaoPointsBySystemEquip
 import a75f.io.logic.util.PreferenceUtil.setModbusKvtagsDataTypeUpdate
+import a75f.io.logic.util.addEquipScheduleStatusPoint
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.NETWORK_INTERFACE
 import android.content.Context
@@ -406,7 +408,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             removingDuplicateDualDuctSensorPoints()
             PreferenceUtil.SetDuplicateDualDuctSensorPointsAreRemoved()
         }
-
+        if (!PreferenceUtil.isEquipScheduleStatusForZoneExternalEquipDone()) {
+            addEquipScheduleStatusEntityForTerminalExternalEquips()
+            PreferenceUtil.setEquipScheduleStatusForZoneExternalEquipDone()
+        }
 
         if (!PreferenceUtil.nonDmPointRemoveStatus()) {
             removeNonDmSensorPoints()
@@ -443,6 +448,16 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
         if(!getMigrateDeleteRedundantOaoPointsBySystemEquip()) {
             deleteRedundantOaoPointsBasedOnCurrentSystemProfile()
+        }
+
+        if (!PreferenceUtil.getCopyModbusPoints()) {
+            copyDefaultValueToLevel17()
+            PreferenceUtil.setCopyModbusPoints()
+        }
+
+        if (!PreferenceUtil.isEquipScheduleStatusForZoneExternalEquipDone()) {
+            addEquipScheduleStatusEntityForTerminalExternalEquips()
+            PreferenceUtil.setEquipScheduleStatusForZoneExternalEquipDone()
         }
 
         hayStack.scheduleSync()
@@ -3606,5 +3621,31 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         } else {
             CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Diag Equip not found to update AHU Ref")
         }
+    }
+
+    private fun copyDefaultValueToLevel17() {
+        hayStack.readAllEntities("equip and (modbus or bacnet) and zone and not scheduleType")
+            .forEach { equip ->
+                hayStack
+                    .readAllEntities("point and writable not scheduleStatus and equipRef==\"${equip["id"].toString()}\"")
+                    .forEach { point ->
+                        hayStack.writePoint(
+                            point["id"].toString(),
+                            SYSTEM_DEFAULT_VAL_LEVEL,
+                            hayStack.getCCUUserName(),
+                            hayStack.readDefaultValById(point["id"].toString()),
+                            0
+                        )
+                    }
+            }
+    }
+
+    private fun addEquipScheduleStatusEntityForTerminalExternalEquips() {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Adding EquipScheduleStatusEntity for TerminalExternalEquips")
+        hayStack.readAllHDictByQuery("(modbus or bacnet) and equip and zone").forEach { externalEquip ->
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Adding EquipScheduleStatusEntity for TerminalExternalEquips: $externalEquip")
+            addEquipScheduleStatusPoint(Equip.Builder().setHDict(externalEquip).build(), externalEquip.id().toString())
+        }
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "EquipScheduleStatusEntity added for all TerminalExternalEquips")
     }
 }

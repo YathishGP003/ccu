@@ -5,6 +5,7 @@ import a75f.io.device.mesh.LSerial
 import a75f.io.domain.util.CommonQueries
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil
 import a75f.io.renatus.ota.OTAUpdateHandlerService
 import a75f.io.usbserial.UsbConnectService
 import a75f.io.usbserial.UsbModbusService
@@ -219,7 +220,7 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
         serviceConnection: ServiceConnection,
         extras: Bundle?
     ) {
-        if (isAdvancedAhuProfile()) {
+        if (isAdvancedAhuProfile() || isConnectNodeDevice()) {
             CcuLog.i(L.TAG_CCU, "Connect module service is started")
             if (!UsbConnectService.SERVICE_CONNECTED) {
                 val startService = Intent(context, service)
@@ -245,6 +246,19 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
             val equip = CCUHsApi.getInstance()
                 .readEntity(CommonQueries.SYSTEM_PROFILE)
             if (equip.isNotEmpty() && (equip["profile"].toString() == "vavAdvancedHybridAhuV2" || equip["profile"].toString() == "dabAdvancedHybridAhuV2")) {
+                return true
+            }
+        } catch (e: Exception) {
+            // Just not to block anything
+            e.printStackTrace()
+        }
+        return false
+    }
+
+    private fun isConnectNodeDevice(): Boolean {
+        if (L.isSimulation()) return false
+        try {
+            if (ConnectNodeUtil.Companion.isConnectNodeAvailable()) {
                 return true
             }
         } catch (e: Exception) {

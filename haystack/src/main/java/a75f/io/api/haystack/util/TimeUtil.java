@@ -5,6 +5,7 @@ import org.projecthaystack.ParseException;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import a75f.io.api.haystack.DAYS;
 import a75f.io.logger.CcuLog;
@@ -123,5 +124,11 @@ public class TimeUtil {
             e.printStackTrace();
             return inputTime;
         }
+    }
+
+    public static String getCurrentDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        Date date = new Date();
+        return sdf.format(date);
     }
 }

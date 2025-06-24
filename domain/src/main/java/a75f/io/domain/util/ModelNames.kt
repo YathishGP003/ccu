@@ -42,6 +42,7 @@ object ModelNames {
     const val dabAdvancedHybridAhuV2 = "dabAdvancedHybridAhuV2"
     const val vavAdvancedHybridAhuV2 = "vavAdvancedHybridAhuV2"
     const val connectModuleDevice = "connectModuleDevice"
+    const val connectNodeDevice = "connectNodeDevice"
     const val hyperStatCpu = "hyperstatCPU"
     const val hyperStatPipe2 = "hyperstat2PFCU"
     const val hyperStatHpu = "hyperstatHPU"

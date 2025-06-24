@@ -34,6 +34,7 @@ import a75f.io.renatus.modbus.util.formattedToastMessage
 import a75f.io.renatus.modbus.util.getParameters
 import a75f.io.renatus.modbus.util.getParametersList
 import a75f.io.renatus.modbus.util.isAllParamsSelected
+import a75f.io.renatus.modbus.util.isAllParamsSelectedTerminal
 import a75f.io.renatus.modbus.util.parseModbusDataFromString
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.CopyConfiguration
@@ -52,6 +53,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.gson.JsonParseException
+import io.seventyfivef.ph.core.Tags
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -106,36 +108,43 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     fun configModelDefinition(context: Context) {
         this.context = context
         if (L.getProfile(selectedSlaveId) != null) {
-                modbusProfile = L.getProfile(selectedSlaveId) as ModbusProfile
-                if (modbusProfile != null) {
-                    selectedSlaveId = modbusProfile.slaveId
-                    val equipmentDevice = buildModbusModel(selectedSlaveId.toInt())
-                    val model = EquipModel()
-                    model.equipDevice.value = equipmentDevice
-                    model.selectAllParameters.value = isAllParamsSelected(equipmentDevice)
-                    model.parameters = getParameters(equipmentDevice)
-                    val subDeviceList = mutableListOf<MutableState<EquipModel>>()
-                    equipModel.value = model
-                    equipModel.value.isDevicePaired = true
-                    equipModel.value.slaveId.value = equipmentDevice.slaveId
-                    if (equipmentDevice.equips != null && equipmentDevice.equips.isNotEmpty()) {
-                        equipmentDevice.equips.forEach {
-                            val subEquip = EquipModel()
-                            subEquip.equipDevice.value = it
-                            subEquip.slaveId.value = it.slaveId
-                            subEquip.parameters = getParameters(it)
-                            subDeviceList.add(mutableStateOf(subEquip))
-                        }
-                    }
-                    if (subDeviceList.isNotEmpty()) {
-                        equipModel.value.subEquips = subDeviceList
-                    }
-                    else {
-                        equipModel.value.subEquips = mutableListOf()
-                    }
-                    isCopiedConfigurationAvailable()
+            modbusProfile = L.getProfile(selectedSlaveId) as ModbusProfile
+            val isTerminalProfile = modbusProfile.equip.roomRef.replace("@","") != "SYSTEM"
+            selectedSlaveId = modbusProfile.slaveId
+            val equipmentDevice = buildModbusModel(selectedSlaveId.toInt())
+            val model = EquipModel()
+            model.equipDevice.value = equipmentDevice
+            model.selectAllParameters.value =
+                if (isTerminalProfile) {
+                    isAllParamsSelectedTerminal(equipmentDevice, true)
+                } else {
+                    isAllParamsSelected(equipmentDevice)
                 }
-            } else if(modelName.value.contentEquals("Select Model")) {
+            model.parameters = getParameters(equipmentDevice)
+            val subDeviceList = mutableListOf<MutableState<EquipModel>>()
+            equipModel.value = model
+            equipModel.value.isDevicePaired = true
+            equipModel.value.slaveId.value = equipmentDevice.slaveId
+            if (equipmentDevice.equips != null && equipmentDevice.equips.isNotEmpty()) {
+                equipmentDevice.equips.forEach {
+                    val subEquip = EquipModel()
+                    subEquip.equipDevice.value = it
+                    subEquip.slaveId.value = it.slaveId
+                    subEquip.parameters = getParameters(it)
+                    if(isTerminalProfile) {
+                        subEquip.selectAllParameters.value = isAllParamsSelectedTerminal(equipmentDevice, false, it)
+                    }
+                    subDeviceList.add(mutableStateOf(subEquip))
+                }
+            }
+            if (subDeviceList.isNotEmpty()) {
+                equipModel.value.subEquips = subDeviceList
+            }
+            else {
+                equipModel.value.subEquips = mutableListOf()
+            }
+            isCopiedConfigurationAvailable()
+        } else if(modelName.value.contentEquals("Select Model")) {
                 ProgressDialogUtils.showProgressDialog(context, LOADING)
                 readDeviceModels()
             }
@@ -194,6 +203,22 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                 if (!response.isNullOrEmpty()) {
                     try {
                         val equipmentDevice = parseModbusDataFromString(response)
+                        equipmentDevice?.registers!!.forEach { equipRegister ->
+                            equipRegister.parameters.forEach { param ->
+                                param.userIntentPointTags?.find { it.tagName == Tags.SCHEDULABLE }?.let {
+                                    param.isSchedulable = true
+                                }
+                            }
+                        }
+                        equipmentDevice?.equips?.forEach {subEquipmentDevice ->
+                            subEquipmentDevice?.registers!!.forEach { equipRegister ->
+                                equipRegister.parameters.forEach { param ->
+                                    param.userIntentPointTags?.find { it.tagName == Tags.SCHEDULABLE }?.let {
+                                        param.isSchedulable = true
+                                    }
+                                }
+                            }
+                        }
                         if (equipmentDevice != null) {
                             val model = EquipModel()
                             model.jsonContent = response
@@ -409,14 +434,12 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
 
     private fun updateModbusProfile() {
         modbusProfile.updateModbusEquip(
-            equipModel.value.equipDevice.value.deviceEquipRef,
             equipModel.value.equipDevice.value.slaveId.toShort(),
             getParametersList(equipModel.value)
         )
 
         equipModel.value.subEquips.forEach {
             modbusProfile.updateModbusEquip(
-                it.value.equipDevice.value.deviceEquipRef,
                 it.value.equipDevice.value.slaveId.toShort(),
                 getParametersList(it.value)
             )
@@ -429,11 +452,13 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
         equipModel.value.equipDevice.value.slaveId = equipModel.value.slaveId.value
         equipModel.value.parameters.forEach {
             it.param.value.isDisplayInUI = it.displayInUi.value
+            it.param.value.isSchedulable = it.schedulable.value
         }
         equipModel.value.subEquips.forEach {
             it.value.equipDevice.value.slaveId = it.value.slaveId.value
             it.value.parameters.forEach { register ->
                 register.param.value.isDisplayInUI = register.displayInUi.value
+                register.param.value.isSchedulable = register.schedulable.value
             }
         }
     }
@@ -460,6 +485,21 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
 
     }
 
+    fun onSelectAllTerminal(equipmentModel: MutableState<EquipModel>, isRootEquip: Boolean, isSelected: Boolean) {
+        if(isRootEquip) {
+            if (equipmentModel.value.parameters.isNotEmpty()) {
+                equipmentModel.value.parameters.forEach {
+                    it.displayInUi.value = isSelected
+                }
+            }
+        } else {
+            equipmentModel.value.selectAllParameters.value = isSelected
+            equipmentModel.value.parameters.forEach {
+                it.displayInUi.value = isSelected
+            }
+        }
+    }
+
     fun updateSelectAll() {
         var isAllSelected = true
         if (equipModel.value.parameters.isNotEmpty()) {
@@ -477,6 +517,27 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
             }
         }
         equipModel.value.selectAllParameters.value = isAllSelected
+    }
+
+    fun updateSelectAllTerminal(equipmentModel: MutableState<EquipModel>, isRootEquip: Boolean) {
+        var isAllSelected = true
+        if(isRootEquip) {
+            if (equipmentModel.value.parameters.isNotEmpty()) {
+                equipmentModel.value.parameters.forEach {
+                    if (!it.displayInUi.value)
+                        isAllSelected = false
+                }
+            }
+            equipmentModel.value.selectAllParameters.value = isAllSelected
+        } else {
+            equipmentModel.value.parameters.forEach {
+                if (!it.displayInUi.value)
+                    isAllSelected = false
+            }
+            equipmentModel.value.selectAllParameters.value = isAllSelected
+        }
+
+
     }
 
     fun showErrorDialog(context: Context, message: String, wantToDismiss: Boolean) {
@@ -513,9 +574,11 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
             copiedModbusConfiguration.value.parameters.forEach { copiedParam ->
                 if (copiedParam.param.value.name == param.param.value.name) {
                     param.displayInUi.value = copiedParam.displayInUi.value
+                    param.schedulable.value = copiedParam.schedulable.value
                 }
             }
         }
+        updateSelectAllTerminal(equipModel, true)
 
         equipModel.value.subEquips.forEach { subEquip ->
             subEquip.value.parameters.forEach { param ->
@@ -523,16 +586,17 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                     copiedSubEquip.value.parameters.forEach { copiedParam ->
                         if (copiedParam.param.value.name == param.param.value.name) {
                             param.displayInUi.value = copiedParam.displayInUi.value
+                            param.schedulable.value = copiedParam.schedulable.value
                         }
                     }
                 }
             }
+            updateSelectAllTerminal(subEquip, false)
         }
         if(!equipModel.value.isDevicePaired){
             equipModel.value.equipDevice.value = CopyConfiguration.getCopiedModbusConfiguration().value.equipDevice.value
         }
         disablePasteConfiguration()
-        updateSelectAll()
         formattedToastMessage(context.getString(R.string.Toast_Success_Message_paste_Configuration), context)
     }
 

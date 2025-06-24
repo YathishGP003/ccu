@@ -11,6 +11,7 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BaseJob;
 import a75f.io.logic.Globals;
+import a75f.io.logic.bo.building.pointscheduling.model.CustomScheduleManager;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.watchdog.WatchdogMonitor;
 
@@ -57,6 +58,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             try {
                 ScheduleManager.getInstance().processSchedules();
                 CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
+                CustomScheduleManager.Companion.getInstance().processPointSchedules();
             } catch (Exception e) {
                 CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob Failed ", e);
             } finally {

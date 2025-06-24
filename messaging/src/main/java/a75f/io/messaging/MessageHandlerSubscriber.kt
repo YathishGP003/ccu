@@ -106,5 +106,46 @@ class MessageHandlerSubscriber @Inject constructor(){
                 MessageHandlerFactory.Command.updateDashboard
             )
         )
+        handlerService.registerMessageHandler(
+            MessageHandlerFactory.createInstance(
+                MessageHandlerFactory.Command.EntitiesApply
+            )
+        )
+
+        handlerService.registerMessageHandler(
+            MessageHandlerFactory.createInstance(
+                MessageHandlerFactory.Command.AddEvent
+            )
+        )
+
+        handlerService.registerMessageHandler(
+            MessageHandlerFactory.createInstance(
+                MessageHandlerFactory.Command.DeleteEvent
+            )
+        )
+
+        handlerService.registerMessageHandler(
+            MessageHandlerFactory.createInstance(
+                MessageHandlerFactory.Command.UpdateEvent
+            )
+        )
+
+        handlerService.registerMessageHandler(
+            MessageHandlerFactory.createInstance(
+                MessageHandlerFactory.Command.AddPointSchedule
+            )
+        )
+
+        handlerService.registerMessageHandler(
+            MessageHandlerFactory.createInstance(
+                MessageHandlerFactory.Command.UpdatePointSchedule
+            )
+        )
+
+        handlerService.registerMessageHandler(
+            MessageHandlerFactory.createInstance(
+                MessageHandlerFactory.Command.DeletePointSchedule
+            )
+        )
     }
 }

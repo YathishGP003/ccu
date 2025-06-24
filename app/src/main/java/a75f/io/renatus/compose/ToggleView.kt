@@ -26,40 +26,6 @@ import androidx.compose.ui.unit.dp
  * Created by Manjunath K on 12-06-2023.
  */
 
-@Composable
-fun ToggleButton(
-    defaultSelection : Boolean,
-    onEnabled: (Boolean) -> Unit,
-) {
-    Box(
-        modifier = Modifier.wrapContentSize().padding(end = 30.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Switch(
-            checked = defaultSelection,
-            onCheckedChange = {
-                onEnabled(it)
-            },
-            thumbContent = {
-                Icon(
-                    imageVector = if (defaultSelection) Icons.Filled.Check else Icons.Filled.Close,
-                    contentDescription = null,
-                    modifier = Modifier.size(SwitchDefaults.IconSize).padding(0.dp)
-                )
-            },
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
-                uncheckedThumbColor = Color.White,
-                uncheckedIconColor = greyColor,
-                uncheckedTrackColor = greyColor,
-                checkedIconColor = primaryColor,
-                checkedTrackColor = primaryColor,
-                uncheckedBorderColor = greyColor,
-                checkedBorderColor = primaryColor
-            ),
-        )
-    }
-}
 
 /**
  * Manages the mutableState within the composable.
@@ -137,6 +103,77 @@ fun ToggleButtonStateful(
                         checkedBorderColor = primaryColor
                 ),
                 enabled = isDisabled
+        )
+    }
+}
+
+@Composable
+fun ToggleButton(
+    defaultSelection : Boolean,
+    modifier: Modifier = Modifier.padding(end = 30.dp),
+    onEnabled: (Boolean) -> Unit,
+) {
+    Box(
+        modifier = modifier.wrapContentSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Switch(
+            checked = defaultSelection,
+            onCheckedChange = {
+                onEnabled(it)
+            },
+            thumbContent = {
+                Icon(
+                    imageVector = if (defaultSelection) Icons.Filled.Check else Icons.Filled.Close,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize).padding(0.dp)
+                )
+            },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                uncheckedThumbColor = Color.White,
+                uncheckedIconColor = greyColor,
+                uncheckedTrackColor = greyColor,
+                checkedIconColor = primaryColor,
+                checkedTrackColor = primaryColor,
+                uncheckedBorderColor = greyColor,
+                checkedBorderColor = primaryColor
+            ),
+        )
+    }
+}
+@Composable
+fun ToggleButtonNoImplicitSpacing(
+    defaultSelection : Boolean,
+    modifier: Modifier = Modifier,
+    onEnabled: (Boolean) -> Unit,
+) {
+    Box(
+        modifier = modifier.wrapContentSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Switch(
+            checked = defaultSelection,
+            onCheckedChange = {
+                onEnabled(it)
+            },
+            thumbContent = {
+                Icon(
+                    imageVector = if (defaultSelection) Icons.Filled.Check else Icons.Filled.Close,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize).padding(0.dp)
+                )
+            },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                uncheckedThumbColor = Color.White,
+                uncheckedIconColor = greyColor,
+                uncheckedTrackColor = greyColor,
+                checkedIconColor = primaryColor,
+                checkedTrackColor = primaryColor,
+                uncheckedBorderColor = greyColor,
+                checkedBorderColor = primaryColor
+            ),
         )
     }
 }

@@ -2,6 +2,7 @@ package a75f.io.device.mesh;
 
 import static a75f.io.device.mesh.DLog.LogdStructAsJson;
 import static a75f.io.device.mesh.MeshUtil.sendStructToCM;
+import static a75f.io.device.serial.MessageType.CM_TO_CCU_OVER_USB_SEQUENCE_PACKET_REQUEST;
 import static a75f.io.logic.L.ccu;
 
 import android.content.Context;
@@ -208,6 +209,8 @@ public class LSerial
                     messageType == MessageType.CM_TO_CCU_OVER_USB_FIRMWARE_PACKET_REQUEST ||
                     messageType == MessageType.CM_TO_CCU_OTA_STATUS ||
                     messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REBOOT ||
+                    messageType == MessageType.CM_TO_CCU_OVER_USB_SEQUENCE_PACKET_REQUEST ||
+                    messageType == MessageType.CM_TO_CCU_OVER_USB_SEQUENCE_OTA_STATUS ||
                     messageType == MessageType.CM_ERROR_REPORT) {
                 Intent eventIntent = new Intent(Globals.IntentActions.LSERIAL_MESSAGE_OTA);
                 eventIntent.putExtra("eventType", messageType);

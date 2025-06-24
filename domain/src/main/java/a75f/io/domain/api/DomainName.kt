@@ -70,6 +70,8 @@ object DomainName {
     const val dabAdvancedHybridAhuV2_connectModule = "dabAdvancedHybridAhuV2_connectModule"
     const val vavAdvancedHybridAhuV2_connectModule = "vavAdvancedHybridAhuV2_connectModule"
     const val connectModuleDevice = "connectModuleDevice"
+    const val connectNodeDevice = "connectNodeDevice"
+
 
     // Profiles
     const val vavReheatNoFan = "vavReheatNoFan"
@@ -1403,5 +1405,19 @@ object DomainName {
     const val enableCo2Display = "enableCo2Display"
     const val fanRunSensor = "fanRunSensor"
     const val defaultSystemEquip = "defaultSystemEquip"
+
+    const val sequenceErrorCode = "sequenceErrorCode"
+    const val sequenceLastRunTime = "sequenceLastRunTime"
+    const val sequenceLongRunTime = "sequenceLongRunTime"
+    const val otaStatusSequence = "otaStatusSequence"
+    const val sequenceUpdateState = "sequenceUpdateState"
+    const val sequenceUpdateError = "sequenceUpdateError"
+    const val sequenceRunCount = "sequenceRunCount"
+    const val sequenceStatus = "sequenceStatus"
+    const val sequenceMetadataName = "sequenceMetadataName"
+    const val sequenceMetadataLength = "sequenceMetadataLength"
+    const val sequenceMetadataIdentity = "sequenceMetadataIdentity"
+
+
 }
 

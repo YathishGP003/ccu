@@ -94,6 +94,9 @@
     <color name="zoneselection_gray">#F0F0F0</color>
     <color name="spinner_divider">#99707070</color>
     <color name="spinner_item_highlight">?orange_75f_secondary</color>
+    <color name="black_transparent">#CC000000</color>
+    <color name="gray_text">#979797</color>
+    <color name="active_schedule">#FA8733</color>
 
     <color name="tuner_group">#999999</color>
     <color name="material_button_ripple">#D0D0D0</color>
@@ -121,5 +124,7 @@
 
     <color name="log_key_blue">#021693</color>
     <color name="log_value_red">#FF3A42</color>
+    <color name="lite_orange">#F4E2E0</color>
 
+    <color name="warning_layout_background">#FBEAE8</color>
 </resources>

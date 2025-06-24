@@ -52,6 +52,7 @@ import org.projecthaystack.server.HStdOps;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -62,6 +63,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.exception.NullHGridException;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
@@ -3458,6 +3460,46 @@ public class CCUHsApi
             }
         }
         return null;
+    }
+
+
+    public void updateRecurringSchedule(String id, HDict dict){
+        tagsDb.addHDict(id,dict);
+    }
+
+    public void updateEventSchedule(String id, HDict dict){
+        tagsDb.addHDict(id,dict);
+    }
+
+
+    // below logic makes the query by using all eventRef
+    // ex:- event and (id == @eventRef1 or id == @eventRef2 or id == @eventRef3)
+    public List<HDict> readEventsDict(List<String> eventRefs) {
+        if (eventRefs == null || eventRefs.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        StringBuilder queryBuilder = new StringBuilder("event and (");
+        boolean first = true;
+
+        for (String ref : eventRefs) {
+            String trimmed = ref.trim();
+
+            if (!trimmed.startsWith("@")) {
+                trimmed = "@" + trimmed;
+            }
+
+            if (!first) queryBuilder.append(" or ");
+            queryBuilder.append("id == ").append(trimmed);
+            first = false;
+        }
+
+        queryBuilder.append(")");
+
+        String query = queryBuilder.toString();
+
+        CcuLog.d(TAG, "readEvents query: " + query);
+        return CCUHsApi.getInstance().readAllHDictByQuery(query);
     }
 
 }

@@ -57,4 +57,7 @@ data class Message(@PrimaryKey val messageId: String,
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_VALUE_DURATION)
     var duration: Long?= 0,
 
-    )
+    @ColumnInfo(name = MESSAGE_ATTRIBUTE_APPLIED_DATA)
+    var appliedData: String? = null,
+
+)

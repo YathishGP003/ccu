@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
@@ -16,6 +17,7 @@ import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.bacnet.BacnetProfile;
+import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.util.ExecutorTask;
 
@@ -110,7 +112,11 @@ public class L
     public static final String TAG_SEQUENCER_LOGS = "SEQUENCER_LOGS";
     public static final String TAG_ALERT_LOGS = "ALERT_LOGS";
     public static final String TAG_PRECONFIGURATION = "PRECONFIGURATION";
+    public static final String TAG_CONNECT_NODE = "CONNECT_NODE";
+    public static final String TAG_CCU_SEQUENCE_APPLY = "CCU_SEQUENCE_APPLY";
     public static final String TAG_REGISTRATION = "REGISTRATION";
+    public static final String TAG_CCU_POINT_SCHEDULE = "CCU_POINT_SCHEDULE";
+
 
     public static Context app()
     {
@@ -139,24 +145,84 @@ public class L
 
 
     public static boolean isModbusSlaveIdExists(Short slaveId) {
-        ArrayList<HashMap<Object, Object>> nodes = CCUHsApi.getInstance().readAllEntities("device and modbus");
-        if(nodes.size() == 0)
+        CCUHsApi hsApi = CCUHsApi.getInstance();
+        ArrayList<HashMap<Object, Object>> nodes = hsApi.readAllEntities("device and modbus");
+        List<Integer> connectNodes = ConnectNodeUtil.Companion.getConnectNodeSlaveIdList(hsApi);
+        if(nodes.isEmpty() && connectNodes.isEmpty()){
             return false;
+        }
 
-        for (HashMap<Object,Object> node : nodes)
-        {
+        for (HashMap<Object,Object> node : nodes) {
             if (node.get("addr").toString().equals(String.valueOf(slaveId))) {
+                return true;
+            }
+        }
+        for (Integer node : connectNodes) {
+            if (node == slaveId.intValue()) {
                 return true;
             }
         }
         return false;
     }
-    
+
+    /**
+     * Generates the next available Connect Module address while ensuring:
+     * 1. The address belongs to the current address band
+     * 2. The address is not zero (0x00)
+     * 3. The address is not already used by another Connect Module
+     * 4. The Modbus slave ID (address % 100) is not already in use
+     *
+     * Algorithm:
+     * 1. Starts checking from (current address band + 1) to avoid zero address
+     * 2. For each candidate address:
+     *    a. Checks against existing Connect Modules
+     *    b. Verifies Modbus slave ID availability
+     * 3. Returns the first available address that meets all criteria
+     *
+     * @return short The next available Connect Module address
+     * @throws IllegalStateException if no valid address can be found after reasonable attempts
+     */
+    public static short generateConnectAddrSkipZero() {
+        final short currentBand = L.ccu().getAddressBand();
+        final short maxAttempts = 200; // Prevent infinite loops
+        short attempts = 0;
+
+        // Get all existing Connect Module devices (excluding BACnet devices)
+        final ArrayList<HashMap<Object, Object>> nodes = CCUHsApi.getInstance()
+                .readAllEntities("device and connectModule and not bacnet");
+
+        // Start checking from currentBand + 1 (to avoid 0x00)
+        short nextAddr = (short) (currentBand + 1);
+
+        while (attempts++ < maxAttempts) {
+            boolean addressAvailable = true;
+
+            // Check against existing nodes
+            for (HashMap<Object, Object> node : nodes) {
+                short nodeAddress = Short.parseShort(node.get("addr").toString());
+                if (nodeAddress == nextAddr) {
+                    addressAvailable = false;
+                    break;
+                }
+            }
+
+            // Check Modbus slave ID availability if address appears available
+            if (addressAvailable && !isModbusSlaveIdExists((short) (nextAddr % 100))) {
+                return nextAddr;
+            }
+
+            nextAddr++;
+        }
+
+        throw new IllegalStateException("Failed to find available Connect Module address after " +
+                maxAttempts + " attempts");
+    }
+
     public static short generateSmartNodeAddress()
     {
         short currentBand = L.ccu().getAddressBand();
-        ArrayList<HashMap<Object,Object>> nodes = CCUHsApi.getInstance().readAllEntities("device and node and not bacnet");
-        if (nodes.size() == 0) {
+        ArrayList<HashMap<Object,Object>> nodes = CCUHsApi.getInstance().readAllEntities("device and (node or connectModule) and not bacnet");
+        if (nodes.isEmpty()) {
             return currentBand;
         }
 
@@ -284,6 +350,11 @@ public class L
                 ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(hsApi, false);
             }
         }
+
+        if(!ConnectNodeUtil.Companion.getConnectNodeByNodeAddress(node.toString(), hsApi).isEmpty()){
+           ConnectNodeUtil.Companion.removeConnectNodeEquips(node.toString(), hsApi);
+        }
+
         HashMap<Object, Object> device = hsApi.readEntity("device and addr == \""+node+"\"");
         if (device.get("id") != null)
         {

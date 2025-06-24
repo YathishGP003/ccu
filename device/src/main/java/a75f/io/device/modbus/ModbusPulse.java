@@ -19,6 +19,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.util.CCUUtils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.projecthaystack.HStr;
 
 public class ModbusPulse {
     private static final int MODBUS_DATA_START_INDEX = 3;

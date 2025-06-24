@@ -1,5 +1,6 @@
 package a75f.io.api.haystack.bacnet.parser
 
+import a75f.io.api.haystack.Tags
 import com.google.gson.annotations.SerializedName
 
 data class BacnetModelDetailResponse(
@@ -45,21 +46,36 @@ data class BacnetPoint(
     @SerializedName("descriptiveTags") var descriptiveTags: MutableList<TagItem>,
     @SerializedName("tags") var equipTagsList: MutableList<TagItem>,
     @SerializedName("bacnetProperties") var bacnetProperties: MutableList<BacnetProperty>,
+    @SerializedName("point") val point : DataPoint?= null,
     // used to show and hide using arrow
     var displayInEditor: Boolean = true,
     // used to show and hide point in zone view
     var displayInUi: Boolean = true,
     @SerializedName("disName") val disName: String = "",
     @SerializedName("defaultWriteLevel") var defaultWriteLevel: String = "8",
-    @SerializedName("isSystem") var isSystem : Boolean = false
+    @SerializedName("isSystem") var isSystem : Boolean = false,
+    var isSchedulable: Boolean = false
 ){
+    fun initailizeSchedulableForFreshPairing() {
+        isSchedulable = equipTagNames.contains(Tags.WRITABLE) && equipTagNames.contains(Tags.SCHEDULABLE)
+    }
+
     constructor() : this("", "", "", "", null,null, "", null, "", ""
-        , mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf(), true, true, "")
+        , mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf(), null,true, true, "", isSchedulable = false)
 }
 
 data class PresentationData(
     @SerializedName("tagValueIncrement") val tagValueIncrement: String?
 )
+data class DataPoint(
+    @SerializedName("name") val name: String,
+    @SerializedName("tags") var equipTagsList: MutableList<TagItem>,
+    @SerializedName("valueConstraint") val valueConstraint: ValueConstraint?,
+    @SerializedName("presentationData") val presentationData: PresentationData?,
+    @SerializedName("defaultUnit") val defaultUnit: String,
+
+    )
+
 data class ValueConstraint(
     @SerializedName("constraintType") val constraintType: String,
     @SerializedName("minValue") val minValue: Double?,

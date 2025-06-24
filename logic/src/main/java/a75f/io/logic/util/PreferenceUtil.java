@@ -2,7 +2,6 @@ package a75f.io.logic.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
 import android.preference.PreferenceManager;
 
 import java.util.Date;
@@ -110,6 +109,7 @@ public class PreferenceUtil {
     private static final String  DUAL_DUCT_SENSOR_POINT_REMOVE = "dualDuctSensorPointRemove";
 
     private static final String CONNECT_MODULE_OAO_POINTS = "connectModuleOaoPoints";
+    private static final String EQUIP_SCHEDULESTATUS_FOR_ZONE_EXTERNAL_EQUIP = "equipScheduleStatusForZoneExternalEquip";
 
     private static final String NON_DM_POINTS_REMOVE_STATUS = "nonDmPointsRemoveStatus";
     private static final String FLOOR_REF_UPDATE_STATUS = "floorRefUpdateStatus";
@@ -121,6 +121,9 @@ public class PreferenceUtil {
 
     private static final String MIGRATE_UPDATE_DAB_AND_VAV_POINTS = "migrateUpdateVavAndDabPoints";
     private static final String MIGRATE_UPDATE_BYPASS_DAMPER_POINTS = "migrateUpdateBypassDamperPoints";
+
+    private static final String MIGRATE_COPY_MODBUS_POINTS = "copyModbusPoints";
+
 
     private static final String MIGRATE_DELETE_REDUNDANT_OAO_POINTS_BY_SYSTEM_EQUIP = "migrateDeleteRedundantOaoPointsBySystemEquip";
 
@@ -974,5 +977,21 @@ public class PreferenceUtil {
     }
     public static void setMigrateDeleteRedundantOaoPointsBySystemEquip() {
         setBooleanPreference(MIGRATE_DELETE_REDUNDANT_OAO_POINTS_BY_SYSTEM_EQUIP, true);
+    }
+
+    public static boolean getCopyModbusPoints() {
+        return getBooleanPreference(MIGRATE_COPY_MODBUS_POINTS);
+    }
+
+    public static void setCopyModbusPoints() {
+        setBooleanPreference(MIGRATE_COPY_MODBUS_POINTS, true);
+    }
+
+    public static boolean isEquipScheduleStatusForZoneExternalEquipDone() {
+        return getBooleanPreference(EQUIP_SCHEDULESTATUS_FOR_ZONE_EXTERNAL_EQUIP);
+    }
+
+    public static void setEquipScheduleStatusForZoneExternalEquipDone() {
+        setBooleanPreference(EQUIP_SCHEDULESTATUS_FOR_ZONE_EXTERNAL_EQUIP, true);
     }
 }

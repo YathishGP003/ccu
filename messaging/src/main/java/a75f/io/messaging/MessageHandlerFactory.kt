@@ -7,7 +7,7 @@ class MessageHandlerFactory {
         UpdateEntity, UpdatePoint, UpdateSchedule, SiteSync, RemoveEntity, RemoteCommand,
         PredefinedAlert, CustomAlert, AlertRemoval, AlertDefRemoval, AutoCommissioningMode,
         SCHEDULE_MIGRATED, sequenceCreated, sequenceUpdated, sequenceDeleted,fixAlert,updateDashboard,
-        AddEntity
+        AddEntity, EntitiesApply, AddEvent, DeleteEvent, UpdateEvent, AddPointSchedule, UpdatePointSchedule, DeletePointSchedule
     }
     companion object {
         fun createInstance(handlerCmd: Command) : MessageHandler =
@@ -30,6 +30,13 @@ class MessageHandlerFactory {
                 Command.sequenceDeleted -> SiteSequencerMessageHandler.SequenceDeletedHandler()
                 Command.fixAlert -> FixAlertHandler()
                 Command.updateDashboard -> DashboardHandler()
+                Command.EntitiesApply -> EntitiesApplyHandler()
+                Command.AddEvent -> UpdateEventHandler()
+                Command.DeleteEvent -> UpdateEventHandler()
+                Command.UpdateEvent -> UpdateEventHandler()
+                Command.AddPointSchedule -> UpdateRecurringScheduleHandler()
+                Command.UpdatePointSchedule -> UpdateRecurringScheduleHandler()
+                Command.DeletePointSchedule -> UpdateRecurringScheduleHandler()
             }
     }
 }

@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -29,10 +30,12 @@ import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
 import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.logic.watchdog.WatchdogMonitor;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
+import kotlin.Triple;
 
 /**
  * Created by samjithsadasivan on 9/19/18.
@@ -43,9 +46,12 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     DeviceNetwork deviceNw;
     ModbusNetwork modbusNetwork;
     boolean watchdogMonitor = false;
+    private static int modbusDiagInterval = 5; // So that first time execution is possible
+    private static final int MODBUS_DIAG_INTERVAL_COUNT = 5; // 5 min
     
     private Lock jobLock = new ReentrantLock();
     private DiagUpdateJob diagUpdateJob;
+    private List<String> connectNodeList = null;
     @Override
     public void bark() {
         watchdogMonitor = true;
@@ -69,11 +75,11 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         //TODO - TEMP code for performance testing to simulate device load. Remove this code after performance issue resolved
        //injectTestInputMessage(0);
     }
-    
+
     public void doJob()
     {
         watchdogMonitor = false;
-        ConnectModbusSerialComm.testReadOp();
+//        ConnectModbusSerialComm.testReadOp();
         CcuLog.d(L.TAG_CCU_JOB, "DeviceUpdateJob -> ");
         if (!CCUHsApi.getInstance().isCCUConfigured() || Globals.getInstance().isRecoveryMode() ||
                 Globals.getInstance().isSafeMode()) {
@@ -94,6 +100,36 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                         ConnectModbusSerialComm.getRegularUpdate();
                     } else {
                         CcuLog.e(L.TAG_CCU_DEVICE, "Connect module not available");
+                    }
+                    if(ConnectNodeUtil.Companion.isConnectNodeAvailable()) {
+                        connectNodeList = ConnectNodeUtil.Companion.getConnectNodeAddressList(CCUHsApi.getInstance());
+
+                        // Read the diagnostic info from the connect module every MODBUS_DIAG_INTERVAL_COUNT minutes(5 min)
+                        if (modbusDiagInterval % MODBUS_DIAG_INTERVAL_COUNT == 0) {
+                            modbusDiagInterval = 0;
+                            // Get the connect node list
+                            for (String nodeAddress : connectNodeList) {
+                                // Extract the LSB which is a slave address of the node
+                                List<Triple<String, String, String>> myTriple = ConnectNodeUtil.Companion.retrievePointSlaveIdRegAddr(
+                                        ConnectNodeUtil.Companion.connectNodeEquip(Integer.parseInt(nodeAddress)).getId()
+                                );
+
+                                // Output sorted list
+//                                for (Triple<String, String, String> triple : myTriple) {
+//                                    CcuLog.d(L.TAG_CCU_JOB, String.valueOf(triple));
+//                                }
+                                // Check for empty list
+                                if (!myTriple.isEmpty() && myTriple.get(0) != null) {
+                                    ConnectModbusSerialComm.getPointInfo(myTriple, (int) myTriple.size(), Integer.parseInt(nodeAddress) % 100);
+                                }
+                                // Update the diagnostic info for the connect node
+                                ConnectModbusSerialComm.getDiagnosticInfo(Integer.parseInt(nodeAddress) % 100);
+                                CcuLog.d(L.TAG_CCU_JOB, "Connected Node: " + nodeAddress);
+                            }
+                        }
+                        modbusDiagInterval++;
+                    } else {
+                        CcuLog.e(L.TAG_CCU_DEVICE, "Connect node not available");
                     }
                     deviceNw.sendMessage();
                     deviceNw.sendSystemControl();

@@ -77,7 +77,7 @@ public class FragmentModbusType  extends BaseDialogFragment {
                 Toast.makeText(getActivity(), "Unpair all Modbus Modules and try to pair Energy meter", Toast.LENGTH_LONG).show();
                 return;
             }
-            showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_EMR,ModbusLevel.ZONE,"emr"), ModbusConfigView.Companion.getID());
+            showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_EMR,ModbusLevel.ZONE,""), ModbusConfigView.Companion.getID());
         });
         (view.findViewById(R.id.imageGoback)).setOnClickListener((v)->removeDialogFragment(MID));
         bacnetEm.setOnClickListener(v -> {

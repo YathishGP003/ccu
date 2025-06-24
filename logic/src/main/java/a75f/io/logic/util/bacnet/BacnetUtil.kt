@@ -812,7 +812,7 @@ fun encodeBacnetId(slaveId: Int, objectType: Int, objectId: Int): Int {
 fun decodeBacnetId(bacnetId: Int,objectType: Int): Int{
     var bacnetIdStr = bacnetId.toString().substring(3)
 
-    bacnetIdStr = bacnetIdStr.replace(objectType.toString(),"")
+    bacnetIdStr = bacnetIdStr.replaceFirst(objectType.toString(),"")
     val objectId = bacnetIdStr.toInt()
 
     return objectId

@@ -874,6 +874,22 @@ public class CCUTagsDb extends HServer {
             appContext.sendBroadcast(intent);
         }
 
+        if (p.getScheduleRef() != null) {
+            b.add(Tags.SCHEDULE_REF, p.getScheduleRef());
+        }
+
+        if (p.getPointDefinitionRef() != null) {
+            b.add(Tags.POINT_DEFINITION_REF, p.getPointDefinitionRef());
+        }
+
+        if(p.getEventRef() != null){
+            b.add(Tags.EVENT_REF, p.getEventRef());
+        }
+
+        if (p.getEventDefinitions() != null && p.getEventDefinitions().size() != 0) {
+            b.add(Tags.EVENT_DEFINITIONS, p.getEventDefinitions());
+        }
+
         HDict dict = b.toDict();
 
         if (!insertEntity(dict, id)) {
@@ -930,6 +946,23 @@ public class CCUTagsDb extends HServer {
             b.add(Tags.BACNET_TYPE, p.getBacnetType());
             CcuLog.d(TAG_CCU_BACNET,"updatePoint: "+p+" bacnetId: "+p.getBacnetId()+" bacnetType: "+p.getBacnetType());
         }
+
+        if (p.getScheduleRef() != null) {
+            b.add(Tags.SCHEDULE_REF, p.getScheduleRef());
+        }
+
+        if (p.getPointDefinitionRef() != null) {
+            b.add(Tags.POINT_DEFINITION_REF, p.getPointDefinitionRef());
+        }
+
+        if(p.getEventRef() != null){
+            b.add(Tags.EVENT_REF, p.getEventRef());
+        }
+
+        if (p.getEventDefinitions() != null && p.getEventDefinitions().size() != 0) {
+            b.add(Tags.EVENT_DEFINITIONS, p.getEventDefinitions());
+        }
+
         HRef id = (HRef) b.get("id");
         HDict hDict = b.toDict();
 

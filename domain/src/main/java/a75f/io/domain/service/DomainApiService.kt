@@ -57,8 +57,15 @@ interface DomainModelerService {
     ): retrofit2.Call<ResponseBody>
 
     @GET("/models/external/{modelId}")
-    fun getBacNetModelById(
-        @retrofit2.http.Path("modelId") modelId: String?
+    fun getModbusModelById(
+        @retrofit2.http.Path("modelId") modelId: String?,
+        @retrofit2.http.Query("version") version: String?,
+    ): retrofit2.Call<ResponseBody>
+
+    @GET("/hayloft/models/external/{modelId}")
+    fun getExternalModbusModelById(
+        @retrofit2.http.Path("modelId") modelId: String?,
+        @retrofit2.http.Query("version") version: String?,
     ): retrofit2.Call<ResponseBody>
 
     @GET("/models/external/export/{modelId}")

@@ -24,7 +24,11 @@ public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
         int column = position % spanCount; // item column
 
         if (column < spanCount - 1) { // Add right margin to all columns except the last one
-            outRect.right = spacing;
+            outRect.right = spacing/2;
+        }
+
+        if (column > 0) {
+            outRect.left = spacing/2;
         }
 
         // If needed, you can add top/bottom margin here

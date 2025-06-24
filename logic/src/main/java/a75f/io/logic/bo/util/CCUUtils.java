@@ -1,6 +1,9 @@
 package a75f.io.logic.bo.util;
 
 import android.content.Context;
+import android.graphics.Typeface;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
 
 import org.joda.time.DateTime;
 import org.projecthaystack.HDict;
@@ -32,9 +35,11 @@ import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
 import a75f.io.logic.R;
 import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.logic.util.PreferenceUtil;
+import kotlin.Pair;
 
 /**
  * Created by Yinten on 10/11/2017.
@@ -399,11 +404,14 @@ public class CCUUtils
             return CCUHsApi.getInstance().readMapById(groupOrEquipId).containsKey("domainName");
         }
     }
-    public static ProfileType getProfileType(String profileType) {
+    public static ProfileType getProfileType(String profileType, int address) {
         for (ProfileType type : ProfileType.values()) {
             if (type.name().equals(profileType)) {
                 return type;
             }
+        }
+        if(ConnectNodeUtil.Companion.isZoneContainingConnectNodeWithEquips(String.valueOf(address), CCUHsApi.getInstance())) {
+            return ProfileType.CONNECTNODE;
         }
         return null;
     }
@@ -426,6 +434,8 @@ public class CCUUtils
             return NodeType.MYSTAT;
         } else if (domainName.contains("otn")) {
             return NodeType.OTN;
+        } else if (domainName.contains("connectnodedevice")) {
+            return NodeType.CONNECTNODE;
         } else {
             return null;
         }
@@ -445,5 +455,12 @@ public class CCUUtils
             return curTemp >= minVal && curTemp <= maxVal;
         }
         return true;
+    }
+
+    public static Date getLastUpdatedTimeForCN(String deviceRef) {
+        HashMap<Object, Object> point = CCUHsApi.getInstance()
+                .readEntity("domainName == \"" + DomainName.heartBeat + "\" and deviceRef == \"" + deviceRef + "\"");
+        HisItem hisItem = CCUHsApi.getInstance().curRead(point.get("id").toString());
+        return (hisItem == null) ? null : hisItem.getDate();
     }
 }

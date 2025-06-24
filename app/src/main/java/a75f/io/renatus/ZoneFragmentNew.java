@@ -3,20 +3,28 @@ package a75f.io.renatus;
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
 import static a75f.io.api.haystack.Tags.BACNET;
 import static a75f.io.api.haystack.Tags.BACNET_POINT_UPDATE;
+import static a75f.io.api.haystack.Tags.CONNECTMODULE;
+import static a75f.io.api.haystack.Tags.MODBUS;
+import static a75f.io.api.haystack.Tags.MODBUS;
+import static a75f.io.api.haystack.Tags.CONNECTMODULE;
 import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
+import static a75f.io.logic.bo.building.definitions.ProfileType.CONNECTNODE;
 import static a75f.io.logic.bo.util.CCUUtils.getTruncatedString;
 import static a75f.io.logic.util.bacnet.BacnetModelBuilderKt.buildBacnetModel;
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModel;
 import static a75f.io.logic.L.TAG_CCU_INIT;
+import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.disconnectedIntervals;
+import static a75f.io.logic.bo.util.CCUUtils.getTruncatedString;
+import static a75f.io.logic.bo.util.CustomScheduleUtilKt.fetchScheduleStatusMessageForPointsUnderCustomControl;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
+import static a75f.io.logic.util.bacnet.BacnetModelBuilderKt.buildBacnetModel;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 
 import android.annotation.SuppressLint;
@@ -32,7 +40,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.text.SpannableString;
 import android.text.Spanned;
+import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -65,6 +75,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.tabs.TabLayout;
@@ -75,6 +86,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.base.BaseInterval;
 import org.projecthaystack.HDict;
+import org.projecthaystack.HNum;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -97,6 +109,7 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.bacnet.parser.BacnetModelDetailResponse;
 import a75f.io.api.haystack.bacnet.parser.BacnetPoint;
@@ -117,12 +130,14 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneState;
+import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.otn.OTNUtil;
+import a75f.io.logic.bo.building.pointscheduling.model.CustomScheduleManager;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
@@ -131,18 +146,20 @@ import a75f.io.logic.bo.building.system.client.RemotePointUpdateInterface;
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.bo.util.CustomScheduleUtilKt;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.interfaces.ZoneDataInterface;
-import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler;
-import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler;
-import a75f.io.logic.util.uiutils.MyStatUserIntentHandler;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.schedule.ScheduleGroup;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.CommonTimeSlotFinder;
 import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.logic.util.PreferenceUtil;
+import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler;
+import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler;
+import a75f.io.logic.util.uiutils.MyStatUserIntentHandler;
 import a75f.io.messaging.handler.UpdateEntityHandler;
 import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants;
@@ -154,9 +171,9 @@ import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitZoneViewKt;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.modbus.util.UtilSourceKt;
 import a75f.io.renatus.model.ZoneViewData;
-import a75f.io.logic.util.CommonTimeSlotFinder;
 import a75f.io.renatus.profiles.hyperstatv2.util.HyperStatZoneViewKt;
 import a75f.io.renatus.profiles.mystat.ui.MyStatZoneUiKt;
+import a75f.io.renatus.schedules.CustomControlDialog;
 import a75f.io.renatus.schedules.NamedSchedule;
 import a75f.io.renatus.schedules.ScheduleGroupFragment;
 import a75f.io.renatus.schedules.ScheduleUtil;
@@ -166,6 +183,7 @@ import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.SeekArc;
+import a75f.io.renatus.util.TextListAdapter;
 import a75f.io.renatus.views.AlertDialogAdapter;
 import a75f.io.renatus.views.AlertDialogData;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
@@ -174,7 +192,6 @@ import a75f.io.util.ExecutorTask;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-
 
 
 public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
@@ -896,6 +913,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\"" + roomMap.get("id").toString() + "\"");
         if (equips.size() > 0) {// zones has devices paired
             boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equips);
+            HashMap<Object, Object> connectNode = ConnectNodeUtil.Companion.getConnectNodeForZone(roomMap.get("id").toString(), CCUHsApi.getInstance());
+            if (!connectNode.isEmpty()) {
+                isZoneAlive = HeartBeatUtil.isConnectNodeAlive(connectNode.get(Tags.ID).toString());
+            }
             HashMap<String, ArrayList<HashMap>> zoneData = new HashMap<String, ArrayList<HashMap>>();
             for (HashMap zoneModel : equips) {
                 if (zoneData.containsKey(zoneModel.get("roomRef").toString())) {
@@ -926,6 +947,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 String profileBacnet = "BACNET_DEFAULT";
                 String profileHyperStatMonitoring = "HYPERSTAT_MONITORING";
                 String profileOTN = "OTN";
+                String profileConnectNode = CONNECTNODE.name();
 
                 boolean tempModule = false;
                 boolean nontempModule = false;
@@ -956,7 +978,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     if (profileType.contains(profileEM) || profileType.contains(profilePLC)
                             || profileType.contains(profileTempMonitor)
                             || profileType.contains(profileModBus)
-                            || profileType.contains(profileBacnet)) {
+                            || profileType.contains(profileBacnet)
+                            || profileType.contains(profileConnectNode)
+                    ) {
                         nontempModule = true;
                     }
                 }
@@ -968,15 +992,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     viewTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, gridPosition, tablerowLayout, isZoneAlive);
                 }
                 if (!tempModule && nontempModule && !profileType.contains(profileHyperStatMonitoring)) {
-                    viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, gridPosition, tablerowLayout, isZoneAlive);
+                    viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, gridPosition,
+                            tablerowLayout, isZoneAlive, roomMap.get("id").toString());
 
                 }
                 gridPosition++;
             }
         } else {
             //No devices paired
-            viewNonTemperatureBasedZone(inflater, rootView, new ArrayList<HashMap>(), zoneTitle, gridPosition, tablerowLayout,
-                                        false);
+            boolean isZoneAlive = false;
+            HashMap<Object, Object> connectNode = ConnectNodeUtil.Companion.getConnectNodeForZone(roomMap.get("id").toString(), CCUHsApi.getInstance());
+            if (!connectNode.isEmpty()) {
+                isZoneAlive = HeartBeatUtil.isConnectNodeAlive(connectNode.get(Tags.ID).toString());
+            }
+            viewNonTemperatureBasedZone(inflater, rootView, new ArrayList<>(), zoneTitle, gridPosition, tablerowLayout,
+                    isZoneAlive, roomMap.get("id").toString());
             gridPosition++;
         }
         return gridPosition;
@@ -2233,12 +2263,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         linearLayoutZonePoints.removeAllViews();
         if (p != null) {
             if (p.getProfile().startsWith("EMR")) {
-                LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
-                LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
-                LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
-                vc_schedule.setVisibility(View.GONE);
-                ll_status.setVisibility(View.GONE);
-                ll_schedule.setVisibility(View.GONE);
+                disableVisibiltyForZoneScheduleUI(zoneDetails);
                 HashMap emPoints = ZoneViewData.getEMEquipPoints(p.getId());
                 CcuLog.i("PointsValue", "EM Points:" + emPoints.toString());
                 if (emPoints.size() > 0) {
@@ -2254,10 +2279,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 }
             }
             if (p.getProfile().startsWith("PLC")) {
-                LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
-                LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
-                ll_status.setVisibility(View.GONE);
-                ll_schedule.setVisibility(View.GONE);
+                disableVisibiltyForZoneScheduleUI(zoneDetails);
                 HashMap plcPoints = ZoneViewData.getPiEquipPoints(p.getId());
                 if (plcPoints.size() > 0) {
                     CcuLog.i("PointsValue", "PiLoop Points:" + plcPoints.toString());
@@ -2289,7 +2311,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
 
-    private void viewNonTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap,String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout, boolean isZoneAlive)
+    private void viewNonTemperatureBasedZone(LayoutInflater inflater, View rootView,
+                                             ArrayList<HashMap> zoneMap, String zoneTitle, int gridPosition,
+                                             LinearLayout[] tablerowLayout, boolean isZoneAlive, String roomRef)
     {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.viewNonTemperatureBasedZone");
 
@@ -2403,7 +2427,22 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 nonTempControl.setImage(R.drawable.ic_zone_em);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
             }
+            if (ConnectNodeUtil.Companion.isConnectNodePaired(roomRef)) {
+                vacationStatusTV.setVisibility(View.GONE);
+                vacationText.setVisibility(View.GONE);
+                vacationEditButton.setVisibility(View.GONE);
+                nonTempControl.setEquipType(2);
+                nonTempControl.setImage(R.drawable.ic_zone_modbus);
+                nonTempControl.setImageViewExpanded(R.drawable.ic_zone_modbus_mx);
+            }
 
+        } else if (ConnectNodeUtil.Companion.isConnectNodePaired(roomRef)) {
+                vacationStatusTV.setVisibility(View.GONE);
+                vacationText.setVisibility(View.GONE);
+                vacationEditButton.setVisibility(View.GONE);
+                nonTempControl.setEquipType(2);
+                nonTempControl.setImage(R.drawable.ic_zone_modbus);
+                nonTempControl.setImageViewExpanded(R.drawable.ic_zone_modbus_mx);
         } else {
             //No devices paired zone
             nonTempControl.setEquipType(2);
@@ -2448,7 +2487,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                             //ImageView imageViewExpanded = gridItem.findViewById(R.id.imageView);
                                             NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
                                             //ScaleImageToNormal(250,210,imageViewExpanded);
-                                            ScaleControlToNormal(270,210,nonTempControl);
+                                            ScaleControlToNormal(270, 210, nonTempControl);
                                             nonTempControl.setExpand(false);
                                             nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
                                             gridItem.invalidate();
@@ -2497,12 +2536,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     } else if (clickposition == clickedView) {
                         v.setBackgroundColor(getResources().getColor(R.color.white));
                         status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
-                        textEquipment.setTextAppearance(getActivity(),R.style.label_black);
+                        textEquipment.setTextAppearance(getActivity(), R.style.label_black);
                         textEquipment.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                         tableLayout.removeView(zoneDetails);
                         imageOn = false;
                         //ScaleImageToNormal(250,210,imageView);
-                        ScaleControlToNormal(270,210,nonTempControl);
+                        ScaleControlToNormal(270, 210, nonTempControl);
                         nonTempControl.setExpand(false);
                         showWeather();
                         clickedView = -1;
@@ -2536,15 +2575,78 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                 if (isExpanded) {
                     linearLayoutZonePoints.removeAllViews();
-                    if (nonTempEquip != null) {
+
+                    if (ConnectNodeUtil.Companion.isConnectNodePaired(roomRef)) {
+                        HashMap<Object, Object> connectNodeDevice = ConnectNodeUtil.Companion.getConnectNodeForZone(roomRef, CCUHsApi.getInstance());
+                        disableVisibiltyForZoneScheduleUI(zoneDetails);
+                        displayRoomSpecificCustomControlFields(zoneDetails, nonTempEquip);
+                        List<EquipmentDevice> modbusDevices = new ArrayList<>();
+                        for (EquipmentDevice equipmentDevice : buildModbusModel(roomRef)) {
+                            modbusDevices.add(equipmentDevice);
+                            if (equipmentDevice.getEquips() != null) {
+                                modbusDevices.addAll(equipmentDevice.getEquips());
+                            }
+                        }
+
+                        View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
+                        TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
+                        TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
+                        TextView textViewUpdatedTimeHeading = zoneDetails.findViewById(R.id.last_updated);
+                        TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
+
+                        String connectNodeId = connectNodeDevice.get(Tags.ID).toString();
+                        String connectNodeAddr = connectNodeDevice.get("addr").toString();
+
+                        HeartBeatUtil.moduleStatusForConnectNode(textViewModule, connectNodeId);
+                        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTimeForCn(connectNodeId));
+
+                        tvEquipmentType.setText("Connect Node (" + connectNodeAddr + ")");
+                        textViewModule.setVisibility(View.VISIBLE);
+                        textViewUpdatedTimeHeading.setVisibility(View.VISIBLE);
+                        textViewUpdatedTime.setVisibility(View.VISIBLE);
+
+                        if (modbusDevices.isEmpty()) {
+                            LinearLayout noEquipPairedLayout = zoneDetails.findViewById(R.id.noEquipPaired);
+                            TextView noModelMessage = zoneDetails.findViewById(R.id.tvNoEquipPaired);
+                            String message = "<b>No Model Configured.</b> Go to Site Sequencer to set up a model for this Connect Node.";
+                            noModelMessage.setText(HtmlCompat.fromHtml(message, HtmlCompat.FROM_HTML_MODE_LEGACY));
+                            noEquipPairedLayout.setVisibility(View.VISIBLE);
+                            noEquipPairedLayout.setBackgroundColor(getResources().getColor(R.color.lite_orange));
+                            linearLayoutZonePoints.addView(zoneDetails);
+                            return;
+                        }
+
+                        linearLayoutZonePoints.addView(zoneDetails);
+
+                        List<HashMap<Object, Object>> connectNodeEquips = CCUHsApi.getInstance().readAllEntities(
+                                "equip and not equipRef and roomRef == \"" + roomRef + "\""
+                        );
+                        CcuLog.i(L.TAG_CONNECT_NODE, "ConnectNode equips : " + connectNodeEquips);
+
+                        if (nonTempEquip == null) {
+                            CcuLog.i(L.TAG_CONNECT_NODE, "Non temp equips are null.");
+                            return;
+                        }
+
+                        for (EquipmentDevice modbusDevice : ConnectNodeUtil.Companion.reorderEquipments(fetchAllModbusEquips(nonTempEquip))) {
+                            loadExternalEquipUi(
+                                    CONNECTMODULE,
+                                    modbusDevice.deviceEquipRef,
+                                    getEquipmentDeviceName(CONNECTMODULE, modbusDevice),
+                                    false,
+                                    modbusDevice,
+                                    inflater.inflate(R.layout.item_modbus_detail_view, null),
+                                    linearLayoutZonePoints,
+                                    connectNodeDevice
+                            );
+                        }
+                    }
+
+                    else if (nonTempEquip != null) {
+                        //
                         if (nonTempEquip.getProfile().startsWith("EMR")) {
 
-                            LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
-                            LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
-                            LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
-                            vc_schedule.setVisibility(View.GONE);
-                            ll_status.setVisibility(View.GONE);
-                            ll_schedule.setVisibility(View.GONE);
+                            disableVisibiltyForZoneScheduleUI(zoneDetails);
                             HashMap emPoints = ZoneViewData.getEMEquipPoints(nonTempEquip.getId());
                             CcuLog.i("PointsValue", "EM Points:" + emPoints.toString());
                             loadEMPointsUI(emPoints, inflater, linearLayoutZonePoints, nonTempEquip.getGroup());
@@ -2561,19 +2663,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                         }
                         if (nonTempEquip.getProfile().startsWith("PLC")) {
-                            LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
-                            LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
-                            LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
-                            vc_schedule.setVisibility(View.GONE);
-                            ll_status.setVisibility(View.GONE);
-                            ll_schedule.setVisibility(View.GONE);
+                            disableVisibiltyForZoneScheduleUI(zoneDetails);
                             HashMap plcPoints = ZoneViewData.getPiEquipPoints(nonTempEquip.getId());
                             CcuLog.i("PointsValue", "PiLoop Points:" + plcPoints.toString());
                             loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints, nonTempEquip.getGroup());
 
                             double targetValue = (double) plcPoints.get("Target Value");
                             double inputValue = (double) plcPoints.get("Input Value");
-                            if( isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").toString().equals("\u00B0F")) {
+                            if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").toString().equals("\u00B0F")) {
                                 nonTempControl.setPiInputText(String.format("%.2f", fahrenheitToCelsius(inputValue)));
                                 nonTempControl.setPiInputUnitText(" \u00B0C");
                             } else {
@@ -2585,7 +2682,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             if ((boolean) plcPoints.get("Dynamic Setpoint")) {
                                 nonTempControl.setPiOutputText(String.valueOf(targetValue));
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
-                            } else if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").toString().equals("\u00B0F")){
+                            } else if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").toString().equals("\u00B0F")) {
                                 nonTempControl.setPiOutputText(String.valueOf(fahrenheitToCelsius(targetValue)));
                                 nonTempControl.setPiOutputUnitText("\u00B0C");
                             } else {
@@ -2593,164 +2690,44 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             }
                         }
                         if (nonTempEquip.getProfile().startsWith("MODBUS")) {
-
-                            LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
-                            LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
-                            LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
-                            vc_schedule.setVisibility(View.GONE);
-                            ll_status.setVisibility(View.GONE);
-                            ll_schedule.setVisibility(View.GONE);
-                            List<EquipmentDevice> list = buildModbusModel(nonTempEquip.getRoomRef());
-                            List<EquipmentDevice> modbusDevices = new ArrayList<>();
-                            for(EquipmentDevice equipmentDevice : list) {
-                                modbusDevices.add(equipmentDevice);
-                                if(null != equipmentDevice.getEquips()) {
-                                    modbusDevices.addAll(equipmentDevice.getEquips());
-                                }
-                            }
+                            // Showing point based schedule layout for modbus devices
+                            disableVisibiltyForZoneScheduleUI(zoneDetails);
+                            displayRoomSpecificCustomControlFields(zoneDetails, nonTempEquip);
 
                             HashMap<Object, Object> parentModbusEquip = CCUHsApi.getInstance().readEntity("equip " +  // parent modbbus equip
                                     "and not equipRef and roomRef  == " + "\""+nonTempEquip.getRoomRef()+"\"");
-
-                            CcuLog.i("MODBUS_UI", "ZoneData:" + modbusDevices);
-
-                            for (int i = 0; i < modbusDevices.size(); i++) {
-                                List<Parameter> parameterList = new ArrayList<>();
-
-                                List<Parameter> allParamList = UtilSourceKt.getParametersList(modbusDevices.get(i));
-                                allParamList.forEach(parameter -> {
-                                    if (parameter.isDisplayInUI())
-                                        parameterList.add(parameter);
-                                });
-                                List<Parameter> sortedparamterList = parameterList.stream()
-                                        .sorted(Comparator.comparing(param -> {
-                                            Integer pointNum = param.getLogicalPointTags().stream()
-                                                    .filter(tag -> "pointNum".equals(tag.getTagName()))
-                                                    .map(tag -> (Integer.parseInt(tag.getTagValue())))
-                                                    .findFirst()
-                                                    .orElse(Integer.MAX_VALUE);
-                                            return pointNum;
-                                        }))
-                                        .collect(Collectors.toList());
-                                View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
-                                RecyclerView modbusParams = zoneDetails.findViewById(R.id.recyclerParams);
-                                TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
-
-                                TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
-                                TextView textViewUpdatedTimeHeading =
-                                        zoneDetails.findViewById(R.id.last_updated);
-                                TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
-
-                                StringBuffer equipString = new StringBuffer();
-                                EquipmentDevice modbusDevice = modbusDevices.get(i);
-                                int displayIndex = modbusDevice.getName().lastIndexOf('-') + 1;
-                                String displayName = modbusDevice.getName().substring(displayIndex);
-                                if(!modbusDevice.getEquipType().contains(displayName)) {
-                                    equipString.append(displayName);
-                                } else {
-                                    String[] equipTypes = modbusDevice.getEquipType().split(",");
-                                    for(String equipType : equipTypes){
-                                        equipString.append(StringUtils.capitalize(equipType.trim()));
-                                        equipString.append(" ");
-                                    }
-                                }
-                                tvEquipmentType.setText(equipString.toString().trim()+ "("+modbusDevices.get(i).getSlaveId()+")");
-                                if(isLastUpdatedTimeShowable(parentModbusEquip, modbusDevices, i)) {
-                                    textViewModule.setVisibility(View.VISIBLE);
-                                    textViewUpdatedTimeHeading.setVisibility(View.VISIBLE);
-                                    textViewUpdatedTime.setVisibility(View.VISIBLE);
-                                    HeartBeatUtil.moduleStatus(textViewModule,
-                                            Integer.toString(modbusDevices.get(i).getSlaveId()));
-                                    textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(
-                                            Integer.toString(modbusDevices.get(i).getSlaveId())));
-                                }
-                                else {
-                                    textViewModule.setVisibility(View.GONE);
-                                    textViewUpdatedTimeHeading.setVisibility(View.GONE);
-                                    textViewUpdatedTime.setVisibility(View.GONE);
-                                }
-                                GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),2);
-                                modbusParams.setLayoutManager(gridLayoutManager);
-                                ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
-                                        new ZoneRecyclerModbusParamAdapter(getContext(),
-                                                                           modbusDevices.get(i).getDeviceEquipRef(),
-                                                                           sortedparamterList);
-                                modbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
-                                modbusParams.invalidate();
-                                linearLayoutZonePoints.addView(zoneDetails);
-                                linearLayoutZonePoints.setPadding(0, 0, 0, 20);
+                            for (EquipmentDevice modbusDevice: fetchAllModbusEquips(nonTempEquip)) {
+                                loadExternalEquipUi(
+                                        "MODBUS",
+                                        modbusDevice.deviceEquipRef,
+                                        getEquipmentDeviceName("MODBUS", modbusDevice),
+                                        isLastUpdatedTimeShowable(parentModbusEquip, modbusDevice),
+                                        modbusDevice,
+                                        inflater.inflate(R.layout.item_modbus_detail_view, null),
+                                        linearLayoutZonePoints,
+                                        null
+                                );
                             }
                         }
-
                         if (nonTempEquip.getProfile().startsWith("BACNET")) {
+                            disableVisibiltyForZoneScheduleUI(zoneDetails);
+                            displayRoomSpecificCustomControlFields(zoneDetails, nonTempEquip);
 
-                            LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
-                            LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
-                            LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
-                            vc_schedule.setVisibility(View.GONE);
-                            ll_status.setVisibility(View.GONE);
-                            ll_schedule.setVisibility(View.GONE);
-
-                            View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
-                            TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
-                            TextView textViewUpdatedTimeHeading =
-                                    zoneDetails.findViewById(R.id.last_updated);
-                            TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
-                            textViewModule.setVisibility(View.VISIBLE);
-                            textViewUpdatedTimeHeading.setVisibility(View.VISIBLE);
-                            textViewUpdatedTime.setVisibility(View.VISIBLE);
-                            HeartBeatUtil.moduleStatus(textViewModule,nonTempEquip.getGroup());
-                            textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nonTempEquip.getGroup()));
-
-                            List<BacnetModelDetailResponse> list = buildBacnetModel(nonTempEquip.getRoomRef());
-
-
-                            String equipName = "";
-                            for (BacnetModelDetailResponse item : list){
-                                equipName = item.getName();
-                                CcuLog.d(BACNET, "EquipName: " + equipName);
-                                List<BacnetPoint> bacnetPoints = item.getPoints();
-                                bacNetPointsList = fetchZoneDataForBacnet(bacnetPoints, nonTempEquip.getTags().get("bacnetConfig").toString());
-                                CcuLog.d(BACNET, "bacNetPointsList: " + bacNetPointsList.size());
-                            }
-
-                            TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
-                            BacnetServicesUtils bacnetServicesUtils = new BacnetServicesUtils();
-                            Map<String,String> config = bacnetServicesUtils.getConfig(nonTempEquip.getTags().get("bacnetConfig").toString());
-                            String macAddr = config.get("macAddress");
-                            if (macAddr == null || macAddr.isEmpty()) {
-                                macAddr = "NA";
-                            }
-                            String bacnetDeviceId = config.get("deviceId");
-                            String deviceId = nonTempEquip.getGroup();
-                            tvEquipmentType.setText(equipName+" ( "+deviceId+" | Device ID: "+bacnetDeviceId+" | MAC Addr: "+macAddr+" )");
-                            bacnetRecyclerView = zoneDetails.findViewById(R.id.recyclerParams);
-
-                            int spanCount = 2;
-                            int spacingInDp = 60;
-                            int spacing = GridSpacingItemDecoration.dpToPx(spacingInDp, getContext());
-
-
-                            GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),spanCount);
-                            bacnetRecyclerView.setLayoutManager(gridLayoutManager);
-                            bacnetRecyclerView.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing));
-                            zoneRecyclerBacnetParamAdapter =
-                                    new ZoneRecyclerBacnetParamAdapter(getContext(),
-                                            bacNetPointsList, remotePointUpdateInterface);
-                            bacnetRecyclerView.setAdapter(zoneRecyclerBacnetParamAdapter);
-                            bacnetRecyclerView.invalidate();
-                            linearLayoutZonePoints.addView(zoneDetails);
-                            linearLayoutZonePoints.setPadding(0, 0, 0, 20);
+                            loadExternalEquipUi(
+                                    "BACNET",
+                                    nonTempEquip.getId(),
+                                    getEquipmentDeviceName("BACNET", nonTempEquip),
+                                    null,
+                                    bacNetPointsList,
+                                    inflater.inflate(R.layout.item_modbus_detail_view, null),
+                                    linearLayoutZonePoints,
+                                    null
+                            );
                             visibleEquip = nonTempEquip;
                         }
                     } else {
                         //Non paired devices
-                        LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
-                        LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
-                        LinearLayout ll_vacation = zoneDetails.findViewById(R.id.vc_schedule);
-                        ll_vacation.setVisibility(View.GONE);
-                        ll_status.setVisibility(View.GONE);
-                        ll_schedule.setVisibility(View.GONE);
+                        disableVisibiltyForZoneScheduleUI(zoneDetails);
                         loadNoDevicesPairedUI(inflater, linearLayoutZonePoints);
                     }
                 }
@@ -2854,10 +2831,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         return arrayList;
     }
 
-    private boolean isLastUpdatedTimeShowable(HashMap<Object, Object> parentModbusEquip, List<EquipmentDevice> modbusDevices, int i) {
-        return (Integer.parseInt(parentModbusEquip.get("group").toString()) == modbusDevices.get(i).getSlaveId() &&
-                (null == modbusDevices.get(i).getEquipRef() || (modbusDevices.get(i).getEquipRef() == modbusDevices.get(i).getDeviceEquipRef())))
-                || (Integer.parseInt(parentModbusEquip.get("group").toString()) != modbusDevices.get(i).getSlaveId());
+    private boolean isLastUpdatedTimeShowable(HashMap<Object, Object> parentModbusEquip, EquipmentDevice modbusDevice) {
+        return (Integer.parseInt(parentModbusEquip.get("group").toString()) == modbusDevice.getSlaveId() &&
+                (null == modbusDevice.getEquipRef() || (modbusDevice.getEquipRef() == modbusDevice.getDeviceEquipRef())))
+                || (Integer.parseInt(parentModbusEquip.get("group").toString()) != modbusDevice.getSlaveId());
     }
 
     public void loadVAVPointsUI(HashMap vavPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
@@ -4950,6 +4927,269 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             return schedule == null;
         }
         return true;
+    }
+
+    private void disableVisibiltyForZoneScheduleUI(View zoneDetails) {
+        LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
+        LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+        LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
+        vc_schedule.setVisibility(View.GONE);
+        ll_status.setVisibility(View.GONE);
+        ll_schedule.setVisibility(View.GONE);
+    }
+
+    private void displayRoomSpecificCustomControlFields(View zoneDetails, Equip nonTempEquip) {
+        if(nonTempEquip == null) {
+            CcuLog.i(L.TAG_CONNECT_NODE, "Non temp equip is null for Connect Node.");
+            return;
+        }
+        zoneDetails.findViewById(R.id.pointBasedScheduleLayout).setVisibility(View.VISIBLE);
+        if(CustomScheduleUtilKt.isZoneUsingCustomSchedulesOrEvents(nonTempEquip.getRoomRef())) {
+            updateCustomScheduleLabelValue(zoneDetails, nonTempEquip.getRoomRef());
+            displaySchedulablePointWithoutSchedulesOrEvents(nonTempEquip, zoneDetails);
+        }
+    }
+
+    private void externalEquipsLayoutSetup(LinearLayout linearLayoutZonePoints, View zoneDetails) {
+        RelativeLayout.LayoutParams paramsLL = (RelativeLayout.LayoutParams) linearLayoutZonePoints.getLayoutParams();
+        paramsLL.removeRule(RelativeLayout.BELOW);
+        paramsLL.addRule(RelativeLayout.BELOW, R.id.pointBasedScheduleLayout);
+        paramsLL.setMarginStart(40);
+        linearLayoutZonePoints.setLayoutParams(paramsLL);
+        linearLayoutZonePoints.setPadding(0, 0, 0, 20);
+        linearLayoutZonePoints.addView(zoneDetails);
+    }
+
+    private void loadExternalEquipUi(
+            String profileName,
+            String equipId,
+            String equipmentDeviceName,
+            Boolean showLastUpdatedTime,
+            Object equipPointDetails,
+            View zoneDetailsView,
+            LinearLayout linearLayoutZonePoints,
+            HashMap<Object, Object> connectNodeDevice
+    ) {
+        externalEquipsLayoutSetup(linearLayoutZonePoints, zoneDetailsView);
+
+        switch (profileName) {
+            case "MODBUS":
+                EquipmentDevice modbusDevice = (EquipmentDevice) equipPointDetails;
+                setEquipmentDeviceName(zoneDetailsView, equipmentDeviceName);
+                controlLastUpdatedVisibilityForModbusEquips(zoneDetailsView, modbusDevice.getSlaveId(), showLastUpdatedTime);
+                setPointScheduleStatusForExternalEquip(zoneDetailsView, equipId);
+                setupExternalEquipParamRecyclerView(zoneDetailsView, MODBUS, modbusDevice, null);
+                break;
+            case "BACNET":
+                setEquipmentDeviceName(zoneDetailsView, equipmentDeviceName);
+                setPointScheduleStatusForExternalEquip(zoneDetailsView, equipId);
+                setupExternalEquipParamRecyclerView(zoneDetailsView, BACNET, bacNetPointsList, null);
+                break;
+            case CONNECTMODULE:
+                setEquipmentDeviceName(zoneDetailsView, equipmentDeviceName);
+                controlLastUpdatedVisibilityForModbusEquips(zoneDetailsView, ((EquipmentDevice) equipPointDetails).getSlaveId(), showLastUpdatedTime);
+                setPointScheduleStatusForExternalEquip(zoneDetailsView, equipId);
+                setupExternalEquipParamRecyclerView(zoneDetailsView, CONNECTMODULE, equipPointDetails, connectNodeDevice);
+                break;
+            case "PCN":
+                break;
+        }
+    }
+
+    private List<EquipmentDevice> fetchAllModbusEquips(Equip nonTempEquip) {
+        List<EquipmentDevice> modbusDevices = new ArrayList<>();
+        for(EquipmentDevice equipmentDevice : buildModbusModel(nonTempEquip.getRoomRef())) {
+            modbusDevices.add(equipmentDevice);
+            if(null != equipmentDevice.getEquips()) {
+                modbusDevices.addAll(equipmentDevice.getEquips());
+            }
+        }
+        CcuLog.i("MODBUS_UI", "ZoneData:" + modbusDevices);
+        return modbusDevices;
+    }
+
+    private void updateCustomScheduleLabelValue(View zoneDetails, String roomRef) {
+        ((TextView) zoneDetails.findViewById(R.id.pointScheduleAvailabilityView))
+                .setText(R.string.point_schedule_assigned);
+        ImageButton detailedPointScheduleViewButton = zoneDetails.findViewById(R.id.point_schedule_view_button);
+        detailedPointScheduleViewButton.setVisibility(View.VISIBLE);
+        CustomScheduleManager customScheduleManager = CustomScheduleManager.Companion.getInstance();
+        detailedPointScheduleViewButton.setOnClickListener(view -> {
+            if (customScheduleManager.getActiveEventAvailability().containsKey(roomRef) &&
+                    Boolean.TRUE.equals(customScheduleManager.getActiveEventAvailability().get(roomRef))) {
+                CustomControlDialog dialog = new CustomControlDialog(roomRef);
+                FragmentManager childFragmentManager = getChildFragmentManager();
+                dialog.show(childFragmentManager, "dialog");
+            } else {
+                Toast.makeText(getContext(), "No active recurring schedule or event found", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void displaySchedulablePointWithoutSchedulesOrEvents(Equip nonTempEquip, View zoneDetails) {
+        List<String> schedulablePointDisWithoutCustomControl = CustomScheduleUtilKt.fetchSchedulablePointsWithoutCustomControl(nonTempEquip.getRoomRef());
+        if(!schedulablePointDisWithoutCustomControl.isEmpty()) {
+
+            zoneDetails.findViewById(R.id.schedulablePointsWithoutScheduleLayout).setVisibility(View.VISIBLE);
+            TextListAdapter pointsWithoutSchedulelistAdapter = new TextListAdapter(schedulablePointDisWithoutCustomControl);
+
+            RecyclerView pointsWithoutScheduleRecyclerView = zoneDetails.findViewById(R.id.point_without_schedule_recycler_view);
+            pointsWithoutScheduleRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            pointsWithoutScheduleRecyclerView.setAdapter(pointsWithoutSchedulelistAdapter);
+        }
+    }
+
+    private List<Parameter> fetchAllExternalParameterPoints(EquipmentDevice equipmentDevice) {
+        List<Parameter> parameterList = new ArrayList<>();
+
+        UtilSourceKt.getParametersList(equipmentDevice).forEach( parameter -> {
+            if (parameter.isDisplayInUI())
+                parameterList.add(parameter);
+        });
+
+        return parameterList;
+    }
+
+    private List<Parameter> getSortedParameterList(EquipmentDevice modbusDevice) {
+        return fetchAllExternalParameterPoints(modbusDevice)
+                .stream()
+                .sorted(Comparator.comparing(param -> {
+                    Integer pointNum = param.getLogicalPointTags().stream()
+                            .filter(tag -> "pointNum".equals(tag.getTagName()))
+                            .map(tag -> (Integer.parseInt(tag.getTagValue())))
+                            .findFirst()
+                            .orElse(Integer.MAX_VALUE);
+                    return pointNum;
+                }))
+                .collect(Collectors.toList());
+    }
+
+    private String getEquipmentDeviceName(String profileType, Object profileParam) {
+        StringBuilder equipName = new StringBuilder();
+
+        switch(profileType) {
+            case "MODBUS":
+                EquipmentDevice modbusDevice = (EquipmentDevice) profileParam;
+
+                int displayIndex = modbusDevice.getName().lastIndexOf('-') + 1;
+                String displayName = modbusDevice.getName().substring(displayIndex);
+                if(!modbusDevice.getEquipType().contains(displayName)) {
+                    equipName.append(displayName);
+                } else {
+                    for(String equipType : modbusDevice.getEquipType().split(",")){
+                        equipName.append(StringUtils.capitalize(equipType.trim()));
+                        equipName.append(" ");
+                    }
+                }
+                return equipName.toString().trim() + "(" + modbusDevice.getSlaveId() + ")";
+
+            case "BACNET":
+                Equip nonTempEquip = (Equip) profileParam;
+
+                for (BacnetModelDetailResponse item : buildBacnetModel(nonTempEquip.getRoomRef())){
+                    equipName.append(item.getName());
+                    CcuLog.d(BACNET, "EquipName: " + equipName);
+                    bacNetPointsList = fetchZoneDataForBacnet(
+                            item.getPoints(),
+                            Objects.requireNonNull(nonTempEquip.getTags().get("bacnetConfig")).toString()
+                    );
+                    CcuLog.d(BACNET, "bacNetPointsList: " + bacNetPointsList.size());
+
+                }
+                return equipName.toString().trim() + " - " +
+                        Objects.requireNonNull(nonTempEquip.getTags().get(Tags.BACNET_DEVICE_ID));
+            case CONNECTMODULE:
+                return ((EquipmentDevice) profileParam).getName();
+            default:
+                return "";
+        }
+    }
+
+    private void setEquipmentDeviceName(View zoneDetailsView, String equipmentDeviceName) {
+        ((TextView) zoneDetailsView.findViewById(R.id.tvEquipmentType)).setText(equipmentDeviceName);
+    }
+
+    private void controlLastUpdatedVisibilityForModbusEquips(
+            View zoneDetails,
+            int slaveId,
+            boolean showLastUpdatedTime
+    ) {
+        TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
+        TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
+        LinearLayout lastUpdatedLayout = zoneDetails.findViewById(R.id.last_updated_layout);
+
+        if(showLastUpdatedTime) {
+            textViewModule.setVisibility(View.VISIBLE);
+            lastUpdatedLayout.setVisibility(View.VISIBLE);
+            HeartBeatUtil.moduleStatus(textViewModule,
+                    Integer.toString(slaveId));
+            textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(
+                    Integer.toString(slaveId)));
+        }
+        else {
+            textViewModule.setVisibility(View.GONE);
+            lastUpdatedLayout.setVisibility(View.GONE);
+        }
+    }
+
+    private void setPointScheduleStatusForExternalEquip(View zoneDetails, String equipRef) {
+        TextView equipStatusTitle = zoneDetails.findViewById(R.id.equip_schedule_status_title);
+        equipStatusTitle.setText(R.string.equip_schedule_status);
+        equipStatusTitle.setTextAppearance(R.style.title_bold);
+        equipStatusTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
+        equipStatusTitle.setTextColor(getResources().getColor(R.color.black, null));
+        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) equipStatusTitle.getLayoutParams();
+        params.setMargins(0, 0, 8, 0); // left, top, right, bottom in pixels
+        equipStatusTitle.setLayoutParams(params);
+        RecyclerView equipScheduleStatus = zoneDetails.findViewById(R.id.recycler_equip_schedule_status);
+        equipScheduleStatus.setLayoutManager(new LinearLayoutManager(getContext()));
+        List <SpannableString> equipScheduleStatusList = fetchScheduleStatusMessageForPointsUnderCustomControl(equipRef);
+        TextListAdapter textListAdapter = new TextListAdapter(equipScheduleStatusList);
+        equipScheduleStatus.setAdapter(textListAdapter);
+    }
+
+    private void setupExternalEquipParamRecyclerView(View zoneDetails, String profileName, Object profileData, HashMap<Object, Object> connectNodeDevice) {
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+        RecyclerView equipParams = zoneDetails.findViewById(R.id.recyclerParams);
+        equipParams.setLayoutManager(gridLayoutManager);
+
+        // Add spacing (e.g., 32 pixels between columns)
+        int columnSpacing = 60;
+        equipParams.addItemDecoration(new GridSpacingItemDecoration(2, columnSpacing));
+
+        RecyclerView.Adapter<? extends RecyclerView.ViewHolder> adapter;
+
+        switch (profileName) {
+            case MODBUS:
+                EquipmentDevice modbusDevice = (EquipmentDevice) profileData;
+                adapter = new ZoneRecyclerModbusParamAdapter(getContext(),
+                        modbusDevice.getDeviceEquipRef(),
+                        getSortedParameterList(modbusDevice));
+                break;
+
+            case BACNET:
+                //noinspection unchecked
+                bacnetRecyclerView = equipParams;
+                List<BacnetZoneViewItem> bacNetPointsList = (List<BacnetZoneViewItem>) profileData;
+                zoneRecyclerBacnetParamAdapter = new ZoneRecyclerBacnetParamAdapter(getContext(),
+                        bacNetPointsList, remotePointUpdateInterface);
+                adapter = zoneRecyclerBacnetParamAdapter;
+                break;
+
+            case CONNECTMODULE:
+                EquipmentDevice cnDevice = (EquipmentDevice) profileData;
+                adapter = new ZoneRecyclerModbusParamAdapter(getContext(), cnDevice.getDeviceEquipRef(),
+                        connectNodeDevice.get(Tags.ID).toString(),
+                        getSortedParameterList(cnDevice), true);
+
+                break;
+
+            default:
+                return;
+        }
+
+        equipParams.setAdapter(adapter);
+        equipParams.invalidate();
     }
 }
 

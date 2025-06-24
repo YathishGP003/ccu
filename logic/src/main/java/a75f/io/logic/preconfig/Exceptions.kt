@@ -4,3 +4,5 @@ class InvalidPreconfigurationDataException(message: String) : RuntimeException(m
 class UnsupportedTimeZoneException(message: String) : RuntimeException(message)
 class UnsupportedPreconfigurationException(message: String) : RuntimeException(message)
 class InvalidStagesException(message: String) : RuntimeException(message)
+class ModbusEquipCreationException(message: String) : RuntimeException(message)
+class LowCodeDownloadException(message: String) : RuntimeException(message)

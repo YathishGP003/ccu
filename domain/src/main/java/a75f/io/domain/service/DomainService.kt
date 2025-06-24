@@ -62,6 +62,27 @@ class DomainService {
         })
     }
 
+    fun readExternalModbusModelById(modelId: String,version: String, callback: ResponseCallback){
+        val call: Call<ResponseBody> = if (BuildConfig.BUILD_TYPE.contentEquals("carrier_prod")
+            || BuildConfig.BUILD_TYPE.contentEquals("daikin_prod")
+            || BuildConfig.BUILD_TYPE.contentEquals("airoverse_prod")) {
+            apiService.getExternalModbusModelById(modelId,version)
+        } else {
+            apiService.getModbusModelById(modelId,version)
+        }
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                if (response.isSuccessful)
+                    callback.onSuccessResponse(response.body()?.string())
+                else
+                    callback.onErrorResponse(response.raw().message)
+            }
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                callback.onErrorResponse(t.message)
+            }
+        })
+    }
+
     fun readBacNetModelsList(queryProtocol: String, queryTagNames : String, callback: ResponseCallback) {
         val call: Call<ResponseBody> = if (BuildConfig.BUILD_TYPE.contentEquals("carrier_prod")
             || BuildConfig.BUILD_TYPE.contentEquals("daikin_prod") || BuildConfig.BUILD_TYPE.contentEquals("airoverse_prod")) {

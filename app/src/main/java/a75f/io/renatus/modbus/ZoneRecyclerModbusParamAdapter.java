@@ -4,6 +4,7 @@ import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquip
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
@@ -51,6 +52,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     String equipRef;
     String deviceRef;
     boolean userAction = false;
+    Boolean isConnectNodeView = false;
 
     public  ZoneRecyclerModbusParamAdapter(Context context, String equipRef, List<Parameter> modbusParam) {
         this.context = context;
@@ -60,6 +62,16 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         if (!device.isEmpty()) {
             this.deviceRef = device.get("id").toString();
         }
+        UpdatePointHandler.setModbusDataInterface(this);
+    }
+
+    public  ZoneRecyclerModbusParamAdapter(Context context,String equipRef, String deviceRef, List<Parameter> modbusParam, boolean isConnectNodeView) {
+        this.context = context;
+        this.modbusParam = modbusParam;
+        this.equipRef = equipRef;
+        this.isConnectNodeView = isConnectNodeView;
+        this.deviceRef = deviceRef;
+
         UpdatePointHandler.setModbusDataInterface(this);
     }
 
@@ -92,10 +104,11 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                     if (modbusParam.get(position).getUserIntentPointTags() != null && modbusParam.get(position).getUserIntentPointTags().size() > 0) {
                         viewHolder.spValue.setVisibility(View.VISIBLE);
                         viewHolder.tvParamValue.setVisibility(View.GONE);
-
+                        Paint paint = new Paint();
                         String unit = null;
                         List<Command> commands = new ArrayList<>();
                         Point p = readPoint(modbusParam.get(position));
+                        int minSpinnerLength = 0;
                         if (modbusParam.get(position).getCommands() != null && modbusParam.get(position).getCommands().size() > 0) {
                             HashMap<String, List<Command>> userIntentsMap = getUserIntentsCommandMap(modbusParam.get(position));
                             for (HashMap.Entry<String, List<Command>> entry : userIntentsMap.entrySet()) {
@@ -104,8 +117,14 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                             }
                             CommandSpinnerAdapter commandAdapter = new CommandSpinnerAdapter(context, R.layout.spinner_dropdown_item, commands);
                             CCUUiUtil.setSpinnerDropDownColor(viewHolder.spValue,context);
+//                            Command tempCommand = modbusParam.get(position).getCommands().get(0);
+//                            tempCommand.setName("Hello. My name is Aditya Raj and I work in 75F as an assoicate Software Engineer.");
+//                            modbusParam.get(position).commands.add(tempCommand);
                             viewHolder.spValue.setAdapter(commandAdapter);
                             for (int i = 0; i < modbusParam.get(position).getCommands().size(); i++) {
+                                minSpinnerLength = Math.max(minSpinnerLength, (int) paint.measureText(
+                                        modbusParam.get(position).getCommands().get(i).getName())
+                                );
                                 if (Double.parseDouble(modbusParam.get(position).getCommands().get(i).getBitValues()) == readVal(p.getId())) {
                                     viewHolder.spValue.setSelection(i, false);
                                 }
@@ -117,8 +136,11 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 unit = entry.getKey();
                                 doubleArrayList = entry.getValue();
                             }
+//                            doubleArrayList.add(9898849139897249249852293093450348508034.023423);
 
                             ArrayAdapter<Double> spinnerAdapter = getAdapterValue(doubleArrayList);
+                            minSpinnerLength = Math.max(minSpinnerLength,
+                                    (int) paint.measureText(doubleArrayList.get(doubleArrayList.size()-1).toString()));
                             CCUUiUtil.setSpinnerDropDownColor(viewHolder.spValue,context);
                             viewHolder.spValue.setAdapter(spinnerAdapter);
                             viewHolder.spValue.setSelection(doubleArrayList.indexOf(readVal(p.getId())), false);
@@ -157,7 +179,8 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                         if (unit != null && !unit.equals("")) {
                             viewHolder.tvParamLabel.append("(" + unit + ")");
                         }
-                        viewHolder.tvParamLabel.append(" : ");
+                        //viewHolder.tvParamLabel.append(": ");
+                        viewHolder.spValue.setMinimumWidth(minSpinnerLength + 90);
                     } else {
                         if (modbusParam.get(position).getLogicalPointTags() != null && modbusParam.get(position).getLogicalPointTags().size() > 0) {
                             Point p = readPoint(modbusParam.get(position));
@@ -181,7 +204,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 if (unit != null && !unit.equals(" ")) {
                                     viewHolder.tvParamLabel.append("(" + unit + ")");
                                 }
-                                viewHolder.tvParamLabel.append(" : ");
+                                viewHolder.tvParamLabel.append(": ");
                             }
                         }
                     }
@@ -211,7 +234,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                     if (unit != null && !unit.equals(" ")) {
                         viewHolder.tvParamLabel.append("(" + unit + ")");
                     }
-                    viewHolder.tvParamLabel.append(" : ");
+                    viewHolder.tvParamLabel.append(": ");
                 }
                 
             }
@@ -330,6 +353,18 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     private Point readPoint(Parameter configParams) {
         //Read using logical tags seems direct and faster. But that approach is prone to incorrect behavior if
         //every logical tag combination is not unique.
+
+        if (isConnectNodeView) {
+            HashMap logicalPoint = CCUHsApi.getInstance().readEntity("point " +
+                    " and registerType == \""+configParams.getRegisterType()+"\""+
+                    " and registerAddress == \""+configParams.getRegisterAddress()+ "\""+
+                    " and equipRef == \"" + equipRef + "\"");
+
+            if (logicalPoint.isEmpty()) {
+                return null;
+            }
+            return new Point.Builder().setHashMap(logicalPoint).build();
+        }
         HashMap phyPoint = CCUHsApi.getInstance().read("point and physical " +
                                          " and registerType == \""+configParams.getRegisterType()+"\""+
                                          " and registerAddress == \""+configParams.getRegisterAddress()+ "\""+
@@ -392,7 +427,8 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                 for (Parameter pam : register.getParameters()) {
                     if (pam.getUserIntentPointTags() != null) {
                         if (pam.getName().equals(parameter.getName())) {
-                            if(register.parameterDefinitionType!=null && register.parameterDefinitionType.equals("float")) {
+                            // if it connect node view, then write only in int
+                            if(register.parameterDefinitionType!=null && register.parameterDefinitionType.equals("float") && !isConnectNodeView) {
                                 LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (float) Double.parseDouble(value));
                             } else {
                                 LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) Double.parseDouble(value));

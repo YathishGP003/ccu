@@ -72,7 +72,7 @@ public class UpdatePointHandler implements MessageHandler
         }
         PointWriteCache.Companion.getInstance().clearPointWriteInCache(pointUid, pointLevel);
 
-        if (HSUtil.isBuildingTuner(pointUid, hayStack)  ||  (HSUtil.isSchedulable(pointUid, hayStack))) {
+        if (HSUtil.isBuildingTuner(pointUid, hayStack) || (HSUtil.isDefaultSchedulable(pointUid, hayStack))) {
             HashMap<Object, Object> buildingTunerPoint = hayStack.readMapById(pointUid);
             TunerUpdateHandler.updateBuildingTuner(msgObject, CCUHsApi.getInstance());
             if (buildingTunerPoint.containsKey("displayUnit") && zoneDataInterface != null) {

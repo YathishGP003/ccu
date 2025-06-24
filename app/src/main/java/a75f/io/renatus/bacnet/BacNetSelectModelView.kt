@@ -1,6 +1,5 @@
 package a75f.io.renatus.bacnet
 
-import a75f.io.api.haystack.bacnet.parser.BacnetProperty
 import a75f.io.api.haystack.bacnet.parser.BacnetSelectedValue
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -16,37 +15,48 @@ import a75f.io.renatus.bacnet.util.CONFIGURATION_TYPE
 import a75f.io.renatus.bacnet.util.CONST_AUTO_DISCOVERY
 import a75f.io.renatus.bacnet.util.IP_CONFIGURATION
 import a75f.io.renatus.bacnet.util.LOADING
-import a75f.io.renatus.bacnet.util.MAC_ADDRESS
 import a75f.io.renatus.bacnet.util.MAC_ADDRESS_INFO
 import a75f.io.renatus.bacnet.util.MODEL
 import a75f.io.renatus.bacnet.util.MSTP_CONFIGURATION
-import a75f.io.renatus.bacnet.util.SELECTED_MODEL
+import a75f.io.renatus.bacnet.util.SELECT_ADDRESS
+import a75f.io.renatus.bacnet.util.SELECT_MODEL
+import a75f.io.renatus.compose.ButtonListRow
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.compose.ComposeUtil.Companion.secondaryColor
+import a75f.io.renatus.compose.FormattedTableWithoutHeader
 import a75f.io.renatus.compose.HeaderLeftAlignedTextViewNew
-import a75f.io.renatus.compose.HeaderTextView
 import a75f.io.renatus.compose.HeaderTextViewCustom
 import a75f.io.renatus.compose.HeaderTextViewNew
-import a75f.io.renatus.compose.ImageViewComposable
+import a75f.io.renatus.compose.HintedEditableText
+import a75f.io.renatus.compose.LabelBoldTextViewForTable
 import a75f.io.renatus.compose.LabelTextView
-import a75f.io.renatus.compose.RadioButtonComposeBacnet
+import a75f.io.renatus.compose.LabelTextViewForTable
+import a75f.io.renatus.compose.ModelSelector
 import a75f.io.renatus.compose.RadioButtonComposeSelectModelCustom
 import a75f.io.renatus.compose.SaveTextView
-import a75f.io.renatus.compose.SubTitle
+import a75f.io.renatus.compose.TableHeaderRow
 import a75f.io.renatus.compose.TextViewWithClickCustom
+import a75f.io.renatus.compose.TextViewWithHint
 import a75f.io.renatus.compose.TitleTextViewCustom
-import a75f.io.renatus.compose.ToggleButton
 import a75f.io.renatus.compose.UnderlinedInput
+import a75f.io.renatus.compose.annotatedStringBySpannableString
 import a75f.io.renatus.modbus.ModelSelectionFragment
 import a75f.io.renatus.modbus.util.BAC_PROP_NOT_FETCHED
 import a75f.io.renatus.modbus.util.CANCEL
 import a75f.io.renatus.modbus.util.DESTINATION_IP
 import a75f.io.renatus.modbus.util.DESTINATION_PORT
 import a75f.io.renatus.modbus.util.DEVICE_ID
+import a75f.io.renatus.modbus.util.DEVICE_NETWORK
+import a75f.io.renatus.modbus.util.DEVICE_VALUE_CAPITALIZED
+import a75f.io.renatus.modbus.util.DISPLAY_UI_CAPITALIZED
 import a75f.io.renatus.modbus.util.FETCH
+import a75f.io.renatus.modbus.util.MAC_ADDRESS
+import a75f.io.renatus.modbus.util.MODELLED_VALUE_CAPITALIZED
 import a75f.io.renatus.modbus.util.ModbusLevel
+import a75f.io.renatus.modbus.util.PARAMETER_CAPITALIZED
 import a75f.io.renatus.modbus.util.RE_FETCH
 import a75f.io.renatus.modbus.util.SAVE
+import a75f.io.renatus.modbus.util.SCHEDULABLE_CAPITALIZED
 import a75f.io.renatus.modbus.util.SEARCH_DEVICE
 import a75f.io.renatus.modbus.util.SEARCH_MODEL
 import a75f.io.renatus.profiles.OnPairingCompleteListener
@@ -68,8 +78,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -79,42 +87,43 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
+import io.seventyfivef.ph.core.Tags
+import kotlinx.android.synthetic.main.dialog_warning_master_control.warningMessage
 import org.json.JSONException
 import org.json.JSONObject
 
 
-class BacNetSelectModelView : BaseDialogFragment(), OnPairingCompleteListener {
+class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
     private lateinit var viewModel: BacNetConfigViewModel
 
     private val TAG = "BacNetSelectModelView"
     private var isBacNetInitialized = false
     private var isBacnetMstpInitialized = false
-
     companion object {
         val ID: String = ModelSelectionFragment::class.java.simpleName
 
@@ -216,10 +225,17 @@ class BacNetSelectModelView : BaseDialogFragment(), OnPairingCompleteListener {
             modifier = Modifier
                 .fillMaxSize()
         ) {
+
+            // Configure the view model for display
             viewModel.configModelDefinition(requireContext())
 
+            /** If the device is already paired, then this display will eligible only for update
+             *  Only DisplayInUi and Schedulable toggles can be changed.
+             */
             if(viewModel.isUpdateMode.value){
                 // show update UI only
+
+                // show the banner to paste the copied configuration
                 item{
                     val isDisabled by viewModel.isDisabled.observeAsState(false)
                     if (isDisabled) {
@@ -228,64 +244,47 @@ class BacNetSelectModelView : BaseDialogFragment(), OnPairingCompleteListener {
                             onClose = { viewModel.disablePasteConfiguration() }
                         )
                     }
-
-                  Column(modifier = Modifier.padding(start = 20.dp, top = 20.dp)) {
-                      Box(
-                          modifier = Modifier.fillMaxWidth(),
-                          contentAlignment = Alignment.Center
-                      ) { TitleTextViewCustom(BACNET, Color.Black) }
-                      ModelSelected()
-                      ConfigurationTypeSelected()
-                      if (viewModel.configurationType.value == IP_CONFIGURATION) {
-                          DeviceDetailsReadOnly()
-                          PortDetailsReadOnlyUpdate()
-                          DeviceNetworkDetailsReadOnlyUpdate()
-                      } else {
-                          MstpMacAddressDetailsViewMode()
-                      }
-                  }
-
                 }
+
                 item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(start = 20.dp)
-                            .padding(PaddingValues(bottom = 20.dp, top = 20.dp)),
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        HeaderLeftAlignedTextViewNew(
-                            if (viewModel.bacnetModel.value.equipDevice.value!!.name.isNullOrEmpty()) "" else getName(
-                                viewModel.bacnetModel.value.equipDevice.value!!.name
-                            ), 22,Modifier.padding(start = 20.dp)
+
+                    // Show the BACnet Title along with selected model and read only configuration details
+                    Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp, top = 40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        BacnetTitleView()
+                        ModelSelector(
+                            titleText = MODEL,
+                            isPaired = viewModel.bacnetModel.value.isDevicePaired,
+                            modelName = viewModel.modelName,
+                            modelEquipVersion = viewModel.bacnetModel.value.version.value,
+                            onClickEvent = {}
                         )
+                        ConfigurationTypeSelected()
+                        if (viewModel.configurationType.value == IP_CONFIGURATION) {
+                            ConfigurationDetailsReadOnly()
+                        } else {
+                            MstpMacAddressDetailsViewMode()
+                        }
+                        BacnetEquipTitle()
 
+                        BacnetPointConfigUpdateOnly()
                     }
-                    Row(modifier = Modifier.padding(start = 20.dp)) { ParameterLabelUpdateConfig() }
-
-                    ParametersListViewUpdate(viewModel.bacnetModel)
                 }
                 item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(50.dp)
-                            .padding(PaddingValues(bottom = 5.dp)),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        SaveTextView(CANCEL) {
-                            dismiss()
-                        }
-                        SaveTextView(SAVE) { viewModel.updateData()
-                            Toast.makeText(requireContext(), "Configuration saved successfully", Toast.LENGTH_LONG).show()
-                            //dismiss()
-                        }
-                    }
-
+                    ButtonListRow(
+                        mapOf(
+                            CANCEL to Pair(true) { closeAllBaseDialogFragments() },
+                            SAVE to Pair(true) {
+                                viewModel.updateData()
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Configuration saved successfully",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        )
+                    )
                 }
-            }else{
+            } else{
                 // show create UI only
                 item {
                     val isDisabled by viewModel.isDisabled.observeAsState(false)
@@ -295,251 +294,132 @@ class BacNetSelectModelView : BaseDialogFragment(), OnPairingCompleteListener {
                             onClose = { viewModel.disablePasteConfiguration() }
                         )
                     }
-                    Column(modifier = Modifier.padding(start = 20.dp, top = 20.dp)) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) { TitleTextViewCustom(BACNET, Color.Black) }
-                    ModelSelection()
-                        if(viewModel.modelName.value == "Select Model" || viewModel.modelName.value.isEmpty()){
-                            // Create a view that mention select the model to proceed
-                            Box(
-                                modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(top = 100.dp, bottom = 100.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                SubTitle(text = "Select a model to proceed with configuration.", fontSizeCustom = 20.0)
+
+                    Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp, top = 40.dp)) {
+                        BacnetTitleView()
+                        ModelAndAddressModeSelector()
+                        if(viewModel.modelName.value == SELECT_MODEL){
+                            Box(modifier = Modifier
+                                .fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                SaveTextView("Select a model to proceed with configuration.", isChanged = false, onClick = {})
                             }
                         } else {
                             ConfigurationTypeSelection()
                             if (viewModel.configurationType.value == IP_CONFIGURATION) {
-                                // show ip configuration
-                                BacnetIpDeviceSelectionModes()
                                 if (viewModel.deviceSelectionMode.value == 0) {
                                     // manual mode
-                                    DeviceDetails()
-                                    PortDetails()
-                                    DeviceNetworkDetails()
+                                    ConfigurationDetailsEditable()
                                 } else {
-                                    DeviceDetailsReadOnly()
-                                    PortDetailsReadOnly()
-                                    DeviceNetworkDetailsReadOnly()
+                                    ConfigurationDetailsReadOnly()
                                 }
                             } else if (viewModel.configurationType.value == MSTP_CONFIGURATION) {
                                 // show mstp configuration
                                 BacnetMSTPDeviceSelectionModes()
                                 MstpMacAddressDetails()
                             }
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(PaddingValues(bottom = 20.dp, top = 20.dp)),
-                                horizontalArrangement = Arrangement.Start,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                HeaderLeftAlignedTextViewNew(
-                                    if (viewModel.bacnetModel.value.equipDevice.value!!.name.isNullOrEmpty()) "" else getName(
-                                        viewModel.bacnetModel.value.equipDevice.value!!.name
-                                    ), 22, Modifier.padding(start = 20.dp)
-                                )
-
-                            }
-                            Row(modifier = Modifier.padding(start = 10.dp)) { ParameterLabel() }
+                            BacnetEquipTitle()
+                            BacnetPointConfigCreateOnly()
                         }
                     }
                 }
-                item { ParametersListView(data = viewModel.bacnetModel) }
 
                 item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(50.dp)
-                            .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                    }
-                }
-                item {
-                    var showToast by remember { mutableStateOf(false) }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(50.dp)
-                            .padding(PaddingValues(bottom = 5.dp)),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        val isEnabledFetch = when (viewModel.configurationType.value) {
-                            MSTP_CONFIGURATION -> {
-                                viewModel.destinationMacAddress.value.trim().isNotEmpty() &&
-                                        isValidMstpMacAddress(viewModel.destinationMacAddress.value.trim())
-                            }
-                            IP_CONFIGURATION -> {
-                                viewModel.destinationIp.value.isNotEmpty() &&
-                                        viewModel.destinationPort.value.isNotEmpty() &&
-                                        viewModel.deviceId.value.isNotEmpty()
-                            }
-                            else -> {
-                                false
-                            }
-                        }
-
-                        SaveTextView(CANCEL) { dismiss() }
-
-                        Divider(modifier = Modifier
-                            .height(48.dp)
-                            .width(1.dp))
-
-                        var fetchButtonText = FETCH
-                        if(viewModel.bacnetPropertiesFetched.value){
-                            fetchButtonText = RE_FETCH
-                        }
-                        SaveTextView(fetchButtonText, isEnabledFetch) {
-                            if(viewModel.configurationType.value == IP_CONFIGURATION) {
-                                if (viewModel.destinationIp.value.isNullOrEmpty()) {
-                                    Toast.makeText(requireContext(), "Please input ip address", Toast.LENGTH_SHORT).show()
-                                } else if (viewModel.destinationPort.value.isNullOrEmpty()) {
-                                    Toast.makeText(requireContext(), "Please input port number", Toast.LENGTH_SHORT).show()
-                                } else if (viewModel.deviceId.value.isNullOrEmpty()) {
-                                    Toast.makeText(requireContext(), "Please input deviceId number", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    if (isBacNetInitialized) {
-                                        viewModel.fetchData()
-                                    } else {
-                                        Toast.makeText(requireContext(), "BacNet is not initialized", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            } else if (viewModel.configurationType.value == MSTP_CONFIGURATION) {
-                                if (viewModel.destinationMacAddress.value.isNullOrEmpty()) {
-                                    Toast.makeText(requireContext(), "Please input mac address", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    if (isBacnetMstpInitialized) {
-                                        viewModel.fetchData()
-                                    } else {
-                                       showToast
-                                    }
-                                }
-                            }
-                        }
-
-                        if(viewModel.bacnetPropertiesFetched.value && viewModel.isDeviceIdValid.value){
-                            Divider(modifier = Modifier
-                                .height(40.dp)
-                                .width(1.dp))
-                            SaveTextView(SAVE) {
-                                if(viewModel.configurationType.value == IP_CONFIGURATION) {
-                                    if (viewModel.destinationIp.value.isEmpty()) {
-                                        Toast.makeText(requireContext(), "Please input ip address", Toast.LENGTH_SHORT).show()
-                                    } else if (viewModel.destinationPort.value.isEmpty()) {
-                                        Toast.makeText(requireContext(), "Please input port number", Toast.LENGTH_SHORT).show()
-                                    } else if (viewModel.deviceId.value.isEmpty()) {
-                                        Toast.makeText(requireContext(), "Please input deviceId number", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        viewModel.save()
-                                    }
-                                } else {
-                                    if (viewModel.destinationMacAddress.value.trim().isEmpty()) {
-                                        Toast.makeText(requireContext(), "Please input mac address", Toast.LENGTH_SHORT).show()
-                                    } else if (!isValidMstpMacAddress(viewModel.destinationMacAddress.value.trim())) {
-                                        Toast.makeText(requireContext(), "Please input valid mac address", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        viewModel.save()
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        // Actual toast
-                        if (showToast) {
-                            ErrorToastMessage(
-                                message = "BACnet - MSTP Configuration is not initialized.",
-                                onDismiss = { showToast = false }
-                            )
-                        }
-                    }
-
+                    CreateOnlyConfigControlButtonList()
                 }
             }
         }
     }
 
     @Composable
-    fun ParametersListView(data: MutableState<BacnetModel>) {
-        if (data.value.points.isNotEmpty()) {
-            var index = 0
-            while (index < data.value.points.size) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 30.dp)
-                        .wrapContentHeight()
-                ) {
-                    for (rowIndex in 0 until 1) {
-                        if (index < data.value.points.size) {
-                            var item = data.value.points[index]
-                            Row {
-                                Box(modifier = Modifier
-                                    .weight(3f)
-                                    .padding(top = 10.dp, bottom = 10.dp)) {
-                                    Row {
-                                        val images = listOf(
-                                            R.drawable.ic_arrow_down,
-                                            R.drawable.ic_arrow_right
-                                        )
-                                        var clickedImageIndex by remember { mutableStateOf(0) }
-                                        ImageViewComposable(images, "") {
-                                            clickedImageIndex =
-                                                (clickedImageIndex + 1) % images.size
-                                            item.displayInEditor.value = !item.displayInEditor.value
-                                        }
-                                        Box(modifier = Modifier.width(20.dp)) { }
-                                        HeaderTextView(
-                                            if (item.name.length > 30)
-                                                item.name.substring(0, 30)
-                                            else
-                                                item.name
-                                        )
-                                    }
-                                }
+    fun ParametersListView(
+        data: MutableState<BacnetModel>,
+        columnsWidthList: SnapshotStateList<Float>
+    ) {
+        data.value.points.forEachIndexed { index, item ->
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+            ) {
 
-                                Box(modifier = Modifier.weight(3f)) {
-                                    ToggleButton(item.displayInUi.value) {
-                                        // need to fix below 2 lines
-                                        item.displayInUi.value = it
-                                        viewModel.updateSelectAll(it, item)
-                                    }
-                                }
-                                val pointDisplayValue: String = if(item.defaultValue == "null" || item.defaultValue == null)
-                                    "-" else{
-                                    "${item.defaultValue} ${item.defaultUnit}"
-                                }
+                val rowDataList = mutableListOf<Pair<String, Any>>()
 
-                                Box(modifier = Modifier.weight(1f)) { LabelTextView(pointDisplayValue, fontSize = 22) }
-                            }
+                // column data for Parameter Name
+                val pointName = item.name
 
-                            if (item.displayInEditor.value) {
-                                populateProperties(item)
-                            }
-                            index++
+                val dropdownImageList = listOf(
+                    R.drawable.arrow_right_disabled,
+                    R.drawable.arrow_down
+                )
+                var clickedImageIndex by remember { mutableStateOf(0) }
+                val imageClickEvent = {
+                    clickedImageIndex =
+                        (clickedImageIndex + 1) % dropdownImageList.size
+                    item.displayInEditor.value = !item.displayInEditor.value
+                }
+                rowDataList.add(
+                    Pair(
+                        "text_with_dropdown",
+                        Triple(pointName, dropdownImageList, imageClickEvent)
+                    )
+                )
+
+                // column data for Display In UI
+                rowDataList.add(
+                    Pair("toggle",
+                        Pair(item.displayInUi.value) { state: Boolean ->
+                            item.displayInUi.value = state
+                            viewModel.updateSelectAll(state, item)
                         }
+                    )
+                )
+
+                // column data for Modelled Value
+                rowDataList.add(Pair("none") {})
+
+                // column data for Device Value
+                val pointDisplayValue: String =
+                    if (item.defaultValue == "null" || item.defaultValue == null)
+                        "-" else {
+                        "${item.defaultValue} ${item.defaultUnit}"
                     }
-                    Divider(color = Color.Gray, modifier = Modifier.padding(0.dp, 5.dp, 0.dp, 5.dp))
+                rowDataList.add(Pair("text", Pair(pointDisplayValue, Alignment.CenterStart)))
+
+                // column data for Schedulable Toggles
+                if (item.equipTagNames.contains(Tags.WRITABLE)) {
+                    rowDataList.add(
+                        Pair(
+                            "toggle",
+                            Pair(item.isSchedulable.value) { state: Boolean ->
+                                item.isSchedulable.value = state
+                                viewModel.updateSchedulableEnableState(state, item)
+                            })
+                    )
+                } else {
+                    rowDataList.add(Pair("text", Pair("NA", Alignment.Center)))
+                }
+
+                FormattedTableWithoutHeader(
+                    rowNo = index,
+                    columnWidthList = columnsWidthList,
+                    rowDataList = rowDataList
+                )
+
+                if (item.displayInEditor.value) {
+                    populateProperties(item, columnsWidthList)
                 }
             }
         }
     }
 
     @Composable
-    fun ParametersListViewUpdate(data: MutableState<BacnetModel>) {
+    fun ParametersListViewUpdate(data: MutableState<BacnetModel>, columnsWidthList: SnapshotStateList<Float>) {
         if (data.value.points.isNotEmpty()) {
             var index = 0
             while (index < data.value.points.size) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 30.dp)
                         .wrapContentHeight()
                 ) {
                     //Row {
@@ -547,40 +427,41 @@ class BacNetSelectModelView : BaseDialogFragment(), OnPairingCompleteListener {
                         if (index < data.value.points.size) {
                             val item = data.value.points[index]
                             if(!item.disName.equals("heartbeat", ignoreCase = true) && !item.disName.contains("heartbeat", ignoreCase = true)){
-                                Row {
-                                    Box(modifier = Modifier
-                                        .weight(5f)
-                                        .padding(top = 10.dp, bottom = 10.dp)) {
-                                        Row {
-                                            val images = listOf(
-                                                //R.drawable.ic_arrow_down,
-                                                R.drawable.ic_arrow_right
-                                            )
-                                            var clickedImageIndex by remember { mutableStateOf(0) }
-                                            ImageViewComposable(images, "") {
-
-                                            }
-                                            HeaderTextView(
-                                                if (item.disName.length> 30)
-                                                    item.disName.substring(0, 30)
-                                                else
-                                                    item.disName
-                                            )
-                                        }
-                                    }
-
-                                    Box(modifier = Modifier.weight(5f).padding(start=100.dp)) {
-                                        ToggleButton(item.displayInUi.value) {
-                                            item.displayInUi.value = it
-                                            viewModel.updateSelectAll(it, item)
-                                        }
-                                    }
+                                var rowColor = Color.White
+                                if(index % 2 != 0) {
+                                    rowColor = colorResource(id = R.color.tuner_bg_grey)
                                 }
 
-                                if (item.displayInEditor.value) {
-                                    //populateProperties(item)
+                                val rowDataList = mutableListOf<Pair<String, Any>>()
+
+                                // column data for Parameter Name
+                                val imageList = listOf(
+                                                R.drawable.arrow_right_disabled
+                                            )
+                                rowDataList.add(Pair("text_with_dropdown", Triple(item.disName, imageList) {}))
+
+                                // column data for Display In UI
+                                rowDataList.add(Pair("toggle", Pair(item.displayInUi.value) { state : Boolean ->
+                                    item.displayInUi.value = state
+                                    viewModel.updateSelectAll(state, item)
+                                }))
+
+                                // column data for Schedulable Toggles
+                                if(item.equipTagNames.contains(Tags.WRITABLE)) {
+                                    rowDataList.add(Pair("toggle", Pair(item.isSchedulable.value) { state : Boolean ->
+                                        item.isSchedulable.value = state
+                                        viewModel.updateSchedulableEnableState(state, item)
+                                    }))
+                                } else {
+                                    rowDataList.add(Pair("text", Pair("NA", Alignment.Center)))
                                 }
-                                Divider(color = Color.Gray, modifier = Modifier.padding(0.dp, 5.dp, 0.dp, 5.dp))
+
+
+                                FormattedTableWithoutHeader(
+                                    rowNo = index,
+                                    columnWidthList = columnsWidthList,
+                                    rowDataList = rowDataList
+                                )
                             }
                             index++
                         }
@@ -591,51 +472,366 @@ class BacNetSelectModelView : BaseDialogFragment(), OnPairingCompleteListener {
     }
 
     @Composable
-    fun ModelSelected() {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Row {
-                Box(modifier = Modifier
-                    .weight(1f)
-                ) {
+    fun ModelAndAddressModeSelector() {
+        val onClickEvent = {
+            ProgressDialogUtils.showProgressDialog(context, LOADING)
+            showDialogFragment(
+                ModelSelectionFragment.newInstance(
+                    viewModel.deviceList,
+                    viewModel.onItemSelect, SEARCH_MODEL
+                ), ModelSelectionFragment.ID
+            )
+        }
+        ModelSelector(
+            titleText = MODEL,
+            isPaired = viewModel.bacnetModel.value.isDevicePaired,
+            modelName = viewModel.modelName,
+            modelEquipVersion = viewModel.bacnetModel.value.version.value,
+            onClickEvent = onClickEvent,
+            otherUiComposable = { AddressSelector() })
+    }
+
+    @Composable
+    fun populateProperties(item: BacnetPointState, columnsWidthList: SnapshotStateList<Float>) {
+        var propertyCount = 0
+        item.bacnetProperties!!.forEach {bacnetProperty ->
+
+            val rowDataList = mutableListOf<Pair<String, Any>>()
+
+            // column data for nested property Name
+            rowDataList.add(Pair("nestedText", Triple(bacnetProperty.displayName, Alignment.CenterStart, 43.dp)))
+
+            // column data for Display In UI
+            rowDataList.add(Pair("none") {})
+
+            // column data for Device Value
+            val propertyValue: String
+            if (!viewModel.bacnetPropertiesFetched.value) {
+                if (bacnetProperty.defaultValue == null) {
+                    propertyValue = "-"
+                } else {
+                    propertyValue = "${bacnetProperty.defaultValue}"
                 }
-                Box(modifier = Modifier
-                    .weight(1f)
-                    .padding(top = 10.dp, bottom = 0.dp, start = 15.dp, end = 10.dp)) {
-                    HeaderTextViewCustom(SELECTED_MODEL)
+                // column data for Modelled Value
+                rowDataList.add(Pair("text", Pair(propertyValue, Alignment.CenterStart)))
+                // column Data for Device Data
+                rowDataList.add(Pair("text", Pair(BAC_PROP_NOT_FETCHED, Alignment.CenterStart)))
+            } else {
+                val testProperty = remember {
+                    mutableStateOf(bacnetProperty)
                 }
-                Box(modifier = Modifier
-                    .weight(1f)
-                ) {
+                DisposableEffect(testProperty.value) {
+                    //bacnetProperty.value = selectedValue.value
+                    onDispose { /* Cleanup logic if needed */ }
+                }
+                val radioTexts = listOf(testProperty.value.defaultValue?.toString(), testProperty.value.fetchedValue)
+                val radioButtonDefaultState = if(viewModel.isDeviceValueSelected.value) 1 else testProperty.value.selectedValue
+                val radioOptions = listOf(BacnetSelectedValue.DEVICE.ordinal, BacnetSelectedValue.FETCHED.ordinal)
+                var selectedItem = remember { mutableStateOf(radioOptions[radioButtonDefaultState]) }
+                val pointId = item.id
+                val objectId = item.protocolData?.bacnet?.objectId
+                val onSelectEventHandler = { selectedItem: Int ->
+                    when (selectedItem) {
+                        BacnetSelectedValue.DEVICE.ordinal -> {
+                            viewModel.isDeviceValueSelected.value = false
+                            val newState = testProperty.value.copy(selectedValue = 0)
+                            testProperty.value = newState
+                            viewModel.updatePropertyStatus(0, pointId, testProperty, objectId)
+                        }
+
+                        BacnetSelectedValue.FETCHED.ordinal -> {
+                            val newState = testProperty.value.copy(selectedValue = 1)
+                            testProperty.value = newState
+                            viewModel.updatePropertyStatus(1, pointId, testProperty, objectId)
+                        }
+                    }
+                }
+                rowDataList.add(
+                    Pair("grouped_columns_with_radio_button", Triple(Triple(radioTexts, radioButtonDefaultState, radioOptions), Pair(BacnetSelectedValue.DEVICE.ordinal, selectedItem), onSelectEventHandler))
+                )
+                rowDataList.add(
+                    Pair("grouped_columns_with_radio_button", Triple(Triple(radioTexts, radioButtonDefaultState, radioOptions), Pair(BacnetSelectedValue.FETCHED.ordinal, selectedItem), onSelectEventHandler))
+                )
+            }
+            // column data for Schedulable Toggles
+            rowDataList.add(Pair("none") {})
+
+            FormattedTableWithoutHeader(rowNo = propertyCount, columnWidthList = columnsWidthList, rowDataList = rowDataList)
+            propertyCount++
+        }
+    }
+
+    fun getName(name: String): String {
+        return if (name.length > 30) name.substring(0, 30) else name
+    }
+
+    override fun getIdString(): String {
+        return BacNetSelectModelView::class.java.simpleName
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val dialog = dialog
+        if (dialog != null) {
+            val width = ViewGroup.LayoutParams.MATCH_PARENT
+            val height = ViewGroup.LayoutParams.MATCH_PARENT
+            dialog.window!!.setLayout(width, height)
+        }
+    }
+
+    @Composable
+    fun BacnetReconfigParameterLabel(tableColumnsWidth: SnapshotStateList<Float>) {
+        val visibleHeaderColumns = listOf(
+            PARAMETER_CAPITALIZED, DISPLAY_UI_CAPITALIZED, SCHEDULABLE_CAPITALIZED)
+
+        val toggleCallbackMap = mapOf(
+            DISPLAY_UI_CAPITALIZED to Pair(viewModel.displayInUi.value) { state: Boolean ->
+                viewModel.displayInUi.value = state
+                viewModel.updateDisplayInUiModules(state)
+            }
+        )
+
+        TableHeaderRow(columnList = visibleHeaderColumns, toggleCallbackMap = toggleCallbackMap) {
+            columnWidth ->
+                tableColumnsWidth!![columnWidth.first] = columnWidth.second
+        }
+    }
+
+    private fun getDataFromSf(context: Context, key: String) :String {
+        var ipAddress = ""
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val confString: String? = sharedPreferences.getString(BacnetConfigConstants.BACNET_CONFIGURATION, null)
+        if (confString != null) {
+            try {
+                val config = JSONObject(confString)
+                val networkObject = config.getJSONObject("network")
+                ipAddress = networkObject.getString(BacnetConfigConstants.IP_ADDRESS)
+                //port = networkObject.getInt(BacnetConfigConstants.PORT)
+                //service = ServiceManager.CcuServiceFactory.makeCcuService(ipAddress)
+                //val deviceObject = config.getJSONObject("device")
+                //deviceId = deviceObject.getString(BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER)
+            } catch (e: JSONException) {
+                e.printStackTrace()
+            }
+        }
+        return ipAddress
+    }
+
+    private fun isBacNetInitialized(context: Context): Boolean {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        return sharedPreferences.getBoolean(BacnetConfigConstants.IS_BACNET_INITIALIZED, false)
+    }
+
+
+    @Composable
+    fun BacnetPairingParameterLabel(tableColumnsWidth: SnapshotStateList<Float>) {
+
+            val visibleHeaderColumnList = listOf(PARAMETER_CAPITALIZED, DISPLAY_UI_CAPITALIZED, MODELLED_VALUE_CAPITALIZED,
+                DEVICE_VALUE_CAPITALIZED, SCHEDULABLE_CAPITALIZED)
+
+            val toggleCallbackMap = mapOf(
+                DISPLAY_UI_CAPITALIZED to Pair(viewModel.displayInUi.value) { state: Boolean ->
+                    viewModel.displayInUi.value = state
+                    viewModel.updateDisplayInUiModules(state)
+                },
+                DEVICE_VALUE_CAPITALIZED to Pair(viewModel.deviceValue.value) { state: Boolean ->
+                    if (viewModel.bacnetPropertiesFetched.value) {
+                        viewModel.deviceValue.value = state
+                        viewModel.updateDeviceValueInUiModules(state)
+                    }
+                }
+            )
+            TableHeaderRow(columnList = visibleHeaderColumnList, toggleCallbackMap = toggleCallbackMap) {
+                    columnWidth ->
+                tableColumnsWidth[columnWidth.first] = columnWidth.second
+            }
+
+    }
+
+    @Composable
+    fun ConfigurationDetailsReadOnly() {
+
+        val configTableData : List<Pair<Pair<String, String>?, Pair<String, String>?>> = listOf(
+            Pair(
+                Pair(DEVICE_ID, viewModel.deviceId.value),
+                Pair(DESTINATION_IP, viewModel.destinationIp.value),
+            ),
+            Pair(
+                Pair(DESTINATION_PORT, viewModel.destinationPort.value),
+                Pair(MAC_ADDRESS, viewModel.destinationMacAddress.value)
+            ),
+            Pair(
+                Pair(DEVICE_NETWORK, viewModel.dnet.value),
+                null
+            )
+        )
+
+        Column(modifier = Modifier
+            .padding(top = 40.dp)
+            .wrapContentHeight()
+            .fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            configTableData.forEach { rowPair ->
+                val subRowPair1 = rowPair.first
+                val subRowPair2 = rowPair.second
+
+                Row(horizontalArrangement = Arrangement.spacedBy(50.dp)) {
+                    Row(modifier = Modifier.weight(0.5f)) {
+                        subRowPair1?.let {
+                            Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.CenterStart) {
+                                LabelBoldTextViewForTable(subRowPair1.first, fontSize = 22, fontColor = Color.Black)
+                            }
+                            Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.CenterStart) {
+                                LabelTextView(subRowPair1.second, fontSize = 22)
+                            }
+                        }
+                    }
+                    Row(modifier = Modifier.weight(0.5f)) {
+                        subRowPair2?.let {
+                            Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.CenterStart) {
+                                LabelBoldTextViewForTable(subRowPair2.first, fontSize = 22, fontColor = Color.Black)
+                            }
+                            Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.CenterStart) {
+                                LabelTextView(subRowPair2.second, fontSize = 22)
+                            }
+                        }
+                    }
                 }
             }
         }
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-            Row {
-                Box(modifier = Modifier
-                    .weight(1f)
-                ) {
+    }
+
+@Composable
+fun ConfigurationDetailsEditable() {
+
+    val configEntryWithHint = listOf(DEVICE_ID, DESTINATION_PORT, DEVICE_NETWORK)
+    val numberTypeConfigEntries = listOf(DEVICE_ID, DESTINATION_PORT, DEVICE_NETWORK)
+
+    val editableEventMap = hashMapOf(
+        DEVICE_ID to { state: String ->
+            viewModel.deviceId.value = state
+        },
+        DESTINATION_PORT to { state: String ->
+            viewModel.destinationPort.value = state
+        },
+        DEVICE_NETWORK to { state: String ->
+            viewModel.dnet.value = state
+        },
+        DESTINATION_IP to { state: String ->
+            viewModel.destinationIp.value = state
+        },
+        MAC_ADDRESS to { state: String ->
+            viewModel.destinationMacAddress.value = state
+        },
+    )
+
+    val configTableData : List<Pair<Triple<String, String, String>?, Triple<String, String, String>?>> = listOf(
+        Pair(
+            Triple(DEVICE_ID, viewModel.deviceId.value, getString(R.string.txt_ip_device_instance_number_hint)),
+            Triple(DESTINATION_IP, viewModel.destinationIp.value, ""),
+        ),
+        Pair(
+            Triple(DESTINATION_PORT, viewModel.destinationPort.value, getString(R.string.txt_destination_port_value_hint)),
+            Triple(MAC_ADDRESS, viewModel.destinationMacAddress.value, "")
+        ),
+        Pair(
+            Triple(DEVICE_NETWORK, viewModel.dnet.value, getString(R.string.txt_dnet_value_hint)),
+            null
+        )
+    )
+
+    Column(modifier = Modifier
+        .padding(top = 40.dp)
+        .wrapContentHeight()
+        .fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        configTableData.forEach { rowPair ->
+            val subRowPair1 = rowPair.first
+            val subRowPair2 = rowPair.second
+
+            Row(horizontalArrangement = Arrangement.spacedBy(50.dp)) {
+                Row(modifier = Modifier
+                    .padding(top = 14.dp)
+                    .weight(0.5f)
+                    .align(Alignment.Top), verticalAlignment = Alignment.Top) {
+                    subRowPair1?.let {
+                        Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.TopStart) {
+                            if(subRowPair1.first in configEntryWithHint) {
+                                TextViewWithHint(modifier = Modifier, text = annotatedStringBySpannableString(text = subRowPair1.first), hintText = subRowPair1.third, fontSize = 22)
+                            } else {
+                                LabelTextViewForTable(
+                                    modifier = Modifier.align(Alignment.CenterStart),
+                                    text = subRowPair1.first,
+                                    fontSize = 22
+                                )
+                            }
+                        }
+                        Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.TopStart) {
+                            editableEventMap[subRowPair1.first]?.let { it1 -> HintedEditableText(valueTypeIsNumber = numberTypeConfigEntries.contains(subRowPair1.first), hintText = "Enter ${subRowPair1.first}", onEditEvent = it1) }
+                        }
+                    }
                 }
+                Row(modifier = Modifier
+                    .padding(top = 14.dp)
+                    .weight(0.5f)
+                    .align(Alignment.Top), verticalAlignment = Alignment.Top) {
+                    subRowPair2?.let {
+                        Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.TopStart) {
+                            if(subRowPair2.first in configEntryWithHint) {
+                                TextViewWithHint(modifier = Modifier, text = annotatedStringBySpannableString(text = subRowPair2.first), hintText = subRowPair2.third, fontSize = 22)
+                            } else {
+                                LabelTextViewForTable(
+                                    modifier = Modifier.align(Alignment.CenterStart),
+                                    text = subRowPair2.first,
+                                    fontSize = 22
+                                )
+                            }
+                        }
+                        Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.TopStart) {
+                            editableEventMap[subRowPair2.first]?.let { it1 -> HintedEditableText(valueTypeIsNumber = numberTypeConfigEntries.contains(subRowPair2.first), hintText = "Enter ${subRowPair2.first}", onEditEvent = it1) }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+    @Composable
+    fun AddressSelector() {
+        Column (modifier = Modifier.padding(top = 20.dp)){
+
+            HeaderLeftAlignedTextViewNew(
+                SELECT_ADDRESS,
+                fontSize = 18,
+                Modifier.padding(bottom = 0.dp)
+            )
+
+            Row {
                 Box(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(top = 0.dp, bottom = 10.dp, start = 7.dp)
                 ) {
+                    val radioOptions = listOf("Manual", "Auto")
+                    RadioButtonComposeSelectModelCustom(
+                        radioOptions, viewModel.deviceSelectionMode.value
+                    ) {
+                        when (it) {
+                            "Manual" -> {
+                                viewModel.deviceSelectionMode.value = 0
+                            }
 
-                    TextViewWithClickCustom(
-                        text = viewModel.modelName,
-                        onClick = { },
-                        enableClick = false,
-                        isCompress = false
-                    )
-                }
-                Box(modifier = Modifier
-                    .weight(1f)
-                ) {
-                    if (viewModel.bacnetModel.value.version.value.isNotEmpty()) {
-                        HeaderTextView("V${viewModel.bacnetModel.value.version.value}")
+                            "Auto" -> {
+                                viewModel.deviceSelectionMode.value = 1
+                                viewModel.searchDevices()
+
+                                ProgressDialogUtils.showProgressDialog(
+                                    context,
+                                    CONST_AUTO_DISCOVERY
+                                )
+                                CcuLog.d(
+                                    TAG,
+                                    "searching devices ${viewModel.isConnectedDevicesSearchFinished.value}"
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -643,69 +839,152 @@ class BacNetSelectModelView : BaseDialogFragment(), OnPairingCompleteListener {
     }
 
     @Composable
-    fun ModelSelection() {
+    fun BacnetTitleView() {
         Box(
             modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.CenterStart
+            contentAlignment = Alignment.Center
+        ) { TitleTextViewCustom(BACNET, Color.Black) }
+    }
+
+    @Composable
+    fun BacnetEquipTitle() {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(PaddingValues(top = 40.dp)),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row {
-                Box(modifier = Modifier
-                    .weight(1f)
-                ) {
-                }
-                Box(modifier = Modifier
-                    .weight(1f)
-                    .padding(top = 10.dp, bottom = 0.dp, start = 15.dp, end = 10.dp)) {
-                    HeaderTextViewCustom(MODEL)
-                }
-                Box(modifier = Modifier
-                    .weight(1f)
-                   ) {
+            HeaderLeftAlignedTextViewNew(
+                if (viewModel.bacnetModel.value.equipDevice.value!!.name.isNullOrEmpty()) "" else getName(
+                    viewModel.bacnetModel.value.equipDevice.value!!.name
+                ), 22,
+            )
+
+        }
+    }
+
+    @Composable
+    fun BacnetPointConfigUpdateOnly() {
+        val tableColumnWidth = remember { mutableStateListOf<Float>().apply {
+            repeat(3) {
+                add(0.0f)
+            }
+        } }
+        Row(modifier = Modifier.padding(top = 10.dp)) { BacnetReconfigParameterLabel(tableColumnWidth) }
+
+        ParametersListViewUpdate(viewModel.bacnetModel, tableColumnWidth)
+    }
+
+    @Composable
+    fun BacnetPointConfigCreateOnly() {
+        val tableColumnsWidth = remember { mutableStateListOf<Float>().apply {
+            repeat(5) {
+                add(0.0f)
+            }
+        } }
+        Row(modifier = Modifier.padding(top = 10.dp))
+        { BacnetPairingParameterLabel(tableColumnsWidth) }
+
+        ParametersListView(data = viewModel.bacnetModel, columnsWidthList = tableColumnsWidth)
+    }
+
+    @Composable
+    fun CreateOnlyConfigControlButtonList() {
+        var showToast by remember { mutableStateOf(false) }
+        var warningToastMessage = ""
+        val buttonInfoMap = mutableMapOf (
+            CANCEL to Pair(true) { closeAllBaseDialogFragments() },
+            getFetchText() to Pair(isFetchReady()) {
+                val (isWarningApplicable, warningMessage) = getFetchWarningToastMessageIfValid()
+                if(isWarningApplicable) {
+                    showToast = true
+                    warningToastMessage = warningMessage
+                } else {
+                    viewModel.fetchData()
                 }
             }
+        )
+
+        if(viewModel.bacnetPropertiesFetched.value && viewModel.isDeviceIdValid.value){
+            buttonInfoMap[SAVE] =
+                Pair(true) {
+                    val (isValidWarning, warningMessage) = getMinValidationWarningToastMessage()
+                    if(isValidWarning) {
+                        Toast.makeText(requireContext(), warningMessage, Toast.LENGTH_SHORT).show()
+                    }else{
+                        viewModel.save()
+                    }
+                }
         }
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-            Row {
-                Box(modifier = Modifier
-                    .weight(1f)
-                ) {
-                }
-                Box(modifier = Modifier
-                    .weight(1f)
-                    .padding(top = 0.dp, bottom = 10.dp, start = 7.dp)) {
-                    if (viewModel.bacnetModel.value.isDevicePaired) {
-                        TextViewWithClickCustom(
-                            text = viewModel.modelName,
-                            onClick = { },
-                            enableClick = false,
-                            isCompress = false
-                        )
-                    } else {
-                        TextViewWithClickCustom(
-                            text = viewModel.modelName,
-                            onClick = {
-                                ProgressDialogUtils.showProgressDialog(context, LOADING)
-                                showDialogFragment(
-                                    ModelSelectionFragment.newInstance(
-                                        viewModel.deviceList,
-                                        viewModel.onItemSelect, SEARCH_MODEL
-                                    ), ModelSelectionFragment.ID
-                                )
-                            },
-                            enableClick = true, isCompress = false
-                        )
-                    }
-                }
-                Box(modifier = Modifier
-                    .weight(1f), contentAlignment = Alignment.BottomStart
-                ) {
-                    if (viewModel.bacnetModel.value.version.value.isNotEmpty()) {
-                        HeaderTextView("V${viewModel.bacnetModel.value.version.value}", padding = 10, fontSize = 20)
-                    }
-                }
+        if (showToast) {
+            ErrorToastMessage(
+                message = warningToastMessage,
+                onDismiss = { showToast = false }
+            )
+        }
+        ButtonListRow(buttonInfoMap)
+    }
+
+    private fun isFetchReady() : Boolean {
+        return when (viewModel.configurationType.value) {
+            MSTP_CONFIGURATION -> {
+                viewModel.destinationMacAddress.value.trim().isNotEmpty() &&
+                        isValidMstpMacAddress(viewModel.destinationMacAddress.value.trim())
+            }
+            IP_CONFIGURATION -> {
+                viewModel.destinationIp.value.isNotEmpty() &&
+                        viewModel.destinationPort.value.isNotEmpty() &&
+                        viewModel.deviceId.value.isNotEmpty()
+            }
+            else -> {
+                false
             }
         }
     }
+
+    private fun getFetchText(): String {
+        return if (viewModel.bacnetPropertiesFetched.value) {
+            RE_FETCH
+        } else {
+            FETCH
+        }
+    }
+
+    private fun getFetchWarningToastMessageIfValid() : Pair<Boolean, String> {
+        var (isValidWarning, warningMessage) = getMinValidationWarningToastMessage()
+        if(!isValidWarning && !isBacNetInitialized){
+            warningMessage = "BacNet is not initialized"
+        } else if(!isValidWarning) {
+            return Pair(false, "")
+        }
+            return Pair(true, warningMessage)
+    }
+
+    private fun getMinValidationWarningToastMessage() : Pair<Boolean, String> {
+        var warningMessage = ""
+
+        if(viewModel.configurationType.value == IP_CONFIGURATION) {
+            if(viewModel.destinationIp.value.isNullOrEmpty() ){
+                warningMessage = "Please input ip address"
+            }else if(viewModel.destinationPort.value.isNullOrEmpty()){
+                warningMessage = "Please input port number"
+            }else if(viewModel.deviceId.value.isNullOrEmpty()){
+                warningMessage = "Please input deviceId number"
+            } else {
+                return Pair(false, "")
+            }
+        } else if (viewModel.configurationType.value == MSTP_CONFIGURATION) {
+            if (viewModel.destinationMacAddress.value.isNullOrEmpty()) {
+                warningMessage = "Please input mac address"
+            } else {
+                return Pair(false, "")
+            }
+        }
+
+        return Pair(true, warningMessage)
+    }
+
 
     @Composable
     fun ConfigurationTypeSelected() {
@@ -752,6 +1031,28 @@ class BacNetSelectModelView : BaseDialogFragment(), OnPairingCompleteListener {
             }
         }
     }
+
+    @Composable
+    fun MstpMacAddressDetailsViewMode() {
+        Row {
+            Column(modifier = Modifier.width(200.dp)) {
+                HeaderTextViewNew(
+                    a75f.io.renatus.bacnet.util.MAC_ADDRESS,
+                    fontWeight = FontWeight.Normal
+                )
+                HeaderTextViewNew(
+                    text = MAC_ADDRESS_INFO,
+                    fontWeight = FontWeight.Normal,
+                    color = ComposeUtil.greyColor,
+                    fontSize = 18
+                )
+            }
+            Box(modifier = Modifier.width(250.dp)) {
+                LabelTextView(viewModel.destinationMacAddress.value, fontSize = 22)
+            }
+        }
+    }
+
     @Composable
     fun ConfigurationTypeSelection() {
         Box(
@@ -815,83 +1116,19 @@ class BacNetSelectModelView : BaseDialogFragment(), OnPairingCompleteListener {
 
                         ) {
                             LazyColumn(modifier = Modifier
-                                    .width(280.dp)
-                                    .height(120.dp)) {
+                                .width(280.dp)
+                                .height(120.dp)) {
 
                                 itemsIndexed(configurationTypes) { index, s ->
                                     DropdownMenuItem(onClick = {
                                         selectedIndex = index
                                         expanded = false
                                         viewModel.configurationType.value = s
-                                         }, text = { Text(text = s, style = TextStyle(fontSize = 22.sp)) },
+                                    }, text = { Text(text = s, style = TextStyle(fontSize = 22.sp)) },
                                         modifier = Modifier.background(if (index == selectedIndex) secondaryColor else Color.White),
                                         contentPadding = PaddingValues(10.dp),
                                     )
                                 }
-                            }
-                        }
-                    }
-                }
-                Box(modifier = Modifier
-                    .weight(1f)
-                ) {
-                }
-            }
-        }
-    }
-
-    @Composable
-    fun BacnetIpDeviceSelectionModes() {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Row {
-                Box(modifier = Modifier
-                    .weight(1f)
-                ) {
-                }
-                Box(modifier = Modifier
-                    .weight(1f)
-                    .padding(top = 0.dp, bottom = 0.dp, start = 15.dp, end = 0.dp)) {
-                    HeaderTextViewCustom("Select address")
-                }
-                Box(modifier = Modifier
-                    .weight(1f)
-                ) {
-                }
-            }
-        }
-
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.CenterStart
-        ) {
-
-            Row {
-                Box(modifier = Modifier
-                    .weight(1f)
-                ) {
-                }
-                Box(modifier = Modifier
-                    .weight(1f)
-                    /*.padding(top = 5.dp, bottom = 10.dp)*/) {
-                    //RadioButtonComposeSelectModel()
-                    val radioOptions = listOf("Manual", "Auto")
-                    RadioButtonComposeSelectModelCustom(
-                        radioOptions, viewModel.deviceSelectionMode.value
-                    ) {
-                        when (it) {
-                            "Manual" -> {
-                                viewModel.deviceSelectionMode.value = 0
-                            }
-
-                            "Auto" -> {
-                                viewModel.deviceSelectionMode.value = 1
-                                viewModel.searchDevices()
-
-                                ProgressDialogUtils.showProgressDialog(context, CONST_AUTO_DISCOVERY)
-                                CcuLog.d(TAG, "searching devices ${viewModel.isConnectedDevicesSearchFinished.value}")
                             }
                         }
                     }
@@ -987,11 +1224,11 @@ class BacNetSelectModelView : BaseDialogFragment(), OnPairingCompleteListener {
     fun MstpMacAddressDetails() {
         Row {
             Column(modifier = Modifier.width(200.dp)) {
-                HeaderTextViewNew(MAC_ADDRESS, fontWeight = FontWeight.Normal)
+                HeaderTextViewNew(a75f.io.renatus.bacnet.util.MAC_ADDRESS, fontWeight = FontWeight.Normal)
                 HeaderTextViewNew(text = MAC_ADDRESS_INFO,
-                               fontWeight = FontWeight.Normal,
-                               color = ComposeUtil.greyColor,
-                               fontSize = 18)
+                    fontWeight = FontWeight.Normal,
+                    color = ComposeUtil.greyColor,
+                    fontSize = 18)
             }
             Box(modifier = Modifier.width(250.dp)) {
                 if (viewModel.mstpDeviceSelectionMode.value == 0) {
@@ -1010,746 +1247,12 @@ class BacNetSelectModelView : BaseDialogFragment(), OnPairingCompleteListener {
 
     }
 
-    @Composable
-    fun MstpMacAddressDetailsViewMode() {
-        Row {
-            Column(modifier = Modifier.width(200.dp)) {
-                HeaderTextViewNew(MAC_ADDRESS, fontWeight = FontWeight.Normal)
-                HeaderTextViewNew(text = MAC_ADDRESS_INFO,
-                    fontWeight = FontWeight.Normal,
-                    color = ComposeUtil.greyColor,
-                    fontSize = 18)
-            }
-            Box(modifier = Modifier.width(250.dp)) {
-                    LabelTextView(viewModel.destinationMacAddress.value, fontSize = 22)
-            }
-        }
-
-    }
-
-    @Composable
-    fun DeviceDetails() {
-
-        Row(
-            modifier = Modifier
-                .padding(PaddingValues(bottom = 5.dp)),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        LabelTextView(annotatedString(DEVICE_ID), fontSize = 22)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    ) {
-                        UnderlinedInput(
-                            onTextChanged = {
-                                viewModel.deviceId.value = it
-                                CcuLog.d("BacNetSelectModelView", "device id-->$it")
-                            },
-                            placeholder = "Enter Device ID"
-                        )
-                    }
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        LabelTextView(annotatedString(DESTINATION_IP), fontSize = 22)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    ) {
-                        val isDestinationIpInvalid = viewModel.isDestinationIpValid
-                        UnderlinedInput(
-                            onTextChanged = {
-                                CcuLog.d("BacNetSelectModelView", "destination ip-->$it")
-                                viewModel.destinationIp.value = it
-                            },
-                            placeholder = "Enter IP Address"
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    @Composable
-    fun DeviceDetailsReadOnly() {
-
-        Row(
-            modifier = Modifier
-                .padding(PaddingValues(bottom = 5.dp)),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        LabelTextView(annotatedString(DEVICE_ID), fontSize = 22)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    ) {
-                        LabelTextView(viewModel.deviceId.value, fontSize = 22)
-                    }
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        LabelTextView(annotatedString(DESTINATION_IP), fontSize = 22)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    ) {
-                        LabelTextView(viewModel.destinationIp.value, fontSize = 22)
-                    }
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun annotatedString(text: String): AnnotatedString {
-        val annotatedString = with(AnnotatedString.Builder()) {
-            append(text)
-            pushStyle(MaterialTheme.typography.bodyLarge.toSpanStyle().copy(color = Color.Red))
-            append(" *")
-            toAnnotatedString()
-        }
-        return annotatedString
-    }
-
-    @Composable
-    fun PortDetails() {
-
-        Row(
-            modifier = Modifier
-                .padding(PaddingValues(bottom = 5.dp, top = 16.dp)),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        LabelTextView(annotatedString(DESTINATION_PORT), fontSize = 22)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    ) {
-                        UnderlinedInput(onTextChanged = {
-                            CcuLog.d("BacNetSelectModelView", "port value-->$it")
-                            viewModel.destinationPort.value = it
-                        },
-                            placeholder = "Enter Port"
-                        )
-                    }
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        LabelTextView(MAC_ADDRESS, fontSize = 22)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    ) {
-                        UnderlinedInput(
-                            onTextChanged = {
-                                CcuLog.d("BacNetSelectModelView", "destination ip-->$it")
-                                viewModel.destinationMacAddress.value = it
-                            },
-                            placeholder = "Enter Mac Address"
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    @Composable
-    fun DeviceNetworkDetails() {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(PaddingValues(bottom = 5.dp, top = 16.dp)),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.5f) // Ensures the Box takes 50% of the Row's width
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        LabelTextView("Device Network", fontSize = 22)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        UnderlinedInput(
-                            onTextChanged = {
-                                CcuLog.d("BacNetSelectModelView", "device network val-->$it")
-                                viewModel.dnet.value = it
-                            },
-                            placeholder = "Enter Device Network Number"
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-
-
-    @Composable
-    fun PortDetailsReadOnly() {
-
-        Row(
-            modifier = Modifier
-                .padding(PaddingValues(bottom = 5.dp)),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        LabelTextView(annotatedString(DESTINATION_PORT), fontSize = 22)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    ) {
-                        LabelTextView(viewModel.destinationPort.value, fontSize = 22)
-                    }
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        LabelTextView("Mac Address", fontSize = 22)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    ) {
-                        LabelTextView(viewModel.destinationMacAddress.value, fontSize = 22)
-                    }
-                }
-            }
-        }
-    }
-
-    @Composable
-    fun DeviceNetworkDetailsReadOnly() {
-
-        Row(
-            modifier = Modifier
-                .padding(PaddingValues(bottom = 5.dp)),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.5f)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        LabelTextView("Device Network", fontSize = 22)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        LabelTextView(viewModel.dnet.value, fontSize = 22)
-                    }
-                }
-            }
-        }
-    }
-
-    @Composable
-    fun PortDetailsReadOnlyUpdate() {
-
-        Row(
-            modifier = Modifier
-                .padding(PaddingValues(bottom = 5.dp)),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        LabelTextView(annotatedString(DESTINATION_PORT), fontSize = 22)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    ) {
-                        LabelTextView(viewModel.destinationPort.value, fontSize = 22)
-                    }
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        LabelTextView("Mac Address", fontSize = 22)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    ) {
-                        LabelTextView(viewModel.destinationMacAddress.value, fontSize = 22)
-                    }
-                }
-            }
-        }
-    }
-
-    @Composable
-    fun DeviceNetworkDetailsReadOnlyUpdate() {
-
-        Row(
-            modifier = Modifier
-                .padding(PaddingValues(bottom = 5.dp)),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.5f)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        LabelTextView("Device Network", fontSize = 22)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    ) {
-                        LabelTextView(viewModel.dnet.value, fontSize = 22)
-                    }
-                }
-            }
-        }
-    }
-
-
-    @Composable
-    fun populateProperties(item: BacnetPointState) {
-        item.bacnetProperties!!.forEach {bacnetProperty ->
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 100.dp)) {
-
-                Box(modifier = Modifier.weight(3f)) { LabelTextView(bacnetProperty.displayName, fontSize = 22) }
-                Box(modifier = Modifier.weight(3f)) {
-                    Row {
-                        if (!viewModel.bacnetPropertiesFetched.value) {
-                            Row(modifier = Modifier.fillMaxWidth()) {
-                                if (bacnetProperty.defaultValue == null) {
-                                    Box(modifier = Modifier
-                                        .weight(3f)
-                                        .padding(top = 10.dp, bottom = 10.dp)) { LabelTextView("-", fontSize = 22) }
-                                } else {
-                                    Box(modifier = Modifier
-                                        .weight(3f)
-                                        .padding(top = 10.dp, bottom = 10.dp)) { LabelTextView("${bacnetProperty.defaultValue}", fontSize = 22) }
-                                }
-                                Box(modifier = Modifier
-                                    .weight(3f)
-                                    .padding(top = 10.dp, bottom = 10.dp)) { LabelTextView(BAC_PROP_NOT_FETCHED, fontSize = 22) }
-                            }
-                        } else {
-                            val testProperty = remember {
-                                mutableStateOf(bacnetProperty)
-                            }
-                            BacnetProperty(testProperty, item.id,
-                                item.protocolData?.bacnet?.objectId
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
-    @Composable
-    fun BacnetProperty(bacnetProperty: MutableState<BacnetProperty>, id: String, objectId: Int?) {
-
-        //var selectedValue by remember { mutableStateOf(bacnetProperty.selectedValue) }
-        var selectedValue by remember { mutableStateOf(bacnetProperty) }
-
-        // Observe changes in selectedValue and trigger recomposition
-        DisposableEffect(bacnetProperty.value) {
-            //bacnetProperty.value = selectedValue.value
-            onDispose { /* Cleanup logic if needed */ }
-        }
-
-        BacnetPropertyUI(selectedValue, id, objectId)
-    }
-
-    @Composable
-    fun BacnetPropertyUI(
-        bacnetProperty: MutableState<BacnetProperty>,
-        pointId: String,
-        objectId: Int?
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            val radioTexts = listOf(bacnetProperty.value.defaultValue, bacnetProperty.value.fetchedValue)
-            val radioButtonDefaultState = if(viewModel.isDeviceValueSelected.value) 1 else bacnetProperty.value.selectedValue
-            val radioOptions = listOf(BacnetSelectedValue.DEVICE.ordinal, BacnetSelectedValue.FETCHED.ordinal)
-            RadioButtonComposeBacnet(radioTexts, radioOptions, radioButtonDefaultState) {
-                when (it) {
-                    BacnetSelectedValue.DEVICE.ordinal -> {
-                        viewModel.isDeviceValueSelected.value = false
-                        val newState = bacnetProperty.value.copy(selectedValue = 0)
-                        bacnetProperty.value = newState
-                        viewModel.updatePropertyStatus(0, pointId, bacnetProperty, objectId)
-                    }
-
-                    BacnetSelectedValue.FETCHED.ordinal -> {
-                        val newState = bacnetProperty.value.copy(selectedValue = 1)
-                        bacnetProperty.value = newState
-                        viewModel.updatePropertyStatus(1, pointId, bacnetProperty, objectId)
-                    }
-                }
-            }
-        }
-    }
-
-    fun getName(name: String): String {
-        return if (name.length > 30) name.substring(0, 30) else name
-    }
-
-    override fun getIdString(): String {
-        return BacNetSelectModelView::class.java.simpleName
-    }
-
-    override fun onStart() {
-        super.onStart()
-        val dialog = dialog
-        if (dialog != null) {
-            val width = ViewGroup.LayoutParams.MATCH_PARENT
-            val height = ViewGroup.LayoutParams.MATCH_PARENT
-            dialog.window!!.setLayout(width, height)
-        }
-    }
-
-    @Composable
-    fun ParameterLabel() {
-        Row(modifier = Modifier.padding(start = 10.dp).fillMaxWidth()) {
-            Box(modifier = Modifier.weight(4f)) { SubTitle("PARAMETER") }
-            Box(modifier = Modifier.weight(3f)) {
-
-                Row {
-                    SubTitle("DISPLAY_IN_UI")
-                    Spacer(modifier = Modifier.width(40.dp))
-                    //CreateToggleButton("on", viewModel.displayInUi.value)
-                    ToggleButton(viewModel.displayInUi.value) {
-                        viewModel.displayInUi.value = it
-                        viewModel.updateDisplayInUiModules(it)
-                    }
-                }
-            }
-            Box(modifier = Modifier.weight(3f)) { SubTitle("MODELLED VALUE") }
-            Box(modifier = Modifier.weight(3f)) {
-                Row {
-                    SubTitle("DEVICE VALUE")
-                    Spacer(modifier = Modifier.width(40.dp))
-                    //CreateToggleButton("on", viewModel.deviceValue.value)
-                    ToggleButton(viewModel.deviceValue.value) {
-                        if(viewModel.bacnetPropertiesFetched.value){
-                            viewModel.deviceValue.value = it
-                            viewModel.updateDeviceValueInUiModules(it)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @Composable
-    fun ParameterLabelUpdateConfig() {
-        Row(modifier = Modifier.fillMaxWidth().padding(start = 20.dp)
-        ) {
-            Box(modifier = Modifier.weight(5f)) { SubTitle("PARAMETER") }
-            Box(modifier = Modifier.weight(5f)) {
-
-                Row {
-                    SubTitle("DISPLAY_IN_UI")
-                    Spacer(modifier = Modifier.width(20.dp))
-                    //CreateToggleButton("on", viewModel.displayInUi.value)
-                    ToggleButton(viewModel.displayInUi.value) {
-                        viewModel.displayInUi.value = it
-                        viewModel.updateDisplayInUiModules(it)
-                    }
-                }
-            }
-        }
-    }
-
-   /* private fun setStateChanged() {
-        viewModel.isStateChanged.value = true
-        viewModel.update()
-    }*/
-
-    private fun getDataFromSf(context: Context, key: String) :String {
-        var ipAddress = ""
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-        val confString: String? = sharedPreferences.getString(BacnetConfigConstants.BACNET_CONFIGURATION, null)
-        if (confString != null) {
-            try {
-                val config = JSONObject(confString)
-                val networkObject = config.getJSONObject("network")
-                ipAddress = networkObject.getString(BacnetConfigConstants.IP_ADDRESS)
-                //port = networkObject.getInt(BacnetConfigConstants.PORT)
-                //service = ServiceManager.CcuServiceFactory.makeCcuService(ipAddress)
-                //val deviceObject = config.getJSONObject("device")
-                //deviceId = deviceObject.getString(BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER)
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            }
-        }
-        return ipAddress
-    }
-
-    private fun isBacNetInitialized(context: Context): Boolean {
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-        return sharedPreferences.getBoolean(BacnetConfigConstants.IS_BACNET_INITIALIZED, false)
+    override fun onPairingComplete() {
+        this.closeAllBaseDialogFragments()
     }
 
     private fun isBacnetMstpInitialized(context: Context): Boolean {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         return sharedPreferences.getBoolean(BacnetConfigConstants.IS_BACNET_MSTP_INITIALIZED, false)
     }
-
-    override fun onPairingComplete() {
-        this.closeAllBaseDialogFragments()
-    }
-
 }
-
-/*class MyPropertyDelegate<T>(private var value: T) : ReadWriteProperty<Any?, T> {
-    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        return value
-    }
-
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        this.value = value
-    }
-
-    private fun getIpAddress() {
-        var deviceIpAddress = ""
-        try {
-            val interfaces = NetworkInterface.getNetworkInterfaces()
-            while (interfaces.hasMoreElements()) {
-                val iface = interfaces.nextElement()
-                // filters out 127.0.0.1 and inactive interfaces
-                if (iface.isLoopback || !iface.isUp) {
-                    continue
-                }
-                if (iface.name.startsWith("wlan") || iface.name.startsWith("eth")) {
-                    val addresses = iface.inetAddresses
-                    while (addresses.hasMoreElements()) {
-                        val addr = addresses.nextElement()
-                        if (!addr.isLoopbackAddress && addr.hostAddress.indexOf(':') == -1) {
-                            Log.d(
-                                Tags.BACNET,
-                                "device interface and ip" + iface.displayName + "-" + addr.hostAddress
-                            )
-                            deviceIpAddress = addr.hostAddress
-                            if (iface.name.startsWith("eth")) {
-                                break
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        //ipAddress.setText(deviceIpAddress)
-    }
-
-
-}*/
-

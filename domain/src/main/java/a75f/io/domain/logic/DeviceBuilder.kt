@@ -30,7 +30,8 @@ import org.projecthaystack.HDateTime
 import org.projecthaystack.HStr
 import kotlin.system.measureTimeMillis
 
-class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: EntityMapper) {
+class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: EntityMapper?) {
+
     fun buildDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String, deviceDis: String,
                              profileModelDef: SeventyFiveFProfileDirective? = null) : String{
         CcuLog.i(Domain.LOG_TAG, "buildDeviceAndPoints $configuration")
@@ -42,6 +43,19 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             createPoints(modelDef, configuration, hayStackDevice)
         }
         profileModelDef?.let { updateBaseConfigPointRefs(configuration, it, hayStackDevice) }
+        CcuLog.i(Domain.LOG_TAG, "Time taken to create device points ${time}ms")
+        return deviceId
+    }
+
+    fun buildCnDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, siteRef : String, deviceDis: String) : String{
+        CcuLog.i(Domain.LOG_TAG, "build connect node DeviceAndPoints $configuration")
+        val hayStackDevice = buildDevice(modelDef, configuration, null, siteRef, deviceDis)
+        val deviceId = hayStack.addDevice(hayStackDevice)
+        hayStackDevice.id = deviceId
+        DomainManager.addDevice(hayStackDevice)
+        val time = measureTimeMillis {
+            createPoints(modelDef, configuration, hayStackDevice)
+        }
         CcuLog.i(Domain.LOG_TAG, "Time taken to create device points ${time}ms")
         return deviceId
     }
@@ -86,15 +100,18 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             }.awaitAll()
         }
     }
-    private fun buildDevice(modelDef: SeventyFiveFDeviceDirective, configuration: ProfileConfiguration, equipRef: String, siteRef : String, deviceDis: String) : Device{
+    private fun buildDevice(modelDef: SeventyFiveFDeviceDirective, configuration: ProfileConfiguration, equipRef: String?, siteRef: String, deviceDis: String) : Device{
         CcuLog.i(Domain.LOG_TAG, "buildDevice ${modelDef.domainName}")
         val deviceBuilder = Device.Builder().setDisplayName(deviceDis)
             .setDomainName(modelDef.domainName)
-            .setEquipRef(equipRef)
             .setRoomRef(configuration.roomRef)
             .setFloorRef(configuration.floorRef)
             .setAddr(configuration.nodeAddress)
             .setSiteRef(siteRef)
+
+        equipRef?.let {
+            deviceBuilder.setEquipRef(it)
+        }
 
         modelDef.tags.filter { it.kind == TagType.MARKER && it.name.lowercase() != "addr"}.forEach{ deviceBuilder.addMarker(it.name)}
         if (modelDef.domainName.equals(DomainName.hyperstatSplitDevice)) { deviceBuilder.addMarker("node") }
@@ -160,6 +177,11 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
                         pointBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
                     }
                 }
+
+                if(tag.name == "confirmedDateTime" || tag.name == "deliveryDateTime") {
+                    val defaultVal = tag.defaultValue?.toString() ?: ""
+                    pointBuilder.addTag(tag.name, HStr.make(defaultVal))
+                }
             }
 
         modelDef.tags.filter { it.kind == TagType.BOOL && it.name != "portEnabled" }
@@ -174,7 +196,11 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
 
         val rawPoint = pointBuilder.build()
         /*If there is logical point associated with Physical point Then only enable port */
-        if (updatePhysicalRef(configuration, rawPoint, entityMapper, device.equipRef)) {
+        val isEnabled = entityMapper?.let {
+            updatePhysicalRef(configuration, rawPoint, it, device.equipRef)
+        } ?: false
+
+        if (isEnabled) {
             CcuLog.i(Domain.LOG_TAG, "Raw point is enabled for  ${modelDef.domainName}")
             rawPoint.enabled = true
         }

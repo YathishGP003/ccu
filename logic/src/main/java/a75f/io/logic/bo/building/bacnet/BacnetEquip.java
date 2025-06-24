@@ -4,6 +4,8 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_CONFIGURATION;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.encodeBacnetId;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.getBacNetType;
 
+import static a75f.io.logic.util.NonModelPointUtilKt.addEquipScheduleStatusPoint;
+
 import android.util.Log;
 
 import org.projecthaystack.HDict;
@@ -167,6 +169,10 @@ public class BacnetEquip {
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, equipScheduleTypeVal);
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, equipScheduleTypeVal);
 
+        if(moduleLevel.equals("zone")) {
+            addEquipScheduleStatusPoint(bacNetEquip.build(), equipmentRef);
+        }
+
         Device bacnetDevice = new Device.Builder()
                 .setDisplayName(bacNetEquipType + "-" + slaveId)
                 .addMarker("network").addMarker("bacnet").addMarker(bacNetEquipType.toLowerCase()).addMarker("his").addMarker("node")
@@ -295,6 +301,9 @@ public class BacnetEquip {
                     logicalParamPoint.addMarker("displayInUi");
                     //physicalParamPoint.addMarker("displayInUi");
                 }
+                if(point.isSchedulable()) {
+                    logicalParamPoint.addMarker(Tags.SCHEDULABLE);
+                }
                 CcuLog.d(TAG, "point display in ui-->" + point.getProtocolData().getBacnet().getDisplayInUIDefault());
                 //AtomicBoolean isWritable = new AtomicBoolean(false);
                 AtomicBoolean hasPresentValue = new AtomicBoolean(false);
@@ -362,8 +371,10 @@ public class BacnetEquip {
                     try {
                         if (presentValue.get() != null && !presentValue.get().equals("null") && !presentValue.get().equals("") && !presentValue.get().equals("NA")) {
                             Log.d(TAG, "write present value to the point id-->" + logicalParamId + " value-->" + presentValue + "<--is writable-->" + isWritable);
-                            CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(presentValue.get()));
-                            CCUHsApi.getInstance().writeHisValById(logicalParamId,Double.parseDouble(presentValue.get()));
+                            double presentVal = Double.parseDouble(presentValue.get());
+                            CCUHsApi.getInstance().writeDefaultValById(logicalParamId, presentVal);
+                            CCUHsApi.getInstance().writeHisValById(logicalParamId, presentVal);
+                            copyDefaultValueToLevel17(logicalParamId, presentVal);
                         }
                     } catch (Exception e) {
                         CcuLog.d(TAG, "hit exception 4-->" + e.getMessage());
@@ -404,32 +415,49 @@ public class BacnetEquip {
             HDict pointRead = CCUHsApi.getInstance().readHDictById(bacnetPoint.getId());
             if (pointRead != null) {
                 Point logicalPoint = new Point.Builder().setHDict(pointRead).build();
+                boolean updatePointFlag = false;
                 if (bacnetPoint.getProtocolData().getBacnet().getDisplayInUIDefault()) {
                     if (!logicalPoint.getMarkers().contains("displayInUi")) {
                         CcuLog.d(TAG_BACNET, "--displayInUi--added for point with id-->" + logicalPoint.getId());
                         logicalPoint.getMarkers().add("displayInUi");
-                        if (logicalPoint.getId() != null) {
-                            CcuLog.d(TAG_BACNET, "--displayInUi-2--added for point with id-->" + logicalPoint.getId());
-                            CcuLog.d(TAG_BACNET, "");
-                            CcuLog.d(TAG_BACNET, "updating point@@-1-->" + logicalPoint.getId() + "<-->" + logicalPoint.getEquipRef() + "<-->" + logicalPoint);
-                            CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
-                        } else {
-                            CcuLog.d(TAG_BACNET, "updating point@@-1--failed--no id-->" + logicalPoint);
-                        }
+                        updatePointFlag = true;
                     }
                 } else if (logicalPoint.getMarkers().contains("displayInUi")) {
                     logicalPoint.getMarkers().remove("displayInUi");
                     CcuLog.d(TAG_BACNET, "--displayInUi--removed for point with id-->" + logicalPoint.getId());
+                    updatePointFlag = true;
+                }
+                if (bacnetPoint.isSchedulable()) {
+                    if (!logicalPoint.getMarkers().contains(Tags.SCHEDULABLE)) {
+                        logicalPoint.getMarkers().add(Tags.SCHEDULABLE);
+                        updatePointFlag = true;
+                    }
+                } else if (logicalPoint.getMarkers().contains(Tags.SCHEDULABLE)) {
+                    logicalPoint.getMarkers().remove(Tags.SCHEDULABLE);
+                    updatePointFlag = true;
+                }
+                if (updatePointFlag) {
                     if (logicalPoint.getId() != null) {
-                        CcuLog.d(TAG_BACNET, "--displayInUi--2--removed for point with id-->" + logicalPoint.getId());
-                        CcuLog.d(TAG_BACNET, "updating point@@-2-->" + logicalPoint.getId() + "<-->" + logicalPoint.getEquipRef() + "<-->" + logicalPoint);
+                        CcuLog.d(TAG_BACNET, "updating point@@-->" + logicalPoint.getId() + "<-->" + logicalPoint.getEquipRef() + "<-->" + logicalPoint);
                         CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
                     } else {
-                        CcuLog.d(TAG_BACNET, "updating point@@-2--failed--no id-->" + logicalPoint);
+                        CcuLog.d(TAG_BACNET, "updating point@@--failed--no id-->" + logicalPoint);
                     }
                 }
             }
         }
         CCUHsApi.getInstance().syncEntityTree();
+    }
+
+    private void copyDefaultValueToLevel17(String logicalPointId, double value) {
+        CcuLog.d(TAG, "copyDefaultValueToLevel17: logical point is zone point "+logicalPointId
+                + " value "+value);
+        CCUHsApi.getInstance().writePoint(
+                logicalPointId,
+                17,
+                CCUHsApi.getInstance().getCCUUserName(),
+                value,
+                0
+        );
     }
 }

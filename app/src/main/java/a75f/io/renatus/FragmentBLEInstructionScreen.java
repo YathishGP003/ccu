@@ -33,6 +33,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
+import a75f.io.renatus.profiles.connectnode.ConnectNodeFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatCpuFragment;
@@ -468,6 +469,15 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
+        else if (mProfileType == ProfileType.CONNECTNODE) {
+            if (L.isSimulation()) {
+                showDialogFragment(ConnectNodeFragment.Companion.newInstance(mNodeAddress, mRoomName,
+                        mFloorName, mNodeType, mProfileType), ConnectNodeFragment.Companion.getIdString());
+            } else {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
 
     }
     
@@ -562,6 +572,16 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 pairinginstruct.setImageResource(R.drawable.air_ms_paring);
             else {
                 pairinginstruct.setImageResource(R.drawable.ms_paring_75);
+                pairingInstructionMainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
+            }
+        } else if (mNodeType == NodeType.CONNECTNODE) {
+            title.setText(R.string.title_pair_connectnode);
+            if (CCUUiUtil.isCarrierThemeEnabled(requireContext()))
+                pairinginstruct.setImageResource(R.drawable.carr_ms_paring);
+            else if(CCUUiUtil.isAiroverseThemeEnabled(requireContext()))
+                pairinginstruct.setImageResource(R.drawable.air_ms_paring);
+            else {
+                pairinginstruct.setImageResource(R.drawable.cn_pairing_75f);
                 pairingInstructionMainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
         }

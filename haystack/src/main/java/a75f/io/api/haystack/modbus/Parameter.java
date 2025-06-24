@@ -11,6 +11,7 @@ import com.google.gson.reflect.TypeToken;
 import java.util.List;
 
 
+import a75f.io.logger.CcuLog;
 import io.objectbox.annotation.Convert;
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
@@ -75,6 +76,8 @@ public class Parameter {
     private String parameterDefinitionType;
     private String multiplier;
     private String wordOrder;
+    private Boolean isSchedulable = false;
+    private String logicalId = "";
     public String getParameterId() {
         return parameterId;
     }
@@ -191,6 +194,12 @@ public class Parameter {
     public void setWordOrder(String wordOrder) {
         this.wordOrder = wordOrder;
     }
+    public boolean getIsSchedulable() {
+        return isSchedulable;
+    }
+    public boolean setIsSchedulable(boolean isSchedulable) {
+        return this.isSchedulable = isSchedulable;
+    }
 
     public static class EncounterCommandConverter implements PropertyConverter<List<Command>, String> {
 
@@ -279,6 +288,14 @@ public class Parameter {
 
             return new Gson().toJson(conditionList);
         }
+    }
+
+    public String getLogicalId() {
+        return logicalId;
+    }
+
+    public void setLogicalId(String logicalId) {
+        this.logicalId = logicalId;
     }
     
     @NonNull

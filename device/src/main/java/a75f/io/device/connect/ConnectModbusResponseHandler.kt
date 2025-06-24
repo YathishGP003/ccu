@@ -1,5 +1,6 @@
 package a75f.io.device.connect
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.cm.Co2SensorBusMapping
 import a75f.io.device.cm.HumiditySensorBusMapping
 import a75f.io.device.cm.OccupancySensorBusMapping
@@ -12,13 +13,16 @@ import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil
 import a75f.io.logic.bo.building.system.util.getConnectEquip
 import com.x75f.modbus4j.serial.rtu.RtuMessageResponse
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.roundToInt
 
+
 const val MODBUS_DATA_OFFSET = 3
+const val CN_MODBUS_DATA_OFFSET = 3
 fun handleModbusResponse(slaveId : Int, response : RtuMessageResponse, ops: ConnectModbusOps) {
     when (ops) {
         ConnectModbusOps.READ_SENSOR_BUS_VALUES -> {
@@ -44,6 +48,22 @@ fun handleModbusResponse(slaveId : Int, response : RtuMessageResponse, ops: Conn
         ConnectModbusOps.WRITE_RELAY_MAPPING_CONFIG -> {
             CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "WRITE_RELAY_MAPPING_CONFIG completed")
         }
+        ConnectModbusOps.READ_DIAGNOSTIC_INFO -> {
+            CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "READ_DIAGNOSTIC_INFO response received $response")
+            val messageData = ByteBuffer.wrap(response.messageData.copyOfRange(MODBUS_DATA_OFFSET, response.messageData.size)).order(ByteOrder.BIG_ENDIAN)
+            val diagnosticInfo = messageData.int
+            CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "READ_DIAGNOSTIC_INFO $diagnosticInfo")
+
+            updateDiagnosticValues(slaveId, response)
+
+        }
+        ConnectModbusOps.READ_SEQUENCE_REG_INFO -> {
+            CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "READ_SEQUENCE_REG_INFO response received $response")
+            val messageData = ByteBuffer.wrap(response.messageData.copyOfRange(CN_MODBUS_DATA_OFFSET, response.messageData.size)).order(ByteOrder.BIG_ENDIAN)
+            val sequenceId = messageData.int
+            CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "READ_SEQUENCE_REG_INFO sequenceId $sequenceId")
+            updateSequencePoints(slaveId, response)
+        }
         ConnectModbusOps.TEST_OPERATION -> {
             CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "TEST_OPERATION response received $response")
         }
@@ -51,6 +71,117 @@ fun handleModbusResponse(slaveId : Int, response : RtuMessageResponse, ops: Conn
     }
     //TODO- Successful read operation ->Update heartbeat
 }
+
+/**
+ * Updates sequence points for a ConnectNode device based on Modbus response data.
+ *
+ * This function:
+ * 1. Extracts the relevant data portion from the Modbus response
+ * 2. Validates the data size matches the expected number of points
+ * 3. Parses the 2-byte register values and updates each sequence point
+ *
+ * @param slaveId The slave ID of the ConnectNode device being updated
+ * @param response The Modbus response containing the sequence point values
+ *
+ * @throws Nothing explicitly but will log errors for:
+ *   - Size mismatch between expected points and received data
+ *   - Potential array index issues (handled by system exceptions)
+ *
+ * The function processes the message data in 2-byte chunks, where each chunk represents:
+ * - A 16-bit register value (big-endian format)
+ * - Corresponds to one sequence point value
+ *
+ * Each parsed value is written to the historical database via CCUHsApi.
+ */
+fun updateSequencePoints(slaveId: Int, response: RtuMessageResponse) {
+
+    // Step 1: Get the response message in byte format
+    var messageData = response.messageData.copyOfRange(CN_MODBUS_DATA_OFFSET, response.messageData.size)
+
+
+    // Step 2: Get the list of connect node points to update. Ignore the last 2 bytes which are checksum
+    val pointsToUpdate = ConnectNodeUtil.Companion.getPointSlaveIdRegAddressPointList()
+    if(pointsToUpdate.size*2 != messageData.size - 2) {
+        CcuLog.e(L.TAG_CCU_SERIAL_CONNECT, "updateSequencePoints: Invalid messageData size ${(messageData.size - 2)/2} for pointsToUpdate size ${pointsToUpdate.size}")
+        return
+    }
+
+    // Step 3: Parse the message data and update the connect node sequence points
+    var offset = 0
+    for (i in 0 until messageData.size - 2 step 2) {
+        offset = i
+        val sequenceRegVal = parseIntFromTwoBytes(messageData.copyOfRange(offset, offset + 2))
+        val pointIndex = i / 2
+        CCUHsApi.getInstance().writeHisValById(pointsToUpdate[pointIndex], sequenceRegVal.toDouble())
+    }
+
+    CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "ConnectNode sequence data Updated")
+}
+
+/**
+ * Updates diagnostic values for a ConnectNode device from Modbus RTU response data.
+ *
+ * @param slaveId The slave ID of the target ConnectNode device
+ * @param response The Modbus RTU response containing diagnostic data
+ *
+ * This function:
+ * 1. Gets the ConnectNode device reference
+ * 2. Extracts the Modbus data payload
+ * 3. Parses and updates the following diagnostic points:
+ *    - Sequence run count (16-bit)
+ *    - Last run time (8-bit)
+ *    - Longest run time (8-bit)
+ *    - Sequence status (8-bit)
+ *    - Error code (8-bit)
+ *    - Update state (8-bit)
+ *    - Active sequence metadata length (16-bit)
+ *    - Update error (8-bit)
+ * 4. Logs the successful update
+ *
+ */
+fun updateDiagnosticValues(slaveId: Int, response: RtuMessageResponse) {
+    // Step 1: Get the connect node device reference based on slave address
+    val connectNodeEquip = ConnectNodeUtil.connectNodeEquip(slaveId)
+
+    // Step 2: Get the response message in byte format
+    val messageData = response.messageData.copyOfRange(CN_MODBUS_DATA_OFFSET, response.messageData.size)
+//    messageData.add(0) // Add a dummy byte to make it even size for processing and to avoid index out of bounds when using copyOfRange
+ 
+    // Step 4: Parse the message data and update the connect node device points
+    var offset = getOffset(LOW_CODE_INPUT_REG_ACTIVE_SEQUENCE_METADATA_LENGTH_MSB)
+    var localPointValInt = parseIntFromFourBytes(messageData.copyOfRange(offset, offset + 4))
+    connectNodeEquip.sequenceMetadataLength.writeHisVal(localPointValInt.toDouble())
+    offset = getOffset(LOW_CODE_INPUT_REG_ACTIVE_SEQUENCE_METADATA_SIGNATURE_0)
+    val signatureBytes = messageData.copyOfRange(offset, offset + 16)
+    val seqId = signatureBytes.joinToString("") { "%02X".format(it) }
+    connectNodeEquip.sequenceMetadataIdentity.writeDefaultVal(seqId) // write seqId by using writeDefaultVal
+    offset = getOffset(LOW_CODE_INPUT_REG_ACTIVE_SEQUENCE_METADATA_NAME_0)
+    val seqName = String(messageData.copyOfRange(offset, offset + 21), Charsets.UTF_8).trim{ it == '\u0000' }
+    connectNodeEquip.sequenceMetadataName.writeDefaultVal(seqName) // write seqId by using writeDefaultVal
+    offset = getOffset(LOW_CODE_INPUT_REG_SEQ_RUN_COUNT)
+    localPointValInt = parseIntFromFourBytes(messageData.copyOfRange(offset, offset + 4))
+    connectNodeEquip.sequenceRunCount.writeHisVal(localPointValInt.toDouble())
+    offset = getOffset(LOW_CODE_INPUT_REG_SEQ_LAST_RUN_TIME)
+    var localPointVal = parseIntFromTwoBytes(messageData.copyOfRange(offset, offset + 2))
+    connectNodeEquip.sequenceLastRunTime.writeHisVal(localPointVal.toDouble())
+    offset = getOffset(LOW_CODE_INPUT_REG_SEQ_LONG_RUN_TIME)
+    localPointVal = parseIntFromTwoBytes(messageData.copyOfRange(offset, offset + 2))
+    connectNodeEquip.sequenceLongRunTime.writeHisVal(localPointVal.toDouble())
+    offset = getOffset(LOW_CODE_INPUT_REG_SEQ_STATUS)
+    localPointVal = parseIntFromTwoBytes(messageData.copyOfRange(offset, offset + 2))
+    connectNodeEquip.sequenceStatus.writeHisVal(localPointVal.toDouble())
+    offset = getOffset(LOW_CODE_INPUT_REG_SEQ_ERROR_CODE)
+    localPointVal = parseIntFromTwoBytes(messageData.copyOfRange(offset, offset + 2))
+    connectNodeEquip.sequenceErrorCode.writeHisVal(localPointVal.toDouble())
+    // Avoid sequenceUpdateState since that is updated during sequence update process
+
+    // Update the heartbeet
+    connectNodeEquip.heartBeat.writeHisValueByIdWithoutCOV(1.0)
+    CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "ConnectNode data Updated")
+}
+
+private fun getOffset(regAddress: Int) =
+    (regAddress - LOW_CODE_INPUT_REG_ACTIVE_SEQUENCE_METADATA_LENGTH_MSB) * 2
 
 fun updateUniversalInputMappedValues(response: RtuMessageResponse) {
     val messageData = ByteBuffer.wrap(response.messageData.copyOfRange(MODBUS_DATA_OFFSET, response.messageData.size)).order(ByteOrder.BIG_ENDIAN)
@@ -373,6 +504,10 @@ fun updateConnectCo2Sensor(slaveId: Int, responseArray : ByteArray, sensorMappin
     //TODO- Write to mapped points
 }
 fun parseIntFromTwoBytes(bytes: ByteArray) = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).short
+
+fun parseIntFromFourBytes(bytes: ByteArray) : Int {
+    return ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).int
+}
 
 fun parse12BitPressureValue(bytes: ByteArray) : Int {
     val pVal = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).short.toInt()

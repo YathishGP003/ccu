@@ -45,6 +45,7 @@ fun getParameters(equipment: EquipmentDevice): MutableList<RegisterItem> {
                     parameterTemp.multiplier = registerTemp.multiplier
                     val register = RegisterItem()
                     register.displayInUi.value = parameterTemp.isDisplayInUI
+                    register.schedulable.value = parameterTemp.isSchedulable
                     register.param = mutableStateOf(parameterTemp)
                     parameterList.add(register)
                 }
@@ -60,6 +61,7 @@ fun getParametersList(equipment: EquipModel): List<Parameter> {
         equipment.parameters.forEach {
             val param = it.param.value
             param.isDisplayInUI = it.displayInUi.value
+            param.isSchedulable = it.schedulable.value
             parameterList.add(param)
         }
     }
@@ -84,16 +86,19 @@ fun getParametersList(equipment: EquipmentDevice): List<Parameter> {
     var isAllSelected = true
     if (equipDevice.points.isNotEmpty()) {
         equipDevice.points.forEach {
-            if (!it.protocolData?.bacnet?.displayInUIDefault!!)
+            if (!it.protocolData?.bacnet?.displayInUIDefault!! && !(it.equipTagNames.contains("heartbeat") && (it.equipTagNames.contains("sensor"))))
                 isAllSelected = false
         }
     }
     return isAllSelected
 }
- fun getBacnetPoints(points: List<BacnetPoint>): MutableList<BacnetPointState> {
+ fun getBacnetPoints(points: List<BacnetPoint>, isPaired : Boolean = true): MutableList<BacnetPointState> {
     val parameterList = mutableListOf<BacnetPointState>()
     if (Objects.nonNull(points)) {
         for (bacnetPoint in points) {
+            if(!isPaired) {
+                bacnetPoint.initailizeSchedulableForFreshPairing()
+            }
             val bacnetPointState = BacnetPointState(
                 bacnetPoint.id,
                 bacnetPoint.name,
@@ -110,7 +115,8 @@ fun getParametersList(equipment: EquipmentDevice): List<Parameter> {
                 bacnetPoint.equipTagsList,
                 bacnetPoint.bacnetProperties,
                 displayInUi = mutableStateOf(bacnetPoint.protocolData?.bacnet!!.displayInUIDefault),
-                disName = bacnetPoint.disName
+                disName = bacnetPoint.disName,
+                isSchedulable = mutableStateOf(bacnetPoint.isSchedulable),
             )
             parameterList.add(bacnetPointState)
         }
@@ -138,6 +144,29 @@ fun isAllParamsSelected(equipDevice: EquipmentDevice) : Boolean {
     }
     return isAllSelected
 }
+
+fun isAllParamsSelectedTerminal(equipDevice: EquipmentDevice, isParent: Boolean, subEquipDevice: EquipmentDevice? = null) : Boolean {
+    var isAllSelected = true
+    if(isParent) {
+        if (equipDevice.registers.isNotEmpty()) {
+            equipDevice.registers.forEach {
+                if (!it.parameters[0].isDisplayInUI)
+                    isAllSelected = false
+            }
+        }
+    } else {
+        subEquipDevice?.let {subEquip ->
+            if (subEquip.registers.isNotEmpty()) {
+                subEquip.registers[0].parameters.forEach {
+                    if (!it.isDisplayInUI)
+                        isAllSelected = false
+                }
+            }
+        }
+    }
+    return isAllSelected
+}
+
 fun isAllLeftParamsSelected(equipDevice: EquipmentDevice) : Boolean {
     var isAllSelected = true
     if (equipDevice.registers.isNotEmpty()) {
@@ -186,7 +215,7 @@ const val MODBUS = "MODBUS"
 const val EQUIP_TYPE = "Equipment Type"
 const val LOADING = "Loading Modbus Models"
 const val LOADING_BACNET_MODELS = "Loading Bacnet Models"
-const val SLAVE_ID = "Slave ID"
+const val SLAVE_ID = "Slave ID:"
 const val SELECT_ALL = "Select All Parameters"
 const val SET = "SET"
 const val SAVE = "SAVE"
@@ -228,9 +257,15 @@ const val DEVICE_MAC_ADDRESS = "Device MAC Address"
 
 const val DESTINATION_IP = "Destination IP"
 const val DESTINATION_PORT = "PORT"
+const val MODBUS_CAPITALIZED = "Modbus"
+const val SCHEDULABLE_CAPITALIZED = "Schedulable"
+const val PARAMETER_CAPITALIZED = "Point Name"
+const val DISPLAY_UI_CAPITALIZED = "Display in UI"
+const val MODELLED_VALUE_CAPITALIZED = "Modelled Value"
+const val DEVICE_VALUE_CAPITALIZED = "Device Value"
 
 
-
+const val MAC_ADDRESS = "Mac Address"
 
 
 fun getSlaveIds(isParent: Boolean): List<String> {

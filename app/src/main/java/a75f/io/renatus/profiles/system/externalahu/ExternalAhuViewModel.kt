@@ -766,14 +766,12 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
 
     private fun updateModbusProfile() {
         modbusProfile.updateModbusEquip(
-            equipModel.value.equipDevice.value.deviceEquipRef,
             equipModel.value.equipDevice.value.slaveId.toShort(),
             getParametersList(equipModel.value)
         )
 
         equipModel.value.subEquips.forEach {
             modbusProfile.updateModbusEquip(
-                it.value.equipDevice.value.deviceEquipRef,
                 it.value.equipDevice.value.slaveId.toShort(),
                 getParametersList(it.value)
             )

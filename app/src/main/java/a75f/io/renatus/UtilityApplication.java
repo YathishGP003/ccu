@@ -86,6 +86,7 @@ import a75f.io.renatus.anrwatchdog.ANRError;
 import a75f.io.renatus.anrwatchdog.ANRHandler;
 import a75f.io.renatus.anrwatchdog.ANRWatchDog;
 import a75f.io.renatus.ota.OtaCache;
+import a75f.io.renatus.ota.SeqCache;
 import a75f.io.renatus.registration.UpdateCCUFragment;
 import a75f.io.renatus.schedules.FileBackupService;
 import a75f.io.renatus.util.Prefs;
@@ -198,6 +199,8 @@ public abstract class UtilityApplication extends Application implements Globals.
             CcuLog.i(L.TAG_CCU, "Reboot service not started for build type: " + BuildConfig.BUILD_TYPE);
         }
         verifyAndroidInitScripts();
+        SeqCache seqCache = new SeqCache();
+        seqCache.restoreSeqRequests(context);
         OtaCache cache = new OtaCache();
         cache.restoreOtaRequests(context);
         CCUUtils.setCCUReadyProperty("false");

@@ -16,6 +16,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.renatus.profiles.CopyConfiguration;
@@ -169,10 +170,14 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 		}
 		else if(equip.get("bacnet") != null){
 			return " " + roomDisplayName + ": " +equip.get("modelConfig").toString().split("modelName:")[1].split(",")[0]+ " ";
+		} else if(ConnectNodeUtil.Companion.isZoneContainingConnectNodeWithEquips(seletedModules.get(0).toString(), ccuHsApi)) {
+			String connectNodeZoneName = ConnectNodeUtil.Companion.getZoneNameByConnectNodeAddress(
+					seletedModules.get(0).toString(), ccuHsApi);
+			return " " + connectNodeZoneName + ": " + "ConnectNode" + " (" + seletedModules.get(0).intValue() + ") ";
 		}
 		else {
 			HashMap<Object,Object>device = ccuHsApi.read(" device and addr == \"" + seletedModules.get(0) + "\"");
-			ProfileType profile = CCUUtils.getProfileType((String) equip.get("profile"));
+			ProfileType profile = CCUUtils.getProfileType((String) equip.get("profile"), seletedModules.get(0).intValue());
 			String profileName = getProfileDescription(profile);
 			NodeType nodeType = CCUUtils.getNodeType(device);
 			String nodeName = profileTypeToCamelCase(nodeType.name());
@@ -186,11 +191,16 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 	@Override
 	public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked)
 	{
-		Long smartNodeID = Long.parseLong(floorPlanActivity.mModuleListAdapter.getItem(position));
+		String nodeAddress = ConnectNodeUtil.Companion.extractNodeAddressIfConnectPaired(
+				floorPlanActivity.mModuleListAdapter.getItem(position));
+		Long smartNodeID = Long.parseLong(nodeAddress);
 		if (checked && !seletedModules.contains(smartNodeID))
 		{
 			seletedModules.add(smartNodeID);
-			seletedModules.addAll(HSUtil.getSubEquipPairingAddr(String.valueOf(smartNodeID)));
+			// No sub equip if connectNode paired
+			if(ConnectNodeUtil.Companion.getConnectNodeByNodeAddress(nodeAddress, CCUHsApi.getInstance()).isEmpty()){
+				seletedModules.addAll(HSUtil.getSubEquipPairingAddr(String.valueOf(smartNodeID)));
+			}
 			floorPlanActivity.mModuleListAdapter.addSelected(position, seletedModules, new ArrayList<>());
 		}
 		else
@@ -239,8 +249,9 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 			if (equip.containsKey("smartstat") || equip.containsKey("ti") ||equip.containsKey("dualDuct") || (equip.containsKey("emr") && (equip.containsKey("smartnode") || equip.containsKey("helionode")))) {
 				return false;
 			}
-			return true;
-		}
+
+            return !ConnectNodeUtil.Companion.isEmptyConnectNodeDevice(seletedModules.get(0), ccuHsApi);
+        }
 		// Non DM profiles -- visibility false
 		else if (equip.containsKey("smartstat") || equip.containsKey("ti") || equip.containsKey("dualDuct") || (equip.containsKey("emr") && (equip.containsKey("smartnode") || equip.containsKey("helionode")))) {
 			return false;

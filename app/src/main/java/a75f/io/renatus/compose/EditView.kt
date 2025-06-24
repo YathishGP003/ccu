@@ -16,13 +16,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -682,4 +679,18 @@ fun UnderlinedInput(
             modifier = Modifier.fillMaxWidth()
         )
     }
+}
+
+
+@Composable
+fun HintedEditableText(valueTypeIsNumber: Boolean, hintText: String, onEditEvent : (String) -> Unit) {
+    var keyboardOptions = KeyboardOptions.Default.copy()
+    if(valueTypeIsNumber) {
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+    }
+    UnderlinedInput(
+        placeholder = hintText,
+        onTextChanged = onEditEvent,
+        keyboardOptions = keyboardOptions,
+    )
 }

@@ -183,9 +183,11 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                 val model = BacnetModel()
                 model.equipDevice.value = equipmentDevice[0]
                 model.selectAllParameters.value = isAllParamsSelectedBacNet(equipmentDevice[0])
+                displayInUi.value = model.selectAllParameters.value
                 model.points = getBacnetPoints(equipmentDevice[0].points.toImmutableList()) //equipmentDevice[0].points
                 bacnetModel.value = model
                 bacnetModel.value.isDevicePaired = true
+                bacnetModel.value.version.value = bacnetProfile.equip.tags.get("version").toString()
 
 
                 model.equipDevice.value.bacnetConfig?.let { config ->
@@ -291,7 +293,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                             model.jsonContent = response
                             model.equipDevice.value = equipmentDevice
                             model.version.value = version
-                            model.points = getBacnetPoints(equipmentDevice.points)
+                            model.points = getBacnetPoints(equipmentDevice.points, isPaired = false)
                             bacnetModel.value = model
 
                         } else {
@@ -338,12 +340,18 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun updateSelectAll(b: Boolean, item: BacnetPointState) {
+        var isAllSelected = true
         bacnetModel.value.equipDevice.value.points.forEach { bacnetPoint ->
-            if(bacnetPoint.id == item.id){
+            if(bacnetPoint.id == item.id &&
+                bacnetPoint.protocolData?.bacnet?.objectId == item.protocolData?.bacnet?.objectId){
                 CcuLog.d(TAG, "updateSelectAll--${bacnetPoint.id}--${item.id} value== $b")
                 bacnetPoint.protocolData?.bacnet?.displayInUIDefault  = b
             }
+            isAllSelected = isAllSelected && (bacnetPoint.protocolData?.bacnet?.displayInUIDefault == true ||
+                    (bacnetPoint.equipTagNames.contains("heartbeat") &&
+                            bacnetPoint.equipTagNames.contains("sensor")))
         }
+        displayInUi.value = isAllSelected
     }
 
     fun showErrorDialog(context: Context, message: String, wantToDismiss: Boolean) {
@@ -1030,6 +1038,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                     if (bacNetPoint.disName.equals(it.disName,true)) {
                         bacNetPoint.displayInUi.value = it.displayInUi.value
                         bacNetPoint.protocolData?.bacnet?.displayInUIDefault = it.displayInUi.value
+                        bacNetPoint.isSchedulable.value = it.isSchedulable.value
                     }
                 }
             }
@@ -1039,6 +1048,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                     if (bacNetPoint.domainName.equals(it.disName.replace(" ", "").toLowerCase(), true) || bacNetPoint.name.equals(it.disName, true)) {
                         bacNetPoint.displayInUi.value = it.displayInUi.value
                         bacNetPoint.protocolData?.bacnet?.displayInUIDefault = it.displayInUi.value
+                        bacNetPoint.isSchedulable.value = it.isSchedulable.value
                     }
                 }
             }
@@ -1065,5 +1075,14 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch(Dispatchers.Main) {
             _isDisabled.value = true
         }
+    }
+
+    fun updateSchedulableEnableState(b: Boolean, item: BacnetPointState) {
+        bacnetModel.value.equipDevice.value.points.find { bacnetPoint -> (bacnetPoint.id == item.id &&
+                bacnetPoint.protocolData?.bacnet?.objectId == item.protocolData?.bacnet?.objectId) }
+            ?. let { bacnetPoint ->
+                CcuLog.d(TAG, "update SchedulableEnable State --${bacnetPoint.id}--${item.id} value== $b")
+                bacnetPoint.isSchedulable  = b
+            }
     }
 }

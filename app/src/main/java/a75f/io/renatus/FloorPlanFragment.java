@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.bo.building.NodeType.CONNECTNODE;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.generateBacnetIdForRoom;
 
 import android.annotation.SuppressLint;
@@ -62,6 +63,9 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.domain.api.DomainName;
+import a75f.io.domain.api.DomainName;
+import a75f.io.domain.devices.ConnectNodeDevice;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
@@ -69,14 +73,17 @@ import a75f.io.logic.L;
 import a75f.io.logic.TaskManager;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
+import a75f.io.logic.connectnode.ConnectNodeEntitiesBuilder;
 import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.renatus.bacnet.BacNetSelectModelView;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
+import a75f.io.renatus.profiles.connectnode.ConnectNodeFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatCpuFragment;
@@ -473,27 +480,44 @@ public class FloorPlanFragment extends Fragment {
     private void updateModules(Zone zone) {
         CcuLog.d(L.TAG_CCU_UI, "Zone Selected " + zone.getDisplayName());
         List<Equip> zoneEquips = HSUtil.getEquipsWithoutSubEquips(zone.getId());
+        HashMap<Object, Object> connectNodeDevice = ConnectNodeUtil.Companion.getConnectNodeForZone(zone.getId(), CCUHsApi.getInstance());
         if (zoneEquips != null && (!zoneEquips.isEmpty())) {
-            mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(zoneEquips), moduleListActionMenuListener.seletedModules, new ArrayList<>());
+            mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(zoneEquips, connectNodeDevice), moduleListActionMenuListener.seletedModules, new ArrayList<>());
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     moduleListView.setAdapter(mModuleListAdapter);
                 }
             });
+        } else if (ConnectNodeUtil.Companion.isZoneContainingEmptyConnectNode(zone.getId(), CCUHsApi.getInstance())) {
+            mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(),
+                    R.layout.listviewitem, createAddressListByDevice(connectNodeDevice),
+                    moduleListActionMenuListener.seletedModules, new ArrayList<>());
+            getActivity().runOnUiThread(() -> moduleListView.setAdapter(mModuleListAdapter));
         } else {
             moduleListView.setAdapter(null);
         }
     }
 
-    private ArrayList<String> createAddressList(List<Equip> equips) {
+    private ArrayList<String> createAddressList(List<Equip> equips, HashMap<Object, Object> connectNodeDevice) {
         equips.sort(new ModuleComparator());
         ArrayList<String> arrayList = new ArrayList<>();
+
+        if (!connectNodeDevice.isEmpty()) {
+            arrayList.add(connectNodeDevice.get("addr").toString());
+            return arrayList;
+        }
 
         for (Equip e : equips) {
             arrayList.add(e.getGroup());
 
         }
+        return arrayList;
+    }
+
+    private ArrayList<String> createAddressListByDevice(HashMap<Object, Object> connectNodeDevice) {
+        ArrayList<String> arrayList = new ArrayList<>();
+        arrayList.add(connectNodeDevice.get("addr").toString() + " (No model configured)");
         return arrayList;
     }
 
@@ -981,12 +1005,14 @@ public class FloorPlanFragment extends Fragment {
 
         Zone selectedZone = getSelectedZone();
         ArrayList<Equip> zoneEquips = HSUtil.getEquips(selectedZone.getId());
+        ArrayList<Device> devices = HSUtil.getDevices(selectedZone.getId());
         boolean isPLCPaired = false;
         boolean isEMRPaired = false;
         boolean isCCUPaired = false;
         boolean isPaired = false;
         boolean isMonitoringPaired = false;
         boolean isOTNPaired = false;
+        boolean isConnectNodePaired;
 
         if (!zoneEquips.isEmpty()) {
             isPaired = true;
@@ -1014,7 +1040,9 @@ public class FloorPlanFragment extends Fragment {
             }
         }
 
-        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isMonitoringPaired && !isOTNPaired) {
+        isConnectNodePaired = devices.size() > 0 && devices.get(0).getDomainName() != null && devices.get(0).getDomainName().equalsIgnoreCase(DomainName.connectNodeDevice);
+
+        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isMonitoringPaired && !isOTNPaired && !isConnectNodePaired) {
             short meshAddress = L.generateSmartNodeAddress();
             if (mFloorListAdapter.getSelectedPostion() == -1) {
             } else {
@@ -1043,6 +1071,9 @@ public class FloorPlanFragment extends Fragment {
             }
             if (isOTNPaired) {
                 Toast.makeText(getActivity(), "OTN is already paired in this zone", Toast.LENGTH_LONG).show();
+            }
+            if (isConnectNodePaired) {
+                Toast.makeText(getActivity(), "Connect Node is already paired in this zone", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1098,9 +1129,11 @@ public class FloorPlanFragment extends Fragment {
 
         Floor floor = getSelectedFloor();
         Zone zone = getSelectedZone();
-        ZoneProfile profile = L.getProfile(Long.parseLong(nodeAddress));
-        if (profile != null) {
+        boolean isConnectNode = nodeAddress.contains("No model configured") ||
+                !ConnectNodeUtil.Companion.getConnectNodeForZone(zone.getId(), CCUHsApi.getInstance()).isEmpty();
 
+        ZoneProfile profile = isConnectNode ? null : L.getProfile(Long.parseLong(nodeAddress));
+        if (profile != null) {
             switch (profile.getProfileType()) {
                 case VAV_REHEAT:
                 case VAV_SERIES_FAN:
@@ -1243,6 +1276,10 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(BacNetSelectModelView.Companion.newInstance(nodeAddress, zone.getId(), floor.getId(), profile.getProfileType(), ModbusLevel.ZONE,""), BacNetSelectModelView.Companion.getID());
                     break;
             }
+
+        } else if (isConnectNode) {
+            showDialogFragment(ConnectNodeFragment.Companion.newInstance(Short.parseShort(ConnectNodeUtil.Companion.extractNodeAddressIfConnectPaired(nodeAddress)), zone.getId(),
+                    floor.getId(), CONNECTNODE, ProfileType.CONNECTNODE).setIsNewPairing(false), ConnectNodeFragment.Companion.getIdString());
         } else
             Toast.makeText(getActivity(), "Zone profile is empty, recheck your DB", Toast.LENGTH_LONG).show();
 

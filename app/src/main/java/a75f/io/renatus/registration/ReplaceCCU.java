@@ -478,6 +478,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         ReplaceCCUTracker replaceCCUTracker = new ReplaceCCUTracker();
         floorAndZoneIds = restoreCCU.getEquipDetailsOfCCU(ccu.getCcuId(), ccu.getSiteCode(),
                 replaceCCUTracker.getEditor(), isReplaceClosed);
+        CcuLog.i(TAG_CCU_REPLACE, "fetched floorAndZoneIds: " + floorAndZoneIds);
         ConcurrentHashMap<String, ?> currentReplacementProgress =
                 new ConcurrentHashMap<> (replaceCCUTracker.getReplaceCCUStatus());
         restoreCCU.restoreCCUDevice(ccu);

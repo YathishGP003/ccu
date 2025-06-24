@@ -48,6 +48,8 @@ public class OTAUpdateHandlerService extends Service {
                 case Globals.IntentActions.OTA_UPDATE_COMPLETE:
                     stopOtaUpdateTimeoutTimer();
                     break;
+                case Globals.IntentActions.SEQUENCE_UPDATE_START:
+                    CcuLog.i(L.TAG_CCU_OTA_PROCESS, "SEQUENCE_UPDATE_START");
             }
         }
     };
@@ -86,6 +88,7 @@ public class OTAUpdateHandlerService extends Service {
         filter.addAction(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT);
         filter.addAction(Globals.IntentActions.OTA_UPDATE_TIMED_OUT);
         filter.addAction(Globals.IntentActions.OTA_UPDATE_COMPLETE);
+        filter.addAction(Globals.IntentActions.SEQUENCE_UPDATE_START);
 
         registerReceiver(mOtaUpdateEventReceiver, filter);
     }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.RadioButton
@@ -80,9 +81,9 @@ fun RadioButtonComposeSelectModelCustom(radioOptions: List<String>, default: Int
     }
     Row(modifier = Modifier
         .selectableGroup()
-        .fillMaxWidth(),
+        .wrapContentWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start,
+        horizontalArrangement = Arrangement.spacedBy(36.dp),
     ) {
         radioOptions.forEach { label ->
             Row(
@@ -96,10 +97,9 @@ fun RadioButtonComposeSelectModelCustom(radioOptions: List<String>, default: Int
                             onSelect(selectedItem)
                         }, role = Role.RadioButton
                     )
-                    .padding(horizontal = 16.dp),
             ) {
                 RadioButton(
-                    modifier = Modifier.padding(end = 10.dp),
+                    modifier = Modifier.padding(end = 14.dp),
                     selected = (selectedItem == label),
                     onClick = null,
                     colors = RadioButtonDefaults.colors(

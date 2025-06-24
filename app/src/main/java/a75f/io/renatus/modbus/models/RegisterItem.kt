@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 class RegisterItem{
     var param = mutableStateOf(Parameter())
     val displayInUi = mutableStateOf(false)
+    val schedulable = mutableStateOf(false)
 
 }
 class RegisterItemForSubEquip{

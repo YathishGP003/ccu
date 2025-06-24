@@ -62,6 +62,9 @@ object ModelLoader {
     fun getConnectModuleDeviceModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_CONNECT_DEVICE)
     }
+    fun getConnectNodeDeviceModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_CONNECT_NODE_DEVICE)
+    }
     fun getVavStageRtuModelDef() : ModelDirective {
         return ModelCache.getModelById(MODEL_VAV_STAGED_RTU)
     }

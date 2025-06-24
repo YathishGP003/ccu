@@ -1,6 +1,7 @@
 package a75f.io.api.haystack.mock;
 
 import org.projecthaystack.HDateTime;
+import org.projecthaystack.HDict;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
@@ -159,5 +160,9 @@ public class MockCcuHsApi extends CCUHsApi {
     };
     public SyncStatusService getSyncStatusService() {
         return syncStatusService;
+    }
+
+    public void addHDict(String id, HDict dict) {
+        tagsDb.addHDict(id,dict);
     }
 }

@@ -29,5 +29,6 @@ data class BacnetPointState(
     @SerializedName("displayInUi")  var displayInUi: MutableState<Boolean> = mutableStateOf(false),
     @SerializedName("disName") val disName: String = "",
     @SerializedName("defaultWriteLevel") var defaultWriteLevel: String = "8",
+    var isSchedulable: MutableState<Boolean> = mutableStateOf(false),
 )
 

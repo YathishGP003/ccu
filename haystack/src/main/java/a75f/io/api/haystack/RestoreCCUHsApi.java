@@ -933,5 +933,47 @@ public class RestoreCCUHsApi {
         return ccuEquipMap.containsKey("domainName") && ccuEquipMap.get("domainName").equals(domainName);
     }
 
+    public HGrid getConnectNodeDevice(String address, RetryCountCallback retryCountCallback) {
+        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HDict ccuDict = new HDictBuilder().add("filter",
+                "device and not ccu and addr == " + StringUtils.prependIfMissing(address,"@")).toDict();
+        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
+    }
+
+    public HGrid getAllConnectNodes(String ccuId, String siteCode, RetryCountCallback retryCountCallback) {
+
+        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HDict ccuDict = new HDictBuilder().add("filter",
+                "domainName == \"connectNodeDevice\" and ccuRef == "+ ccuId +" and siteRef == "+ siteCode).toDict();
+        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
+    }
+    public void importPointScheduleAndEvent(RetryCountCallback retryCountCallback) {
+        CcuLog.i(TAG, " Import point schedule/event started");
+        Site site = CCUHsApi.getInstance().getSite();
+        HClient hClient =new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        if (site != null && site.getOrganization() != null) {
+            String org = site.getOrganization();
+            HDict scheduleDicts = new HDictBuilder().add("filter",
+                    "point and (schedule or event) organization == \""+org+"\" and " +
+                            "(not siteRef or siteRef == \"" + site.getId().replace("@","") + "\")").toDict();
+            CcuLog.d(TAG, "scheduleDicts: query----"+ ("point and (schedule or event) organization == \""+org+"\" and " +
+                            "(not siteRef or siteRef == \"" + site.getId().replace("@","") + "\")"));
+            HGrid scheduleGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(scheduleDicts),
+                    retryCountCallback);
+
+            if (scheduleGrid == null) {
+                CcuLog.d(TAG, "ScheduleGrid is null");
+                return;
+            }
+
+            Iterator it = scheduleGrid.iterator();
+            while (it.hasNext()) {
+                HRow row = (HRow) it.next();
+                CcuLog.d(TAG, "scheduleDicts: row----"+ row.get("id").toString());
+                tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
+            }
+        }
+        CcuLog.i(TAG, "Import point schedule/event completed");
+    }
 }
 

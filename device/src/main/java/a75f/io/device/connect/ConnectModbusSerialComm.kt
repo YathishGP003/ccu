@@ -8,6 +8,7 @@ import a75f.io.logic.BuildConfig
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.util.getConnectEquip
 import com.x75f.modbus4j.msg.ModbusResponse
+import com.x75f.modbus4j.msg.ReadHoldingRegistersRequest
 import com.x75f.modbus4j.msg.ReadInputRegistersRequest
 import com.x75f.modbus4j.msg.WriteRegistersRequest
 import com.x75f.modbus4j.serial.rtu.RtuMessageRequest
@@ -48,6 +49,16 @@ object ConnectModbusSerialComm {
     private fun readSensorBusValues() {
         val request = ReadInputRegistersRequest(ADVANCED_AHU_CONNECT1_SLAVE_ADDR, SENSOR_BUS_START_ADDR, SENSOR_BUS_REG_COUNT)
         sendRequestAndLockComm(RtuMessageRequest(request), ConnectModbusOps.READ_SENSOR_BUS_VALUES)
+    }
+
+    private fun readDiagnosticInfo(slaveAddr: Int) {
+        val request = ReadInputRegistersRequest(slaveAddr, DIAGONASTIC_INFO_START_ADDR, DIAGONASTIC_INFO_REG_COUNT)
+        sendRequestAndLockComm(RtuMessageRequest(request), ConnectModbusOps.READ_DIAGNOSTIC_INFO)
+    }
+
+    private fun readPointInfo(slaveAddr: Int, length: Int, startAddress: Int) {
+        val request = ReadHoldingRegistersRequest(slaveAddr, startAddress, length)
+        sendRequestAndLockComm(RtuMessageRequest(request), ConnectModbusOps.READ_SEQUENCE_REG_INFO)
     }
 
     // Read 8 Float values over 8 registers
@@ -117,6 +128,19 @@ object ConnectModbusSerialComm {
     fun getRegularUpdate() {
         readSensorBusValues()
         readUniversalInputMappedValues()
+    }
+
+    @JvmStatic
+    fun getDiagnosticInfo(slaveAddr : Int) {
+        readDiagnosticInfo(slaveAddr)
+    }
+
+    @JvmStatic
+    fun getPointInfo(info : List<Triple<String, String, String>>, length: Int, slaveAddr : Int) {
+        info.forEach {
+            CcuLog.d(L.TAG_CCU_SERIAL_CONNECT, "Point Info: ${it.first}, ${it.second}, ${it.third}")
+        }
+        readPointInfo(slaveAddr, length, info[0].third.toInt()) // Assuming you want to read the first point info
     }
 
     @JvmStatic

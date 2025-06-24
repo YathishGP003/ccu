@@ -33,6 +33,7 @@ import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatSettingsUtil;
 import a75f.io.device.mesh.mystat.MyStatMsgSender;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedCnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
@@ -105,6 +106,8 @@ public class MeshNetwork extends DeviceNetwork
                         }
                         else if (d.getMarkers().contains("hyperstatsplit")) {
                             deviceType = NodeType.HYPERSTATSPLIT;
+                        } else if(d.getMarkers().contains("connectModule")) {
+                            deviceType = NodeType.CONNECTNODE;
                         }
                         switch (deviceType) {
                             case SMART_NODE:
@@ -263,7 +266,16 @@ public class MeshNetwork extends DeviceNetwork
                                     HyperSplitMessageSender.sendControlMessage(Integer.parseInt(d.getAddr()), d.getEquipRef());
 
                                 }
+                                break;
 
+                            case CONNECTNODE:
+                                if (bSeedMessage) {
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN SEEDS=====================" + zone.getId());
+                                    CcuToCmOverUsbDatabaseSeedCnMessage_t seedMessage = LConnectNode.getSeedMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), "connect");
+                                    tempLogdStructAsJson(seedMessage);
+                                    sendStructToCM(seedMessage);
+                                }
+                                break;
                         }
                     }
                 }

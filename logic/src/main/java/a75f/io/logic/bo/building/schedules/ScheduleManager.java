@@ -51,6 +51,7 @@ import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
+import a75f.io.logic.bo.building.bacnet.BacnetProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.erm.EmrProfile;
 import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.monitoring.HyperStatV2MonitoringProfile;
@@ -241,6 +242,7 @@ public class ScheduleManager {
                     || profile instanceof HyperStatV2MonitoringProfile
                     || profile instanceof PlcProfile
                     || profile instanceof EmrProfile
+                    || profile instanceof BacnetProfile
             ) {
                 continue;
             }
@@ -308,7 +310,7 @@ public class ScheduleManager {
         boolean drActivated = DemandResponseMode.isDRModeActivated();
         CcuLog.i(TAG_CCU_SCHEDULER, "updateOccupancy : ScheduleManager");
         for (ZoneProfile profile : zoneProfiles) {
-            if (profile instanceof ModbusProfile) {
+            if (profile instanceof ModbusProfile || profile instanceof BacnetProfile) {
                 continue;
             }
             try {
@@ -385,7 +387,7 @@ public class ScheduleManager {
 
         for (ZoneProfile profile : zoneProfiles) {
             try {
-                if (profile instanceof ModbusProfile || profile instanceof HyperStatV2MonitoringProfile) {
+                if (profile instanceof ModbusProfile || profile instanceof BacnetProfile || profile instanceof HyperStatV2MonitoringProfile) {
                     continue;
                 }
                 EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
@@ -428,6 +430,7 @@ public class ScheduleManager {
                             || profile instanceof HyperStatV2MonitoringProfile
                             || profile instanceof PlcProfile
                             || profile instanceof EmrProfile
+                            || profile instanceof BacnetProfile
                     ) {
                         continue;
                     }

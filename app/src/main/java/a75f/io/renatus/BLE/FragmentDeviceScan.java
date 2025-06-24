@@ -152,6 +152,11 @@ public class FragmentDeviceScan extends BaseDialogFragment
                     return true;
                 }
                 break;
+            case SerialConsts.CONNECTNODE_NAME :
+                if(mNodeType == NodeType.CONNECTNODE){
+                    return true;
+                }
+                break;
        }
         return false;
     }
@@ -316,7 +321,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
 
     private boolean isDeviceSupportsAlternatePairing() {
         return mNodeType == NodeType.SMART_NODE || mNodeType.equals(NodeType.HELIO_NODE) || mNodeType.equals(NodeType.MYSTAT) ||
-                mNodeType.equals(NodeType.HYPER_STAT) || mNodeType.equals(NodeType.HYPERSTATSPLIT);
+                mNodeType.equals(NodeType.HYPER_STAT) || mNodeType.equals(NodeType.HYPERSTATSPLIT) || mNodeType.equals(NodeType.CONNECTNODE);
     }
 
 
@@ -353,12 +358,17 @@ public class FragmentDeviceScan extends BaseDialogFragment
             ScanFilter mystat = new ScanFilter.Builder()
                     .setDeviceName(SerialConsts.MYSTAT_NAME)
                     .build();
+            ScanFilter connectNode = new ScanFilter.Builder()
+                    .setDeviceName(SerialConsts.CONNECTNODE_NAME)
+                    .build();
+
             filters.add(smartNode);
             filters.add(smartStat);
             filters.add(hyperStat);
             filters.add(helioNode);
             filters.add(hyperStatSplit);
             filters.add(mystat);
+            filters.add(connectNode);
 
             ScanSettings scanSettings = new ScanSettings.Builder()
                     .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)

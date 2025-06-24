@@ -1,25 +1,55 @@
 package a75f.io.renatus.compose
 
+import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.renatus.R
+import a75f.io.renatus.compose.ComposeUtil.Companion.myFontFamily
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
 import a75f.io.renatus.profiles.system.advancedahu.Option
 import a75f.io.renatus.util.CCUUiUtil
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.snapshots.SnapshotMutableState
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.MutableState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.style.TextAlign
 
 /**
  * Created by Manjunath K on 16-08-2023.
@@ -228,6 +258,371 @@ fun StagedFanConfiguration(
                     items = itemList,
                     unit = unit,
                     itemSelected = { onlabel2Selected(it) }, viewModel = viewModel)
+            }
+        }
+    }
+}
+
+@Composable
+fun DividerLine(modifier: Modifier) {
+    Box(
+        modifier = modifier.background(colorResource(id = R.color.listview_divider_color)),
+    )
+}
+
+@Composable
+fun TableHeaderRow(
+    columnList: List<String>,
+    toggleCallbackMap: Map<String, Pair<Boolean, (Boolean) -> Unit>> = emptyMap(),
+    onWidthMeasured: (Pair<Int, Float>) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = colorResource(id = R.color.tuner_header_bg))
+            .height(50.dp),
+        horizontalArrangement = Arrangement.Start
+    ) {
+        for (i in columnList.indices) {
+            val column = columnList[i]
+            var boxModifier = Modifier.weight(1f)
+
+            if (i > 0) {
+                DividerLine(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .height(20.dp)
+                        .align(Alignment.CenterVertically)
+                )
+
+                boxModifier = Modifier
+                    .wrapContentWidth(align = Alignment.CenterHorizontally)
+            }
+
+            Box(
+                modifier = boxModifier
+                    .padding(horizontal = 20.dp)
+                    .align(Alignment.CenterVertically)
+                    .onGloballyPositioned { coordinates ->
+                        val widthPx = coordinates.size.width.toFloat()
+                        onWidthMeasured(Pair(i, widthPx))
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                toggleCallbackMap[column]?.let {
+                    TextViewWithToggle(
+                        text = column,
+                        defaultSelection = it.first,
+                        onEnabled = it.second
+                    )
+                } ?: run {
+                    SubTitleNoPadding(column)
+                }
+            }
+        }
+    }
+}
+
+fun trimStringByCharacterCount(input: String): String {
+    val maxLength = 30
+    if (input.length > maxLength) {
+        return input.substring(0, maxLength)
+    } else {
+        return input
+    }
+}
+
+@Composable
+fun FormattedTableWithoutHeader(
+    rowNo: Int,
+    columnWidthList: SnapshotStateList<Float>,
+    rowDataList: List<Pair<String, Any?>>
+) {
+
+    var backgroundColor = Color.White
+    val hasNestedTable = rowDataList[0].first == "text_with_dropdown"
+
+    if (!hasNestedTable) {
+        if (rowNo % 2 != 0) {
+            backgroundColor = colorResource(id = R.color.tuner_bg_grey)
+        }
+    } else if (rowNo > 0) {
+        Divider(color = Color.Gray, modifier = Modifier.padding(0.dp, 5.dp, 0.dp, 5.dp))
+    }
+
+    Row(
+        modifier = Modifier.background(backgroundColor),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        for (i in rowDataList.indices) {
+            val columnWidth = with(LocalDensity.current) { (columnWidthList[i]).toDp() }
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .width(columnWidth)
+                    .defaultMinSize(minHeight = 50.dp),
+                contentAlignment = Alignment.Center
+             ) {
+                when (rowDataList[i].first) {
+                    "text" -> {
+                        val textUIData = rowDataList[i].second as Pair<String, Alignment>
+                        val cellText = textUIData.first
+                        LabelTextViewForTable(
+                            text = cellText,
+                            modifier = Modifier.align(textUIData.second),
+                            fontSize = 22
+                        )
+                    }
+
+                    "nestedText" -> {
+                        val textUIData = rowDataList[i].second as Triple<String, Alignment, Dp>
+                        val cellText = trimStringByCharacterCount(textUIData.first)
+                        LabelTextViewForTable(
+                            text = cellText, modifier = Modifier
+                                .align(textUIData.second)
+                                .padding(start = textUIData.third), fontSize = 22
+                        )
+                    }
+
+                    "toggle" -> {
+                        val toggleCallbackMap =
+                            rowDataList[i].second as Pair<Boolean, (Boolean) -> Unit>
+                        ToggleButton(defaultSelection = toggleCallbackMap.first, Modifier) {
+                            toggleCallbackMap.second(it)
+                        }
+                    }
+
+                    "text_with_dropdown" -> {
+                        val data = rowDataList[i].second as Triple<String, List<Int>, () -> Unit>
+                        val text = data.first
+                        val imageList = data.second
+                        val imageClickEvent = data.third
+                        TextViewWithDropdown(
+                            modifier = Modifier.align(Alignment.CenterStart),
+                            imageList = imageList,
+                            text = text
+                        ) {
+                            imageClickEvent()
+                        }
+                    }
+
+                    "grouped_columns_with_radio_button" -> {
+                        val radioData =
+                            rowDataList[i].second as Triple<Triple<List<String?>, Int, List<Int>>, Pair<Int, SnapshotMutableState<Int>>, (Int) -> Unit>
+                        val radioTexts = radioData.first.first
+                        val modelDefaultState = radioData.first.second
+                        val radioOptions = radioData.first.third
+
+                        val nestedRowIndex = radioData.second.first
+                        val rememberedSelectedItem = radioData.second.second
+
+                        val onSelect = radioData.third
+
+                        RadioButtonComposeBacnetTerminal(
+                            modifier = Modifier.align(Alignment.CenterStart),
+                            groupedRowIndex = nestedRowIndex,
+                            radioTexts = radioTexts,
+                            radioOptions = radioOptions,
+                            default = modelDefaultState,
+                            selectedItem = rememberedSelectedItem,
+                            onSelect = onSelect
+                        )
+                    }
+
+                    "none" -> {
+                        // Do nothing
+                    }
+
+                    else -> {
+                        // Handle other types if needed
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ModelSelector(
+    titleText: String,
+    isPaired: Boolean,
+    modelName: MutableState<String>,
+    modelEquipVersion: String,
+    onClickEvent: () -> Unit,
+    otherUiComposable: @Composable (() -> Unit)? = null
+) {
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .padding(top = 40.dp)
+    ) {
+        Row(
+            modifier = Modifier.align(Alignment.Center),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier
+                    .wrapContentSize(),
+            ) {
+                HeaderLeftAlignedTextViewNew(
+                    titleText,
+                    fontSize = 18,
+                    Modifier.padding(bottom = 0.dp)
+                )
+                Row {
+                    if (isPaired) {
+                        TextViewWithClickNoLeadingSpace(
+                            text = modelName,
+                            onClick = { },
+                            enableClick = false,
+                            isCompress = false
+                        )
+                    } else {
+                        TextViewWithClickNoLeadingSpace(
+                            text = modelName,
+                            onClick = {
+                                onClickEvent()
+                            },
+                            enableClick = true, isCompress = false
+                        )
+                    }
+                    if (isPaired || modelEquipVersion.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .fillMaxHeight()
+                                .align(Alignment.Bottom)
+                                .padding(bottom = 20.dp, start = 8.dp)
+                        ) {
+                            HeaderTextView(
+                                "V $modelEquipVersion",
+                                fontSize = 18,
+                                fontWeight = FontWeight.Normal
+                            )
+                        }
+                    }
+                }
+
+                otherUiComposable?.let {
+                    it()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun annotatedStringBySpannableString(text: String): AnnotatedString {
+    return buildAnnotatedString {
+        append(text)
+        withStyle(
+            style = SpanStyle(
+                color = Color.Red,
+                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                baselineShift = BaselineShift(0.3f)
+            )
+        ) {
+            append("*")
+        }
+    }
+}
+
+@Composable
+fun annotatedStringBySpannableString(text: String, delimiter: String): AnnotatedString {
+    return buildAnnotatedString {
+        val delimiterIndex = text.indexOf(delimiter)
+        if(delimiterIndex != -1) {
+            withStyle(
+                style = SpanStyle(
+                    fontFamily = myFontFamily,
+                    fontWeight = FontWeight.Bold,
+                )
+            ) {
+                append(text.substring(0, delimiterIndex))
+            }
+            append(text.substring(delimiterIndex))
+        } else {
+            append(text)
+        }
+    }
+}
+
+@Composable
+fun ButtonListRow(textActionPairMap: Map<String, Pair<Boolean, () -> Unit>>) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(end = 20.dp, bottom = 40.dp, top = 40.dp),
+        horizontalArrangement = Arrangement.End
+    ) {
+        textActionPairMap.entries.forEachIndexed { index, entry ->
+            val buttonText = entry.key
+            val buttonEnable = entry.value.first
+            val buttonAction = entry.value.second
+            if (index > 0) {
+                DividerLine(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .height(20.dp)
+                        .align(Alignment.CenterVertically)
+                )
+            }
+            SaveTextView(text = buttonText, isChanged = buttonEnable, fontSize = 22f) {
+                buttonAction()
+            }
+        }
+    }
+}
+
+@Composable
+fun TableHeaderRowByWeight(
+    columnList: List<String>,
+    weightMap: Map<Int, Float>,
+    toggleCallbackMap: Map<String, Pair<Boolean, (Boolean) -> Unit>> = emptyMap(),
+    onWidthMeasured: (Pair<Int, Float>) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = colorResource(id = R.color.tuner_header_bg))
+            .height(50.dp),
+        horizontalArrangement = Arrangement.Start
+    ) {
+        for (i in columnList.indices) {
+            val column = columnList[i]
+            var boxModifier = Modifier.weight(weightMap[i]!!)
+
+            if (i > 0) {
+                DividerLine(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .height(20.dp)
+                        .align(Alignment.CenterVertically)
+                )
+
+//                boxModifier = Modifier
+//                    .wrapContentWidth(align = Alignment.CenterHorizontally)
+            }
+
+            Box(
+                modifier = boxModifier
+                    .padding(horizontal = 20.dp)
+                    .align(Alignment.CenterVertically)
+                    .onGloballyPositioned { coordinates ->
+                        val widthPx = coordinates.size.width.toFloat()
+                        onWidthMeasured(Pair(i, widthPx))
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                toggleCallbackMap[column]?.let {
+                    TextViewWithToggle(
+                        text = column,
+                        defaultSelection = it.first,
+                        onEnabled = it.second
+                    )
+                } ?: run {
+                    SubTitleNoPadding(column)
+                }
             }
         }
     }

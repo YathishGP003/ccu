@@ -17,6 +17,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
+import a75f.io.renatus.profiles.connectnode.ConnectNodeFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
@@ -123,9 +124,21 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                 manualPairingLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
         }
+        else if (mNodeType == NodeType.CONNECTNODE) {
+            title.setText(R.string.title_pair_cn_manual);
+            if (CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
+                imageView.setImageResource(R.drawable.cn_alt_pairing_carrier);
+            } else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
+                imageView.setImageResource(R.drawable.cn_alt_pairing_75f);
+            } else {
+                imageView.setImageResource(R.drawable.cn_alt_pairing_75f);
+                manualPairingLayout.setBackgroundResource(R.drawable.bg_logoscreen);
+            }
+        }
 
         if(CCUUiUtil.isCarrierThemeEnabled(requireContext())
-                || mNodeType == NodeType.HYPERSTATSPLIT || mNodeType == NodeType.MYSTAT || mNodeType == NodeType.HYPER_STAT)
+                || mNodeType == NodeType.HYPERSTATSPLIT || mNodeType == NodeType.MYSTAT ||
+                mNodeType == NodeType.HYPER_STAT || mNodeType == NodeType.CONNECTNODE)
         {
             // To update pairing address in carrier themed UI we need to add some extra margin
             // For Hyperstat profile we have added some extra margins as the image res didnt fit for SN and HS
@@ -135,7 +148,7 @@ public class AlternatePairingFragment extends BaseDialogFragment {
             if (mNodeType == NodeType.HYPER_STAT ) {
                 leftMargin = 525;
                 topMargin = 250;
-            } else if (mNodeType == NodeType.MYSTAT) {
+            } else if (mNodeType == NodeType.MYSTAT || mNodeType == NodeType.CONNECTNODE) {
                 leftMargin = 490;
                 topMargin = 255;
             }
@@ -196,15 +209,15 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                 showDialogFragment(OAOProfileFragment.Companion
                         .newInstance(mPairingAddress, mRoomName, mFloorName, mNodeType,
                                 mProfileType), OAOProfileFragment.Companion.getID());
-                    break;
+                break;
             case EMR:
-                    showDialogFragment(FragmentEMRConfiguration
-                            .newInstance(mPairingAddress, mRoomName, mNodeType, mFloorName),
-                            FragmentEMRConfiguration.ID);
-                    break;
+                showDialogFragment(FragmentEMRConfiguration
+                                .newInstance(mPairingAddress, mRoomName, mNodeType, mFloorName),
+                        FragmentEMRConfiguration.ID);
+                break;
             case PLC:
                 showDialogFragment(PlcProfileConfigFragment.Companion
-                            .newInstance(mPairingAddress, mRoomName, mFloorName, mNodeType, ProfileType.PLC),
+                                .newInstance(mPairingAddress, mRoomName, mFloorName, mNodeType, ProfileType.PLC),
                         PlcProfileConfigFragment.Companion.getID());
                 break;
             case HYPERSTAT_MONITORING:
@@ -227,11 +240,11 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                 break;
             case HYPERSTAT_TWO_PIPE_FCU:
                 showDialogFragment(HyperStatV2Pipe2Fragment.newInstance(mPairingAddress,mRoomName,mFloorName,
-                                mNodeType,ProfileType.HYPERSTAT_TWO_PIPE_FCU), HyperStatV2Pipe2Fragment.ID);
+                        mNodeType,ProfileType.HYPERSTAT_TWO_PIPE_FCU), HyperStatV2Pipe2Fragment.ID);
                 break;
             case HYPERSTATSPLIT_CPU:
                 showDialogFragment(HyperStatSplitCpuFragment.Companion.newInstance(mPairingAddress,mRoomName,mFloorName,
-                                mNodeType,ProfileType.HYPERSTATSPLIT_CPU), HyperStatSplitCpuFragment.Companion.getID());
+                        mNodeType,ProfileType.HYPERSTATSPLIT_CPU), HyperStatSplitCpuFragment.Companion.getID());
                 break;
             case BYPASS_DAMPER:
                 showDialogFragment(BypassConfigFragment.Companion.newInstance(mPairingAddress, mRoomName,
@@ -249,6 +262,9 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                 showDialogFragment(MyStatHpuFragment.Companion.newInstance(mPairingAddress, mRoomName,
                         mFloorName, mNodeType, mProfileType) , BypassConfigFragment.Companion.getID());
                 break;
+            case CONNECTNODE:
+                showDialogFragment(ConnectNodeFragment.Companion.newInstance(mPairingAddress, mRoomName,
+                        mFloorName, mNodeType, mProfileType), ConnectNodeFragment.Companion.getIdString());
         }
     }
 

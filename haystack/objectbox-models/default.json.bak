@@ -296,7 +296,7 @@
     },
     {
       "id": "4:648221881845039292",
-      "lastPropertyId": "19:3341082453701738453",
+      "lastPropertyId": "20:1448656757372860392",
       "name": "Parameter",
       "properties": [
         {
@@ -394,6 +394,12 @@
           "id": "19:3341082453701738453",
           "name": "wordOrder",
           "type": 9
+        },
+        {
+          "id": "20:1448656757372860392",
+          "name": "isSchedulable",
+          "type": 1,
+          "flags": 2
         }
       ],
       "relations": []

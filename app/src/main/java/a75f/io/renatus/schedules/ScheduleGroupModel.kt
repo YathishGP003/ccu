@@ -10,6 +10,7 @@ import a75f.io.api.haystack.util.hayStack
 import a75f.io.logger.CcuLog
 import a75f.io.logic.DefaultSchedules
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.pointscheduling.model.Day
 import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.schedule.ScheduleGroup
 import a75f.io.logic.schedule.SpecialSchedule
@@ -21,7 +22,6 @@ import a75f.io.renatus.schedules.ScheduleUtil.isAnyDaysNotPresentInBuildingOccup
 import a75f.io.renatus.schedules.ScheduleUtil.isWeekDaysSatAndSunNotPresentInBuildingOccupancy
 import a75f.io.renatus.schedules.ScheduleUtil.isWeekDaysWeekendNotPresentInBuildingOccupancy
 import a75f.io.renatus.util.ProgressDialogUtils
-import a75f.io.renatus.util.RxjavaUtil
 import android.app.Application
 import android.content.Context
 import android.content.res.Resources
@@ -49,6 +49,35 @@ class ScheduleGroupModel (application: Application) : AndroidViewModel(applicati
         zoneScheduleViewModel: ZoneScheduleViewModel
     ): MutableList<UnOccupiedDays> {
         val unoccupiedDays = zoneScheduleViewModel.getUnoccupiedDays(days)
+        for (i in days.indices) {
+            val occupiedDaysElement = days[i]
+            if (occupiedDaysElement.sthh > occupiedDaysElement.ethh) {
+                var unOccupiedDayIteration = 0
+                while (unOccupiedDayIteration < unoccupiedDays.size) {
+                    val daysElement1 = unoccupiedDays[unOccupiedDayIteration]
+                    if (occupiedDaysElement.day == daysElement1.day && (occupiedDaysElement.ethh == daysElement1.sthh && occupiedDaysElement.etmm == daysElement1.stmm)) {
+                        if (unoccupiedDays[unOccupiedDayIteration].day == 6 && (unOccupiedDayIteration + 1) == unoccupiedDays.size) {
+                            unoccupiedDays.removeAt(unOccupiedDayIteration)
+                            unoccupiedDays[0].sthh = daysElement1.sthh
+                            unoccupiedDays[0].stmm = daysElement1.stmm
+                        } else if ((unOccupiedDayIteration + 1 < unoccupiedDays.size && unoccupiedDays[unOccupiedDayIteration + 1].day != daysElement1.day)) {
+                            unoccupiedDays.removeAt(unOccupiedDayIteration)
+                            unoccupiedDays[unOccupiedDayIteration].sthh = daysElement1.sthh
+                            unoccupiedDays[unOccupiedDayIteration].stmm = daysElement1.stmm
+                        }
+                    }
+                    unOccupiedDayIteration++
+                }
+            }
+        }
+        return unoccupiedDays
+    }
+
+    fun getUnScheduledDays(
+        days: List<Day>,
+        zoneScheduleViewModel: ZoneScheduleViewModel
+    ): MutableList<UnOccupiedDays> {
+        val unoccupiedDays = zoneScheduleViewModel.getUnscheduledDays(days)
         for (i in days.indices) {
             val occupiedDaysElement = days[i]
             if (occupiedDaysElement.sthh > occupiedDaysElement.ethh) {
@@ -113,6 +142,14 @@ class ScheduleGroupModel (application: Application) : AndroidViewModel(applicati
         mRoomRef: String?
     ) {
         this.mSchedule = mSchedule
+        this.mScheduleGroup = mScheduleGroup
+        this.mRoomRef = mRoomRef ?: ""
+    }
+
+    fun bindCustomControlData(
+        mScheduleGroup: Int,
+        mRoomRef: String?
+    ) {
         this.mScheduleGroup = mScheduleGroup
         this.mRoomRef = mRoomRef ?: ""
     }

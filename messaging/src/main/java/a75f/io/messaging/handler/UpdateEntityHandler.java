@@ -37,6 +37,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.BuildingOccupancyListener;
 import a75f.io.logic.interfaces.ZoneDataInterface;
@@ -56,7 +57,6 @@ public class UpdateEntityHandler implements MessageHandler {
             CcuLog.i(L.TAG_CCU_MESSAGING, " UpdateEntityHandler "+msgJson.toString());
             String uid = msgJson.toString().replaceAll("\"", "");
             HashMap<Object,Object> entity = CCUHsApi.getInstance().read("id == " + HRef.make(uid));
-
             if (entity.get(Tags.MODBUS) == null && !isCloudEntityHasLatestValue(entity, timeToken)) {
                 CcuLog.i("ccu_read_changes", "CCU HAS LATEST VALUE ");
                 return;
@@ -137,9 +137,10 @@ public class UpdateEntityHandler implements MessageHandler {
                 RawPoint point = new RawPoint.Builder().setHDict((HDict) row).build();
                 CCUHsApi.getInstance().tagsDb.updatePoint(point, entityId);
             } else {
-                Point point = new Point.Builder().setHDict((HDict) row).build();
+                Point point = new Point.Builder().setHDict(row).build();
                 updateEquipRefIfRequired(point);
                 CCUHsApi.getInstance().tagsDb.updatePoint(point, entityId);
+                CcuLog.d(L.TAG_CCU_MESSAGING, "UpdateEntityHandler: point updated--> "+row);
             }
 
             CcuLog.i(L.TAG_CCU_MESSAGING,"<< Entities Imported");
@@ -320,8 +321,6 @@ public class UpdateEntityHandler implements MessageHandler {
                        validMessage.set(false);
                 }
             }
-
-
         });
         return validMessage.get();
     }

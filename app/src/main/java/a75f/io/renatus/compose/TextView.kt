@@ -6,6 +6,7 @@ import a75f.io.renatus.compose.ComposeUtil.Companion.myFontFamily
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -46,7 +48,7 @@ import androidx.compose.ui.unit.sp
 
 
 @Composable
-fun HeaderTextView(text: String, padding : Int = 5, fontSize : Int = 22,fontWeight: FontWeight = FontWeight.Bold) {
+fun HeaderTextView(text: String, padding : Int = 5, fontSize : Int = 22,fontWeight: FontWeight = FontWeight.Bold, textAlignment: TextAlign = TextAlign.Center) {
     Text(
         modifier = Modifier
             .wrapContentSize()
@@ -56,7 +58,7 @@ fun HeaderTextView(text: String, padding : Int = 5, fontSize : Int = 22,fontWeig
             fontWeight = fontWeight,
             fontSize = fontSize.sp,
             color = Color.Black,
-            textAlign = TextAlign.Center,
+            textAlign = textAlignment,
         ),
         text = text
     )
@@ -118,11 +120,10 @@ fun HeaderTextViewNew(text: String, padding : Int = 5, fontSize : Int = 22,fontW
 
 
 @Composable
-fun HeaderLeftAlignedTextView(text: String) {
+fun HeaderLeftAlignedTextView(text: String, modifier : Modifier = Modifier.padding(5.dp) ) {
     Text(
-        modifier = Modifier
-            .wrapContentSize()
-            .padding(5.dp),
+        modifier = modifier
+            .wrapContentSize(),
         style = TextStyle(
             fontFamily = myFontFamily,
             fontWeight = FontWeight.Bold,
@@ -162,7 +163,8 @@ fun HeaderLeftAlignedTextViewNew(text: String) {
             color = Color.Black,
             textAlign = TextAlign.Left,
         ),
-        text = text
+        text = text,
+        maxLines = 1
     )
 }
 
@@ -174,6 +176,22 @@ fun HeaderLeftAlignedTextViewNew(text: String, fontSize : Int = 22, modifier: Mo
         style = TextStyle(
             fontFamily = myFontFamily,
             fontWeight = FontWeight.ExtraBold,
+            fontSize = fontSize.sp,
+            color = Color.Black,
+            textAlign = TextAlign.Left,
+        ),
+        text = text
+    )
+}
+
+@Composable
+fun HeaderLeftAlignedTextViewNew(text: AnnotatedString, fontSize : Int = 22, modifier: Modifier= Modifier) {
+    Text(
+        modifier = modifier
+            .wrapContentSize(),
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Normal,
             fontSize = fontSize.sp,
             color = Color.Black,
             textAlign = TextAlign.Left,
@@ -264,6 +282,52 @@ fun LabelTextViewForModbus(text: String) {
 }
 
 @Composable
+fun LabelTextViewForTable(text: String, modifier: Modifier, fontSize: Int = 20, textAlign: TextAlign = TextAlign.Start, textColor : Color = Color.Black) {
+    Text(
+        modifier = modifier,
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = fontSize.sp,
+            color = textColor,
+            textAlign = textAlign,
+        ),
+        maxLines = 1,
+        text = text
+    )
+}
+
+@Composable
+fun LabelTextViewForTable(text: AnnotatedString, modifier: Modifier = Modifier, fontSize: Int = 20, textAlign: TextAlign = TextAlign.Start, fontColor: Color = Color.Black) {
+    Text(
+        modifier = modifier,
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = fontSize.sp,
+            color = fontColor,
+            textAlign = textAlign
+        ),
+        text = text
+    )
+}
+
+@Composable
+fun LabelBoldTextViewForTable(text: String, modifier: Modifier = Modifier, fontSize: Int = 20, textAlign: TextAlign = TextAlign.Start, fontColor: Color = Color.White) {
+    Text(
+        modifier = modifier,
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = fontSize.sp,
+            color = fontColor,
+            textAlign = textAlign
+        ),
+        text = text
+    )
+}
+
+@Composable
 fun StyledTextView(text: String, fontSize : Int, textAlignment: TextAlign = TextAlign.Center) {
     Text(
         style = TextStyle(
@@ -277,7 +341,7 @@ fun StyledTextView(text: String, fontSize : Int, textAlignment: TextAlign = Text
     )
 }
 @Composable
-fun GrayLabelTextColor(text: String,widthValue:Int =200) {
+fun GrayLabelTextColor(text: String,widthValue:Int =200, textAlignment: TextAlign = TextAlign.Left) {
     Text(
         modifier = Modifier
             .padding(PaddingValues(start = 16.dp))
@@ -286,7 +350,8 @@ fun GrayLabelTextColor(text: String,widthValue:Int =200) {
             fontFamily = myFontFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 20.sp,
-            color = Color.Gray
+            color = Color.Gray,
+            textAlign = textAlignment
         ),
         text = text
     )
@@ -299,6 +364,19 @@ fun BoldStyledTextView(text: String, fontSize : Int, textAlignment: TextAlign = 
             fontWeight = FontWeight.SemiBold,
             fontSize = fontSize.sp,
             color = Color.Black,
+            textAlign = textAlignment
+        ),
+        text = text,
+    )
+}
+@Composable
+fun BoldStyledGreyTextView(text: String, fontSize : Int, textAlignment: TextAlign = TextAlign.Center) {
+    Text(
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = fontSize.sp,
+            color = Color.Gray,
             textAlign = textAlignment
         ),
         text = text,
@@ -345,13 +423,26 @@ fun TitleTextView(text: String) {
 fun TitleTextViewCustom(text: String, color: Color) {
     Text(
         modifier = Modifier
-            .padding(top = 0.dp, start = 0.dp, end = 10.dp, bottom = 10.dp)
             .wrapContentSize(),
         style = TextStyle(
             textAlign = TextAlign.Center,
             fontFamily = myFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 33.5.sp,
+            color = color
+        ),
+        text = text
+    )
+}
+
+@Composable
+fun TitleTextViewCustomNoModifier(text: String, color: Color) {
+    Text(
+        style = TextStyle(
+            textAlign = TextAlign.Center,
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 34.sp,
             color = color
         ),
         text = text
@@ -395,7 +486,25 @@ fun SubTitle(text: String,modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun SaveTextView(text: String,isChanged: Boolean = true,onClick: () -> Unit) {
+fun SubTitleNoPadding(text: String, modifier: Modifier = Modifier, fontSize: Float = 20.0f, fontWeight: FontWeight = FontWeight.Bold) {
+
+    Text(
+        modifier = modifier
+            .wrapContentHeight(),
+        style = TextStyle(
+            textAlign = TextAlign.Center,
+            fontWeight = fontWeight,
+            fontFamily = myFontFamily,
+            fontSize =  fontSize.sp,
+            color = greyColor
+        ),
+        text = text
+    )
+}
+
+
+@Composable
+fun SaveTextView(text: String,isChanged: Boolean = true, fontSize : Float = 20f, onClick: () -> Unit ) {
     Button(
         enabled = isChanged,
         onClick = {onClick()},
@@ -407,7 +516,7 @@ fun SaveTextView(text: String,isChanged: Boolean = true,onClick: () -> Unit) {
         )
     ) {
         Spacer(modifier = Modifier.width(width = 8.dp))
-        Text(text = text, style =  TextStyle( fontFamily = myFontFamily,fontSize = 20.sp,  fontWeight = FontWeight.Normal))
+        Text(text = text, style =  TextStyle( fontFamily = myFontFamily, fontSize = fontSize.sp,  fontWeight = FontWeight.Normal))
         Spacer(modifier = Modifier.width(width = 8.dp))
     }
 }
@@ -513,7 +622,9 @@ fun TextViewWithClickCustom(text: MutableState<String>, onClick: () -> Unit, ena
             onValueChange = { text.value = it },
             enabled = false,
             readOnly = !enableClick,
-            modifier = modifier.fillMaxHeight().width(400.dp),
+            modifier = modifier
+                .fillMaxHeight()
+                .width(300.dp),
             maxLines = 1,
             textStyle = TextStyle(
                 fontFamily = myFontFamily,
@@ -543,7 +654,10 @@ fun TextViewWithClickCustom(text: MutableState<String>, onClick: () -> Unit, ena
             },
         )
         Divider(
-            Modifier.width(380.dp).padding(top = 0.dp, start = 10.dp).offset(x = 5.dp, y = (-10).dp))
+            Modifier
+                .width(280.dp)
+                .padding(top = 0.dp, start = 0.dp)
+                .offset(x = 5.dp, y = (-10).dp))
     }
 }
 
@@ -592,7 +706,10 @@ fun TextViewWithClickOption(text: MutableState<Int>, onClick: () -> Unit, enable
             singleLine = true
         )
         Divider(
-            Modifier.width(85.dp).padding(top = 0.dp, start = 5.dp).offset(x = 5.dp, y = (-10).dp))
+            Modifier
+                .width(90.dp)
+                .padding(top = 0.dp, start = 5.dp)
+                .offset(x = 5.dp, y = (-10).dp))
     }
 }
 
@@ -634,11 +751,124 @@ fun TextViewCompose(text: String) {
             },
         )
         Divider(
-            Modifier.width(85.dp).padding(top = 0.dp, start = 5.dp).offset(x = 5.dp, y = (-10).dp))
+            Modifier
+                .width(85.dp)
+                .padding(top = 0.dp, start = 5.dp)
+                .offset(x = 5.dp, y = (-10).dp))
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TextViewWithClickNoLeadingSpace(text: MutableState<String>, onClick: () -> Unit, enableClick: Boolean, isCompress: Boolean) {
+    val modifier = Modifier.clickable(onClick = {
+        if (enableClick)
+            onClick()
+    })
+    if (isCompress)
+        modifier.width(200.dp)
 
+    Column{
+
+        TextField(
+            value = text.value,
+            onValueChange = { text.value = it },
+            enabled = false,
+            readOnly = !enableClick,
+            modifier = modifier
+                .offset(x = (-16).dp)
+                .wrapContentHeight()
+                .width(300.dp)
+                .padding(start = 0.dp),
+            maxLines = 1,
+            textStyle = TextStyle(
+                fontFamily = myFontFamily,
+                fontSize = 19.sp,
+                color = Color.Black,
+                textAlign = TextAlign.Start
+            ),
+            colors = TextFieldDefaults.textFieldColors(
+                focusedIndicatorColor = primaryColor,
+                textColor = primaryColor,
+                placeholderColor = primaryColor,
+                unfocusedIndicatorColor = primaryColor,
+                disabledIndicatorColor = Color.Transparent,
+                containerColor = Color.Transparent,
+                cursorColor = primaryColor,
+                disabledTextColor = Color.Black,
+                disabledLabelColor = Color.Black
+            ),
+            trailingIcon = {
+                Image(
+                    painter = painterResource(id = R.drawable.angle_down_solid),
+                    colorFilter = ColorFilter.tint(primaryColor),
+                    contentDescription = "Custom Icon",
+                    modifier = Modifier.size(20.dp)
+
+                )
+            },
+        )
+        Divider(
+            Modifier
+                .width(280.dp)
+                .padding(top = 0.dp, start = 0.dp)
+                .offset(y = (-10).dp))
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TextViewWithClickOptionNoLeadingSpace(text: MutableState<Int>, onClick: () -> Unit, enableClick: Boolean) {
+
+    Column {
+
+        TextField(
+            value = text.value.toString(),
+            onValueChange = { text.value = it.toInt() },
+            enabled = false,
+            readOnly = !enableClick,
+            modifier = Modifier
+                .offset(x = (-16).dp)
+                .width(105.dp)
+                .clickable(onClick = {
+                    if (enableClick)
+                        onClick()
+                }),
+            textStyle = TextStyle(
+                fontFamily = myFontFamily,
+                fontSize = 19.sp,
+                color = Color.Black,
+                textAlign = TextAlign.Left
+            ),
+            colors = TextFieldDefaults.textFieldColors(
+                focusedIndicatorColor = primaryColor,
+                textColor = primaryColor,
+                placeholderColor = primaryColor,
+                unfocusedIndicatorColor = primaryColor,
+                disabledIndicatorColor = Color.Transparent,
+                containerColor = Color.Transparent,
+                cursorColor = primaryColor,
+                disabledTextColor = Color.Black,
+                disabledLabelColor = Color.Black
+            ),
+            trailingIcon = {
+                Image(
+                    painter = painterResource(id = R.drawable.angle_down_solid),
+                    colorFilter = ColorFilter.tint(primaryColor),
+                    contentDescription = "Custom Icon",
+                    modifier = Modifier.size(20.dp)
+                )
+            },
+            singleLine = true
+        )
+        Divider(
+            Modifier
+                .width(85.dp)
+                .padding(top = 0.dp, start = 0.dp)
+                .offset(y = (-10).dp)
+        )
+    }
+}
 
 
 @Composable
@@ -670,9 +900,46 @@ fun VerticalDivider(heightValue:Int=20,offsetValue:Int=0){
                 modifier = Modifier
                     .width(1.dp)
                     .height(heightValue.dp)
-                    .offset(x=0.dp,y=offsetValue.dp),
+                    .offset(x = 0.dp, y = offsetValue.dp),
                 color = Color.Gray
             )
         }
+    }
+}
+
+@Composable
+fun TextViewWithToggle(text: String, defaultSelection: Boolean, modifier: Modifier = Modifier, onEnabled: (Boolean) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        SubTitleNoPadding(text = text)
+        Spacer(modifier = Modifier.width(16.dp))
+        ToggleButtonNoImplicitSpacing(defaultSelection, modifier, onEnabled = onEnabled)
+    }
+}
+
+@Composable
+fun TextViewWithDropdown(modifier: Modifier, imageList : List<Int>, text : String, fontSize: Int = 24, imageClickEvent: () -> Unit) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start) {
+        ImageViewComposableNoImageSpacing(imageList, "", modifier = Modifier.padding(end = 5.dp)) {
+            imageClickEvent()
+        }
+        HeaderLeftAlignedTextViewNew(text = text, fontSize = fontSize)
+    }
+}
+
+@Composable
+fun TextViewWithDropdown(modifier: Modifier, imageList : List<Int>, text : AnnotatedString, fontSize: Int = 24, imageClickEvent: () -> Unit) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start) {
+        ImageViewComposableNoImageSpacing(imageList, "", modifier = Modifier.padding(end = 5.dp)) {
+            imageClickEvent()
+        }
+        HeaderLeftAlignedTextViewNew(text = text, fontSize = fontSize)
+    }
+}
+
+@Composable
+fun TextViewWithHint(modifier: Modifier, text: AnnotatedString, hintText: String, fontSize: Int) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        LabelTextViewForTable(modifier = modifier, text = text, fontSize = fontSize)
+        SubTitleNoPadding(text = hintText, fontSize = 18f, modifier = Modifier, fontWeight = FontWeight.Normal)
     }
 }

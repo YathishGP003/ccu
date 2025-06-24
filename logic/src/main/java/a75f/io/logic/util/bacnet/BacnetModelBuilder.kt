@@ -3,6 +3,7 @@ package a75f.io.logic.util.bacnet
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.RawPoint
+import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.bacnet.parser.AllowedValues
 import a75f.io.api.haystack.bacnet.parser.BacnetModelDetailResponse
 import a75f.io.api.haystack.bacnet.parser.BacnetPoint
@@ -95,9 +96,14 @@ private fun getRegister(rawMap: HashMap<Any, Any>): BacnetPoint {
     val physicalPoint = RawPoint.Builder().setHashMap(rawMap).build()
     var isDisplayInUiEnabled = false
     var isSystem = physicalPoint.markers.contains("system")
+    var isSchedulable = false
     for (marker in physicalPoint.markers) {
         if (marker.equals("displayInUi")) {
             isDisplayInUiEnabled = true
+        } else if (marker.equals(Tags.SCHEDULABLE)) {
+            isSchedulable = true
+        }
+        if(isDisplayInUiEnabled && isSchedulable){
             break
         }
     }
@@ -163,7 +169,8 @@ private fun getRegister(rawMap: HashMap<Any, Any>): BacnetPoint {
         bacnetProperty,
         disName = shortDisplayName,
         defaultWriteLevel = defaultWriteLevel,
-        isSystem = isSystem
+        isSystem = isSystem,
+        isSchedulable = isSchedulable
     )
 }
 

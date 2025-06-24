@@ -10,6 +10,8 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.util.CommonQueries
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil
+import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil.Companion.connectNodeEquip
 
 /**
  * Created by Manjunath K on 28-02-2023.
@@ -222,9 +224,37 @@ class OtaStatusDiagPoint {
             }
         }
 
+        fun updateCcuToCmSeqProgress(totalPackets: Double, currentRunningPacket: Int, nodeAddress: Int) {
+            val seqProgress = ((currentRunningPacket.toDouble() / totalPackets) * 100).toInt()
+            val currentSeqStatus = connectNodeEquip(nodeAddress).otaStatus.readHisVal().toInt()
+            CcuLog.d(L.TAG_CCU_OTA_PROCESS, "" +
+                    "\n totalPackets : $totalPackets"+ "  currentRunningPacket : $currentRunningPacket"+
+                    "\n otaProgress : $seqProgress"+ "  currentOtaStatus : ${SequenceOtaStatus.values()[currentSeqStatus]}"
+            )
+            when {
+                (seqProgress in (10..49)) -> {
+                    updateIfChangeInSeqValue (currentSeqStatus,SequenceOtaStatus.SEQ_CCU_TO_CM_PERCENT_COMPLETED_10,nodeAddress)
+                    return
+                }
+                (seqProgress in (50..98)) -> {
+                    updateIfChangeInSeqValue (currentSeqStatus,SequenceOtaStatus.SEQ_CCU_TO_CM_PERCENT_COMPLETED_50,nodeAddress)
+                    return
+                }
+                (seqProgress >= 99)  -> {
+                    updateIfChangeInSeqValue (currentSeqStatus,SequenceOtaStatus.SEQ_CCU_TO_CM_PERCENT_COMPLETED_100,nodeAddress)
+                    return
+                }
+            }
+        }
+
         private fun updateIfChangeInValue(currentState: Int, newState: OtaStatus, nodeAddress: Int) {
             if (currentState != newState.ordinal)
                 updateOtaStatusPoint(newState, nodeAddress)
+        }
+
+        private fun updateIfChangeInSeqValue(currentState: Int, newState: SequenceOtaStatus, nodeAddress: Int) {
+            if (currentState != newState.ordinal)
+                ConnectNodeUtil.updateOtaSequenceStatus(newState, nodeAddress)
         }
 
         fun updateCmToDeviceOtaProgress(totalPackets: Double, currentRunningPacket: Int, nodeAddress: Int) {
@@ -277,6 +307,52 @@ class OtaStatusDiagPoint {
                     return
                 }
             }
+        }
+
+        /**
+         * Updates and logs the progress of an OTA (Over-The-Air) sequence transfer from CM to device.
+         *
+         * @param totalPackets The total number of packets expected in the transfer
+         * @param currentRunningPacket The current packet number being processed
+         * @param nodeAddress The network address of the target device
+         *
+         * This function:
+         * 1. Calculates the current progress percentage
+         * 2. Reads the current OTA status from the device
+         * 3. Logs detailed progress information
+         * 4. Updates the sequence status when progress reaches each 10% milestone
+         *
+         * Progress Thresholds:
+         * - Updates status at every 10% interval (10%, 20%, ..., 100%)
+         * - Uses [SequenceOtaStatus] to track completion milestones
+         * - Only updates status when crossing a new threshold (via [updateIfChangeInSeqValue])
+         *
+         */
+        fun updateCmToDeviceSeqProgress(totalPackets: Double, currentRunningPacket: Int, nodeAddress: Int) {
+
+            val otaProgress = ((currentRunningPacket.toDouble() / totalPackets) * 100).toInt()
+            val currentSeqStatus = connectNodeEquip(nodeAddress).otaStatus.readHisVal().toInt()
+
+            CcuLog.d(L.TAG_CCU_OTA_PROCESS, "" +
+                    "\n totalPackets : $totalPackets"+ " currentRunningPacket : $currentRunningPacket"+
+                    "\n otaProgress : $otaProgress"+ " currentOtaStatus : ${OtaStatus.values()[getCurrentOtaStatus(nodeAddress).toInt()]}")
+            // Determine the appropriate progress milestone
+            val progressStatus = when (otaProgress) {
+                in 10..19 -> SequenceOtaStatus.SEQ_CM_TO_DEVICE_PERCENT_COMPLETED_10
+                in 20..29 -> SequenceOtaStatus.SEQ_CM_TO_DEVICE_PERCENT_COMPLETED_20
+                in 30..39 -> SequenceOtaStatus.SEQ_CM_TO_DEVICE_PERCENT_COMPLETED_30
+                in 40..49 -> SequenceOtaStatus.SEQ_CM_TO_DEVICE_PERCENT_COMPLETED_40
+                in 50..59 -> SequenceOtaStatus.SEQ_CM_TO_DEVICE_PERCENT_COMPLETED_50
+                in 60..69 -> SequenceOtaStatus.SEQ_CM_TO_DEVICE_PERCENT_COMPLETED_60
+                in 70..79 -> SequenceOtaStatus.SEQ_CM_TO_DEVICE_PERCENT_COMPLETED_70
+                in 80..89 -> SequenceOtaStatus.SEQ_CM_TO_DEVICE_PERCENT_COMPLETED_80
+                in 90..98 -> SequenceOtaStatus.SEQ_CM_TO_DEVICE_PERCENT_COMPLETED_90
+                99, 100 -> SequenceOtaStatus.SEQ_CM_TO_DEVICE_PERCENT_COMPLETED_100
+                else -> return  // No status update for progress < 10%
+            }
+            currentSeqStatus.takeIf { it != progressStatus.ordinal }?.let {
+                updateIfChangeInSeqValue(currentSeqStatus, progressStatus, nodeAddress)
+            } ?: CcuLog.d(L.TAG_CCU_OTA_PROCESS, "No change in sequence status for node $nodeAddress")
         }
 
         private fun isCMDevice(nodeAddress: Int) : Boolean {

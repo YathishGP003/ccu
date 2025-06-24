@@ -3,9 +3,9 @@ package a75f.io.renatus.compose
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +35,32 @@ fun ImageViewComposable(
                 onClick()
             },
         contentAlignment = Alignment.Center
+    ) {
+        val painter: Painter = painterResource(id = imageResIds[currentImageIndex])
+        Image(
+            painter = painter,
+            contentDescription = contentDescription
+        )
+    }
+}
+
+@Composable
+fun ImageViewComposableNoImageSpacing(
+    imageResIds: List<Int>,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    var currentImageIndex by remember { mutableStateOf(0) }
+    Box(
+        modifier = modifier
+            .wrapContentSize()
+            //.fillMaxSize()
+            .clickable {
+                currentImageIndex = (currentImageIndex + 1) % imageResIds.size
+                onClick()
+            },
+        contentAlignment = Alignment.CenterStart
     ) {
         val painter: Painter = painterResource(id = imageResIds[currentImageIndex])
         Image(

@@ -162,6 +162,7 @@ public class Tags
     public static final String INCREMENTAL ="incrementVal" ;
     public static final String COV = "cov" ;
     public static final String RANGE = "range";
+    public static final String REASON = "reason";
     public static final String SPECIAL = "special";
     public static final String AUTO = "auto";
     public static final String AWAY = "away";
@@ -248,7 +249,32 @@ public class Tags
     public static final String BACNET_DEVICE_JOB = "BacnetDeviceJob";
 
     public static final String BACNET_POINT_UPDATE = "bacnetPointUpdate";
+    public static final String CONNECT_ADDRESS  ="connectAddress";
     public static final String AHU_REF = "AhuRef";
     public static final String GATEWAY_REF = "gatewayRef";
 
+    public static final String EVENT_REF = "eventRef";
+    public static final String POINT_DEFINITION_REF = "pointDefinitionRef";
+    public static final String NAME = "name";
+    public static final String ORGANIZATION_ID = "organizationId";
+    public static final String START_TIME = "startTime";
+    public static final String END_TIME = "endTime";
+    public static final String START_DATE = "startDate";
+    public static final String END_DATE = "endDate";
+    public static final String START_HOUR = "sthh";
+    public static final String START_MINUTE = "stmm";
+    public static final String END_HOUR = "ethh";
+    public static final String END_MINUTE = "etmm";
+    public static final String VALUE = "val";
+    public static final String BUILDER_TYPE = "builderType";
+    public static final String QUERY = "query";
+    public static final String TAGS = "tags";
+    public static final String DEFAULT_VALUE = "defaultValue";
+    public static final String POINT_DEFINITIONS = "pointDefinitions";
+    public static final String EVENT_DEFINITIONS = "eventDefinitions";
+    public static final String MARKERS = "markers";
+    public static final String SCHEDULE_GROUP = "scheduleGroup";
+    public static final String DESCRIPTION = "description";
+    public static final String UNIT = "unit";
+    public static final String ORGANIZATION = "organization";
 }

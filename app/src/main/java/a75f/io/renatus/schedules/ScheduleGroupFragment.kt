@@ -1,5 +1,6 @@
 package a75f.io.renatus.schedules
 
+import PointDefinition
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.DAYS
 import a75f.io.api.haystack.MockTime
@@ -10,8 +11,12 @@ import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.DefaultSchedules
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.pointscheduling.model.Day
 import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.logic.bo.util.UnitUtils.roundToHalf
+import a75f.io.logic.bo.util.formatTimeRange
+import a75f.io.logic.bo.util.getValueByEnum
+import a75f.io.logic.bo.util.populateIntersections
 import a75f.io.logic.schedule.ScheduleGroup
 import a75f.io.logic.schedule.SpecialSchedule
 import a75f.io.logic.util.CommonTimeSlotFinder
@@ -52,6 +57,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.text.HtmlCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.doOnPreDraw
 import androidx.core.widget.NestedScrollView
 import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.DialogFragment
@@ -142,8 +148,12 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
 
     private var heatingDesiredTempColor: String = ""
     private var coolingDesiredTempColor: String = ""
+    private var customValueColor: String = ""
     private var mSchedule = schedule
     private var mScheduleGroup = scheduleGroup
+    private var mPointDefinition: PointDefinition? = null
+    private var mEnumStringForPointSchedule: String? = null
+    private var mUnitForPointSchedule: String? = null
     var radioGroupSelectedId = -1
     private var isSpecialSchedule = false
     private var isVacationSchedule = false
@@ -156,6 +166,8 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
     private lateinit var weekDayWeekendRadioButton: RadioButton
     private lateinit var weekDaySaturdaySundayRadioButton: RadioButton
     private lateinit var sevenDayRadioButton: RadioButton
+
+    var pointScheduleUiClicked: ((Map<String, String>) -> Unit)? = null
 
     fun showSpecialScheduleLayout(roomRef: String, schedule: Schedule): ScheduleGroupFragment {
         isSpecialSchedule = true
@@ -191,6 +203,13 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
         isNamedSchedulePreview = true
         return this
     }
+    fun showPointCustomSchedulePreviewLayout(scheduleGroup: Int?, pointDefinition: PointDefinition, enumString: String?, unit: String?): ScheduleGroupFragment {
+        mScheduleGroup = scheduleGroup
+        mPointDefinition = pointDefinition
+        mEnumStringForPointSchedule = enumString
+        mUnitForPointSchedule = unit
+        return this
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -200,12 +219,22 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
         scheduleGroupModel= ViewModelProvider(this)[ScheduleGroupModel::class.java]
         /*At the time of site creating Default named schedule is null*/
         if (mSchedule == null || mScheduleGroup == null){
-            initZoneSpecialAndVacationLayout()
-            showScheduleLayout(View.GONE, View.VISIBLE, View.VISIBLE)
-            loadVacations()
-            loadSpecialSchedules()
+             initZoneSpecialAndVacationLayout()
+                showScheduleLayout(View.GONE, View.VISIBLE, View.VISIBLE)
+                loadVacations()
+                loadSpecialSchedules()
             return rootView
         }
+            mPointDefinition?.let {
+                initialiseSchedulerLayout(rootView)
+                scheduleGroupModel.bindCustomControlData(mScheduleGroup!!, mRoomRef)
+                addViewTimeLines()
+                prepareCustomSchedulePreviewLayout()
+                customValueColor = resources.getString(0 + R.color.white)
+                customValueColor = "#" + customValueColor.substring(3)
+                return rootView
+            }
+
         scheduleGroupModel.bindData(mSchedule!!, mScheduleGroup!!, mRoomRef)
 
         initialiseSchedulerLayout(rootView)
@@ -322,6 +351,17 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
             initialiseListeners()
         }
         initialiseSpecialAndVacationListeners()
+        mPointDefinition?.let {
+            view.doOnPreDraw {
+                view.post {
+                    mPixelsBetweenAnHour = viewTimeLines[2].x - viewTimeLines[1].x
+                    // Maintain standard padding of 48.0f between two days
+                    mPixelsBetweenADay = 48.0f
+                    view.setPadding(0, 0, 0, 0)
+                    updateCustomUI()
+                }
+            }
+        }
     }
 
     private fun initialiseSpecialAndVacationListeners() {
@@ -646,8 +686,8 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
             if (scheduleGroupModel.shouldDrawDay(daysElement.day, scheduleGroup ?: ScheduleGroup.EVERYDAY.ordinal)) {
                 drawSchedule(
                     i,
-                    daysElement.coolingVal,
                     daysElement.heatingVal,
+                    daysElement.coolingVal,
                     daysElement.sthh,
                     daysElement.ethh,
                     daysElement.stmm,
@@ -1416,5 +1456,243 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
 
     override fun onClickCancelSaveSchedule(scheduleId: String?) {
         RangeBar.setUnOccupiedFragment(true)
+    }
+    private fun prepareCustomSchedulePreviewLayout() {
+        showScheduleLayout(View.VISIBLE, View.GONE, View.GONE)
+        headerLayout.visibility = View.GONE
+        cancelUpdateLayout.visibility = View.GONE
+        radioGroupLayout.visibility = View.GONE
+    }
+
+    private fun updateCustomUI() {
+        populateIntersections(mPointDefinition!!)
+        Handler(Looper.getMainLooper()).post {
+            hasTextViewChildren()
+            val days: List<Day> = mPointDefinition!!.days
+            days.sortedBy { it.sthh }
+            days.sortedBy { it.day }
+
+            val unOccupiedDays = scheduleGroupModel.getUnScheduledDays(days, ZoneScheduleViewModel())
+            drawScheduleLayoutBasedOnGroup(scheduleGroupModel.mScheduleGroup)
+            drawUnscheduledTimeSlots(unOccupiedDays, getValueByEnum(mPointDefinition!!.defaultValue, mEnumStringForPointSchedule, mUnitForPointSchedule), scheduleGroupModel.mScheduleGroup)
+            drawScheduledTimeSlots(days, scheduleGroupModel.mScheduleGroup)
+            drawCurrentTime()
+        }
+    }
+
+    private fun drawPointSchedule(
+        position: Int, currentVal: String, startTimeHH: Int,
+        endTimeHH: Int, startTimeMM: Int, endTimeMM: Int, day: DAYS,
+        intersection: Boolean, isOccupied: Boolean
+    ) {
+        var currentValLocal = FontManager.getColoredSpanned(currentVal, customValueColor)
+
+        var typeface = Typeface.DEFAULT
+        try {
+            typeface = Typeface.createFromAsset(requireActivity().assets, "font/Lato-Bold.ttf")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        if (startTimeHH > endTimeHH || (startTimeHH == endTimeHH && startTimeMM > endTimeMM)) {
+            drawPointScheduleBlock(
+                position, currentValLocal, typeface, startTimeHH,
+                24, startTimeMM, 0,
+                scheduleGroupModel.getTextViewFromDay(day, textViewFirstRow,
+                    textViewSecondRow, textViewThirdRow, textViewFourthRow, textViewFifthRow,
+                    textViewSixthRow, textViewSeventhRow),
+                leftBreak = false,
+                rightBreak = true,
+                intersection = intersection,
+                isOccupied = isOccupied
+            )
+            drawPointScheduleBlock(
+                position, currentValLocal, typeface, 0,
+                endTimeHH, 0, endTimeMM,
+                scheduleGroupModel.getTextViewFromDay(day.nextDay, textViewFirstRow,
+                    textViewSecondRow, textViewThirdRow, textViewFourthRow, textViewFifthRow,
+                    textViewSixthRow, textViewSeventhRow),
+                leftBreak = true, rightBreak = false, intersection = intersection, isOccupied = isOccupied
+            )
+        } else {
+            drawPointScheduleBlock(
+                position, currentValLocal,
+                typeface, startTimeHH, endTimeHH, startTimeMM,
+                endTimeMM, scheduleGroupModel.getTextViewFromDay(day, textViewFirstRow,
+                    textViewSecondRow, textViewThirdRow, textViewFourthRow, textViewFifthRow,
+                    textViewSixthRow, textViewSeventhRow),
+                leftBreak = false, rightBreak = false, intersection = intersection, isOccupied = isOccupied
+            )
+        }
+    }
+
+    private fun drawPointScheduleBlock(
+        position: Int, strCurrVal: String, typeface: Typeface?,
+        tempStartTime: Int, tempEndTime: Int,
+        startTimeMM: Int, endTimeMM: Int, textView: TextView?,
+        leftBreak: Boolean, rightBreak: Boolean, intersection: Boolean, isOccupied: Boolean
+    ) {
+        var tempEndTimeLocal = tempEndTime
+        CcuLog.d(
+            L.TAG_CCU_UI,
+            "position: " + position + " tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTimeLocal + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM + "isOccupied " + isOccupied
+        )
+
+        if (context == null) return
+        val textViewTemp = AppCompatTextView(
+            requireContext()
+        )
+        textViewTemp.gravity = Gravity.CENTER_HORIZONTAL
+        if (isOccupied) {
+            textViewTemp.text = Html.fromHtml("$strCurrVal", Html.FROM_HTML_MODE_LEGACY)
+        }
+        if (typeface != null) textViewTemp.typeface = typeface
+        TextViewCompat.setAutoSizeTextTypeWithDefaults(
+            textViewTemp,
+            TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM
+        )
+        textViewTemp.maxLines = 2
+        textViewTemp.contentDescription =
+            textView!!.text.toString() + "_" + tempStartTime + ":" + startTimeMM + "-" + tempEndTimeLocal + ":" + endTimeMM
+        textViewTemp.id = ViewCompat.generateViewId()
+        textViewTemp.tag = position
+
+        val lp = ConstraintLayout.LayoutParams(0, mPixelsBetweenADay.toInt())
+        lp.bottomToBottom = textView.id
+
+
+        val leftMargin =
+            if (startTimeMM > 0) ((startTimeMM / 60.0) * mPixelsBetweenAnHour).toInt() else lp.leftMargin
+        val rightMargin =
+            if (endTimeMM > 0) (((60 - endTimeMM) / 60.0) * mPixelsBetweenAnHour).toInt() else lp.rightMargin
+
+        lp.leftMargin = leftMargin
+        lp.rightMargin = rightMargin
+
+        val drawableCompat: Drawable?
+
+        if (leftBreak) {
+            drawableCompat = ResourcesCompat.getDrawable(resources,R.drawable.occupancy_background, requireContext().theme)
+            if (intersection) {
+                val rightGreyBar = ResourcesCompat.getDrawable(resources,R.drawable.dashed_separator, requireContext().theme)
+                textViewTemp.setCompoundDrawablesWithIntrinsicBounds(
+                    mDrawableBreakLineLeft,
+                    null,
+                    rightGreyBar,
+                    null
+                )
+            } else textViewTemp.setCompoundDrawablesWithIntrinsicBounds(
+                mDrawableBreakLineLeft,
+                null,
+                null,
+                null
+            )
+
+            val space = Space(activity)
+            space.id = View.generateViewId()
+            val px =
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, resources.displayMetrics)
+
+            val spaceLP = ConstraintLayout.LayoutParams(px.toInt(), 10)
+            spaceLP.rightToLeft = viewTimeLines[tempStartTime].id
+            constraintScheduler.addView(space, spaceLP)
+            if (endTimeMM > 0) tempEndTimeLocal++
+            lp.startToStart = space.id
+            lp.endToEnd = viewTimeLines[tempEndTimeLocal].id
+        } else if (rightBreak) {
+            drawableCompat = ResourcesCompat.getDrawable(resources,R.drawable.occupancy_background, requireContext().theme)
+            textViewTemp.setCompoundDrawablesWithIntrinsicBounds(
+                null,
+                null,
+                mDrawableBreakLineRight,
+                null
+            )
+            val space = Space(activity)
+            space.id = View.generateViewId()
+            val px =
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, resources.displayMetrics)
+            val spaceLP = ConstraintLayout.LayoutParams(px.toInt(), 10)
+            spaceLP.leftToRight = viewTimeLines[tempEndTimeLocal].id
+            constraintScheduler.addView(space, spaceLP)
+            lp.startToStart = viewTimeLines[tempStartTime].id
+            lp.endToEnd = space.id
+        } else {
+            if (intersection) {
+                val rightGreyBar = ResourcesCompat.getDrawable(resources,R.drawable.dashed_separator, requireContext().theme)
+                textViewTemp.setCompoundDrawablesWithIntrinsicBounds(
+                    null, null,
+                    rightGreyBar, null
+                )
+            }
+            drawableCompat = ResourcesCompat.getDrawable(resources,
+                if (isOccupied) R.drawable.occupancy_background else R.drawable.occupancy_background_unoccupied,
+                null
+            )
+            if (endTimeMM > 0) tempEndTimeLocal++
+            lp.startToStart = viewTimeLines[tempStartTime].id
+            lp.endToEnd = viewTimeLines[tempEndTimeLocal].id
+        }
+        textViewTemp.background = drawableCompat
+        constraintScheduler.addView(textViewTemp, lp)
+        textViewTemp.setOnClickListener { v ->
+            try {
+                if (isOccupied) {
+                    pointScheduleUiClicked!!.invoke(mapOf(
+                        "scheduleGroup" to ScheduleGroup.values()[scheduleGroupModel.mScheduleGroup].group,
+                        "timeRange" to formatTimeRange(tempStartTime, startTimeMM, tempEndTime, endTimeMM),
+                        "valueType" to "Custom Value",
+                        "value" to Html.fromHtml(strCurrVal, Html.FROM_HTML_MODE_LEGACY).toString()
+                    ))
+                } else {
+                    pointScheduleUiClicked!!.invoke(mapOf(
+                        "scheduleGroup" to ScheduleGroup.values()[scheduleGroupModel.mScheduleGroup].group,
+                        "timeRange" to formatTimeRange(tempStartTime, startTimeMM, tempEndTime, endTimeMM),
+                        "valueType" to "Default Value",
+                        "value" to Html.fromHtml(strCurrVal, Html.FROM_HTML_MODE_LEGACY).toString()
+                    ))
+                }
+            } catch (e: ArrayIndexOutOfBoundsException) {
+                CcuLog.e("Schedule", "onClick: " + e.message)
+            }
+        }
+    }
+
+    private fun drawUnscheduledTimeSlots(
+        unOccupiedDays: MutableList<UnOccupiedDays>,
+        defaultValue: String,
+        scheduleGroup: Int
+    ) {
+        for (i in unOccupiedDays.indices) {
+            val daysElement = unOccupiedDays[i]
+            if (scheduleGroupModel.shouldDrawDay(daysElement.day, scheduleGroup)) {
+                drawPointSchedule(
+                    daysElement.day, defaultValue, daysElement.sthh, daysElement.ethh,
+                    daysElement.stmm, daysElement.etmm,
+                    DAYS.values()[daysElement.day], daysElement.isIntersection, false
+                )
+            }
+        }
+    }
+
+    private fun drawScheduledTimeSlots(
+        days: List<Day>,
+        scheduleGroup: Int?
+    ) {
+        for (i in days.indices) {
+            val daysElement = days[i]
+            if (scheduleGroupModel.shouldDrawDay(daysElement.day, scheduleGroup ?: ScheduleGroup.EVERYDAY.ordinal)) {
+                drawPointSchedule(
+                    i,
+                    getValueByEnum(daysElement.`val`, mEnumStringForPointSchedule, mUnitForPointSchedule),
+                    daysElement.sthh,
+                    daysElement.ethh,
+                    daysElement.stmm,
+                    daysElement.etmm,
+                    DAYS.values()[daysElement.day],
+                    daysElement.intersection,
+                    true
+                )
+            }
+        }
     }
 }

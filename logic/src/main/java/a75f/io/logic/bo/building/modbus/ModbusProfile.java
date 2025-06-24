@@ -23,7 +23,9 @@ public class ModbusProfile extends ZoneProfile {
                            List<Parameter> configParams, ProfileType profileType,
                            List<EquipmentDevice> subEquipmentDevices, String modbusLevel,String modelVersion) {
         modBusEquip = new ModbusEquip(profileType, slaveId);
-        String equipRef = modBusEquip.createEntities(floorRef, roomRef, equipmentDevice, configParams,null,false, modbusLevel,modelVersion,false);
+        String equipRef = modBusEquip.createEntities(floorRef, roomRef, equipmentDevice, configParams,
+                null, false, modbusLevel, modelVersion, false,
+                null, false, "", null, null);
         equipmentDevice.setEquips(null);
         List<EquipmentDevice> intermediateList = new ArrayList<>();
         for(EquipmentDevice subEquipmentDevice : subEquipmentDevices){
@@ -48,7 +50,8 @@ public class ModbusProfile extends ZoneProfile {
             }
             boolean isSlaveIdSameAsParent = subEquipmentDevice.getSlaveId() == equipmentDevice.getSlaveId();
             String subEquipRef = modBusEquip.createEntities(floorRef, roomRef, subEquipmentDevice, parameterList,
-                    equipRef, isSlaveIdSameAsParent,modbusLevel,null, true);
+                    equipRef, isSlaveIdSameAsParent, modbusLevel,null, false,
+                    null, true, "", null, null);
             subEquipmentDevice.setDeviceEquipRef(subEquipRef);
             intermediateList.add(subEquipmentDevice);
         }
@@ -60,8 +63,8 @@ public class ModbusProfile extends ZoneProfile {
         modBusEquip.init(slaveId);
     }
 
-    public void updateModbusEquip(String equipRef, short slaveId, List<Parameter> configParams){
-        modBusEquip.updateHaystackPoints(equipRef,configParams);
+    public void updateModbusEquip(short slaveId, List<Parameter> configParams){
+        modBusEquip.updateHaystackPoints(null, configParams);
         modBusEquip.init(slaveId);
     }
 

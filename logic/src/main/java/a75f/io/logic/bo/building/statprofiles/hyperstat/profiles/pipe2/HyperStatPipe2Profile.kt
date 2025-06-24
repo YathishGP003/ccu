@@ -636,36 +636,42 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
                     ), Port.ANALOG_OUT_THREE
                 ),
             ).forEach { (analogOutConfig, port) ->
+                if(analogOutConfig.enabled) {
 
-                val mapping = HsPipe2AnalogOutMapping.values()[analogOutConfig.association]
-                when (mapping) {
-                    HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE -> {
-                        if (equip.waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
-                            doAnalogWaterValveAction(
-                                port, basicSettings, waterValveLoop(userIntents),
-                                analogOutStages
+                    val mapping = HsPipe2AnalogOutMapping.values()[analogOutConfig.association]
+                    when (mapping) {
+                        HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE -> {
+                            if (equip.waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
+                                doAnalogWaterValveAction(
+                                    port, basicSettings, waterValveLoop(userIntents),
+                                    analogOutStages
+                                )
+                            }
+                        }
+
+                        HsPipe2AnalogOutMapping.DCV_DAMPER -> {
+                            doAnalogDCVAction(
+                                port, analogOutStages, config.zoneCO2Threshold.currentVal,
+                                config.zoneCO2DamperOpeningRate.currentVal,
+                                isDoorOpenState(config, equip), equip
                             )
                         }
-                    }
 
-                    HsPipe2AnalogOutMapping.DCV_DAMPER -> {
-                        doAnalogDCVAction(
-                            port, analogOutStages, config.zoneCO2Threshold.currentVal,
-                            config.zoneCO2DamperOpeningRate.currentVal,
-                            isDoorOpenState(config, equip), equip
-                        )
-                    }
+                        HsPipe2AnalogOutMapping.FAN_SPEED -> {
+                            doAnalogFanAction(
+                                port,
+                                analogOutConfig.fanSpeed.low.currentVal.toInt(),
+                                analogOutConfig.fanSpeed.medium.currentVal.toInt(),
+                                analogOutConfig.fanSpeed.high.currentVal.toInt(),
+                                equip,
+                                basicSettings,
+                                fanLoopOutput,
+                                isFanGoodRun(doorWindowSensorOpenStatus)
+                            )
+                        }
 
-                    HsPipe2AnalogOutMapping.FAN_SPEED -> {
-                        doAnalogFanAction(
-                            port, analogOutConfig.fanSpeed.low.currentVal.toInt(),
-                            analogOutConfig.fanSpeed.medium.currentVal.toInt(),
-                            analogOutConfig.fanSpeed.high.currentVal.toInt(),
-                            equip, basicSettings, fanLoopOutput, isFanGoodRun(doorWindowSensorOpenStatus)
-                        )
+                        else -> {}
                     }
-
-                    else -> {}
                 }
             }
         }

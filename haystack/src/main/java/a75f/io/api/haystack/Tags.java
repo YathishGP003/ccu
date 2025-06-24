@@ -248,5 +248,7 @@ public class Tags
     public static final String BACNET_DEVICE_JOB = "BacnetDeviceJob";
 
     public static final String BACNET_POINT_UPDATE = "bacnetPointUpdate";
+    public static final String AHU_REF = "AhuRef";
+    public static final String GATEWAY_REF = "gatewayRef";
 
 }

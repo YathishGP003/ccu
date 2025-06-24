@@ -3576,4 +3576,35 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             exception.printStackTrace()
         }
     }
+     fun updateAhuRefDiagEquip() {
+        val diagEquip = hayStack.readHDict("domainName==\"${DomainName.diagEquip}\"")
+        if (!diagEquip.isEmpty) {
+            val equipId = diagEquip["id"].toString()
+            val systemEquip = hayStack.readHDict(CommonQueries.SYSTEM_PROFILE)
+            if (!systemEquip.isEmpty) {
+                val systemEquipId = systemEquip[Tags.ID].toString()
+                if (diagEquip.get(Tags.AHU_REF, false) == null || !diagEquip.get(Tags.AHU_REF)
+                        .equals(systemEquipId) || !diagEquip.get(Tags.GATEWAY_REF)
+                        .equals(systemEquipId)
+                ) {
+                    CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating AHU Ref for diag equip: $equipId")
+                    Equip.Builder().setHDict(diagEquip).build().apply {
+                        this.ahuRef = systemEquipId
+                        this.gatewayRef = systemEquipId
+                        hayStack.updateEquip(this, equipId)
+                        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "AHU Ref updated for diag equip: $equipId")
+                    }
+                } else {
+                    CcuLog.d(TAG_CCU_MIGRATION_UTIL, "AHU Ref already set for diag equip: $equipId")
+                }
+            } else {
+                CcuLog.e(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "System profile not found to update AHU Ref for diag equip: $equipId"
+                )
+            }
+        } else {
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Diag Equip not found to update AHU Ref")
+        }
+    }
 }

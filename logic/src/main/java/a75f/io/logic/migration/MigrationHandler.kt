@@ -15,6 +15,7 @@ import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.OAOEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.createDomainDevicePoint
+import a75f.io.domain.api.Domain.createDomainPoint
 import a75f.io.domain.api.Domain.writeValAtLevelByDomain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.DefaultProfileConfiguration
@@ -93,9 +94,12 @@ import a75f.io.logic.bo.building.system.DefaultSystemConfig
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
+import a75f.io.logic.bo.building.vav.AcbProfileConfiguration
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.haystack.device.SmartNode
+import a75f.io.logic.bo.util.CCUUtils.getNodeType
+import a75f.io.logic.bo.util.CCUUtils.getProfileType
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
 import a75f.io.logic.migration.VavAndAcbProfileMigration.Companion.cleanACBDuplicatePoints
@@ -271,10 +275,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             PreferenceUtil.setVavCfmOnEdgeMigrationDone()
         }
         clearOtaCachePreferences() // While migrating to new version, we need to clear the ota cache preferences
-        if(!PreferenceUtil.getMigrateAnalogInputTypeForVavDevicePoint()) {
+        if(!PreferenceUtil.getMigrateAnalogInputTypeForVavOrDabDevicePoint()) {
            try {
-                migrateAnalogTypeForVavAnalog1In()
-                PreferenceUtil.setMigrateAnalogInputTypeForVavDevicePoint()
+                migrateAnalogTypeForVavOrDabAnalog1In()
+                PreferenceUtil.setMigrateAnalogInputTypeForVavOrDabDevicePoint()
               } catch (e: Exception) {
                 //For now, we make sure it does not stop other migrations even if this fails.
                 CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Error in migrateAnalogTypeForVAVanalog1In $e")
@@ -1623,20 +1627,100 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
     }
 
-    private fun migrateAnalogTypeForVavAnalog1In() {
-        CcuLog.i(TAG_CCU_MIGRATION_UTIL,"Migrate Analog Type for VAV Analog1In!!")
-        hayStack.readAllEntities("equip and zone and vav and domainName").forEach { equip ->
-            val device = hayStack.read("device and equipRef == \"${equip["id"]}\"")
-            val analog1In = hayStack.read("domainName == \"${DomainName.analog1In}\" and deviceRef == \"${device["id"]}\"")
-            val damperType = hayStack.readPointPriorityValByQuery("domainName == \"${DomainName.damperType}\" and equipRef == \"${equip["id"]}\"")
-            if (analog1In.isNotEmpty()) {
-                val analog1InPoint = RawPoint.Builder().setHDict(hayStack.readHDictById(analog1In["id"].toString())).build()
+    private fun migrateAnalogTypeForVavOrDabAnalog1In() {
+        CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Migrate Analog Type for VAV or DAB Analog1In!!")
+        hayStack.readAllEntities("equip and zone and (vav or dab) and domainName").forEach { equip ->
+            CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Equip id ${equip["id"]} equip name ${equip["dis"]}")
+            val device = hayStack.readEntity("device and equipRef == \"${equip["id"]}\"")
+            createDamperFeedbackPoint(equip, device)
+            val analog1In =
+                hayStack.readEntity("domainName == \"${DomainName.analog1In}\" and deviceRef == \"${device["id"]}\"")
+            val damperType =
+                hayStack.readPointPriorityValByQuery("domainName == \"${DomainName.damperType}\" and equipRef == \"${equip["id"]}\"")
+            if (analog1In.isNotEmpty() || analog1In["portEnable"].toString().isEmpty() || analog1In["portEnable"].toString().equals(null, true) || analog1In["pointRef"].toString().equals(null,true)) {
+                CcuLog.i(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "Analog In does not contains  pointRef Equip id ${equip["id"]} equip name ${equip["dis"]}"
+                )
+                val damperFeedback =
+                    hayStack.read("domainName == \"${DomainName.damperFeedback}\" and equipRef == \"${equip["id"]}\"")
+                val analog1InPoint =
+                    RawPoint.Builder().setHDict(hayStack.readHDictById(analog1In["id"].toString()))
+                        .build()
+                analog1InPoint.enabled = true
+                analog1InPoint.pointRef = damperFeedback["id"].toString()
                 analog1InPoint.type = getDamperTypeString(damperType.toInt())
-                hayStack.updatePoint(analog1InPoint , analog1In["id"].toString())
-                CcuLog.d(TAG_CCU_MIGRATION_UTIL,"Analog1In type updated for device ${device["dis"]}")
+                hayStack.updatePoint(analog1InPoint, analog1In["id"].toString())
+                CcuLog.d(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "Analog1In type updated for device ${device["dis"]}"
+                )
             }
         }
     }
+
+    private fun createDamperFeedbackPoint(equip: HashMap<Any, Any>, device: HashMap<Any, Any>) {
+
+        val damperFeedBack = hayStack.read(
+            "domainName == \"${DomainName.damperFeedback}\" and equipRef == \"${
+                equip["id"]
+            }\""
+        )
+        if (damperFeedBack.isEmpty()) {
+            CcuLog.i(
+                TAG_CCU_MIGRATION_UTIL,
+                "Damper feedback point not found  : Equip id ${equip["id"]} equip name ${equip["dis"]}"
+            )
+            val model =
+                getModelForDomainName(equip["domainName"].toString()) as SeventyFiveFProfileDirective
+            val profileConfig = when (equip["domainName"]) {
+                //ACB equip
+                DomainName.helionodeActiveChilledBeam, DomainName.smartnodeActiveChilledBeam -> {
+                    AcbProfileConfiguration(
+                        device["addr"].toString().toInt(), getNodeType(device).toString(), 0,
+                        equip["roomRef"].toString(), equip["floorRef"].toString(),
+                        getProfileType(equip["profile"]?.toString()), model
+                    ).getActiveConfiguration()
+
+                }
+                //DAB equip
+                DomainName.smartnodeDAB , DomainName.helionodeDAB ->{
+                    DabProfileConfiguration(
+                        device["addr"].toString().toInt(), getNodeType(device).toString(), 0,
+                        equip["roomRef"].toString(), equip["floorRef"].toString(),
+                        getProfileType(equip["profile"]?.toString()), model
+                    ).getActiveConfiguration()
+                }
+                // VAV equip
+                else -> {
+                    VavProfileConfiguration(
+                        device["addr"].toString().toInt(), getNodeType(device).toString(), 0,
+                        equip["roomRef"].toString(), equip["floorRef"].toString(),
+                        getProfileType(equip["profile"]?.toString()), model
+                    ).getActiveConfiguration()
+                }
+            }
+            createDomainPoint(
+                model,
+                profileConfig,
+                equip["id"].toString(),
+                hayStack.site!!.id,
+                hayStack.timeZone,
+                equip["dis"].toString(),
+                DomainName.damperFeedback
+            )
+            CcuLog.i(
+                TAG_CCU_MIGRATION_UTIL,
+                "Damper feedback point created newly: Equip id ${equip["id"]} equip name ${equip["dis"]}"
+            )
+        } else {
+            CcuLog.i(
+                TAG_CCU_MIGRATION_UTIL,
+                "Damper feedback point already exists : Equip id ${equip["id"]} equip name ${equip["dis"]}"
+            )
+        }
+    }
+
     private fun getDamperTypeString(index: Int) : String {
         return when(index) {
             0 -> "0-10v"

@@ -71,7 +71,7 @@ public class PreferenceUtil {
     public static final String DEAD_BAND_MIGRATION = "deadBandMigration";
     public static final String ZONE_CO2_MIGRATION = "ZONE_CO2_MIGRATION";
     public static final String MIGRATE_HIS_INTERPOLATE_FOR_DEVICE_POINTS = "migrateHisInterpolateForDeviceEntities";
-    public static final String MIGRATE_ANALOG_INPUT_TYPE_FOR_VAV_DEVICE_POINT = "migrateAnalogInputTypeForVavDevicePoint";
+    public static final String MIGRATE_ANALOG_INPUT_TYPE_FOR_VAV_DAB_DEVICE_POINT = "migrateAnalogInputTypeForVavOrDabDevicePointAndPointRef";
     public static final String DELETE_REDUNDANT_SETBACK_POINTS_FROM_HN_ACB_EQUIPS  = "deleteRedundantSetbackPointsFromHnAcbEquips";
     public static final String BACKFILL_DEFAULT_VALUE_MIGRATION = "backfillDefaultValueMigration";
     public static final String DAB_DAMPER_SIZE_MIGRATION = "dabDamperSizeMigration";
@@ -629,12 +629,12 @@ public class PreferenceUtil {
         setBooleanPreference(MIGRATE_HIS_INTERPOLATE_FOR_DEVICE_POINTS, true);
     }
 
-    public static boolean getMigrateAnalogInputTypeForVavDevicePoint() {
-        return getBooleanPreference(MIGRATE_ANALOG_INPUT_TYPE_FOR_VAV_DEVICE_POINT);
+    public static boolean getMigrateAnalogInputTypeForVavOrDabDevicePoint() {
+        return getBooleanPreference(MIGRATE_ANALOG_INPUT_TYPE_FOR_VAV_DAB_DEVICE_POINT);
     }
 
-    public static void setMigrateAnalogInputTypeForVavDevicePoint() {
-        setBooleanPreference(MIGRATE_ANALOG_INPUT_TYPE_FOR_VAV_DEVICE_POINT, true);
+    public static void setMigrateAnalogInputTypeForVavOrDabDevicePoint() {
+        setBooleanPreference(MIGRATE_ANALOG_INPUT_TYPE_FOR_VAV_DAB_DEVICE_POINT, true);
     }
     public static boolean isBackFillValueUpdateRequired() {
         return getBooleanPreference(BACKFILL_DEFAULT_VALUE_MIGRATION);

@@ -356,13 +356,11 @@ class HyperStatSplitEquip (equipRef : String) : DomainEquip(equipRef) {
     val highestCoolingStages = CalibratedPoint("highestCoolingStages" ,equipRef,0.0) // This is dynamically going to change based
     val highestCompressorStages = CalibratedPoint("highestCompressorStages" ,equipRef,0.0) // This is dynamically going to change based
     val isEconAvailable: CalibratedPoint = CalibratedPoint("economizingAvailable", "", 0.0)
-
+    var zoneOccupancyState = CalibratedPoint("zoneOccupancyState", equipRef, 0.0)
     fun getInCalibratedPointPoint(data: Int): CalibratedPoint {
         return CalibratedPoint(
             "InCalibratedPoint", // dummy name
-            "",
-            data.toDouble()
-        )
+            "", data.toDouble())
     }
 
     fun isCondensateTripped(): Boolean = condensateStatusNC.readHisVal() > 0.0 || condensateStatusNO.readHisVal() > 0.0

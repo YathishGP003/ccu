@@ -2,7 +2,6 @@ package a75f.io.logic.controlcomponents.handlers
 
 import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logger.CcuLog
-import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.controlcomponents.controlimpls.GenericBooleanControllerImpl
 import a75f.io.logic.controlcomponents.controls.Constraint
 import a75f.io.logic.controlcomponents.controls.Controller

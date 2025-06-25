@@ -46,6 +46,7 @@ import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.handlers.doAnalogOperation
 import a75f.io.logic.controlcomponents.util.ControllerNames
+import a75f.io.logic.controlcomponents.util.isOccupiedDcvHumidityControl
 import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler
 import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler.Companion.hyperStatSplitStatus
@@ -76,7 +77,6 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
     private var outsideAirLoopOutput = 0
     private var outsideAirFinalLoopOutput = 0
     override lateinit var occupancyStatus: Occupancy
-    private var zoneOccupancyState = CalibratedPoint(DomainName.zoneOccupancy, hssEquip.equipRef, 0.0)
     // Flags for keeping tab of occupancy during linear fan operation(Only to be used in doAnalogFanActionCpu())
     private var previousOccupancyStatus: Occupancy = Occupancy.NONE
     private var previousFanStageStatus: StandaloneFanStage = StandaloneFanStage.OFF
@@ -95,7 +95,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
     private var prePurgeEnabled = false
     private var prePurgeOpeningValue = 0.0
 
-    private var controllerFactory = SplitControllerFactory(hssEquip, zoneOccupancyState)
+    private var controllerFactory = SplitControllerFactory(hssEquip, hssEquip.zoneOccupancyState)
 
     override fun updateZonePoints() {
         if (Globals.getInstance().isTestMode) {
@@ -741,7 +741,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
             L.TAG_CCU_HSSPLIT_CPUECON,
             "zoneSensorCO2: $zoneSensorCO2, zoneCO2Threshold: $zoneCO2Threshold, co2DamperOpeningRate: $co2DamperOpeningRate"
         )
-        if (occupancyStatus == Occupancy.OCCUPIED || occupancyStatus == Occupancy.FORCEDOCCUPIED || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED) {
+        if (isOccupiedDcvHumidityControl(hssEquip.zoneOccupancyState)) {
             if (zoneSensorCO2 > zoneCO2Threshold) {
                 dcvAvailable = true
                 dcvLoopOutput = max(
@@ -1223,7 +1223,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         if (controllerFactory.equip != hssEquip) {
             controllerFactory.equip = hssEquip
         }
-        zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+        hssEquip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
 
         if (coolingLoopOutput > 0) {
             hssEquip.isEconAvailable.data = if (economizingAvailable) 1.0 else 0.0
@@ -1256,7 +1256,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         }
         controllerFactory.addControllers(config, ::isPrePurgeActive)
         logIt(" isEconAvailable: ${hssEquip.isEconAvailable.data} " +
-                "zoneOccupancyState : ${zoneOccupancyState.data}" +
+                "zoneOccupancyState : ${hssEquip.zoneOccupancyState.data}" +
                 " highestCoolingStages : ${hssEquip.highestCoolingStages.data}" +
                 " highestCompressorStages : ${hssEquip.highestCompressorStages.data} ")
     }

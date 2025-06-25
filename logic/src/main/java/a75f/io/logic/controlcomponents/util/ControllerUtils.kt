@@ -3,8 +3,6 @@ package a75f.io.logic.controlcomponents.util
 import a75f.io.domain.api.Point
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.schedules.Occupancy
-import a75f.io.logic.bo.building.schedules.ScheduleManager
-import a75f.io.logic.bo.building.statprofiles.util.FanSpeed
 
 /**
  * Created by Manjunath K on 07-05-2025.

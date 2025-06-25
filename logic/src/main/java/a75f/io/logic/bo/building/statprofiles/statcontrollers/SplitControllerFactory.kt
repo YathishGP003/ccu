@@ -218,8 +218,8 @@ class SplitControllerFactory(
             zoneHumidity = equip.zoneHumidity,
             targetHumidifier = equip.targetHumidifier,
             activationHysteresis = equip.standaloneRelayActivationHysteresis,
-            offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
             occupancy = zoneOccupancyState,
+            offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
             logTag = L.TAG_CCU_HSSPLIT_CPUECON
         )
     }
@@ -267,7 +267,7 @@ class SplitControllerFactory(
             equip = equip,
             dcvLoopOutput = equip.dcvLoopOutput,
             actionHysteresis = equip.standaloneRelayActivationHysteresis,
-            currentOccupancy = zoneOccupancyState,
+            currentOccupancy = equip.zoneOccupancyState,
             offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
             logTag = L.TAG_CCU_HSSPLIT_CPUECON
         )

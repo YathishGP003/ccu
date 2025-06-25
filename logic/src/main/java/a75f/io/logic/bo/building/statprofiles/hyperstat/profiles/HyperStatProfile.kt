@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.updateLoopOutputs
+import a75f.io.logic.controlcomponents.util.isOccupiedDcvHumidityControl
 import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler
 import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler.Companion.hyperStatStatus
 import a75f.io.logic.util.uiutils.updateUserIntentPoints
@@ -167,39 +168,31 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
         isDoorOpen: Boolean,
         equip: HyperStatEquip
     ) {
-        val currentOccupancy = equip.occupancyMode.readHisVal().toInt()
         val co2Value = equip.zoneCo2.readHisVal()
         logIt(
             "doAnalogDCVAction: co2Value : $co2Value zoneCO2Threshold: $zoneCO2Threshold zoneCO2DamperOpeningRate $zoneCO2DamperOpeningRate"
         )
-        if (isDcvEligibleToOn(co2Value, zoneCO2Threshold, currentOccupancy, isDoorOpen)) {
+        if (isDcvEligibleToOn(co2Value, zoneCO2Threshold, isDoorOpen, equip.zoneOccupancyState)) {
             updateLogicalPoint(logicalPointsList[port]!!, dcvLoopOutput.toDouble())
             analogOutStages[StatusMsgKeys.DCV_DAMPER.name] = dcvLoopOutput
-        } else if (isDcvEligibleToOff(co2Value, zoneCO2Threshold, currentOccupancy, isDoorOpen)) {
+        } else if (isDcvEligibleToOn(co2Value, zoneCO2Threshold, isDoorOpen, equip.zoneOccupancyState).not()) {
             updateLogicalPoint(logicalPointsList[port]!!, 0.0)
         }
     }
-
-    private fun isDcvEligibleToOff(
-        co2Value: Double, zoneCO2Threshold: Double, currentOccupancy: Int, isDoorOpen: Boolean
-    ): Boolean {
-        return (dcvLoopOutput == 0 || co2Value < zoneCO2Threshold || currentOccupancy == Occupancy.AUTOAWAY.ordinal
-                || currentOccupancy == Occupancy.VACATION.ordinal || isDoorOpen
-                || currentOccupancy == Occupancy.DEMAND_RESPONSE_UNOCCUPIED.ordinal
-                || currentOccupancy == Occupancy.UNOCCUPIED.ordinal)
-    }
-
+    /**
+     * Checks if the DCV is eligible to be turned ON based on CO2 value, zone CO2 threshold,
+     * door open status, and zone occupancy.
+     */
     private fun isDcvEligibleToOn(
-        co2Value: Double, zoneCO2Threshold: Double, currentOccupancyMode: Int, isDoorOpen: Boolean
+        co2Value: Double,
+        zoneCO2Threshold: Double,
+        isDoorOpen: Boolean,
+        zoneOccupancy: a75f.io.domain.api.Point
     ): Boolean {
-        return (co2Value > 0 && co2Value > zoneCO2Threshold && dcvLoopOutput > 0 && !isDoorOpen
-                && (currentOccupancyMode == Occupancy.OCCUPIED.ordinal
-                || currentOccupancyMode == Occupancy.AUTOFORCEOCCUPIED.ordinal
-                || currentOccupancyMode == Occupancy.PRECONDITIONING.ordinal
-                || currentOccupancyMode == Occupancy.DEMAND_RESPONSE_OCCUPIED.ordinal
-                || currentOccupancyMode == Occupancy.FORCEDOCCUPIED.ordinal))
+        return (co2Value > 0 && co2Value > zoneCO2Threshold && dcvLoopOutput > 0 && !isDoorOpen && isOccupiedDcvHumidityControl(
+            zoneOccupancy
+        ))
     }
-
 
     fun doorWindowIsOpen(
         doorWindowEnabled: Double,

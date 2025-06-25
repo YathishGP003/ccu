@@ -757,11 +757,7 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
             ControllerNames.FAN_ENABLED -> updateStatus(equip.fanEnable, result)
             ControllerNames.OCCUPIED_ENABLED -> updateStatus(equip.occupiedEnable, result)
             ControllerNames.HUMIDIFIER_CONTROLLER -> updateStatus(equip.humidifierEnable, result)
-            ControllerNames.DEHUMIDIFIER_CONTROLLER -> updateStatus(
-                equip.dehumidifierEnable,
-                result
-            )
-
+            ControllerNames.DEHUMIDIFIER_CONTROLLER -> updateStatus(equip.dehumidifierEnable, result)
             ControllerNames.DAMPER_RELAY_CONTROLLER -> updateStatus(equip.dcvDamper, result)
             else -> {
                 logIt( "Unknown controller: $controllerName")

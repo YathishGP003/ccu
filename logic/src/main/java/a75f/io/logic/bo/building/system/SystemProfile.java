@@ -239,10 +239,11 @@ public abstract class SystemProfile
                 || q.getMarkers().contains("vrv") || q.getMarkers().contains("otn") || q.getMarkers().contains("bypassDamper")) {
                 q.setAhuRef(systemEquipId);
             } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") ||
-                       q.getMarkers().contains("modbus") || q.getMarkers().contains("monitoring") || q.getMarkers().contains("hyperstat") ||q.getMarkers().contains("hyperstatsplit")) {
+                    q.getMarkers().contains("modbus") || q.getMarkers().contains("monitoring") || q.getMarkers().contains("hyperstat")
+                    || q.getMarkers().contains("hyperstatsplit") || q.getMarkers().contains("mystat")) {
                 //All the standalone zone equips will have a gatewayRef
                 q.setGatewayRef(systemEquipId);
-            }else {
+            } else {
                 //TODO- This cant happen, we are passing an equip with invalid ahuRef/gatewayRef. There should be
                 // some sort of retry mechanism.
                 CcuLog.e(L.TAG_CCU_SYSTEM, "Invalid profile, AhuRef is not updated for " + q.getDisplayName());

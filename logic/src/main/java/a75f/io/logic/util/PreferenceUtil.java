@@ -127,6 +127,7 @@ public class PreferenceUtil {
 
     private static final String MIGRATE_DELETE_REDUNDANT_OAO_POINTS_BY_SYSTEM_EQUIP = "migrateDeleteRedundantOaoPointsBySystemEquip";
 
+    private static final String UPDATE_MYSTAT_GATEWAY_REF_FLAG = "updateMystatGatewayRefFlag";
     private static final String MIGRATE_VFD_FAN_MODE = "migrateVfdFanMode";
     private static final String IS_REBOOT_REQUIRED_AFTER_REPLACE = "isRebootRequiredAfterReplace";
 
@@ -1010,5 +1011,13 @@ public class PreferenceUtil {
 
     public static void setIsRebootRequiredAfterReplaceFlag(boolean isRequired) {
         setBooleanPreferenceByCommitting(IS_REBOOT_REQUIRED_AFTER_REPLACE, isRequired);
+    }
+
+    public static boolean getUpdateMystatGatewayRefFlag() {
+        return getBooleanPreference(UPDATE_MYSTAT_GATEWAY_REF_FLAG);
+    }
+
+    public static void setUpdateMystatGatewayRefFlag() {
+        setBooleanPreference(UPDATE_MYSTAT_GATEWAY_REF_FLAG, true);
     }
 }

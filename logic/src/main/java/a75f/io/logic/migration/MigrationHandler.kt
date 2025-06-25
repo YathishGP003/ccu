@@ -461,6 +461,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             PreferenceUtil.setEquipScheduleStatusForZoneExternalEquipDone()
         }
 
+        if (!PreferenceUtil.getUpdateMystatGatewayRefFlag()) {
+            updateGatewayRefForMystatEquips();
+            PreferenceUtil.setUpdateMystatGatewayRefFlag()
+        }
+
         hayStack.scheduleSync()
     }
 
@@ -3846,5 +3851,18 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             addEquipScheduleStatusPoint(Equip.Builder().setHDict(externalEquip).build(), externalEquip.id().toString())
         }
         CcuLog.d(TAG_CCU_MIGRATION_UTIL, "EquipScheduleStatusEntity added for all TerminalExternalEquips")
+    }
+
+    private fun updateGatewayRefForMystatEquips() {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating gatewayRef for mystat equips")
+        val myStatEquips = hayStack.readAllHDictByQuery("equip and mystat")
+        val systemEquipId = hayStack.readId("equip and system and not modbus")
+        myStatEquips.forEach {
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating equip: ${it.dis()} gatewayRef with systemEquipId: $systemEquipId")
+            val equip = Equip.Builder().setHDict(it).build()
+            equip.gatewayRef = systemEquipId
+            hayStack.updateEquip(equip, equip.id)
+        }
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating gatewayRef for mystat equips completed")
     }
 }

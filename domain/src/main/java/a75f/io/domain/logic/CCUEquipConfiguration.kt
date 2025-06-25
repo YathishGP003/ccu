@@ -38,16 +38,7 @@ class CCUEquipConfiguration (private val ccuBaseModel : SeventyFiveFProfileDirec
 
     fun saveDemandResponseEnrollmentStatus(isDREnabled : Boolean){
         CcuLog.i(Domain.LOG_TAG, "saveDemandResponseEnrollmentStatus: $isDREnabled")
-        //TODO : AMAR
-        // we have observed an isssue that is when DR Enrollment is enabled then duplicate activation
-        // points are created in the haystack, so Im printing stack trace to debug the issue we can
-        // remove this once 2.19.0 is released to production
-        try {
-            throw NullPointerException()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            CcuLog.e(Domain.LOG_TAG, "Dummy exception to find stacktrace while saving demand response enrollment status")
-        }
+
         val ccuConfigurationModel =  CCUConfigurationModel(
             ModelLoader.getCCUBaseConfigurationModel() as (SeventyFiveFProfileDirective) , ccuHsApi)
 

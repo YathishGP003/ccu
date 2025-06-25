@@ -7,8 +7,8 @@ import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
-import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.equips.CCUEquip;
 import a75f.io.domain.logic.CCUEquipConfiguration;
 
 import a75f.io.logger.CcuLog;
@@ -75,9 +75,9 @@ public class DemandResponseMode {
         }
         if (isDRActivationPoint(pointEntity)) {
             CcuLog.i(L.TAG_CCU_DR_MODE,"Handle DR Activation message ");
-            boolean isDREnrollmentEnabled = msgObject.get("val").getAsInt() == 1;
-            CcuLog.i(L.TAG_CCU_DR_MODE,"isDRActivationPoint "+isDREnrollmentEnabled);
-            setDRModeActivationStatus(isDREnrollmentEnabled);
+            boolean isDRActivationEnabled = msgObject.get("val").getAsInt() == 1;
+            CcuLog.i(L.TAG_CCU_DR_MODE,"isDRActivationPoint "+isDRActivationEnabled);
+            setDRModeActivationStatus(isDRActivationEnabled);
             zoneDataInterface.refreshScreen("",false);
         }
     }
@@ -104,16 +104,26 @@ public class DemandResponseMode {
         return Domain.readDefaultValByDomain(DomainName.demandResponseEnrollment) > 0;
     }
     public static void setDREnrollmentStatus(boolean enabled) {
-        Domain.writeDefaultValByDomain(DomainName.demandResponseEnrollment, enabled ? 1.0 : 0);
-        Domain.writeHisValByDomain(DomainName.demandResponseEnrollment, enabled ? 1.0 : 0);
+        CCUEquip ccuEquip = Domain.INSTANCE.getDomainCCUEquip();
+        if(ccuEquip != null) {
+            ccuEquip.getDemandResponseEnrollment().writePointValue(enabled ? 1.0 : 0);
+        } else {
+            CcuLog.e(L.TAG_CCU_DR_MODE, "CCUEquip is null, Failed to set DR Mode Enrollment Status");
+        }
     }
 
     public static boolean isDRModeActivated() {
         return Domain.readDefaultValByDomain(DomainName.demandResponseActivation) > 0;
     }
     public static void setDRModeActivationStatus(boolean enabled) {
-        Domain.writeDefaultValByDomain(DomainName.demandResponseActivation, enabled ? 1.0 : 0);
+        CCUEquip ccuEquip = Domain.INSTANCE.getDomainCCUEquip();
+        if(ccuEquip != null) {
+            ccuEquip.getDemandResponseActivation().writePointValue(enabled ? 1.0 : 0);
+        } else {
+            CcuLog.e(L.TAG_CCU_DR_MODE, "CCUEquip is null, Failed to set DR Mode Activation Status");
+        }
     }
+
     public static double getCoolingSetBack(double coolingDT, double buildingLimitMin) {
         return Math.min(coolingDT, buildingLimitMin);
     }

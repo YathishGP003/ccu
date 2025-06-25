@@ -126,6 +126,7 @@ public class PreferenceUtil {
 
 
     private static final String MIGRATE_DELETE_REDUNDANT_OAO_POINTS_BY_SYSTEM_EQUIP = "migrateDeleteRedundantOaoPointsBySystemEquip";
+    private static final String HIS_WRITE_ACTIVATION_POINT = "hisWriteActivation";
 
     private static final String UPDATE_MYSTAT_GATEWAY_REF_FLAG = "updateMystatGatewayRefFlag";
     private static final String MIGRATE_VFD_FAN_MODE = "migrateVfdFanMode";
@@ -980,6 +981,13 @@ public class PreferenceUtil {
     }
     public static void setMigrateDeleteRedundantOaoPointsBySystemEquip() {
         setBooleanPreference(MIGRATE_DELETE_REDUNDANT_OAO_POINTS_BY_SYSTEM_EQUIP, true);
+    }
+
+    public static boolean getDRMigrationStatus() {
+        return getBooleanPreference(HIS_WRITE_ACTIVATION_POINT);
+    }
+    public static void setDRMigrationStatus() {
+        setBooleanPreference(HIS_WRITE_ACTIVATION_POINT, true);
     }
 
     public static boolean getMigrateVfdFanMode() {

@@ -461,12 +461,23 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             PreferenceUtil.setEquipScheduleStatusForZoneExternalEquipDone()
         }
 
+        if (!PreferenceUtil.getDRMigrationStatus()) {
+            reSyncHisPointsForDR()
+            PreferenceUtil.setDRMigrationStatus()
+        }
+
         if (!PreferenceUtil.getUpdateMystatGatewayRefFlag()) {
             updateGatewayRefForMystatEquips();
             PreferenceUtil.setUpdateMystatGatewayRefFlag()
         }
 
         hayStack.scheduleSync()
+    }
+
+    private fun reSyncHisPointsForDR() {
+        val activationQuery = ("domainName == \"" + DomainName.demandResponseActivation + "\"")
+        val demandResponseActivationVal = hayStack.readPointPriorityValByQuery(activationQuery)
+        hayStack.writeHisValByQuery(activationQuery, demandResponseActivationVal)
     }
 
     private fun doDefaultSystemDomainModelMigration() {

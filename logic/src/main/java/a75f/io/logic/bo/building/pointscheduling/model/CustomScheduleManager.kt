@@ -633,11 +633,11 @@ class CustomScheduleManager {
                 "Fetched point definition: id=${pointDefinition.id}, ref=$pointDefinitionRef"
             )
             if (pointDefinition.id == pointDefinitionRef) {
-                val isPointScheduleExist = isPointScheduleActiveNow(pointDefinition)
+                val isPointScheduleExist : Map<Boolean, Day> = isPointScheduleActiveNow(pointDefinition)
                 val pointID = pointDict["id"].toString()
                 val pointDis = pointDict.get("dis").toString().split("-")
                 if(isPointScheduleExist.containsKey(true)) {
-                    val day = isPointScheduleExist[true]
+                    val day : Day = isPointScheduleExist[true]!!
                     val value = day?.`val`.toString().toDouble()
                     CcuLog.d(
                         L.TAG_CCU_POINT_SCHEDULE,
@@ -654,26 +654,18 @@ class CustomScheduleManager {
 
                     // this below code is get the next default value if continuous schedule is found
                     // 38571 observation1
-                    val pointDefinitionCustomVal = pointDefinition.days
-                        .groupBy { it.day }
-                        .values
-                        .firstNotNullOfOrNull { sameDayList ->
-                            sameDayList.firstNotNullOfOrNull { a ->
-                                sameDayList.firstOrNull { b ->
-                                    a !== b && a.ethh == b.sthh && a.etmm == b.stmm
-                                }?.`val` ?: sameDayList.firstOrNull()?.`val`
-                            }
-                        }
+                    val pointDefinitionCustomVal = findNextValFromCurrentDay(day, pointDefinition.days)
 
-                    CcuLog.d(
-                        L.TAG_CCU_POINT_SCHEDULE,
-                        "Point definition custom value: $pointDefinitionCustomVal"
-                    )
+
                     var pointDefinitionDefaultVal = pointDefinition.defaultValue
                     if(pointDefinitionCustomVal != value){
                         pointDefinitionDefaultVal = pointDefinitionCustomVal!!
                     }
 
+                    CcuLog.d(
+                        L.TAG_CCU_POINT_SCHEDULE,
+                        "upcoming change value: $pointDefinitionCustomVal"
+                    )
 
                     // Converts a value and default value based on enum and unit information,
                     //falling back to the original value if conversion fails or enum is missing.
@@ -892,6 +884,25 @@ class CustomScheduleManager {
             }
         }
         return null
+    }
+
+    private fun findNextValFromCurrentDay(
+        currentDayObj: Day,
+        allDays: List<Day>
+    ): Double {
+        val currentDay = currentDayObj.day
+        val endHour = currentDayObj.ethh
+        val endMinute = currentDayObj.etmm
+
+        val nextDay = (currentDay + 1) % 7
+
+        val candidates = allDays.filter {
+            (it.day == currentDay || it.day == nextDay) &&
+                    it.sthh == endHour &&
+                    it.stmm == endMinute
+        }
+
+        return candidates.firstOrNull()?.`val` ?: currentDayObj.`val`
     }
 
 }

@@ -624,6 +624,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         ExecutorTask.executeBackground(() -> {
                             double currentTempSensor = 0;
                             double noTempSensor = 0;
+                            final double currentTempVal ;
                             ArrayList<HashMap> zoneEquips = gridItem.getZoneEquips();
                             for (int j = 0; j < zoneEquips.size(); j++) {
                                 Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();
@@ -646,9 +647,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 DecimalFormat decimalFormat = new DecimalFormat("#.#");
                                 currentTempSensor = Double.parseDouble(decimalFormat.format(Math.round(currentTempSensor * 10.0) / 10.0));
                             }
+                            currentTempVal = currentTempSensor;
                             if (currentTempSensor > 0) {
-                                tempSeekArc.setCurrentTemp((float) (currentTempSensor));
-                                CcuLog.e("UI_PROFILING","ZoneFragmentNew.updateTemperature Arc updated");
+                                getActivity().runOnUiThread(
+                                        () ->{
+                                            CcuLog.i(LOG_TAG + "CurrentTemp", "SensorCurrentTemp:" + currentTempVal + " Node:" + nodeAddress + " zoneNodes:" + zoneNodes);
+                                            tempSeekArc.setCurrentTemp((float) (currentTempVal));
+                                            tempSeekArc.invalidate();
+                                            CcuLog.e("UI_PROFILING","ZoneFragmentNew.updateTemperature Arc updated");
+                                        }
+                                );
                             }
                         });
                         break;

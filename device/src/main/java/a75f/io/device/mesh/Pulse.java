@@ -492,7 +492,7 @@ public class Pulse
 				e.printStackTrace();
 			}
 		}
-		
+
 		if (emVal > 0) {
 			double emValFinal = CCUUtils.roundToOneDecimal(emVal/10); //SN sends multiples of 10
 			RawPoint sp = node.getRawPoint(Port.SENSOR_ENERGY_METER);
@@ -510,7 +510,7 @@ public class Pulse
 			}
 			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : EMR "+emValFinal);
 		}
-	
+
 	}
 
 	private static double getPressureValue(String pressureBinary) {
@@ -534,7 +534,7 @@ public class Pulse
 	public static double round(double val) {
 		return Math.round(100*val)/100;
 	}
-	
+
 	public static Double getRoomTempConversion(Double temp) {
 		return CCUUtils.roundToOneDecimal(temp/10.0);
 	}
@@ -551,7 +551,7 @@ public class Pulse
 	public static Double getDesredTempConversion(Double val) {
 		return val/2;
 	}
-	
+
 	public static Double getAnalogConversion(HashMap pp, HashMap lp, Double val) {
 		CcuLog.i(L.TAG_CCU_DEVICE, "Feedback Node address "+ pp.get("group")+" Feedback  type"+pp.get("analogType"));
 		double analogVal = val/1000;
@@ -582,7 +582,7 @@ public class Pulse
 		double analogConversion = analogSensor.minEngineeringValue +
 				(analogSensor.maxEngineeringValue- analogSensor.minEngineeringValue) * analogVal / (analogSensor.maxVoltage - analogSensor.minVoltage);
 		return CCUUtils.roundToTwoDecimal(analogConversion);
-		
+
 	}
 
 	private static Double convertToPressureValue(Double val, Sensor analogSensor) {
@@ -830,7 +830,13 @@ public class Pulse
 							logicalCurTempPoint = logPoint.get("id").toString();
 							phyCurTempPoint = phyPoint;
 							if (phyPoint.get("portEnabled").toString().equals("true") && device.containsKey("ti")) {
+								double oldVal = hayStack.readHisValById(logPoint.get("id").toString());
 								tiEquip.getRoomTemperature().writeHisVal(curTempVal);
+								if (oldVal != curTempVal) {
+									if (currentTempInterface != null) {
+										currentTempInterface.updateTemperature(curTempVal, Short.parseShort(nodeAddress));
+									}
+								}
 							}
 							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : currentTemp " + curTempVal + "," + tempOffset + "," + val);
 						} else {
@@ -1013,19 +1019,19 @@ public class Pulse
 				hayStack.writeHisValById(analog1In.get("id").toString(),
 				                         (double) cmRegularUpdateMessage_t.analogSense1.get());
 			}
-			
+
 			HashMap analog2In = hayStack.read("point and analog2 and in and deviceRef == \""+deviceId+"\"");
 			if (!analog1In.isEmpty()) {
 				hayStack.writeHisValById(analog2In.get("id").toString(),
 				                         (double) cmRegularUpdateMessage_t.analogSense2.get());
 			}
-			
+
 			HashMap th1In = hayStack.read("point and th1 and in and deviceRef == \""+deviceId+"\"");
 			if (!th1In.isEmpty()) {
 				hayStack.writeHisValById(th1In.get("id").toString(),
 				                         (double) cmRegularUpdateMessage_t.thermistor1.get());
 			}
-			
+
 			HashMap th2In = hayStack.read("point and th2 and in and deviceRef == \""+deviceId+"\"");
 			if (!th2In.isEmpty()) {
 				hayStack.writeHisValById(th2In.get("id").toString(),
@@ -1191,12 +1197,12 @@ public class Pulse
 					continue;
 				}
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
-				
+
 				if (logPoint.isEmpty()) {
 					CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+phyPoint.get("dis"));
 					continue;
 				}
-				
+
 				double val;
 				switch (Port.valueOf(phyPoint.get("port").toString())){
 					case RSSI:
@@ -1497,9 +1503,9 @@ public class Pulse
 					case DESIRED_TEMP:
 						double curValue = LSmartStat.getDesiredTemp(nodeAddr);
 						double desiredTemp = getDesredTempConversion(temp);
-						
+
 						boolean validDesiredTemp = DeviceUtil.validateDesiredTempUserLimits(nodeAddr, desiredTemp);
-						
+
 						if (desiredTemp > 0 && (curValue != desiredTemp)) {
 							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
 							updateSmartStatDesiredTemp(nodeAddr, desiredTemp, true);
@@ -1515,9 +1521,9 @@ public class Pulse
 
 			CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromSmartStat : FanMode " + fanSpeed.name()+","+curFanSpeeds.name());
 			boolean isFanModeChanged = false;
-			
+
 			if(fanOpModePoint != null && fanOpModePoint.size() > 0) {
-				
+
 				//FCU profiles on SmartStat extended the serial protocol to support medium Fan levels.
 				//FanHigh2 when comes from an FCU device, it is in fact Medium.
 				if (fanOpModePoint.containsKey(Tags.FCU)) {

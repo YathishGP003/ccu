@@ -20,6 +20,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -174,6 +175,12 @@ class CustomControlDialog(val roomRef: String) : BaseDialogFragment() {
             }
             if(viewModel.isPointDropdownClicked[itemIndex] == true) {
                 pointData.pointDefinitionRef?.let { pointDefinitionId ->
+                        val pointDefinitionMap =  viewModel.pointDefinitionMap.containsKey(pointDefinitionId)
+                        if(!pointDefinitionMap) {
+                            Toast.makeText(context, "Schedule not updated for $pointDefinitionId." +
+                                    " Please wait or try again later.", Toast.LENGTH_SHORT).show()
+                            return@let
+                        }
                         PointScheduleUI(
                             pointData.scheduleGroup!!,
                             viewModel.pointDefinitionMap[pointDefinitionId]!!,

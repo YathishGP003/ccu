@@ -11,8 +11,6 @@ import a75f.io.api.haystack.util.TimeUtil
 import a75f.io.api.haystack.util.getCurrentDateTime
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.bacnet.BacnetEquip
-import a75f.io.logic.bo.building.system.BacnetServicesUtils
 import a75f.io.logic.bo.building.system.doMakeRequest
 import a75f.io.logic.bo.building.system.getObjectType
 import a75f.io.logic.bo.util.getValueByEnum
@@ -654,6 +652,29 @@ class CustomScheduleManager {
                     haystack.writeDefaultValById(pointID, value)
                     writeToPhysical(equip, pointDict, value)
 
+                    // this below code is get the next default value if continuous schedule is found
+                    // 38571 observation1
+                    val pointDefinitionCustomVal = pointDefinition.days
+                        .groupBy { it.day }
+                        .values
+                        .firstNotNullOfOrNull { sameDayList ->
+                            sameDayList.firstNotNullOfOrNull { a ->
+                                sameDayList.firstOrNull { b ->
+                                    a !== b && a.ethh == b.sthh && a.etmm == b.stmm
+                                }?.`val` ?: sameDayList.firstOrNull()?.`val`
+                            }
+                        }
+
+                    CcuLog.d(
+                        L.TAG_CCU_POINT_SCHEDULE,
+                        "Point definition custom value: $pointDefinitionCustomVal"
+                    )
+                    var pointDefinitionDefaultVal = pointDefinition.defaultValue
+                    if(pointDefinitionCustomVal != value){
+                        pointDefinitionDefaultVal = pointDefinitionCustomVal!!
+                    }
+
+
                     // Converts a value and default value based on enum and unit information,
                     //falling back to the original value if conversion fails or enum is missing.
 
@@ -663,12 +684,12 @@ class CustomScheduleManager {
                         val enum = getValueByEnum(value, enumStr, unitStr)
                         val customVal = enum.ifEmpty { value }
 
-                        val enum2 = getValueByEnum(pointDefinition.defaultValue, enumStr, unitStr)
-                        val defaultVal = enum2.ifEmpty { pointDefinition.defaultValue }
+                        val enum2 = getValueByEnum(pointDefinitionDefaultVal, enumStr, unitStr)
+                        val defaultVal = enum2.ifEmpty { pointDefinitionDefaultVal }
 
                         customVal to defaultVal
                     } else {
-                        (value.toString() + unitStr) to (pointDefinition.defaultValue.toString() + unitStr)
+                        (value.toString() + unitStr) to (pointDefinitionDefaultVal.toString() + unitStr)
                     }
 
                     equipScheduleStatus.append(
@@ -802,6 +823,20 @@ class CustomScheduleManager {
 
             val startTotalMinutes = startHour * 60 + startMinute
             val endTotalMinutes = endHour * 60 + endMinute
+
+            // overnight schedule
+            if(endTotalMinutes <= startTotalMinutes){
+                val value = dayItem.`val`.toString().toDouble()
+                CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "custom value found. value=$value")
+                return mapOf(true to dayItem)
+            }
+
+            CcuLog.d(
+                L.TAG_CCU_POINT_SCHEDULE,
+                "Current total minutes: $currentTotalMinutes, " +
+                        "Start total minutes: $startTotalMinutes, " +
+                        "End total minutes: $endTotalMinutes"
+            )
 
             CcuLog.d(
                 L.TAG_CCU_POINT_SCHEDULE,

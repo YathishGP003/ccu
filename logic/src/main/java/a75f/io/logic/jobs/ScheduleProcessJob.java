@@ -59,6 +59,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 ScheduleManager.getInstance().processSchedules();
                 CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
                 CustomScheduleManager.Companion.getInstance().processPointSchedules();
+                CcuLog.d(TAG_CCU_JOB,"<- PointScheduleProcessJob");
             } catch (Exception e) {
                 CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob Failed ", e);
             } finally {

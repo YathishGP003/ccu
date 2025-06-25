@@ -456,18 +456,17 @@ fun FormattedTableWithoutHeader(
 }
 
 @Composable
-fun ModelSelector(
+fun ExternalConfigDropdownSelector (
     titleText: String,
     isPaired: Boolean,
-    modelName: MutableState<String>,
-    modelEquipVersion: String,
+    selectedItemName: MutableState<String>,
+    modelVersion: String,
     onClickEvent: () -> Unit,
-    otherUiComposable: @Composable (() -> Unit)? = null
+    otherUiComposable: @Composable (() -> Unit)? = null,
+    isNested: Boolean = false
 ) {
     Box(
-        Modifier
-            .fillMaxWidth()
-            .padding(top = 40.dp)
+        modifier = if(!isNested) Modifier.fillMaxWidth().padding(top = 40.dp) else Modifier.padding(top = 30.dp)
     ) {
         Row(
             modifier = Modifier.align(Alignment.Center),
@@ -485,21 +484,21 @@ fun ModelSelector(
                 Row {
                     if (isPaired) {
                         TextViewWithClickNoLeadingSpace(
-                            text = modelName,
+                            text = selectedItemName,
                             onClick = { },
                             enableClick = false,
                             isCompress = false
                         )
                     } else {
                         TextViewWithClickNoLeadingSpace(
-                            text = modelName,
+                            text = selectedItemName,
                             onClick = {
                                 onClickEvent()
                             },
                             enableClick = true, isCompress = false
                         )
                     }
-                    if (isPaired || modelEquipVersion.isNotEmpty()) {
+                    if ((isPaired && !isNested) || modelVersion.isNotEmpty()) {
                         Box(
                             modifier = Modifier
                                 .wrapContentWidth()
@@ -508,7 +507,7 @@ fun ModelSelector(
                                 .padding(bottom = 20.dp, start = 8.dp)
                         ) {
                             HeaderTextView(
-                                "V $modelEquipVersion",
+                                "V $modelVersion",
                                 fontSize = 18,
                                 fontWeight = FontWeight.Normal
                             )

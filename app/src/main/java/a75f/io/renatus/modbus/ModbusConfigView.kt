@@ -10,7 +10,7 @@ import a75f.io.renatus.compose.FormattedTableWithoutHeader
 import a75f.io.renatus.compose.HeaderLeftAlignedTextView
 import a75f.io.renatus.compose.HeaderTextView
 import a75f.io.renatus.compose.LabelTextView
-import a75f.io.renatus.compose.ModelSelector
+import a75f.io.renatus.compose.ExternalConfigDropdownSelector
 import a75f.io.renatus.compose.ParameterLabel
 import a75f.io.renatus.compose.SaveTextView
 import a75f.io.renatus.compose.TableHeaderRow
@@ -260,9 +260,7 @@ class ModbusConfigView : BaseDialogFragment() {
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            if (viewModel.isExistingProfile(filter) && viewModel.floorRef.equals("SYSTEM") && viewModel.zoneRef.equals(
-                                    "SYSTEM"
-                                )
+                            if (viewModel.isExistingProfile(filter) && viewModel.floorRef == "SYSTEM" && viewModel.zoneRef == "SYSTEM"
                             ) {
                                 SaveTextView("UNPAIR") { viewModel.unpair() }
                             } else {
@@ -333,7 +331,7 @@ class ModbusConfigView : BaseDialogFragment() {
                             }
 
                             // Select Modbus Model Dropdown with Version Info
-                            ModelSelector(
+                            ExternalConfigDropdownSelector(
                                 EQUIP_TYPE,
                                 viewModel.equipModel.value.isDevicePaired,
                                 viewModel.modelName,

@@ -5,8 +5,6 @@ import static a75f.io.api.haystack.Tags.BACNET;
 import static a75f.io.api.haystack.Tags.BACNET_POINT_UPDATE;
 import static a75f.io.api.haystack.Tags.CONNECTMODULE;
 import static a75f.io.api.haystack.Tags.MODBUS;
-import static a75f.io.api.haystack.Tags.MODBUS;
-import static a75f.io.api.haystack.Tags.CONNECTMODULE;
 import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
 import static a75f.io.logic.bo.building.definitions.ProfileType.CONNECTNODE;
 import static a75f.io.logic.bo.util.CCUUtils.getTruncatedString;
@@ -16,7 +14,6 @@ import static a75f.io.logic.L.TAG_CCU_INIT;
 import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.disconnectedIntervals;
-import static a75f.io.logic.bo.util.CCUUtils.getTruncatedString;
 import static a75f.io.logic.bo.util.CustomScheduleUtilKt.fetchScheduleStatusMessageForPointsUnderCustomControl;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
@@ -24,7 +21,6 @@ import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.logic.util.bacnet.BacnetModelBuilderKt.buildBacnetModel;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 
 import android.annotation.SuppressLint;
@@ -86,7 +82,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.base.BaseInterval;
 import org.projecthaystack.HDict;
-import org.projecthaystack.HNum;
+import org.projecthaystack.HStr;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -137,7 +133,6 @@ import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.otn.OTNUtil;
-import a75f.io.logic.bo.building.pointscheduling.model.CustomScheduleManager;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
@@ -5079,6 +5074,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             case "BACNET":
                 Equip nonTempEquip = (Equip) profileParam;
+                BacnetServicesUtils serviceUtils = new BacnetServicesUtils();
+
+                Map<String, String> bacnetConfig = serviceUtils.getConfig(
+                        nonTempEquip.getTags().getOrDefault(
+                                "bacnetConfig",
+                                HStr.make("")).toString()
+                );
+                String macAddr = bacnetConfig.get("macAddress");
+                if (macAddr == null || macAddr.isEmpty()) {
+                    macAddr = "NA";
+                }
 
                 for (BacnetModelDetailResponse item : buildBacnetModel(nonTempEquip.getRoomRef())){
                     equipName.append(item.getName());
@@ -5091,7 +5097,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                 }
                 return equipName.toString().trim() + " - " +
-                        Objects.requireNonNull(nonTempEquip.getTags().get(Tags.BACNET_DEVICE_ID));
+                        " ( " +
+                        nonTempEquip.getGroup() +
+                        " | Device ID: " +
+                        bacnetConfig.get("deviceId") +
+                        " | MAC Addr: " +
+                        macAddr +
+                        " )";
             case CONNECTMODULE:
                 return ((EquipmentDevice) profileParam).getName();
             default:

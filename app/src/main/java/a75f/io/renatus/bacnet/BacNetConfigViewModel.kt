@@ -141,6 +141,8 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     val bacNetItemsMap = hashMapOf<String, RpResponseMultiReadItem>()
     private lateinit var service : CcuService
 
+    val showToast = mutableStateOf(false)
+
     val onItemSelect = object : OnItemSelect {
         override fun onItemSelected(index: Int, item: String) {
             modelName.value = item
@@ -1084,5 +1086,13 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                 CcuLog.d(TAG, "update SchedulableEnable State --${bacnetPoint.id}--${item.id} value== $b")
                 bacnetPoint.isSchedulable  = b
             }
+    }
+
+    fun clearConfigFieldData() {
+        deviceId.value = ""
+        destinationPort.value = ""
+        dnet.value = ""
+        destinationIp.value = ""
+        destinationMacAddress.value = ""
     }
 }

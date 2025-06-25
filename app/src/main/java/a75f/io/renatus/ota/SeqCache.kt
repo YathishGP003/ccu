@@ -98,6 +98,7 @@ class SeqCache {
         map[META_NAME] = intent.getStringExtra(META_NAME)!!
         map[CMD_LEVEL] = intent.getStringExtra(CMD_LEVEL)!!
         map[MESSAGE_ID] = intent.getStringExtra(MESSAGE_ID)!!
+        map[ERASE_SEQUENCE] = intent.getStringExtra(ERASE_SEQUENCE)!!
         map[CMD_TYPE] = intent.getStringExtra(CMD_TYPE)!!
         map[NODE_ADDRESS] = intent.getStringExtra(NODE_ADDRESS) // Since not applicable for firmware OTA type, no need of !!
         map[SEQ_NAME] = intent.getStringExtra(SEQ_NAME) // Since not applicable for firmware OTA type, no need of !!
@@ -112,6 +113,7 @@ class SeqCache {
         otaUpdateIntent.putExtra(META_NAME,request[META_NAME])
         otaUpdateIntent.putExtra(CMD_LEVEL, request[CMD_LEVEL])
         otaUpdateIntent.putExtra(MESSAGE_ID, request[MESSAGE_ID])
+        otaUpdateIntent.putExtra(ERASE_SEQUENCE, request[ERASE_SEQUENCE])
         otaUpdateIntent.putExtra(CMD_TYPE, request[CMD_TYPE] ?: "")
         otaUpdateIntent.putExtra(SEQ_NAME, request[SEQ_NAME] ?: "") // Since SEQ_VERSION might not be applicable for firmware OTA type
         otaUpdateIntent.putExtra(NODE_ADDRESS, request[NODE_ADDRESS] ?: "") // Since NODE_ADDRESS might not be applicable for firmware OTA type

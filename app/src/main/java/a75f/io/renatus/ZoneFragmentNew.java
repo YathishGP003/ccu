@@ -2607,13 +2607,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         textViewModule.setVisibility(View.VISIBLE);
                         textViewUpdatedTimeHeading.setVisibility(View.VISIBLE);
                         textViewUpdatedTime.setVisibility(View.VISIBLE);
+                        LinearLayout equipScheduleStatusLayout = zoneDetails.findViewById(R.id.equip_schedule_status_layout);
+                        equipScheduleStatusLayout.setVisibility(View.GONE);
 
                         if (modbusDevices.isEmpty()) {
                             LinearLayout noEquipPairedLayout = zoneDetails.findViewById(R.id.noEquipPaired);
+                            LinearLayout modbusLayout = zoneDetails.findViewById(R.id.modbus_layout_detain);
                             TextView noModelMessage = zoneDetails.findViewById(R.id.tvNoEquipPaired);
                             String message = "<b>No Model Configured.</b> Go to Site Sequencer to set up a model for this Connect Node.";
                             noModelMessage.setText(HtmlCompat.fromHtml(message, HtmlCompat.FROM_HTML_MODE_LEGACY));
                             noEquipPairedLayout.setVisibility(View.VISIBLE);
+                            modbusLayout.setPadding(40, 0, 0, 0);
                             noEquipPairedLayout.setBackgroundColor(getResources().getColor(R.color.lite_orange));
                             linearLayoutZonePoints.addView(zoneDetails);
                             return;

@@ -12,7 +12,7 @@ import a75f.io.logic.L;
 
 public class LConnectNode
 {
-    public static CcuToCmOverUsbDatabaseSeedCnMessage_t getSeedMessage(Zone zone, short address, String equipRef, String profile)
+    public static CcuToCmOverUsbDatabaseSeedCnMessage_t getSeedMessage(short address, String equipRef, String profile)
     {
         CcuToCmOverUsbDatabaseSeedCnMessage_t seedMessage =
                 new CcuToCmOverUsbDatabaseSeedCnMessage_t();

@@ -232,7 +232,8 @@ public class ModbusEquip {
                 logicalParamPoint.addTag("registerNumber", HStr.make(registerAddressMap.get(configParam.getName()).getFirst()))
                         .addTag("registerAddress", HStr.make(registerAddressMap.get(configParam.getName()).getSecond()))
                         .addTag("registerType", HStr.make("holdingRegister"))
-                        .addTag("parameterDefinitionType", HStr.make("float"));
+                        .addTag("parameterDefinitionType", HStr.make("float"))
+                        .addTag("wordOrder", HStr.make("bigEndian"));
             }
             if(configParam.isDisplayInUI()){
                 logicalParamPoint.addMarker("displayInUi");

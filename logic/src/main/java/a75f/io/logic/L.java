@@ -187,9 +187,9 @@ public class L
         final short maxAttempts = 200; // Prevent infinite loops
         short attempts = 0;
 
-        // Get all existing Connect Module devices (excluding BACnet devices)
-        final ArrayList<HashMap<Object, Object>> nodes = CCUHsApi.getInstance()
-                .readAllEntities("device and connectModule and not bacnet");
+        // Get all existing devices (excluding BACnet devices)
+        final ArrayList<HashMap<Object, Object>> nodes = CCUHsApi.getInstance().
+                readAllEntities("device and (node or connectModule) and not bacnet");
 
         // Start checking from currentBand + 1 (to avoid 0x00)
         short nextAddr = (short) (currentBand + 1);

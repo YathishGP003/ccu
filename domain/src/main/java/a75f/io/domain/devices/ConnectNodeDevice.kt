@@ -21,6 +21,7 @@ class ConnectNodeDevice(deviceRef: String) : DomainDevice(deviceRef) {
     val sequenceMetadataName = PhysicalPoint(DomainName.sequenceMetadataName, deviceRef)
     val sequenceMetadataLength = PhysicalPoint(DomainName.sequenceMetadataLength, deviceRef)
     val sequenceMetadataIdentity = PhysicalPoint(DomainName.sequenceMetadataIdentity, deviceRef)
+    val sequenceVersion = PhysicalPoint(DomainName.sequenceVersion, deviceRef)
 
 
     fun updateDeliveryTime(deliveryReceipt: HDateTime) {

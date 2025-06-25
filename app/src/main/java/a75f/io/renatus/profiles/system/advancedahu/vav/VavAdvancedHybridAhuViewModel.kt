@@ -1,6 +1,7 @@
 package a75f.io.renatus.profiles.system.advancedahu.vav
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.domain.logic.hasChanges
@@ -106,6 +107,8 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                 updateOaoPoints()
                 if (profileConfiguration.connectConfiguration.connectEnabled) {
                     updateAhuRefForConnectModule()
+                    // Send seed message when connect module is added
+                    LSerial.getInstance().setResetSeedMessage(true)
                 }
                 updateConditioningMode()
                 hayStack.setCcuReady()

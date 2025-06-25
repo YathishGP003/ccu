@@ -10,6 +10,7 @@ import static a75f.io.logic.L.ccu;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
@@ -42,6 +43,8 @@ import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettings2Message_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.devices.ConnectDevice;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
@@ -271,7 +274,7 @@ public class MeshNetwork extends DeviceNetwork
                             case CONNECTNODE:
                                 if (bSeedMessage) {
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN SEEDS=====================" + zone.getId());
-                                    CcuToCmOverUsbDatabaseSeedCnMessage_t seedMessage = LConnectNode.getSeedMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), "connect");
+                                    CcuToCmOverUsbDatabaseSeedCnMessage_t seedMessage = LConnectNode.getSeedMessage(Short.parseShort(d.getAddr()), d.getEquipRef(), "connect");
                                     tempLogdStructAsJson(seedMessage);
                                     sendStructToCM(seedMessage);
                                 }
@@ -342,7 +345,17 @@ public class MeshNetwork extends DeviceNetwork
                     sendStruct((short) settings2Message.smartNodeAddress.get(), settings2Message);
                 }
             }
-            
+            if (bSeedMessage && (ccu().systemProfile instanceof VavAdvancedAhu || ccu().systemProfile instanceof DabAdvancedAhu)) {
+                if(Domain.connect1Device != null) {
+                    ConnectDevice d = Domain.connect1Device;
+                    HashMap<Object, Object> deviceMap = CCUHsApi.getInstance().readMapById(Domain.connect1Device.getDeviceRef());
+                    short localAddr = Short.parseShort(Objects.requireNonNull(deviceMap.get("addr")).toString());
+                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING CN SEEDS ADV AHU=====================");
+                    CcuToCmOverUsbDatabaseSeedCnMessage_t seedMessage = LConnectNode.getSeedMessage(localAddr, d.getDeviceRef(), "connect");
+                    tempLogdStructAsJson(seedMessage);
+                    sendStructToCM(seedMessage);
+                }
+            }
         }
         catch (Exception e)  {
             e.printStackTrace();

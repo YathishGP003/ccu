@@ -166,11 +166,14 @@ class OtaStatusDiagPoint {
             }
         }
 
+
         fun updateOtaStatusPoint(status: OtaStatus,node: Int) {
             val hsApi = CCUHsApi.getInstance()
             if (isCMDevice(node)) {
                 Domain.diagEquip.otaStatusCM.writeHisVal(status.ordinal.toDouble())
-            } else {
+            } else if (ConnectNodeUtil.getConnectNodeByNodeAddress(node.toString(), hsApi).size > 0) {
+                hsApi.writeHisValByQuery("ota and status and domainName ==\"otaStatus\" and group ==\"$node\"",status.ordinal.toDouble())
+            }else {
                 //hyperstatsplit we have two OTA point -->  connect module and Hyperstatsplit
                 if(connectmoduleUpdateLevel) {
                     hsApi.writeHisValByQuery(" ota and status and domainName ==\"otaStatusConnectModule\" and  group ==\"$node\"",status.ordinal.toDouble())
@@ -226,7 +229,7 @@ class OtaStatusDiagPoint {
 
         fun updateCcuToCmSeqProgress(totalPackets: Double, currentRunningPacket: Int, nodeAddress: Int) {
             val seqProgress = ((currentRunningPacket.toDouble() / totalPackets) * 100).toInt()
-            val currentSeqStatus = connectNodeEquip(nodeAddress).otaStatus.readHisVal().toInt()
+            val currentSeqStatus = connectNodeEquip(nodeAddress).sequenceStatus.readHisVal().toInt()
             CcuLog.d(L.TAG_CCU_OTA_PROCESS, "" +
                     "\n totalPackets : $totalPackets"+ "  currentRunningPacket : $currentRunningPacket"+
                     "\n otaProgress : $seqProgress"+ "  currentOtaStatus : ${SequenceOtaStatus.values()[currentSeqStatus]}"
@@ -331,7 +334,7 @@ class OtaStatusDiagPoint {
         fun updateCmToDeviceSeqProgress(totalPackets: Double, currentRunningPacket: Int, nodeAddress: Int) {
 
             val otaProgress = ((currentRunningPacket.toDouble() / totalPackets) * 100).toInt()
-            val currentSeqStatus = connectNodeEquip(nodeAddress).otaStatus.readHisVal().toInt()
+            val currentSeqStatus = connectNodeEquip(nodeAddress).sequenceStatus.readHisVal().toInt()
 
             CcuLog.d(L.TAG_CCU_OTA_PROCESS, "" +
                     "\n totalPackets : $totalPackets"+ " currentRunningPacket : $currentRunningPacket"+

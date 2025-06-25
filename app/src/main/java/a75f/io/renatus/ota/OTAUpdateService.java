@@ -36,6 +36,7 @@ import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.stream.JsonReader;
 
 import org.projecthaystack.HDateTime;
+import org.projecthaystack.HTimeZone;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -130,6 +131,7 @@ public class OTAUpdateService extends IntentService {
     private static String mSequenceMetaFileName = "";
     private static String mSequenceSeqFileName = "";
     private static short mSequenceVersion = -1;
+    private static Boolean mSequenceEmptyRequest = false;
 
     private static long mMetadataDownloadId = -1;
     private static long mBinaryDownloadId = -1;
@@ -421,18 +423,23 @@ public class OTAUpdateService extends IntentService {
 
     /**
      * Extracts and processes metadata from a sequence file and manages the OTA update cache.
-     *
+     * <p>
      * This function:
      * 1. Locates the metadata file for the specified sequence file
      * 2. Extracts metadata information from the file
      * 3. Cleans up the current OTA request from the cache
      *
-     * @param filename The base filename (without extension) of the sequence file to process
-     *
+     * @param filename              The base filename (without extension) of the sequence file to process
+     * @param mCurrentLwMeshAddress
+     * @param seqVersion
      */
-    void extractFileSequenceMeta(String filename) {
+    void extractFileSequenceMeta(String filename, int mCurrentLwMeshAddress, Integer seqVersion) {
         SeqCache cache = new SeqCache();
         File metadata = findFile(OTAUpdateService.DOWNLOAD_SEQ_DIR, filename, METADATA_FILE_FORMAT);
+
+        ConnectNodeUtil.Companion.connectNodeEquip(mCurrentLwMeshAddress)
+                .getSequenceVersion().writeHisVal(seqVersion);
+
         extractSequenceMetadata(metadata);
         cache.removeRequest(currentOtaRequest);
         otaRequestsQueue.removeIf(intent -> Objects.equals(intent.getStringExtra(MESSAGE_ID), currentOtaRequest));
@@ -528,13 +535,14 @@ public class OTAUpdateService extends IntentService {
 
         CcuLog.i(L.TAG_CCU_OTA_PROCESS, " CM to Device process : State : "+msg.currentState.get() + " Data : "+msg.data.get());
         ConnectNodeUtil.Companion.updateOtaSequenceState(msg.currentState.get(), mCurrentLwMeshAddress);
+        if ( msg.currentState.get() == SequenceOtaState.SEQUENCE_COPY_AVAILABLE.ordinal()) {
+            ConnectNodeDevice connectNodeEquip = ConnectNodeUtil.Companion.connectNodeEquip(mCurrentLwMeshAddress);
+            connectNodeEquip.updateDeliveryTime(HDateTime.make(System.currentTimeMillis(), HTimeZone.make("UTC")));
+        }
         if ( msg.currentState.get() == SequenceOtaState.SEQUENCE_RECEIVED.ordinal()
                 || msg.currentState.get() == SequenceOtaState.SEQUENCE_COPY_AVAILABLE.ordinal()) {
+
             ConnectNodeUtil.Companion.updateOtaSequenceStatus(SequenceOtaStatus.SEQ_CCU_TO_CM_FIRMWARE_RECEIVED, mCurrentLwMeshAddress);
-            short currentBand = L.ccu().getAddressBand();
-            if (mCurrentLwMeshAddress != (currentBand + 99)){
-                ConnectNodeUtil.Companion.updateOtaSequenceStatus(SequenceOtaStatus.SEQ_CM_TO_DEVICE_PACKET_STARTED, mCurrentLwMeshAddress);
-            }
             mUpdateWaitingToComplete = true;
         } else if ( msg.currentState.get() == SequenceOtaState.CM_DEVICE_IN_PROGRESS.ordinal()) {
             OtaStatusDiagPoint.Companion.updateCmToDeviceSeqProgress(
@@ -563,7 +571,7 @@ public class OTAUpdateService extends IntentService {
         ConnectNodeDevice connectNodeEquip = ConnectNodeUtil.Companion.connectNodeEquip(mCurrentLwMeshAddress);
         ConnectNodeUtil.Companion.updateOtaSequenceStatus(SequenceOtaStatus.SEQ_SUCCEEDED, mCurrentLwMeshAddress);
         // Update the delivery time
-        connectNodeEquip.updateConfirmedTime(HDateTime.make(System.currentTimeMillis()));
+        connectNodeEquip.updateConfirmedTime(HDateTime.make(System.currentTimeMillis(), HTimeZone.make("UTC")));
         moveUpdateToNextNode();
     }
 
@@ -666,14 +674,18 @@ public class OTAUpdateService extends IntentService {
             // Extract the metadata and binary file information from the files which are already present in the download directory
             mSequenceMetaFileName = intent.getStringExtra(META_NAME);
             // Send metadata only if the erase sequence is not requested
+
             if(!eraseSequence) {
-                extractFileSequenceMeta(mSequenceMetaFileName);
+                extractFileSequenceMeta(mSequenceMetaFileName, mCurrentLwMeshAddress,
+                        Integer.parseInt(Objects.requireNonNull(intent.getStringExtra(SEQ_VERSION))));
                 mSequenceSeqFileName = intent.getStringExtra(FIRMWARE_NAME);
                 extractFileSequenceOta(mSequenceSeqFileName);
+                mSequenceEmptyRequest = false;
             } else {
                 SeqCache cache = new SeqCache();
                 cache.removeRequest(currentOtaRequest);
                 otaRequestsQueue.removeIf(intent1 -> Objects.equals(intent1.getStringExtra(MESSAGE_ID), currentOtaRequest));
+                mSequenceEmptyRequest = true;
             }
             startSequenceUpdate(id, currentOtaRequest, eraseSequence);
             return;
@@ -1338,7 +1350,7 @@ public class OTAUpdateService extends IntentService {
         OTAUpdateHandlerService.lastOTAUpdateTime = System.currentTimeMillis();
         mCurrentLwMeshAddress = mLwMeshSeqAddresses.get(0);
         ConnectNodeDevice connectNodeEquip = ConnectNodeUtil.Companion.connectNodeEquip(mCurrentLwMeshAddress);
-        connectNodeEquip.getOtaStatus().writePointValue(SequenceOtaStatus.SEQ_UPDATE_STARTED.ordinal());
+        connectNodeEquip.getSequenceStatus().writePointValue(SequenceOtaStatus.SEQ_UPDATE_STARTED.ordinal());
 
         mLwMeshSeqAddresses.remove(0);
 
@@ -1425,6 +1437,7 @@ public class OTAUpdateService extends IntentService {
     private void sendPacketEraseSequence(int lwMeshAddress) {
         CcuToCmOverUsbFirmwarePacketMessage_t message = new CcuToCmOverUsbFirmwarePacketMessage_t();
         message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SEQUENCE_ERASE);
+        CcuLog.d(TAG, "[UPDATE] Erase sequence request to address " + lwMeshAddress);
         message.lwMeshAddress.set(lwMeshAddress);
         try {
             MeshUtil.sendStructToCM(message);
@@ -1445,7 +1458,7 @@ public class OTAUpdateService extends IntentService {
         }
         if(packetNumber == 0) {
             ConnectNodeDevice connectNodeEquip = ConnectNodeUtil.Companion.connectNodeEquip(mCurrentLwMeshAddress);
-            connectNodeEquip.updateDeliveryTime(HDateTime.make(System.currentTimeMillis()));
+            connectNodeEquip.updateDeliveryTime(HDateTime.make(System.currentTimeMillis(), HTimeZone.make("UTC")));
         }
         if (packetNumber < 0 || packetNumber > packets.size()) {
             CcuLog.d(TAG, "[UPDATE] Received request for invalid packet: " + packetNumber);
@@ -1526,12 +1539,12 @@ public class OTAUpdateService extends IntentService {
         }
         return nodeAddress == ( L.ccu().getAddressBand() + 98 ) || connectNodeEquipAvailable;    }
 
-    private void checkSequenceCacheForUpdate() {
+    private Integer checkSequenceCacheForUpdate() {
         SeqCache seqCache = new SeqCache();
         LinkedTreeMap<String, LinkedTreeMap<String,String>> seqRequests = seqCache.getRequestMap();
 
         if (seqRequests.isEmpty()) {
-            return;
+            return null;
         }
         LinkedTreeMap<String, String> currentRequest = seqRequests.entrySet().iterator().next().getValue();
         if(mLwMeshSeqAddresses == null) {
@@ -1544,18 +1557,20 @@ public class OTAUpdateService extends IntentService {
         mSequenceMetaFileName = Objects.requireNonNull(currentRequest.get(META_NAME));
         mSequenceSeqFileName = Objects.requireNonNull(currentRequest.get(FIRMWARE_NAME));
         currentOtaRequest = Objects.requireNonNull(currentRequest.get(MESSAGE_ID));
-//        seqCache.saveRunningDeviceDetails(mCurrentLwMeshAddress,mFirmwareDeviceType.ordinal(),mSequenceSeqFileName,mSequenceMetaFileName,mLwMeshAddresses);
-
+        String eraseSequenceStr = Objects.requireNonNull(currentRequest.get(ERASE_SEQUENCE));
+        mSequenceEmptyRequest = eraseSequenceStr.equals("true");
         CcuLog.d(TAG, "[VALIDATION] Found sequence update in cache for device type: " + mFirmwareDeviceType + ", addresses: " + mLwMeshSeqAddresses);
+
+        return Integer.valueOf(Objects.requireNonNull(currentRequest.get(SEQ_VERSION)));
     }
 
     private void moveUpdateToNextNode() {
         // Add support for the sequence update
         resetUpdateVariables();
-        checkSequenceCacheForUpdate();
+        Integer seqVersion = checkSequenceCacheForUpdate();
         if((mLwMeshAddresses == null || mLwMeshAddresses.isEmpty()) && (mLwMeshSeqAddresses == null || mLwMeshSeqAddresses.isEmpty())) {
             completeUpdate();
-//            deleteFilesByDeviceType(DOWNLOAD_DIR);
+            deleteFilesByDeviceType(DOWNLOAD_DIR);
             return;
         }
         if(mLwMeshAddresses != null && !isConnectDeviceToCm(mLwMeshAddresses.get(0)) && !HeartBeatUtil.isModuleAlive(mLwMeshAddresses.get(0).toString()) && !isCMDevice(mLwMeshAddresses.get(0)) ) {
@@ -1570,10 +1585,17 @@ public class OTAUpdateService extends IntentService {
         if(mLwMeshSeqAddresses != null && !mLwMeshSeqAddresses.isEmpty()) {
             ConnectNodeDevice connectNodeEquip = ConnectNodeUtil.Companion.connectNodeEquip(mCurrentLwMeshAddress);
             connectNodeEquip.getSequenceStatus().writePointValue(SequenceOtaStatus.SEQ_UPDATE_STARTED.ordinal());
-            extractFileSequenceMeta(mSequenceMetaFileName);
-            extractFileSequenceOta(mSequenceSeqFileName);
-            String nodeId = ConnectNodeUtil.Companion.connectNodeEquip(mCurrentLwMeshAddress).getId();
-            sendSequenceMetadata(FirmwareComponentType_t.CONNECT_MODULE_SEQUENCE_TYPE);
+            if(!mSequenceEmptyRequest) {
+                extractFileSequenceMeta(mSequenceMetaFileName, mCurrentLwMeshAddress, seqVersion);
+                extractFileSequenceOta(mSequenceSeqFileName);
+                sendSequenceMetadata(FirmwareComponentType_t.CONNECT_MODULE_SEQUENCE_TYPE);
+            } else {
+                SeqCache cache = new SeqCache();
+                cache.removeRequest(currentOtaRequest);
+                otaRequestsQueue.removeIf(intent1 -> Objects.equals(intent1.getStringExtra(MESSAGE_ID), currentOtaRequest));
+                sendPacketEraseSequence(mLwMeshSeqAddresses.get(0));
+                mLwMeshSeqAddresses.remove(0);
+            }
             return;
         }
 
@@ -1603,6 +1625,7 @@ public class OTAUpdateService extends IntentService {
         mUpdateLengthSq = -1;
         mSequenceVersion = -1;
         mSequenceName = "";
+        mSequenceEmptyRequest = false;
 
         mUpdateWaitingToComplete = false;
         CcuLog.d(TAG, "[RESET] Reset OTA update status");
@@ -1627,6 +1650,7 @@ public class OTAUpdateService extends IntentService {
         mUpdateLengthSq = -1;
         mSequenceVersion = -1;
         mSequenceName = null;
+        mSequenceEmptyRequest = false;
 
         mUpdateInProgress = false;
         Intent completeIntent = new Intent(Globals.IntentActions.OTA_UPDATE_COMPLETE);
@@ -1661,7 +1685,6 @@ public class OTAUpdateService extends IntentService {
     void sequenceRequest(Intent seqRequest) {
         CcuLog.i(TAG, "sequenceRequest: "+ seqRequest);
         ArrayList<String> deviceListToSendLowCode = seqRequest.getStringArrayListExtra(DEVICE_LIST);
-        if (deviceListToSendLowCode == null) return;
 
         for (String device : Objects.requireNonNull(deviceListToSendLowCode)) {
             // Create a new Intent for each device
@@ -1678,12 +1701,13 @@ public class OTAUpdateService extends IntentService {
             deviceIntent.putExtra(CMD_TYPE, seqRequest.getStringExtra(CMD_TYPE));
             deviceIntent.putExtra(META_NAME, seqRequest.getStringExtra(META_NAME));
             deviceIntent.putExtra(FIRMWARE_NAME, seqRequest.getStringExtra(FIRMWARE_NAME));
+            deviceIntent.putExtra(SEQ_VERSION, seqRequest.getStringExtra(SEQ_VERSION));
+            deviceIntent.putExtra(ERASE_SEQUENCE, ERASE_SEQUENCE_FALSE);
 
             addSequenceRequest(deviceIntent);
         }
         ArrayList<String> removedDeviceList = seqRequest.getStringArrayListExtra(REMOVE_LIST);
-        if (removedDeviceList == null) return;
-        for (String device : removedDeviceList) {
+        for (String device : Objects.requireNonNull(removedDeviceList)) {
             // Create a new Intent for each device
             Intent deviceIntent = new Intent(seqRequest);
 
@@ -1698,6 +1722,7 @@ public class OTAUpdateService extends IntentService {
             deviceIntent.putExtra(CMD_TYPE, seqRequest.getStringExtra(CMD_TYPE));
             deviceIntent.putExtra(META_NAME, seqRequest.getStringExtra(EMPTY_META_NAME));
             deviceIntent.putExtra(FIRMWARE_NAME, seqRequest.getStringExtra(EMPTY_FIRMWARE_NAME));
+            deviceIntent.putExtra(SEQ_VERSION, seqRequest.getStringExtra(SEQ_VERSION));
             deviceIntent.putExtra(ERASE_SEQUENCE, ERASE_SEQUENCE_TRUE);
             addSequenceRequest(deviceIntent);
         }

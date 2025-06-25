@@ -186,10 +186,10 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
             return;
         }
         if (HSUtil.getEquips(mRoomName).isEmpty()) {
-            if(mNodeAddress % 100 == 0) {
-                // If the last two digits are 00, then it is not allowed since modbus cannot have 00 as last two digits
-                mNodeAddress = generateConnectAddrSkipZero();
-            }
+
+            // If the last two digits are 00, then it is not allowed since modbus cannot have 00 as last two digits
+            mNodeAddress = generateConnectAddrSkipZero();
+
             showDialogFragment(
                     FragmentBLEInstructionScreen.getInstance(
                             mNodeAddress, mRoomName, mFloorName, ProfileType.CONNECTNODE, NodeType.CONNECTNODE

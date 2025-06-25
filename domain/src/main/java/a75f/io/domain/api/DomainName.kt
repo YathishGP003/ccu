@@ -1419,6 +1419,7 @@ object DomainName {
     const val sequenceMetadataName = "sequenceMetadataName"
     const val sequenceMetadataLength = "sequenceMetadataLength"
     const val sequenceMetadataIdentity = "sequenceMetadataIdentity"
+    const val sequenceVersion = "sequenceVersion"
 
 
 }

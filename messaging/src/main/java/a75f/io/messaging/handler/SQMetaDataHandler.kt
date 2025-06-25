@@ -56,9 +56,8 @@ class SQMetaDataHandler {
         * Get device list where sequence version is greater than local version
         * */
         val reconfiguredDeviceList = (finalDeviceList.toSet() - addedDeviceList.toSet()).toList().filter { deviceId ->
-//            val localSeqVersion = ConnectNodeDevice(deviceId.prependIndent("@")).sequenceMetadataIdentity.readDefaultVal()
-//            seqVersion > localSeqVersion
-            true
+           val localSeqVersion = ConnectNodeDevice(deviceId.prependIndent("@")).sequenceVersion.readHisVal()
+            ((seqVersion > localSeqVersion) || localSeqVersion == 0.0)
         }
 
         val deviceListToSendLowCode = (addedDeviceList + reconfiguredDeviceList).toSet().toList()

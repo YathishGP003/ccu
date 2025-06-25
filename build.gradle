@@ -4,8 +4,7 @@
 buildscript {
     ext.kotlin_version = '1.7.20'
     ext.objectboxVersion = '2.8.0'
-    ext.domainModelLibVersion = '20250618.3-prod'
-
+    ext.domainModelLibVersion = '20250624.1-prod'
 
 
 

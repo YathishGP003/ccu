@@ -242,12 +242,12 @@ class ConnectNodeUtil {
 
         fun updateOtaSequenceStatus(status: SequenceOtaStatus, slaveId: Int) {
             // Step 1: Get the connect node device reference based on slave address
-            val connectNodeEquip = ConnectNodeUtil.connectNodeEquip(slaveId)
+            val connectNodeEquip = connectNodeEquip(slaveId)
             connectNodeEquip.otaStatusSequence.writeHisVal(status.ordinal.toDouble())
         }
 
         fun updateOtaSequenceState(state: Short, slaveId: Int) {
-            val connectNodeEquip = ConnectNodeUtil.connectNodeEquip(slaveId)
+            val connectNodeEquip = connectNodeEquip(slaveId)
             connectNodeEquip.sequenceUpdateState.writeHisVal(state.toDouble())
         }
 

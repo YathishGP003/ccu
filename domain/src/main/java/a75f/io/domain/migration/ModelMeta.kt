@@ -5,6 +5,7 @@ import a75f.io.domain.util.MODEL_CCU_BASE_CONFIGURATION
 import a75f.io.domain.util.MODEL_CCU_DIAG_EQUIP
 import a75f.io.domain.util.MODEL_CM_DEVICE
 import a75f.io.domain.util.MODEL_CONNECT_DEVICE
+import a75f.io.domain.util.MODEL_CONNECT_NODE_DEVICE
 import a75f.io.domain.util.MODEL_DAB_ADVANCED_AHU_V2_CM
 import a75f.io.domain.util.MODEL_DAB_ADVANCED_AHU_V2_CONNECT
 import a75f.io.domain.util.MODEL_DAB_MODULATING_AHU
@@ -117,6 +118,7 @@ fun getRequiredModels(): List<String> {
             MODEL_MYSTAT_CPU,
             MODEL_MYSTAT_PIPE2,
             MODEL_MYSTAT_HPU,
-            MODEL_DEFAULT_SYSTEM_PROFILE
+            MODEL_DEFAULT_SYSTEM_PROFILE,
+            MODEL_CONNECT_NODE_DEVICE
     )
 }

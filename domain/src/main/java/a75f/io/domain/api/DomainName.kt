@@ -901,6 +901,7 @@ object DomainName {
     const val chilledWaterInletTemp = "chilledWaterInletTemp"
     const val chilledWaterOutletTemp = "chilledWaterOutletTemp"
     const val coolingValvePositionFeedback = "coolingValvePositionFeedback"
+    const val fanRunSensor = "fanRunSensor"
     const val supplyAirDamperFeedback = "supplyAirDamperFeedback"
     const val supplyAirFlowSensor = "supplyAirFlowSensor"
     const val supplyAirHumidity = "supplyAirHumidity"
@@ -1405,8 +1406,13 @@ object DomainName {
     const val disableTouch = "disableTouch"
     const val enableBrightness = "enableBrightness"
     const val enableCo2Display = "enableCo2Display"
-    const val fanRunSensor = "fanRunSensor"
+    const val fanRunSensorNC = "fanRunSensorNC"
+    const val fanRunSensorNO = "fanRunSensorNO"
     const val defaultSystemEquip = "defaultSystemEquip"
+    const val hyperstatStageUpTimerCounter = "hyperstatStageUpTimerCounter"
+    const val hyperstatStageDownTimerCounter = "hyperstatStageDownTimerCounter"
+    const val mystatStageUpTimerCounter = "mystatStageUpTimerCounter"
+    const val mystatStageDownTimerCounter = "mystatStageDownTimerCounter"
 
     const val sequenceErrorCode = "sequenceErrorCode"
     const val sequenceLastRunTime = "sequenceLastRunTime"
@@ -1420,7 +1426,6 @@ object DomainName {
     const val sequenceMetadataLength = "sequenceMetadataLength"
     const val sequenceMetadataIdentity = "sequenceMetadataIdentity"
     const val sequenceVersion = "sequenceVersion"
-
 
 }
 

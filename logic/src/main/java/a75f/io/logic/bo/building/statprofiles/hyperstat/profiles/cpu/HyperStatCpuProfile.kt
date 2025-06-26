@@ -68,6 +68,7 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
     private var previousFanLoopVal = 0
     private var previousFanLoopValStaged = 0
     private var fanLoopCounter = 0
+    private var hasZeroFanLoopBeenHandled = false
 
     override fun getProfileType() = ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT
 
@@ -466,9 +467,10 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
         basicSettings: BasicSettings,
         config: CpuConfiguration
     ) {
-
         equip.derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
         equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+        equip.stageDownTimer.data = equip.hyperstatStageUpTimerCounter.readPriorityVal()
+        equip.stageUpTimer.data = equip.hyperstatStageUpTimerCounter.readPriorityVal()
         // This is for title 24 compliance
         if (fanLoopCounter > 0) {
             equip.derivedFanLoopOutput.data = previousFanLoopVal.toDouble()
@@ -754,7 +756,19 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
                 }
             }
 
-            ControllerNames.FAN_ENABLED -> updateStatus(equip.fanEnable, result)
+            ControllerNames.FAN_ENABLED -> {
+                var isFanLoopCounterEnabled = false;
+                if (previousFanLoopVal > 0 && fanLoopCounter > 0) {
+                    isFanLoopCounterEnabled = true
+                }
+                // In order to protect the fan, persist the fan for few cycles when there is a sudden change in
+                // occupancy and decrease in fan loop output
+                var currentStatus = result as Boolean
+                if (!currentStatus && isFanLoopCounterEnabled  ) {
+                    currentStatus = true
+                }
+                updateStatus(equip.fanEnable, currentStatus)
+            }
             ControllerNames.OCCUPIED_ENABLED -> updateStatus(equip.occupiedEnable, result)
             ControllerNames.HUMIDIFIER_CONTROLLER -> updateStatus(equip.humidifierEnable, result)
             ControllerNames.DEHUMIDIFIER_CONTROLLER -> updateStatus(equip.dehumidifierEnable, result)

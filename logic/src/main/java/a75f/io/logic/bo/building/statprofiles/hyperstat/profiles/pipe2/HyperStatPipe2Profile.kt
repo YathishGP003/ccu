@@ -692,6 +692,8 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
     private fun runControllers(equip: Pipe2V2Equip, basicSettings: BasicSettings, config: Pipe2Configuration) {
         equip.derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
         equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+        equip.stageDownTimer.data = equip.hyperstatStageUpTimerCounter.readPriorityVal()
+        equip.stageUpTimer.data = equip.hyperstatStageUpTimerCounter.readPriorityVal()
         equip.controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             val result = controller.runController()

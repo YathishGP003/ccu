@@ -11,7 +11,6 @@ import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.schedules.Occupancy
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil
 import a75f.io.logic.bo.building.statprofiles.util.BasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
@@ -26,7 +25,18 @@ import a75f.io.logic.util.uiutils.updateUserIntentPoints
 abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short) : ZoneProfile() {
 
     var hssEquip : HyperStatSplitEquip = HyperStatSplitEquip(equipRef)
-    var hsSplitHaystackUtil: HSSplitHaystackUtil = HSSplitHaystackUtil(equipRef)
+
+    var fanEnabledStatus = false
+    var lowestStageFanLow = false
+    var lowestStageFanMedium = false
+    var lowestStageFanHigh = false
+
+    fun resetFanStatus() {
+        fanEnabledStatus = false
+        lowestStageFanLow = false
+        lowestStageFanMedium = false
+        lowestStageFanHigh = false
+    }
 
     open var occupancyStatus: Occupancy = Occupancy.OCCUPIED
     protected val haystack: CCUHsApi = CCUHsApi.getInstance()

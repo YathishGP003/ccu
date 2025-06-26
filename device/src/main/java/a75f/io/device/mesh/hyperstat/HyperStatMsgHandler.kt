@@ -238,11 +238,11 @@ private fun updateThermistor(logicalPointId: String, value: Double, equipRef: St
     val logicalDomainName = logicalPoint[Tags.DOMAIN_NAME].toString()
     val logicalValue = when (logicalDomainName) {
         DomainName.doorWindowSensorNCTitle24, DomainName.genericAlarmNC,
-        DomainName.genericAlarmNC_th1, DomainName.genericAlarmNC_th2, DomainName.fanRunSensor -> {
+        DomainName.genericAlarmNC_th1, DomainName.genericAlarmNC_th2, DomainName.fanRunSensorNC -> {
             if ((value * 10) >= 10000) 1.0 else 0.0
         }
 
-        DomainName.genericAlarmNO, DomainName.genericAlarmNO_th1, DomainName.genericAlarmNO_th2 -> {
+        DomainName.genericAlarmNO, DomainName.genericAlarmNO_th1, DomainName.genericAlarmNO_th2, DomainName.fanRunSensorNO -> {
             if ((value * 10) <= 10000) 1.0 else 0.0
         }
         /*For Generic(1-100)kohms, CCU just need to convert kOhms*/

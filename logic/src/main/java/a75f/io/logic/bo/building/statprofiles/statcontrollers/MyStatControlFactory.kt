@@ -44,11 +44,13 @@ class MyStatControlFactory(
                 MyStatCpuRelayMapping.COOLING_STAGE_1, MyStatCpuRelayMapping.COOLING_STAGE_2 -> {
                     controllerFactory.addStageController(
                         ControllerNames.COOLING_STAGE_CONTROLLER,
-                        equip,
-                        equip.coolingLoopOutput,
+                        equip, equip.coolingLoopOutput,
                         getInCalibratedPointPoint(config.getHighestCoolingStageCount()),
                         equip.standaloneRelayActivationHysteresis,
+                        stageDownTimer = equip.stageDownTimer,
+                        stageUpTimer = equip.stageUpTimer,
                         logTag = L.TAG_CCU_MSCPU
+
                     )
                 }
 
@@ -59,6 +61,8 @@ class MyStatControlFactory(
                         equip.heatingLoopOutput,
                         getInCalibratedPointPoint(config.getHighestHeatingStageCount()),
                         equip.standaloneRelayActivationHysteresis,
+                        stageDownTimer = equip.stageDownTimer,
+                        stageUpTimer = equip.stageUpTimer,
                         logTag = L.TAG_CCU_MSCPU
                     )
                 }
@@ -70,6 +74,8 @@ class MyStatControlFactory(
                         equip.derivedFanLoopOutput,
                         getInCalibratedPointPoint(config.getHighestFanStageCount()),
                         equip.standaloneRelayActivationHysteresis,
+                        stageDownTimer = equip.stageDownTimer,
+                        stageUpTimer = equip.stageUpTimer,
                         logTag = L.TAG_CCU_MSCPU
                     )
                 }
@@ -138,6 +144,8 @@ class MyStatControlFactory(
                         equip.derivedFanLoopOutput,
                         getInCalibratedPointPoint(config.getHighestFanStageCount()),
                         equip.standaloneRelayActivationHysteresis,
+                        stageDownTimer = equip.stageDownTimer,
+                        stageUpTimer = equip.stageUpTimer,
                         logTag = L.TAG_CCU_MSPIPE2
                     )
                 }
@@ -225,6 +233,8 @@ class MyStatControlFactory(
                         loopOutput = (equip as MyStatHpuEquip).compressorLoopOutput,
                         activationHysteresis = equip.standaloneRelayActivationHysteresis,
                         totalStages = getInCalibratedPointPoint(config.highestCompressorStages()),
+                        stageDownTimer = equip.stageDownTimer,
+                        stageUpTimer = equip.stageUpTimer,
                         logTag = L.TAG_CCU_MSHPU
                     )
                 }
@@ -234,7 +244,7 @@ class MyStatControlFactory(
                         equip,
                         equip.currentTemp,
                         equip.desiredTempHeating,
-                        (equip as MyStatHpuEquip).auxHeating1Activate,
+                        (equip as MyStatHpuEquip).mystatAuxHeating1Activate,
                         logTag = L.TAG_CCU_MSHPU
                     )
                 }
@@ -246,6 +256,8 @@ class MyStatControlFactory(
                         equip.derivedFanLoopOutput,
                         getInCalibratedPointPoint(config.getHighestFanStageCount()),
                         equip.standaloneRelayActivationHysteresis,
+                        stageDownTimer = equip.stageDownTimer,
+                        stageUpTimer = equip.stageUpTimer,
                         logTag = L.TAG_CCU_MSHPU
                     )
                 }

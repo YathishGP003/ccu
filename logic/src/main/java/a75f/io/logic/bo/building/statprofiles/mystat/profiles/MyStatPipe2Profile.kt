@@ -241,17 +241,20 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         userIntents: UserIntents
     ) {
         val controllerFactory = MyStatControlFactory(equip)
-        equip.waterValveLoop.data = waterValveLoop(userIntents).toDouble()
         controllerFactory.addControllers(config)
-        runControllers(equip, basicSettings, config)
+        runControllers(equip, basicSettings, config, userIntents)
     }
 
     private fun runControllers(
         equip: MyStatPipe2Equip, basicSettings: MyStatBasicSettings,
-        config: MyStatPipe2Configuration
+        config: MyStatPipe2Configuration, userIntents: UserIntents
     ) {
+        equip.waterValveLoop.data = waterValveLoop(userIntents).toDouble()
         equip.derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
         equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+        equip.stageDownTimer.data = equip.mystatStageUpTimerCounter.readPriorityVal()
+        equip.stageUpTimer.data = equip.mystatStageUpTimerCounter.readPriorityVal()
+
         equip.controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             val result = controller.runController()

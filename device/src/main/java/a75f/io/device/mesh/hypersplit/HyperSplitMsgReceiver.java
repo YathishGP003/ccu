@@ -522,7 +522,8 @@ public class HyperSplitMsgReceiver {
             DomainName.lowDifferentialPressureSwitch,
             DomainName.condensateStatusNO,
             DomainName.emergencyShutoffNO,
-            DomainName.genericAlarmNO
+            DomainName.genericAlarmNO,
+            DomainName.fanRunSensorNO
     );
 
     private static List<String> digitalNcPoints = Arrays.asList(
@@ -530,7 +531,7 @@ public class HyperSplitMsgReceiver {
             DomainName.condensateStatusNC,
             DomainName.emergencyShutoffNC,
             DomainName.genericAlarmNC,
-            DomainName.fanRunSensor
+            DomainName.fanRunSensorNC
     );
 
     /*

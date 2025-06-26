@@ -146,6 +146,7 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
             modifyFanMode(possibleFanMode, equip.fanOpMode)
             modifyConditioningMode(possibleConditioningMode.ordinal, equip.conditioningMode, allStandaloneProfileConditions)
             setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap())
+            DesiredTempDisplayMode.setModeTypeOnUserIntentChange(roomRef, CCUHsApi.getInstance())
         }
     }
 

@@ -104,20 +104,6 @@ fun getAirEnthalpy(temp: Double, humidity: Double): Double {
     return CCUUtils.roundToTwoDecimal(h)
 }
 
-fun isDcvEligibleToOff(currentOccupancy: CalibratedPoint): Boolean {
-    return (currentOccupancy.data.toInt() != Occupancy.OCCUPIED.ordinal
-            && currentOccupancy.data.toInt() != Occupancy.AUTOFORCEOCCUPIED.ordinal
-            && currentOccupancy.data.toInt() != Occupancy.DEMAND_RESPONSE_OCCUPIED.ordinal
-            && currentOccupancy.data.toInt() != Occupancy.FORCEDOCCUPIED.ordinal)
-}
-
-fun isDcvEligibleToOn(currentOccupancy: CalibratedPoint): Boolean {
-    return (currentOccupancy.data.toInt() == Occupancy.OCCUPIED.ordinal
-            || currentOccupancy.data.toInt() == Occupancy.AUTOFORCEOCCUPIED.ordinal
-            || currentOccupancy.data.toInt() == Occupancy.DEMAND_RESPONSE_OCCUPIED.ordinal
-            || currentOccupancy.data.toInt() == Occupancy.FORCEDOCCUPIED.ordinal)
-}
-
 fun fetchUserIntents(equip: DomainEquip): UserIntents {
 
     return when (equip) {

@@ -56,7 +56,6 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
 
     private val hpuDeviceMap: MutableMap<Int, MyStatHpuEquip> = mutableMapOf()
 
-    private val myStatLoopController = StatLoopController()
     private lateinit var curState: ZoneState
     override lateinit var occupancyStatus: Occupancy
 
@@ -112,10 +111,8 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
             "After fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}"
         )
 
-
-
-        myStatLoopController.initialise(tuners = myStatTuners)
-        myStatLoopController.dumpLogs()
+        loopController.initialise(tuners = myStatTuners)
+        loopController.dumpLogs()
         handleChangeOfDirection(currentTemp, userIntents)
         updateOperatingMode(currentTemp, averageDesiredTemp, basicSettings.conditioningMode, equip.operatingMode)
 
@@ -202,6 +199,9 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
     private fun runControllers(equip: MyStatHpuEquip, basicSettings: MyStatBasicSettings, config: MyStatHpuConfiguration) {
         equip.derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
         equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+        equip.stageDownTimer.data = equip.mystatStageUpTimerCounter.readPriorityVal()
+        equip.stageUpTimer.data = equip.mystatStageUpTimerCounter.readPriorityVal()
+
         equip.controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             val result = controller.runController()
@@ -268,7 +268,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
                     val mode = equip.fanOpMode
                     return when (stage) {
                         0 -> isMyStatHighUserIntentFanMode(mode) || isMyStatLowUserIntentFanMode(mode)
-                        2 -> isMyStatLowUserIntentFanMode(mode)
+                        2 -> isMyStatHighUserIntentFanMode(mode)
                         else -> false
                     }
                 }

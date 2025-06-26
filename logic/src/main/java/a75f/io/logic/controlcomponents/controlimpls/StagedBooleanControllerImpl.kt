@@ -26,7 +26,7 @@ class StagedBooleanControllerImpl(
 
         if (upTimer > 0) upTimer--
         if (downTimer > 0) downTimer--
-        logIt(logTag, "Started Timers => up: $upTimer, down: $downTimer")
+        logIt(logTag, "Tuners : stageUpTimer ${stageUpTimer.readPriorityVal()} stageDownTimer ${stageDownTimer.readPriorityVal()} Started Timers => up: $upTimer, down: $downTimer")
         val newState = mutableMapOf<Int, Boolean>()
 
         logIt(logTag, "-------- On constrains ----------------------")

@@ -197,16 +197,22 @@ class MyStatHpuConfiguration(
         return MyStatHpuRelayMapping.values()[lowestSelected]
     }
 
-    private fun getHighestFanSelected(): MyStatHpuRelayMapping {
-        val highestSelected = getHighestStage(MyStatHpuRelayMapping.FAN_LOW_SPEED.ordinal, MyStatHpuRelayMapping.FAN_HIGH_SPEED.ordinal)
-        return MyStatHpuRelayMapping.values()[highestSelected]
-    }
     private fun getHighestCompressorSelected(): MyStatHpuRelayMapping {
-        val highestSelected = getHighestStage(MyStatHpuRelayMapping.COMPRESSOR_STAGE1.ordinal, MyStatHpuRelayMapping.COMPRESSOR_STAGE1.ordinal)
+        val highestSelected = getHighestStage(MyStatHpuRelayMapping.COMPRESSOR_STAGE1.ordinal, MyStatHpuRelayMapping.COMPRESSOR_STAGE2.ordinal)
         return MyStatHpuRelayMapping.values()[highestSelected]
     }
 
-    fun getHighestFanStageCount() = getHighestFanSelected().ordinal - 2
+    fun getHighestFanStageCount(): Int {
+        val highestSelected = getHighestStage(
+            MyStatHpuRelayMapping.FAN_LOW_SPEED.ordinal,
+            MyStatHpuRelayMapping.FAN_HIGH_SPEED.ordinal
+        )
+        return when(highestSelected) {
+            MyStatHpuRelayMapping.FAN_LOW_SPEED.ordinal -> 1
+            MyStatHpuRelayMapping.FAN_HIGH_SPEED.ordinal -> 3
+            else -> 0
+        }
+    }
 
     fun highestCompressorStages() = getHighestCompressorSelected().ordinal + 1
 

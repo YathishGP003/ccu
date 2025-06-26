@@ -5,9 +5,7 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
 import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.api.Domain
-import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
-import a75f.io.domain.util.CalibratedPoint
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
@@ -19,14 +17,14 @@ import a75f.io.logic.bo.building.ZonePriority
 import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
+import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HyperStatSplitAssociationUtil
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitPackageUnitProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitProfile
 import a75f.io.logic.bo.building.statprofiles.statcontrollers.SplitControllerFactory
 import a75f.io.logic.bo.building.statprofiles.util.BaseStatTuners
 import a75f.io.logic.bo.building.statprofiles.util.BasicSettings
@@ -62,7 +60,7 @@ import kotlin.math.roundToInt
  *
  * Created for HyperStat Split CPU/Econ by Nick P on 07-24-2023.
  */
-class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Short) : HyperStatSplitPackageUnitProfile(equipRef, nodeAddress) {
+class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Short) : HyperStatSplitProfile(equipRef, nodeAddress) {
 
     private var wasCondensateTripped = false
 
@@ -83,7 +81,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
     private var previousFanLoopVal = 0
     private var previousFanLoopValStaged = 0
     private var fanLoopCounter = 0
-
+    private var hasZeroFanLoopBeenHandled = false
     private val loopController = StatLoopController()
 
     private var economizingAvailable = false
@@ -95,7 +93,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
     private var prePurgeEnabled = false
     private var prePurgeOpeningValue = 0.0
 
-    private var controllerFactory = SplitControllerFactory(hssEquip, hssEquip.zoneOccupancyState)
+    private var controllerFactory = SplitControllerFactory(hssEquip)
 
     override fun updateZonePoints() {
         if (Globals.getInstance().isTestMode) {
@@ -176,11 +174,10 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         hssEquip.dcvLoopOutput.writeHisVal(dcvLoopOutput.toDouble())
         hssEquip.outsideAirLoopOutput.writeHisVal(outsideAirLoopOutput.toDouble())
         hssEquip.outsideAirFinalLoopOutput.writeHisVal(outsideAirFinalLoopOutput.toDouble())
-
-        val currentOperatingMode = hssEquip.occupancyMode.readHisVal().toInt()
+        hssEquip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
 
         updateTitle24LoopCounter(hyperStatSplitTuners, basicSettings)
-        logIt("present hssEquip : $hssEquip domain equip ${Domain.equips[equipRef]}")
+        logIt("present hssEquip : $hssEquip domain equip ${Domain.equips[equipRef]} ${hssEquip.zoneOccupancyState.data}")
 
         if (basicSettings.fanMode != StandaloneFanStage.OFF) {
             runRelayOperations(config, basicSettings)
@@ -198,7 +195,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
             ZoneTempState.EMERGENCY
         logIt(
             "Analog Fan speed multiplier  ${hyperStatSplitTuners.analogFanSpeedMultiplier} \n" +
-                    "Current Working mode : ${Occupancy.values()[currentOperatingMode]} \n" +
+                    "Current Working mode : $occupancyStatus\n" +
                     "Current Temp : $currentTemp \n" +
                     "Desired Heating: ${userIntents.heatingDesiredTemp} \n" +
                     "Desired Cooling: ${userIntents.coolingDesiredTemp} \n" +
@@ -304,13 +301,17 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
     private fun updateTitle24LoopCounter(tuners: BaseStatTuners, basicSettings: BasicSettings) {
         // Check if there is change in occupancy and the fan-loop output is less than the previous value,
         // then offer the fan protection
-        if ((occupancyStatus != previousOccupancyStatus && fanLoopOutput < previousFanLoopVal) ||
-            (basicSettings.fanMode != previousFanStageStatus && fanLoopOutput < previousFanLoopVal)
-        ) {
+        CcuLog.d( L.TAG_CCU_HSSPLIT_CPUECON, "Occupancy: $occupancyStatus, Fan Loop Output: $fanLoopOutput, Previous Fan Loop Val: $previousFanLoopVal, Fan Loop Counter: $fanLoopCounter , hasZeroFanLoopBeenHandled $hasZeroFanLoopBeenHandled")
+
+        if((occupancyStatus != previousOccupancyStatus && fanLoopOutput < previousFanLoopVal) || (basicSettings.fanMode != previousFanStageStatus && fanLoopOutput < previousFanLoopVal) ||
+            (fanLoopOutput == 0 && fanLoopOutput < previousFanLoopVal && !hasZeroFanLoopBeenHandled)) {
             fanLoopCounter = tuners.minFanRuntimePostConditioning
-        } else if (occupancyStatus != previousOccupancyStatus && fanLoopOutput > previousFanLoopVal)
-            fanLoopCounter =
-                0 // Reset the counter if the fan-loop output is greater than the previous value
+            hasZeroFanLoopBeenHandled = true
+        }
+        else if((occupancyStatus != previousOccupancyStatus || (hasZeroFanLoopBeenHandled && fanLoopOutput > 0)) && fanLoopOutput > previousFanLoopVal) {
+            fanLoopCounter = 0 // Reset the counter if the fan-loop output is greater than the previous value
+            hasZeroFanLoopBeenHandled = false
+        }
     }
 
     private fun handleChangeOfDirection(userIntents: UserIntents) {
@@ -513,7 +514,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
             L.TAG_CCU_HSSPLIT_CPUECON,
             "zoneSensorCO2: $zoneSensorCO2, zoneCO2Threshold: $zoneCO2Threshold, co2DamperOpeningRate: $co2DamperOpeningRate"
         )
-        if (occupancyStatus == Occupancy.OCCUPIED || occupancyStatus == Occupancy.FORCEDOCCUPIED || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED) {
+        if (isOccupiedDcvHumidityControl(hssEquip.zoneOccupancyState)) {
             if (zoneSensorCO2 > zoneCO2Threshold) {
                 dcvAvailable = true
                 dcvLoopOutput = max(
@@ -969,9 +970,10 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
                     fanLoopForAnalog // else indicates we are not in protection mode, so store the fanLoopForAnalog value for protection mode
 
                 // Check Dead-band condition
-                if (fanLoopOutput == 0 && fanProtectionCounter == 0 && checkIfInOccupiedMode()) { // When in dead-band, set the fan-loopForAnalog to the recirculate analog value
-                    fanLoopForAnalog =
-                        getPercentFromVolt(getAnalogRecirculateValueActivated().roundToInt())
+                // added the new check if the fan loop output is with in relayActivationHysteresis ,sending the Analog recirculate value
+                val relayActivationHysteresis = hssEquip.standaloneRelayActivationHysteresis.readPriorityVal()
+                if ((fanLoopOutput == 0 ||  (fanLoopOutput > 0 && fanLoopOutput < relayActivationHysteresis) ) && fanProtectionCounter == 0 && checkIfInOccupiedMode()) { // When in dead-band, set the fan-loopForAnalog to the recirculate analog value
+                    fanLoopForAnalog = getPercentFromVolt(getAnalogRecirculateValueActivated().roundToInt())
                     logMsg = "Deadband"
                 }
                 // The speed at which fan operates during economization is determined by configuration parameter - "Analog-Out During Economizer"
@@ -1224,6 +1226,8 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
             controllerFactory.equip = hssEquip
         }
         hssEquip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+        hssEquip.stageDownTimer.data = hssEquip.hyperstatStageUpTimerCounter.readPriorityVal()
+        hssEquip.stageUpTimer.data = hssEquip.hyperstatStageUpTimerCounter.readPriorityVal()
 
         if (coolingLoopOutput > 0) {
             hssEquip.isEconAvailable.data = if (economizingAvailable) 1.0 else 0.0
@@ -1492,7 +1496,19 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
                 }
             }
 
-            ControllerNames.FAN_ENABLED -> updateStatus(equip.fanEnable,result, StatusMsgKeys.FAN_ENABLED.name)
+            ControllerNames.FAN_ENABLED -> {
+                var isFanLoopCounterEnabled = false
+                if (previousFanLoopVal > 0 && fanLoopCounter > 0) {
+                    isFanLoopCounterEnabled = true
+                }
+                // In order to protect the fan, persist the fan for few cycles when there is a sudden change in
+                // occupancy and decrease in fan loop output
+                var currentStatus = result as Boolean
+                if (!currentStatus && isFanLoopCounterEnabled  ) {
+                    currentStatus = true
+                }
+                updateStatus(equip.fanEnable, currentStatus)
+            }
             ControllerNames.OCCUPIED_ENABLED -> updateStatus(equip.occupiedEnable,result)
             ControllerNames.HUMIDIFIER_CONTROLLER -> updateStatus(equip.humidifierEnable,result)
             ControllerNames.DEHUMIDIFIER_CONTROLLER -> updateStatus(equip.dehumidifierEnable,result)

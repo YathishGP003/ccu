@@ -309,9 +309,8 @@ private fun updateUniversalInput(point: PhysicalPoint, value: Int) {
                     CCUUtils.roundToOneDecimal(ThermistorUtil.getThermistorValueToTemp(rawData * 10))
                 }
                 DomainName.doorWindowSensorNCTitle24,
-                DomainName.genericAlarmNC -> { if ((rawData * 10) >= 10000) 1.0 else 0.0 }
-
-                DomainName.genericAlarmNO -> { if ((rawData * 10) <= 10000) 1.0 else 0.0 }
+                DomainName.genericAlarmNC, DomainName.fanRunSensorNC -> { if ((rawData * 10) >= 10000) 1.0 else 0.0 }
+                DomainName.genericAlarmNO, DomainName.fanRunSensorNO -> { if ((rawData * 10) <= 10000) 1.0 else 0.0 }
                 DomainName.keyCardSensor,
                 DomainName.doorWindowSensorTitle24 -> { deriveValue() }
                 else -> {

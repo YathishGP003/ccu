@@ -77,7 +77,7 @@ fun ErrorDialog(
                             Text("Error", style= TextStyle(fontWeight = FontWeight.Bold, fontSize = 22.sp) )
                             Text(buildAnnotatedString {
                                 withStyle(style= SpanStyle(fontSize= 20.sp )) {
-                                    append("Invalid HPU Configuration")
+                                    append("Invalid HSS Configuration")
                                 }
                             })
                         }

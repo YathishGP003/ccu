@@ -27,7 +27,6 @@ import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.MyStatBasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
 import a75f.io.logic.bo.building.statprofiles.util.MyStatTuners
-import a75f.io.logic.bo.building.statprofiles.util.StatLoopController
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoCooling
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoHeating
@@ -54,12 +53,8 @@ import kotlin.math.roundToInt
 
 class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
     private val cpuDeviceMap: MutableMap<Int, MyStatCpuEquip> = mutableMapOf()
-    private var analogLogicalPoints: HashMap<Int, String> = HashMap()
-    private var relayLogicalPoints: HashMap<Int, String> = HashMap()
     private var hasZeroFanLoopBeenHandled = false
 
-
-    private val myStatLoopController = StatLoopController()
     private lateinit var curState: ZoneState
     override lateinit var occupancyStatus: Occupancy
 
@@ -112,8 +107,8 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
         basicSettings.fanMode = updatedFanMode
         logIt("After fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
 
-        myStatLoopController.initialise(tuners = myStatTuners)
-        myStatLoopController.dumpLogs()
+        loopController.initialise(tuners = myStatTuners)
+        loopController.dumpLogs()
         handleChangeOfDirection(currentTemp, userIntents)
         updateOperatingMode(currentTemp, averageDesiredTemp, basicSettings.conditioningMode, equip.operatingMode)
 
@@ -537,10 +532,14 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
     ) {
 
         equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+        equip.stageDownTimer.data = equip.mystatStageUpTimerCounter.readPriorityVal()
+        equip.stageUpTimer.data = equip.mystatStageUpTimerCounter.readPriorityVal()
+        equip.derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
         // This is for title 24 compliance
         if (fanLoopCounter > 0) {
             equip.derivedFanLoopOutput.data = previousFanLoopVal.toDouble()
         }
+
         equip.controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             val result = controller.runController()
@@ -632,10 +631,7 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
                 fun checkUserIntentAction(stage: Int): Boolean {
                     val mode = equip.fanOpMode
                     return when (stage) {
-                        0 -> isMyStatHighUserIntentFanMode(mode) || isMyStatLowUserIntentFanMode(
-                            mode
-                        )
-
+                        0 -> isMyStatHighUserIntentFanMode(mode) || isMyStatLowUserIntentFanMode(mode)
                         2 -> isMyStatHighUserIntentFanMode(mode)
                         else -> false
                     }
@@ -676,7 +672,19 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
                 }
             }
 
-            ControllerNames.FAN_ENABLED -> updateStatus(equip.fanEnable, result)
+            ControllerNames.FAN_ENABLED -> {
+                var isFanLoopCounterEnabled = false;
+                if (previousFanLoopVal > 0 && fanLoopCounter > 0) {
+                    isFanLoopCounterEnabled = true
+                }
+                // In order to protect the fan, persist the fan for few cycles when there is a sudden change in
+                // occupancy and decrease in fan loop output
+                var currentStatus = result as Boolean
+                if (!currentStatus && isFanLoopCounterEnabled  ) {
+                    currentStatus = true
+                }
+                updateStatus(equip.fanEnable, currentStatus)
+            }
             ControllerNames.OCCUPIED_ENABLED -> updateStatus(equip.occupiedEnable, result)
             ControllerNames.HUMIDIFIER_CONTROLLER -> updateStatus(equip.humidifierEnable, result)
             ControllerNames.DEHUMIDIFIER_CONTROLLER -> updateStatus(

@@ -140,6 +140,7 @@ class CpuV2ViewModel(application: Application) : HyperStatViewModel(application)
             modifyFanMode(possibleFanMode.ordinal, equip.fanOpMode)
             modifyConditioningMode(possibleConditioningMode.ordinal, equip.conditioningMode, allStandaloneProfileConditions)
             setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap())
+            DesiredTempDisplayMode.setModeTypeOnUserIntentChange(roomRef, CCUHsApi.getInstance())
         }
     }
 

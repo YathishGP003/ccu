@@ -19,9 +19,7 @@ import a75f.io.logic.controlcomponents.util.ControllerNames
  * Created by Manjunath K on 12-05-2025.
  */
 
-class HyperStatControlFactory(
-    var equip: HyperStatEquip
-) {
+class HyperStatControlFactory(var equip: HyperStatEquip) {
     private val controllerFactory = ControllerFactory()
     fun addControllers(config: HyperStatConfiguration) {
         when (config) {
@@ -33,8 +31,6 @@ class HyperStatControlFactory(
             }
         }
     }
-
-
 
     private fun addHsCpuControllers(config: CpuConfiguration) {
         val mappings = config.getRelayEnabledAssociations() // only enabled mappings
@@ -48,6 +44,8 @@ class HyperStatControlFactory(
                         equip.coolingLoopOutput,
                         getInCalibratedPointPoint(config.getHighestCoolingStageCount()),
                         equip.standaloneRelayActivationHysteresis,
+                        stageDownTimer = equip.stageDownTimer,
+                        stageUpTimer = equip.stageUpTimer,
                         logTag = L.TAG_CCU_HSCPU
                     )
                 }
@@ -59,6 +57,8 @@ class HyperStatControlFactory(
                         equip.heatingLoopOutput,
                         getInCalibratedPointPoint(config.getHighestHeatingStageCount()),
                         equip.standaloneRelayActivationHysteresis,
+                        stageDownTimer = equip.stageDownTimer,
+                        stageUpTimer = equip.stageUpTimer,
                         logTag = L.TAG_CCU_HSCPU
                     )
                 }
@@ -70,6 +70,8 @@ class HyperStatControlFactory(
                         equip.derivedFanLoopOutput,
                         getInCalibratedPointPoint(config.getHighestFanStageCount()),
                         equip.standaloneRelayActivationHysteresis,
+                        stageDownTimer = equip.stageDownTimer,
+                        stageUpTimer = equip.stageUpTimer,
                         logTag = L.TAG_CCU_HSCPU
                     )
                 }
@@ -141,6 +143,8 @@ class HyperStatControlFactory(
                         loopOutput = (equip as HpuV2Equip).compressorLoopOutput,
                         activationHysteresis = equip.standaloneRelayActivationHysteresis,
                         totalStages = getInCalibratedPointPoint(config.highestCompressorStages()),
+                        stageDownTimer = equip.stageDownTimer,
+                        stageUpTimer = equip.stageUpTimer,
                         logTag = L.TAG_CCU_HSHPU
                     )
                 }
@@ -152,6 +156,8 @@ class HyperStatControlFactory(
                         equip.derivedFanLoopOutput,
                         getInCalibratedPointPoint(config.getHighestFanStageCount()),
                         equip.standaloneRelayActivationHysteresis,
+                        stageDownTimer = equip.stageDownTimer,
+                        stageUpTimer = equip.stageUpTimer,
                         logTag = L.TAG_CCU_HSHPU
                     )
                 }
@@ -264,6 +270,8 @@ class HyperStatControlFactory(
                         equip.derivedFanLoopOutput,
                         getInCalibratedPointPoint(config.getHighestFanStageCount()),
                         equip.standaloneRelayActivationHysteresis,
+                        stageDownTimer = equip.stageDownTimer,
+                        stageUpTimer = equip.stageUpTimer,
                         logTag = L.TAG_CCU_HSPIPE2
                     )
                 }

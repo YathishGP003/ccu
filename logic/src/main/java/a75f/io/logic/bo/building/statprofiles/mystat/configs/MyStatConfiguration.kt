@@ -277,6 +277,8 @@ abstract class MyStatConfiguration(
         KEY_CARD_SENSOR,
         DOOR_WINDOW_SENSOR_NC_TITLE24,
         DOOR_WINDOW_SENSOR_TITLE24,
+        FAN_RUN_SENSOR_NO,
+        FAN_RUN_SENSOR_NC
     }
 }
 

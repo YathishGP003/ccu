@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.statprofiles.hyperstat.profiles
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.equips.hyperstat.HpuV2Equip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
+import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.ZoneProfile
 import a75f.io.logic.bo.building.ZoneState
@@ -51,7 +52,6 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
 
     var doorWindowSensorOpenStatus = false
     var runFanLowDuringDoorWindow = false
-    var hasZeroFanLoopBeenHandled = false
 
     var fanEnabledStatus = false
     var lowestStageFanLow = false

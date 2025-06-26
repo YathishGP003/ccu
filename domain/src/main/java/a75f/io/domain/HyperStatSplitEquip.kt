@@ -348,7 +348,8 @@ class HyperStatSplitEquip (equipRef : String) : DomainEquip(equipRef) {
     val changeOverHeating = Point(DomainName.changeOverHeating, equipRef)
     val otaStatusHyperLite = Point(DomainName.otaStatusHyperlite, equipRef)
     val otaStatusConnectModule = Point(DomainName.otaStatusConnectModule, equipRef)
-
+    val hyperstatStageDownTimerCounter = Point(DomainName.hyperstatStageDownTimerCounter, equipRef)
+    val hyperstatStageUpTimerCounter = Point(DomainName.hyperstatStageUpTimerCounter, equipRef)
     val relayStages = HashMap<String, Int>()
     val analogOutStages = HashMap<String, Int>()
 
@@ -357,6 +358,9 @@ class HyperStatSplitEquip (equipRef : String) : DomainEquip(equipRef) {
     val highestCompressorStages = CalibratedPoint("highestCompressorStages" ,equipRef,0.0) // This is dynamically going to change based
     val isEconAvailable: CalibratedPoint = CalibratedPoint("economizingAvailable", "", 0.0)
     var zoneOccupancyState = CalibratedPoint("zoneOccupancyState", equipRef, 0.0)
+
+    var stageUpTimer = CalibratedPoint(DomainName.hyperstatStageDownTimerCounter, equipRef, 0.0)
+    var stageDownTimer = CalibratedPoint(DomainName.hyperstatStageUpTimerCounter, equipRef, 0.0)
     fun getInCalibratedPointPoint(data: Int): CalibratedPoint {
         return CalibratedPoint(
             "InCalibratedPoint", // dummy name

@@ -19,6 +19,7 @@ import a75f.io.logic.bo.building.statprofiles.util.MyStatTuners
 import a75f.io.logic.bo.building.statprofiles.util.StatLoopController
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
 import a75f.io.logic.bo.building.statprofiles.util.updateLogicalPoint
+import a75f.io.logic.controlcomponents.util.isOccupiedDcvHumidityControl
 import a75f.io.logic.util.uiutils.MyStatUserIntentHandler
 import a75f.io.logic.util.uiutils.MyStatUserIntentHandler.Companion.myStatStatus
 import a75f.io.logic.util.uiutils.updateUserIntentPoints
@@ -212,30 +213,25 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
         logIt(
             "doAnalogDCVAction: co2Value : $co2Value zoneCO2Threshold: $cO2Threshold zoneCO2DamperOpeningRate $damperOpeningRate"
         )
-        if (isDcvEligibleToOn(co2Value, cO2Threshold, occupancyStatus, isDoorOpen)) {
+        if (isDcvEligibleToOn(co2Value, cO2Threshold, isDoorOpen, equip.zoneOccupancyState)) {
             updateLogicalPoint(logicalPointsList[port]!!, dcvLoopOutput.toDouble())
             analogOutStages[StatusMsgKeys.DCV_DAMPER.name] = dcvLoopOutput
-        } else if (isDcvEligibleToOff(co2Value, cO2Threshold, isDoorOpen)) {
+        } else if (isDcvEligibleToOn(co2Value, cO2Threshold, isDoorOpen, equip.zoneOccupancyState).not()) {
             updateLogicalPoint(logicalPointsList[port]!!, 0.0)
         }
-    }
-
-    private fun isDcvEligibleToOff(
-        co2Value: Double, zoneCO2Threshold: Double, isDoorOpen: Boolean
-    ): Boolean {
-        return (dcvLoopOutput == 0 || co2Value < zoneCO2Threshold || isDoorOpen
-                || isOccupancyModeIsUnOccupied(occupancyStatus))
     }
 
     private fun isDcvEligibleToOn(
         co2Value: Double,
         zoneCO2Threshold: Double,
-        currentOccupancyMode: Occupancy,
-        isDoorOpen: Boolean
+        isDoorOpen: Boolean,
+        zoneOccupancy: a75f.io.domain.api.Point
     ): Boolean {
-        return (co2Value > 0 && co2Value > zoneCO2Threshold && dcvLoopOutput > 0 && !isDoorOpen
-                && (isOccupancyModeIsOccupied(currentOccupancyMode)))
+        return (co2Value > 0 && co2Value > zoneCO2Threshold && dcvLoopOutput > 0 && !isDoorOpen && isOccupiedDcvHumidityControl(
+            zoneOccupancy
+        ))
     }
+
 
     fun doorWindowIsOpen(doorWindowEnabled: Double, doorWindowSensor: Double, equip: MyStatEquip) {
         equip.doorWindowSensingEnable.writePointValue(doorWindowEnabled)

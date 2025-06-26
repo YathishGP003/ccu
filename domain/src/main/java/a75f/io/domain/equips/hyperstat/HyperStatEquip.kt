@@ -159,11 +159,15 @@ open class HyperStatEquip(equipRef : String) : DomainEquip(equipRef) {
     val analog1MaxDCVDamper = Point(DomainName.analog1MaxDCVDamper, equipRef)
     val analog2MaxDCVDamper = Point(DomainName.analog2MaxDCVDamper, equipRef)
     val analog3MaxDCVDamper = Point(DomainName.analog3MaxDCVDamper, equipRef)
+    val hyperstatStageDownTimerCounter = Point(DomainName.hyperstatStageDownTimerCounter, equipRef)
+    val hyperstatStageUpTimerCounter = Point(DomainName.hyperstatStageUpTimerCounter, equipRef)
 
     val relayStages = HashMap<String, Int>()
     val analogOutStages = HashMap<String, Int>()
 
     val derivedFanLoopOutput = CalibratedPoint(DomainName.fanLoopOutput ,equipRef,0.0)
     var zoneOccupancyState = CalibratedPoint(DomainName.zoneOccupancy, equipRef, 0.0)
+    var stageUpTimer = CalibratedPoint(DomainName.hyperstatStageUpTimerCounter, equipRef, 0.0)
+    var stageDownTimer = CalibratedPoint(DomainName.hyperstatStageDownTimerCounter, equipRef, 0.0)
 
 }

@@ -347,7 +347,7 @@ class CustomScheduleManager {
                     var defaultValue = 0.0
                     for (matchingPoint in matchingPoints) {
                         if (matchingPoint.get("id").toString() == pointId) {
-                            defaultValue = haystack.readPointPriorityVal(pointId)
+                            defaultValue = haystack.readDefaultValById(pointId)
                             val unitStr =
                                 if (point.has("unit")) point.get("unit").toString() else ""
                             val (updatedValue, updatedDefaultVal) = if (point.has("enum")) {
@@ -363,19 +363,6 @@ class CustomScheduleManager {
                                 (customValue.toString() + unitStr) to (defaultValue.toString() + unitStr)
                             }
 
-                            CcuLog.d(
-                                L.TAG_CCU_POINT_SCHEDULE,
-                                "writing value ($customValue) to ${point.id()}, eventScheduleId: $eventScheduleId"
-                            )
-                            if (point.has("his")) {
-                                haystack.writeHisValById(
-                                    pointId,
-                                    customValue
-                                )
-                            }
-                            haystack.writeDefaultValById(pointId, customValue)
-                            writeToPhysical(equip, point , customValue)
-
                             equipScheduleStatus.append(
                                 (pointDis[pointDis.size - 1]) + " is " + updatedValue + ", and event ends " +
                                         "at ${formatTimeValue(eventSchedule.range.ethh)}:${
@@ -385,21 +372,48 @@ class CustomScheduleManager {
                                         };\n"
                             )
 
-                            valueWritten = true
-                            break
+                            if (defaultValue == customValue) {
+                                CcuLog.d(
+                                    L.TAG_CCU_POINT_SCHEDULE,
+                                    "No change in value for pointId=$pointId, currentDefaultVal=$defaultValue  value=$customValue"
+                                )
+                            } else {
+                                CcuLog.d(
+                                    L.TAG_CCU_POINT_SCHEDULE,
+                                    "writing value ($customValue) to ${point.id()}, eventScheduleId: $eventScheduleId"
+                                )
+                                if (point.has("his")) {
+                                    haystack.writeHisValById(
+                                        pointId,
+                                        customValue
+                                    )
+                                }
+                                haystack.writeDefaultValById(pointId, customValue)
+                                writeToPhysical(equip, point, customValue)
+                                valueWritten = true
+                                break
+                            }
                         }
                     }
                     // if no event found for this point, write the default value
                     if (!valueWritten) {
-                        defaultValue = haystack.readPointPriorityVal(pointId)
-                        if (point.has("his")) {
-                            haystack.writeHisValById(
-                                pointId,
-                                defaultValue
+                        defaultValue = haystack.readDefaultValById(pointId)
+                        if (defaultValue == customValue) {
+                            CcuLog.d(
+                                L.TAG_CCU_POINT_SCHEDULE,
+                                "No change in value for pointId=$pointId, " +
+                                        "currentDefaultVal=$defaultValue  value=$customValue"
                             )
+                        } else {
+                            if (point.has("his")) {
+                                haystack.writeHisValById(
+                                    pointId,
+                                    defaultValue
+                                )
+                            }
+                            haystack.writeDefaultValById(pointId, defaultValue)
+                            writeToPhysical(equip, point, defaultValue)
                         }
-                        haystack.writeDefaultValById(pointId, defaultValue)
-                        writeToPhysical(equip, point , defaultValue)
                     }
 
                 }
@@ -636,6 +650,7 @@ class CustomScheduleManager {
                 val isPointScheduleExist : Map<Boolean, Day> = isPointScheduleActiveNow(pointDefinition)
                 val pointID = pointDict["id"].toString()
                 val pointDis = pointDict.get("dis").toString().split("-")
+                val currentDefaultVal = haystack.readDefaultValById(pointID);
                 if(isPointScheduleExist.containsKey(true)) {
                     val day : Day = isPointScheduleExist[true]!!
                     val value = day?.`val`.toString().toDouble()
@@ -643,14 +658,22 @@ class CustomScheduleManager {
                         L.TAG_CCU_POINT_SCHEDULE,
                         "Point schedule found: pointId=$pointID, value=$value"
                     )
-                    if (pointDict.has("his")) {
-                        haystack.writeHisValById(
-                            pointID,
-                            value
+
+                    if (currentDefaultVal == value) {
+                        CcuLog.d(
+                            L.TAG_CCU_POINT_SCHEDULE,
+                            "No change in value for pointId=$pointID, currentDefaultVal=$currentDefaultVal  value=$value"
                         )
+                    } else {
+                        if (pointDict.has("his")) {
+                            haystack.writeHisValById(
+                                pointID,
+                                value
+                            )
+                        }
+                        haystack.writeDefaultValById(pointID, value)
+                        writeToPhysical(equip, pointDict, value)
                     }
-                    haystack.writeDefaultValById(pointID, value)
-                    writeToPhysical(equip, pointDict, value)
 
                     // this below code is get the next default value if continuous schedule is found
                     // 38571 observation1
@@ -721,14 +744,22 @@ class CustomScheduleManager {
                         (pointDis[pointDis.size - 1]) + " is " + updatedDefaultVal+ ", and changes to " + updatedValue +
                                 " at " + formatTimeValue(day?.sthh.toString()) + ":" + formatTimeValue(day?.stmm.toString()) + ";\n"
                     )
-                    if (pointDict.has("his")) {
-                        haystack.writeHisValById(
-                            pointID,
-                            pointDefinition.defaultValue
+
+                    if (currentDefaultVal == value) {
+                        CcuLog.d(
+                            L.TAG_CCU_POINT_SCHEDULE,
+                            "No change in value for pointId=$pointID, currentDefaultVal=$currentDefaultVal  value=$value"
                         )
+                    } else {
+                        if (pointDict.has("his")) {
+                            haystack.writeHisValById(
+                                pointID,
+                                pointDefinition.defaultValue
+                            )
+                        }
+                        haystack.writeDefaultValById(pointID, pointDefinition.defaultValue)
+                        writeToPhysical(equip, pointDict, pointDefinition.defaultValue)
                     }
-                    haystack.writeDefaultValById(pointID, pointDefinition.defaultValue)
-                    writeToPhysical(equip, pointDict, pointDefinition.defaultValue)
                 }
                 CcuLog.d(
                     L.TAG_CCU_POINT_SCHEDULE,

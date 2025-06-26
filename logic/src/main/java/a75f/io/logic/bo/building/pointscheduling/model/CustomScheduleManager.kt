@@ -212,7 +212,8 @@ class CustomScheduleManager {
         val rooms = haystack.readAllEntities("room")
         rooms.forEach { room ->
             val equips = haystack
-                .readAllEntities("equip and (modbus or connect or bacnet or pcn) and roomRef == \"" + room["id"].toString()+"\"")
+                .readAllEntities("equip and (modbus or connectModule or bacnet or pcn) " +
+                        "and roomRef == \"" + room["id"].toString()+"\"")
             equips.forEach { equip ->
                 CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "fetched>>>>>>>>> Equip: ${equip["dis"].toString()}")
                 // kumar-to-do  -- below query we need to change - mandate schedulable tag

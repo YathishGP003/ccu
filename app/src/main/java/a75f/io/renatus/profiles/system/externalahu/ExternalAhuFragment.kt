@@ -32,8 +32,6 @@ import a75f.io.renatus.bacnet.BacnetDeviceSelectionFragment
 import a75f.io.renatus.bacnet.models.BacnetModel
 import a75f.io.renatus.bacnet.models.BacnetPointState
 import a75f.io.renatus.bacnet.util.CONST_AUTO_DISCOVERY
-import a75f.io.renatus.compose.EditableTextFieldWhiteBgUnderline
-import a75f.io.renatus.compose.EditableTextFieldWhiteBgUnderlineOnlyNumbers
 import a75f.io.renatus.compose.HeaderCenterLeftAlignedTextView
 import a75f.io.renatus.compose.HeaderLeftAlignedTextView
 import a75f.io.renatus.compose.HeaderLeftAlignedTextViewNew
@@ -131,6 +129,9 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
     private lateinit var viewModel: ExternalAhuViewModel
     //private lateinit var bacnetConfigViewmodel : BacNetConfigViewModel
     private var isBacNetInitialized = false
+    companion object {
+        private const val RESET_VALUE = "0"
+    }
 
     fun hasUnsavedChanged(): Boolean{
         return viewModel.hasUnsavedChanges()
@@ -307,10 +308,15 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                             ), state = viewModel.configModel.value.fanStaticSetPointControl
                         ) {
                             viewModel.configModel.value.fanStaticSetPointControl = it
-                            viewModel.configModel.value.fanMinSp =
-                                viewModel.getDefaultValByDomain(systemStaticPressureMinimum)
-                            viewModel.configModel.value.fanMaxSp =
-                                viewModel.getDefaultValByDomain(systemStaticPressureMaximum)
+                            if (it) {
+                                viewModel.configModel.value.fanMinSp =
+                                    viewModel.getDefaultValByDomain(systemStaticPressureMinimum)
+                                viewModel.configModel.value.fanMaxSp =
+                                    viewModel.getDefaultValByDomain(systemStaticPressureMaximum)
+                            } else {
+                                viewModel.configModel.value.fanMinSp = RESET_VALUE
+                                viewModel.configModel.value.fanMaxSp = RESET_VALUE
+                            }
                             setStateChanged()
                         }
                     }
@@ -377,16 +383,24 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                             ), state = viewModel.configModel.value.dcvControl
                         ) {
                             viewModel.configModel.value.dcvControl = it
-                            viewModel.configModel.value.dcvMin =
-                                viewModel.getDefaultValByDomain(systemDCVDamperPosMinimum)
-                            viewModel.configModel.value.dcvMax =
-                                viewModel.getDefaultValByDomain(systemDCVDamperPosMaximum)
-                            viewModel.configModel.value.co2Threshold =
-                                viewModel.getDefaultValByDomain(systemCO2Threshold)
-                            viewModel.configModel.value.co2Target =
-                                viewModel.getDefaultValByDomain(systemCO2Target)
-                            viewModel.configModel.value.damperOpeningRate =
-                                viewModel.getDefaultValByDomain(systemCO2DamperOpeningRate)
+                            if (it) {
+                                viewModel.configModel.value.dcvMin =
+                                    viewModel.getDefaultValByDomain(systemDCVDamperPosMinimum)
+                                viewModel.configModel.value.dcvMax =
+                                    viewModel.getDefaultValByDomain(systemDCVDamperPosMaximum)
+                                viewModel.configModel.value.co2Threshold =
+                                    viewModel.getDefaultValByDomain(systemCO2Threshold)
+                                viewModel.configModel.value.co2Target =
+                                    viewModel.getDefaultValByDomain(systemCO2Target)
+                                viewModel.configModel.value.damperOpeningRate =
+                                    viewModel.getDefaultValByDomain(systemCO2DamperOpeningRate)
+                            } else {
+                                viewModel.configModel.value.dcvMin = RESET_VALUE
+                                viewModel.configModel.value.dcvMax = RESET_VALUE
+                                viewModel.configModel.value.co2Threshold = RESET_VALUE
+                                viewModel.configModel.value.co2Target = RESET_VALUE
+                                viewModel.configModel.value.damperOpeningRate = RESET_VALUE
+                            }
                             setStateChanged()
                         }
                     }

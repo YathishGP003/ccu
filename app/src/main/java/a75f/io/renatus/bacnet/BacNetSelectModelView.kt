@@ -677,6 +677,12 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                         null
                     )
                 )
+                MSTP_CONFIGURATION -> listOf(
+                    Pair(
+                        Pair(MAC_ADDRESS, viewModel.destinationMacAddress.value),
+                        null
+                    )
+                )
 
                 else -> emptyList()
             }

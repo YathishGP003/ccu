@@ -27,6 +27,9 @@ data class BacnetMstpSubscribeCov(
 )
 
 data class BacnetMstpSubscribeCovRequest(
+    @SerializedName("cov_function")
+    private val covFunction: Int, // 0 for unsubscribe Cov, 1 for subscribe Cov
+
     @SerializedName("object_identifier")
     private val objectIdentifiers :MutableList<ObjectIdentifierBacNet>
 )

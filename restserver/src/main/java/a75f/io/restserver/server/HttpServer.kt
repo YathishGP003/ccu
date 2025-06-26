@@ -24,6 +24,7 @@ import a75f.io.logic.util.bacnet.updateBacnetIpModeConfigurations
 import a75f.io.logic.util.bacnet.updateBacnetMstpLinearAndCovSubscription
 import a75f.io.logic.util.bacnet.updateBacnetMstpHeartBeat
 import a75f.io.logic.util.bacnet.updateBacnetStackInitStatus
+import a75f.io.logic.util.bacnet.updateHeartBeatPoint
 import a75f.io.util.query_parser.modifyKVPairFromFilter
 import android.content.Context
 import android.content.SharedPreferences
@@ -353,9 +354,32 @@ class HttpServer {
                             level = "8"
                         }
 
-                        val pointGrid = CCUHsApi.getInstance().writePoint(id, level!!.toInt(), who, value!!.toDouble(), duration!!.toInt())
-                        CCUHsApi.getInstance()
-                            .writeHisValById(id, hayStack.readPointPriorityVal(id))
+                        val pointMap = CCUHsApi.getInstance().readMapById(id)
+                        if (pointMap.isEmpty()) {
+                            CcuLog.e(HTTP_SERVER, "Point not found for id: $id")
+                            call.respond(HttpStatusCode.NotFound, BaseResponse("Point not found for id: $id"))
+                            return@get
+                        } else {
+                            if(pointMap.containsKey(Tags.WRITABLE)) {
+                                val pointGrid = CCUHsApi.getInstance().writePoint(id, level!!.toInt(), who, value!!.toDouble(), duration!!.toInt())
+                                CCUHsApi.getInstance().writeHisValById(id, hayStack.readPointPriorityVal(id))
+                                if (pointGrid != null) {
+                                    if(!pointGrid.isEmpty || !pointGrid.isErr){
+                                        call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK))
+                                        updateHeartBeatPoint(id)
+                                    }
+                                    else
+                                        call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
+                                } else {
+                                    call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
+                                }
+                            } else {
+                                CCUHsApi.getInstance().writeHisValById(id, value!!.toDouble())
+                                call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK))
+
+                            }
+                        }
+
                         if(isBacnetClientPoint(id)){
                             CcuLog.i(HTTP_SERVER, "this is a bacnet client point update ui-->$id")
                             updateZoneUi(id)
@@ -368,23 +392,13 @@ class HttpServer {
                                 sendWriteRequestToMstpEquip(id,level!!, value!!)
                             }
                         }
-
-                        if (pointGrid != null) {
-                            if(!pointGrid.isEmpty || !pointGrid.isErr){
-                                call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK))
-                                updateHeartBeatPoint(id)
-                            }
-                            else
-                                call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
-                        }else{
-                            call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
-                        }
                     }
                 }
 
                 //example call = http://127.0.0.1:5001/pointWrite/mstp?deviceId=1199&level=0&val=75.0&who=bacnet&duration=0&objectId=1&objectType=2
                 get("/pointWrite/mstp") {
                     val deviceId = call.parameters["deviceId"]
+                    val macAddr = call.parameters["macAddress"]
                     var level = call.parameters["level"]
                     var value = call.parameters["val"]
                     val who = call.parameters["who"]
@@ -392,7 +406,7 @@ class HttpServer {
                     val objectType = call.parameters["objectType"]
                     var duration : String? = call.parameters["duration"]
 
-                    CcuLog.i(HTTP_SERVER, "called API: /pointWrite/mstp -deviceId->$deviceId<--value-->$value<--level-->$level")
+                    CcuLog.i(HTTP_SERVER, "called API: /pointWrite/mstp -deviceId->$deviceId macAddr -> $macAddr <--value-->$value<--level-->$level")
 
                     if(level == null || who == null || duration == null || objectId == null || objectType == null) {
                         call.respond(HttpStatusCode.NotFound, BaseResponse( "Invalid request"))
@@ -400,9 +414,11 @@ class HttpServer {
                         var updatedObjectType = getBacNetType( ObjectType.values()[objectType.toInt()].key.replace("OBJECT_", ""))
                         CcuLog.i(HTTP_SERVER, "MSTP -> updatedObjectType: $updatedObjectType")
                         CcuLog.i(HTTP_SERVER, "MSTP -> objectId: $objectId")
-                        val query = "point and bacnetDeviceId == $deviceId and bacnetObjectId==$objectId and bacnetType==\"$updatedObjectType\""
+                        val query = "point and bacnetDeviceMacAddr == $macAddr and bacnetObjectId==$objectId and bacnetType==\"$updatedObjectType\""
                         CcuLog.i(HTTP_SERVER, "MSTP -> query: $query")
-                        val id = CCUHsApi.getInstance().read(query)?.get("id")?.toString()
+                        val pointMap  = CCUHsApi.getInstance().read(query)
+                        val id = pointMap?.get("id")?.toString()
+
                         if (id == null) {
                             CcuLog.e(HTTP_SERVER, "MSTP -> Point not found for deviceId: $deviceId and objectId: $objectId and  objectType: $objectType")
                             call.respond(
@@ -420,32 +436,27 @@ class HttpServer {
                             if (isBacnetMSTPPoint(id) /*&& !level.isNullOrEmpty() && level!!.toInt() < 1*/) {
                                 level = "8"
                             }
-                            val pointGrid = CCUHsApi.getInstance().writePoint(
-                                id,
-                                level!!.toInt(),
-                                who,
-                                value!!.toDouble(),
-                                duration!!.toInt()
-                            )
-                            CCUHsApi.getInstance().writeHisValById(id, CCUHsApi.getInstance().readPointPriorityVal(id))
+
+                            if(pointMap.containsKey(Tags.WRITABLE)) {
+                                val pointGrid = CCUHsApi.getInstance().writePoint(id, level!!.toInt(), who, value!!.toDouble(), duration!!.toInt())
+                                CCUHsApi.getInstance().writeHisValById(id, hayStack.readPointPriorityVal(id))
+                                if (pointGrid != null) {
+                                    if(!pointGrid.isEmpty || !pointGrid.isErr) {
+                                        call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK))
+                                    }
+                                    else {
+                                        call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
+                                    }
+                                } else {
+                                    call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
+                                }
+                            } else {
+                                CCUHsApi.getInstance().writeHisValById(id, value!!.toDouble())
+                                call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK))
+                            }
+
                             updateZoneUi(id)
                             updateHeartBeatPoint(id)
-                            if (pointGrid != null) {
-                                CcuLog.d(HTTP_SERVER, "MSTP -> pointGrid is not null: $pointGrid")
-                                if (!pointGrid.isEmpty || !pointGrid.isErr) {
-                                    call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK))
-                                } else
-                                    call.respond(
-                                        HttpStatusCode.OK,
-                                        BaseResponse(HttpStatusCode.NoContent)
-                                    )
-                            } else {
-                                CcuLog.e(HTTP_SERVER, "MSTP -> pointGrid is null")
-                                call.respond(
-                                    HttpStatusCode.OK,
-                                    BaseResponse(HttpStatusCode.NoContent)
-                                )
-                            }
                         }
                     }
                 }
@@ -648,26 +659,6 @@ class HttpServer {
         }
         val pointMap = CCUHsApi.getInstance().readMapById(pointId)
         return pointMap != null && pointMap["bacnetMstp"] != null
-    }
-
-    private fun updateHeartBeatPoint(id: String){
-        var pointId = id
-        if(!pointId.startsWith("@")){
-            pointId = "@$pointId"
-        }
-        val point = CCUHsApi.getInstance().readMapById(pointId)
-        val isBacnetClientPoint = point["bacnetCur"]
-        val isBacnetMstpPoint = point["bacnetMstp"]
-        if(isBacnetClientPoint.toString().isNotEmpty() || isBacnetMstpPoint.toString().isNotEmpty()){
-            val equipId = point["equipRef"]
-            CcuLog.i(HTTP_SERVER, "updateHeartBeatPoint for equip: $equipId")
-            val heartBeatPointId = CCUHsApi.getInstance().readEntity("point and heartbeat and equipRef==\"$equipId\"")["id"]
-            if(heartBeatPointId.toString().isNotEmpty()){
-                CcuLog.i(HTTP_SERVER, "updateHeartBeatPoint for equip: $equipId with heartBeatPointId: $heartBeatPointId")
-                CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(heartBeatPointId.toString(), 1.0)
-            }
-            //modbusDataInterface?.refreshScreen(id)
-        }
     }
 
     private fun getLevelValues(tempGrid: HGrid): MutableList<LevelData> {

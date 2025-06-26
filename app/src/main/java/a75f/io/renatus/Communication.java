@@ -134,10 +134,6 @@ public class Communication extends Fragment {
     private int bacnetConfigSelectedPosition = 2; // Default value mapped to Normal
 
     @BindView(R.id.spinnerBaudRate) Spinner spinnerBaudRate;
-
-    @BindView(R.id.mstpSpinnerPortAddress) Spinner mstpSpinnerPortAddress;
-
-    @BindView(R.id.tvMstpPortAddress) TextView tvMstpPortAddress;
     
     @BindView(R.id.spinnerParity) Spinner spinnerParity;
     
@@ -171,7 +167,7 @@ public class Communication extends Fragment {
 
     @BindView(R.id.tv_mstp_disable) TextView btnMstpDisable;
 
-    @BindView(R.id.imageUSBSerial) ImageView usbSerial;
+    @BindView(R.id.tvMstpUsbSerialConnection) TextView usbSerial;
 
     @BindView(R.id.mstpConfigLayout) LinearLayout mstpConfigLayout;
 
@@ -335,33 +331,16 @@ public class Communication extends Fragment {
         }
 
         ArrayList<String> usbSerialPorts = getPortAddressMstpDevices();
-        ArrayAdapter<String> spinnerMstpPortAdapter = getAdapterValue(usbSerialPorts);
-        mstpSpinnerPortAddress.setAdapter(spinnerMstpPortAdapter);
-
-        mstpSpinnerPortAddress.setSelection(((ArrayAdapter<String>)mstpSpinnerPortAddress.getAdapter())
-                .getPosition(String.valueOf(readStringPref(PREF_MSTP_PORT_ADDRESS, portAddress))));
-        mstpSpinnerPortAddress.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                portAddress = (String) parent.getItemAtPosition(position);
-                writeStringPref(PREF_MSTP_PORT_ADDRESS, portAddress);
-                CcuLog.d(TAG_CCU_BACNET_MSTP, "Selected Port: " + portAddress);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Optional: Handle case when nothing is selected
-            }
-        });
-        tvMstpPortAddress.setText(usbSerialPorts.get(0));
 
         if(!usbSerialPorts.isEmpty() && usbSerialPorts.get(0).contains("USB")) {
             CcuLog.d(TAG_CCU_BACNET_MSTP, "USB Serial Ports found: " + usbSerialPorts);
-            usbSerial.setImageResource(android.R.drawable.checkbox_on_background);
+            usbSerial.setText("Connected");
+            portAddress = usbSerialPorts.get(0);
             isUSBSerialPortAvailable = true;
         } else {
             CcuLog.d(TAG_CCU_BACNET_MSTP, "No USB Serial Ports found");
-            usbSerial.setImageResource(android.R.drawable.checkbox_off_background);
+            usbSerial.setText("Not Connected");
+            usbSerial.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
             isUSBSerialPortAvailable = false;
         }
 
@@ -457,7 +436,7 @@ public class Communication extends Fragment {
             }
         });
 
-        etMstpSourceAddress.setText(String.valueOf(readIntPref(PREF_MSTP_SOURCE_ADDRESS, 0)));
+        etMstpSourceAddress.setText(String.valueOf(readIntPref(PREF_MSTP_SOURCE_ADDRESS, 1)));
         etMstpMaxMaster.setText(String.valueOf(readIntPref(PREF_MSTP_MAX_MASTER, 127)));
         etMstpMaxFrame.setText(String.valueOf(readIntPref(PREF_MSTP_MAX_FRAME, 1)));
         etMstpDeviceId.setText(String.valueOf(readIntPref(PREF_MSTP_DEVICE_ID, 1)));
@@ -535,6 +514,10 @@ public class Communication extends Fragment {
             sharedPreferences.edit().putBoolean(IS_BACNET_MSTP_INITIALIZED, false).apply();
             Intent intent = new Intent("MSTP_STOP");
             context.sendBroadcast(intent);
+            boolean isBacnetIpInitialized = sharedPreferences.getBoolean(IS_BACNET_INITIALIZED, false);
+            if (!DashboardUtilKt.isDashboardConfig(context) && !isBacnetIpInitialized) {
+                stopRestServer();
+            }
             enableMstpConfigView();
         });
 
@@ -661,7 +644,7 @@ public class Communication extends Fragment {
     }
 
     private boolean isMstpConfigValid() {
-        if (etMstpSourceAddress.getText().toString().isEmpty() || !CCUUiUtil.isValidNumber(Integer.parseInt(etMstpSourceAddress.getText().toString()), 0, 127, 1)) {
+        if (etMstpSourceAddress.getText().toString().isEmpty() || !CCUUiUtil.isValidNumber(Integer.parseInt(etMstpSourceAddress.getText().toString()), 1, 127, 1)) {
             return false;
         }
 
@@ -671,7 +654,7 @@ public class Communication extends Fragment {
         if (etMstpMaxFrame.getText().toString().isEmpty() || !CCUUiUtil.isValidNumber(Integer.parseInt(etMstpMaxFrame.getText().toString()), 1, 255, 1)) {
             return false;
         }
-        if(etMstpDeviceId.getText().toString().isEmpty() || !CCUUiUtil.isValidNumber(Integer.parseInt(etMstpDeviceId.getText().toString()), 1, 4194303, 1)) {
+        if(etMstpDeviceId.getText().toString().isEmpty() || !CCUUiUtil.isValidNumber(Integer.parseInt(etMstpDeviceId.getText().toString()), 1, 4194302, 1)) {
             return false;
         }
         return isUSBSerialPortAvailable;
@@ -681,11 +664,13 @@ public class Communication extends Fragment {
 
            if (view.getText().toString().isEmpty() || !CCUUiUtil.isValidNumber(Integer.parseInt(view.getText().toString()), min, max, multiplier)) {
                view.setError(errorMessage);
+               view.setSelected(true);
                btnMstpInitialize.setEnabled(false);
                btnMstpInitialize.setClickable(false);
                btnMstpInitialize.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
            } else {
                view.setError(null);
+               view.setSelected(false);
 
                if (isMstpConfigValid()) {
                    btnMstpInitialize.setEnabled(true);
@@ -1257,7 +1242,7 @@ public class Communication extends Fragment {
                     break;
 
                 case R.id.etMstpSourceAddress:
-                    validateAndUpdateMstpConfig(etMstpSourceAddress, PREF_MSTP_SOURCE_ADDRESS, etMstpSourceAddress.getText().toString(), 0, 127, 1, getString(R.string.err_txt_mstp_source_address));
+                    validateAndUpdateMstpConfig(etMstpSourceAddress, PREF_MSTP_SOURCE_ADDRESS, etMstpSourceAddress.getText().toString(), 1, 127, 1, getString(R.string.err_txt_mstp_source_address));
                     break;
                 case R.id.etMstpMaxMaster:
                     validateAndUpdateMstpConfig(etMstpMaxMaster, PREF_MSTP_MAX_MASTER, etMstpMaxMaster.getText().toString(), 1, 127, 1, getString(R.string.err_txt_mstp_max_master));
@@ -1266,7 +1251,7 @@ public class Communication extends Fragment {
                     validateAndUpdateMstpConfig(etMstpMaxFrame, PREF_MSTP_MAX_FRAME, etMstpMaxFrame.getText().toString(), 1, 255, 1, getString(R.string.err_txt_mstp_max_frame));
                     break;
                 case R.id.etMstpDeviceId:
-                    validateAndUpdateMstpConfig(etMstpDeviceId, PREF_MSTP_DEVICE_ID, etMstpDeviceId.getText().toString(), 1, 4194303, 1, getString(R.string.err_txt_mstp_device_id));
+                    validateAndUpdateMstpConfig(etMstpDeviceId, PREF_MSTP_DEVICE_ID, etMstpDeviceId.getText().toString(), 1, 4194302, 1, getString(R.string.err_txt_mstp_device_id));
                     break;
             }
         }
@@ -1277,11 +1262,13 @@ public class Communication extends Fragment {
                     CcuLog.i(TAG_CCU_BACNET, "Key: "+key+", Value: "+value+", isValid: "+CCUUiUtil.isValidNumber(Integer.parseInt(value), min, max, multiple));
                     if (!CCUUiUtil.isValidNumber(Integer.parseInt(value.trim()),min,max, multiple)) {
                         view.setError(error);
+                        view.setSelected(true);
                         initializeBACnet.setEnabled(false);
                         initializeBACnet.setClickable(false);
                         initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
                     } else {
                         view.setError(null);
+                        view.setSelected(false);
                         jsonObject.put(key,Integer.parseInt(value));
                         sharedPreferences.edit().putString(BACNET_CONFIGURATION, config.toString()).apply();
                         if(validateEntries()){
@@ -1912,9 +1899,6 @@ public class Communication extends Fragment {
             }
         }
 
-        if (usbSerialPorts.isEmpty()) {
-            usbSerialPorts.add("Port not available");
-        }
         return usbSerialPorts;
     }
 

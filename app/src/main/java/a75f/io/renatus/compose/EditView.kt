@@ -20,6 +20,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +32,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -642,8 +644,8 @@ fun UnderlinedInput(
     inputText: String = ""
 ) {
     var textValue by remember { mutableStateOf(TextFieldValue()) }
-    if (inputText.isNotEmpty()) {
-        textValue = TextFieldValue(inputText)
+    LaunchedEffect(inputText) {
+        textValue = TextFieldValue(inputText, TextRange(inputText.length))
     }
 
     Column(modifier = modifier) {
@@ -683,7 +685,7 @@ fun UnderlinedInput(
 
 
 @Composable
-fun HintedEditableText(valueTypeIsNumber: Boolean, hintText: String, onEditEvent : (String) -> Unit) {
+fun HintedEditableText(valueTypeIsNumber: Boolean, hintText: String, defaultText: String = "", onEditEvent : (String) -> Unit) {
     var keyboardOptions = KeyboardOptions.Default.copy()
     if(valueTypeIsNumber) {
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
@@ -692,5 +694,6 @@ fun HintedEditableText(valueTypeIsNumber: Boolean, hintText: String, onEditEvent
         placeholder = hintText,
         onTextChanged = onEditEvent,
         keyboardOptions = keyboardOptions,
+        inputText = defaultText,
     )
 }

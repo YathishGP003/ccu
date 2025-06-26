@@ -5,6 +5,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.util.bacnet.BacnetConfigConstants
 import a75f.io.logic.util.bacnet.isValidMstpMacAddress
+import a75f.io.logic.util.bacnet.validateInputdata
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
@@ -15,7 +16,8 @@ import a75f.io.renatus.bacnet.util.CONFIGURATION_TYPE
 import a75f.io.renatus.bacnet.util.CONST_AUTO_DISCOVERY
 import a75f.io.renatus.bacnet.util.IP_CONFIGURATION
 import a75f.io.renatus.bacnet.util.LOADING
-import a75f.io.renatus.bacnet.util.MAC_ADDRESS_INFO
+import a75f.io.renatus.bacnet.util.MAC_ADDRESS_INFO_MASTER
+import a75f.io.renatus.bacnet.util.MAC_ADDRESS_INFO_SLAVE
 import a75f.io.renatus.bacnet.util.MODEL
 import a75f.io.renatus.bacnet.util.MSTP_CONFIGURATION
 import a75f.io.renatus.bacnet.util.SELECT_ADDRESS
@@ -285,7 +287,7 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                                 SaveTextView(getString(R.string.select_model_to_proceed), isChanged = false, onClick = {})
                             }
                         } else {
-                                if (viewModel.deviceSelectionMode.value == 0) {
+                                if (viewModel.deviceSelectionMode.value == 0 || viewModel.configurationType.value == MSTP_CONFIGURATION) {
                                     // manual mode
                                     ConfigurationDetailsEditable(viewModel.configurationType.value)
                                 } else {
@@ -675,12 +677,7 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                         null
                     )
                 )
-                MSTP_CONFIGURATION -> listOf(
-                    Pair(
-                        Pair(MAC_ADDRESS, viewModel.destinationMacAddress.value),
-                        null
-                    )
-                )
+
                 else -> emptyList()
             }
 
@@ -804,7 +801,8 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                         Triple(
                             MAC_ADDRESS,
                             viewModel.destinationMacAddress.value,
-                            MAC_ADDRESS_INFO
+                            if (viewModel.deviceSelectionMode.value == 0) MAC_ADDRESS_INFO_SLAVE
+                            else MAC_ADDRESS_INFO_MASTER
                         ),
                         null
                     )
@@ -813,7 +811,14 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                 else -> emptyList()
             }
 
-        EditableConfigFields(configTableData, configEntryWithHint, numberTypeConfigEntries, editableEventMap)
+        val defaultTextList =
+            when(configType) {
+                MSTP_CONFIGURATION -> listOf(MAC_ADDRESS)
+                else -> emptyList()
+            }
+
+        EditableConfigFields(configTableData, configEntryWithHint, numberTypeConfigEntries, editableEventMap,
+            defaultTextList)
 
     }
 
@@ -822,7 +827,8 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
         configTableData: List<Pair<Triple<String, String, String>?, Triple<String, String, String>?>>,
         configEntryWithHint: List<String>,
         numberTypeConfigEntries: List<String>,
-        editableEventMap: HashMap<String, (String) -> Unit>
+        editableEventMap: HashMap<String, (String) -> Unit>,
+        defaultTextList: List<String>
     ) {
         Column(modifier = Modifier
             .padding(top = 20.dp)
@@ -850,7 +856,7 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                                 }
                             }
                             Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.TopStart) {
-                                editableEventMap[subRowPair1.first]?.let { it1 -> HintedEditableText(valueTypeIsNumber = numberTypeConfigEntries.contains(subRowPair1.first), hintText = "Enter ${subRowPair1.first}", onEditEvent = it1) }
+                                editableEventMap[subRowPair1.first]?.let { it1 -> HintedEditableText(valueTypeIsNumber = numberTypeConfigEntries.contains(subRowPair1.first), hintText = "Enter ${subRowPair1.first}", defaultText = if(defaultTextList.contains(subRowPair1.first)) subRowPair1.second else "", onEditEvent = it1) }
                             }
                         }
                     }
@@ -871,7 +877,7 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                                 }
                             }
                             Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.TopStart) {
-                                editableEventMap[subRowPair2.first]?.let { it1 -> HintedEditableText(valueTypeIsNumber = numberTypeConfigEntries.contains(subRowPair2.first), hintText = "Enter ${subRowPair2.first}", onEditEvent = it1) }
+                                editableEventMap[subRowPair2.first]?.let { it1 -> HintedEditableText(valueTypeIsNumber = numberTypeConfigEntries.contains(subRowPair2.first), hintText = "Enter ${subRowPair2.first}", defaultText = if(defaultTextList.contains(subRowPair2.first)) subRowPair2.second else "", onEditEvent = it1) }
                             }
                         }
                     }
@@ -908,8 +914,8 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
 
     @Composable
     fun DeviceSelector() {
-        viewModel.clearConfigFieldData()
         RadioButtonSelector(SEARCH_DEVICE, listOf("Slave", "Master"), viewModel.deviceSelectionMode.value) {
+            viewModel.clearConfigFieldData()
             when (it) {
                 "Slave" -> {
                     viewModel.deviceSelectionMode.value = 0
@@ -1052,7 +1058,10 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
         return when (viewModel.configurationType.value) {
             MSTP_CONFIGURATION -> {
                 viewModel.destinationMacAddress.value.trim().isNotEmpty() &&
-                        isValidMstpMacAddress(viewModel.destinationMacAddress.value.trim())
+                       if (viewModel.deviceSelectionMode.value == 1)
+                           validateInputdata(1,127, viewModel.destinationMacAddress.value.toInt())
+                       else
+                           validateInputdata(128, 255, viewModel.destinationMacAddress.value.toInt())
             }
             IP_CONFIGURATION -> {
                 viewModel.destinationIp.value.isNotEmpty() &&
@@ -1075,10 +1084,14 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
 
     private fun getFetchWarningToastMessageIfValid() : Pair<Boolean, String> {
         var (isValidWarning, warningMessage) = getMinValidationWarningToastMessage()
-        if(!isValidWarning && !isBacNetInitialized){
-            warningMessage = "BacNet is not initialized"
-        } else if(!isValidWarning) {
-            return Pair(false, "")
+        if(!isValidWarning){
+            if(viewModel.configurationType.value == IP_CONFIGURATION && !isBacNetInitialized) {
+                warningMessage = "BACnet IP is not initialized"
+            } else if(viewModel.configurationType.value == MSTP_CONFIGURATION && !isBacnetMstpInitialized) {
+                warningMessage = "BACnet MSTP is not initialized"
+            } else {
+                return Pair(false, "")
+            }
         }
             return Pair(true, warningMessage)
     }

@@ -433,7 +433,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
 
         val subscribeCovRequest = BacnetMstpSubscribeCov(
             destination,
-            BacnetMstpSubscribeCovRequest(objectIdentifierList)
+            BacnetMstpSubscribeCovRequest(1,objectIdentifierList)
         )
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -486,9 +486,10 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         CcuLog.d(TAG, "setUpBacnetProfile node address $groupId")
 
             bacnetProfile = BacnetProfile()
-            val configParam = "deviceId:${deviceId.value},destinationIp:${destinationIp.value},destinationPort:${destinationPort.value},macAddress:${destinationMacAddress.value},deviceNetwork:${dnet.value}"
+            val deviceID = deviceId.value.ifEmpty { 0 }
+            val configParam = "deviceId:${deviceID},destinationIp:${destinationIp.value},destinationPort:${destinationPort.value},macAddress:${destinationMacAddress.value},deviceNetwork:${dnet.value}"
             val modelConfig = "modelName:${modelName.value},modelId:${getModelIdByName(modelName.value)},version:${bacnetModel.value.version.value}"
-            bacnetProfile.addBacAppEquip(configParam, modelConfig, deviceId.value,
+            bacnetProfile.addBacAppEquip(configParam, modelConfig, deviceID.toString(),
                 groupId.toString(), floorRef, zoneRef,
                 bacnetModel.value.equipDevice.value,
                 profileType,moduleLevel,bacnetModel.value.version.value,configurationType.value, destinationMacAddress.value, false)
@@ -747,9 +748,9 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         }
         connectedDevices = mutableStateOf(emptyList())
         connectedDevices.value = list
-        if (configurationType.value == IP_CONFIGURATION) {
-            fetchDeviceNames()
-        }
+
+        fetchDeviceNames()
+
     }
 
     private fun fetchConnectedDeviceGlobally() {

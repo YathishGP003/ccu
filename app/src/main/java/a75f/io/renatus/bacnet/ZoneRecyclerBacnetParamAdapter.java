@@ -2,7 +2,6 @@ package a75f.io.renatus.bacnet;
 
 import static a75f.io.logic.bo.building.bacnet.BacnetEquip.TAG_BACNET;
 
-import static a75f.io.logic.util.bacnet.BacnetUtilKt.decodeBacnetId;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.isValidMstpMacAddress;
 
 import android.content.Context;
@@ -35,6 +34,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.bacnet.parser.BacnetZoneViewItem;
 import a75f.io.logic.bo.building.system.BacnetServicesUtils;
 import a75f.io.logic.bo.building.system.BacnetWriteRequest;
@@ -116,14 +116,19 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
             viewHolder.tvParamValue.setVisibility(View.GONE);
             viewHolder.spValue.setAdapter(getAdapterValue((ArrayList) bacnetZoneViewItem.getSpinnerValues()));
 
+            String enumValues = (String) CCUHsApi.getInstance().readMapById(bacnetZoneViewItem.getBacnetObj().getId()).get("enum");
             int itemIndex = 0;
-            try {
-                itemIndex = findItemPosition(bacnetZoneViewItem.getSpinnerValues(), Double.parseDouble(bacnetZoneViewItem.getValue()));
-            } catch (NumberFormatException e) {
-                CcuLog.d(TAG,"this is not a number");
-                itemIndex = (int) Double.parseDouble(bacnetZoneViewItem.getValue());
+            if(enumValues != null){
+                CcuLog.d(TAG,"onBindViewHolder bacnetZoneViewItem writable point enum-->"+bacnetZoneViewItem.getBacnetObj().getId()+"--"+enumValues);
+                itemIndex = searchIndexValue(enumValues, String.valueOf((int)Double.parseDouble(bacnetZoneViewItem.getValue())));
+            }else{
+                try {
+                    itemIndex = findItemPosition(bacnetZoneViewItem.getSpinnerValues(), Double.parseDouble(bacnetZoneViewItem.getValue()));
+                } catch (NumberFormatException e) {
+                    CcuLog.d(TAG,"this is not a number");
+                    itemIndex = (int) Double.parseDouble(bacnetZoneViewItem.getValue());
+                }
             }
-
             CcuLog.d(TAG, "onBindViewHolder:: " + bacnetZoneViewItem.getSpinnerValues() + " searching for-> " + String.valueOf(Double.parseDouble(bacnetZoneViewItem.getValue())) + "<--found at index-->" + itemIndex);
             viewHolder.spValue.setSelection(itemIndex);
         } else {
@@ -193,15 +198,12 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
             return;
         }*/
 
-        int objectId = bacnetZoneViewItem.getBacnetObj().getProtocolData().getBacnet().getObjectId();
-        String objectType = bacnetZoneViewItem.getObjectType();
-         objectId = decodeBacnetId(objectId,ObjectType.valueOf(objectType).getValue());
+        int objectId = (int) Double.parseDouble(CCUHsApi.getInstance().readMapById(bacnetZoneViewItem.getBacnetObj().getId()).get(Tags.BACNET_OBJECT_ID).toString());
         boolean isMstpEquip = isValidMstpMacAddress(Objects.requireNonNull(configMap.getOrDefault(MAC_ADDRESS, "")));
         BacnetServicesUtils bacnetServicesUtils = new BacnetServicesUtils();
         if(bacnetZoneViewItem.getBacnetObj().isSystem()){
-            CcuLog.d(TAG_BACNET, "--this is a system point, subtract 110000 from objectId--"+objectId);
-            int originalBacnetId = objectId - 1100000;
-            bacnetServicesUtils.sendWriteRequest(generateWriteObject(configMap, originalBacnetId, selectedValue,
+            CcuLog.d(TAG_BACNET, "--this is a system point, objectId--"+objectId);
+            bacnetServicesUtils.sendWriteRequest(generateWriteObject(configMap, objectId, selectedValue,
                             bacnetZoneViewItem.getObjectType(), bacnetZoneViewItem.getBacnetObj().getDefaultWriteLevel(), isMstpEquip),
                     serverIpAddress, remotePointUpdateInterface, selectedValue, bacnetZoneViewItem.getBacnetObj().getId(), isMstpEquip);
         }else{
@@ -223,7 +225,7 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
         //OBJECT_MULTI_STATE_VALUE
         DestinationMultiRead destinationMultiRead = new DestinationMultiRead(Objects.requireNonNull(configMap.getOrDefault(DESTINATION_IP,"")),
                 Objects.requireNonNull(configMap.getOrDefault(DESTINATION_PORT, "0")), Objects.requireNonNull(configMap.getOrDefault(DEVICE_ID,"0")),
-                Objects.requireNonNull(configMap.get(DEVICE_NETWORK)), macAddress);
+                Objects.requireNonNull(configMap.getOrDefault(DEVICE_NETWORK,"0")), macAddress);
 
         int dataType;
         String selectedValueAsPerType;
@@ -348,5 +350,23 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
             reverseMapOne.put(entry.getValue(), entry.getKey());
         }
         return reverseMapOne;
+    }
+
+    private int searchIndexValue(String enumString, String inputValue) {
+        CcuLog.d(TAG_BACNET, "---------searchIndexValue-------" + enumString
+                + "<--inputValue-->" + inputValue);
+        try {
+            String[] parts = enumString.split(",");
+            for (int i = 0; i < parts.length; i++) {
+                String part = parts[i].trim(); // trim leading/trailing spaces
+                String[] keyValue = part.split("=");
+                if (keyValue.length == 2 && keyValue[1].trim().equals(inputValue)) {
+                    return i;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1; // Not found
     }
 }

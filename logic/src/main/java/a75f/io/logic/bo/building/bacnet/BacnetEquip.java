@@ -106,6 +106,10 @@ public class BacnetEquip {
 
         int bacnetIdForEquip = HSUtil.generateBacnetId(String.valueOf(slaveId), false, false);
 
+        if (deviceId.isEmpty()) { // For Slave Device we unable to get device Id
+            deviceId = "0";
+        }
+
         Equip.Builder bacNetEquip = new Equip.Builder().setSiteRef(siteRef)
                     .setDisplayName(equipDis)
                     .setRoomRef(roomRef)
@@ -208,8 +212,11 @@ public class BacnetEquip {
             CCUHsApi.getInstance().addPoint(heartBeat);
         }
 
+        int i = 0;
         try {
             for (BacnetPoint point : points) {
+                CcuLog.d(TAG, "point to add start-->" + point.getName() + "<--i-->"+i);
+                i++;
 
                 boolean isPointHistorized = point.getEquipTagNames().contains("his");
                 boolean isWritable = point.getEquipTagNames().contains("writable");
@@ -217,8 +224,18 @@ public class BacnetEquip {
                 int objectId = point.getProtocolData().getBacnet().getObjectId();
                 String objectType = Objects.requireNonNull(point.getProtocolData()).getBacnet().getObjectType();
                 int groupId = (int) (slaveId);
-                int bacnetId = Integer.parseInt(String.valueOf(groupId) + ObjectType.valueOf("OBJECT_"+objectType).getValue() + objectId) ;
+                int bacnetId = -1;
+                try {
+                    bacnetId = Integer.parseInt(String.valueOf(groupId) + ObjectType.valueOf("OBJECT_"+objectType).getValue() + objectId) ;
+                }catch(Exception e){
+                    e.printStackTrace();
 
+                }
+                if(bacnetId == -1){
+                    bacnetId = objectId;
+                }
+                //int bacnetId = Integer.parseInt(String.valueOf(groupId) + ObjectType.valueOf("OBJECT_"+objectType).getValue() + objectId) ;
+                CcuLog.d(TAG, "point to add start-->" + point.getName() + "------making logical param point-----");
                 Point.Builder logicalParamPoint = new Point.Builder()
                         .setDisplayName(equipDis + "-" + point.getName())
                         .setShortDis(point.getName())
@@ -242,6 +259,7 @@ public class BacnetEquip {
                     .addTag(CONST_BACNET_DEVICE_MAC_ADDR, HNum.make(Integer.parseInt(macAddress)));
                 }
 
+                CcuLog.d(TAG, "point to add start-->" + point.getName() + "------checking allowed values-----");
                 if (Objects.requireNonNull(point.getValueConstraint()).getAllowedValues() != null) {
                     StringBuffer enumVariables = new StringBuffer();
                     AtomicReference<String> values = new AtomicReference<>("");
@@ -281,14 +299,14 @@ public class BacnetEquip {
 //                        .setSiteRef(siteRef).addMarker("register").addMarker("bacnet")
 //                        .setTz(tz);
 
-
+                CcuLog.d(TAG, "point to add start-->" + point.getName() + "------checking getEquipTagsList-----");
                 if (point.getEquipTagsList().size() > 0) {
                     for (TagItem tagItem : point.getEquipTagsList()) {
                         if (tagItem.getKind().toLowerCase().equals("marker")) {
                             bacNetEquip.addMarker(tagItem.getName().toLowerCase().trim());
                         } else {
                             try {
-                                bacNetEquip.addTag(tagItem.getKind().toLowerCase(), HStr.make(tagItem.getDefaultValue().toString()));
+                                bacNetEquip.addTag(tagItem.getKind().toLowerCase(), HStr.make(tagItem.getDefaultValue()+""));
                             } catch (Exception e) {
                                 CcuLog.d(TAG, "hit exception 5-->" + e.getMessage());
                             }
@@ -300,9 +318,6 @@ public class BacnetEquip {
                 if (point.getProtocolData().getBacnet().getDisplayInUIDefault()) {
                     logicalParamPoint.addMarker("displayInUi");
                     //physicalParamPoint.addMarker("displayInUi");
-                }
-                if(point.isSchedulable()) {
-                    logicalParamPoint.addMarker(Tags.SCHEDULABLE);
                 }
                 CcuLog.d(TAG, "point display in ui-->" + point.getProtocolData().getBacnet().getDisplayInUIDefault());
                 //AtomicBoolean isWritable = new AtomicBoolean(false);

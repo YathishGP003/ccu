@@ -5097,6 +5097,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 if (macAddr == null || macAddr.isEmpty()) {
                     macAddr = "NA";
                 }
+                String bacnetDeviceId = bacnetConfig.get("deviceId");
+                if (bacnetDeviceId == null || bacnetDeviceId.isEmpty()) {
+                    bacnetDeviceId = "NA";
+                }
 
                 for (BacnetModelDetailResponse item : buildBacnetModel(nonTempEquip.getRoomRef())){
                     equipName.append(item.getName());
@@ -5112,7 +5116,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         " ( " +
                         nonTempEquip.getGroup() +
                         " | Device ID: " +
-                        bacnetConfig.get("deviceId") +
+                        bacnetDeviceId +
                         " | MAC Addr: " +
                         macAddr +
                         " )";

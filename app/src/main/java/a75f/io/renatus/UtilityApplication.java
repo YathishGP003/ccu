@@ -713,7 +713,7 @@ public abstract class UtilityApplication extends Application implements Globals.
     }
     private static void checkAndServerStatus() {
         DashboardHandlerKt.getDashboardConfiguration();
-        if (DashboardUtilKt.isDashboardConfig(Globals.getInstance().getApplicationContext()) || isBACnetIntialized()) {
+        if (DashboardUtilKt.isDashboardConfig(Globals.getInstance().getApplicationContext()) || isBACnetIntialized() || isBacnetMstpInitialized()) {
             startRestServer();
         }
     }

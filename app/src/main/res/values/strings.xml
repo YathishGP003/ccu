@@ -1268,7 +1268,7 @@
     <string name="hint_mstp_maxMaster">Enter Max Master</string>
     <string name="txt_mstp_maxFrames">Max Frames</string>
     <string name="hint_mstp_maxFrames">Enter Max Frames</string>
-    <string name="txt_mstp_sourceAddress_hint">In between 0 to 127</string>
+    <string name="txt_mstp_sourceAddress_hint">In between 1 to 127</string>
     <string name="txt_mstp_maxMaster_hint">In between 1 to 127</string>
     <string name="txt_mstp_maxFrames_hint">In between 1 to 255</string>
     <string name="txt_mstp_initialise">INITIALIZE</string>
@@ -1280,8 +1280,12 @@
     <string name="err_txt_mstp_device_id">Please enter valid device id</string>
 
     <string-array name="mstp_config_baudrate_array">
+        <item>  9600  </item>
+        <item>  19200 </item>
         <item>  38400 </item>
+        <item>  57600 </item>
         <item>  76800 </item>
+        <item>  115200 </item>
     </string-array>
 
     <string name="title_bacnet_config">BACnet - IP Configuration</string>
@@ -1307,7 +1311,7 @@
     <string name="txt_error_port">Port should be within 47808 to 47823</string>
     <string name="txt_valid_number">Please input valid number</string>
     <string name="txt_ip_device_instance_number">IP Device Instance Number  <font color="#e5561a">*</font></string>
-    <string name="txt_ip_device_instance_number_hint">In between 0 to 4194302</string>
+    <string name="txt_ip_device_instance_number_hint">In between 1 to 4194302</string>
     <string name="txt_apdu_timeout">APDU Timeout  <font color="#e5561a">*</font></string>
     <string name="txt_apdu_timeout_hint">In between 6000 to 65535</string>
     <string name="txt_number_of_apdu_retries">Number of APDU Retries <font color="#e5561a">*</font></string>
@@ -1845,6 +1849,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="txt_mstp_device_id">Device Id</string>
+    <string name="txt_mstp_device_id_hint">In between 1 to 4194303</string>
     <string name="txt_mstp_port_address">PortAddress</string>
     <string name="txt_mstp_hint_device_id">Enter Device Id</string>
 

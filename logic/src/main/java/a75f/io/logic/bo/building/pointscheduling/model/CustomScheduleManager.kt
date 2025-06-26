@@ -15,6 +15,7 @@ import a75f.io.logic.bo.building.system.doMakeRequest
 import a75f.io.logic.bo.building.system.getObjectType
 import a75f.io.logic.bo.util.getValueByEnum
 import a75f.io.logic.interfaces.ModbusWritableDataInterface
+import a75f.io.logic.util.bacnet.sendWriteRequestToMstpEquip
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.joda.time.LocalTime
@@ -260,8 +261,8 @@ class CustomScheduleManager {
                     } catch (e: Exception) {
                         // we don't want to crash the app if there is an error in processing this point
                         // we want to continue processing the other points
-                        CcuLog.e(L.TAG_CCU_POINT_SCHEDULE, "Error processing point: $point", e)
                         e.printStackTrace()
+                        CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "@@Error processing point: $point \n ${e.stackTrace} \n ${e.message}")
                     }
                 }
 
@@ -794,18 +795,10 @@ class CustomScheduleManager {
                     configMap[configKeyValueList[0]] = configKeyValueList[1]
                 }
             }
-            val bacnetObjectId = pointDict.getInt(Tags.BACNET_OBJECT_ID)
-            val bacnetObjectType = getObjectType(pointDict.getStr(Tags.BACNET_TYPE))
             val priority = pointDict.getStr("defaultWriteLevel")
             val bacnetValue = value.toString()
-            doMakeRequest(
-                configMap,
-                bacnetObjectId,
-                bacnetValue,
-                bacnetObjectType,
-                priority,
-                pointID
-            )
+            val isMstp = equip.containsKey("bacnetMstp")
+            sendWriteRequestToMstpEquip(pointID,priority,bacnetValue,isMstp)
         }
     }
 

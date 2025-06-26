@@ -2720,12 +2720,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             disableVisibiltyForZoneScheduleUI(zoneDetails);
                             displayRoomSpecificCustomControlFields(zoneDetails, nonTempEquip);
 
+                            HashMap<Object, Object> parentBacnetEquip = CCUHsApi.getInstance().readEntity("equip " +  // parent modbbus equip
+                                    "and not equipRef and roomRef  == " + "\""+nonTempEquip.getRoomRef()+"\"");
+                            HashMap<Object,Object> bacnetDevice = CCUHsApi.getInstance().readEntity("device and equipRef == \"" + nonTempEquip.getId() + "\"");
                             loadExternalEquipUi(
                                     "BACNET",
                                     nonTempEquip.getId(),
                                     getEquipmentDeviceName("BACNET", nonTempEquip),
-                                    null,
-                                    bacNetPointsList,
+                                    true,
+                                    bacnetDevice,
                                     inflater.inflate(R.layout.item_modbus_detail_view, null),
                                     linearLayoutZonePoints,
                                     null
@@ -4988,7 +4991,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 setupExternalEquipParamRecyclerView(zoneDetailsView, MODBUS, modbusDevice, null);
                 break;
             case "BACNET":
+                HashMap<Object,Object> bacnetDevice = (HashMap<Object,Object>) equipPointDetails;
                 setEquipmentDeviceName(zoneDetailsView, equipmentDeviceName);
+                controlLastUpdatedVisibilityForModbusEquips(zoneDetailsView, Integer.parseInt(bacnetDevice.get("addr").toString()), showLastUpdatedTime);
                 setPointScheduleStatusForExternalEquip(zoneDetailsView, equipId);
                 setupExternalEquipParamRecyclerView(zoneDetailsView, BACNET, bacNetPointsList, null);
                 break;

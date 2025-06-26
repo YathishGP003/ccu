@@ -797,7 +797,7 @@ fun isAppRunning(packageName: String): Boolean {
 }
 
 
-fun sendWriteRequestToMstpEquip(id : String, level: String, value: String) {
+fun sendWriteRequestToMstpEquip(id : String, level: String, value: String, isMstpEquip : Boolean = true) {
     var pointId = id
     if(!pointId.startsWith("@")){
         pointId = "@$pointId"
@@ -808,7 +808,7 @@ fun sendWriteRequestToMstpEquip(id : String, level: String, value: String) {
         return
     }
 
-    var bacnetId = pointMap[Tags.BACNET_OBJECT_ID]?.toString()?.toIntOrNull()
+    var bacnetId = pointMap[Tags.BACNET_OBJECT_ID]?.toString()?.toDouble()?.toInt()
     val group = pointMap[Tags.GROUP]?.toString()?.toIntOrNull()
     val objectType = pointMap[Tags.BACNET_TYPE]?.toString()?.let { BacnetTypeMapper.getObjectType(it) }
     if (bacnetId == null || group == null || objectType == null) {
@@ -832,7 +832,7 @@ fun sendWriteRequestToMstpEquip(id : String, level: String, value: String) {
         bacnetService.sendWriteRequest(
             bacnetService.generateWriteObject(bacnetService.getConfig(bacnetConfig), bacnetId, value,
             "OBJECT_$objectType", level, true),
-            serverIpAddress, remotePointUpdateInterface, value, pointId, true)
+            serverIpAddress, remotePointUpdateInterface, value, pointId, isMstpEquip)
     }
 
 }

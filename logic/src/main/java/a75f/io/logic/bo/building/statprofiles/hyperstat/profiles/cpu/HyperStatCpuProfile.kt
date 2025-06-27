@@ -320,8 +320,12 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
 
         logicalPointsList = getHSLogicalPointList(equip, config!!)
         curState = ZoneState.DEADBAND
-        occupancyStatus = equipOccupancyHandler.currentOccupiedMode
-        equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+
+        if (equipOccupancyHandler != null) {
+            occupancyStatus = equipOccupancyHandler.currentOccupiedMode
+            equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+        }
+
 
         logIt( "Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
         val updatedFanMode = fallBackFanMode(equip, equip.equipRef, fanModeSaved, basicSettings)
@@ -468,7 +472,6 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
         config: CpuConfiguration
     ) {
         equip.derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
-        equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
         equip.stageDownTimer.data = equip.hyperstatStageUpTimerCounter.readPriorityVal()
         equip.stageUpTimer.data = equip.hyperstatStageUpTimerCounter.readPriorityVal()
         // This is for title 24 compliance

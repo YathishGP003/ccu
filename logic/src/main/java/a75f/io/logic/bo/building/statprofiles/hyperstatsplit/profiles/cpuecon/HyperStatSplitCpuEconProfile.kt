@@ -74,7 +74,6 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
     private var outsideAirCalculatedMinDamper = 0
     private var outsideAirLoopOutput = 0
     private var outsideAirFinalLoopOutput = 0
-    override lateinit var occupancyStatus: Occupancy
     // Flags for keeping tab of occupancy during linear fan operation(Only to be used in doAnalogFanActionCpu())
     private var previousOccupancyStatus: Occupancy = Occupancy.NONE
     private var previousFanStageStatus: StandaloneFanStage = StandaloneFanStage.OFF
@@ -174,7 +173,11 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         hssEquip.dcvLoopOutput.writeHisVal(dcvLoopOutput.toDouble())
         hssEquip.outsideAirLoopOutput.writeHisVal(outsideAirLoopOutput.toDouble())
         hssEquip.outsideAirFinalLoopOutput.writeHisVal(outsideAirFinalLoopOutput.toDouble())
-        hssEquip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+
+        if (equipOccupancyHandler != null) {
+            occupancyStatus = equipOccupancyHandler.currentOccupiedMode
+            hssEquip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+        }
 
         updateTitle24LoopCounter(hyperStatSplitTuners, basicSettings)
         logIt("present hssEquip : $hssEquip domain equip ${Domain.equips[equipRef]} ${hssEquip.zoneOccupancyState.data}")
@@ -1225,7 +1228,6 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         if (controllerFactory.equip != hssEquip) {
             controllerFactory.equip = hssEquip
         }
-        hssEquip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
         hssEquip.stageDownTimer.data = hssEquip.hyperstatStageUpTimerCounter.readPriorityVal()
         hssEquip.stageUpTimer.data = hssEquip.hyperstatStageUpTimerCounter.readPriorityVal()
 

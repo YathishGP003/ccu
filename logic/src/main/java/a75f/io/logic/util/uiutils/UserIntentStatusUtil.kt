@@ -110,9 +110,10 @@ fun getStatusMsg(
         portStages, "Heating", listOf(Stage.HEATING_1, Stage.HEATING_2, Stage.HEATING_3)
     )?.let { statusParts.add(it) }
 
-    if (portStages.containsKey("Water Valve") || portStages.containsKey("WATER_VALVE")) statusParts.add(
-        "Water Valve ON"
-    )
+    if (portStages.containsKey("Water Valve") || portStages.containsKey("WATER_VALVE")
+        || analogOutStages.containsKey("Water Valve") || analogOutStages.containsKey("WATER_VALVE")) {
+        statusParts.add("Water Valve ON")
+    }
 
     getAuxHeatStatus(portStages)?.let { statusParts.add(it) }
 

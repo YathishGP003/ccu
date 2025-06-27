@@ -114,9 +114,14 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         relayLogicalPoints = getMyStatRelayOutputPoints(equip)
         analogLogicalPoints = getMyStatAnalogOutputPoints(equip)
         curState = ZoneState.DEADBAND
-        occupancyStatus = equipOccupancyHandler.currentOccupiedMode
+
         heatingThreshold = myStatTuners.heatingThreshold
         coolingThreshold = myStatTuners.coolingThreshold
+
+        if (equipOccupancyHandler != null) {
+            occupancyStatus = equipOccupancyHandler.currentOccupiedMode
+            equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+        }
 
         logIt( "Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
         val updatedFanMode = fallBackFanMode(equip, equip.equipRef, fanModeSaved, basicSettings)
@@ -311,7 +316,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
                         else -> false
                     }
                 }
-                val isFanGoodToRun = isFanGoodRun(doorWindowSensorOpenStatus)
+                val isFanGoodToRun = isFanGoodRun(doorWindowSensorOpenStatus, equip)
 
                 fun isStageActive(
                     stage: Int, currentState: Boolean, isLowestStageActive: Boolean
@@ -334,14 +339,15 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
                     fanStages.find { it.first == MyStatPipe2RelayMapping.FAN_LOW_SPEED.ordinal }
 
                 var isHighActive = false
+                val isHighExist = equip.fanHighSpeed.pointExists()
 
-                if (highExist != null) {
+                if (isHighExist && highExist != null) {
                     isHighActive = isStageActive(highExist.first, highExist.second, lowestStageFanHigh)
                     updateRelayStage(Stage.FAN_2.displayName, isHighActive, equip.fanHighSpeed)
                 }
 
-                if (lowExist != null) {
-                    val isLowActive = if (isHighActive) false else isStageActive(lowExist.first, lowExist.second, lowestStageFanLow)
+                if (equip.fanLowSpeed.pointExists() && lowExist != null) {
+                    val isLowActive = if (isHighExist && isHighActive) false else isStageActive(lowExist.first, lowExist.second, lowestStageFanLow)
                     updateRelayStage(Stage.FAN_1.displayName, isLowActive, equip.fanLowSpeed)
                 }
             }
@@ -364,13 +370,13 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         }
     }
 
-    private fun isFanGoodRun(isDoorWindowOpen: Boolean): Boolean {
+    private fun isFanGoodRun(isDoorWindowOpen: Boolean, equip: MyStatPipe2Equip): Boolean {
         return if (isDoorWindowOpen || heatingLoopOutput > 0 && supplyWaterTempTh2 > coolingThreshold) {
             // If current direction is heating then check allow only when valve or heating is available
-            (isConfigPresent(MyStatPipe2RelayMapping.WATER_VALVE)
+            (isConfigPresent(MyStatPipe2RelayMapping.WATER_VALVE) || equip.modulatingWaterValve.pointExists()
                     || isConfigPresent(MyStatPipe2RelayMapping.AUX_HEATING_STAGE1))
         } else if (isDoorWindowOpen || coolingLoopOutput > 0 && supplyWaterTempTh2 < coolingThreshold) {
-            isConfigPresent(MyStatPipe2RelayMapping.WATER_VALVE)
+            (isConfigPresent(MyStatPipe2RelayMapping.WATER_VALVE) || equip.modulatingWaterValve.pointExists())
         } else {
             false
         }
@@ -453,7 +459,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
                         Port.ANALOG_OUT_ONE, config.analogOut1FanSpeedConfig.low.currentVal.toInt(),
                         config.analogOut1FanSpeedConfig.high.currentVal.toInt(),
                         basicSettings.fanMode, basicSettings.conditioningMode,
-                        fanLoopOutput, analogOutStages, isFanGoodRun(doorWindowSensorOpenStatus)
+                        fanLoopOutput, analogOutStages, isFanGoodRun(doorWindowSensorOpenStatus, equip)
                     )
                 }
 

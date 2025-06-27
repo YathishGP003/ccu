@@ -94,7 +94,11 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
         analogLogicalPoints = getMyStatHpuAnalogOutputPoints(equip)
 
         curState = ZoneState.DEADBAND
-        occupancyStatus = equipOccupancyHandler.currentOccupiedMode
+
+        if (equipOccupancyHandler != null) {
+            occupancyStatus = equipOccupancyHandler.currentOccupiedMode
+            equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+        }
 
         val myStatTuners = fetchMyStatTuners(equip) as MyStatTuners
         val userIntents = fetchUserIntents(equip)
@@ -198,7 +202,6 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
 
     private fun runControllers(equip: MyStatHpuEquip, basicSettings: MyStatBasicSettings, config: MyStatHpuConfiguration) {
         equip.derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
-        equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
         equip.stageDownTimer.data = equip.mystatStageUpTimerCounter.readPriorityVal()
         equip.stageUpTimer.data = equip.mystatStageUpTimerCounter.readPriorityVal()
 

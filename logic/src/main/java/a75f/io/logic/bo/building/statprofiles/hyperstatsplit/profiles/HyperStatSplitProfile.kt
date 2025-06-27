@@ -38,7 +38,7 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short) :
         lowestStageFanHigh = false
     }
 
-    open var occupancyStatus: Occupancy = Occupancy.OCCUPIED
+    open var occupancyStatus: Occupancy = Occupancy.NONE
     protected val haystack: CCUHsApi = CCUHsApi.getInstance()
 
     abstract fun isHeatingActive() : Boolean

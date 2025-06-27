@@ -1,13 +1,13 @@
 package a75f.io.logic.bo.building.statprofiles.util
 
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.Domain.hayStack
 import a75f.io.domain.api.Point
 import a75f.io.domain.devices.HyperStatDevice
 import a75f.io.domain.devices.MyStatDevice
 import a75f.io.domain.equips.hyperstat.HpuV2Equip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
-import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
@@ -29,8 +29,6 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2Analog
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2RelayMapping
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HyperStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
-import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping
-import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuAnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuRelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2AnalogOutMapping
@@ -97,7 +95,12 @@ fun getHSAnalogOutputPoints(equip: HpuV2Equip): HashMap<Int, String> {
 fun getHSLogicalPointList(
     equip: HyperStatEquip, config: HyperStatConfiguration
 ): HashMap<Port, String> {
-    val device = Domain.getEquipDevices()[equip.equipRef] as HyperStatDevice
+
+    val device = Domain.getEquipDevices()[equip.equipRef] as? HyperStatDevice
+        ?: run {
+            val deviceMap = hayStack.readEntity("device and equipRef== \"${equip.equipRef}\"")
+            HyperStatDevice(deviceMap["id"].toString())
+        }
     val logicalPoints = HashMap<Port, String>()
 
     val points = listOf(
@@ -124,35 +127,6 @@ fun getHSLogicalPointList(
 /**
  * MyStat logical points
  */
-
-
-fun getMyStatCpuRelayOutputPoints(equip: MyStatCpuEquip): HashMap<Int, String> {
-    val relayStatus: HashMap<Int, String> = HashMap()
-
-    putPointToMap(equip.coolingStage1, relayStatus, MyStatCpuRelayMapping.COOLING_STAGE_1.ordinal)
-    putPointToMap(equip.coolingStage2, relayStatus, MyStatCpuRelayMapping.COOLING_STAGE_2.ordinal)
-    putPointToMap(equip.heatingStage1, relayStatus, MyStatCpuRelayMapping.HEATING_STAGE_1.ordinal)
-    putPointToMap(equip.heatingStage2, relayStatus, MyStatCpuRelayMapping.HEATING_STAGE_2.ordinal)
-    putPointToMap(equip.fanLowSpeed, relayStatus, MyStatCpuRelayMapping.FAN_LOW_SPEED.ordinal)
-    putPointToMap(equip.fanHighSpeed, relayStatus, MyStatCpuRelayMapping.FAN_HIGH_SPEED.ordinal)
-    putPointToMap(equip.fanEnable, relayStatus, MyStatCpuRelayMapping.FAN_ENABLED.ordinal)
-    putPointToMap(equip.occupiedEnable, relayStatus, MyStatCpuRelayMapping.OCCUPIED_ENABLED.ordinal)
-    putPointToMap(equip.humidifierEnable, relayStatus, MyStatCpuRelayMapping.HUMIDIFIER.ordinal)
-    putPointToMap(equip.dehumidifierEnable, relayStatus, MyStatCpuRelayMapping.DEHUMIDIFIER.ordinal)
-    putPointToMap(equip.dcvDamper, relayStatus, MyStatCpuRelayMapping.DCV_DAMPER.ordinal)
-    return relayStatus
-}
-
-fun getMyStatCpuAnalogOutputPoints(equip: MyStatCpuEquip): HashMap<Int, String> {
-    val analogOutputPoints: HashMap<Int, String> = HashMap()
-    putPointToMap(equip.coolingSignal, analogOutputPoints, MyStatCpuAnalogOutMapping.COOLING.ordinal)
-    putPointToMap(equip.linearFanSpeed, analogOutputPoints, MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal)
-    putPointToMap(equip.heatingSignal, analogOutputPoints, MyStatCpuAnalogOutMapping.HEATING.ordinal)
-    putPointToMap(equip.stagedFanSpeed, analogOutputPoints, MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)
-    putPointToMap(equip.stagedFanSpeed, analogOutputPoints, MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)
-    putPointToMap(equip.dcvDamperModulating, analogOutputPoints, MyStatCpuAnalogOutMapping.DCV_DAMPER.ordinal)
-    return analogOutputPoints
-}
 
 fun getMyStatHpuRelayOutputPoints(equip: MyStatHpuEquip): HashMap<Int, String> {
     val relayStatus: HashMap<Int, String> = HashMap()
@@ -186,7 +160,13 @@ fun getMyStatLogicalPointList(
     equip: MyStatEquip,
     config: MyStatConfiguration
 ): HashMap<Port, String> {
-    val device = Domain.getEquipDevices()[equip.equipRef] as MyStatDevice
+
+    val device = Domain.getEquipDevices()[equip.equipRef] as? MyStatDevice
+        ?: run {
+            val deviceMap = hayStack.readEntity("device and equipRef== \"${equip.equipRef}\"")
+            MyStatDevice(deviceMap["id"].toString())
+        }
+
     val logicalPoints = HashMap<Port, String>()
 
     val points = listOf(
@@ -194,7 +174,11 @@ fun getMyStatLogicalPointList(
         Triple(RELAY_TWO, device.relay2.readPoint().pointRef, config.relay2Enabled.enabled),
         Triple(RELAY_THREE, device.relay3.readPoint().pointRef, config.relay3Enabled.enabled),
         Triple(RELAY_FOUR, device.relay4.readPoint().pointRef, config.relay4Enabled.enabled),
-        Triple(ANALOG_OUT_ONE, device.analog1Out.readPoint().pointRef, config.analogOut1Enabled.enabled)
+        Triple(
+            ANALOG_OUT_ONE,
+            device.analog1Out.readPoint().pointRef,
+            config.analogOut1Enabled.enabled
+        )
     )
 
     for ((port, pointRef, isEnabled) in points) {

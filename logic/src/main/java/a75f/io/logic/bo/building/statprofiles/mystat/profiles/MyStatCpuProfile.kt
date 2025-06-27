@@ -97,10 +97,12 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
         val config = getMyStatConfiguration(equip.equipRef) as MyStatCpuConfiguration
 
         curState = ZoneState.DEADBAND
-        occupancyStatus = equipOccupancyHandler.currentOccupiedMode
-        equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
         logicalPointsList = getMyStatLogicalPointList(equip, config)
 
+        if (equipOccupancyHandler != null) {
+            occupancyStatus = equipOccupancyHandler.currentOccupiedMode
+            equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+        }
 
         logIt("Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
         val updatedFanMode = fallBackFanMode(equip, equip.equipRef, fanModeSaved, basicSettings)

@@ -36,8 +36,8 @@ fun fetchPointsWithCustomScheduleOrEventByZone(roomRef: String): List<HashMap<An
 fun fetchSchedulablePointsWithoutCustomControl(roomRef: String): List<String> {
     val pointsDisName: MutableList<String> = ArrayList()
     val pointsMapList: List<HashMap<Any, Any>> = CCUHsApi.getInstance().readAllEntities(
-        ("schedulable and writable and point and not scheduleRef" +
-                " and (modbus or bacnetDeviceId) and roomRef == \"" + roomRef + "\"")
+        ("schedulable and writable and point and (not scheduleRef && not eventRef)" +
+                " and roomRef == \"" + roomRef + "\"")
     )
     if (pointsMapList.isNotEmpty()) {
         for (pointMap: HashMap<Any, Any> in pointsMapList) {

@@ -5033,7 +5033,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     private void displaySchedulablePointWithoutSchedulesOrEvents(Equip nonTempEquip, View zoneDetails) {
-        List<String> schedulablePointDisWithoutCustomControl = CustomScheduleUtilKt.fetchSchedulablePointsWithoutCustomControl(nonTempEquip.getRoomRef());
+
+        List<String> schedulablePointDisWithoutCustomControl = new ArrayList<>();
+        if (nonTempEquip.getMarkers().contains("modbus")
+                || nonTempEquip.getMarkers().contains("connectModule")
+                || nonTempEquip.getMarkers().contains("pcn")
+                || nonTempEquip.getMarkers().contains("bacnet")) {
+            schedulablePointDisWithoutCustomControl = CustomScheduleUtilKt
+                    .fetchSchedulablePointsWithoutCustomControl(nonTempEquip.getRoomRef());
+        }
         if(!schedulablePointDisWithoutCustomControl.isEmpty()) {
 
             zoneDetails.findViewById(R.id.schedulablePointsWithoutScheduleLayout).setVisibility(View.VISIBLE);

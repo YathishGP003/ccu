@@ -781,7 +781,7 @@ class CustomScheduleManager {
 
     private fun writeToPhysical(equip: HashMap<Any, Any>, pointDict: HDict, value: Double) {
         val pointID = pointDict["id"].toString()
-        if (equip.containsKey("modbus")) {
+        if (equip.containsKey("modbus") && !equip.containsKey("connectModule")) {
             CcuLog.d(
                 L.TAG_CCU_POINT_SCHEDULE,
                 "Writing value to Modbus for pointId=${pointID}, value=$value"
@@ -800,6 +800,19 @@ class CustomScheduleManager {
             val bacnetValue = value.toString()
             val isMstp = equip.containsKey("bacnetMstp")
             sendWriteRequestToMstpEquip(pointID,priority,bacnetValue,isMstp)
+        } else if (equip.containsKey("connectModule")) {
+            val slaveId = pointDict["group"].toString().toDouble().toInt()
+            val registerAddress = pointDict["registerNumber"].toString().toDouble().toInt()
+            CcuLog.d(
+                L.TAG_CCU_POINT_SCHEDULE,
+                "Writing value to Connect Module for " +
+                        "pointId=${pointID}, " +
+                        "slaveId=$slaveId, " +
+                        "registerAddress=$registerAddress, value=$value"
+            )
+            modbusWritableDataInterface?.writeConnectModbusRegister(
+                slaveId, registerAddress, value
+            )
         }
     }
 

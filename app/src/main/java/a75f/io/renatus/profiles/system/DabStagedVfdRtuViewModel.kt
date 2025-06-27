@@ -82,7 +82,7 @@ class DabStagedVfdRtuViewModel : DabStagedRtuBaseViewModel() {
                         "<b>The compressor is mapped, but the O/B changeover relay is not mapped.</b>",
                         Html.FROM_HTML_MODE_LEGACY
                     )
-                )
+                ) { viewState.value.isStateChanged = true; }
                 return false
             }
             if (changeOverCooling && changeOverHeating) {
@@ -92,7 +92,7 @@ class DabStagedVfdRtuViewModel : DabStagedRtuBaseViewModel() {
                         "<b>The O/B changeover relay is mapped for both cooling and heating. Please select only one.</b>",
                         Html.FROM_HTML_MODE_LEGACY
                     )
-                )
+                ){ viewState.value.isStateChanged = true; }
                 return false
             }
 

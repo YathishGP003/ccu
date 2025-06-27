@@ -4,6 +4,7 @@ import a75f.io.domain.api.Point
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.schedules.Occupancy
 
+
 /**
  * Created by Manjunath K on 07-05-2025.
  */

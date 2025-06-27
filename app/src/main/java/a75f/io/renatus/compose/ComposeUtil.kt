@@ -264,7 +264,8 @@ fun StagedFanConfiguration(
     }
 }
 
-fun showErrorDialog(context: Context, message: Spanned) {
+fun showErrorDialog(context: Context, message: Spanned,
+                        onDismiss: () -> Unit = {}) {
     val builder = AlertDialog.Builder(context)
     builder.setTitle(ALERT)
     builder.setIcon(R.drawable.ic_warning)
@@ -272,6 +273,7 @@ fun showErrorDialog(context: Context, message: Spanned) {
     builder.setCancelable(false)
     builder.setPositiveButton(OK) { dialog, _ ->
         dialog.dismiss()
+        onDismiss()
     }
     builder.create().show()
 }

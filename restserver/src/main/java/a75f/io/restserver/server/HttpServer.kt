@@ -575,9 +575,9 @@ class HttpServer {
                 URL     : 192.168.1.5:5001/writeManyDefaultValues
                 Body    :
                    [
-                    { "id": "95100eed-a06e-45c7-97e6-5a599cf434a6", "value": "","level": 8},
-                    { "id": "95100eed-a06e-45c7-97e6-5a599cf434a6", "value": "","level": 8},
-                    { "id": "95100eed-a06e-45c7-97e6-5a599cf434a6", "value": "","level": 8},
+                    { "id": "95100eed-a06e-45c7-97e6-5a599cf434a6", "value": "","level": 8,"duration": 10},
+                    { "id": "95100eed-a06e-45c7-97e6-5a599cf434a6", "value": "","level": 8,"duration": 10},
+                    { "id": "95100eed-a06e-45c7-97e6-5a599cf434a6", "value": "","level": 8,"duration": 10},
                 ]
                  */
 
@@ -595,18 +595,19 @@ class HttpServer {
                                     val id = dataItem.getString("id")
                                     val value = dataItem.get("value")
                                     val level = dataItem.getInt("level")
+                                    val duration = dataItem.getInt("duration")
                                     val entity = haystack.readMapById(id)
                                     if (entity.isEmpty()) {
                                         idsStatus.put(JSONObject().put(id, "Id not found"))
                                     } else if (entity.containsKey(Tags.WRITABLE)) {
                                         when (value) {
                                             is Int, Double, is Number -> {
-                                                haystack.pointWrite(HRef.copy(id), level , "CCU_DASHBOARD", HNum.make(value.toString().toDouble()), HNum.make(0))
+                                                haystack.pointWrite(HRef.copy(id), level , "CCU_DASHBOARD", HNum.make(value.toString().toDouble()), HNum.make(duration))
                                                 haystack.writeHisValById(id, haystack.readPointPriorityVal(id))
                                                 idsStatus.put(JSONObject().put(id, "Updated successfully"))
                                             }
                                             is String -> {
-                                                haystack.pointWrite(HRef.copy(id), level , "CCU_DASHBOARD", HStr.make(value), HNum.make(0))
+                                                haystack.pointWrite(HRef.copy(id), level , "CCU_DASHBOARD", HStr.make(value), HNum.make(duration))
                                                 idsStatus.put(JSONObject().put(id, "Updated successfully"))
                                             }
                                             else -> {}

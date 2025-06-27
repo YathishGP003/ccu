@@ -57,7 +57,7 @@ class SQMetaDataHandler {
         * */
         val reconfiguredDeviceList = (finalDeviceList.toSet() - addedDeviceList.toSet()).toList().filter { deviceId ->
            val localSeqVersion = ConnectNodeDevice(deviceId.prependIndent("@")).sequenceVersion.readHisVal()
-            ((seqVersion > localSeqVersion) || localSeqVersion == 0.0)
+            ((seqVersion != localSeqVersion.toInt()) || localSeqVersion == 0.0)
         }
 
         val deviceListToSendLowCode = (addedDeviceList + reconfiguredDeviceList).toSet().toList()
@@ -104,7 +104,7 @@ class SQMetaDataHandler {
                     "\nAdded devices: $addedDeviceList, " +
                     "\nReconfigured devices: $reconfiguredDeviceList, " +
                     "\nRemoved devices: $removedDeviceList, " +
-                    "\nLow code will be sent devices: $deviceListToSendLowCode"
+                    "\nLow code will be sent devices: $ deviceListToSendLowCode"
         )
 
         val lowCodeFileName = seqName+"_v$seqVersion.mpy"

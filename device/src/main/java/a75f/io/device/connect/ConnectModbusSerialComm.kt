@@ -7,6 +7,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.BuildConfig
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.util.getConnectEquip
+import com.x75f.modbus4j.ModbusConversions
 import com.x75f.modbus4j.msg.ModbusResponse
 import com.x75f.modbus4j.msg.ReadHoldingRegistersRequest
 import com.x75f.modbus4j.msg.ReadInputRegistersRequest
@@ -119,6 +120,13 @@ object ConnectModbusSerialComm {
     }
 
     @JvmStatic
+     fun writeToConnectNode(slaveId: Int, registerNumber: Int, value: Double) {
+        val shotArray = ModbusConversions.floatToRegistersBigEndian(value.toFloat())
+        val request = WriteRegistersRequest(slaveId, registerNumber, shotArray)
+        sendRequestAndLockComm(RtuMessageRequest(request), ConnectModbusOps.CONNECT_NODE_WRITE)
+    }
+
+    @JvmStatic
     fun sendControlsMessage(device : ConnectDevice) {
         writeRelayOutputMappedValues(getRelayOutputMappedValues(device))
         writeAnalogOutputMappedValues(getAnalogOutputMappedValues(device))
@@ -140,7 +148,7 @@ object ConnectModbusSerialComm {
         info.forEach {
             CcuLog.d(L.TAG_CCU_SERIAL_CONNECT, "Point Info: ${it.first}, ${it.second}, ${it.third}")
         }
-        readPointInfo(slaveAddr, length, info[0].third.toInt()) // Assuming you want to read the first point info
+        readPointInfo(slaveAddr, length * 2, info[0].third.toInt()) // Assuming you want to read the first point info
     }
 
     @JvmStatic

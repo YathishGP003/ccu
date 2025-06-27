@@ -35,6 +35,7 @@ import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.api.haystack.modbus.UserIntentPointTags;
+import a75f.io.device.connect.ConnectModbusSerialComm;
 import a75f.io.device.modbus.LModbus;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -162,9 +163,9 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                     ExecutorTask.executeBackground(() -> {
                                         if (modbusParam.get(position).getCommands() != null && modbusParam.get(position).getCommands().size() > 0) {
                                             Command command = (Command) adapterView.getSelectedItem();
-                                            writePoint(p, command.getBitValues(), modbusParam.get(position));
+                                            writePoint(p, command.getBitValues(), modbusParam.get(position), isConnectNodeView);
                                         } else {
-                                            writePoint(p, adapterView.getItemAtPosition(pos).toString(), modbusParam.get(position));
+                                            writePoint(p, adapterView.getItemAtPosition(pos).toString(), modbusParam.get(position), isConnectNodeView);
                                         }
                                     });
                                 }
@@ -403,7 +404,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         return hayStack.readHisValById(id);
     }
 
-    private void writePoint(Point point, String value, Parameter parameter) {
+    private void writePoint(Point point, String value, Parameter parameter, boolean isConnectNodeView) {
 
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(point.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
@@ -413,7 +414,10 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         }
         List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
 
-
+        if (isConnectNodeView) {
+            ConnectModbusSerialComm.writeToConnectNode(Integer.parseInt(point.getGroup()),
+                    Integer.parseInt(parameter.getRegisterNumber()), Double.parseDouble(value));
+        }
         if (equip.getEquipRef() != null) {
             EquipmentDevice parentEquip = buildModbusModelByEquipRef(equip.getEquipRef());
             if (!parentEquip.getEquips().isEmpty()) {
@@ -428,7 +432,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                     if (pam.getUserIntentPointTags() != null) {
                         if (pam.getName().equals(parameter.getName())) {
                             // if it connect node view, then write only in int
-                            if(register.parameterDefinitionType!=null && register.parameterDefinitionType.equals("float") && !isConnectNodeView) {
+                            if(register.parameterDefinitionType!=null && register.parameterDefinitionType.equals("float")) {
                                 LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (float) Double.parseDouble(value));
                             } else {
                                 LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) Double.parseDouble(value));

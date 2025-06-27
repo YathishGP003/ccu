@@ -67,6 +67,9 @@ fun handleModbusResponse(slaveId : Int, response : RtuMessageResponse, ops: Conn
         ConnectModbusOps.TEST_OPERATION -> {
             CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "TEST_OPERATION response received $response")
         }
+        ConnectModbusOps.CONNECT_NODE_WRITE -> {
+            CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "CONNECT_NODE_WRITE SUCCEEDED $response")
+        }
 
     }
     //TODO- Successful read operation ->Update heartbeat
@@ -101,18 +104,20 @@ fun updateSequencePoints(slaveId: Int, response: RtuMessageResponse) {
 
     // Step 2: Get the list of connect node points to update. Ignore the last 2 bytes which are checksum
     val pointsToUpdate = ConnectNodeUtil.Companion.getPointSlaveIdRegAddressPointList()
-    if(pointsToUpdate.size*2 != messageData.size - 2) {
+    if(pointsToUpdate.size * 4 != messageData.size - 2) {
         CcuLog.e(L.TAG_CCU_SERIAL_CONNECT, "updateSequencePoints: Invalid messageData size ${(messageData.size - 2)/2} for pointsToUpdate size ${pointsToUpdate.size}")
         return
     }
 
     // Step 3: Parse the message data and update the connect node sequence points
     var offset = 0
-    for (i in 0 until messageData.size - 2 step 2) {
+    for (i in 0 until messageData.size - 2 step 4) {
         offset = i
-        val sequenceRegVal = parseIntFromTwoBytes(messageData.copyOfRange(offset, offset + 2))
-        val pointIndex = i / 2
-        CCUHsApi.getInstance().writeHisValById(pointsToUpdate[pointIndex], sequenceRegVal.toDouble())
+        val sequenceRegVal = parseFloatFromFourBytes(messageData.copyOfRange(offset, offset + 4))
+        val pointIndex = i / 4
+
+        CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "updateSequencePoints: pointIndex $pointIndex, sequenceRegVal $sequenceRegVal, pointId ${pointsToUpdate[pointIndex].second}, slaveId $slaveId")
+        CCUHsApi.getInstance().writeHisValById(pointsToUpdate[pointIndex].first, sequenceRegVal.toDouble())
     }
 
     CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "ConnectNode sequence data Updated")
@@ -177,7 +182,7 @@ fun updateDiagnosticValues(slaveId: Int, response: RtuMessageResponse) {
 
     // Update the heartbeet
     connectNodeEquip.heartBeat.writeHisValueByIdWithoutCOV(1.0)
-    CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "ConnectNode data Updated")
+    CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "ConnectNode data Updated slaveId : $slaveId")
 }
 
 private fun getOffset(regAddress: Int) =
@@ -507,6 +512,10 @@ fun parseIntFromTwoBytes(bytes: ByteArray) = ByteBuffer.wrap(bytes).order(ByteOr
 
 fun parseIntFromFourBytes(bytes: ByteArray) : Int {
     return ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).int
+}
+
+fun parseFloatFromFourBytes(bytes: ByteArray) : Float {
+    return ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).getFloat()
 }
 
 fun parse12BitPressureValue(bytes: ByteArray) : Int {

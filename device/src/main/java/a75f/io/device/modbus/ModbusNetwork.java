@@ -17,6 +17,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.DeviceNetwork;
+import a75f.io.device.connect.ConnectModbusSerialComm;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -133,6 +134,11 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                 }
             }
         }
+    }
+
+    @Override
+    public void writeConnectModbusRegister(int slaveId, int registerAddress, double value) {
+        ConnectModbusSerialComm.writeToConnectNode(slaveId, registerAddress, value);
     }
 
     public void writeRegister(String id ) {

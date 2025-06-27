@@ -11,7 +11,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -106,7 +105,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                         connectNodeList = ConnectNodeUtil.Companion.getConnectNodeAddressList(CCUHsApi.getInstance());
 
                         // Read the diagnostic info from the connect module every MODBUS_DIAG_INTERVAL_COUNT minutes(5 min)
-                        if (modbusDiagInterval % MODBUS_DIAG_INTERVAL_COUNT == 0) {
+//                        if (modbusDiagInterval % MODBUS_DIAG_INTERVAL_COUNT == 0) {
                             modbusDiagInterval = 0;
                             // Get the connect node list
                             for (String nodeAddress : connectNodeList) {
@@ -127,7 +126,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                                 ConnectModbusSerialComm.getDiagnosticInfo(Integer.parseInt(nodeAddress) % 100);
                                 CcuLog.d(L.TAG_CCU_JOB, "Connected Node: " + nodeAddress);
                             }
-                        }
+//                        }
                         modbusDiagInterval++;
                     } else {
                         CcuLog.e(L.TAG_CCU_DEVICE, "Connect node not available");

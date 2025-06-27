@@ -11,7 +11,8 @@ enum class ConnectModbusOps {
     WRITE_RELAY_MAPPING_CONFIG,
     READ_DIAGNOSTIC_INFO, // Modbus registers for diagnostic info
     READ_SEQUENCE_REG_INFO, // Modbus registers for sequence
-    TEST_OPERATION;
+    TEST_OPERATION,
+    CONNECT_NODE_WRITE;
 }
 
 inline fun <reified T : Enum<T>> Int.toEnum(): T? {

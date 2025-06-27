@@ -1354,7 +1354,7 @@ public class OTAUpdateService extends IntentService {
 
         mLwMeshSeqAddresses.remove(0);
 
-        updateOtaStatusToOtaStarted();
+       // updateOtaStatusToOtaStarted();
         CcuToCmOverUsbSequenceMetadataMessage_t message = new CcuToCmOverUsbSequenceMetadataMessage_t();
 
         message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SEQUENCE_METADATA);
@@ -1557,7 +1557,8 @@ public class OTAUpdateService extends IntentService {
         mSequenceMetaFileName = Objects.requireNonNull(currentRequest.get(META_NAME));
         mSequenceSeqFileName = Objects.requireNonNull(currentRequest.get(FIRMWARE_NAME));
         currentOtaRequest = Objects.requireNonNull(currentRequest.get(MESSAGE_ID));
-        String eraseSequenceStr = Objects.requireNonNull(currentRequest.get(ERASE_SEQUENCE));
+        //
+        String eraseSequenceStr = currentRequest.getOrDefault(ERASE_SEQUENCE, "false");
         mSequenceEmptyRequest = eraseSequenceStr.equals("true");
         CcuLog.d(TAG, "[VALIDATION] Found sequence update in cache for device type: " + mFirmwareDeviceType + ", addresses: " + mLwMeshSeqAddresses);
 
@@ -1683,48 +1684,53 @@ public class OTAUpdateService extends IntentService {
     }
 
     void sequenceRequest(Intent seqRequest) {
-        CcuLog.i(TAG, "sequenceRequest: "+ seqRequest);
+        CcuLog.i(TAG, "sequenceRequest: " + seqRequest);
         ArrayList<String> deviceListToSendLowCode = seqRequest.getStringArrayListExtra(DEVICE_LIST);
 
-        for (String device : Objects.requireNonNull(deviceListToSendLowCode)) {
-            // Create a new Intent for each device
-            Intent deviceIntent = new Intent(seqRequest);
+        if (deviceListToSendLowCode != null && !deviceListToSendLowCode.isEmpty()) {
+            for (String device : deviceListToSendLowCode) {
+                // Create a new Intent for each device
+                Intent deviceIntent = new Intent(seqRequest);
 
-            deviceIntent.putExtra(ID, device);
-            String nodeAddress = ConnectNodeUtil.Companion.getAddressById(device, CCUHsApi.getInstance());
-            deviceIntent.putExtra(NODE_ADDRESS, nodeAddress);
+                deviceIntent.putExtra(ID, device);
+                String nodeAddress = ConnectNodeUtil.Companion.getAddressById(device, CCUHsApi.getInstance());
+                deviceIntent.putExtra(NODE_ADDRESS, nodeAddress);
 
-            // Copy the existing fields from seqRequest to deviceIntent
-            deviceIntent.putExtra(MESSAGE_ID, nodeAddress);
-            deviceIntent.putExtra(SEQ_NAME, seqRequest.getStringExtra(SEQ_NAME));
-            deviceIntent.putExtra(CMD_LEVEL, seqRequest.getStringExtra(CMD_LEVEL));
-            deviceIntent.putExtra(CMD_TYPE, seqRequest.getStringExtra(CMD_TYPE));
-            deviceIntent.putExtra(META_NAME, seqRequest.getStringExtra(META_NAME));
-            deviceIntent.putExtra(FIRMWARE_NAME, seqRequest.getStringExtra(FIRMWARE_NAME));
-            deviceIntent.putExtra(SEQ_VERSION, seqRequest.getStringExtra(SEQ_VERSION));
-            deviceIntent.putExtra(ERASE_SEQUENCE, ERASE_SEQUENCE_FALSE);
+                // Copy the existing fields from seqRequest to deviceIntent
+                deviceIntent.putExtra(MESSAGE_ID, nodeAddress);
+                deviceIntent.putExtra(SEQ_NAME, seqRequest.getStringExtra(SEQ_NAME));
+                deviceIntent.putExtra(CMD_LEVEL, seqRequest.getStringExtra(CMD_LEVEL));
+                deviceIntent.putExtra(CMD_TYPE, seqRequest.getStringExtra(CMD_TYPE));
+                deviceIntent.putExtra(META_NAME, seqRequest.getStringExtra(META_NAME));
+                deviceIntent.putExtra(FIRMWARE_NAME, seqRequest.getStringExtra(FIRMWARE_NAME));
+                deviceIntent.putExtra(SEQ_VERSION, seqRequest.getStringExtra(SEQ_VERSION));
+                deviceIntent.putExtra(ERASE_SEQUENCE, ERASE_SEQUENCE_FALSE);
 
-            addSequenceRequest(deviceIntent);
+                addSequenceRequest(deviceIntent);
+            }
         }
         ArrayList<String> removedDeviceList = seqRequest.getStringArrayListExtra(REMOVE_LIST);
-        for (String device : Objects.requireNonNull(removedDeviceList)) {
-            // Create a new Intent for each device
-            Intent deviceIntent = new Intent(seqRequest);
 
-            deviceIntent.putExtra(ID, device);
-            String nodeAddress = ConnectNodeUtil.Companion.getAddressById(device, CCUHsApi.getInstance());
-            deviceIntent.putExtra(NODE_ADDRESS, nodeAddress);
+        if (removedDeviceList != null && !removedDeviceList.isEmpty()) {
+            for (String device : removedDeviceList) {
+                // Create a new Intent for each device
+                Intent deviceIntent = new Intent(seqRequest);
 
-            // Copy the existing fields from seqRequest to deviceIntent
-            deviceIntent.putExtra(MESSAGE_ID, nodeAddress);
-            deviceIntent.putExtra(SEQ_NAME, seqRequest.getStringExtra(SEQ_NAME));
-            deviceIntent.putExtra(CMD_LEVEL, seqRequest.getStringExtra(CMD_LEVEL));
-            deviceIntent.putExtra(CMD_TYPE, seqRequest.getStringExtra(CMD_TYPE));
-            deviceIntent.putExtra(META_NAME, seqRequest.getStringExtra(EMPTY_META_NAME));
-            deviceIntent.putExtra(FIRMWARE_NAME, seqRequest.getStringExtra(EMPTY_FIRMWARE_NAME));
-            deviceIntent.putExtra(SEQ_VERSION, seqRequest.getStringExtra(SEQ_VERSION));
-            deviceIntent.putExtra(ERASE_SEQUENCE, ERASE_SEQUENCE_TRUE);
-            addSequenceRequest(deviceIntent);
+                deviceIntent.putExtra(ID, device);
+                String nodeAddress = ConnectNodeUtil.Companion.getAddressById(device, CCUHsApi.getInstance());
+                deviceIntent.putExtra(NODE_ADDRESS, nodeAddress);
+
+                // Copy the existing fields from seqRequest to deviceIntent
+                deviceIntent.putExtra(MESSAGE_ID, nodeAddress);
+                deviceIntent.putExtra(SEQ_NAME, seqRequest.getStringExtra(SEQ_NAME));
+                deviceIntent.putExtra(CMD_LEVEL, seqRequest.getStringExtra(CMD_LEVEL));
+                deviceIntent.putExtra(CMD_TYPE, seqRequest.getStringExtra(CMD_TYPE));
+                deviceIntent.putExtra(META_NAME, seqRequest.getStringExtra(EMPTY_META_NAME));
+                deviceIntent.putExtra(FIRMWARE_NAME, seqRequest.getStringExtra(EMPTY_FIRMWARE_NAME));
+                deviceIntent.putExtra(SEQ_VERSION, seqRequest.getStringExtra(SEQ_VERSION));
+                deviceIntent.putExtra(ERASE_SEQUENCE, ERASE_SEQUENCE_TRUE);
+                addSequenceRequest(deviceIntent);
+            }
         }
     }
 

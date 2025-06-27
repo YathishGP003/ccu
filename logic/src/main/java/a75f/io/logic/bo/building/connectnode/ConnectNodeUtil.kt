@@ -29,11 +29,11 @@ class ConnectNodeUtil {
         }
         fun isConnectNodeAvailable(): Boolean = getConnectNodeDevice().isNotEmpty()
 
-        fun getPointSlaveIdRegAddressPointList(): List<String> {
+        fun getPointSlaveIdRegAddressPointList(): List<Pair<String, String>> {
             if (pointSlaveIdRegAddress.isEmpty()) {
                 CcuLog.e(L.TAG_CONNECT_NODE, "Point slave id and register address list is empty. Call retrievePointSlaveIdRegAddr() first.")
             }
-            return pointSlaveIdRegAddress.map { it.first }
+            return pointSlaveIdRegAddress.map { Pair(it.first, it.third) }
         }
 
         fun isZoneContainingEmptyConnectNode(

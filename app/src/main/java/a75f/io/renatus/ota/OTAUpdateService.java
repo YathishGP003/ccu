@@ -776,8 +776,13 @@ public class OTAUpdateService extends IntentService {
             case "system":
                 //update everything
                 HashMap<Object, Object> deviceList= CCUHsApi.getInstance().readEntity("device and cm");
-//                HashMap<Object, Object> deviceListConnect= CCUHsApi.getInstance().readEntity("device and connectModule and not hyperstatsplit");
+                HashMap<Object, Object> deviceListConnect= CCUHsApi.getInstance().readEntity("device and connectModule and not hyperstatsplit");
                 HashMap equipment =  CCUHsApi.getInstance().readEntity("equip and oao and not hyperstatsplit");
+                //OTA is not supported in system level for Connect Module
+                if (deviceType.equals(FirmwareComponentType_t.CONNECT_MODULE_DEVICE_TYPE)) {
+                    CcuLog.i(TAG, "[VALIDATION] Adding Connect Module device " + deviceListConnect.get(Tags.ADDR).toString() + " to update");
+                    mLwMeshAddresses.add(Integer.parseInt(deviceListConnect.get(Tags.ADDR).toString()));
+                }
 
                 if(!equipment.isEmpty()){
                     Device OAOdevice = HSUtil.getDevice(Short.parseShort(equipment.get(Tags.GROUP).toString()));

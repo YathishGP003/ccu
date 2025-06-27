@@ -21,6 +21,7 @@ import a75f.io.logic.Globals;
 import a75f.io.renatus.R;
 import a75f.io.renatus.ota.OTAUpdateService;
 import a75f.io.renatus.ota.OtaCache;
+import a75f.io.renatus.ota.SeqCache;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -82,6 +83,8 @@ public class OTAUpdateTestFragment extends Fragment {
     public void handleResetOtaTest() {
         OtaCache cache = new OtaCache();
         cache.clear();
+        SeqCache seqCache = new SeqCache();
+        seqCache.clear();
         OTAUpdateService.otaRequestsQueue.clear();
         Activity activity = getActivity();
 

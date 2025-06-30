@@ -9,6 +9,7 @@ import java.util.Iterator;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZonePriority;
@@ -57,7 +58,7 @@ public class VavSystemController extends SystemController
     int heatingSignal;
     
     EvictingQueue<Double> weightedAverageCoolingOnlyLoadMAQueue = EvictingQueue.create(15);
-    EvictingQueue<Double> weightedAverageHeatingOnlyLoadMAQueue = EvictingQueue.create(15);;
+    EvictingQueue<Double> weightedAverageHeatingOnlyLoadMAQueue = EvictingQueue.create(15);
     
     int comfortIndex = 0;
     
@@ -82,8 +83,7 @@ public class VavSystemController extends SystemController
     
     double weightedAverageCoolingOnlyLoadPostML;
     double weightedAverageHeatingOnlyLoadPostML;
-    double weightedAverageLoadPostML;
-    
+
     double co2WeightedAverage = 0;
 
     private SystemMode conditioningMode = SystemMode.OFF;
@@ -367,7 +367,7 @@ public class VavSystemController extends SystemController
                     prioritySum += zoneDynamicPriority;
                     CcuLog.d(L.TAG_CCU_SYSTEM, "CM zoneDynamicPriority: " + zoneDynamicPriority +
                                                " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " +
-                                               "" + zoneHeatingLoad + " weightedAverageCoolingOnlyLoadSum " +
+                                                zoneHeatingLoad + " weightedAverageCoolingOnlyLoadSum " +
                                                weightedAverageCoolingOnlyLoadSum + ", prioritySum" + prioritySum +
                                                ", cmCurrentTemp" + cmCurrentTemp+
                                                ", weightedAverageHeatingConditioningLoadSum "+weightedAverageHeatingConditioningLoadSum
@@ -406,13 +406,13 @@ public class VavSystemController extends SystemController
             weightedAverageHeatingOnlyLoadMASum += val;
         }
         weightedAverageHeatingOnlyLoadMA = weightedAverageHeatingOnlyLoadMASum/weightedAverageHeatingOnlyLoadMAQueue.size();
-        
-        systemProfile.setSystemPoint("moving and (average or avg) and cooling and load",
-                                     CCUUtils.roundToTwoDecimal(weightedAverageCoolingOnlyLoadMA));
-        systemProfile.setSystemPoint("moving and (average or avg) and heating and load",
-                                     CCUUtils.roundToTwoDecimal(weightedAverageHeatingOnlyLoadMA));
 
-
+        systemProfile.setSystemPoint("domainName == \"" + DomainName.weightedAverageCoolingLoadMA + "\""
+                        +" or moving and (average or avg) and cooling and load",
+                CCUUtils.roundToTwoDecimal(weightedAverageCoolingOnlyLoadMA));
+        systemProfile.setSystemPoint("domainName == \"" + DomainName.weightedAverageHeatingLoadMA + "\""
+                        +" or moving and (average or avg) and heating and load",
+                CCUUtils.roundToTwoDecimal(weightedAverageHeatingOnlyLoadMA));
     }
 
     private void handleEmergencyCooling() {

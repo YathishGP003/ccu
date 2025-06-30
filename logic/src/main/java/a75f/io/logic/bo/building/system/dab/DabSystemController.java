@@ -490,9 +490,10 @@ public class DabSystemController extends SystemController
     
     private void writeAlgoVariablesToDb() {
 
-        if (L.ccu().systemProfile instanceof DabExternalAhu ||
-                (L.ccu().systemProfile instanceof DabStagedRtu && !(L.ccu().systemProfile instanceof DabAdvancedHybridRtu)) ||
-                L.ccu().systemProfile instanceof DabStagedRtuWithVfd || L.ccu().systemProfile instanceof DabFullyModulatingRtu
+        if (L.ccu().systemProfile instanceof DabExternalAhu
+                || (L.ccu().systemProfile instanceof DabStagedRtu && !(L.ccu().systemProfile instanceof DabAdvancedHybridRtu))
+                || L.ccu().systemProfile instanceof DabStagedRtuWithVfd || L.ccu().systemProfile instanceof DabFullyModulatingRtu
+                || L.ccu().systemProfile instanceof DabAdvancedAhu
         ) {
             Domain.writeHisValByDomain(systemCI, comfortIndex);
             Domain.writeHisValByDomain(DomainName.weightedAverageLoadMA, weightedAverageChangeOverLoadMA);

@@ -163,7 +163,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                 List<HashMap<Object, Object>> hsDevices = CCUHsApi.getInstance().readAllEntities("device and hyperstat");
                 CcuLog.i(L.TAG_CCU_DEVICE, "Injecting test messages for " + hsDevices.size() + " hyperstat devices");
                 hsDevices.forEach(device -> {
-                    injectTestRegularUpdateMessage(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
+                    //injectTestRegularUpdateMessage(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
                     try {
                         sleep(500);
                     } catch (InterruptedException e) {
@@ -174,7 +174,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                 List<HashMap<Object, Object>> snDevices = CCUHsApi.getInstance().readAllEntities("device and smartnode");
                 CcuLog.i(L.TAG_CCU_DEVICE, "Injecting test messages for " + snDevices.size() + " smartnode devices");
                 snDevices.forEach(device -> {
-                    injectTestRegularUpdateMessageSmartNode(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
+                    //injectTestRegularUpdateMessageSmartNode(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
                     try {
                         sleep(500);
                     } catch (InterruptedException e) {
@@ -191,7 +191,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                 List<HashMap<Object, Object>> msDevices = CCUHsApi.getInstance().readAllEntities("device and mystat");
                 CcuLog.i(L.TAG_CCU_DEVICE, "Injecting test messages for " + msDevices.size() + " mystat devices");
                 msDevices.forEach(device -> {
-                    injectTestMyStatRegularUpdateMessage(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
+                    //injectTestMyStatRegularUpdateMessage(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
                     try {
                         sleep(500);
                     } catch (InterruptedException e) {
@@ -199,7 +199,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                     }
                 });
 
-                injectRegularCMUpdate();
+                //injectRegularCMUpdate();
             }
         }).start();
     }

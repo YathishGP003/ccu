@@ -365,7 +365,7 @@ public class Globals {
         try {
             String modelsPath = mApplicationContext.getFilesDir().getAbsolutePath() + "/models";
             DiffManger diffManger = new DiffManger(getApplicationContext());
-            if (/*migrationHandler.isMigrationRequired() &&*/ CCUHsApi.getInstance().isCCURegistered()) {
+            if (migrationHandler.isMigrationRequired() && CCUHsApi.getInstance().isCCURegistered()) {
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                 modelSharedPref = Globals.getInstance().mApplicationContext
                         .getSharedPreferences(DOMAIN_MODEL_SF, Context.MODE_PRIVATE);

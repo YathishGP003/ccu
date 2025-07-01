@@ -732,8 +732,8 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
             unit = "\u00B0C"
         }
 
-        val strMinTemp = FontManager.getColoredSpanned(coolingTempLocal.toString() + unit, heatingDesiredTempColor)
-        val strMaxTemp = FontManager.getColoredSpanned(heatingTempLocal.toString() + unit, coolingDesiredTempColor)
+        val strMinTemp = FontManager.getColoredSpanned(heatingTempLocal.toString() + unit, heatingDesiredTempColor)
+        val strMaxTemp = FontManager.getColoredSpanned(coolingTempLocal.toString() + unit, coolingDesiredTempColor)
 
         var typeface = Typeface.DEFAULT
         try {

@@ -271,7 +271,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
                     val mode = equip.fanOpMode
                     return when (stage) {
                         0 -> isMyStatHighUserIntentFanMode(mode) || isMyStatLowUserIntentFanMode(mode)
-                        2 -> isMyStatHighUserIntentFanMode(mode)
+                        1 -> isMyStatHighUserIntentFanMode(mode)
                         else -> false
                     }
                 }
@@ -299,8 +299,8 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
                             equip.fanLowSpeed
                         )
 
-                        2 -> updateRelayStage(
-                            Stage.FAN_3.displayName,
+                        1 -> updateRelayStage(
+                            Stage.FAN_2.displayName,
                             isStageActive(stage, isActive, lowestStageFanHigh),
                             equip.fanHighSpeed
                         )
@@ -333,7 +333,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
                 updateStatus(equip.changeOverHeating, status)
             }
 
-            ControllerNames.FAN_ENABLED -> updateStatus(equip.fanEnable, result)
+            ControllerNames.FAN_ENABLED -> updateStatus(equip.fanEnable, result, StatusMsgKeys.FAN_ENABLED.name)
             ControllerNames.OCCUPIED_ENABLED -> updateStatus(equip.occupiedEnable, result)
             ControllerNames.HUMIDIFIER_CONTROLLER -> updateStatus(equip.humidifierEnable, result)
             ControllerNames.DEHUMIDIFIER_CONTROLLER -> updateStatus(equip.dehumidifierEnable, result)

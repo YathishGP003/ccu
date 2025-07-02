@@ -263,7 +263,7 @@ class MyStatCpuConfiguration(nodeAddress: Int, nodeType: String, priority: Int, 
         )
         return when (found) {
             MyStatCpuRelayMapping.FAN_LOW_SPEED.ordinal -> 1
-            MyStatCpuRelayMapping.FAN_HIGH_SPEED.ordinal -> 3
+            MyStatCpuRelayMapping.FAN_HIGH_SPEED.ordinal -> 2
             else -> 0
         }
     }

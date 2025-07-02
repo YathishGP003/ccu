@@ -171,7 +171,7 @@ class MyStatPipe2Configuration(nodeAddress: Int, nodeType: String, priority: Int
         )
         return when(highestSelected) {
             MyStatPipe2RelayMapping.FAN_LOW_SPEED.ordinal -> 1
-            MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal -> 3
+            MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal -> 2
             else -> 0
         }
     }

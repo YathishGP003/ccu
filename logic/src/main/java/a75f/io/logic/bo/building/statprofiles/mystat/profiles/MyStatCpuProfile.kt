@@ -634,7 +634,7 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
                     val mode = equip.fanOpMode
                     return when (stage) {
                         0 -> isMyStatHighUserIntentFanMode(mode) || isMyStatLowUserIntentFanMode(mode)
-                        2 -> isMyStatHighUserIntentFanMode(mode)
+                        1 -> isMyStatHighUserIntentFanMode(mode)
                         else -> false
                     }
                 }
@@ -665,7 +665,7 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
                             equip.fanLowSpeed
                         )
 
-                        2 -> updateRelayStage(
+                        1 -> updateRelayStage(
                             Stage.FAN_2.displayName,
                             isStageActive(stage, isActive, lowestStageFanHigh),
                             equip.fanHighSpeed
@@ -685,7 +685,7 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
                 if (!currentStatus && isFanLoopCounterEnabled  ) {
                     currentStatus = true
                 }
-                updateStatus(equip.fanEnable, currentStatus)
+                updateStatus(equip.fanEnable, currentStatus, StatusMsgKeys.FAN_ENABLED.name)
             }
             ControllerNames.OCCUPIED_ENABLED -> updateStatus(equip.occupiedEnable, result)
             ControllerNames.HUMIDIFIER_CONTROLLER -> updateStatus(equip.humidifierEnable, result)

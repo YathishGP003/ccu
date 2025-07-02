@@ -352,8 +352,8 @@ class HyperSplitSettingsUtil {
             else if (intAssociation == CpuRelayType.DEHUMIDIFIER.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DEHUMIDIFIER
             else if (intAssociation == CpuRelayType.EX_FAN_STAGE1.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_EXAUST_1
             else if (intAssociation == CpuRelayType.EX_FAN_STAGE2.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_EXAUST_2
-            else if (intAssociation == CpuRelayType.DCV_DAMPER.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED // This will display as NONE in Connect Module UI
-            else if (intAssociation == CpuRelayType.EXTERNALLY_MAPPED.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED // This will display as NONE in Connect Module UI
+            else if (intAssociation == CpuRelayType.DCV_DAMPER.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_DCV_DAMPER
+            else if (intAssociation == CpuRelayType.EXTERNALLY_MAPPED.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED
             else if (intAssociation == CpuRelayType.COMPRESSOR_STAGE1.ordinal +1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_COMPRESSOR_STAGE_1
             else if (intAssociation == CpuRelayType.COMPRESSOR_STAGE2.ordinal +1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_COMPRESSOR_STAGE_2
             else if (intAssociation == CpuRelayType.COMPRESSOR_STAGE3.ordinal +1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_COMPRESSOR_STAGE_3
@@ -611,7 +611,8 @@ class HyperSplitSettingsUtil {
 
                 CpuUniInType.CONDENSATE_STATUS_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CONDENSATE_NO
                 CpuUniInType.CONDENSATE_STATUS_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CONDENSATE_NC
-
+                CpuUniInType.RUN_FAN_STATUS_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_RUN_FAN_STATUS_NO
+                CpuUniInType.RUN_FAN_STATUS_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_RUN_FAN_STATUS_NC
                 else -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_DISABLED
             }
         }

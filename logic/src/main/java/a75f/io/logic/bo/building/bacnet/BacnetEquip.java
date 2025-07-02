@@ -300,13 +300,25 @@ public class BacnetEquip {
 //                        .setTz(tz);
 
                 CcuLog.d(TAG, "point to add start-->" + point.getName() + "------checking getEquipTagsList-----");
-                if (point.getEquipTagsList().size() > 0) {
+                List<String> skipTags = Arrays.asList("dis", "displayName", "roomRef", "floorRef",
+                        "profile", "bacnetId", "bacnetType", "bacnetObjectId", "tz", "group",
+                        "shortDis", "equipRef", "siteRef", "unit", "bacnetDeviceId");
+                if (!point.getEquipTagsList().isEmpty()) {
                     for (TagItem tagItem : point.getEquipTagsList()) {
-                        if (tagItem.getKind().toLowerCase().equals("marker")) {
-                            bacNetEquip.addMarker(tagItem.getName().toLowerCase().trim());
+                        if (tagItem.getKind().equalsIgnoreCase("marker")) {
+                            logicalParamPoint.addMarker(tagItem.getName().toLowerCase().trim());
                         } else {
                             try {
-                                bacNetEquip.addTag(tagItem.getKind().toLowerCase(), HStr.make(tagItem.getDefaultValue()+""));
+                                if (skipTags.contains(tagItem.getName()) ||
+                                        tagItem.getKind().equalsIgnoreCase("ref") &&
+                                                (tagItem.getDefaultValue() == null ||
+                                                        tagItem.getDefaultValue().equals(""))) {
+
+                                    CcuLog.d(TAG, "skipping this tag >>> " + tagItem.getName());
+                                    continue;
+                                }
+                                logicalParamPoint.addTag(tagItem.getName().toLowerCase(),
+                                        HStr.make(tagItem.getDefaultValue() + ""));
                             } catch (Exception e) {
                                 CcuLog.d(TAG, "hit exception 5-->" + e.getMessage());
                             }

@@ -275,7 +275,7 @@ public class MeshNetwork extends DeviceNetwork
 
                             case CONNECTNODE:
                                 if (bSeedMessage) {
-                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN SEEDS=====================" + zone.getId());
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING CN SEEDS=====================" + zone.getId());
                                     CcuToCmOverUsbDatabaseSeedCnMessage_t seedMessage = LConnectNode.getSeedMessage(Short.parseShort(d.getAddr()), d.getEquipRef(), "connect");
                                     tempLogdStructAsJson(seedMessage);
                                     sendStructToCM(seedMessage);

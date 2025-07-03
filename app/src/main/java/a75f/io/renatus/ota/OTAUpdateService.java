@@ -533,7 +533,7 @@ public class OTAUpdateService extends IntentService {
         CmToCcuOtaStatus_t msg = new CmToCcuOtaStatus_t();
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
 
-        CcuLog.i(L.TAG_CCU_OTA_PROCESS, " CM to Device process : State : "+msg.currentState.get() + " Data : "+msg.data.get());
+        CcuLog.i(L.TAG_CCU_OTA_PROCESS, " CM to Device process : State : "+ SequenceOtaState.values()[msg.currentState.get()].name() + " Data : "+msg.data.get());
         ConnectNodeUtil.Companion.updateOtaSequenceState(msg.currentState.get(), mCurrentLwMeshAddress);
         if ( msg.currentState.get() == SequenceOtaState.SEQUENCE_COPY_AVAILABLE.ordinal()) {
             ConnectNodeDevice connectNodeEquip = ConnectNodeUtil.Companion.connectNodeEquip(mCurrentLwMeshAddress);
@@ -551,6 +551,8 @@ public class OTAUpdateService extends IntentService {
             );
         } else if (msg.currentState.get() == SequenceOtaState.SEQUENCE_UPDATE_COMPLETE.ordinal()) {
             handleSequenceComplete();
+        } else if ( msg.currentState.get() == SequenceOtaState.SEQUENCE_UPDATE_FAILED.ordinal()) {
+            handleSequenceOtaFail();
         }
         else if ( msg.currentState.get() == SequenceOtaState.CM_DEVICE_TIMEOUT.ordinal()) {
             sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_TIMED_OUT));
@@ -572,6 +574,20 @@ public class OTAUpdateService extends IntentService {
         ConnectNodeUtil.Companion.updateOtaSequenceStatus(SequenceOtaStatus.SEQ_SUCCEEDED, mCurrentLwMeshAddress);
         // Update the delivery time
         connectNodeEquip.updateConfirmedTime(HDateTime.make(System.currentTimeMillis(), HTimeZone.make("UTC")));
+        moveUpdateToNextNode();
+    }
+
+    /**
+     * Handles the failure of a Sequence OTA (Over-The-Air) update.
+     *
+     * This function:
+     * 1. Logs the failure
+     * 2. Updates the OTA sequence status to FAILED
+     * 3. Initiates the update process for the next node in sequence
+     */
+    private void handleSequenceOtaFail() {
+        CcuLog.d(TAG, "Sequence OTA update failed");
+        ConnectNodeUtil.Companion.updateOtaSequenceStatus(SequenceOtaStatus.SEQ_UPDATE_FAILED, mCurrentLwMeshAddress);
         moveUpdateToNextNode();
     }
 

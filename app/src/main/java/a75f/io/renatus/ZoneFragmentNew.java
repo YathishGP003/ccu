@@ -2880,13 +2880,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewValue1.setText(vavPoints.get("Damper").toString());
         textViewLabel2.setText(isACB ? "CHW Valve : " : "Reheat Coil : ");
         textViewValue2.setText(vavPoints.get("Reheat Coil").toString());
-        textViewLabel3.setText("Discharge Airflow : ");
+        textViewLabel3.setText("Discharge Airflow Temperature: ");
         if( isCelsiusTunerAvailableStatus()) {
             textViewValue3.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
         }
-        textViewLabel4.setText("Supply Airflow : ");
+        textViewLabel4.setText("Supply Airflow Temperature : ");
         if( isCelsiusTunerAvailableStatus()) {
             textViewValue4.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Entering Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
@@ -2960,7 +2960,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewTitle.setText(ssePoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(ssePoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
-        textViewLabel1.setText("Discharge Airflow : ");
+        textViewLabel1.setText("Discharge Airflow Temperature : ");
         if( isCelsiusTunerAvailableStatus()) {
             textViewValue1.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(ssePoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
@@ -3031,7 +3031,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewStatus.setText(dabPoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Damper : ");
-        textViewLabel2.setText("Discharge Airflow Temp : ");
+        textViewLabel2.setText("Discharge Airflow Temperature : ");
         textViewValue1.setText(dabPoints.get("Damper").toString());
         if( isCelsiusTunerAvailableStatus()) {
             textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dabPoints.get("Supply Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
@@ -3119,7 +3119,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
         }
 
-        textViewLabel2.setText("Discharge Airflow : ");
+        textViewLabel2.setText("Discharge Airflow Temperature : ");
         try {
             if (isCelsiusTunerAvailableStatus()) {
                 textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dualDuctPoints.get("DischargeAirflow").toString().replaceAll("[^0-9\\.]", "")))) + " \u00B0C");

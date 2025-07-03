@@ -18,6 +18,7 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.ControlMote;
 import a75f.io.device.DeviceNetwork;
@@ -53,6 +54,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
+import a75f.io.logic.bo.util.CCUUtils;
 
 
 /**
@@ -428,6 +430,14 @@ public class MeshNetwork extends DeviceNetwork
         for (HashMap point : allStatusPoints) {
             int statusVal = hayStack.readHisValById(point.get("id").toString()).intValue();
             if (statusVal < ZoneState.TEMPDEAD.ordinal()) {
+                return true;
+            }
+        }
+
+        List<HashMap<Object, Object>> connectModules = hayStack.readAllEntities("connectModule and device");
+        for (HashMap<Object, Object> connectModule : connectModules) {
+            if (CCUUtils.isConnectModuleAlive(connectModule.get(Tags.ID).toString())) {
+                CcuLog.d(L.TAG_CCU_DEVICE, "Connect Module is alive: " + connectModule.get(Tags.ID));
                 return true;
             }
         }

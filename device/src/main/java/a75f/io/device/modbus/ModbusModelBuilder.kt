@@ -349,7 +349,7 @@ private fun getParentEquipMapBySlaveId(slaveId: Int): HashMap<Any, Any> {
  */
 private fun getParentEquipMapByZone(zoneRef: String): ArrayList<HashMap<Any, Any>> {
     return CCUHsApi.getInstance()
-        .readAllEntities("equip and modbus and not equipRef and roomRef == \"$zoneRef\"")
+        .readAllEntities("equip and (modbus or connectModule) and not equipRef and roomRef == \"$zoneRef\"")
 }
 
 /**

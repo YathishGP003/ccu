@@ -107,7 +107,7 @@ public class ModbusEquip {
                     .setRoomRef(roomRef)
                     .setFloorRef(floorRef)
                     .setProfile(profileType.name())
-                    .addMarker("equip").addMarker("modbus")
+                    .addMarker("equip")
                     .addTag("version", HStr.make(modelVersion))
                     .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(equipmentInfo.getSlaveId()));
         if (parentEquipId != null) {
@@ -117,6 +117,8 @@ public class ModbusEquip {
             mbEquip.addMarker(Tags.CONNECTMODULE);
             mbEquip.addTag("connectAddress", HStr.make(connectNodeAddress));
             mbEquip.addTag("modelId", HStr.make(modelId));
+        } else {
+            mbEquip.addMarker("modbus");
         }
         mbEquip.setEquipType(equipmentInfo.getEquipType());
 
@@ -200,7 +202,7 @@ public class ModbusEquip {
                         .setEquipRef(equipmentRef)
                         .setSiteRef(siteRef)
                         .setRoomRef(roomRef)
-                        .setFloorRef(floorRef).addMarker("logical").addMarker("modbus")
+                        .setFloorRef(floorRef).addMarker("logical")
                         .setGroup(String.valueOf(equipmentInfo.getSlaveId()))
                         .setTz(tz);
             logicalParamPoint.addMarker(modbusLevel.toLowerCase().trim());
@@ -229,11 +231,14 @@ public class ModbusEquip {
                 if(!registerAddressMap.containsKey(configParam.getName())) {
                     continue;
                 }
+                logicalParamPoint.addMarker(Tags.CONNECTMODULE);
                 logicalParamPoint.addTag("registerNumber", HStr.make(registerAddressMap.get(configParam.getName()).getFirst()))
                         .addTag("registerAddress", HStr.make(registerAddressMap.get(configParam.getName()).getSecond()))
                         .addTag("registerType", HStr.make("holdingRegister"))
                         .addTag("parameterDefinitionType", HStr.make("float"))
                         .addTag("wordOrder", HStr.make("bigEndian"));
+            } else {
+                logicalParamPoint.addMarker("modbus");
             }
             if(configParam.isDisplayInUI()){
                 logicalParamPoint.addMarker("displayInUi");

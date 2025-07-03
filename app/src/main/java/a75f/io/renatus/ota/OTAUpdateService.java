@@ -1579,7 +1579,7 @@ public class OTAUpdateService extends IntentService {
             deleteFilesByDeviceType(DOWNLOAD_DIR);
             return;
         }
-        if(mLwMeshAddresses != null && !isConnectDeviceToCm(mLwMeshAddresses.get(0)) && !HeartBeatUtil.isModuleAlive(mLwMeshAddresses.get(0).toString()) && !isCMDevice(mLwMeshAddresses.get(0)) ) {
+        if(mLwMeshAddresses != null && !mLwMeshAddresses.isEmpty() && !isConnectDeviceToCm(mLwMeshAddresses.get(0)) && !HeartBeatUtil.isModuleAlive(mLwMeshAddresses.get(0).toString()) && !isCMDevice(mLwMeshAddresses.get(0)) ) {
             CcuLog.d(TAG, "[UPDATE] [FAILED] [Node Address:" + mLwMeshAddresses.get(0) + "] Skipping update due to RF Signal Dead ");
             OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_CCU_TO_CM_FAILED, mLwMeshAddresses.get(0));
             mLwMeshAddresses.remove(0);

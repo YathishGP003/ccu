@@ -1,9 +1,6 @@
 package a75f.io.logic.bo.util;
 
 import android.content.Context;
-import android.graphics.Typeface;
-import android.text.SpannableString;
-import android.text.style.StyleSpan;
 
 import org.joda.time.DateTime;
 import org.projecthaystack.HDict;
@@ -20,6 +17,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -39,7 +37,6 @@ import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.logic.util.PreferenceUtil;
-import kotlin.Pair;
 
 /**
  * Created by Yinten on 10/11/2017.
@@ -455,6 +452,15 @@ public class CCUUtils
             return curTemp >= minVal && curTemp <= maxVal;
         }
         return true;
+    }
+
+    public static boolean isConnectModuleAlive(String deviceRef) {
+        Date updatedTime = CCUUtils.getLastUpdatedTimeForCN(deviceRef);
+        if (updatedTime == null) {
+            return false;
+        }
+        return TimeUnit.MILLISECONDS.toMinutes(new Date().getTime() -
+                updatedTime.getTime()) <= (double) 15;// 15 minutes
     }
 
     public static Date getLastUpdatedTimeForCN(String deviceRef) {

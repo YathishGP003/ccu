@@ -918,7 +918,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equips);
             HashMap<Object, Object> connectNode = ConnectNodeUtil.Companion.getConnectNodeForZone(roomMap.get("id").toString(), CCUHsApi.getInstance());
             if (!connectNode.isEmpty()) {
-                isZoneAlive = HeartBeatUtil.isConnectNodeAlive(connectNode.get(Tags.ID).toString());
+                isZoneAlive = CCUUtils.isConnectModuleAlive(connectNode.get(Tags.ID).toString());
             }
             HashMap<String, ArrayList<HashMap>> zoneData = new HashMap<String, ArrayList<HashMap>>();
             for (HashMap zoneModel : equips) {
@@ -1006,10 +1006,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             boolean isZoneAlive = false;
             HashMap<Object, Object> connectNode = ConnectNodeUtil.Companion.getConnectNodeForZone(roomMap.get("id").toString(), CCUHsApi.getInstance());
             if (!connectNode.isEmpty()) {
-                isZoneAlive = HeartBeatUtil.isConnectNodeAlive(connectNode.get(Tags.ID).toString());
+                isZoneAlive = CCUUtils.isConnectModuleAlive(connectNode.get(Tags.ID).toString());
             }
             viewNonTemperatureBasedZone(inflater, rootView, new ArrayList<>(), zoneTitle, gridPosition, tablerowLayout,
-                    isZoneAlive, roomMap.get("id").toString());
+                    isZoneAlive, roomMap.get("id") .toString());
             gridPosition++;
         }
         return gridPosition;

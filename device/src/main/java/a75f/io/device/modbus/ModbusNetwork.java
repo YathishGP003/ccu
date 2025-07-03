@@ -138,6 +138,8 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
 
     @Override
     public void writeConnectModbusRegister(int slaveId, int registerAddress, double value) {
+        CcuLog.i(L.TAG_CONNECT_NODE, "Write Connect Modbus register slaveId :" + slaveId
+                + " RegisterAddress :" + registerAddress + " with val :" + value);
         ConnectModbusSerialComm.writeToConnectNode(slaveId, registerAddress, value);
     }
 

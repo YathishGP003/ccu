@@ -318,7 +318,7 @@ public class Communication extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         this.rootView = view;
-        runChmodUsbDevices();
+//        runChmodUsbDevices();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
         String selectedDeviceType = sharedPreferences.getString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_NORMAL);

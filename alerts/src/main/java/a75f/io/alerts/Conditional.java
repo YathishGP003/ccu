@@ -216,8 +216,14 @@ public class Conditional
                     }
                                                 sb.append("\nFound point").append(point.get("id")).append(" -- reading his val");
                     String pointRef = point.get("id").toString();
-                    val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \""+q.get("id")+"\""));
-                                                sb.append("\n   val (RHS): ").append(val).append("   --re-evaluated for this zone.");
+                    if (isValueNumeric()) {
+                        val = value;
+                        sb.append("\n   val (RHS): ").append(val).append("  -- reading his val for this point");
+                        sb.append("  (numeric)");
+                    } else {
+                        val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value + " and equipRef == \"" + q.get("id") + "\""));
+                        sb.append("\n   val (RHS): ").append(val).append("   --re-evaluated for this zone.");
+                    }
 
                     resVal = CCUHsApi.getInstance().readHisValById(point.get("id").toString());
                                                 sb.append("\n   resVal (LHS): ").append(resVal);

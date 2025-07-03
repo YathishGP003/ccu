@@ -143,11 +143,20 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             val haystackDevice = a75f.io.api.haystack.Device.Builder().setHDict(deviceHdict).build()
             val equip = haystack.readEntity("equip and id == "+haystackDevice.equipRef.toString())
             val sourceModel = equip["sourceModel"].toString()
-            val modelDirective = ModelCache.getModelById(sourceModel)
             val profileConfiguration = getProfileConfig(equip["profile"].toString())
-            updateRef(equip, profileConfiguration)
-            val entityMapper = EntityMapper(modelDirective as SeventyFiveFProfileDirective)
-            val deviceBuilder = DeviceBuilder(haystack, entityMapper)
+            val isConnectModuleDevice = haystackDevice.domainName?.equals(DomainName.connectNodeDevice) == true
+            val deviceBuilder = if (isConnectModuleDevice) {
+                DeviceBuilder(haystack, null)
+            } else {
+                val modelDirective = ModelCache.getModelById(sourceModel)
+                val entityMapper = EntityMapper(modelDirective as SeventyFiveFProfileDirective)
+                DeviceBuilder(haystack, entityMapper)
+            }
+
+            if(!isConnectModuleDevice) {
+                updateRef(equip, profileConfiguration)
+            }
+
             tobeAdded.forEach { diffDomain ->
                 CcuLog.d(Domain.LOG_TAG, "tobe added ${diffDomain.domainName}  to the device $device" )
                val modelPointDef =
@@ -186,11 +195,20 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             val haystackDevice = a75f.io.api.haystack.Device.Builder().setHDict(deviceHdict).build()
             val deviceEntity = haystack.readEntity("equip and id == " + haystackDevice.equipRef)
             val sourceModel = deviceEntity["sourceModel"].toString()
-            val modelDirective = ModelCache.getModelById(sourceModel)
             val profileConfiguration = getProfileConfig(deviceEntity["profile"].toString())
-            updateRef(deviceEntity, profileConfiguration)
-            val entityMapper = EntityMapper(modelDirective as SeventyFiveFProfileDirective)
-            val deviceBuilder = DeviceBuilder(haystack, entityMapper)
+
+            val isConnectModuleDevice = haystackDevice.domainName?.equals(DomainName.connectNodeDevice) == true
+            val deviceBuilder = if (isConnectModuleDevice) {
+                DeviceBuilder(haystack, null)
+            } else {
+                val modelDirective = ModelCache.getModelById(sourceModel)
+                val entityMapper = EntityMapper(modelDirective as SeventyFiveFProfileDirective)
+                DeviceBuilder(haystack, entityMapper)
+            }
+
+            if(!isConnectModuleDevice) {
+                updateRef(deviceEntity, profileConfiguration)
+            }
             val devicePoints = haystack.readAllEntities("point and deviceRef == \"${device.id}\"")
 
             tobeUpdated.forEach { diffDomain ->
@@ -229,10 +247,16 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             val haystackDevice = a75f.io.api.haystack.Device.Builder().setHDict(deviceHdict).build()
             val deviceEntity = haystack.readEntity("equip and id == " + haystackDevice.equipRef)
             val sourceModel = deviceEntity["sourceModel"].toString()
-            val modelDirective = ModelCache.getModelById(sourceModel)
             val profileConfiguration = getProfileConfig(deviceEntity["profile"].toString())
-            val entityMapper = EntityMapper(modelDirective as SeventyFiveFProfileDirective)
-            val deviceBuilder = DeviceBuilder(haystack , entityMapper)
+
+            val deviceBuilder = if (haystackDevice.domainName?.equals(DomainName.connectNodeDevice) == true) {
+                DeviceBuilder(haystack, null)
+            } else {
+                val modelDirective = ModelCache.getModelById(sourceModel)
+                val entityMapper = EntityMapper(modelDirective as SeventyFiveFProfileDirective)
+                DeviceBuilder(haystack, entityMapper)
+
+            }
             val devicePoints = haystack.readAllEntities("point and deviceRef == \"${device.id}\"")
             tobeDeleted.forEach { diffDomain ->
                 val point =

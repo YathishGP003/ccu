@@ -185,19 +185,12 @@ public class HeartBeatUtil {
     }
 
     public static void moduleStatusForConnectNode(TextView moduleStatus, String deviceRef){
-        if (isConnectNodeAlive(deviceRef)) {
+        if (CCUUtils.isConnectModuleAlive(deviceRef)) {
             moduleStatus.setBackgroundResource(R.drawable.module_alive);
         } else {
             moduleStatus.setBackgroundResource(R.drawable.module_dead);
         }
     }
 
-    public static boolean isConnectNodeAlive(String deviceRef) {
-        Date updatedTime = CCUUtils.getLastUpdatedTimeForCN(deviceRef);
-        if (updatedTime == null) {
-            return false;
-        }
-        return TimeUnit.MILLISECONDS.toMinutes(new Date().getTime() -
-                updatedTime.getTime()) <= (double) DEFAULT_ZONE_DEAD_TIME_MINUTES;
-    }
+
 }

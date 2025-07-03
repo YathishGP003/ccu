@@ -37,6 +37,8 @@ class VavConfigHandler {
             val relay2Point = RawPoint.Builder().setHDict(relay2).setType(if (relay2OpEnabled) "Relay N/C" else "Relay N/O").setEnabled(relay2OpEnabled)
             if ((config.profileType == ProfileType.VAV_REHEAT.name) && relay2OpEnabled){
                 relay2Point.setPointRef(reheatCmdPoint["id"].toString())
+            } else {
+                relay2Point.setPointRef(null)
             }
             hayStack.updatePoint(relay2Point.build(), relay2["id"].toString())
 
@@ -51,9 +53,15 @@ class VavConfigHandler {
                     reheatType == ReheatType.Pulse.ordinal
             val analogOut2 = hayStack.readHDict("point and deviceRef == \""+ device["id"]
                     +"\" and domainName == \"" + DomainName.analog2Out + "\"")
-            val analog2Point = RawPoint.Builder().setHDict(analogOut2)
-                .setType(getReheatTypeString(config)).setEnabled(analog2OpEnabled).build()
-            hayStack.updatePoint(analog2Point, analogOut2["id"].toString())
+            val analog2Point =
+                RawPoint.Builder().setHDict(analogOut2).setType(getReheatTypeString(config))
+                    .setEnabled(analog2OpEnabled)
+            if (analog2OpEnabled) {
+                analog2Point.setPointRef(reheatCmdPoint["id"].toString())
+            } else {
+                analog2Point.setPointRef(null)
+            }
+            hayStack.updatePoint(analog2Point.build(), analogOut2["id"].toString())
 
             val analogIn1 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.analog1In + "\"")
             val analog1InPoint = RawPoint.Builder().setHDict(analogIn1)

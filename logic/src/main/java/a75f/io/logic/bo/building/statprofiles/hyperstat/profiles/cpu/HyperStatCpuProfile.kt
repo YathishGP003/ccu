@@ -682,8 +682,13 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
             }
         }
 
-        fun updateStatus(point: Point, result: Any) {
+        fun updateStatus(point: Point, result: Any, status: String? = null) {
             point.writeHisVal(if (result as Boolean) 1.0 else 0.0)
+            if (status != null && result) {
+                equip.relayStages[status] = 1
+            } else {
+                equip.relayStages.remove(status)
+            }
         }
 
 
@@ -770,7 +775,7 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
                 if (!currentStatus && isFanLoopCounterEnabled  ) {
                     currentStatus = true
                 }
-                updateStatus(equip.fanEnable, currentStatus)
+                updateStatus(equip.fanEnable, currentStatus, StatusMsgKeys.FAN_ENABLED.name)
             }
             ControllerNames.OCCUPIED_ENABLED -> updateStatus(equip.occupiedEnable, result)
             ControllerNames.HUMIDIFIER_CONTROLLER -> updateStatus(equip.humidifierEnable, result)

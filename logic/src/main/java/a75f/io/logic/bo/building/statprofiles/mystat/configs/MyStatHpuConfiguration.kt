@@ -209,7 +209,7 @@ class MyStatHpuConfiguration(
         )
         return when(highestSelected) {
             MyStatHpuRelayMapping.FAN_LOW_SPEED.ordinal -> 1
-            MyStatHpuRelayMapping.FAN_HIGH_SPEED.ordinal -> 3
+            MyStatHpuRelayMapping.FAN_HIGH_SPEED.ordinal -> 2
             else -> 0
         }
     }

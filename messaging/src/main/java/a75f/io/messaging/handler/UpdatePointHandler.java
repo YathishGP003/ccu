@@ -86,7 +86,7 @@ public class UpdatePointHandler implements MessageHandler
             TunerUtil.refreshEquipTuners();
         }
 
-        Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(pointUid)).build();
+        Point localPoint = new Point.Builder().setHashMap(pointEntity).build();
         CcuLog.d(L.TAG_CCU_PUBNUB, " handleMessage for" + Arrays.toString(localPoint.getMarkers().toArray()));
 
 
@@ -286,13 +286,19 @@ public class UpdatePointHandler implements MessageHandler
             }
         }
 
-        if (localPoint.getMarkers().contains("modbus")){
+        if (localPoint.getMarkers().contains("modbus") || localPoint.getMarkers().contains(Tags.CONNECTMODULE)){
             ModbusHandler.updatePoint(msgObject,localPoint);
             if (modbusDataInterface != null) {
                 modbusDataInterface.refreshScreen(localPoint.getId());
             }
-            if (localPoint.getMarkers().contains(Tags.WRITABLE) && modbusWritableDataInterface != null) {
+            if (localPoint.getMarkers().contains(Tags.MODBUS) && localPoint.getMarkers().contains(Tags.WRITABLE) && modbusWritableDataInterface != null) {
                 modbusWritableDataInterface.writeRegister(localPoint.getId());
+            } else if (localPoint.getMarkers().contains(Tags.CONNECTMODULE) && modbusWritableDataInterface != null && localPoint.getMarkers().contains(Tags.WRITABLE)) {
+                JsonElement valElement = msgObject.get("val");
+                if (valElement != null && valElement.isJsonPrimitive() && !valElement.getAsString().trim().isEmpty()) {
+                    modbusWritableDataInterface.writeConnectModbusRegister(Integer.parseInt(pointEntity.get("group").toString()),
+                            Integer.parseInt(pointEntity.get("registerNumber").toString()), msgObject.get(WRITABLE_ARRAY_VAL).getAsDouble());
+                }
             }
         }
 

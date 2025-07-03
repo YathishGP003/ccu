@@ -336,6 +336,11 @@ open class PhysicalPoint(domainName : String, val deviceRef: String) : Entity (d
         }
     }
 
+    fun readDefaultStrVal() : String {
+        requireId()
+        return Domain.hayStack.readDefaultStrValById(id)
+    }
+
     fun readDefaultVal() : Double {
         requireId()
         return Domain.hayStack.readDefaultValById(id)

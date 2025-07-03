@@ -398,7 +398,7 @@ class ConnectNodeEntitiesBuilder {
         return equipsList.associate { equip ->
             val equipId = equip["id"].toString()
             val regNumber =
-                hayStack.readAllEntities("point and modbus and equipRef == \"$equipId\"")
+                hayStack.readAllEntities("point and connectModule and equipRef == \"$equipId\"")
                     .map { it["registerNumber"].toString() }
             equipId to regNumber
         }
@@ -416,7 +416,7 @@ class ConnectNodeEntitiesBuilder {
             val modelId = equip["modelId"]?.toString() ?: continue
             val equipId = equip["id"].toString()
 
-            val points = hayStack.readAllEntities("point and modbus and equipRef == \"$equipId\"")
+            val points = hayStack.readAllEntities("point and connectModule and equipRef == \"$equipId\"")
             for (point in points) {
                 val registerNumber = point["registerNumber"]?.toString() ?: continue
                 val shortDis = point["shortDis"]?.toString() ?: ""

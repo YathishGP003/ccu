@@ -7,7 +7,6 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil
-import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil.Companion.getAddressById
 import a75f.io.logic.bo.building.connectnode.SequenceMetaDownloader
 import a75f.io.logic.connectnode.ConnectNodeEntitiesBuilder
 import a75f.io.logic.connectnode.SequenceMetaDataDTO
@@ -26,18 +25,33 @@ import java.util.concurrent.atomic.AtomicReference
 
 
 class SQMetaDataHandler {
-    fun handleMetaData(appliedDetails: JsonObject, seqId: String, messageId : String, context: Context) {
+    fun handleMetaData(
+        appliedDetails: JsonObject,
+        seqId: String,
+        messageId: String,
+        context: Context
+    ) {
 
         val originalMetaData = SequenceService().retrieveMetaData(seqId)
-        CcuLog.d(L.TAG_CCU_SEQUENCE_APPLY, "Original Sequence metadata response: $originalMetaData $seqId")
+        CcuLog.d(
+            L.TAG_CCU_SEQUENCE_APPLY,
+            "Original Sequence metadata response: $originalMetaData $seqId"
+        )
 
-        if(originalMetaData == null) {
-            CcuLog.e(L.TAG_CCU_SEQUENCE_APPLY, "Failed to retrieve sequence metadata for seqId: $seqId")
+        if (originalMetaData == null) {
+            CcuLog.e(
+                L.TAG_CCU_SEQUENCE_APPLY,
+                "Failed to retrieve sequence metadata for seqId: $seqId"
+            )
             return
         }
 
-        val sequenceMetaData = originalMetaData.copy(metadata = ConnectNodeUtil.normaliseSeqMetaData(originalMetaData))
-        CcuLog.d(L.TAG_CCU_SEQUENCE_APPLY, "Normalised Sequence metadata response: $sequenceMetaData")
+        val sequenceMetaData =
+            originalMetaData.copy(metadata = ConnectNodeUtil.normaliseSeqMetaData(originalMetaData))
+        CcuLog.d(
+            L.TAG_CCU_SEQUENCE_APPLY,
+            "Normalised Sequence metadata response: $sequenceMetaData"
+        )
 
         val hayStack = CCUHsApi.getInstance()
         val domainService = DomainService()
@@ -55,10 +69,13 @@ class SQMetaDataHandler {
         /*
         * Get device list where sequence version is greater than local version
         * */
-        val reconfiguredDeviceList = (finalDeviceList.toSet() - addedDeviceList.toSet()).toList().filter { deviceId ->
-           val localSeqVersion = ConnectNodeDevice(deviceId.prependIndent("@")).sequenceVersion.readHisVal()
-            ((seqVersion != localSeqVersion.toInt()) || localSeqVersion == 0.0)
-        }
+        val reconfiguredDeviceList =
+            (finalDeviceList.toSet() - addedDeviceList.toSet()).toList().filter { deviceId ->
+                val connectNode = ConnectNodeDevice(deviceId.prependIndent("@"))
+                val localSeqVersion = connectNode.sequenceVersion.readHisVal()
+                val localSequenceName = connectNode.sequenceMetadataName.readDefaultStrVal()
+                ((seqVersion != localSeqVersion.toInt()) || (seqName != "" && seqName != localSequenceName) || localSeqVersion == 0.0)
+            }
 
         val deviceListToSendLowCode = (addedDeviceList + reconfiguredDeviceList).toSet().toList()
 
@@ -76,7 +93,10 @@ class SQMetaDataHandler {
                 hayStack
             )
             SequenceApplyPrefHandler.removeMessageFromHandling(context, messageId)
-            CcuLog.e(L.TAG_CCU_SEQUENCE_APPLY, "Failed to create sequence for devices: $addedDeviceList. Errors: $errors")
+            CcuLog.e(
+                L.TAG_CCU_SEQUENCE_APPLY,
+                "Failed to create sequence for devices: $addedDeviceList. Errors: $errors"
+            )
             throw ModbusEquipCreationException(
                 "One or more devices failed during connect node sequence. Errors:\n" +
                         errors.joinToString("\n") { it.message ?: "Unknown error" }
@@ -107,7 +127,7 @@ class SQMetaDataHandler {
                     "\nLow code will be sent devices: $ deviceListToSendLowCode"
         )
 
-        val lowCodeFileName = seqName+"_v$seqVersion.mpy"
+        val lowCodeFileName = seqName + "_v$seqVersion.mpy"
 
         val downloadId = SequenceMetaDownloader().downloadLowCode(sequenceMetaData, lowCodeFileName)
 
@@ -139,7 +159,6 @@ class SQMetaDataHandler {
     }
 
 
-
     private fun handleLowCodeDownload(
         context: Context,
         downloadId: Long,
@@ -159,18 +178,24 @@ class SQMetaDataHandler {
             override fun onReceive(context: Context, intent: Intent) {
                 val completedId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                 if (completedId == downloadId) {
-                    val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                    val downloadManager =
+                        context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
                     val query = DownloadManager.Query().setFilterById(completedId)
                     val cursor = downloadManager.query(query)
 
                     if (cursor != null && cursor.moveToFirst()) {
-                        val status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
+                        val status =
+                            cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
 
                         when (status) {
                             DownloadManager.STATUS_SUCCESSFUL -> {
-                                CcuLog.d(L.TAG_CCU_DOWNLOAD, "Download completed for ID: $completedId")
+                                CcuLog.d(
+                                    L.TAG_CCU_DOWNLOAD,
+                                    "Download completed for ID: $completedId"
+                                )
 
-                                val metaFileName = "${sequenceMetaData.seqName.trim()}_v$seqVersion.meta"
+                                val metaFileName =
+                                    "${sequenceMetaData.seqName.trim()}_v$seqVersion.meta"
                                 ConnectNodeUtil.createMetaFileForCN(
                                     metaFileName,
                                     signature,
@@ -182,32 +207,46 @@ class SQMetaDataHandler {
                                 ConnectNodeUtil.createMetaFileForCN(
                                     emptyMetaName,
                                     "7b07415e7380c4576e2781ab51af4cb8e43b5f11ed6391d780ac8059b6cf517c",
-                                    0,15,32
+                                    0, 15, 32
                                 )
                                 ConnectNodeUtil.createDummyMpyFile(emptySequenceFileName)
 
                                 // Extract address for every device in the deviceListToSendLowCode
 //                                var addr = "0"
-                                val eventIntent = Intent(Globals.IntentActions.SEQUENCE_UPDATE_START).apply {
-                                    putExtra("deviceList", ArrayList(deviceListToSendLowCode)) // Send only one device in the list
-                                    putExtra("removedDeviceList", ArrayList(removedDeviceList))
-                                    putExtra("seqVersion", seqVersion.toString())
-                                    putExtra("seqName", sequenceMetaData.seqName.trim())
-                                    putExtra("cmdLevel", "module") // Dummy
-                                    putExtra("remoteCmdType", "sequence");
-                                    putExtra("metaFileName", metaFileName)
-                                    putExtra("firmwareName", lowCodeFileName)
-                                    putExtra("emptyMetaFileName", emptyMetaName)
-                                    putExtra("emptyFirmwareName", emptySequenceFileName)
-                                }
+                                val eventIntent =
+                                    Intent(Globals.IntentActions.SEQUENCE_UPDATE_START).apply {
+                                        putExtra(
+                                            "deviceList",
+                                            ArrayList(deviceListToSendLowCode)
+                                        ) // Send only one device in the list
+                                        putExtra("removedDeviceList", ArrayList(removedDeviceList))
+                                        putExtra("seqVersion", seqVersion.toString())
+                                        putExtra("seqName", sequenceMetaData.seqName.trim())
+                                        putExtra("cmdLevel", "module") // Dummy
+                                        putExtra("remoteCmdType", "sequence")
+                                        putExtra("metaFileName", metaFileName)
+                                        putExtra("firmwareName", lowCodeFileName)
+                                        putExtra("emptyMetaFileName", emptyMetaName)
+                                        putExtra("emptyFirmwareName", emptySequenceFileName)
+                                    }
                                 context.sendBroadcast(eventIntent)
-                                SequenceApplyPrefHandler.removeMessageFromHandling(context, messageId)
+                                SequenceApplyPrefHandler.removeMessageFromHandling(
+                                    context,
+                                    messageId
+                                )
                             }
 
                             DownloadManager.STATUS_FAILED -> {
-                                val reason = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_REASON))
-                                CcuLog.e(L.TAG_CCU_DOWNLOAD, "Download failed for ID: $completedId, reason: $reason")
-                                SequenceApplyPrefHandler.removeMessageFromHandling(context, messageId)
+                                val reason =
+                                    cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_REASON))
+                                CcuLog.e(
+                                    L.TAG_CCU_DOWNLOAD,
+                                    "Download failed for ID: $completedId, reason: $reason"
+                                )
+                                SequenceApplyPrefHandler.removeMessageFromHandling(
+                                    context,
+                                    messageId
+                                )
 
                                 exceptionRef.set(
                                     LowCodeDownloadException(
@@ -217,7 +256,10 @@ class SQMetaDataHandler {
                             }
 
                             else -> {
-                                CcuLog.w(L.TAG_CCU_DOWNLOAD, "Download ID $completedId status: $status")
+                                CcuLog.w(
+                                    L.TAG_CCU_DOWNLOAD,
+                                    "Download ID $completedId status: $status"
+                                )
                             }
                         }
                     }
@@ -229,7 +271,10 @@ class SQMetaDataHandler {
             }
         }
 
-        context.registerReceiver(onDownloadComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+        context.registerReceiver(
+            onDownloadComplete,
+            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+        )
         latch.await()
 
         exceptionRef.get()?.let { throw it }

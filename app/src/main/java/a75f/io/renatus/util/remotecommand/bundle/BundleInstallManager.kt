@@ -1193,27 +1193,30 @@ class BundleInstallManager: BundleInstallListener {
             var ccuAppName = ""
             allEntries.forEachIndexed { index, (id, file) ->
                 val apkName = file?.name ?: "Unknown"
-                if (apkName.contains("HomeApp")) {
-                    isHomeAppPresent = true
-                    homeAppName = apkName
-                    return@forEachIndexed
-                }
 
-                if (apkName.contains("CCU")) {
-                    isCCUAppPresent = true
-                    ccuAppName = apkName
-                    return@forEachIndexed
-                }
+                when {
+                    apkName.contains("HomeApp") -> {
+                        isHomeAppPresent = true
+                        homeAppName = apkName
+                        return@forEachIndexed
+                    }
 
-                AppInstaller.CCU_APK_FILE_NAME = apkName
-                CcuLog.i(L.TAG_CCU_REPLACE, "Installing.... $apkName (ID: $id)")
-                AppInstaller().invokeInstallerIntent(
-                    activity,
-                    id,
-                    AppInstaller.CCUAPP_INSTALL_CODE,
-                    bSilent,
-                    false
-                )
+                    apkName.contains("CCU") -> {
+                        isCCUAppPresent = true
+                        ccuAppName = apkName
+                        return@forEachIndexed
+                    }
+
+                    apkName.contains("RemoteApp") -> {
+                        CcuLog.i(L.TAG_CCU_REPLACE, "Installing RemoteApp: $apkName (ID: $id)")
+                        RemoteApp(apkName).installApp()
+                    }
+
+                    apkName.contains("BACapp") -> {
+                        CcuLog.i(L.TAG_CCU_REPLACE, "Installing BACApp: $apkName (ID: $id)")
+                        BACApp(apkName).installApp()
+                    }
+                }
             }
 
             CcuLog.i(L.TAG_CCU_REPLACE,"Home app present: $isHomeAppPresent - fileName $homeAppName" +

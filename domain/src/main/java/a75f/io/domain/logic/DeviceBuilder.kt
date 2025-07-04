@@ -94,7 +94,8 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
                         hayStackPoint.id = pointId
                         DomainManager.addRawPoint(hayStackPoint)
                     } catch (e: Exception) {
-                        CcuLog.e(Domain.LOG_TAG, "Error adding raw point ${point.domainName}: ${e.message}")
+                        e.printStackTrace()
+                        CcuLog.e(Domain.LOG_TAG, "Error adding raw point ${point.domainName}")
                     }
                 }
             }.awaitAll()

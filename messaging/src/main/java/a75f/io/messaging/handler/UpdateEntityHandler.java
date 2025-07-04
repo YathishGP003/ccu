@@ -124,7 +124,7 @@ public class UpdateEntityHandler implements MessageHandler {
 
             if (isModbusInputOrDiscreteInput(row)) {
                 CcuLog.e(L.TAG_CCU_MESSAGING, "Ignore Message !"+ entityId);
-                return;
+                continue;
             }
 
             if (row.has("equip")) {

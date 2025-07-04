@@ -775,6 +775,7 @@ class CustomScheduleManager {
                             " pointDefinitionRef=$pointDefinitionRef," +
                             " actualId=${pointDefinition.id}"
                 )
+                continue
             }
         }
     }

@@ -11,9 +11,12 @@ import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.schedules.Occupancy
+import a75f.io.logic.bo.building.statprofiles.statcontrollers.SplitControllerFactory
 import a75f.io.logic.bo.building.statprofiles.util.BasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.util.StatLoopController
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
+import a75f.io.logic.controlcomponents.util.ControllerNames
 import a75f.io.logic.util.uiutils.updateUserIntentPoints
 
 
@@ -25,6 +28,14 @@ import a75f.io.logic.util.uiutils.updateUserIntentPoints
 abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short) : ZoneProfile() {
 
     var hssEquip : HyperStatSplitEquip = HyperStatSplitEquip(equipRef)
+    val loopController = StatLoopController()
+
+    var previousOccupancyStatus: Occupancy = Occupancy.NONE
+    var previousFanStageStatus: StandaloneFanStage = StandaloneFanStage.OFF
+    var previousFanLoopVal = 0
+    var previousFanLoopValStaged = 0
+    var fanLoopCounter = 0
+    var hasZeroFanLoopBeenHandled = false
 
     var fanEnabledStatus = false
     var lowestStageFanLow = false
@@ -84,10 +95,45 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short) :
         hssEquip.derivedFanLoopOutput.data = 0.0
     }
 
+    fun handleChangeOfDirection(userIntents: UserIntents, factory: SplitControllerFactory) {
+        if (currentTemp > userIntents.coolingDesiredTemp && state != ZoneState.COOLING) {
+            loopController.resetCoolingControl()
+            state = ZoneState.COOLING
+            resetControllers(factory)
+            logIt("Resetting cooling")
+        } else if (currentTemp < userIntents.heatingDesiredTemp && state != ZoneState.HEATING) {
+            loopController.resetHeatingControl()
+            state = ZoneState.HEATING
+            resetControllers(factory)
+            logIt("Resetting heating")
+        }
+    }
+
     open fun resetAllLogicalPointValues() {
         resetLoops()
         resetRelayLogicalPoints()
         resetAnalogOutLogicalPoints()
+    }
+
+    private fun resetControllers(factory: SplitControllerFactory) {
+        // Add controller here if any new stage controller is added
+        listOf(
+            ControllerNames.COOLING_STAGE_CONTROLLER,
+            ControllerNames.HEATING_STAGE_CONTROLLER,
+            ControllerNames.FAN_SPEED_CONTROLLER,
+            ControllerNames.COMPRESSOR_RELAY_CONTROLLER,
+        ).forEach {
+            val controller = factory.getController(it, hssEquip)
+            controller?.resetController()
+        }
+
+        previousFanLoopVal = 0
+        previousFanLoopValStaged = 0
+        fanLoopCounter = 0
+        hasZeroFanLoopBeenHandled = false
+        resetAllLogicalPointValues()
+        hssEquip.analogOutStages.clear()
+        hssEquip.relayStages.clear()
     }
 
     fun fallBackFanMode(

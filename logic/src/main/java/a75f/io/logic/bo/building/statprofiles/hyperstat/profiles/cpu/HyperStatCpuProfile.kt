@@ -64,11 +64,6 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
     private var previousFanStageStatus: StandaloneFanStage = StandaloneFanStage.OFF
     private val cpuDeviceMap: MutableMap<Int, CpuV2Equip> = mutableMapOf()
 
-    private val defaultFanLoopOutput = 0.0
-    private var previousFanLoopVal = 0
-    private var previousFanLoopValStaged = 0
-    private var fanLoopCounter = 0
-    private var hasZeroFanLoopBeenHandled = false
 
     override fun getProfileType() = ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT
 
@@ -301,8 +296,6 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
 
         if (mInterface != null) mInterface.refreshView()
 
-
-
         if (isRFDead) {
             handleRFDead(equip)
             return
@@ -317,6 +310,7 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
         val fanModeSaved = FanModeCacheStorage.getHyperStatFanModeCache().getFanModeFromCache(equip.equipRef)
         val basicSettings = fetchBasicSettings(equip)
         val config = getHsConfiguration(equip.equipRef)
+        val controllerFactory = HyperStatControlFactory(equip)
 
         logicalPointsList = getHSLogicalPointList(equip, config!!)
         curState = ZoneState.DEADBAND
@@ -334,7 +328,7 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
 
         loopController.initialise(hyperStatTuners)
         loopController.dumpLogs()
-        handleChangeOfDirection(currentTemp, userIntents)
+        handleChangeOfDirection(currentTemp, userIntents, controllerFactory, equip)
         updateOperatingMode(currentTemp, averageDesiredTemp, basicSettings.conditioningMode, equip.operatingMode)
 
         resetEquip(equip)
@@ -356,7 +350,7 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
         updateTitle24LoopCounter(hyperStatTuners, basicSettings)
 
         if (basicSettings.fanMode != StandaloneFanStage.OFF) {
-            operateRelays(config as CpuConfiguration, basicSettings, equip)
+            operateRelays(config as CpuConfiguration, basicSettings, equip, controllerFactory)
             operateAnalogOutputs(config, equip, basicSettings)
         } else {
             resetLogicalPoints()
@@ -459,9 +453,9 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
     }
 
     private fun operateRelays(
-        config: CpuConfiguration, basicSettings: BasicSettings, equip: CpuV2Equip
+        config: CpuConfiguration, basicSettings: BasicSettings, equip: CpuV2Equip,
+        controllerFactory: HyperStatControlFactory
     ) {
-        val controllerFactory = HyperStatControlFactory(equip)
         controllerFactory.addControllers(config)
         runControllers(equip, basicSettings, config)
     }
@@ -765,7 +759,7 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
             }
 
             ControllerNames.FAN_ENABLED -> {
-                var isFanLoopCounterEnabled = false;
+                var isFanLoopCounterEnabled = false
                 if (previousFanLoopVal > 0 && fanLoopCounter > 0) {
                     isFanLoopCounterEnabled = true
                 }

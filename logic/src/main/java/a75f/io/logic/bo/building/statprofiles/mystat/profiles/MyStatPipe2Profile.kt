@@ -109,6 +109,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         val averageDesiredTemp = getAverageTemp(userIntents)
         val fanModeSaved = FanModeCacheStorage.getMyStatFanModeCache().getFanModeFromCache(equip.equipRef)
         val basicSettings = fetchMyStatBasicSettings(equip)
+        val controllerFactory = MyStatControlFactory(equip)
 
         logicalPointsList = getMyStatLogicalPointList(equip, config!!)
         relayLogicalPoints = getMyStatRelayOutputPoints(equip)
@@ -130,7 +131,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
 
         loopController.initialise(tuners = myStatTuners)
         loopController.dumpLogs()
-        handleChangeOfDirection(currentTemp, userIntents)
+        handleChangeOfDirection(currentTemp, userIntents, controllerFactory, equip)
         updateOperatingMode(currentTemp, averageDesiredTemp, basicSettings.conditioningMode, equip.operatingMode)
 
         resetEquip(equip)
@@ -149,7 +150,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
             dcvLoopOutput, equip.dcvLoopOutput,
         )
 
-        operateRelays(config as MyStatPipe2Configuration, basicSettings, equip, userIntents)
+        operateRelays(config as MyStatPipe2Configuration, basicSettings, equip, userIntents, controllerFactory)
         handleAnalogOutState(config, equip, basicSettings, equip.analogOutStages, userIntents)
         processForWaterSampling(equip, myStatTuners, config, equip.relayStages, basicSettings)
         runAlgorithm(equip, basicSettings, equip.relayStages, equip.analogOutStages, config)
@@ -240,12 +241,10 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
     }
 
     private fun operateRelays(
-        config: MyStatPipe2Configuration,
-        basicSettings: MyStatBasicSettings,
-        equip: MyStatPipe2Equip,
-        userIntents: UserIntents
+        config: MyStatPipe2Configuration, basicSettings: MyStatBasicSettings,
+        equip: MyStatPipe2Equip, userIntents: UserIntents,
+        controllerFactory: MyStatControlFactory
     ) {
-        val controllerFactory = MyStatControlFactory(equip)
         controllerFactory.addControllers(config)
         runControllers(equip, basicSettings, config, userIntents)
     }
@@ -323,9 +322,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
                 ): Boolean {
                     val mode = equip.fanOpMode.readPriorityVal().toInt()
                     return if (isFanGoodToRun && mode == MyStatFanStages.AUTO.ordinal) {
-                        (basicSettings.fanMode != MyStatFanStages.OFF && currentState ||
-                                (fanEnabledStatus && fanLoopOutput > 0 && isLowestStageActive) ||
-                                (isLowestStageActive && runFanLowDuringDoorWindow))
+                        (basicSettings.fanMode != MyStatFanStages.OFF && currentState || (isLowestStageActive && runFanLowDuringDoorWindow))
                     } else {
                         checkUserIntentAction(stage)
                     }

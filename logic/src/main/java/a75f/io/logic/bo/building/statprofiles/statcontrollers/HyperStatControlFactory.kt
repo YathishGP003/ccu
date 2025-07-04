@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.statprofiles.statcontrollers
 
+import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.equips.hyperstat.HpuV2Equip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
@@ -13,6 +14,7 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HyperStatConf
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
 import a75f.io.logic.bo.building.statprofiles.util.getInCalibratedPointPoint
 import a75f.io.logic.controlcomponents.controls.ControllerFactory
+import a75f.io.logic.controlcomponents.handlers.StageControlHandler
 import a75f.io.logic.controlcomponents.util.ControllerNames
 
 /**
@@ -345,6 +347,13 @@ class HyperStatControlFactory(var equip: HyperStatEquip) {
 
                 else -> {}
             }
+        }
+    }
+
+    fun getController(controllerName: String, equip: DomainEquip): StageControlHandler? {
+        return if (equip.controllers.containsKey(controllerName)) equip.controllers[controllerName] as StageControlHandler
+        else {
+            return null
         }
     }
 

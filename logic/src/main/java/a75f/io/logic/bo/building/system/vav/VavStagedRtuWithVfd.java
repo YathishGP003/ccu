@@ -114,7 +114,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                     signal = vfdSystemEquip.getAnalog2CoolStage1().readDefaultVal();
                 }
             }
-            else if (isHeatingActive()) {
+            else if (isHeatingActive() || isCompressorActive()) {
                 if (getDomainPointForStage(Stage.HEATING_5).readHisVal() > 0
                         || getDomainPointForStage(Stage.COMPRESSOR_5).readHisVal() > 0) {
                     signal = vfdSystemEquip.getAnalog2HeatStage5().readDefaultVal();
@@ -134,7 +134,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
             } else if (isEconomizingAvailable && (systemCoolingLoopOp > 0)){
                 signal = vfdSystemEquip.getAnalog2Economizer().readDefaultVal();
             }
-            else if (systemEquip.getConditioningStages().getFanStage1().readHisVal() > 0) {
+            else if (systemEquip.getConditioningStages().getFanEnable().readHisVal() > 0) {
                 signal = vfdSystemEquip.getAnalog2Recirculate().readDefaultVal();
             }
             else {

@@ -36,6 +36,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.Html
+import android.text.TextUtils
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -1547,11 +1548,11 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
             textViewTemp.text = Html.fromHtml("$strCurrVal", Html.FROM_HTML_MODE_LEGACY)
         }
         if (typeface != null) textViewTemp.typeface = typeface
-        TextViewCompat.setAutoSizeTextTypeWithDefaults(
-            textViewTemp,
-            TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM
-        )
-        textViewTemp.maxLines = 2
+        val textSizeInSp = 24 * (resources.displayMetrics.density / resources.displayMetrics.scaledDensity)
+        textViewTemp.textSize = textSizeInSp
+        textViewTemp.ellipsize = TextUtils.TruncateAt.END
+        textViewTemp.ellipsize = null
+        textViewTemp.maxLines = 1
         textViewTemp.contentDescription =
             textView!!.text.toString() + "_" + tempStartTime + ":" + startTimeMM + "-" + tempEndTimeLocal + ":" + endTimeMM
         textViewTemp.id = ViewCompat.generateViewId()

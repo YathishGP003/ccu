@@ -331,6 +331,9 @@ public class BacnetEquip {
                     logicalParamPoint.addMarker("displayInUi");
                     //physicalParamPoint.addMarker("displayInUi");
                 }
+                if(point.isSchedulable()) {
+                    logicalParamPoint.addMarker(Tags.SCHEDULABLE);
+                }
                 CcuLog.d(TAG, "point display in ui-->" + point.getProtocolData().getBacnet().getDisplayInUIDefault());
                 //AtomicBoolean isWritable = new AtomicBoolean(false);
                 AtomicBoolean hasPresentValue = new AtomicBoolean(false);

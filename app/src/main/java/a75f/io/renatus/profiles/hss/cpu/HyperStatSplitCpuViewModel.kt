@@ -36,8 +36,8 @@ import a75f.io.renatus.profiles.hss.ConfigState
 import a75f.io.renatus.profiles.hss.HyperStatSplitViewModel
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
-import a75f.io.renatus.util.modifyConditioningMode
-import a75f.io.renatus.util.modifyFanMode
+import a75f.io.logic.util.modifyConditioningMode
+import a75f.io.logic.util.modifyFanMode
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -538,7 +538,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
             }
         }
 
-        val possibleConditioningMode = getPossibleConditioningModeSettings(hssProfile.hssEquip)
+        val possibleConditioningMode = getPossibleConditioningModeSettings(profileConfiguration as HyperStatSplitCpuConfiguration)
         val possibleFanMode = getSplitPossibleFanModeSettings(profileConfiguration.nodeAddress)
         modifyFanMode(possibleFanMode.ordinal, hssProfile.hssEquip.fanOpMode)
         modifyConditioningMode(possibleConditioningMode.ordinal, hssProfile.hssEquip.conditioningMode, allStandaloneProfileConditions)

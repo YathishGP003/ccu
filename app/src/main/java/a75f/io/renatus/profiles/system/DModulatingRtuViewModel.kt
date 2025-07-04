@@ -25,7 +25,7 @@ import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
 import a75f.io.renatus.util.SystemProfileUtil
 import a75f.io.renatus.util.TestSignalManager
-import a75f.io.renatus.util.modifyConditioningMode
+import a75f.io.logic.util.modifyConditioningMode
 import android.app.Activity
 import android.content.Context
 import androidx.compose.runtime.MutableState

@@ -694,7 +694,7 @@ public class Globals {
     }
 
 
-    private String getDomainSafeProfile(String profile) {
+    public String getDomainSafeProfile(String profile) {
         switch (profile) {
             case DomainName.vavReheatNoFan:
                 return ProfileType.VAV_REHEAT.name();

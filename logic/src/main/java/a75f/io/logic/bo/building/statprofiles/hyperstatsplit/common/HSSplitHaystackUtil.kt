@@ -89,6 +89,30 @@ class HSSplitHaystackUtil(
             return status
         }
 
+        fun getPossibleConditioningModeSettings(hssEquip: HyperStatSplitCpuConfiguration): PossibleConditioningMode {
+            val status = PossibleConditioningMode.OFF
+            try {
+                if (hssEquip.isCompressorStage1Enabled() || hssEquip.isCompressorStage2Enabled() || hssEquip.isCompressorStage3Enabled()) {
+                    return PossibleConditioningMode.BOTH
+                } else if ((hssEquip.isCoolingStagesAvailable() || hssEquip.isAnalogCoolingEnabled()) &&
+                    (hssEquip.isHeatingStagesAvailable() || hssEquip.isAnalogHeatingEnabled())) {
+                    return PossibleConditioningMode.BOTH
+                } else if (hssEquip.isCoolingStagesAvailable() || hssEquip.isAnalogCoolingEnabled()) {
+                    return PossibleConditioningMode.COOLONLY
+                } else if (hssEquip.isHeatingStagesAvailable() || hssEquip.isAnalogHeatingEnabled()) {
+                    return PossibleConditioningMode.HEATONLY
+                }
+
+            } catch (e: Exception) {
+                CcuLog.e(
+                    L.TAG_CCU_HSCPU,
+                    "Exception getPossibleConditioningModeSettings: ${e.message}"
+                )
+            }
+            CcuLog.d(L.TAG_CCU_HSCPU, "getPossibleConditioningModeSettings: $status")
+            return status
+        }
+
         fun getActualConditioningMode(hssEquip: HyperStatSplitEquip, selectedConditioningMode: Int): Int{
             if(selectedConditioningMode == 0)
                 return StandaloneConditioningMode.OFF.ordinal

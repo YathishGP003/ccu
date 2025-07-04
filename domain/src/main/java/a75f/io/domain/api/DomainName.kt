@@ -10,8 +10,8 @@ object DomainName {
 
     // Added all the profile names
     const val mystat2PFCU = "mystat2PFCU"
-    const val myStatHPU = "myStatHPU"
-    const val myStatCPU = "myStatCPU"
+    const val myStatHPU = "mystatHPU"
+    const val myStatCPU = "mystatCPU"
     const val vavStagedRtu = "vavStagedRtu"
     const val vavStagedRtuVfdFan = "vavStagedRtuVfdFan"
     const val vavAdvancedHybridAhuV2 = "vavAdvancedHybridAhuV2"

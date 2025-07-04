@@ -45,7 +45,13 @@ import a75f.io.domain.equips.OtnEquip
 import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.TIEquip
 import a75f.io.domain.equips.VavEquip
+import a75f.io.domain.equips.hyperstat.CpuV2Equip
+import a75f.io.domain.equips.hyperstat.HpuV2Equip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
+import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
+import a75f.io.domain.equips.mystat.MyStatCpuEquip
+import a75f.io.domain.equips.mystat.MyStatHpuEquip
+import a75f.io.domain.equips.mystat.MyStatPipe2Equip
 import a75f.io.domain.logic.CCUBaseConfigurationBuilder
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager.addCmBoardDevice
@@ -63,6 +69,7 @@ import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.ModelLoader.getCMDeviceModel
 import a75f.io.domain.util.ModelLoader.getDabStagedVfdRtuModelDef
 import a75f.io.domain.util.ModelLoader.getModelForDomainName
+import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.domain.util.ModelLoader.getVavStagedVfdRtuModelDef
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
@@ -89,10 +96,25 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfigurat
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.MonitoringConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuUniInType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.util.getCpuFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getHpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getHsFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatCpuFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatHpuFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe2FanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
+import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
 import a75f.io.logic.bo.building.system.DefaultSystemConfig
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
@@ -121,6 +143,8 @@ import a75f.io.logic.util.PreferenceUtil.setModbusKvtagsDataTypeUpdate
 import a75f.io.logic.util.addEquipScheduleStatusPoint
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.NETWORK_INTERFACE
+import a75f.io.logic.util.modifyConditioningMode
+import a75f.io.logic.util.modifyFanMode
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageInfo
@@ -450,6 +474,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if(!getMigrateDeleteRedundantOaoPointsBySystemEquip()) {
             deleteRedundantOaoPointsBasedOnCurrentSystemProfile()
         }
+        if (!PreferenceUtil.getUpdateEnumValuesForTerminalProfile()) {
+            updateEnumValueForTerminalProfile()
+            SystemProfileMigration.loadProfileForMigration()
+            SystemProfileMigration.updateEnumValuesForSystemProfile()
+            PreferenceUtil.setUpdateEnumValuesForTerminalProfile()
+        }
 
         if (!PreferenceUtil.getCopyModbusPoints()) {
             copyDefaultValueToLevel17()
@@ -473,6 +503,125 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
         hayStack.scheduleSync()
     }
+
+    private fun updateEnumValueForTerminalProfile() {
+        val standaloneEquip = hayStack.readAllEntities("equip and domainName and standalone")
+
+        standaloneEquip.forEach { equip ->
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating Enum Value for Equip: ${equip["id"]}")
+            val equipIdStr = equip["id"]?.toString() ?: return@forEach
+            if (equip["domainName"].toString().equals(DomainName.hyperstatSplitCpu, ignoreCase = true)) {
+                // For HyperStat Split CPU, we need to handle it separately
+                val equipId = HyperStatSplitEquip(equip["id"].toString())
+                val possibleConditioningMode =
+                    HSSplitHaystackUtil.getPossibleConditioningModeSettings(equipId)
+                val possibleFanMode = HSSplitHaystackUtil.getSplitPossibleFanModeSettings(
+                    equip["group"].toString().toInt()
+                )
+                modifyFanMode(possibleFanMode.ordinal, equipId.fanOpMode)
+                modifyConditioningMode(
+                    possibleConditioningMode.ordinal,
+                    equipId.conditioningMode,
+                    allStandaloneProfileConditions
+                )
+                return@forEach
+            } else if (equip["domainName"].toString().equals(DomainName.myStatCPU, ignoreCase = true) ||equip["domainName"].toString().equals(DomainName.mystat2PFCU, ignoreCase = true) || equip["domainName"].toString().equals(DomainName.myStatHPU, ignoreCase = true)) {
+                handleEnumUpdateForMyStatStatEquip(equip, equipIdStr)
+            } else if (equip["domainName"].toString().equals(DomainName.hyperstatHPU, ignoreCase = true) || equip["domainName"].toString().equals(DomainName.hyperstatCPU, ignoreCase = true) || equip["domainName"].toString().equals(DomainName.hyperstat2PFCU, ignoreCase = true)) {
+                handleEnumUpdateForHyperStatEquip(equip, equipIdStr)
+            }
+        }
+    }
+
+    private fun handleEnumUpdateForMyStatStatEquip(equip: HashMap<Any, Any>?, equipIdStr: String) {
+        // For MyStat CPU, HPU and Pipe2, we need to handle it separately
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Handling MyStat Equip Enum Update for $equipIdStr")
+        val (profileConfig, fanMode, equipId) = when (equip?.get("domainName").toString()) {
+            DomainName.myStatCPU -> {
+                val config = getMyStatConfiguration(equipIdStr) as MyStatCpuConfiguration
+                Triple(
+                    config,
+                    getMyStatPossibleFanModeSettings(getMyStatCpuFanLevel(config)),
+                    MyStatCpuEquip(equipIdStr)
+                )
+            }
+
+            DomainName.myStatHPU -> {
+                val config = getMyStatConfiguration(equipIdStr) as MyStatHpuConfiguration
+                Triple(
+                    config,
+                    getMyStatPossibleFanModeSettings(getMyStatHpuFanLevel(config)),
+                    MyStatHpuEquip(equipIdStr)
+                )
+            }
+
+            DomainName.mystat2PFCU -> {
+                val config = getMyStatConfiguration(equipIdStr) as MyStatPipe2Configuration
+                Triple(
+                    config,
+                    getMyStatPossibleFanModeSettings(getMyStatPipe2FanLevel(config)),
+                    MyStatPipe2Equip(equipIdStr)
+                )
+            }
+
+            else -> return
+        }
+        val possibleConditioningMode = getMyStatPossibleConditionMode(profileConfig)
+        modifyFanMode(fanMode, equipId.fanOpMode)
+        modifyConditioningMode(
+            possibleConditioningMode.ordinal,
+            equipId.conditioningMode,
+            allStandaloneProfileConditions
+        )
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Completed MyStat Equip Enum Update for $equipIdStr")
+
+    }
+
+    private fun handleEnumUpdateForHyperStatEquip(equip: HashMap<Any, Any>?, equipIdStr: String) {
+        // For HyperStat CPU, HPU and Pipe2, we need to handle it separately
+        val (profileConfig, fanMode, equipId) = when (equip?.get("domainName").toString()) {
+            DomainName.hyperstatCPU -> {
+                val config =
+                    getHsConfiguration(equipIdStr) as? CpuConfiguration ?: return
+                Triple(
+                    config,
+                    getHsPossibleFanModeSettings(getCpuFanLevel(config)),
+                    CpuV2Equip(equipIdStr)
+                )
+            }
+
+            DomainName.hyperstat2PFCU -> {
+                val config =
+                    getHsConfiguration(equipIdStr) as? Pipe2Configuration ?: return
+                Triple(
+                    config,
+                    getHsPossibleFanModeSettings(getHsFanLevel(config)),
+                    Pipe2V2Equip(equipIdStr)
+                )
+            }
+
+            DomainName.hyperstatHPU -> {
+                val config =
+                    getHsConfiguration(equipIdStr) as? HpuConfiguration ?: return
+                Triple(
+                    config,
+                    getHsPossibleFanModeSettings(getHpuFanLevel(config)),
+                    HpuV2Equip(equipIdStr)
+                )
+            }
+
+            else -> return
+        }
+        val conditionMode = getPossibleConditionMode(profileConfig)
+        modifyFanMode(fanMode.ordinal, equipId.fanOpMode)
+        modifyConditioningMode(
+            conditionMode.ordinal,
+            equipId.conditioningMode,
+            allStandaloneProfileConditions
+        )
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Completed HSStat Equip Enum Update for $equipIdStr")
+    }
+
 
     private fun reSyncHisPointsForDR() {
         val activationQuery = ("domainName == \"" + DomainName.demandResponseActivation + "\"")

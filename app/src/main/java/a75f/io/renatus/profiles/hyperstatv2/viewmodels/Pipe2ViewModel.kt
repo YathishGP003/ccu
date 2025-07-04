@@ -27,8 +27,8 @@ import a75f.io.renatus.profiles.hyperstatv2.viewstates.HyperStatV2ViewState
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.Pipe2ViewState
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
-import a75f.io.renatus.util.modifyConditioningMode
-import a75f.io.renatus.util.modifyFanMode
+import a75f.io.logic.util.modifyConditioningMode
+import a75f.io.logic.util.modifyFanMode
 import android.app.Application
 import android.content.Context
 import android.content.Intent

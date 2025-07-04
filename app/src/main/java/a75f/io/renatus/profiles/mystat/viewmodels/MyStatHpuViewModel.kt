@@ -28,8 +28,8 @@ import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewStateUtil
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
-import a75f.io.renatus.util.modifyConditioningMode
-import a75f.io.renatus.util.modifyFanMode
+import a75f.io.logic.util.modifyConditioningMode
+import a75f.io.logic.util.modifyFanMode
 import a75f.io.renatus.util.showErrorDialog
 import android.app.Application
 import android.content.Context

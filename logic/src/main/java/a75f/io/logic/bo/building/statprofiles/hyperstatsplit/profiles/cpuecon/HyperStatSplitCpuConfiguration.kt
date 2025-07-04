@@ -607,6 +607,10 @@ class HyperStatSplitCpuConfiguration (nodeAddress: Int, nodeType: String, priori
         return (isCoolStage1Enabled() || isCoolStage2Enabled() || isCoolStage3Enabled())
     }
 
+    fun isHeatingStagesAvailable():Boolean{
+        return (isHeatStage1Enabled() || isHeatStage2Enabled() || isHeatStage3Enabled())
+    }
+
     fun isCompressorStagesAvailable(): Boolean {
         return (isCompressorStage1Enabled() || isCompressorStage2Enabled() || isCompressorStage3Enabled())
     }

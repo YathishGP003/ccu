@@ -24,7 +24,6 @@ import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
 import a75f.io.renatus.util.SystemProfileUtil
 import a75f.io.renatus.util.TestSignalManager
-import a75f.io.renatus.util.modifyConditioningMode
 import android.app.Activity
 import android.content.Context
 import androidx.compose.runtime.MutableState
@@ -39,6 +38,7 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import a75f.io.logic.util.modifyConditioningMode
 import kotlin.system.measureTimeMillis
 
 open class StagedRtuProfileViewModel : ViewModel() {

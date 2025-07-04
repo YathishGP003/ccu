@@ -3988,11 +3988,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun copyDefaultValueToLevel17() {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Copying default value to level 17 for writable points")
         hayStack.readAllEntities("equip and (modbus or bacnet) and zone and not scheduleType")
             .forEach { equip ->
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Processing equip: ${equip["dis"]} with id: ${equip["id"]}")
                 hayStack
-                    .readAllEntities("point and writable not scheduleStatus and equipRef==\"${equip["id"].toString()}\"")
+                    .readAllEntities("point and writable and not scheduleStatus and equipRef==\"${equip["id"].toString()}\"")
                     .forEach { point ->
+                        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Copying default value for point: ${point["dis"]} with id: ${point["id"]}")
                         hayStack.writePoint(
                             point["id"].toString(),
                             SYSTEM_DEFAULT_VAL_LEVEL,
@@ -4002,6 +4005,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                         )
                     }
             }
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Copying default value to level 17 completed")
     }
 
     private fun addEquipScheduleStatusEntityForTerminalExternalEquips() {

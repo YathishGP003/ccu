@@ -205,7 +205,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     ArrayList<Zone> roomList = new ArrayList<>();
 
     private RelativeLayout weather_data = null;
-    private RelativeLayout two_months_offline = null;
     private TextView place;
     private TextView temperature;
     private TextView weather_condition;

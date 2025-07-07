@@ -76,21 +76,29 @@ class DefaultSystem : SystemProfile() {
                 return this
             }
         }
-        CoroutineScope(Dispatchers.IO).launch {
-            val defaultSystemModel = getDefaultSystemProfileModel() as SeventyFiveFProfileDirective
-            val deviceModel = getCMDeviceModel() as SeventyFiveFDeviceDirective
-            val entityMapper = EntityMapper(defaultSystemModel)
-            val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
-            val equipBuilder = ProfileEquipBuilder(hayStack)
-            val profileConfiguration = DefaultSystemConfig(defaultSystemModel)
 
-            val equipDis = hayStack.siteName + "-" + defaultSystemModel.name
-            val equipId = equipBuilder.buildEquipAndPoints(
-                profileConfiguration,
-                defaultSystemModel,
-                hayStack.site!!.id,
-                equipDis
-            )
+        /*system equip needs to be created before CCU registeration happens*/
+        val defaultSystemModel = getDefaultSystemProfileModel() as SeventyFiveFProfileDirective
+        val deviceModel = getCMDeviceModel() as SeventyFiveFDeviceDirective
+        val entityMapper = EntityMapper(defaultSystemModel)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val profileConfiguration = DefaultSystemConfig(defaultSystemModel)
+
+        val equipDis = hayStack.siteName + "-" + defaultSystemModel.name
+        val equipId = equipBuilder.buildEquipAndPoints(
+            profileConfiguration,
+            defaultSystemModel,
+            hayStack.site!!.id,
+            equipDis
+        )
+
+        CcuLog.d(L.TAG_CCU_SYSTEM, "Add Default System Equip")
+
+        updateAhuRef(equipId)
+        addSystemDomainEquip(hayStack)
+
+        CoroutineScope(Dispatchers.IO).launch {
             val cmDevice = hayStack.readEntity("cm and device")
             if (cmDevice.isNotEmpty()) {
                 hayStack.deleteEntityTree(cmDevice["id"].toString())
@@ -105,10 +113,6 @@ class DefaultSystem : SystemProfile() {
                 deviceDis, null
             )
 
-            CcuLog.d(L.TAG_CCU_SYSTEM, "Add Default System Equip")
-            updateAhuRef(equipId)
-
-            addSystemDomainEquip(hayStack)
             DomainManager.addCmBoardDevice(hayStack)
             L.saveCCUState()
 

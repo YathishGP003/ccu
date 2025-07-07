@@ -1,9 +1,7 @@
 package a75f.io.renatus.profiles.system
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.device.mesh.DeviceUtil
 import a75f.io.domain.api.Domain
-import a75f.io.domain.api.DomainName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.renatus.R
@@ -15,7 +13,6 @@ import a75f.io.renatus.modbus.util.CANCEL
 import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment.Companion.DividerRow
-import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.util.AddProgressGif
 import a75f.io.renatus.util.TestSignalManager
 import a75f.io.renatus.util.highPriorityDispatcher
@@ -47,7 +44,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -123,11 +119,6 @@ class DabModulatingRtuFragment : DModulatingRtuFragment() {
                 .padding(10.dp),
         ) {
             item {
-                // Adaptive delta and maximized exit water buttons
-                var dcwbEnabledMutableState by remember { mutableStateOf(viewState.value.isDcwbEnabled) }
-                // State to show or hide alert dialog
-                var showDialog by remember { mutableStateOf(false) }
-                var changeAnalog4Values = remember { mutableStateOf(false) }
 
                 Row(
                     modifier = Modifier
@@ -135,8 +126,8 @@ class DabModulatingRtuFragment : DModulatingRtuFragment() {
                         .padding(10.dp)
                 ) {
                     Image(
-                        painter = if (dcwbEnabledMutableState) painterResource(id = R.drawable.input_dab_fullyahu_ao4) else painterResource(
-                            id = R.drawable.input_dab_fullyahu
+                        painter = painterResource(
+                            id = R.drawable.modulating
                         ),
                         contentDescription = "Relays",
                         modifier = Modifier
@@ -175,147 +166,64 @@ class DabModulatingRtuFragment : DModulatingRtuFragment() {
                                 )
                             }
                             Spacer(modifier = Modifier.height(18.dp))
-                            AnalogOutComposable(
-                                viewModel = dabModulatingViewModel,
-                                dcwbEnabledMutableState
-                            )
-                            // Analog out 4 composable when dcwb is enabled
-                            if (dcwbEnabledMutableState) {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                SystemAnalogOutMappingViewWithList(
-                                    analogName = "Analog-Out 4",
-                                    analogOutState = viewState.value.isAnalog4OutputEnabled,
-                                    onAnalogOutEnabled = {
-                                        viewState.value.isAnalog4OutputEnabled = it
-                                        dabModulatingViewModel.setStateChanged()
-                                        viewState.value.unusedPortState =
-                                            UnusedPortsModel.setPortState(
-                                                "Analog 4 Output",
-                                                it,
-                                                dabModulatingViewModel.profileConfiguration
-                                            )
-                                    },
-                                    mappingSpace = 15.dp,
-                                    mappingSelection = viewState.value.analog4Association,
-                                    mapping = dabModulatingViewModel.analog4AssociationList,
-                                    onMappingChanged = {
-                                        viewState.value.analog4Association = it
-                                        dabModulatingViewModel.setStateChanged()
-                                        changeAnalog4Values.value = true
-                                    },
-                                    analogOutValList = (0..100).map { it.toDouble().toString() },
-                                    analogOutVal =
-                                    try {
-                                        (0..100).map { it }.indexOf(
-                                            Domain.cmBoardDevice.analog4Out.readHisVal().toInt()
-                                        )
-                                    } catch (e: UninitializedPropertyAccessException) {
-                                        // When the cmBoardDevice is uninitialized after registration
-                                        (0..100).map { it }.indexOf(20)
-                                    },
-                                    onAnalogOutChanged = {
-                                        viewState.value.analogOut4OutSideAirTestSignal =
-                                            it.toDouble()
-                                        dabModulatingViewModel.sendAnalogRelayTestSignal(
-                                            DomainName.analog4Out,
-                                            it.toDouble()
-                                        )
-                                    },
-                                    dropDownWidthPreview = 100,
-                                    dropdownWidthExpanded = 120,
-                                    mappingTextSpacer = 20
-                                )
-                            }
+                            AnalogOutComposable(viewModel = dabModulatingViewModel)
                             RelayComposable(viewModel = dabModulatingViewModel)
+                            Spacer(modifier = Modifier.height(18.dp))
+                            AnalogInputConfig()
+
                         }
                     }
                 }
+            }
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+                if (dabModulatingViewModel.viewState.value.isDcwbEnabled) {
+                    DcwbComposable()
+                }
+            }
 
-
-                Spacer(modifier = Modifier.height(14.dp))
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
                 Row(
                     modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),  // Makes the row take up the full width of the screen
+                        .fillMaxWidth()
+                        .padding(end = 40.dp),
+                    horizontalArrangement = Arrangement.Start
                 ) {
-                    Spacer(modifier = Modifier.padding(start = 280.dp))
-                    SwitchWithLabelOnRight(
-                        label = "DCWB Enable",
-                        isChecked = dcwbEnabledMutableState,
-                        onCheckedChange = {
-                            // Reset the button state
-                            viewState.value.isAnalog1OutputEnabled = false
-                            viewState.value.isAnalog4OutputEnabled = false
-                            if(it) {
-                                dcwbEnabledMutableState = true
-                                showDialog = true
-                            } else {
-                                viewState.value.isDcwbEnabled = false
-                                dabModulatingViewModel.setStateChanged()
-                                dcwbEnabledMutableState = false
-                            }
-                        }
-                    )
-                    // Alert Dialog to show when switch is toggled
-                    if (showDialog) {
-                        AlertDialog(
-                            onDismissRequest = {
-                                // When the user clicks outside the dialog or back button do nothing. Keep the dialog ON
-                            },
-                            text = {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically // Align icon and text vertically
-                                ) {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.ic_dialog_alert),
-                                        contentDescription = "Warning",
-                                        modifier = Modifier
-                                            .size(40.dp) // Adjust the size of the icon
-                                            .padding(end = 8.dp) // Add space between icon and text
-                                    )
-                                    Text(
-                                        text = "Please Configure the BTU meter's\nModbus parameters",
-                                        fontSize = 16.sp
-                                    )
-                                }
-
-                            },
-                            confirmButton = {
-                                TextButton(
-                                    onClick = {
-                                        dcwbEnabledMutableState = true
-                                        showDialog = false // Close dialog on OK click
-                                        viewState.value.isDcwbEnabled = true
-                                        viewState.value.isAdaptiveDeltaEnabled = true
-                                        dabModulatingViewModel.setStateChanged()
-                                    }
-                                ) {
-                                    Text("PROCEED")
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(
-                                    onClick = {
-                                        // Action on "Cancel"
-                                        dcwbEnabledMutableState = false
-                                        showDialog = false
-                                        viewState.value.isDcwbEnabled = false
-                                        dabModulatingViewModel.setStateChanged()
-                                    }
-                                ) {
-                                    Text("CANCEL")
-                                }
-                            }
-                        )
-                    }
+                    AnalogOut1MinMaxConfig()
                 }
-                if (dcwbEnabledMutableState) {
-                    DcwbEnabledAnalogView(
-                        dabModulatingViewModel,
-                        viewState.value.analog4Association > 0
-                    )
-                } else {
-                    DcwbDisabledAnalogView(dabModulatingViewModel)
+            }
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 40.dp),
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    AnalogOut2MinMaxConfig()
+                }
+            }
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 40.dp),
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    AnalogOut3MinMaxConfig()
+                }
+            }
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 40.dp),
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    AnalogOut4MinMaxConfig()
                 }
             }
 

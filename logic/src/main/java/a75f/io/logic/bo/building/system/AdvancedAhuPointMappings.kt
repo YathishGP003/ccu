@@ -1,6 +1,5 @@
 package a75f.io.logic.bo.building.system
 
-import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.AdvancedHybridSystemEquip
@@ -9,7 +8,7 @@ import a75f.io.domain.equips.DomainEquip
 import a75f.io.logic.bo.building.system.util.DuctPressureSensorSource
 
 enum class AdvancedAhuRelayAssociationType {
-    LOAD_COOLING, LOAD_HEATING, LOAD_FAN, HUMIDIFIER, DEHUMIDIFIER, SAT_COOLING, SAT_HEATING, FAN_PRESSURE, OCCUPIED_ENABLE, FAN_ENABLE, AHU_FRESH_AIR_FAN_COMMAND, EXHAUST_FAN;
+    LOAD_COOLING, LOAD_HEATING, LOAD_FAN, HUMIDIFIER, DEHUMIDIFIER, SAT_COOLING, SAT_HEATING, FAN_PRESSURE, OCCUPIED_ENABLE, FAN_ENABLE, AHU_FRESH_AIR_FAN_COMMAND, EXHAUST_FAN, COMPRESSOR_SPEED,CHANGE_OVER_O_COOLING, CHANGE_OVER_B_HEATING ;
 
     fun isConditioningStage() = this == LOAD_COOLING || this == SAT_COOLING || this == LOAD_HEATING || this == SAT_HEATING
     fun isSatStage() = this == SAT_COOLING || this == SAT_HEATING
@@ -17,7 +16,7 @@ enum class AdvancedAhuRelayAssociationType {
 }
 
 enum class AdvancedAhuAnalogOutAssociationType {
-    PRESSURE_FAN, SAT_COOLING, SAT_HEATING, LOAD_COOLING, LOAD_HEATING, LOAD_FAN, CO2_DAMPER, COMPOSITE_SIGNAL, OAO_DAMPER, RETURN_DAMPER
+    PRESSURE_FAN, SAT_COOLING, SAT_HEATING, LOAD_COOLING, LOAD_HEATING, LOAD_FAN, CO2_DAMPER, COMPOSITE_SIGNAL, COMPRESSOR_SPEED;
 }
 
 fun getCMRelayAssociationMap(systemEquip: AdvancedHybridSystemEquip): Map<Point, Point> {
@@ -78,7 +77,14 @@ enum class AdvancedAhuRelayMappings {
     FAN_PRESSURE_STAGE_5,
     OCCUPIED_ENABLE,
     FAN_ENABLE,
-    AHU_FRESH_AIR_FAN_RUN_COMMAND
+    AHU_FRESH_AIR_FAN_RUN_COMMAND,
+    COMPRESSOR__STAGE_1,
+    COMPRESSOR__STAGE_2,
+    COMPRESSOR__STAGE_3,
+    COMPRESSOR__STAGE_4,
+    COMPRESSOR__STAGE_5,
+    CHANGE_OVER_O_COOLING,
+    CHANGE_OVER_B_HEATING
 }
 
 enum class AdvancedAhuThermistorAssociationType {
@@ -340,6 +346,13 @@ fun relayAssociationToDomainName(associationIndex : Int) : String {
         32 -> DomainName.occupiedEnable
         33 -> DomainName.fanEnable
         34 -> DomainName.ahuFreshAirFanRunCommand
+        35 -> DomainName.compressorStage1
+        36 -> DomainName.compressorStage2
+        37 -> DomainName.compressorStage3
+        38 -> DomainName.compressorStage4
+        39 -> DomainName.compressorStage5
+        40 -> DomainName.changeOverCooling
+        41 -> DomainName.changeOverHeating
         else -> throw IllegalArgumentException("Invalid association index $associationIndex")
     }
 }
@@ -354,6 +367,7 @@ fun analogOutAssociationToDomainName(associationIndex: Int) : String {
         5 -> DomainName.loadBasedFanControl
         6 -> DomainName.co2BasedDamperControl
         7 -> DomainName.compositeSignal
+        8 -> DomainName.compressorSpeed
         else -> throw IllegalArgumentException("Invalid association index $associationIndex")
     }
 }
@@ -366,6 +380,7 @@ fun connectAnalogOutAssociationToDomainName(associationIndex: Int) : String {
         4 -> DomainName.co2BasedDamperControl
         5 -> DomainName.oaoDamper
         6 -> DomainName.returnDamperCmd
+        7 -> DomainName.compressorSpeed
         else -> throw IllegalArgumentException("Invalid association index $associationIndex")
     }
 }
@@ -394,12 +409,17 @@ fun relayAssociationDomainNameToType (domainName : String) : AdvancedAhuRelayAss
 
         DomainName.occupiedEnable -> return AdvancedAhuRelayAssociationType.OCCUPIED_ENABLE
         DomainName.fanEnable -> return AdvancedAhuRelayAssociationType.FAN_ENABLE
+
         DomainName.ahuFreshAirFanRunCommand -> return AdvancedAhuRelayAssociationType.AHU_FRESH_AIR_FAN_COMMAND
-
         DomainName.exhaustFanStage1 , DomainName.exhaustFanStage2 -> return AdvancedAhuRelayAssociationType.EXHAUST_FAN
+
+        DomainName.compressorStage1, DomainName.compressorStage2, DomainName.compressorStage3,
+        DomainName.compressorStage4, DomainName.compressorStage5-> return AdvancedAhuRelayAssociationType.COMPRESSOR_SPEED
+
+        DomainName.changeOverCooling -> return AdvancedAhuRelayAssociationType.CHANGE_OVER_O_COOLING
+        DomainName.changeOverHeating -> return AdvancedAhuRelayAssociationType.CHANGE_OVER_B_HEATING
+
         else -> throw IllegalArgumentException("Invalid domain name $domainName")
-
-
     }
 }
 
@@ -476,41 +496,48 @@ fun co2DamperControlTypeToDomainPoint(index: Int, systemEquip: AdvancedHybridSys
 
 fun getDomainPointForName(name: String, systemEquip: AdvancedHybridSystemEquip): Point {
     return when (name) {
-        DomainName.loadCoolingStage1 -> systemEquip.loadCoolingStage1
-        DomainName.loadCoolingStage2 -> systemEquip.loadCoolingStage2
-        DomainName.loadCoolingStage3 -> systemEquip.loadCoolingStage3
-        DomainName.loadCoolingStage4 -> systemEquip.loadCoolingStage4
-        DomainName.loadCoolingStage5 -> systemEquip.loadCoolingStage5
-        DomainName.loadHeatingStage1 -> systemEquip.loadHeatingStage1
-        DomainName.loadHeatingStage2 -> systemEquip.loadHeatingStage2
-        DomainName.loadHeatingStage3 -> systemEquip.loadHeatingStage3
-        DomainName.loadHeatingStage4 -> systemEquip.loadHeatingStage4
-        DomainName.loadHeatingStage5 -> systemEquip.loadHeatingStage5
-        DomainName.loadFanStage1 -> systemEquip.loadFanStage1
-        DomainName.loadFanStage2 -> systemEquip.loadFanStage2
-        DomainName.loadFanStage3 -> systemEquip.loadFanStage3
-        DomainName.loadFanStage4 -> systemEquip.loadFanStage4
-        DomainName.loadFanStage5 -> systemEquip.loadFanStage5
-        DomainName.humidifierEnable -> systemEquip.humidifierEnable
-        DomainName.dehumidifierEnable -> systemEquip.dehumidifierEnable
-        DomainName.satCoolingStage1 -> systemEquip.satCoolingStage1
-        DomainName.satCoolingStage2 -> systemEquip.satCoolingStage2
-        DomainName.satCoolingStage3 -> systemEquip.satCoolingStage3
-        DomainName.satCoolingStage4 -> systemEquip.satCoolingStage4
-        DomainName.satCoolingStage5 -> systemEquip.satCoolingStage5
-        DomainName.satHeatingStage1 -> systemEquip.satHeatingStage1
-        DomainName.satHeatingStage2 -> systemEquip.satHeatingStage2
-        DomainName.satHeatingStage3 -> systemEquip.satHeatingStage3
-        DomainName.satHeatingStage4 -> systemEquip.satHeatingStage4
-        DomainName.satHeatingStage5 -> systemEquip.satHeatingStage5
-        DomainName.fanPressureStage1 -> systemEquip.fanPressureStage1
-        DomainName.fanPressureStage2 -> systemEquip.fanPressureStage2
-        DomainName.fanPressureStage3 -> systemEquip.fanPressureStage3
-        DomainName.fanPressureStage4 -> systemEquip.fanPressureStage4
-        DomainName.fanPressureStage5 -> systemEquip.fanPressureStage5
-        DomainName.occupiedEnable -> systemEquip.occupiedEnable
-        DomainName.fanEnable -> systemEquip.fanEnable
-        DomainName.ahuFreshAirFanRunCommand -> systemEquip.ahuFreshAirFanRunCommand
+        DomainName.loadCoolingStage1 -> systemEquip.conditioningStages.loadCoolingStage1
+        DomainName.loadCoolingStage2 -> systemEquip.conditioningStages.loadCoolingStage2
+        DomainName.loadCoolingStage3 -> systemEquip.conditioningStages.loadCoolingStage3
+        DomainName.loadCoolingStage4 -> systemEquip.conditioningStages.loadCoolingStage4
+        DomainName.loadCoolingStage5 -> systemEquip.conditioningStages.loadCoolingStage5
+        DomainName.loadHeatingStage1 -> systemEquip.conditioningStages.loadHeatingStage1
+        DomainName.loadHeatingStage2 -> systemEquip.conditioningStages.loadHeatingStage2
+        DomainName.loadHeatingStage3 -> systemEquip.conditioningStages.loadHeatingStage3
+        DomainName.loadHeatingStage4 -> systemEquip.conditioningStages.loadHeatingStage4
+        DomainName.loadHeatingStage5 -> systemEquip.conditioningStages.loadHeatingStage5
+        DomainName.loadFanStage1 -> systemEquip.conditioningStages.loadFanStage1
+        DomainName.loadFanStage2 -> systemEquip.conditioningStages.loadFanStage2
+        DomainName.loadFanStage3 -> systemEquip.conditioningStages.loadFanStage3
+        DomainName.loadFanStage4 -> systemEquip.conditioningStages.loadFanStage4
+        DomainName.loadFanStage5 -> systemEquip.conditioningStages.loadFanStage5
+        DomainName.humidifierEnable -> systemEquip.conditioningStages.humidifierEnable
+        DomainName.dehumidifierEnable -> systemEquip.conditioningStages.dehumidifierEnable
+        DomainName.satCoolingStage1 -> systemEquip.conditioningStages.satCoolingStage1
+        DomainName.satCoolingStage2 -> systemEquip.conditioningStages.satCoolingStage2
+        DomainName.satCoolingStage3 -> systemEquip.conditioningStages.satCoolingStage3
+        DomainName.satCoolingStage4 -> systemEquip.conditioningStages.satCoolingStage4
+        DomainName.satCoolingStage5 -> systemEquip.conditioningStages.satCoolingStage5
+        DomainName.satHeatingStage1 -> systemEquip.conditioningStages.satHeatingStage1
+        DomainName.satHeatingStage2 -> systemEquip.conditioningStages.satHeatingStage2
+        DomainName.satHeatingStage3 -> systemEquip.conditioningStages.satHeatingStage3
+        DomainName.satHeatingStage4 -> systemEquip.conditioningStages.satHeatingStage4
+        DomainName.satHeatingStage5 -> systemEquip.conditioningStages.satHeatingStage5
+        DomainName.fanPressureStage1 -> systemEquip.conditioningStages.fanPressureStage1
+        DomainName.fanPressureStage2 -> systemEquip.conditioningStages.fanPressureStage2
+        DomainName.fanPressureStage3 -> systemEquip.conditioningStages.fanPressureStage3
+        DomainName.fanPressureStage4 -> systemEquip.conditioningStages.fanPressureStage4
+        DomainName.fanPressureStage5 -> systemEquip.conditioningStages.fanPressureStage5
+        DomainName.occupiedEnable -> systemEquip.conditioningStages.occupiedEnabled
+        DomainName.fanEnable -> systemEquip.conditioningStages.fanEnable
+        DomainName.ahuFreshAirFanRunCommand -> systemEquip.conditioningStages.ahuFreshAirFanRunCommand
+        DomainName.compressorStage1 -> systemEquip.conditioningStages.compressorStage1
+        DomainName.compressorStage2 -> systemEquip.conditioningStages.compressorStage2
+        DomainName.compressorStage3 -> systemEquip.conditioningStages.compressorStage3
+        DomainName.compressorStage4 -> systemEquip.conditioningStages.compressorStage4
+        DomainName.compressorStage5 -> systemEquip.conditioningStages.compressorStage5
+        DomainName.changeOverCooling -> systemEquip.conditioningStages.changeOverCooling
+        DomainName.changeOverHeating -> systemEquip.conditioningStages.changeOverHeating
         DomainName.pressureBasedFanControl -> systemEquip.pressureBasedFanControl
         DomainName.satBasedCoolingControl -> systemEquip.satBasedCoolingControl
         DomainName.satBasedHeatingControl -> systemEquip.satBasedHeatingControl
@@ -519,37 +546,46 @@ fun getDomainPointForName(name: String, systemEquip: AdvancedHybridSystemEquip):
         DomainName.loadBasedFanControl -> systemEquip.loadBasedFanControl
         DomainName.co2BasedDamperControl -> systemEquip.co2BasedDamperControl
         DomainName.compositeSignal -> systemEquip.compositeSignal
+        DomainName.compressorSpeed -> systemEquip.compressorSpeed
         else -> throw IllegalArgumentException("Invalid point $name")
     }
 }
 
 fun getDomainPointForName(name: String, connectEquip: ConnectModuleEquip): Point {
     return when (name) {
-        DomainName.loadCoolingStage1 -> connectEquip.loadCoolingStage1
-        DomainName.loadCoolingStage2 -> connectEquip.loadCoolingStage2
-        DomainName.loadCoolingStage3 -> connectEquip.loadCoolingStage3
-        DomainName.loadCoolingStage4 -> connectEquip.loadCoolingStage4
-        DomainName.loadCoolingStage5 -> connectEquip.loadCoolingStage5
-        DomainName.loadHeatingStage1 -> connectEquip.loadHeatingStage1
-        DomainName.loadHeatingStage2 -> connectEquip.loadHeatingStage2
-        DomainName.loadHeatingStage3 -> connectEquip.loadHeatingStage3
-        DomainName.loadHeatingStage4 -> connectEquip.loadHeatingStage4
-        DomainName.loadHeatingStage5 -> connectEquip.loadHeatingStage5
-        DomainName.loadFanStage1 -> connectEquip.loadFanStage1
-        DomainName.loadFanStage2 -> connectEquip.loadFanStage2
-        DomainName.loadFanStage3 -> connectEquip.loadFanStage3
-        DomainName.loadFanStage4 -> connectEquip.loadFanStage4
-        DomainName.loadFanStage5 -> connectEquip.loadFanStage5
-        DomainName.humidifierEnable -> connectEquip.humidifierEnable
-        DomainName.dehumidifierEnable -> connectEquip.dehumidifierEnable
-        DomainName.occupiedEnable -> connectEquip.occupiedEnable
-        DomainName.fanEnable -> connectEquip.fanEnable
-        DomainName.ahuFreshAirFanRunCommand -> connectEquip.ahuFreshAirFanRunCommand
+        DomainName.loadCoolingStage1 -> connectEquip.conditioningStages.loadCoolingStage1
+        DomainName.loadCoolingStage2 -> connectEquip.conditioningStages.loadCoolingStage2
+        DomainName.loadCoolingStage3 -> connectEquip.conditioningStages.loadCoolingStage3
+        DomainName.loadCoolingStage4 -> connectEquip.conditioningStages.loadCoolingStage4
+        DomainName.loadCoolingStage5 -> connectEquip.conditioningStages.loadCoolingStage5
+        DomainName.loadHeatingStage1 -> connectEquip.conditioningStages.loadHeatingStage1
+        DomainName.loadHeatingStage2 -> connectEquip.conditioningStages.loadHeatingStage2
+        DomainName.loadHeatingStage3 -> connectEquip.conditioningStages.loadHeatingStage3
+        DomainName.loadHeatingStage4 -> connectEquip.conditioningStages.loadHeatingStage4
+        DomainName.loadHeatingStage5 -> connectEquip.conditioningStages.loadHeatingStage5
+        DomainName.loadFanStage1 -> connectEquip.conditioningStages.loadFanStage1
+        DomainName.loadFanStage2 -> connectEquip.conditioningStages.loadFanStage2
+        DomainName.loadFanStage3 -> connectEquip.conditioningStages.loadFanStage3
+        DomainName.loadFanStage4 -> connectEquip.conditioningStages.loadFanStage4
+        DomainName.loadFanStage5 -> connectEquip.conditioningStages.loadFanStage5
+        DomainName.humidifierEnable -> connectEquip.conditioningStages.humidifierEnable
+        DomainName.dehumidifierEnable -> connectEquip.conditioningStages.dehumidifierEnable
+        DomainName.occupiedEnable -> connectEquip.conditioningStages.occupiedEnabled
+        DomainName.fanEnable -> connectEquip.conditioningStages.fanEnable
+        DomainName.ahuFreshAirFanRunCommand -> connectEquip.conditioningStages.ahuFreshAirFanRunCommand
+        DomainName.compressorStage1 -> connectEquip.conditioningStages.compressorStage1
+        DomainName.compressorStage2 -> connectEquip.conditioningStages.compressorStage2
+        DomainName.compressorStage3 -> connectEquip.conditioningStages.compressorStage3
+        DomainName.compressorStage4 -> connectEquip.conditioningStages.compressorStage4
+        DomainName.compressorStage5 -> connectEquip.conditioningStages.compressorStage5
+        DomainName.changeOverCooling -> connectEquip.conditioningStages.changeOverCooling
+        DomainName.changeOverHeating -> connectEquip.conditioningStages.changeOverHeating
         DomainName.loadBasedCoolingControl -> connectEquip.loadBasedCoolingControl
         DomainName.loadBasedHeatingControl -> connectEquip.loadBasedHeatingControl
         DomainName.loadBasedFanControl -> connectEquip.loadBasedFanControl
         DomainName.co2BasedDamperControl -> connectEquip.co2BasedDamperControl
         DomainName.compositeSignal -> connectEquip.compositeSignal
+        DomainName.compressorSpeed -> connectEquip.compressorSpeed
         DomainName.oaoDamper -> connectEquip.oaoDamper
         DomainName.returnDamperCmd -> connectEquip.returnDamperCmd
         DomainName.exhaustFanStage1 -> connectEquip.exhaustFanStage1

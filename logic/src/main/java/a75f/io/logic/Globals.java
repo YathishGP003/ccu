@@ -17,6 +17,7 @@ import org.projecthaystack.client.HClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -305,9 +306,20 @@ public class Globals {
                 CcuLog.i(L.TAG_CCU_INIT, "Schedule Jobs");
                 //TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
 
+                Map<String, Integer> analogMappings = null;
+                if (!PreferenceUtil.getMigrateModulatingProfileNormalization()) {
+                    analogMappings = migrationHandler.fetchAnalogPointsForSystemProfile(CCUHsApi.getInstance());
+                    CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Analog Mappings for System Profile: " + analogMappings);
+                } else {
+                    CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Analog Mappings for System Profile migration already done");
+                }
                 modelMigration(migrationHandler);
                 migrationHandler.doPostModelMigrationTasks();
 
+                if (analogMappings != null) {
+                    CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Modulating Profile Normalization migration");
+                    migrationHandler.doModulatingProfileNormalization(analogMappings);
+                }
                 /*Below migration scripts should be handled after model migration*/
                 migrationHandler.temperatureModeMigration();
                 /*checkBacnetIdMigrationRequired migration script will update source model version
@@ -482,9 +494,11 @@ public class Globals {
             L.ccu().systemProfile = new DefaultSystem().createDefaultSystemEquip();
             isDefaultSystem = true;
         }
+        CcuLog.d(L.TAG_CCU, "Add SystemEquip");
         if (!isDefaultSystem)
             L.ccu().systemProfile.addSystemEquip();
 
+        CcuLog.d(L.TAG_CCU, "Load Terminal Equips");
         for (Floor f : HSUtil.getFloors()) {
             for (Zone z : HSUtil.getZones(f.getId())) {
                 for (Equip eq : HSUtil.getEquips(z.getId())) {

@@ -5,6 +5,7 @@ import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logic.L
 import a75f.io.logic.controlcomponents.controls.ControllerFactory
+import a75f.io.logic.controlcomponents.handlers.ExhaustFanController
 import a75f.io.logic.controlcomponents.handlers.StageControlHandler
 import a75f.io.logic.controlcomponents.util.ControllerNames
 
@@ -68,7 +69,6 @@ class SystemControllerFactory {
         }
     }
 
-
     fun addFanControllers(
         equip: DomainEquip,
         heatingLoopOutput: Point,
@@ -120,7 +120,7 @@ class SystemControllerFactory {
         zoneHumidity: Point,
         targetHumidifier: Point,
         activationHysteresis: Point,
-        occupancyMode : CalibratedPoint
+        occupancyMode: CalibratedPoint
     ) {
         factory.addHumidifierController(
             equip = equip,
@@ -199,9 +199,186 @@ class SystemControllerFactory {
         )
     }
 
+    fun addFanRunCommandController(
+        equip: DomainEquip, systemCo2Loop: Point, occupancy: CalibratedPoint
+    ) {
+        factory.addFanRunCommandController(
+            equip, systemCo2Loop, occupancy, logTag = L.TAG_CCU_SYSTEM
+        )
+    }
+
+    fun addExhaustFanStage1Controller(
+        equip: DomainEquip,
+        outsideAirFinalLoopOutput: Point,
+        exhaustFanStage1Threshold: Point,
+        exhaustFanHysteresis: Point,
+    ) {
+        if (equip.controllers.containsKey(ControllerNames.EXHAUST_FAN_STAGE1_CONTROLLER)) return
+
+        val controller = ExhaustFanController(
+            outsideAirFinalLoopOutput,
+            exhaustFanStage1Threshold,
+            exhaustFanHysteresis,
+            logTag = L.TAG_CCU_SYSTEM
+        )
+        equip.controllers[ControllerNames.EXHAUST_FAN_STAGE1_CONTROLLER] = controller
+    }
+
+    fun addExhaustFanStage2Controller(
+        equip: DomainEquip,
+        outsideAirFinalLoopOutput: Point,
+        exhaustFanStage2Threshold: Point,
+        exhaustFanHysteresis: Point,
+    ) {
+        if (equip.controllers.containsKey(ControllerNames.EXHAUST_FAN_STAGE2_CONTROLLER)) return
+        val controller = ExhaustFanController(
+            outsideAirFinalLoopOutput,
+            exhaustFanStage2Threshold,
+            exhaustFanHysteresis,
+            logTag = L.TAG_CCU_SYSTEM
+        )
+        equip.controllers[ControllerNames.EXHAUST_FAN_STAGE2_CONTROLLER] = controller
+    }
+
+
+    fun addLoadCoolingControllers(
+        equip: DomainEquip,
+        coolingLoopOutput: Point,
+        activationHysteresis: Point,
+        stageUpTimerCounter: Point,
+        stageDownTimerCounter: Point,
+        economizationAvailable: CalibratedPoint,
+        coolingStages: Int
+    ) {
+        if (coolingStages > 0) {
+            factory.addStageController(
+                controllerName = ControllerNames.LOAD_COOLING_STAGE_CONTROLLER,
+                equip = equip,
+                loopOutput = coolingLoopOutput,
+                totalStages = getInCalibratedPointPoint(coolingStages),
+                activationHysteresis = activationHysteresis,
+                stageUpTimer = stageUpTimerCounter,
+                stageDownTimer = stageDownTimerCounter,
+                economizingAvailable = economizationAvailable,
+                logTag = L.TAG_CCU_SYSTEM
+            )
+        }
+    }
+
+    fun addLoadHeatingControllers(
+        equip: DomainEquip,
+        heatingLoopOutput: Point,
+        activationHysteresis: Point,
+        stageUpTimerCounter: Point,
+        stageDownTimerCounter: Point,
+        heatingStages: Int
+    ) {
+        if (heatingStages > 0) {
+            factory.addStageController(
+                controllerName = ControllerNames.LOAD_HEATING_STAGE_CONTROLLER,
+                equip = equip,
+                loopOutput = heatingLoopOutput,
+                totalStages = getInCalibratedPointPoint(heatingStages),
+                activationHysteresis = activationHysteresis,
+                stageUpTimer = stageUpTimerCounter,
+                stageDownTimer = stageDownTimerCounter,
+                logTag = L.TAG_CCU_SYSTEM
+            )
+        }
+    }
+
+    fun addLoadFanControllers(
+        equip: DomainEquip,
+        heatingLoopOutput: Point,
+        activationHysteresis: Point,
+        stageUpTimerCounter: Point,
+        stageDownTimerCounter: Point,
+        fanStages: Int
+    ) {
+        if (fanStages > 0) {
+            factory.addStageController(
+                controllerName = ControllerNames.LOAD_FAN_STAGE_CONTROLLER,
+                equip = equip,
+                loopOutput = heatingLoopOutput,
+                totalStages = getInCalibratedPointPoint(fanStages),
+                activationHysteresis = activationHysteresis,
+                stageUpTimer = stageUpTimerCounter,
+                stageDownTimer = stageDownTimerCounter,
+                logTag = L.TAG_CCU_SYSTEM
+            )
+        }
+    }
+
+    fun addSatCoolingControllers(
+        equip: DomainEquip,
+        coolingLoopOutput: Point,
+        activationHysteresis: Point,
+        stageUpTimerCounter: Point,
+        stageDownTimerCounter: Point,
+        economizationAvailable: CalibratedPoint,
+        coolingStages: Int
+    ) {
+        if (coolingStages > 0) {
+            factory.addStageController(
+                controllerName = ControllerNames.SAT_COOLING_STAGE_CONTROLLER,
+                equip = equip,
+                loopOutput = coolingLoopOutput,
+                totalStages = getInCalibratedPointPoint(coolingStages),
+                activationHysteresis = activationHysteresis,
+                stageUpTimer = stageUpTimerCounter,
+                stageDownTimer = stageDownTimerCounter,
+                economizingAvailable = economizationAvailable,
+                logTag = L.TAG_CCU_SYSTEM
+            )
+        }
+    }
+
+    fun addSatHeatingControllers(
+        equip: DomainEquip,
+        heatingLoopOutput: Point,
+        activationHysteresis: Point,
+        stageUpTimerCounter: Point,
+        stageDownTimerCounter: Point,
+        heatingStages: Int
+    ) {
+        if (heatingStages > 0) {
+            factory.addStageController(
+                controllerName = ControllerNames.SAT_HEATING_STAGE_CONTROLLER,
+                equip = equip,
+                loopOutput = heatingLoopOutput,
+                totalStages = getInCalibratedPointPoint(heatingStages),
+                activationHysteresis = activationHysteresis,
+                stageUpTimer = stageUpTimerCounter,
+                stageDownTimer = stageDownTimerCounter,
+                logTag = L.TAG_CCU_SYSTEM
+            )
+        }
+    }
+
+    fun addPressureFanControllers(
+        equip: DomainEquip,
+        heatingLoopOutput: Point,
+        activationHysteresis: Point,
+        stageUpTimerCounter: Point,
+        stageDownTimerCounter: Point,
+        fanStages: Int
+    ) {
+        if (fanStages > 0) {
+            factory.addStageController(
+                controllerName = ControllerNames.PRESSURE_FAN_STAGE_CONTROLLER,
+                equip = equip,
+                loopOutput = heatingLoopOutput,
+                totalStages = getInCalibratedPointPoint(fanStages),
+                activationHysteresis = activationHysteresis,
+                stageUpTimer = stageUpTimerCounter,
+                stageDownTimer = stageDownTimerCounter,
+                logTag = L.TAG_CCU_SYSTEM
+            )
+        }
+    }
+
     fun getController(controllerName: String, equip: DomainEquip): StageControlHandler? {
-        return if (equip.controllers.containsKey(controllerName))
-             equip.controllers[controllerName] as StageControlHandler
+        return if (equip.controllers.containsKey(controllerName)) equip.controllers[controllerName] as StageControlHandler
         else {
             return null
         }

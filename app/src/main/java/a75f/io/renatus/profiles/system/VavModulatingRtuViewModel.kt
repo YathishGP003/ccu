@@ -13,23 +13,32 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hvac.ModulatingProfileAnalogMapping
+import a75f.io.logic.bo.building.hvac.ModulatingProfileRelayMapping
+import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.system.setFanTypeToStages
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
+import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.renatus.compose.showErrorDialog
 import a75f.io.renatus.profiles.oao.updateOaoPoints
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
+import a75f.io.renatus.profiles.system.advancedahu.Option
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.TestSignalManager
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.content.Context
+import android.text.Html
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
+
+    var minMaxVoltage = List(11) { Option(it, it.toString()) }
 
     fun init(context: Context, hayStack: CCUHsApi) {
         super.init(context, ModelLoader.getVavModulatingRtuModelDef(), hayStack)
@@ -56,13 +65,20 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
     override fun saveConfiguration() {
         hayStack.resetCcuReady()
         var systemEquipId : String? = null
+
+        viewState.value.updateConfigFromViewState(profileConfiguration)
+        if (!checkConfigValidity()) {
+            viewState.value.isSaveRequired = true
+            viewState.value.isStateChanged = true
+            return
+        }
+
         ProgressDialogUtils.showProgressDialog(context, "Saving VAV Configuration")
         viewModelScope.launch (highPriorityDispatcher) {
             val systemEquip = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
             if (systemEquip["profile"].toString() != "vavFullyModulatingAhu"
                 && systemEquip["profile"].toString() != ProfileType.SYSTEM_VAV_ANALOG_RTU.name
             ) {
-                viewState.value.updateConfigFromViewState(profileConfiguration)
                 CcuLog.d(Tags.ADD_REMOVE_PROFILE, "VavModulatingRtuViewModel removing profile with it -->${systemEquip["id"].toString()}")
                 deleteSystemProfile(systemEquip["id"].toString())
                 systemEquipId = createNewEquip(systemEquip["id"].toString())
@@ -179,5 +195,49 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
         } catch (e: Exception) {
             false
         }
+    }
+
+    private fun checkConfigValidity(): Boolean {
+        val compressorAvailable =  profileConfiguration.isAnyAnalogMappedToCompressor()
+        val changeOverCooling =
+            profileConfiguration.isAnyRelayEnabledAndMapped(ModulatingProfileRelayMapping.CHANGE_OVER_COOLING.ordinal)
+        val changeOverHeating =
+            profileConfiguration.isAnyRelayEnabledAndMapped(ModulatingProfileRelayMapping.CHANGE_OVER_HEATING.ordinal)
+
+        if (compressorAvailable) {
+            if (!changeOverCooling && !changeOverHeating) {
+                showErrorDialog(
+                    context,
+                    Html.fromHtml(
+                        "<b>The compressor is mapped, but the O/B changeover relay is not mapped.</b>",
+                        Html.FROM_HTML_MODE_LEGACY
+                    )
+                ){ viewState.value.isStateChanged = true; }
+                return false
+            }
+            if (changeOverCooling && changeOverHeating) {
+                showErrorDialog(
+                    context,
+                    Html.fromHtml(
+                        "<b>The O/B changeover relay is mapped for both cooling and heating. Please select only one.</b>",
+                        Html.FROM_HTML_MODE_LEGACY
+                    )
+                ){ viewState.value.isStateChanged = true; }
+                return false
+            }
+
+        } else {
+            if (changeOverCooling || changeOverHeating) {
+                showErrorDialog(
+                    context,
+                    Html.fromHtml(
+                        "<b>The O/B changeover relay is mapped, but the compressor is not mapped.</b>",
+                        Html.FROM_HTML_MODE_LEGACY
+                    )
+                )
+                return false
+            }
+        }
+        return true
     }
 }

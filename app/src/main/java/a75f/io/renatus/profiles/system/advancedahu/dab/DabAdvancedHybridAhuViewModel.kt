@@ -49,6 +49,8 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
             DabAdvancedHybridAhuConfig(cmModel, connectModel)
         }
         viewState = mutableStateOf(DabAdvancedAhuState.fromProfileConfigToState(profileConfiguration as DabAdvancedHybridAhuConfig))
+        viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("dabAdvancedHybridAhuV2")
+        modelLoadedState.postValue(true)
     }
 
 

@@ -159,7 +159,9 @@ class DabAdvancedAhuState : AdvancedHybridAhuState() {
             this.exhaustFanStage1Threshold.currentVal = State.exhaustFanStage1ThresholdPos
             this.exhaustFanStage2Threshold.currentVal = State.exhaustFanStage2ThresholdPos
             this.currentTransformerType.currentVal = State.currentTransformerTypePos
-            this.co2Threshold.currentVal = State.oaoCo2ThresholdVal
+            if (enableOutsideAirOptimization.enabled) {
+                this.co2Threshold.currentVal = State.oaoCo2ThresholdVal
+            }
             this.exhaustFanHysteresis.currentVal = State.exhaustFanHysteresisPos
             this.systemPurgeOutsideDamperMinPos.currentVal = State.systemPurgeOutsideDamperMinPos
             this.enhancedVentilationOutsideDamperMinOpen.currentVal =

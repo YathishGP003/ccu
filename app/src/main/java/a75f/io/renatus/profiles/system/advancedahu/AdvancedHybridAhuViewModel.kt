@@ -23,7 +23,6 @@ import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
-
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.getAnalogOutLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.getCMRelayLogicalPhysicalMap
@@ -50,7 +49,6 @@ import a75f.io.logic.util.modifyConditioningMode
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -149,7 +147,6 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     var testVoltage = List(101) { Option(it, String.format("%.1f", it * 0.1)) }
 
     var modelLoadedState = MutableLiveData(false)
-    val modelLoaded: LiveData<Boolean> get() = modelLoadedState
 
     /**
      * Initialize the ViewModel
@@ -298,7 +295,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                     domainName,
                     0.0
                 )
-                CcuLog.i("USER_TEST", "Resetting the system user Intent ${domainName}  to 0 ")
+                CcuLog.i(Domain.LOG_TAG, "Resetting the system user Intent $domainName  to 0 ")
             }
         }
     }
@@ -504,6 +501,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     fun isHeatLoadEnabled() = isAnyAnalogMappedToControl(ControlType.LOAD_BASED_HEATING_CONTROL)
     fun isDampersEnabled() = isAnyAnalogMappedToControl(ControlType.CO2_BASED_DAMPER_CONTROL)
     fun isCompositeEnabled() = isAnyAnalogMappedToControl(ControlType.COMPOSITE)
+    fun isCompressorSpeedEnabled() = isAnyAnalogMappedToControl(ControlType.COMPRESSOR_SPEED)
     private fun isAnyAnalogMappedToControl(type: ControlType): Boolean {
         return ((this.viewState.value.analogOut1Enabled && this.viewState.value.analogOut1Association == type.ordinal) || (this.viewState.value.analogOut2Enabled && this.viewState.value.analogOut2Association == type.ordinal) || (this.viewState.value.analogOut3Enabled && this.viewState.value.analogOut3Association == type.ordinal) || (this.viewState.value.analogOut4Enabled && this.viewState.value.analogOut4Association == type.ordinal))
     }
@@ -513,6 +511,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     fun isConnectHeatLoadEnabled() = isAnyConnectAnalogMappedToControl(ConnectControlType.LOAD_BASED_HEATING_CONTROL)
     fun isConnectCompositeEnabled() = isAnyConnectAnalogMappedToControl(ConnectControlType.COMPOSITE)
     fun isConnectDampersEnabled() = isAnyConnectAnalogMappedToControl(ConnectControlType.CO2_BASED_DAMPER_CONTROL)
+    fun isConnectCompressorSpeedEnabled() = isAnyConnectAnalogMappedToControl(ConnectControlType.COMPRESSOR_SPEED)
     private fun isAnyConnectAnalogMappedToControl(type: ConnectControlType): Boolean {
         return ((this.viewState.value.connectAnalogOut1Enabled && this.viewState.value.connectAnalogOut1Association == type.ordinal) || (this.viewState.value.connectAnalogOut2Enabled && this.viewState.value.connectAnalogOut2Association == type.ordinal) || (this.viewState.value.connectAnalogOut3Enabled && this.viewState.value.connectAnalogOut3Association == type.ordinal) || (this.viewState.value.connectAnalogOut4Enabled && this.viewState.value.connectAnalogOut4Association == type.ordinal))
     }
@@ -760,7 +759,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
  * This enum list is picked from the model & Need to update when any changes in the model for this enum
  */
 enum class ControlType {
-    PRESSURE_BASED_FAN_CONTROL, SAT_BASED_COOLING_CONTROL, SAT_BASED_HEATING_CONTROL, LOAD_BASED_COOLING_CONTROL, LOAD_BASED_HEATING_CONTROL, LOAD_BASED_FAN_CONTROL, CO2_BASED_DAMPER_CONTROL, COMPOSITE
+    PRESSURE_BASED_FAN_CONTROL, SAT_BASED_COOLING_CONTROL, SAT_BASED_HEATING_CONTROL, LOAD_BASED_COOLING_CONTROL, LOAD_BASED_HEATING_CONTROL, LOAD_BASED_FAN_CONTROL, CO2_BASED_DAMPER_CONTROL, COMPOSITE, COMPRESSOR_SPEED
 }
 
 /**
@@ -768,7 +767,7 @@ enum class ControlType {
  * This enum list is picked from the model & Need to update when any changes in the model for this enum
  */
 enum class ConnectControlType {
-    LOAD_BASED_COOLING_CONTROL, LOAD_BASED_HEATING_CONTROL, LOAD_BASED_FAN_CONTROL, COMPOSITE, CO2_BASED_DAMPER_CONTROL, OAO_DAMPER, RETURN_DAMPER
+    LOAD_BASED_COOLING_CONTROL, LOAD_BASED_HEATING_CONTROL, LOAD_BASED_FAN_CONTROL, COMPOSITE, CO2_BASED_DAMPER_CONTROL, OAO_DAMPER, RETURN_DAMPER, COMPRESSOR_SPEED
 }
 
 data class Option(val index: Int, val value: String, val dis: String? = null)

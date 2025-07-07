@@ -24,7 +24,6 @@ import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import android.annotation.SuppressLint
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
-import java.util.ArrayList
 import kotlin.system.measureTimeMillis
 
 /**
@@ -100,6 +99,26 @@ data class UserIntentConfig(
         var isPressureControlAvailable: Boolean = false,
         var isCo2DamperControlAvailable: Boolean = false,
 )
+
+data class StagesCounts(
+    var loadCoolingStages: Int = 0,
+    var loadHeatingStages: Int = 0,
+    var loadFanStages: Int = 0,
+    var satCoolingStages: Int = 0,
+    var satHeatingStages: Int = 0,
+    var pressureFanStages: Int = 0,
+    var compressorStages: Int = 0
+) {
+    fun resetCounts() {
+        loadCoolingStages = 0
+        loadHeatingStages = 0
+        loadFanStages = 0
+        satCoolingStages = 0
+        satHeatingStages = 0
+        pressureFanStages = 0
+        compressorStages = 0
+    }
+}
 
 @SuppressLint("DefaultLocale")
 fun roundOff(value: Double): Double {
@@ -221,20 +240,24 @@ fun isConnectModuleExist(): Boolean {
     return false
 }
 
- fun getConnectModuleSystemStatus(connectEquip: ConnectModuleEquip, advancedAhuImpl: AdvancedAhuAlgoHandler, coolingLoopOutput :Double, analogControlsEnabled : Set<AdvancedAhuAnalogOutAssociationType>, ahuSettings: AhuSettings): String {
+ fun getConnectModuleSystemStatus(
+     connectEquip: ConnectModuleEquip, advancedAhuImpl: AdvancedAhuAlgoHandler,
+     coolingLoopOutput :Double, heatingLoopOutput: Double,
+     analogControlsEnabled : Set<AdvancedAhuAnalogOutAssociationType>, ahuSettings: AhuSettings
+ ): String {
     val systemEquip = getAdvancedAhuSystemEquip()
-    if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(
-            connectEquip1 = connectEquip,
-        )
-    )
+    if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(connectEquip1 = connectEquip)) {
         return "Emergency Shut Off mode is active"
-    val connectModuleSystemStatus = StringBuilder().apply {
-        append(if (connectEquip.loadFanStage1.readHisVal() > 0) "1" else "")
-        append(if (connectEquip.loadFanStage2.readHisVal() > 0) ",2" else "")
-        append(if (connectEquip.loadFanStage3.readHisVal() > 0) ",3" else "")
-        append(if (connectEquip.loadFanStage4.readHisVal() > 0) ",4" else "")
-        append(if (connectEquip.loadFanStage5.readHisVal() > 0) ",5" else "")
     }
+     val systemStages = connectEquip.conditioningStages
+     val connectModuleSystemStatus = StringBuilder().apply {
+         append(if (systemStages.loadFanStage1.readHisVal() > 0) "1" else "")
+         append(if (systemStages.loadFanStage2.readHisVal() > 0) ",2" else "")
+         append(if (systemStages.loadFanStage3.readHisVal() > 0) ",3" else "")
+         append(if (systemStages.loadFanStage4.readHisVal() > 0) ",4" else "")
+         append(if (systemStages.loadFanStage5.readHisVal() > 0) ",5" else "")
+     }
+
     if (connectModuleSystemStatus.isNotEmpty()) {
         if (connectModuleSystemStatus[0] == ',') {
             connectModuleSystemStatus.deleteCharAt(0)
@@ -242,27 +265,27 @@ fun isConnectModuleExist(): Boolean {
         connectModuleSystemStatus.insert(0, "Fan Stage ")
         connectModuleSystemStatus.append(" ON ")
     }
-    val coolingStatus = StringBuilder().apply {
-        append(if (connectEquip.loadCoolingStage1.readHisVal() > 0) "1" else "")
-        append(if (connectEquip.loadCoolingStage2.readHisVal() > 0) ",2" else "")
-        append(if (connectEquip.loadCoolingStage3.readHisVal() > 0) ",3" else "")
-        append(if (connectEquip.loadCoolingStage4.readHisVal() > 0) ",4" else "")
-        append(if (connectEquip.loadCoolingStage5.readHisVal() > 0) ",5" else "")
-    }
-    if (coolingStatus.isNotEmpty()) {
-        if (coolingStatus[0] == ',') {
-            coolingStatus.deleteCharAt(0)
-        }
-        coolingStatus.insert(0, "Cooling Stage ")
-        coolingStatus.append(" ON ")
-    }
+     val coolingStatus = StringBuilder().apply {
+         append(if (systemStages.loadCoolingStage1.readHisVal() > 0 || (coolingLoopOutput > 0 && systemStages.compressorStage1.readHisVal() > 0)) "1" else "")
+         append(if (systemStages.loadCoolingStage2.readHisVal() > 0 || (coolingLoopOutput > 0 && systemStages.compressorStage2.readHisVal() > 0)) ",2" else "")
+         append(if (systemStages.loadCoolingStage3.readHisVal() > 0 || (coolingLoopOutput > 0 && systemStages.compressorStage3.readHisVal() > 0)) ",3" else "")
+         append(if (systemStages.loadCoolingStage4.readHisVal() > 0 || (coolingLoopOutput > 0 && systemStages.compressorStage4.readHisVal() > 0)) ",4" else "")
+         append(if (systemStages.loadCoolingStage5.readHisVal() > 0 || (coolingLoopOutput > 0 && systemStages.compressorStage5.readHisVal() > 0)) ",5" else "")
+     }
+     if (coolingStatus.isNotEmpty()) {
+         if (coolingStatus[0] == ',') {
+             coolingStatus.deleteCharAt(0)
+         }
+         coolingStatus.insert(0, "Cooling Stage ")
+         coolingStatus.append(" ON ")
+     }
 
-    val heatingStatus = StringBuilder().apply {
-        append(if (connectEquip.loadHeatingStage1.readHisVal() > 0) "1" else "")
-        append(if (connectEquip.loadHeatingStage2.readHisVal() > 0) ",2" else "")
-        append(if (connectEquip.loadHeatingStage3.readHisVal() > 0) ",3" else "")
-        append(if (connectEquip.loadHeatingStage4.readHisVal() > 0) ",4" else "")
-        append(if (connectEquip.loadHeatingStage5.readHisVal() > 0) ",5" else "")
+     val heatingStatus = StringBuilder().apply {
+         append(if (systemStages.loadHeatingStage1.readHisVal() > 0 || (heatingLoopOutput > 0 && systemStages.compressorStage1.readHisVal() > 0)) "1" else "")
+         append(if (systemStages.loadHeatingStage2.readHisVal() > 0 || (heatingLoopOutput > 0 && systemStages.compressorStage2.readHisVal() > 0)) ",2" else "")
+         append(if (systemStages.loadHeatingStage3.readHisVal() > 0 || (heatingLoopOutput > 0 && systemStages.compressorStage3.readHisVal() > 0)) ",3" else "")
+         append(if (systemStages.loadHeatingStage4.readHisVal() > 0 || (heatingLoopOutput > 0 && systemStages.compressorStage4.readHisVal() > 0)) ",4" else "")
+         append(if (systemStages.loadHeatingStage5.readHisVal() > 0 || (heatingLoopOutput > 0 && systemStages.compressorStage5.readHisVal() > 0)) ",5" else "")
     }
     if (heatingStatus.isNotEmpty()) {
         if (heatingStatus[0] == ',') {
@@ -313,32 +336,33 @@ fun isConnectModuleExist(): Boolean {
     systemEquip: AdvancedHybridSystemEquip? = null,
     connectEquip1: ConnectModuleEquip? = null
 ): String {
-    if (systemEquip != null && systemEquip.humidifierEnable.pointExists()) {
-        return if (systemEquip.humidifierEnable.readHisVal() > 0) {
+    if (systemEquip != null && systemEquip.conditioningStages.humidifierEnable.pointExists()) {
+        return if (systemEquip.conditioningStages.humidifierEnable.readHisVal() > 0) {
             " | Humidifier ON "
 
         } else " | Humidifier OFF "
     }
-    if (connectEquip1 != null && connectEquip1.humidifierEnable.pointExists()) {
-        return if (connectEquip1.humidifierEnable.readHisVal() > 0) {
+    if (connectEquip1 != null && connectEquip1.conditioningStages.humidifierEnable.pointExists()) {
+        return if (connectEquip1.conditioningStages.humidifierEnable.readHisVal() > 0) {
             " | Humidifier ON "
         } else " | Humidifier OFF "
     }
     // just for the case when dehumidifierEnable point is not available
     return ""
 }
+
  fun getDehumidifierStatus(
     systemEquip: AdvancedHybridSystemEquip? = null,
     connectEquip1: ConnectModuleEquip? = null
 ): String {
-    if (systemEquip != null && systemEquip.dehumidifierEnable.pointExists()) {
-        return if (systemEquip.dehumidifierEnable.readHisVal() > 0) {
+    if (systemEquip != null && systemEquip.conditioningStages.dehumidifierEnable.pointExists()) {
+        return if (systemEquip.conditioningStages.dehumidifierEnable.readHisVal() > 0) {
             " | DeHumidifier ON "
 
         } else " | DeHumidifier OFF "
     }
-    if (connectEquip1 != null && connectEquip1.dehumidifierEnable.pointExists()) {
-        return if (connectEquip1.dehumidifierEnable.readHisVal() > 0) {
+    if (connectEquip1 != null && connectEquip1.conditioningStages.dehumidifierEnable.pointExists()) {
+        return if (connectEquip1.conditioningStages.dehumidifierEnable.readHisVal() > 0) {
             " | DeHumidifier ON "
         } else " | DeHumidifier OFF "
     }

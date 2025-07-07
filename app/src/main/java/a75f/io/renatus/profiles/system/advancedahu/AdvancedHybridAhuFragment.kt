@@ -3,6 +3,7 @@ package a75f.io.renatus.profiles.system.advancedahu
 import a75f.io.domain.api.DomainName
 import a75f.io.logic.Globals
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.system.AdvancedAhuRelayMappings
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.renatus.R
@@ -39,6 +40,7 @@ import a75f.io.renatus.profiles.system.CO2_DAMPER_CONTROL_ON
 import a75f.io.renatus.profiles.system.CO2_TARGET
 import a75f.io.renatus.profiles.system.CO2_THRESHOLD
 import a75f.io.renatus.profiles.system.COMPOSITE_CONTROL
+import a75f.io.renatus.profiles.system.COMPRESSOR_SPEED
 import a75f.io.renatus.profiles.system.CONNECT_MODULE
 import a75f.io.renatus.profiles.system.COOLING_CONTROL
 import a75f.io.renatus.profiles.system.ENABLE
@@ -126,8 +128,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
     fun TitleLabel() {
         Row(
             modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 5.dp, bottom = 10.dp)
+                .fillMaxWidth()
+                .padding(top = 5.dp, bottom = 10.dp)
         ) {
             Box(
                 modifier = Modifier.weight(0.5f), contentAlignment = Alignment.Center
@@ -155,8 +157,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
         if (viewModel.viewState.value.isConnectEnabled) {
             Row(
                 modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp, bottom = 10.dp)
+                    .fillMaxWidth()
+                    .padding(top = 10.dp, bottom = 10.dp)
             ) {
                 Box(modifier = Modifier.padding(top = 10.dp)) {
                     LabelTextView(text = CONNECT_MODULE, widthValue = 250)
@@ -461,6 +463,19 @@ open class AdvancedHybridAhuFragment : Fragment() {
     fun CMRelayConfig(viewModel: AdvancedHybridAhuViewModel) {
         val relayEnums = viewModel.getAllowedValues(DomainName.relay1OutputAssociation, viewModel.cmModel)
 
+
+        fun getDisabledIndices(config: ConfigState): List<Int> {
+            return if (viewModel.viewState.value.isAnyRelayMapped(
+                    AdvancedAhuRelayMappings.CHANGE_OVER_B_HEATING.ordinal,
+                    config)) {
+                listOf(AdvancedAhuRelayMappings.CHANGE_OVER_O_COOLING.ordinal)
+            } else if (viewModel.viewState.value.isAnyRelayMapped(
+                    AdvancedAhuRelayMappings.CHANGE_OVER_O_COOLING.ordinal,
+                    config)) {
+                listOf(AdvancedAhuRelayMappings.CHANGE_OVER_B_HEATING.ordinal)
+            } else { emptyList() }
+        }
+
         Row(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -511,7 +526,10 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         },
                         isEnabled = relayConfig.enabled,
                         testState = getRelayStatus(index + 1),
-                        onTestActivated = {viewModel.sendCMRelayTestCommand(index, it)})
+                        onTestActivated = { viewModel.sendCMRelayTestCommand(index, it)},
+                        disabledIndices= getDisabledIndices(relayConfig)
+                    )
+
                 }
             }
         }
@@ -616,6 +634,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
         LoadBasedFanControl(viewModel)
         HeatLoadBasedControl(viewModel)
         CompositeBasedControl(viewModel)
+        CompressorSpeedBasedControl(viewModel)
         viewModel.modelLoadedState.value = true
     }
 
@@ -635,15 +654,15 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 BoldStyledTextView(PRESSURE_BASED_FC, fontSize = 20)
                 Row(modifier = Modifier.padding(top = 10.dp, bottom = 15.dp)) {
                     Box(modifier = Modifier
-                            .weight(1f)
-                            .padding(top = 10.dp)) {
+                        .weight(1f)
+                        .padding(top = 10.dp)) {
                         StyledTextView(
                             PRESSURE_BASED_FC_ON, fontSize = 20, textAlignment = TextAlign.Left
                         )
                     }
                     Box(modifier = Modifier
-                            .weight(1f)
-                            .padding(top = 5.dp)) {
+                        .weight(1f)
+                        .padding(top = 5.dp)) {
                         SearchSpinnerElement(
                             default = pressureEnum[viewModel.viewState.value.pressureConfig.pressureControlAssociation],
                             allItems = pressureEnum,
@@ -688,8 +707,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogOut1Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out1 at Min \nStatic Pressure",
-                    "Analog-out1 at Max \nStatic Pressure",
+                MinMaxConfiguration("Analog-Out1 at Min \nStatic Pressure",
+                    "Analog-Out1 at Max \nStatic Pressure",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analogOut1MinMax.staticPressureMinVoltage.toString(),
@@ -711,8 +730,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogOut2Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out2 at Min \nStatic Pressure",
-                    "Analog-out2 at Max \nStatic Pressure",
+                MinMaxConfiguration("Analog-Out2 at Min \nStatic Pressure",
+                    "Analog-Out2 at Max \nStatic Pressure",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analogOut2MinMax.staticPressureMinVoltage.toString(),
@@ -734,8 +753,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogOut3Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out3 at Min \nStatic Pressure",
-                    "Analog-out3 at Max \nStatic Pressure",
+                MinMaxConfiguration("Analog-Out3 at Min \nStatic Pressure",
+                    "Analog-Out3 at Max \nStatic Pressure",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analogOut3MinMax.staticPressureMinVoltage.toString(),
@@ -757,8 +776,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogOut4Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out4 at Min \nStatic Pressure",
-                    "Analog-out4 at Max \nStatic Pressure",
+                MinMaxConfiguration("Analog-Out4 at Min \nStatic Pressure",
+                    "Analog-Out4 at Max \nStatic Pressure",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analogOut4MinMax.staticPressureMinVoltage.toString(),
@@ -793,8 +812,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 BoldStyledTextView(SAT_CONTROL, fontSize = 20)
                 Row(modifier = Modifier.padding(top = 10.dp, bottom = 15.dp)) {
                     Box(modifier = Modifier
-                            .weight(1f)
-                            .padding(top = 10.dp)) {
+                        .weight(1f)
+                        .padding(top = 10.dp)) {
                         StyledTextView(
                             SAT_CONTROL_ON, fontSize = 20, textAlignment = TextAlign.Left
                         )
@@ -862,8 +881,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogOut1Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out1 at Min \nSAT Cooling",
-                    "Analog-out1 at Max \nSAT Cooling",
+                MinMaxConfiguration("Analog-Out1 at Min \nSAT Cooling",
+                    "Analog-Out1 at Max \nSAT Cooling",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analogOut1MinMax.satCoolingMinVoltage.toString(),
@@ -885,8 +904,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogOut2Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out2 at Min \nSAT Cooling",
-                    "Analog-out2 at Max \nSAT Cooling",
+                MinMaxConfiguration("Analog-Out2 at Min \nSAT Cooling",
+                    "Analog-Out2 at Max \nSAT Cooling",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analogOut2MinMax.satCoolingMinVoltage.toString(),
@@ -908,8 +927,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogOut3Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out3 at Min \nSAT Cooling",
-                    "Analog-out3 at Max \nSAT Cooling",
+                MinMaxConfiguration("Analog-Out3 at Min \nSAT Cooling",
+                    "Analog-Out3 at Max \nSAT Cooling",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analogOut3MinMax.satCoolingMinVoltage.toString(),
@@ -931,8 +950,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogOut4Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out4 at Min \nSAT Cooling",
-                    "Analog-out4 at Max \nSAT Cooling",
+                MinMaxConfiguration("Analog-Out4 at Min \nSAT Cooling",
+                    "Analog-Out4 at Max \nSAT Cooling",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analogOut4MinMax.satCoolingMinVoltage.toString(),
@@ -960,8 +979,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogOut1Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out1 at Min \nSAT Heating",
-                    "Analog-out1 at Max \nSAT Heating",
+                MinMaxConfiguration("Analog-Out1 at Min \nSAT Heating",
+                    "Analog-Out1 at Max \nSAT Heating",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analogOut1MinMax.satHeatingMinVoltage.toString(),
@@ -983,8 +1002,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogOut2Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out2 at Min \nSAT Heating",
-                    "Analog-out2 at Max \nSAT Heating",
+                MinMaxConfiguration("Analog-Out2 at Min \nSAT Heating",
+                    "Analog-Out2 at Max \nSAT Heating",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analogOut2MinMax.satHeatingMinVoltage.toString(),
@@ -1006,8 +1025,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogOut3Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out3 at Min \nSAT Heating",
-                    "Analog-out3 at Max \nSAT Heating",
+                MinMaxConfiguration("Analog-Out3 at Min \nSAT Heating",
+                    "Analog-Out3 at Max \nSAT Heating",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analogOut3MinMax.satHeatingMinVoltage.toString(),
@@ -1029,8 +1048,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogOut4Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out4 at Min \nSAT Heating",
-                    "Analog-out4 at Max \nSAT Heating",
+                MinMaxConfiguration("Analog-Out4 at Min \nSAT Heating",
+                    "Analog-Out4 at Max \nSAT Heating",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analogOut4MinMax.satHeatingMinVoltage.toString(),
@@ -1067,8 +1086,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 BoldStyledTextView(CO2_DAMPER_CONTROL, fontSize = 20)
                 Row(modifier = Modifier.padding(top = 10.dp, bottom = 15.dp)) {
                     Box(modifier = Modifier
-                            .weight(1f)
-                            .padding(top = 10.dp)) {
+                        .weight(1f)
+                        .padding(top = 10.dp)) {
                         StyledTextView(
                             CO2_DAMPER_CONTROL_ON, fontSize = 20, textAlignment = TextAlign.Left
                         )
@@ -1139,8 +1158,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogOut1Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out1 at Min \nDCV Damper Pos",
-                    "Analog-out1 at Max \nDCV Damper Pos",
+                MinMaxConfiguration("Analog-Out1 at Min \nDCV Damper Pos",
+                    "Analog-Out1 at Max \nDCV Damper Pos",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analogOut1MinMax.damperPosMinVoltage.toString(),
@@ -1162,8 +1181,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogOut2Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out2 at Min \nDCV Damper Pos",
-                    "Analog-out2 at Max \nDCV Damper Pos",
+                MinMaxConfiguration("Analog-Out2 at Min \nDCV Damper Pos",
+                    "Analog-Out2 at Max \nDCV Damper Pos",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analogOut2MinMax.damperPosMinVoltage.toString(),
@@ -1185,8 +1204,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogOut3Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out3 at Min \nDCV Damper Pos",
-                    "Analog-out3 at Max \nDCV Damper Pos",
+                MinMaxConfiguration("Analog-Out3 at Min \nDCV Damper Pos",
+                    "Analog-Out3 at Max \nDCV Damper Pos",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analogOut3MinMax.damperPosMinVoltage.toString(),
@@ -1208,8 +1227,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogOut4Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out4 at Min \nDCV Damper Pos",
-                    "Analog-out4 at Max \nDCV Damper Pos",
+                MinMaxConfiguration("Analog-Out4 at Min \nDCV Damper Pos",
+                    "Analog-Out4 at Max \nDCV Damper Pos",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analogOut4MinMax.damperPosMinVoltage.toString(),
@@ -1246,8 +1265,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.analogOut1Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out1 at Min \nCooling",
-                        "Analog-out1 at Max \nCooling",
+                    MinMaxConfiguration("Analog-Out1 at Min \nCooling",
+                        "Analog-Out1 at Max \nCooling",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.analogOut1MinMax.coolingMinVoltage.toString(),
@@ -1267,8 +1286,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.analogOut2Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out2 at Min \nCooling",
-                        "Analog-out2 at Max \nCooling",
+                    MinMaxConfiguration("Analog-Out2 at Min \nCooling",
+                        "Analog-Out2 at Max \nCooling",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.analogOut2MinMax.coolingMinVoltage.toString(),
@@ -1288,8 +1307,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.analogOut3Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out3 at Min \nCooling",
-                        "Analog-out3 at Max \nCooling",
+                    MinMaxConfiguration("Analog-Out3 at Min \nCooling",
+                        "Analog-Out3 at Max \nCooling",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.analogOut3MinMax.coolingMinVoltage.toString(),
@@ -1309,8 +1328,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.analogOut4Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out4 at Min \nCooling",
-                        "Analog-out4 at Max \nCooling",
+                    MinMaxConfiguration("Analog-Out4 at Min \nCooling",
+                        "Analog-Out4 at Max \nCooling",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.analogOut4MinMax.coolingMinVoltage.toString(),
@@ -1346,8 +1365,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.analogOut1Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out1 at Min \nFan",
-                        "Analog-out1 at Max \nFan",
+                    MinMaxConfiguration("Analog-Out1 at Min \nFan",
+                        "Analog-Out1 at Max \nFan",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.analogOut1MinMax.fanMinVoltage.toString(),
@@ -1369,8 +1388,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.analogOut2Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out2 at Min \nFan",
-                        "Analog-out2 at Max \nFan",
+                    MinMaxConfiguration("Analog-Out2 at Min \nFan",
+                        "Analog-Out2 at Max \nFan",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.analogOut2MinMax.fanMinVoltage.toString(),
@@ -1392,8 +1411,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.analogOut3Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out3 at Min \nFan",
-                        "Analog-out3 at Max \nFan",
+                    MinMaxConfiguration("Analog-Out3 at Min \nFan",
+                        "Analog-Out3 at Max \nFan",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.analogOut3MinMax.fanMinVoltage.toString(),
@@ -1415,8 +1434,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.analogOut4Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out4 at Min \nFan",
-                        "Analog-out4 at Max \nFan",
+                    MinMaxConfiguration("Analog-Out4 at Min \nFan",
+                        "Analog-Out4 at Max \nFan",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.analogOut4MinMax.fanMinVoltage.toString(),
@@ -1455,8 +1474,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.analogOut1Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out1 at Min \nHeating",
-                        "Analog-out1 at Max \nHeating",
+                    MinMaxConfiguration("Analog-Out1 at Min \nHeating",
+                        "Analog-Out1 at Max \nHeating",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.analogOut1MinMax.heatingMinVoltage.toString(),
@@ -1476,8 +1495,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.analogOut2Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out2 at Min \nHeating",
-                        "Analog-out2 at Max \nHeating",
+                    MinMaxConfiguration("Analog-Out2 at Min \nHeating",
+                        "Analog-Out2 at Max \nHeating",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.analogOut2MinMax.heatingMinVoltage.toString(),
@@ -1497,8 +1516,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.analogOut3Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out3 at Min \nHeating",
-                        "Analog-out3 at Max \nHeating",
+                    MinMaxConfiguration("Analog-Out3 at Min \nHeating",
+                        "Analog-Out3 at Max \nHeating",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.analogOut3MinMax.heatingMinVoltage.toString(),
@@ -1518,8 +1537,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.analogOut4Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out4 at Min \nHeating",
-                        "Analog-out4 at Max \nHeating",
+                    MinMaxConfiguration("Analog-Out4 at Min \nHeating",
+                        "Analog-Out4 at Max \nHeating",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.analogOut4MinMax.heatingMinVoltage.toString(),
@@ -1536,6 +1555,107 @@ open class AdvancedHybridAhuFragment : Fragment() {
             }
         }
     }
+
+    @Composable
+    fun CompressorSpeedBasedControl(viewModel: AdvancedHybridAhuViewModel) {
+        if (viewModel.isCompressorSpeedEnabled()) {
+
+            if (viewModel.viewState.value.noOfAnalogOutDynamic > 0) {
+                ComposeUtil.DashDivider()
+            }
+            viewModel.viewState.value.noOfAnalogOutDynamic++
+
+            Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 17.dp)) {
+
+                BoldStyledTextView(COMPRESSOR_SPEED, fontSize = 20)
+                if (viewModel.isAnalogEnabledAndMapped(
+                        ControlType.COMPRESSOR_SPEED,
+                        viewModel.viewState.value.analogOut1Enabled,
+                        viewModel.viewState.value.analogOut1Association
+                    )
+                ) {
+                    MinMaxConfiguration("Analog-Out1 at Min \nCompressor Speed",
+                        "Analog-Out1 at Max \nCompressor Speed",
+                        viewModel.minMaxVoltage,
+                        "V",
+                        minDefault = viewModel.viewState.value.analogOut1MinMax.compressorMinVoltage.toString(),
+                        maxDefault = viewModel.viewState.value.analogOut1MinMax.compressorMaxVoltage.toString(),
+                        onMinSelected = {
+                            viewModel.viewState.value.analogOut1MinMax.compressorMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
+                        },
+                        onMaxSelected = {
+                            viewModel.viewState.value.analogOut1MinMax.compressorMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
+                        })
+                }
+                if (viewModel.isAnalogEnabledAndMapped(
+                        ControlType.COMPRESSOR_SPEED,
+                        viewModel.viewState.value.analogOut2Enabled,
+                        viewModel.viewState.value.analogOut2Association
+                    )
+                ) {
+                    MinMaxConfiguration("Analog-Out2 at Min \nCompressor Speed",
+                        "Analog-Out2 at Max \nCompressor Speed",
+                        viewModel.minMaxVoltage,
+                        "V",
+                        minDefault = viewModel.viewState.value.analogOut2MinMax.compressorMinVoltage.toString(),
+                        maxDefault = viewModel.viewState.value.analogOut2MinMax.compressorMaxVoltage.toString(),
+                        onMinSelected = {
+                            viewModel.viewState.value.analogOut2MinMax.compressorMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
+                        },
+                        onMaxSelected = {
+                            viewModel.viewState.value.analogOut2MinMax.compressorMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
+                        })
+                }
+                if (viewModel.isAnalogEnabledAndMapped(
+                        ControlType.COMPRESSOR_SPEED,
+                        viewModel.viewState.value.analogOut3Enabled,
+                        viewModel.viewState.value.analogOut3Association
+                    )
+                ) {
+                    MinMaxConfiguration("Analog-Out3 at Min \nCompressor Speed",
+                        "Analog-Out3 at Max \nCompressor Speed",
+                        viewModel.minMaxVoltage,
+                        "V",
+                        minDefault = viewModel.viewState.value.analogOut3MinMax.compressorMinVoltage.toString(),
+                        maxDefault = viewModel.viewState.value.analogOut3MinMax.compressorMaxVoltage.toString(),
+                        onMinSelected = {
+                            viewModel.viewState.value.analogOut3MinMax.compressorMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
+                        },
+                        onMaxSelected = {
+                            viewModel.viewState.value.analogOut3MinMax.compressorMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
+                        })
+                }
+                if (viewModel.isAnalogEnabledAndMapped(
+                        ControlType.COMPRESSOR_SPEED,
+                        viewModel.viewState.value.analogOut4Enabled,
+                        viewModel.viewState.value.analogOut4Association
+                    )
+                ) {
+                    MinMaxConfiguration("Analog-Out4 at Min \nCompressor Speed",
+                        "Analog-Out4 at Max \nCompressor Speed",
+                        viewModel.minMaxVoltage,
+                        "V",
+                        minDefault = viewModel.viewState.value.analogOut4MinMax.compressorMinVoltage.toString(),
+                        maxDefault = viewModel.viewState.value.analogOut4MinMax.compressorMaxVoltage.toString(),
+                        onMinSelected = {
+                            viewModel.viewState.value.analogOut4MinMax.compressorMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
+                        },
+                        onMaxSelected = {
+                            viewModel.viewState.value.analogOut4MinMax.compressorMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
+                        })
+                }
+            }
+        }
+    }
+
 
     @Composable
     fun CompositeBasedControl(viewModel: AdvancedHybridAhuViewModel) {
@@ -1563,8 +1683,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 viewModel.viewState.value.analogOut1Association
             )
         ) {
-            MinMaxConfiguration("Analog-out1 at Min \nCooling",
-                "Analog-out1 at Max \nCooling",
+            MinMaxConfiguration("Analog-Out1 at Min \nCooling",
+                "Analog-Out1 at Max \nCooling",
                 viewModel.minMaxVoltage,
                 "V",
                 minDefault = viewModel.viewState.value.analogOut1MinMax.compositeCoolingMinVoltage.toString(),
@@ -1584,8 +1704,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 viewModel.viewState.value.analogOut2Association
             )
         ) {
-            MinMaxConfiguration("Analog-out2 at Min \nCooling",
-                "Analog-out2 at Max \nCooling",
+            MinMaxConfiguration("Analog-Out2 at Min \nCooling",
+                "Analog-Out2 at Max \nCooling",
                 viewModel.minMaxVoltage,
                 "V",
                 minDefault = viewModel.viewState.value.analogOut2MinMax.compositeCoolingMinVoltage.toString(),
@@ -1605,8 +1725,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 viewModel.viewState.value.analogOut3Association
             )
         ) {
-            MinMaxConfiguration("Analog-out3 at Min \nCooling",
-                "Analog-out3 at Max \nCooling",
+            MinMaxConfiguration("Analog-Out3 at Min \nCooling",
+                "Analog-Out3 at Max \nCooling",
                 viewModel.minMaxVoltage,
                 "V",
                 minDefault = viewModel.viewState.value.analogOut3MinMax.compositeCoolingMinVoltage.toString(),
@@ -1626,8 +1746,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 viewModel.viewState.value.analogOut4Association
             )
         ) {
-            MinMaxConfiguration("Analog-out4 at Min \nCooling",
-                "Analog-out4 at Max \nCooling",
+            MinMaxConfiguration("Analog-Out4 at Min \nCooling",
+                "Analog-Out4 at Max \nCooling",
                 viewModel.minMaxVoltage,
                 "V",
                 minDefault = viewModel.viewState.value.analogOut4MinMax.compositeCoolingMinVoltage.toString(),
@@ -1651,8 +1771,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 viewModel.viewState.value.analogOut1Association
             )
         ) {
-            MinMaxConfiguration("Analog-out1 at Min \nHeating",
-                "Analog-out1 at Max \nHeating",
+            MinMaxConfiguration("Analog-Out1 at Min \nHeating",
+                "Analog-Out1 at Max \nHeating",
                 viewModel.minMaxVoltage,
                 "V",
                 minDefault = viewModel.viewState.value.analogOut1MinMax.compositeHeatingMinVoltage.toString(),
@@ -1672,8 +1792,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 viewModel.viewState.value.analogOut2Association
             )
         ) {
-            MinMaxConfiguration("Analog-out2 at Min \nHeating",
-                "Analog-out2 at Max \nHeating",
+            MinMaxConfiguration("Analog-Out2 at Min \nHeating",
+                "Analog-Out2 at Max \nHeating",
                 viewModel.minMaxVoltage,
                 "V",
                 minDefault = viewModel.viewState.value.analogOut2MinMax.compositeHeatingMinVoltage.toString(),
@@ -1693,8 +1813,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 viewModel.viewState.value.analogOut3Association
             )
         ) {
-            MinMaxConfiguration("Analog-out3 at Min \nHeating",
-                "Analog-out3 at Max \nHeating",
+            MinMaxConfiguration("Analog-Out3 at Min \nHeating",
+                "Analog-Out3 at Max \nHeating",
                 viewModel.minMaxVoltage,
                 "V",
                 minDefault = viewModel.viewState.value.analogOut3MinMax.compositeHeatingMinVoltage.toString(),
@@ -1714,8 +1834,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 viewModel.viewState.value.analogOut4Association
             )
         ) {
-            MinMaxConfiguration("Analog-out4 at Min \nHeating",
-                "Analog-out4 at Max \nHeating",
+            MinMaxConfiguration("Analog-Out4 at Min \nHeating",
+                "Analog-Out4 at Max \nHeating",
                 viewModel.minMaxVoltage,
                 "V",
                 minDefault = viewModel.viewState.value.analogOut4MinMax.compositeHeatingMinVoltage.toString(),
@@ -1975,8 +2095,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
         val universalEnum = viewModel.getAllowedValues(DomainName.universalIn1Association, viewModel.connectModel)
 
         Row(modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 20.dp)) {
+            .fillMaxWidth()
+            .padding(bottom = 20.dp)) {
             Image(
                 painter = painterResource(id = R.drawable.connect_ui),
                 contentDescription = "Universal Inputs",
@@ -2078,6 +2198,15 @@ open class AdvancedHybridAhuFragment : Fragment() {
     fun ConnectRelayConfig(viewModel: AdvancedHybridAhuViewModel) {
         val relayEnums = viewModel.getAllowedValues(DomainName.relay1OutputAssociation, viewModel.connectModel)
 
+        fun getDisabledIndices(config: ConfigState): List<Int> {
+            return if (viewModel.viewState.value.isAnyConnectRelayMapped(28,config)) { // 28 is changeOverHeating
+                listOf(27)
+            } else if (viewModel.viewState.value.isAnyConnectRelayMapped(27, config)) { // 27 is changeOverCooling
+                listOf(28)
+            } else {
+                emptyList()
+            }
+        }
         Row(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -2123,7 +2252,9 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             setStateChanged(viewModel)
                         },
                         testState = if(viewModel.isConnectModulePaired) viewModel.getConnectPhysicalPointForRelayIndex(index)?.let { it.readHisVal() > 0 } ?: false else false,
-                        onTestActivated = {viewModel.sendConnectRelayTestCommand(index, it)})
+                        onTestActivated = {viewModel.sendConnectRelayTestCommand(index, it)},
+                        disabledIndices= getDisabledIndices(relayConfig)
+                    )
                 }
             }
         }
@@ -2242,6 +2373,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
         ConnectLoadBasedFanControl(viewModel)
         ConnectHeatLoadBasedControl(viewModel)
         ConnectCompositeBasedControl(viewModel)
+        ConnectCompressorSpeedBasedControl(viewModel)
     }
 
     @Composable
@@ -2261,8 +2393,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.connectAnalogOut1Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out1 at Min \nCooling",
-                        "Analog-out1 at Max \nCooling",
+                    MinMaxConfiguration("Analog-Out1 at Min \nCooling",
+                        "Analog-Out1 at Max \nCooling",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.connectAnalogOut1MinMax.coolingMinVoltage.toString(),
@@ -2282,8 +2414,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.connectAnalogOut2Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out2 at Min \nCooling",
-                        "Analog-out2 at Max \nCooling",
+                    MinMaxConfiguration("Analog-Out2 at Min \nCooling",
+                        "Analog-Out2 at Max \nCooling",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.connectAnalogOut2MinMax.coolingMinVoltage.toString(),
@@ -2303,8 +2435,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.connectAnalogOut3Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out3 at Min \nCooling",
-                        "Analog-out3 at Max \nCooling",
+                    MinMaxConfiguration("Analog-Out3 at Min \nCooling",
+                        "Analog-Out3 at Max \nCooling",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.connectAnalogOut3MinMax.coolingMinVoltage.toString(),
@@ -2324,8 +2456,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.connectAnalogOut4Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out4 at Min \nCooling",
-                        "Analog-out4 at Max \nCooling",
+                    MinMaxConfiguration("Analog-Out4 at Min \nCooling",
+                        "Analog-Out4 at Max \nCooling",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.connectAnalogOut4MinMax.coolingMinVoltage.toString(),
@@ -2359,8 +2491,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.connectAnalogOut1Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out1 at Min \nFan",
-                        "Analog-out1 at Max \nFan",
+                    MinMaxConfiguration("Analog-Out1 at Min \nFan",
+                        "Analog-Out1 at Max \nFan",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.connectAnalogOut1MinMax.fanMinVoltage.toString(),
@@ -2382,8 +2514,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.connectAnalogOut2Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out2 at Min \nFan",
-                        "Analog-out2 at Max \nFan",
+                    MinMaxConfiguration("Analog-Out2 at Min \nFan",
+                        "Analog-Out2 at Max \nFan",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.connectAnalogOut2MinMax.fanMinVoltage.toString(),
@@ -2405,8 +2537,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.connectAnalogOut3Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out3 at Min \nFan",
-                        "Analog-out3 at Max \nFan",
+                    MinMaxConfiguration("Analog-Out3 at Min \nFan",
+                        "Analog-Out3 at Max \nFan",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.connectAnalogOut3MinMax.fanMinVoltage.toString(),
@@ -2428,8 +2560,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.connectAnalogOut4Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out4 at Min \nFan",
-                        "Analog-out4 at Max \nFan",
+                    MinMaxConfiguration("Analog-Out4 at Min \nFan",
+                        "Analog-Out4 at Max \nFan",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.connectAnalogOut4MinMax.fanMinVoltage.toString(),
@@ -2467,8 +2599,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.connectAnalogOut1Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out1 at Min \nHeating",
-                        "Analog-out1 at Max \nHeating",
+                    MinMaxConfiguration("Analog-Out1 at Min \nHeating",
+                        "Analog-Out1 at Max \nHeating",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.connectAnalogOut1MinMax.heatingMinVoltage.toString(),
@@ -2488,8 +2620,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.connectAnalogOut2Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out2 at Min \nHeating",
-                        "Analog-out2 at Max \nHeating",
+                    MinMaxConfiguration("Analog-Out2 at Min \nHeating",
+                        "Analog-Out2 at Max \nHeating",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.connectAnalogOut2MinMax.heatingMinVoltage.toString(),
@@ -2509,8 +2641,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.connectAnalogOut3Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out3 at Min \nHeating",
-                        "Analog-out3 at Max \nHeating",
+                    MinMaxConfiguration("Analog-Out3 at Min \nHeating",
+                        "Analog-Out3 at Max \nHeating",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.connectAnalogOut3MinMax.heatingMinVoltage.toString(),
@@ -2530,8 +2662,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         viewModel.viewState.value.connectAnalogOut4Association
                     )
                 ) {
-                    MinMaxConfiguration("Analog-out4 at Min \nHeating",
-                        "Analog-out4 at Max \nHeating",
+                    MinMaxConfiguration("Analog-Out4 at Min \nHeating",
+                        "Analog-Out4 at Max \nHeating",
                         viewModel.minMaxVoltage,
                         "V",
                         minDefault = viewModel.viewState.value.connectAnalogOut4MinMax.heatingMinVoltage.toString(),
@@ -2548,6 +2680,105 @@ open class AdvancedHybridAhuFragment : Fragment() {
             }
         }
     }
+    @Composable
+    fun ConnectCompressorSpeedBasedControl(viewModel: AdvancedHybridAhuViewModel) {
+        if (viewModel.isConnectCompressorSpeedEnabled()) {
+
+            if (viewModel.viewState.value.noOfAnalogOutDynamic > 0) {
+                ComposeUtil.DashDivider()
+            }
+            viewModel.viewState.value.noOfAnalogOutDynamic++
+        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 17.dp)) {
+
+                BoldStyledTextView(COMPRESSOR_SPEED, fontSize = 20)
+                if (viewModel.isAnalogEnabledAndMapped(
+                        ConnectControlType.COMPRESSOR_SPEED,
+                        viewModel.viewState.value.connectAnalogOut1Enabled,
+                        viewModel.viewState.value.connectAnalogOut1Association
+                    )
+                ) {
+                    MinMaxConfiguration("Analog-Out1 at Min \nCompressor Speed",
+                        "Analog-Out1 at Max \nCompressor Speed",
+                        viewModel.minMaxVoltage,
+                        "V",
+                        minDefault = viewModel.viewState.value.connectAnalogOut1MinMax.compressorMinVoltage.toString(),
+                        maxDefault = viewModel.viewState.value.connectAnalogOut1MinMax.compressorMaxVoltage.toString(),
+                        onMinSelected = {
+                            viewModel.viewState.value.connectAnalogOut1MinMax.compressorMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
+                        },
+                        onMaxSelected = {
+                            viewModel.viewState.value.connectAnalogOut1MinMax.compressorMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
+                        })
+                }
+                if (viewModel.isAnalogEnabledAndMapped(
+                        ConnectControlType.COMPRESSOR_SPEED,
+                        viewModel.viewState.value.connectAnalogOut2Enabled,
+                        viewModel.viewState.value.connectAnalogOut2Association
+                    )
+                ) {
+                    MinMaxConfiguration("Analog-Out2 at Min \nCompressor Speed",
+                        "Analog-Out2 at Max \nCompressor Speed",
+                        viewModel.minMaxVoltage,
+                        "V",
+                        minDefault = viewModel.viewState.value.connectAnalogOut2MinMax.compressorMinVoltage.toString(),
+                        maxDefault = viewModel.viewState.value.connectAnalogOut2MinMax.compressorMaxVoltage.toString(),
+                        onMinSelected = {
+                            viewModel.viewState.value.connectAnalogOut2MinMax.compressorMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
+                        },
+                        onMaxSelected = {
+                            viewModel.viewState.value.connectAnalogOut2MinMax.compressorMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
+                        })
+                }
+                if (viewModel.isAnalogEnabledAndMapped(
+                        ConnectControlType.COMPRESSOR_SPEED,
+                        viewModel.viewState.value.connectAnalogOut3Enabled,
+                        viewModel.viewState.value.connectAnalogOut3Association
+                    )
+                ) {
+                    MinMaxConfiguration("Analog-Out3 at Min \nCompressor Speed",
+                        "Analog-Out3 at Max \nCompressor Speed",
+                        viewModel.minMaxVoltage,
+                        "V",
+                        minDefault = viewModel.viewState.value.connectAnalogOut3MinMax.compressorMinVoltage.toString(),
+                        maxDefault = viewModel.viewState.value.connectAnalogOut3MinMax.compressorMaxVoltage.toString(),
+                        onMinSelected = {
+                            viewModel.viewState.value.connectAnalogOut3MinMax.compressorMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
+                        },
+                        onMaxSelected = {
+                            viewModel.viewState.value.connectAnalogOut3MinMax.compressorMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
+                        })
+                }
+                if (viewModel.isAnalogEnabledAndMapped(
+                        ConnectControlType.COMPRESSOR_SPEED,
+                        viewModel.viewState.value.connectAnalogOut4Enabled,
+                        viewModel.viewState.value.connectAnalogOut4Association
+                    )
+                ) {
+                    MinMaxConfiguration("Analog-Out4 at Min \nCompressor Speed",
+                        "Analog-Out4 at Max \nCompressor Speed",
+                        viewModel.minMaxVoltage,
+                        "V",
+                        minDefault = viewModel.viewState.value.connectAnalogOut4MinMax.compressorMinVoltage.toString(),
+                        maxDefault = viewModel.viewState.value.connectAnalogOut4MinMax.compressorMaxVoltage.toString(),
+                        onMinSelected = {
+                            viewModel.viewState.value.connectAnalogOut4MinMax.compressorMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
+                        },
+                        onMaxSelected = {
+                            viewModel.viewState.value.connectAnalogOut4MinMax.compressorMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
+                        })
+                }
+            }
+        }
+    }
+
 
     @Composable
     fun ConnectCompositeBasedControl(viewModel: AdvancedHybridAhuViewModel) {
@@ -2584,8 +2815,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 BoldStyledTextView(CO2_DAMPER_CONTROL, fontSize = 20)
                 Row(modifier = Modifier.padding(top = 10.dp, bottom = 15.dp)) {
                     Box(modifier = Modifier
-                            .weight(1f)
-                            .padding(top = 10.dp)) {
+                        .weight(1f)
+                        .padding(top = 10.dp)) {
                         StyledTextView(
                             CO2_DAMPER_CONTROL_ON, fontSize = 20, textAlignment = TextAlign.Left
                         )
@@ -2656,8 +2887,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectAnalogOut1Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out1 at Min \nDCV Damper Pos",
-                    "Analog-out1 at Max \nDCV Damper Pos",
+                MinMaxConfiguration("Analog-Out1 at Min \nDCV Damper Pos",
+                    "Analog-Out1 at Max \nDCV Damper Pos",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.connectAnalogOut1MinMax.damperPosMinVoltage.toString(),
@@ -2679,8 +2910,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectAnalogOut2Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out2 at Min \nDCV Damper Pos",
-                    "Analog-out2 at Max \nDCV Damper Pos",
+                MinMaxConfiguration("Analog-Out2 at Min \nDCV Damper Pos",
+                    "Analog-Out2 at Max \nDCV Damper Pos",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.connectAnalogOut2MinMax.damperPosMinVoltage.toString(),
@@ -2702,8 +2933,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectAnalogOut3Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out3 at Min \nDCV Damper Pos",
-                    "Analog-out3 at Max \nDCV Damper Pos",
+                MinMaxConfiguration("Analog-Out3 at Min \nDCV Damper Pos",
+                    "Analog-Out3 at Max \nDCV Damper Pos",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.connectAnalogOut3MinMax.damperPosMinVoltage.toString(),
@@ -2725,8 +2956,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectAnalogOut4Association
                 )
             ) {
-                MinMaxConfiguration("Analog-out4 at Min \nDCV Damper Pos",
-                    "Analog-out4 at Max \nDCV Damper Pos",
+                MinMaxConfiguration("Analog-Out4 at Min \nDCV Damper Pos",
+                    "Analog-Out4 at Max \nDCV Damper Pos",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.connectAnalogOut4MinMax.damperPosMinVoltage.toString(),
@@ -2753,8 +2984,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 viewModel.viewState.value.connectAnalogOut1Association
             )
         ) {
-            MinMaxConfiguration("Analog-out1 at Min \nCooling",
-                "Analog-out1 at Max \nCooling",
+            MinMaxConfiguration("Analog-Out1 at Min \nCooling",
+                "Analog-Out1 at Max \nCooling",
                 viewModel.minMaxVoltage,
                 "V",
                 minDefault = viewModel.viewState.value.connectAnalogOut1MinMax.compositeCoolingMinVoltage.toString(),
@@ -2774,8 +3005,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 viewModel.viewState.value.connectAnalogOut2Association
             )
         ) {
-            MinMaxConfiguration("Analog-out2 at Min \nCooling",
-                "Analog-out2 at Max \nCooling",
+            MinMaxConfiguration("Analog-Out2 at Min \nCooling",
+                "Analog-Out2 at Max \nCooling",
                 viewModel.minMaxVoltage,
                 "V",
                 minDefault = viewModel.viewState.value.connectAnalogOut2MinMax.compositeCoolingMinVoltage.toString(),
@@ -2795,8 +3026,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 viewModel.viewState.value.connectAnalogOut3Association
             )
         ) {
-            MinMaxConfiguration("Analog-out3 at Min \nCooling",
-                "Analog-out3 at Max \nCooling",
+            MinMaxConfiguration("Analog-Out3 at Min \nCooling",
+                "Analog-Out3 at Max \nCooling",
                 viewModel.minMaxVoltage,
                 "V",
                 minDefault = viewModel.viewState.value.connectAnalogOut3MinMax.compositeCoolingMinVoltage.toString(),
@@ -2816,8 +3047,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 viewModel.viewState.value.connectAnalogOut4Association
             )
         ) {
-            MinMaxConfiguration("Analog-out4 at Min \nCooling",
-                "Analog-out4 at Max \nCooling",
+            MinMaxConfiguration("Analog-Out4 at Min \nCooling",
+                "Analog-Out4 at Max \nCooling",
                 viewModel.minMaxVoltage,
                 "V",
                 minDefault = viewModel.viewState.value.connectAnalogOut4MinMax.compositeCoolingMinVoltage.toString(),
@@ -2841,8 +3072,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 viewModel.viewState.value.connectAnalogOut1Association
             )
         ) {
-            MinMaxConfiguration("Analog-out1 at Min \nHeating",
-                "Analog-out1 at Max \nHeating",
+            MinMaxConfiguration("Analog-Out1 at Min \nHeating",
+                "Analog-Out1 at Max \nHeating",
                 viewModel.minMaxVoltage,
                 "V",
                 minDefault = viewModel.viewState.value.connectAnalogOut1MinMax.compositeHeatingMinVoltage.toString(),
@@ -2862,8 +3093,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 viewModel.viewState.value.connectAnalogOut2Association
             )
         ) {
-            MinMaxConfiguration("Analog-out2 at Min \nHeating",
-                "Analog-out2 at Max \nHeating",
+            MinMaxConfiguration("Analog-Out2 at Min \nHeating",
+                "Analog-Out2 at Max \nHeating",
                 viewModel.minMaxVoltage,
                 "V",
                 minDefault = viewModel.viewState.value.connectAnalogOut2MinMax.compositeHeatingMinVoltage.toString(),
@@ -2883,8 +3114,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 viewModel.viewState.value.connectAnalogOut3Association
             )
         ) {
-            MinMaxConfiguration("Analog-out3 at Min \nHeating",
-                "Analog-out3 at Max \nHeating",
+            MinMaxConfiguration("Analog-Out3 at Min \nHeating",
+                "Analog-Out3 at Max \nHeating",
                 viewModel.minMaxVoltage,
                 "V",
                 minDefault = viewModel.viewState.value.connectAnalogOut3MinMax.compositeHeatingMinVoltage.toString(),
@@ -2904,8 +3135,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 viewModel.viewState.value.connectAnalogOut4Association
             )
         ) {
-            MinMaxConfiguration("Analog-out4 at Min \nHeating",
-                "Analog-out4 at Max \nHeating",
+            MinMaxConfiguration("Analog-Out4 at Min \nHeating",
+                "Analog-Out4 at Max \nHeating",
                 viewModel.minMaxVoltage,
                 "V",
                 minDefault = viewModel.viewState.value.connectAnalogOut4MinMax.compositeHeatingMinVoltage.toString(),

@@ -24,8 +24,9 @@ fun getAnalogAssociation(enabledControls: MutableSet<AdvancedAhuAnalogOutAssocia
                 AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_COOLING -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.LOAD_COOLING)
                 AdvancedAhuAnalogOutAssociationTypeConnect.CO2_DAMPER -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.CO2_DAMPER)
                 AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.COMPOSITE_SIGNAL)
-                AdvancedAhuAnalogOutAssociationTypeConnect.OAO_DAMPER -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.OAO_DAMPER)
-                AdvancedAhuAnalogOutAssociationTypeConnect.RETURN_DAMPER -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.RETURN_DAMPER)
+                /*AdvancedAhuAnalogOutAssociationTypeConnect.OAO_DAMPER -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.OAO_DAMPER)
+                AdvancedAhuAnalogOutAssociationTypeConnect.RETURN_DAMPER -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.RETURN_DAMPER)*/
+                AdvancedAhuAnalogOutAssociationTypeConnect.COMPRESSOR_SPEED -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.COMPRESSOR_SPEED)
 
                 else -> { } // Do nothing
             }
@@ -46,17 +47,17 @@ fun isConnectStageEnabled(stage: String, connectRelayMappings: Map<Point, Point>
 }
 
 fun isConnectHighFanStagesEnabled(connectEquip: ConnectModuleEquip) : Boolean {
-    return  connectEquip.loadFanStage5.readHisVal() > 0 ||
-            connectEquip.loadFanStage4.readHisVal() > 0 ||
-            connectEquip.loadFanStage3.readHisVal() > 0
+    return  connectEquip.conditioningStages.loadFanStage5.readHisVal() > 0 ||
+            connectEquip.conditioningStages.loadFanStage4.readHisVal() > 0 ||
+            connectEquip.conditioningStages.loadFanStage3.readHisVal() > 0
 }
 
 fun isConnectMediumFanStagesEnabled(connectEquip: ConnectModuleEquip) : Boolean {
-    return  connectEquip.loadFanStage2.readHisVal() > 0
+    return  connectEquip.conditioningStages.loadFanStage2.readHisVal() > 0
 }
 
 fun isConnectLowFanStageEnabled(connectEquip: ConnectModuleEquip) : Boolean{
-    return  connectEquip.loadFanStage1.readHisVal() > 0
+    return  connectEquip.conditioningStages.loadFanStage1.readHisVal() > 0
 }
 
 
@@ -158,6 +159,7 @@ fun getConnectLoopOutput(
         }
         AdvancedAhuAnalogOutAssociationTypeConnect.OAO_DAMPER -> connectEquip.outsideDamperCmd.readHisVal()
         AdvancedAhuAnalogOutAssociationTypeConnect.RETURN_DAMPER -> connectEquip.returnDamperCmd.readHisVal()
+        AdvancedAhuAnalogOutAssociationTypeConnect.COMPRESSOR_SPEED -> connectEquip.compressorLoopOutput.readHisVal()
     }
 }
 
@@ -247,6 +249,11 @@ fun getConnectAnalogOut1MinMax(
             analogMinVoltage = connectEquip.analog1MinReturnDamper.readDefaultVal()
             analogMaxVoltage = connectEquip.analog1MaxReturnDamper.readDefaultVal()
         }
+
+        AdvancedAhuAnalogOutAssociationTypeConnect.COMPRESSOR_SPEED -> {
+            analogMinVoltage = connectEquip.analog1MinCompressorSpeed.readDefaultVal()
+            analogMaxVoltage = connectEquip.analog1MaxCompressorSpeed.readDefaultVal()
+        }
     }
     return Pair(analogMinVoltage, analogMaxVoltage)
 }
@@ -298,6 +305,11 @@ fun getConnectAnalogOut2MinMax(
         AdvancedAhuAnalogOutAssociationTypeConnect.RETURN_DAMPER ->{
             analogMinVoltage = connectEquip.analog2MinReturnDamper.readDefaultVal()
             analogMaxVoltage = connectEquip.analog2MaxReturnDamper.readDefaultVal()
+        }
+
+        AdvancedAhuAnalogOutAssociationTypeConnect.COMPRESSOR_SPEED -> {
+            analogMinVoltage = connectEquip.analog2MinCompressorSpeed.readDefaultVal()
+            analogMaxVoltage = connectEquip.analog2MaxCompressorSpeed.readDefaultVal()
         }
     }
     return Pair(analogMinVoltage, analogMaxVoltage)
@@ -351,6 +363,11 @@ fun getConnectAnalogOut3MinMax(
             analogMinVoltage = connectEquip.analog3MinReturnDamper.readDefaultVal()
             analogMaxVoltage = connectEquip.analog3MaxReturnDamper.readDefaultVal()
         }
+
+        AdvancedAhuAnalogOutAssociationTypeConnect.COMPRESSOR_SPEED -> {
+            analogMinVoltage = connectEquip.analog3MinCompressorSpeed.readDefaultVal()
+            analogMaxVoltage = connectEquip.analog3MaxCompressorSpeed.readDefaultVal()
+        }
     }
     return Pair(analogMinVoltage, analogMaxVoltage)
 }
@@ -403,6 +420,11 @@ fun getConnectAnalogOut4MinMax(
             analogMinVoltage = connectEquip.analog4MinReturnDamper.readDefaultVal()
             analogMaxVoltage = connectEquip.analog4MaxReturnDamper.readDefaultVal()
         }
+
+        AdvancedAhuAnalogOutAssociationTypeConnect.COMPRESSOR_SPEED -> {
+            analogMinVoltage = connectEquip.analog4MinCompressorSpeed.readDefaultVal()
+            analogMaxVoltage = connectEquip.analog4MaxCompressorSpeed.readDefaultVal()
+        }
     }
     return Pair(analogMinVoltage, analogMaxVoltage)
 }
@@ -415,7 +437,7 @@ fun getConnectAnalogModulation(
         ahuSettings: AhuSettings,
         isLockoutActiveDuringUnoccupied: Boolean
 ) : Double {
-    var econFlag : Boolean = false
+    var econFlag = false
     val finalLoop = when (controlType) {
         AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> {
             if (ahuSettings.isMechanicalCoolingAvailable || ahuSettings.isMechanicalHeatingAvailable

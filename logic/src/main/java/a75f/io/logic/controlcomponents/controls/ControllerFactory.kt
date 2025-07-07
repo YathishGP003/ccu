@@ -8,6 +8,7 @@ import a75f.io.logic.controlcomponents.handlers.DcvDamperController
 import a75f.io.logic.controlcomponents.handlers.DehumidifierController
 import a75f.io.logic.controlcomponents.handlers.EnableController
 import a75f.io.logic.controlcomponents.handlers.FanEnableController
+import a75f.io.logic.controlcomponents.handlers.FanRunCommandController
 import a75f.io.logic.controlcomponents.handlers.HumidifierController
 import a75f.io.logic.controlcomponents.handlers.OccupiedEnabledController
 import a75f.io.logic.controlcomponents.handlers.StageControlHandler
@@ -339,6 +340,27 @@ open class ControllerFactory {
             logIt(logTag, "Controller added with name: WaterValveController")
         }
         return equip.controllers[ControllerNames.WATER_VALVE_CONTROLLER] as WaterValveController
+    }
+
+    fun addFanRunCommandController(
+        equip: DomainEquip,
+        systemCo2Loop: Point,
+        occupancy: CalibratedPoint,
+        onConstrains: Map<Int, Constraint> = emptyMap(),
+        offConstrains: Map<Int, Constraint> = emptyMap(),
+        logTag: String
+    ): FanRunCommandController {
+        if (!equip.controllers.containsKey(ControllerNames.FAN_RUN_COMMAND_CONTROLLER)) {
+            val controller = FanRunCommandController(
+                isSystemOccupied = occupancy,
+                systemCo2Loop = systemCo2Loop,
+                logTag = logTag
+            )
+            addConstraintsIfExist(controller, onConstrains, offConstrains)
+            equip.controllers[ControllerNames.FAN_RUN_COMMAND_CONTROLLER] = controller
+            logIt(logTag, "Controller added with name: FanRunCommandController")
+        }
+        return equip.controllers[ControllerNames.FAN_RUN_COMMAND_CONTROLLER] as FanRunCommandController
     }
 
 

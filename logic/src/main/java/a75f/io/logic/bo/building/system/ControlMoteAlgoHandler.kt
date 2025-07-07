@@ -121,9 +121,7 @@ fun getCmLoopOutput(systemEquip: AdvancedHybridSystemEquip, controlType: Advance
                 }
             }
         }
-        // Just to avoid build errors for now. OAO and RETURN dampers are unused in the Advanced AHU system profiles
-        AdvancedAhuAnalogOutAssociationType.OAO_DAMPER -> 0.0
-        AdvancedAhuAnalogOutAssociationType.RETURN_DAMPER -> 0.0
+        AdvancedAhuAnalogOutAssociationType.COMPRESSOR_SPEED -> systemEquip.compressorLoopOutput.readHisVal()
     }
 }
 
@@ -187,10 +185,10 @@ fun getAnalogOut1MinMax(controlType : AdvancedAhuAnalogOutAssociationType, syste
                 }
             }
         }
-        // Just to avoid build errors for now. OAO and RETURN dampers are unused in the Advanced AHU system profiles
-        AdvancedAhuAnalogOutAssociationType.OAO_DAMPER -> {
-        }
-        AdvancedAhuAnalogOutAssociationType.RETURN_DAMPER -> {
+
+        AdvancedAhuAnalogOutAssociationType.COMPRESSOR_SPEED -> {
+            analogMinVoltage = systemEquip.analog1MinCompressorSpeed.readDefaultVal()
+            analogMaxVoltage = systemEquip.analog1MaxCompressorSpeed.readDefaultVal()
         }
     }
     return Pair(analogMinVoltage, analogMaxVoltage)
@@ -251,10 +249,9 @@ fun getAnalogOut2MinMax(controlType : AdvancedAhuAnalogOutAssociationType, syste
                 }
             }
         }
-        // Just to avoid build errors for now. OAO and RETURN dampers are unused in the Advanced AHU system profiles
-        AdvancedAhuAnalogOutAssociationType.OAO_DAMPER -> {
-        }
-        AdvancedAhuAnalogOutAssociationType.RETURN_DAMPER -> {
+        AdvancedAhuAnalogOutAssociationType.COMPRESSOR_SPEED -> {
+            analogMinVoltage = systemEquip.analog2MinCompressorSpeed.readDefaultVal()
+            analogMaxVoltage = systemEquip.analog2MaxCompressorSpeed.readDefaultVal()
         }
     }
     return Pair(analogMinVoltage, analogMaxVoltage)
@@ -315,10 +312,10 @@ fun getAnalogOut3MinMax(controlType : AdvancedAhuAnalogOutAssociationType, syste
                 }
             }
         }
-        // Just to avoid build errors for now. OAO and RETURN dampers are unused in the Advanced AHU system profiles
-        AdvancedAhuAnalogOutAssociationType.OAO_DAMPER -> {
-        }
-        AdvancedAhuAnalogOutAssociationType.RETURN_DAMPER -> {
+
+        AdvancedAhuAnalogOutAssociationType.COMPRESSOR_SPEED -> {
+            analogMinVoltage = systemEquip.analog3MinCompressorSpeed.readDefaultVal()
+            analogMaxVoltage = systemEquip.analog3MaxCompressorSpeed.readDefaultVal()
         }
     }
     return Pair(analogMinVoltage, analogMaxVoltage)
@@ -380,10 +377,10 @@ fun getAnalogOut4MinMax(controlType : AdvancedAhuAnalogOutAssociationType, syste
                 }
             }
         }
-        // Just to avoid build errors for now. OAO and RETURN dampers are unused in the Advanced AHU system profiles
-        AdvancedAhuAnalogOutAssociationType.OAO_DAMPER -> {
-        }
-        AdvancedAhuAnalogOutAssociationType.RETURN_DAMPER -> {
+
+        AdvancedAhuAnalogOutAssociationType.COMPRESSOR_SPEED -> {
+            analogMinVoltage = systemEquip.analog4MinCompressorSpeed.readDefaultVal()
+            analogMaxVoltage = systemEquip.analog4MaxCompressorSpeed.readDefaultVal()
         }
     }
     return Pair(analogMinVoltage, analogMaxVoltage)
@@ -396,7 +393,7 @@ fun getAnalogModulation(
         ahuSettings: AhuSettings,
         isLockoutActiveDuringUnoccupied: Boolean
 ) : Double {
-    var econFlag : Boolean = false
+    var econFlag = false
     val finalLoop = when (controlType) {
         AdvancedAhuAnalogOutAssociationType.COMPOSITE_SIGNAL -> {
             if (ahuSettings.isMechanicalCoolingAvailable || ahuSettings.isMechanicalHeatingAvailable

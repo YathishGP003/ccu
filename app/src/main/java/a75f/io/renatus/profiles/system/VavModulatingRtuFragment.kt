@@ -117,7 +117,7 @@ class VavModulatingRtuFragment(loadingListener: onLoadingCompleteListener) : Mod
                         .padding(10.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.input_vavanalog),
+                        painter = painterResource(id = R.drawable.modulating),
                         contentDescription = "Relays",
                         modifier = Modifier
                             .wrapContentSize()
@@ -142,6 +142,8 @@ class VavModulatingRtuFragment(loadingListener: onLoadingCompleteListener) : Mod
                         }
                         Spacer(modifier = Modifier.height(18.dp))
                         AnalogOutAndRelayComposable(viewModel = vavModulatingViewModel)
+                        Spacer(modifier = Modifier.height(18.dp))
+                        AnalogInputConfig()
                     }
                 }
             }
@@ -154,32 +156,9 @@ class VavModulatingRtuFragment(loadingListener: onLoadingCompleteListener) : Mod
                         .padding(end = 40.dp),
                     horizontalArrangement = Arrangement.Start
                 ) {
-                    DropDownWithLabel(label = "Analog-Out1 at\nMin Cooling",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.value.analogOut1CoolingMin,
-                        onSelected = {
-                            viewState.value.analogOut1CoolingMin = it
-                            vavModulatingViewModel.setStateChanged()
-                        },
-                        isEnabled = viewState.value.isAnalog1OutputEnabled,
-                        spacerLimit = 102,
-                        previewWidth = 100,
-                        expandedWidth = 120)
-                    Spacer(modifier = Modifier.width(130.dp))
-                    DropDownWithLabel(label = "Analog-Out1 at\nMax Cooling",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.value.analogOut1CoolingMax,
-                        onSelected = {
-                            viewState.value.analogOut1CoolingMax = it
-                            vavModulatingViewModel.setStateChanged()
-                        },
-                        isEnabled = viewState.value.isAnalog1OutputEnabled,
-                        spacerLimit = 147,
-                        previewWidth = 100,
-                        expandedWidth = 120)
+                    AnalogOut1MinMaxConfig()
                 }
             }
-
             item {
                 Spacer(modifier = Modifier.height(20.dp))
                 Row(
@@ -188,32 +167,9 @@ class VavModulatingRtuFragment(loadingListener: onLoadingCompleteListener) : Mod
                         .padding(end = 40.dp),
                     horizontalArrangement = Arrangement.Start
                 ) {
-                    DropDownWithLabel(label = "Analog-Out2 at\nMin Static",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.value.analogOut2StaticPressureMin,
-                        onSelected = {
-                            viewState.value.analogOut2StaticPressureMin = it
-                            vavModulatingViewModel.setStateChanged()
-                        },
-                        isEnabled = viewState.value.isAnalog2OutputEnabled,
-                        spacerLimit = 102,
-                        previewWidth = 100,
-                        expandedWidth = 120)
-                    Spacer(modifier = Modifier.width(130.dp))
-                    DropDownWithLabel(label = "Analog-Out2 at\nMax Static",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.value.analogOut2StaticPressureMax,
-                        onSelected = {
-                            viewState.value.analogOut2StaticPressureMax = it
-                            vavModulatingViewModel.setStateChanged()
-                        },
-                        isEnabled = viewState.value.isAnalog2OutputEnabled,
-                        spacerLimit = 147,
-                        previewWidth = 100,
-                        expandedWidth = 120)
+                    AnalogOut2MinMaxConfig()
                 }
             }
-
             item {
                 Spacer(modifier = Modifier.height(20.dp))
                 Row(
@@ -222,32 +178,9 @@ class VavModulatingRtuFragment(loadingListener: onLoadingCompleteListener) : Mod
                         .padding(end = 40.dp),
                     horizontalArrangement = Arrangement.Start
                 ) {
-                    DropDownWithLabel(label = "Analog-Out3 at\nMin Heating",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.value.analogOut3HeatingMin,
-                        onSelected = {
-                            viewState.value.analogOut3HeatingMin = it
-                            vavModulatingViewModel.setStateChanged()
-                        },
-                        isEnabled = viewState.value.isAnalog3OutputEnabled,
-                        spacerLimit = 102,
-                        previewWidth = 100,
-                        expandedWidth = 120)
-                    Spacer(modifier = Modifier.width(130.dp))
-                    DropDownWithLabel(label = "Analog-Out3 at\nMax Heating",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.value.analogOut3HeatingMax,
-                        onSelected = {
-                            viewState.value.analogOut3HeatingMax = it
-                            vavModulatingViewModel.setStateChanged()
-                        },
-                        isEnabled = viewState.value.isAnalog3OutputEnabled,
-                        spacerLimit = 147,
-                        previewWidth = 100,
-                        expandedWidth = 120)
+                    AnalogOut3MinMaxConfig()
                 }
             }
-
             item {
                 Spacer(modifier = Modifier.height(20.dp))
                 Row(
@@ -256,32 +189,10 @@ class VavModulatingRtuFragment(loadingListener: onLoadingCompleteListener) : Mod
                         .padding(end = 40.dp),
                     horizontalArrangement = Arrangement.Start
                 ) {
-
-                    DropDownWithLabel(label = "Analog-Out4 at\nMin Fresh Air",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.value.analogOut4FreshAirMin,
-                        onSelected = {
-                            viewState.value.analogOut4FreshAirMin = it
-                            vavModulatingViewModel.setStateChanged()
-                        },
-                        isEnabled = viewState.value.isAnalog4OutputEnabled,
-                        spacerLimit = 102,
-                        previewWidth = 100,
-                        expandedWidth = 120)
-                    Spacer(modifier = Modifier.width(130.dp))
-                    DropDownWithLabel(label = "Analog-Out4 at\nMax Fresh Air",
-                        list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = vavModulatingViewModel.viewState.value.analogOut4FreshAirMax,
-                        onSelected = {
-                            viewState.value.analogOut4FreshAirMax = it
-                            vavModulatingViewModel.setStateChanged()
-                        },
-                        isEnabled = viewState.value.isAnalog4OutputEnabled,
-                        spacerLimit = 147,
-                        previewWidth = 100,
-                        expandedWidth = 120)
+                    AnalogOut4MinMaxConfig()
                 }
             }
+
             if(vavModulatingViewModel.viewState.value.unusedPortState.isNotEmpty()) {
                 item {
                     DividerRow()

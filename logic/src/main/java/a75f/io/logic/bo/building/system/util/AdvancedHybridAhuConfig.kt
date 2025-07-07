@@ -464,6 +464,8 @@ open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, co
                 fanMaxVoltage.currentVal = getDefault(equip.analog1MaxFan, equip, fanMaxVoltage)
                 damperPosMinVoltage.currentVal = getDefault(equip.analog1DamperMinPos, equip, damperPosMinVoltage)
                 damperPosMaxVoltage.currentVal = getDefault(equip.analog1DamperMaxPos, equip, damperPosMaxVoltage)
+                compressorMinVoltage.currentVal = getDefault(equip.analog1MinCompressorSpeed, equip, compressorMinVoltage)
+                compressorMaxVoltage.currentVal = getDefault(equip.analog1MaxCompressorSpeed, equip, compressorMaxVoltage)
             }
 
             analog2MinMaxVoltage.apply {
@@ -485,6 +487,8 @@ open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, co
                 fanMaxVoltage.currentVal = getDefault(equip.analog2MaxFan, equip, fanMaxVoltage)
                 damperPosMinVoltage.currentVal = getDefault(equip.analog2DamperMinPos, equip, damperPosMinVoltage)
                 damperPosMaxVoltage.currentVal = getDefault(equip.analog2DamperMaxPos, equip, damperPosMaxVoltage)
+                compressorMinVoltage.currentVal = getDefault(equip.analog2MinCompressorSpeed, equip, compressorMinVoltage)
+                compressorMaxVoltage.currentVal = getDefault(equip.analog2MaxCompressorSpeed, equip, compressorMaxVoltage)
             }
 
             analog3MinMaxVoltage.apply {
@@ -506,6 +510,8 @@ open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, co
                 fanMaxVoltage.currentVal = getDefault(equip.analog3MaxFan, equip, fanMaxVoltage)
                 damperPosMinVoltage.currentVal = getDefault(equip.analog3DamperMinPos, equip, damperPosMinVoltage)
                 damperPosMaxVoltage.currentVal = getDefault(equip.analog3DamperMaxPos, equip, damperPosMaxVoltage)
+                compressorMinVoltage.currentVal = getDefault(equip.analog3MinCompressorSpeed, equip, compressorMinVoltage)
+                compressorMaxVoltage.currentVal = getDefault(equip.analog3MaxCompressorSpeed, equip, compressorMaxVoltage)
             }
 
             analog4MinMaxVoltage.apply {
@@ -527,6 +533,8 @@ open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, co
                 fanMaxVoltage.currentVal = getDefault(equip.analog4MaxFan, equip, fanMaxVoltage)
                 damperPosMinVoltage.currentVal = getDefault(equip.analog4DamperMinPos, equip, damperPosMinVoltage)
                 damperPosMaxVoltage.currentVal = getDefault(equip.analog4DamperMaxPos, equip, damperPosMaxVoltage)
+                compressorMinVoltage.currentVal = getDefault(equip.analog4MinCompressorSpeed, equip, compressorMinVoltage)
+                compressorMaxVoltage.currentVal = getDefault(equip.analog4MaxCompressorSpeed, equip, compressorMaxVoltage)
             }
         }
     }
@@ -560,6 +568,8 @@ open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, co
                 fanMaxVoltage.currentVal = getDefault(equip.analog1MaxFan, equip, fanMaxVoltage)
                 damperPosMinVoltage.currentVal = getDefault(equip.analog1MinDamperPos, equip, damperPosMinVoltage)
                 damperPosMaxVoltage.currentVal = getDefault(equip.analog1MaxDamperPos, equip, damperPosMaxVoltage)
+                compressorMinVoltage.currentVal = getDefault(equip.analog1MinCompressorSpeed, equip, compressorMinVoltage)
+                compressorMaxVoltage.currentVal = getDefault(equip.analog1MaxCompressorSpeed, equip, compressorMaxVoltage)
             }
             analog2MinMaxVoltage.apply {
                 heatingMinVoltage.currentVal = getDefault(equip.analog2MinHeating, equip, heatingMinVoltage)
@@ -574,6 +584,8 @@ open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, co
                 fanMaxVoltage.currentVal = getDefault(equip.analog2MaxFan, equip, fanMaxVoltage)
                 damperPosMinVoltage.currentVal = getDefault(equip.analog2MinDamperPos, equip, damperPosMinVoltage)
                 damperPosMaxVoltage.currentVal = getDefault(equip.analog2MaxDamperPos, equip, damperPosMaxVoltage)
+                compressorMinVoltage.currentVal = getDefault(equip.analog2MinCompressorSpeed, equip, compressorMinVoltage)
+                compressorMaxVoltage.currentVal = getDefault(equip.analog2MaxCompressorSpeed, equip, compressorMaxVoltage)
             }
             analog3MinMaxVoltage.apply {
                 heatingMinVoltage.currentVal = getDefault(equip.analog3MinHeating, equip, heatingMinVoltage)
@@ -588,6 +600,8 @@ open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, co
                 fanMaxVoltage.currentVal = getDefault(equip.analog3MaxFan, equip, fanMaxVoltage)
                 damperPosMinVoltage.currentVal = getDefault(equip.analog3MinDamperPos, equip, damperPosMinVoltage)
                 damperPosMaxVoltage.currentVal = getDefault(equip.analog3MaxDamperPos, equip, damperPosMaxVoltage)
+                compressorMinVoltage.currentVal = getDefault(equip.analog3MinCompressorSpeed, equip, compressorMinVoltage)
+                compressorMaxVoltage.currentVal = getDefault(equip.analog3MaxCompressorSpeed, equip, compressorMaxVoltage)
             }
             analog4MinMaxVoltage.apply {
                 heatingMinVoltage.currentVal = getDefault(equip.analog4MinHeating, equip, heatingMinVoltage)
@@ -602,6 +616,8 @@ open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, co
                 fanMaxVoltage.currentVal = getDefault(equip.analog4MaxFan, equip, fanMaxVoltage)
                 damperPosMinVoltage.currentVal = getDefault(equip.analog4MinDamperPos, equip, damperPosMinVoltage)
                 damperPosMaxVoltage.currentVal = getDefault(equip.analog4MaxDamperPos, equip, damperPosMaxVoltage)
+                compressorMinVoltage.currentVal = getDefault(equip.analog4MinCompressorSpeed, equip, compressorMinVoltage)
+                compressorMaxVoltage.currentVal = getDefault(equip.analog4MaxCompressorSpeed, equip, compressorMaxVoltage)
             }
         }
     }

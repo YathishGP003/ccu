@@ -33,6 +33,8 @@ const val COOLING_CONTROL = "Load Based Cooling Control"
 const val FAN_CONTROL = "Load Based Fan Control"
 const val HEATING_CONTROL = "Load Based Heating Control"
 const val COMPOSITE_CONTROL = "Composite Heat and Cool"
+const val
+        COMPRESSOR_SPEED = "Compressor Control"
 const val PRESSURE_BASED_FC_ON = "Pressure Based Fan Control On"
 const val SP_MIN = "Static Pressure Min"
 const val SP_MAX = "Static Pressure Max"

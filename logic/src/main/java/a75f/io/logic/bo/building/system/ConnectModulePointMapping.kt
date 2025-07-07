@@ -12,7 +12,7 @@ import a75f.io.domain.equips.ConnectModuleEquip
 
 
 enum class AdvancedAhuAnalogOutAssociationTypeConnect {
-    LOAD_COOLING, LOAD_HEATING, LOAD_FAN, COMPOSITE_SIGNAL, CO2_DAMPER, OAO_DAMPER, RETURN_DAMPER
+    LOAD_COOLING, LOAD_HEATING, LOAD_FAN, COMPOSITE_SIGNAL, CO2_DAMPER, OAO_DAMPER, RETURN_DAMPER, COMPRESSOR_SPEED
 }
 
 fun getConnectRelayAssociationMap(connectEquip1: ConnectModuleEquip) : Map<Point, Point> {
@@ -101,6 +101,13 @@ fun connectRelayAssociationToDomainName(associationIndex : Int) : String {
         19 -> DomainName.ahuFreshAirFanRunCommand
         20 -> DomainName.exhaustFanStage1
         21 -> DomainName.exhaustFanStage2
+        22 -> DomainName.compressorStage1
+        23 -> DomainName.compressorStage2
+        24 -> DomainName.compressorStage3
+        25 -> DomainName.compressorStage4
+        26 -> DomainName.compressorStage5
+        27 -> DomainName.changeOverCooling
+        28 -> DomainName.changeOverHeating
         else -> throw IllegalArgumentException("Invalid association index $associationIndex")
     }
 }

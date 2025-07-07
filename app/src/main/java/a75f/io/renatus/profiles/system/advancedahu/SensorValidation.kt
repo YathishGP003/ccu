@@ -15,9 +15,12 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.equips.TIEquip
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
+import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationTypeConnect
 import a75f.io.logic.bo.building.system.AdvancedAhuRelayAssociationType
 import a75f.io.logic.bo.building.system.UniversalInputAssociationType
+import a75f.io.logic.bo.building.system.connectRelayAssociationToDomainName
 import a75f.io.logic.bo.building.system.getDomainPressure
 import a75f.io.logic.bo.building.system.getPressureDomainForAnalogOut
 import a75f.io.logic.bo.building.system.relayAssociationDomainNameToType
@@ -54,6 +57,9 @@ private fun isSensorBusMappedConnectModule(enabled: EnableConfig, association:Se
 
 private fun isRelayMapped(enabled: EnableConfig, association: AssociationConfig, mappedTo: AdvancedAhuRelayAssociationType) =
         enabled.enabled && relayAssociationDomainNameToType(relayAssociationToDomainName(association.associationVal)).ordinal == mappedTo.ordinal
+
+private fun isConnectRelayMapped(enabled: EnableConfig, association: AssociationConfig, mappedTo: AdvancedAhuRelayAssociationType) =
+    enabled.enabled && relayAssociationDomainNameToType(connectRelayAssociationToDomainName(association.associationVal)).ordinal == mappedTo.ordinal
 
 private fun isAnyAnalogOutMapped(config: CmConfiguration, mappedTo: AdvancedAhuAnalogOutAssociationType): Boolean {
     return listOf(
@@ -106,6 +112,18 @@ private fun isAnyRelayMapped(config: CmConfiguration, mappedTo: AdvancedAhuRelay
             config.relay8Enabled to config.relay8Association
     ).any { (enabled, association) -> isRelayMapped(enabled, association, mappedTo) }
 }
+private fun isAnyConnectRelayMapped(config: ConnectConfiguration, mappedTo: AdvancedAhuRelayAssociationType): Boolean {
+    return listOf(
+            config.relay1Enabled to config.relay1Association,
+            config.relay2Enabled to config.relay2Association,
+            config.relay3Enabled to config.relay3Association,
+            config.relay4Enabled to config.relay4Association,
+            config.relay5Enabled to config.relay5Association,
+            config.relay6Enabled to config.relay6Association,
+            config.relay7Enabled to config.relay7Association,
+            config.relay8Enabled to config.relay8Association
+    ).any { (enabled, association) -> isConnectRelayMapped(enabled, association, mappedTo) }
+}
 
 private fun isPressureSensorAvailable(config: CmConfiguration): Boolean {
     return config.address0SensorAssociation.pressureAssociation?.associationVal?.let { it > 0 } == true ||
@@ -117,10 +135,14 @@ private fun isPressureSensorAvailable(config: CmConfiguration): Boolean {
 fun isAOPressureAvailable(config: CmConfiguration) = isAnyAnalogOutMapped(config, AdvancedAhuAnalogOutAssociationType.PRESSURE_FAN)
 fun isAOCoolingSatAvailable(config: CmConfiguration) = isAnyAnalogOutMapped(config, AdvancedAhuAnalogOutAssociationType.SAT_COOLING)
 fun isAOHeatingSatAvailable(config: CmConfiguration) = isAnyAnalogOutMapped(config, AdvancedAhuAnalogOutAssociationType.SAT_HEATING)
+fun isAOCompressorSpeedAvailable(config: CmConfiguration) = isAnyAnalogOutMapped(config, AdvancedAhuAnalogOutAssociationType.COMPRESSOR_SPEED)
+fun isConnectAOCompressorSpeedAvailable(config: ConnectConfiguration) = isAnyAnalogOutMappedConnectModule(config, ConnectControlType.COMPRESSOR_SPEED)
 
 fun isRelayPressureFanAvailable(config: CmConfiguration) = isAnyRelayMapped(config, AdvancedAhuRelayAssociationType.FAN_PRESSURE)
 fun isRelaySatCoolingAvailable(config: CmConfiguration) = isAnyRelayMapped(config, AdvancedAhuRelayAssociationType.SAT_COOLING)
 fun isRelaySatHeatingAvailable(config: CmConfiguration) = isAnyRelayMapped(config, AdvancedAhuRelayAssociationType.SAT_HEATING)
+fun isRelayCompressorSpeedAvailable(config: CmConfiguration) = isAnyRelayMapped(config, AdvancedAhuRelayAssociationType.COMPRESSOR_SPEED)
+fun isConnectRelayCompressorSpeedAvailable(config: ConnectConfiguration) = isAnyConnectRelayMapped(config, AdvancedAhuRelayAssociationType.COMPRESSOR_SPEED)
 
 private fun getDisForDomain(domainName: String): String {
     return when (domainName) {
@@ -475,29 +497,59 @@ fun checkTIValidation(profileConfiguration: AdvancedHybridAhuConfig): Pair<Boole
 
 
 fun isValidateConfiguration(
-    profileConfiguration: AdvancedHybridAhuConfig,
+    config: AdvancedHybridAhuConfig,
     analogOutMappedToOaoDamper: Boolean): Pair<Boolean, Spanned> {
 
+
+    val isCompressorMapped = (isAOCompressorSpeedAvailable(config.cmConfiguration) || isRelayCompressorSpeedAvailable(config.cmConfiguration))
+    val isChangeOverIsMapped =
+        (isAnyRelayMapped(config.cmConfiguration,AdvancedAhuRelayAssociationType.CHANGE_OVER_B_HEATING)
+                || isAnyRelayMapped(config.cmConfiguration,AdvancedAhuRelayAssociationType.CHANGE_OVER_O_COOLING))
+
+
+    if (isCompressorMapped && !isChangeOverIsMapped) {
+        return Pair(false, Html.fromHtml(NO_OB_REALLY, Html.FROM_HTML_MODE_LEGACY))
+    }
+
+    if (isChangeOverIsMapped && !isCompressorMapped) {
+        return Pair(false, Html.fromHtml(NO_COMPRESSOR, Html.FROM_HTML_MODE_LEGACY))
+    }
+
+    if (config.connectConfiguration.connectEnabled) {
+        val isConnectCompressorMapped = (isConnectAOCompressorSpeedAvailable(config.connectConfiguration) || isConnectRelayCompressorSpeedAvailable(config.connectConfiguration))
+        val isConnectChangeOverIsMapped =
+            (isAnyConnectRelayMapped(config.connectConfiguration,AdvancedAhuRelayAssociationType.CHANGE_OVER_B_HEATING)
+                    || isAnyConnectRelayMapped(config.connectConfiguration,AdvancedAhuRelayAssociationType.CHANGE_OVER_O_COOLING))
+        if (isConnectCompressorMapped && !isConnectChangeOverIsMapped) {
+            return Pair(false, Html.fromHtml(NO_OB_REALLY_CONNECT, Html.FROM_HTML_MODE_LEGACY))
+        }
+
+        if (isConnectChangeOverIsMapped && !isConnectCompressorMapped) {
+            return Pair(false, Html.fromHtml(NO_COMPRESSOR_CONNECT, Html.FROM_HTML_MODE_LEGACY))
+        }
+    }
+
+
     var isPressureAvailable = false
-    if (isRelayPressureFanAvailable(profileConfiguration.cmConfiguration)) {
-        if (!isAOPressureAvailable(profileConfiguration.cmConfiguration)) {
+    if (isRelayPressureFanAvailable(config.cmConfiguration)) {
+        if (!isAOPressureAvailable(config.cmConfiguration)) {
             return Pair(false, Html.fromHtml(PRESSURE_RELAY_ERROR, Html.FROM_HTML_MODE_LEGACY))
         }
-        if (!isPressureSensorAvailable(profileConfiguration.cmConfiguration)) {
+        if (!isPressureSensorAvailable(config.cmConfiguration)) {
             return Pair(false, Html.fromHtml(NO_PRESSURE_SENSOR_ERROR, Html.FROM_HTML_MODE_LEGACY))
         }
         isPressureAvailable = true
     }
-    if (isAOPressureAvailable(profileConfiguration.cmConfiguration)) {
-        if (!isPressureSensorAvailable(profileConfiguration.cmConfiguration)) {
+    if (isAOPressureAvailable(config.cmConfiguration)) {
+        if (!isPressureSensorAvailable(config.cmConfiguration)) {
             return Pair(false, Html.fromHtml(NO_PRESSURE_SENSOR_ERROR, Html.FROM_HTML_MODE_LEGACY))
         }
         isPressureAvailable = true
     }
 
-    val pressureDomainName = getDomainPressure(profileConfiguration.cmConfiguration.sensorBus0PressureEnabled.enabled, profileConfiguration.cmConfiguration.address0SensorAssociation.pressureAssociation!!.associationVal)
-    val analogIn1DomainName = getPressureDomainForAnalogOut(profileConfiguration.cmConfiguration.analog1InEnabled.enabled, profileConfiguration.cmConfiguration.analog1InAssociation.associationVal)
-    val analogIn2DomainName = getPressureDomainForAnalogOut(profileConfiguration.cmConfiguration.analog2InEnabled.enabled, profileConfiguration.cmConfiguration.analog2InAssociation.associationVal)
+    val pressureDomainName = getDomainPressure(config.cmConfiguration.sensorBus0PressureEnabled.enabled, config.cmConfiguration.address0SensorAssociation.pressureAssociation!!.associationVal)
+    val analogIn1DomainName = getPressureDomainForAnalogOut(config.cmConfiguration.analog1InEnabled.enabled, config.cmConfiguration.analog1InAssociation.associationVal)
+    val analogIn2DomainName = getPressureDomainForAnalogOut(config.cmConfiguration.analog2InEnabled.enabled, config.cmConfiguration.analog2InAssociation.associationVal)
 
     if (isPressureAvailable && pressureDomainName == null && analogIn1DomainName == null && analogIn2DomainName == null) {
         return Pair(false, Html.fromHtml(NO_PRESSURE_SENSOR_ERROR, Html.FROM_HTML_MODE_LEGACY))
@@ -508,24 +560,24 @@ fun isValidateConfiguration(
         return pressureStatus
     }
 
-    if (isRelaySatCoolingAvailable(profileConfiguration.cmConfiguration)) {
-        if (!isAOCoolingSatAvailable(profileConfiguration.cmConfiguration)) {
+    if (isRelaySatCoolingAvailable(config.cmConfiguration)) {
+        if (!isAOCoolingSatAvailable(config.cmConfiguration)) {
             return Pair(false, Html.fromHtml(COOLING_CONFIG_ERROR, Html.FROM_HTML_MODE_LEGACY))
         }
     }
 
-    if (isRelaySatHeatingAvailable(profileConfiguration.cmConfiguration)) {
-        if (!isAOHeatingSatAvailable(profileConfiguration.cmConfiguration)) {
+    if (isRelaySatHeatingAvailable(config.cmConfiguration)) {
+        if (!isAOHeatingSatAvailable(config.cmConfiguration)) {
             return Pair(false, Html.fromHtml(HEATING_CONFIG_ERROR, Html.FROM_HTML_MODE_LEGACY))
         }
     }
 
-    val otherSensorStatus = isValidSatSensorSelection(profileConfiguration.cmConfiguration)
+    val otherSensorStatus = isValidSatSensorSelection(config.cmConfiguration)
     if (!otherSensorStatus.first) {
         return otherSensorStatus
     }
 
-    val connectModuleStatus = validateConnectModule(profileConfiguration)
+    val connectModuleStatus = validateConnectModule(config)
     if (!connectModuleStatus.first) {
         return connectModuleStatus
     }
@@ -534,14 +586,14 @@ fun isValidateConfiguration(
         return checkTIValidation(profileConfiguration)
     }*/
     // added the check only when the connect module is paired
-    if(profileConfiguration.connectConfiguration.connectEnabled) {
+    if(config.connectConfiguration.connectEnabled) {
         if (analogOutMappedToOaoDamper &&
-            !profileConfiguration.connectConfiguration.enableOutsideAirOptimization.enabled
+            !config.connectConfiguration.enableOutsideAirOptimization.enabled
         ) {
             return Pair(false, Html.fromHtml(OAO_DAMPER_ERROR, Html.FROM_HTML_MODE_LEGACY))
         }
         if (!analogOutMappedToOaoDamper &&
-            profileConfiguration.connectConfiguration.enableOutsideAirOptimization.enabled
+            config.connectConfiguration.enableOutsideAirOptimization.enabled
         ) {
             return Pair(
                 false,
@@ -549,16 +601,16 @@ fun isValidateConfiguration(
             )
         }
 
-        if (isAnyAnalogOutMappedConnectModule(profileConfiguration.connectConfiguration,ConnectControlType.RETURN_DAMPER) && !analogOutMappedToOaoDamper) {
+        if (isAnyAnalogOutMappedConnectModule(config.connectConfiguration,ConnectControlType.RETURN_DAMPER) && !analogOutMappedToOaoDamper) {
             return Pair(
                 false,
                 Html.fromHtml(RETURN_DAMPER_OAO_DAMPER_ERROR, Html.FROM_HTML_MODE_LEGACY)
             )
         }
         //MAT, SAT AND OAT MAPPING VALIDATION
-        if (analogOutMappedToOaoDamper && ((!(isAnyUniversalMapped(profileConfiguration.connectConfiguration,UniversalInputAssociationType.MIXED_AIR_TEMPERATURE) || isAnySensorBusMappedTempSensor(profileConfiguration.connectConfiguration,TemperatureSensorBusMapping.mixedAirTemperature))) ||
-            (!(isSupplyAirTemperatureMappedInSensorBusOrUniversal(profileConfiguration).first || isSupplyAirTemperatureMappedInSensorBusOrUniversal(profileConfiguration).second)) ||
-            (!isAnyUniversalMapped(profileConfiguration.connectConfiguration,UniversalInputAssociationType.OUTSIDE_TEMPERATURE)))
+        if (analogOutMappedToOaoDamper && ((!(isAnyUniversalMapped(config.connectConfiguration,UniversalInputAssociationType.MIXED_AIR_TEMPERATURE) || isAnySensorBusMappedTempSensor(config.connectConfiguration,TemperatureSensorBusMapping.mixedAirTemperature))) ||
+            (!(isSupplyAirTemperatureMappedInSensorBusOrUniversal(config).first || isSupplyAirTemperatureMappedInSensorBusOrUniversal(config).second)) ||
+            (!isAnyUniversalMapped(config.connectConfiguration,UniversalInputAssociationType.OUTSIDE_TEMPERATURE)))
         ) {
             return Pair(false, Html.fromHtml(MAT_OAT_SAT_NOT_MAPPED, Html.FROM_HTML_MODE_LEGACY))
         }

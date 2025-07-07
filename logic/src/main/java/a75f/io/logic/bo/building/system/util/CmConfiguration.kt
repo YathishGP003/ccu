@@ -201,6 +201,8 @@ open class CmConfiguration(open val model: SeventyFiveFProfileDirective) :
             add(analogConfig.fanMaxVoltage)
             add(analogConfig.damperPosMinVoltage)
             add(analogConfig.damperPosMaxVoltage)
+            add(analogConfig.compressorMinVoltage)
+            add(analogConfig.compressorMaxVoltage)
         }
 
     }
@@ -459,12 +461,8 @@ open class CmConfiguration(open val model: SeventyFiveFProfileDirective) :
      */
     private fun getAnalogOut1MinMaxVoltage() {
         analog1MinMaxVoltage = AnalogOutMinMaxVoltage(
-            staticPressureMinVoltage = getDefaultValConfig(
-                DomainName.analog1MinStaticPressure, model
-            ),
-            staticPressureMaxVoltage = getDefaultValConfig(
-                DomainName.analog1MaxStaticPressure, model
-            ),
+            staticPressureMinVoltage = getDefaultValConfig(DomainName.analog1MinStaticPressure, model),
+            staticPressureMaxVoltage = getDefaultValConfig(DomainName.analog1MaxStaticPressure, model),
             satCoolingMinVoltage = getDefaultValConfig(DomainName.analog1MinSatCooling, model),
             satCoolingMaxVoltage = getDefaultValConfig(DomainName.analog1MaxSatCooling, model),
             satHeatingMinVoltage = getDefaultValConfig(DomainName.analog1MinSatHeating, model),
@@ -480,7 +478,9 @@ open class CmConfiguration(open val model: SeventyFiveFProfileDirective) :
             fanMinVoltage = getDefaultValConfig(DomainName.analog1MinFan, model),
             fanMaxVoltage = getDefaultValConfig(DomainName.analog1MaxFan, model),
             damperPosMinVoltage = getDefaultValConfig(DomainName.analog1MinDamperPos, model),
-            damperPosMaxVoltage = getDefaultValConfig(DomainName.analog1MaxDamperPos, model)
+            damperPosMaxVoltage = getDefaultValConfig(DomainName.analog1MaxDamperPos, model),
+            compressorMinVoltage = getDefaultValConfig(DomainName.analog1MinCompressorSpeed, model),
+            compressorMaxVoltage = getDefaultValConfig(DomainName.analog1MaxCompressorSpeed, model)
         )
     }
 
@@ -507,7 +507,9 @@ open class CmConfiguration(open val model: SeventyFiveFProfileDirective) :
             fanMinVoltage = getDefaultValConfig(DomainName.analog2MinFan, model),
             fanMaxVoltage = getDefaultValConfig(DomainName.analog2MaxFan, model),
             damperPosMinVoltage = getDefaultValConfig(DomainName.analog2MinDamperPos, model),
-            damperPosMaxVoltage = getDefaultValConfig(DomainName.analog2MaxDamperPos, model)
+            damperPosMaxVoltage = getDefaultValConfig(DomainName.analog2MaxDamperPos, model),
+            compressorMinVoltage = getDefaultValConfig(DomainName.analog2MinCompressorSpeed, model),
+            compressorMaxVoltage = getDefaultValConfig(DomainName.analog2MaxCompressorSpeed, model)
         )
     }
 
@@ -534,7 +536,9 @@ open class CmConfiguration(open val model: SeventyFiveFProfileDirective) :
             fanMinVoltage = getDefaultValConfig(DomainName.analog3MinFan, model),
             fanMaxVoltage = getDefaultValConfig(DomainName.analog3MaxFan, model),
             damperPosMinVoltage = getDefaultValConfig(DomainName.analog3MinDamperPos, model),
-            damperPosMaxVoltage = getDefaultValConfig(DomainName.analog3MaxDamperPos, model)
+            damperPosMaxVoltage = getDefaultValConfig(DomainName.analog3MaxDamperPos, model),
+            compressorMinVoltage = getDefaultValConfig(DomainName.analog3MinCompressorSpeed, model),
+            compressorMaxVoltage = getDefaultValConfig(DomainName.analog3MaxCompressorSpeed, model)
         )
     }
 
@@ -561,7 +565,9 @@ open class CmConfiguration(open val model: SeventyFiveFProfileDirective) :
             fanMinVoltage = getDefaultValConfig(DomainName.analog4MinFan, model),
             fanMaxVoltage = getDefaultValConfig(DomainName.analog4MaxFan, model),
             damperPosMinVoltage = getDefaultValConfig(DomainName.analog4MinDamperPos, model),
-            damperPosMaxVoltage = getDefaultValConfig(DomainName.analog4MaxDamperPos, model)
+            damperPosMaxVoltage = getDefaultValConfig(DomainName.analog4MaxDamperPos, model),
+            compressorMinVoltage = getDefaultValConfig(DomainName.analog4MinCompressorSpeed, model),
+            compressorMaxVoltage = getDefaultValConfig(DomainName.analog4MaxCompressorSpeed, model)
         )
     }
 
@@ -606,6 +612,7 @@ data class AnalogOutMinMaxVoltage(
     var compositeHeatingMinVoltage: ValueConfig, var compositeHeatingMaxVoltage: ValueConfig,
     var fanMinVoltage: ValueConfig, var fanMaxVoltage: ValueConfig,
     var damperPosMinVoltage: ValueConfig, var damperPosMaxVoltage: ValueConfig,
+    var compressorMinVoltage: ValueConfig, var compressorMaxVoltage: ValueConfig,
 ) {
     override fun toString(): String {
         return "AnalogOutMinMaxVoltage(staticPressureMinVoltage=$staticPressureMinVoltage, staticPressureMaxVoltage=$staticPressureMaxVoltage, satCoolingMinVoltage=$satCoolingMinVoltage, satCoolingMaxVoltage=$satCoolingMaxVoltage, satHeatingMinVoltage=$satHeatingMinVoltage, satHeatingMaxVoltage=$satHeatingMaxVoltage, heatingMinVoltage=$heatingMinVoltage, heatingMaxVoltage=$heatingMaxVoltage, coolingMinVoltage=$coolingMinVoltage, coolingMaxVoltage=$coolingMaxVoltage, fanMinVoltage=$fanMinVoltage, fanMaxVoltage=$fanMaxVoltage, damperPosMinVoltage=$damperPosMinVoltage, damperPosMaxVoltage=$damperPosMaxVoltage)"

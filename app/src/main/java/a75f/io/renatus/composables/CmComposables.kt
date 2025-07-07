@@ -392,6 +392,7 @@ fun MinMaxConfiguration(
     maxDefault: String,
     onMinSelected: (Option) -> Unit = {},
     onMaxSelected: (Option) -> Unit = {},
+    paddingStart: Int = 0,
     viewModel: AdvancedHybridAhuViewModel? = null
 ) {
     Row(
@@ -401,7 +402,7 @@ fun MinMaxConfiguration(
     ) {
         Box(modifier = Modifier
                 .weight(1f)
-                .padding(top = 10.dp)) {
+                .padding(start = paddingStart.dp, top = 10.dp)) {
             StyledTextView(
                 minLabel, fontSize = 20, textAlignment = TextAlign.Left
             )

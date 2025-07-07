@@ -132,6 +132,7 @@ public class PreferenceUtil {
     private static final String MIGRATE_VFD_FAN_MODE = "migrateVfdFanMode";
     private static final String UPDATE_MYSTAT_GATEWAY_REF_FLAG = "updateMystatGatewayRefFlag";
     private static final String IS_REBOOT_REQUIRED_AFTER_REPLACE = "isRebootRequiredAfterReplace";
+    private static final String MIGRATE_MODULATING_PROFILE_NORMALIZATION = "migrateModulatingProfileNormalization";
 
     public static void setContext(Context c) {
         context= c;
@@ -1036,5 +1037,12 @@ public class PreferenceUtil {
     }
     public static void setUpdateEnumValuesForTerminalProfile() {
         setBooleanPreference(UPDATE_ENUM_VALUES_FOR_TERMINAL_SYSTEM_PROFILE, true);
+    }
+
+    public static boolean getMigrateModulatingProfileNormalization() {
+        return getBooleanPreference(MIGRATE_MODULATING_PROFILE_NORMALIZATION);
+    }
+    public static void setMigrateModulatingProfileNormalization() {
+        setBooleanPreference(MIGRATE_MODULATING_PROFILE_NORMALIZATION, true);
     }
 }

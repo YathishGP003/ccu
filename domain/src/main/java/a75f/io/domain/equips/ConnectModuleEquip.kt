@@ -5,6 +5,7 @@ import a75f.io.domain.api.Point
 
 class ConnectModuleEquip (equipRef : String) : DomainEquip(equipRef) {
 
+    val conditioningStages = ConditioningStages(equipRef)
     val universalIn1Enable = Point(DomainName.universalIn1Enable, equipRef)
     val universalIn2Enable = Point(DomainName.universalIn2Enable, equipRef)
     val universalIn3Enable = Point(DomainName.universalIn3Enable, equipRef)
@@ -53,27 +54,12 @@ class ConnectModuleEquip (equipRef : String) : DomainEquip(equipRef) {
     val fanLoopOutput = Point(DomainName.fanLoopOutput, equipRef)
     val co2LoopOutput = Point(DomainName.co2LoopOutput, equipRef)
 
-    val loadCoolingStage1 = Point(DomainName.loadCoolingStage1, equipRef)
-    val loadCoolingStage2 = Point(DomainName.loadCoolingStage2, equipRef)
-    val loadCoolingStage3 = Point(DomainName.loadCoolingStage3, equipRef)
-    val loadCoolingStage4 = Point(DomainName.loadCoolingStage4, equipRef)
-    val loadCoolingStage5 = Point(DomainName.loadCoolingStage5, equipRef)
-    val loadHeatingStage1 = Point(DomainName.loadHeatingStage1, equipRef)
-    val loadHeatingStage2 = Point(DomainName.loadHeatingStage2, equipRef)
-    val loadHeatingStage3 = Point(DomainName.loadHeatingStage3, equipRef)
-    val loadHeatingStage4 = Point(DomainName.loadHeatingStage4, equipRef)
-    val loadHeatingStage5 = Point(DomainName.loadHeatingStage5, equipRef)
-    val loadFanStage1 = Point(DomainName.loadFanStage1, equipRef)
-    val loadFanStage2 = Point(DomainName.loadFanStage2, equipRef)
-    val loadFanStage3 = Point(DomainName.loadFanStage3, equipRef)
-    val loadFanStage4 = Point(DomainName.loadFanStage4, equipRef)
-    val loadFanStage5 = Point(DomainName.loadFanStage5, equipRef)
-
     val loadBasedCoolingControl = Point(DomainName.loadBasedCoolingControl, equipRef)
     val loadBasedHeatingControl = Point(DomainName.loadBasedHeatingControl, equipRef)
     val loadBasedFanControl = Point(DomainName.loadBasedFanControl, equipRef)
     val co2BasedDamperControl = Point(DomainName.co2BasedDamperControl, equipRef)
     val compositeSignal = Point(DomainName.compositeSignal, equipRef)
+    val compressorSpeed = Point(DomainName.compressorSpeed, equipRef)
 
     val temperatureSensorBusAdd0 = Point(DomainName.temperatureSensorBusAdd0, equipRef)
     val temperatureSensorBusAdd1 = Point(DomainName.temperatureSensorBusAdd1, equipRef)
@@ -105,11 +91,6 @@ class ConnectModuleEquip (equipRef : String) : DomainEquip(equipRef) {
     val supplyAirTemperature1 = Point(DomainName.supplyAirTemperature1, equipRef)
     val supplyAirTemperature2 = Point(DomainName.supplyAirTemperature2, equipRef)
     val supplyAirTemperature3 = Point(DomainName.supplyAirTemperature3, equipRef)
-
-   /*  val ductStaticPressure1 = Point(DomainName.ductStaticPressure1, equipRef)
-    val ductStaticPressure2 = Point(DomainName.ductStaticPressure2, equipRef)
-    val ductStaticPressure3 = Point(DomainName.ductStaticPressure3, equipRef)
-    */
 
     val returnAirHumidity = Point(DomainName.returnAirHumidity, equipRef)
     val mixedAirHumidity = Point(DomainName.mixedAirHumidity, equipRef)
@@ -243,11 +224,6 @@ class ConnectModuleEquip (equipRef : String) : DomainEquip(equipRef) {
     val analog4MaxFan = Point(DomainName.analog4MaxFan, equipRef)
     val analog4MinFan = Point(DomainName.analog4MinFan, equipRef)
 
-    val humidifierEnable = Point(DomainName.humidifierEnable, equipRef)
-    val dehumidifierEnable = Point(DomainName.dehumidifierEnable, equipRef)
-    val occupiedEnable = Point(DomainName.occupiedEnable, equipRef)
-    val fanEnable = Point(DomainName.fanEnable, equipRef)
-    val ahuFreshAirFanRunCommand = Point(DomainName.ahuFreshAirFanRunCommand, equipRef)
     val voltageInput = Point(DomainName.voltageInput, equipRef)
 
     val analog1MinDamperPos = Point(DomainName.analog1MinDamperPos, equipRef)
@@ -298,6 +274,14 @@ class ConnectModuleEquip (equipRef : String) : DomainEquip(equipRef) {
     val analog4MinReturnDamper = Point(DomainName.analog4MinReturnDamper,equipRef)
     val analog4MaxReturnDamper = Point(DomainName.analog4MaxReturnDamper,equipRef)
 
+    val analog1MinCompressorSpeed = Point(DomainName.analog1MinCompressorSpeed, equipRef)
+    val analog1MaxCompressorSpeed = Point(DomainName.analog1MaxCompressorSpeed, equipRef)
+    val analog2MinCompressorSpeed = Point(DomainName.analog2MinCompressorSpeed, equipRef)
+    val analog2MaxCompressorSpeed = Point(DomainName.analog2MaxCompressorSpeed, equipRef)
+    val analog3MinCompressorSpeed = Point(DomainName.analog3MinCompressorSpeed, equipRef)
+    val analog3MaxCompressorSpeed = Point(DomainName.analog3MaxCompressorSpeed, equipRef)
+    val analog4MinCompressorSpeed = Point(DomainName.analog4MinCompressorSpeed, equipRef)
+    val analog4MaxCompressorSpeed = Point(DomainName.analog4MaxCompressorSpeed, equipRef)
 
     val outsideDamperMinOpenDuringRecirculation = Point(DomainName.outsideDamperMinOpenDuringRecirculation, equipRef)
     val outsideDamperMinOpenDuringConditioning = Point(DomainName.outsideDamperMinOpenDuringConditioning, equipRef)
@@ -355,8 +339,6 @@ class ConnectModuleEquip (equipRef : String) : DomainEquip(equipRef) {
     val systemPrePurgeFanSpeedTuner = Point(DomainName.systemPrePurgeFanSpeedTuner, equipRef)
     val systemPostPurgeFanSpeedTuner = Point(DomainName.systemPostPurgeFanSpeedTuner, equipRef)
     val oaoDamper = Point(DomainName.oaoDamper,equipRef)
+    val compressorLoopOutput = Point(DomainName.compressorLoopOutput, equipRef)
 
-
-    var stageUpTimer = 0.0
-    var stageDownTimer = 0.0
 }

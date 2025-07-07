@@ -262,6 +262,8 @@ class ConnectConfiguration(open val model: SeventyFiveFProfileDirective, nodeAdd
             add(analogConfig.fanMaxVoltage)
             add(analogConfig.damperPosMinVoltage)
             add(analogConfig.damperPosMaxVoltage)
+            add(analogConfig.compressorMinVoltage)
+            add(analogConfig.compressorMaxVoltage)
         }
 
     }
@@ -353,6 +355,9 @@ class ConnectConfiguration(open val model: SeventyFiveFProfileDirective, nodeAdd
      */
     override fun getDependencies(): List<ValueConfig> {
         return mutableListOf<ValueConfig>().apply {
+            add(co2Threshold)
+            add(co2Target)
+            add(damperOpeningRate)
             addValueConfig(analog1MinMaxVoltage, this)
             addValueConfig(analog2MinMaxVoltage, this)
             addValueConfig(analog3MinMaxVoltage, this)
@@ -546,7 +551,9 @@ class ConnectConfiguration(open val model: SeventyFiveFProfileDirective, nodeAdd
             fanMinVoltage = getDefaultValConfig(DomainName.analog1MinFan, model),
             fanMaxVoltage = getDefaultValConfig(DomainName.analog1MaxFan, model),
             damperPosMinVoltage = getDefaultValConfig(DomainName.analog1MinDamperPos, model),
-            damperPosMaxVoltage = getDefaultValConfig(DomainName.analog1MaxDamperPos, model)
+            damperPosMaxVoltage = getDefaultValConfig(DomainName.analog1MaxDamperPos, model),
+            compressorMinVoltage = getDefaultValConfig(DomainName.analog1MinCompressorSpeed, model),
+            compressorMaxVoltage = getDefaultValConfig(DomainName.analog1MaxCompressorSpeed, model),
         )
     }
 
@@ -576,7 +583,9 @@ class ConnectConfiguration(open val model: SeventyFiveFProfileDirective, nodeAdd
             fanMinVoltage = getDefaultValConfig(DomainName.analog2MinFan, model),
             fanMaxVoltage = getDefaultValConfig(DomainName.analog2MaxFan, model),
             damperPosMinVoltage = getDefaultValConfig(DomainName.analog2MinDamperPos, model),
-            damperPosMaxVoltage = getDefaultValConfig(DomainName.analog2MaxDamperPos, model)
+            damperPosMaxVoltage = getDefaultValConfig(DomainName.analog2MaxDamperPos, model),
+            compressorMinVoltage = getDefaultValConfig(DomainName.analog2MinCompressorSpeed, model),
+            compressorMaxVoltage = getDefaultValConfig(DomainName.analog2MaxCompressorSpeed, model)
         )
     }
 
@@ -606,7 +615,9 @@ class ConnectConfiguration(open val model: SeventyFiveFProfileDirective, nodeAdd
             fanMinVoltage = getDefaultValConfig(DomainName.analog3MinFan, model),
             fanMaxVoltage = getDefaultValConfig(DomainName.analog3MaxFan, model),
             damperPosMinVoltage = getDefaultValConfig(DomainName.analog3MinDamperPos, model),
-            damperPosMaxVoltage = getDefaultValConfig(DomainName.analog3MaxDamperPos, model)
+            damperPosMaxVoltage = getDefaultValConfig(DomainName.analog3MaxDamperPos, model),
+            compressorMinVoltage = getDefaultValConfig(DomainName.analog3MinCompressorSpeed, model),
+            compressorMaxVoltage = getDefaultValConfig(DomainName.analog3MaxCompressorSpeed, model)
         )
     }
 
@@ -636,7 +647,9 @@ class ConnectConfiguration(open val model: SeventyFiveFProfileDirective, nodeAdd
             fanMinVoltage = getDefaultValConfig(DomainName.analog4MinFan, model),
             fanMaxVoltage = getDefaultValConfig(DomainName.analog4MaxFan, model),
             damperPosMinVoltage = getDefaultValConfig(DomainName.analog4MinDamperPos, model),
-            damperPosMaxVoltage = getDefaultValConfig(DomainName.analog4MaxDamperPos, model)
+            damperPosMaxVoltage = getDefaultValConfig(DomainName.analog4MaxDamperPos, model),
+            compressorMinVoltage = getDefaultValConfig(DomainName.analog4MinCompressorSpeed, model),
+            compressorMaxVoltage = getDefaultValConfig(DomainName.analog4MaxCompressorSpeed, model)
         )
     }
 
@@ -663,7 +676,7 @@ class ConnectConfiguration(open val model: SeventyFiveFProfileDirective, nodeAdd
                 "" + "\nanalogOut3Association=${analogOut3Association.associationVal}," + "\nanalogOut4Association=${analogOut4Association.associationVal})"+
                 "damper association $damperControlAssociation"+
                 "\nco2Threshold=${co2Threshold.currentVal}, co2Target=${co2Target.currentVal}, damperOpeningRate=${damperOpeningRate.currentVal}," +
-                "\nOAO enable = ${enableOutsideAirOptimization.enabled}"
+                "\nOAO enable = ${enableOutsideAirOptimization.enabled}" +
                 "\n analog1MinOAODamper =  ${analog1MinOaoDamper.currentVal}, analog1MaxOAODamper = ${analog1MaxOaoDamper.currentVal},"+
                 "\n analog2MinOAODamper = ${analog2MinOaoDamper.currentVal}, analog2MaxOAODamper = ${analog2MaxOaoDamper.currentVal},"+
                 "\n analog3MinOAODamper = ${analog3MinOaoDamper.currentVal}, analog3MaxOAODamper = ${analog3MaxOaoDamper.currentVal},"+

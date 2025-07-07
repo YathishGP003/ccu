@@ -59,7 +59,7 @@ open class AdvancedHybridAhuState {
             0, 10, 0, 10,
             0, 10, 0, 10,
             0, 10, 0, 10,
-            0, 10,0,10,0,10
+            0, 10,0,10,0,10,0,10
 
         )
     )
@@ -69,7 +69,7 @@ open class AdvancedHybridAhuState {
             0, 10, 0, 10,
             0, 10, 0, 10, 0,
             10, 0, 10, 0,
-            10,0,10,0,10
+            10,0,10,0,10,0,10
         )
     )
 
@@ -78,7 +78,7 @@ open class AdvancedHybridAhuState {
             0, 10, 0, 10,
             0, 10, 0, 10,
             0, 10, 0, 10,
-            0, 10,0,10,0,10
+            0, 10,0,10,0,10,0,10
         )
     )
 
@@ -87,7 +87,7 @@ open class AdvancedHybridAhuState {
             0, 10, 0, 10,
             0, 10, 0, 10, 0,
             10, 0, 10, 0,
-            10,0,10,0,10
+            10,0,10,0,10,0,10
         )
     )
 
@@ -128,25 +128,26 @@ open class AdvancedHybridAhuState {
     var connectDamperConfig by mutableStateOf(DamperConfig(0, 0.0, 0.0, 0.0))
     var connectAnalogOut1MinMax by mutableStateOf(
         MinMaxVoltage(
-            0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10,0,10,0,10
+            0, 10,
+            0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10,0,10,0,10,0,10
         )
     )
 
     var connectAnalogOut2MinMax by mutableStateOf(
         MinMaxVoltage(
-            0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10,0,10,0,10
+            0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10,0,10,0,10,0,10
         )
     )
 
     var connectAnalogOut3MinMax by mutableStateOf(
         MinMaxVoltage(
-            0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10,0,10,0,10
+            0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10,0,10,0,10, 0,10
         )
     )
 
     var connectAnalogOut4MinMax by mutableStateOf(
         MinMaxVoltage(
-            0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10,0,10,0,10
+            0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10,0,10,0,10, 0,10
         )
     )
     //OAO state
@@ -187,6 +188,40 @@ open class AdvancedHybridAhuState {
     var enableOutsideAirOptimization by mutableStateOf (false)
 
 
+    fun isAnyRelayMapped(mapping: Int, ignoreSelection: ConfigState): Boolean {
+
+        fun checkSelection(config: ConfigState): Boolean {
+            config.apply { return (ignoreSelection != this && association == mapping) }
+        }
+
+        if (checkSelection(relay1Config)) return true
+        if (checkSelection(relay2Config)) return true
+        if (checkSelection(relay3Config)) return true
+        if (checkSelection(relay4Config)) return true
+        if (checkSelection(relay5Config)) return true
+        if (checkSelection(relay6Config)) return true
+        if (checkSelection(relay7Config)) return true
+        if (checkSelection(relay8Config)) return true
+
+        return false
+    }
+
+    fun isAnyConnectRelayMapped(mapping: Int, ignoreSelection: ConfigState): Boolean {
+
+        fun checkSelection(config: ConfigState): Boolean {
+            config.apply { return (ignoreSelection != this && association == mapping) }
+        }
+
+        if (checkSelection(connectRelay1Config)) return true
+        if (checkSelection(connectRelay2Config)) return true
+        if (checkSelection(connectRelay3Config)) return true
+        if (checkSelection(connectRelay4Config)) return true
+        if (checkSelection(connectRelay5Config)) return true
+        if (checkSelection(connectRelay6Config)) return true
+        if (checkSelection(connectRelay7Config)) return true
+        if (checkSelection(connectRelay8Config)) return true
+        return false
+    }
 
 }
 
@@ -214,6 +249,7 @@ data class MinMaxVoltage(
     var compositeHeatingMinVoltage: Int, var compositeHeatingMaxVoltage: Int,
     var fanMinVoltage: Int, var fanMaxVoltage: Int,
     var damperPosMinVoltage: Int, var damperPosMaxVoltage: Int,
+    var compressorMinVoltage: Int, var compressorMaxVoltage: Int,
 )
 
 data class PressureConfig(

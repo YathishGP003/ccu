@@ -237,13 +237,13 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         Row {
                             HeaderTextView(text = "Thermistor-1", padding = 0)
                             Spacer(modifier = Modifier.width(160.dp))
-                            LabelTextView(text = "Discharge Airflow")
+                            LabelTextView(text = "Discharge Airflow Temperature")
                         }
                         Spacer(modifier = Modifier.width(63.dp))
                         Row {
                             HeaderTextView(text = "Thermistor-2", padding = 0)
                             Spacer(modifier = Modifier.width(115.dp))
-                            LabelTextView(text = "Supply Airflow")
+                            LabelTextView(text = "Entering Airflow Temperature")
                         }
                     }
 

@@ -205,6 +205,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     ArrayList<Zone> roomList = new ArrayList<>();
 
     private RelativeLayout weather_data = null;
+    private RelativeLayout two_months_offline = null;
     private TextView place;
     private TextView temperature;
     private TextView weather_condition;
@@ -310,6 +311,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         lvFloorList = view.findViewById(R.id.floorList);
 
         weather_data = getView().findViewById(R.id.weather_data);
+        two_months_offline=getView().findViewById(R.id.offline_two_months);
         place = getView().findViewById(R.id.place);
         temperature = getView().findViewById(R.id.temperature);
         weather_condition = getView().findViewById(R.id.weather_condition);
@@ -751,6 +753,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
         }
     }
+
+
+
 
     private void selectFloor(int position) {
         mFloorListAdapter.setSelectedItem(position);
@@ -2886,7 +2891,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         } else {
             textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
         }
-        textViewLabel4.setText("Supply Airflow Temperature : ");
+        textViewLabel4.setText("Entering Airflow Temperature: ");
         if( isCelsiusTunerAvailableStatus()) {
             textViewValue4.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Entering Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {

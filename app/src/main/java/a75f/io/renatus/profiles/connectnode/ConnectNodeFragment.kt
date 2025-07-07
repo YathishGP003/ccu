@@ -7,6 +7,7 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
+import a75f.io.renatus.BackgroundServiceInitiator
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
@@ -122,6 +123,8 @@ class ConnectNodeFragment : BaseDialogFragment(), OnPairingCompleteListener {
                         viewModel.saveConfiguration()
                         arguments?.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
                             ?.let { showSuccessToast("Connect Node", it.toInt(), requireContext()) }
+                        // Initialize background services after saving configuration
+                        context?.let { BackgroundServiceInitiator.initializeServices(it.applicationContext) }
                     },
                     isNewPairingDevice
                 )

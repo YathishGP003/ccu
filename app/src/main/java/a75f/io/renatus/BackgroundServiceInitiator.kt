@@ -11,6 +11,7 @@ import a75f.io.usbserial.UsbConnectService
 import a75f.io.usbserial.UsbModbusService
 import a75f.io.usbserial.UsbService
 import a75f.io.usbserial.UsbServiceActions
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
@@ -31,6 +32,29 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
     private var usbConnectService: UsbConnectService? = null
 
     private val TAG_CCU_SERVICE_INIT = "CCU_SERVICE_INIT"
+
+    companion object {
+        @Volatile
+        private var instance: BackgroundServiceInitiator? = null
+
+        /**
+         * Returns the singleton.
+         * The *application* context is stored, so no Android component
+         * (Activity, Service, etc.) can be leaked.
+         */
+        fun getInstance(context: Context = UtilityApplication.context): BackgroundServiceInitiator {
+            // Always coerce to applicationContext
+            val appContext = context.applicationContext
+            return instance ?: synchronized(this) {
+                instance ?: BackgroundServiceInitiator(appContext).also { instance = it }
+            }
+        }
+
+        /** Convenience entry point */
+        fun initializeServices(context: Context = UtilityApplication.context) {
+            getInstance(context).initServices()
+        }
+    }
 
     fun initServices() {
         CoroutineScope(Dispatchers.IO).launch {

@@ -172,6 +172,8 @@ public class Tags
 
 
     public static final String TEMP = "temp";
+    public static final String TEMPERATURE = "temperature";
+
     public static final String CMD = "cmd";
     public static final String DISCHARGE = "discharge";
     public static final String AIR = "air";

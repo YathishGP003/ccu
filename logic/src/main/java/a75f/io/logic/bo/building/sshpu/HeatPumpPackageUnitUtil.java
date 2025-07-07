@@ -136,6 +136,9 @@ public class HeatPumpPackageUnitUtil {
             SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.TH2_IN.name(),
                                       configVal > 0 ? true : false);
         }
+        if(configPoint.getMarkers().contains(Tags.OFFSET) && configPoint.getMarkers().contains(Tags.TEMPERATURE)){
+            configVal = configVal*10;
+        }
         writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
         hayStack.scheduleSync();
         adjustHPUFanMode(equip,hayStack);

@@ -310,7 +310,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         lvFloorList = view.findViewById(R.id.floorList);
 
         weather_data = getView().findViewById(R.id.weather_data);
-        two_months_offline=getView().findViewById(R.id.offline_two_months);
         place = getView().findViewById(R.id.place);
         temperature = getView().findViewById(R.id.temperature);
         weather_condition = getView().findViewById(R.id.weather_condition);
@@ -752,9 +751,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
         }
     }
-
-
-
 
     private void selectFloor(int position) {
         mFloorListAdapter.setSelectedItem(position);

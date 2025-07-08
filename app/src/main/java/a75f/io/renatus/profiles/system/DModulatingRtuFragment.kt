@@ -1,18 +1,23 @@
 package a75f.io.renatus.profiles.system
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.device.mesh.DeviceUtil
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.logger.CcuLog
+import a75f.io.logic.bo.building.hvac.ModulatingProfileAnalogMapping
+import a75f.io.renatus.R
+import a75f.io.renatus.composables.AddInputWidget
 import a75f.io.renatus.composables.DropDownWithLabel
+import a75f.io.renatus.composables.MinMaxConfiguration
 import a75f.io.renatus.composables.SimpleSwitch
 import a75f.io.renatus.composables.SwitchWithLabel
-import a75f.io.renatus.composables.SystemAnalogOutMappingView
-import a75f.io.renatus.composables.SystemAnalogOutMappingViewButtonComposable
+import a75f.io.renatus.composables.SystemAnalogOutMappingDropDown
 import a75f.io.renatus.compose.ComposeUtil
-import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,12 +26,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -44,45 +53,54 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 
 open class DModulatingRtuFragment : Fragment() {
+    private val viewModel: DabModulatingRtuViewModel by viewModels()
+    @SuppressLint("LogNotTimber")
     @Composable
     fun AnalogOutComposable(
         viewModel: DabModulatingRtuViewModel,
-        dcwbEnabledMutableState: Boolean
     ) {
 
         Spacer(modifier = Modifier.height(12.dp))
-        SystemAnalogOutDynamicMappingView(
+
+        SystemAnalogOutMappingDropDown(
             analogName = "Analog-Out 1",
             analogOutState = viewModel.viewState.value.isAnalog1OutputEnabled,
             onAnalogOutEnabled = {
                 viewModel.viewState.value.isAnalog1OutputEnabled = it
                 viewModel.setStateChanged()
-                viewModel.viewState.value.unusedPortState = UnusedPortsModel.setPortState(
-                    "Analog 1 Output",
-                    it,
-                    viewModel.profileConfiguration
-                )
+                viewModel.viewState.value.unusedPortState =
+                    UnusedPortsModel.setPortState(
+                        "Analog 1 Output",
+                        it,
+                        viewModel.profileConfiguration
+                    )
             },
-            mappingText = if(dcwbEnabledMutableState) "CHW valve" else "Cooling",
+            mapping = viewModel.analog1AssociationList,
+            mappingSelection = viewModel.viewState.value.analog1OutputAssociation,
             analogOutValList = (0..100).map { it.toDouble().toString() },
             analogOutVal =
-                try {
-                    (0..100).map { it }.indexOf(Domain.cmBoardDevice.analog1Out.readHisVal().toInt())
-                } catch (e: UninitializedPropertyAccessException) {
-                    // When the cmBoardDevice is uninitialized after registration
-                    (0..100).map { it }.indexOf(20)
-                },
+            try {
+                (0..100).map { it }.indexOf(Domain.cmBoardDevice.analog1Out.readHisVal().toInt())
+            } catch (e: UninitializedPropertyAccessException) {
+                // When the cmBoardDevice is uninitialized after registration
+                (0..100).map { it }.indexOf(20)
+            },
+            dropDownWidthPreview = 100,
+            dropdownWidthExpanded = 120,
             onAnalogOutChanged = {
                 viewModel.viewState.value.analogOut1CoolingTestSignal = it.toDouble()
                 viewModel.sendAnalogRelayTestSignal(DomainName.analog1Out, it.toDouble())
             },
-            dropDownWidthPreview = 100,
-            dropdownWidthExpanded = 120,
-            mappingTextSpacer = if(dcwbEnabledMutableState) 163 else 193
+            onMappingChanged = {
+                viewModel.viewState.value.analog1OutputAssociation = it
+                viewModel.resetDcwbConfig()
+                viewModel.setStateChanged()
+            },
         )
+
         Spacer(modifier = Modifier.height(14.dp))
 
-        SystemAnalogOutMappingView(
+        SystemAnalogOutMappingDropDown(
             analogName = "Analog-Out 2",
             analogOutState = viewModel.viewState.value.isAnalog2OutputEnabled,
             onAnalogOutEnabled = {
@@ -94,7 +112,8 @@ open class DModulatingRtuFragment : Fragment() {
                     viewModel.profileConfiguration
                 )
             },
-            mappingText = "Fan Speed",
+            mapping = viewModel.analog1AssociationList,
+            mappingSelection = viewModel.viewState.value.analog2OutputAssociation,
             analogOutValList = (0..100).map { it.toDouble().toString() },
             analogOutVal =
                 try {
@@ -109,11 +128,16 @@ open class DModulatingRtuFragment : Fragment() {
             },
             dropDownWidthPreview = 100,
             dropdownWidthExpanded = 120,
-            mappingTextSpacer = 163
+            onMappingChanged = {
+                viewModel.viewState.value.analog2OutputAssociation = it
+                viewModel.resetDcwbConfig()
+                viewModel.setStateChanged()
+            },
         )
-        Spacer(modifier = Modifier.height(16.dp))
 
-        SystemAnalogOutMappingView(
+        Spacer(modifier = Modifier.height(14.dp))
+
+        SystemAnalogOutMappingDropDown(
             analogName = "Analog-Out 3",
             analogOutState = viewModel.viewState.value.isAnalog3OutputEnabled,
             onAnalogOutEnabled = {
@@ -125,7 +149,8 @@ open class DModulatingRtuFragment : Fragment() {
                     viewModel.profileConfiguration
                 )
             },
-            mappingText = "Heating",
+            mapping = viewModel.analog1AssociationList,
+            mappingSelection = viewModel.viewState.value.analog3OutputAssociation,
             analogOutValList = (0..100).map { it.toDouble().toString() },
             analogOutVal =
                 try {
@@ -140,17 +165,64 @@ open class DModulatingRtuFragment : Fragment() {
             },
             dropDownWidthPreview = 100,
             dropdownWidthExpanded = 120,
-            mappingTextSpacer = 190
+            onMappingChanged = {
+                viewModel.viewState.value.analog3OutputAssociation = it
+                viewModel.resetDcwbConfig()
+                viewModel.setStateChanged()
+            },
         )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        SystemAnalogOutMappingDropDown(
+            analogName = "Analog-Out 4",
+            analogOutState = viewModel.viewState.value.isAnalog4OutputEnabled,
+            onAnalogOutEnabled = {
+                viewModel.viewState.value.isAnalog4OutputEnabled = it
+                viewModel.setStateChanged()
+                viewModel.viewState.value.unusedPortState = UnusedPortsModel.setPortState(
+                    "Analog 3 Output",
+                    it,
+                    viewModel.profileConfiguration
+                )
+            },
+            mapping = viewModel.analog1AssociationList,
+            mappingSelection = viewModel.viewState.value.analog4OutputAssociation,
+            analogOutValList = (0..100).map { it.toDouble().toString() },
+            analogOutVal =
+            try {
+                (0..100).map { it }.indexOf(Domain.cmBoardDevice.analog4Out.readHisVal().toInt())
+            } catch (e: UninitializedPropertyAccessException) {
+                // When the cmBoardDevice is uninitialized after registration
+                (0..100).map { it }.indexOf(20)
+            },
+            onAnalogOutChanged = {
+                viewModel.viewState.value.analogOut4OutSideAirTestSignal = it.toDouble()
+                viewModel.sendAnalogRelayTestSignal(DomainName.analog4Out, it.toDouble())
+            },
+            dropDownWidthPreview = 100,
+            dropdownWidthExpanded = 120,
+            onMappingChanged = {
+                viewModel.viewState.value.analog4OutputAssociation = it
+                viewModel.resetDcwbConfig()
+                viewModel.setStateChanged()
+            },
+        )
+        Log.i(Domain.LOG_TAG, "Show BTU Meter Dialog "+viewModel.shouldShowBtuDialog.value+
+                " : DCWB Status: ${viewModel.viewState.value.isDcwbEnabled} ")
+        if (viewModel.checkDcwbBtuMeterStatus()) {
+            viewModel.shouldShowBtuDialog.value = true
+            ShowBtuMeterDialog(viewModel)
+        }
     }
 
     @Composable
-    fun DModulatingRtuFragment.RelayComposable(viewModel: DabModulatingRtuViewModel) {
+    fun RelayComposable(viewModel: DabModulatingRtuViewModel) {
         Spacer(modifier = Modifier.height(14.dp))
-        SystemAnalogOutMappingViewButtonComposable(
-            analogName = "Relay 3",
-            analogOutState = viewModel.viewState.value.isRelay3OutputEnabled,
-            onAnalogOutEnabled = {
+        SystemRelayMappingView(
+            relayText = "Relay 3",
+            relayState = viewModel.viewState.value.isRelay3OutputEnabled,
+            onRelayEnabled = {
                 viewModel.viewState.value.isRelay3OutputEnabled = it
                 viewModel.setStateChanged()
                 viewModel.viewState.value.unusedPortState = UnusedPortsModel.setPortState(
@@ -159,8 +231,12 @@ open class DModulatingRtuFragment : Fragment() {
                     viewModel.profileConfiguration
                 )
             },
-            mappingText = "Fan Enable",
-            paddingLimitEnd = 0,
+            mappingSelection = viewModel.viewState.value.relay3Association,
+            mapping = viewModel.relay3AssociationList,
+            onMappingChanged = {
+                viewModel.viewState.value.relay3Association = it
+                viewModel.setStateChanged()
+            },
             buttonState =
             try {
                 Domain.cmBoardDevice.relay3.readHisVal() > 0
@@ -170,7 +246,7 @@ open class DModulatingRtuFragment : Fragment() {
             },
             onTestActivated = {
                 viewModel.sendTestCommand(DomainName.relay3, it)
-            }
+            },
         )
         Spacer(modifier = Modifier.height(14.dp))
         SystemRelayMappingView(
@@ -186,7 +262,7 @@ open class DModulatingRtuFragment : Fragment() {
                 )
             },
             mappingSelection = viewModel.viewState.value.relay7Association,
-            mapping = viewModel.relay7AssociationList,
+            mapping = viewModel.relay3AssociationList,
             onMappingChanged = {
                 viewModel.viewState.value.relay7Association = it
                 viewModel.setStateChanged()
@@ -209,7 +285,7 @@ open class DModulatingRtuFragment : Fragment() {
         relayText: String,
         relayState: Boolean = false,
         onRelayEnabled: (Boolean) -> Unit,
-        mappingSpace: Dp = 75.dp,
+        mappingSpace: Dp = 40.dp,
         mapping: List<String>,
         mappingSelection: Int = 0,
         onMappingChanged: (Int) -> Unit,
@@ -219,12 +295,12 @@ open class DModulatingRtuFragment : Fragment() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 25.dp, end = 0.dp),
+                .padding(start = 20.dp, end = 0.dp),
             horizontalArrangement = Arrangement.Start
         ) {
             Row {
                 SimpleSwitch(isChecked = relayState, onCheckedChange = onRelayEnabled)
-                Spacer(modifier = Modifier.width(30.dp))
+                Spacer(modifier = Modifier.width(15.dp))
                 Column {
                     Spacer(modifier=Modifier.height(6.dp))
                     Text(text = relayText, fontSize = 20.sp)
@@ -234,8 +310,8 @@ open class DModulatingRtuFragment : Fragment() {
             DropDownWithLabel(
                 label = "",
                 list = mapping,
-                previewWidth = 235,
-                expandedWidth = 253,
+                previewWidth = 280,
+                expandedWidth = 280,
                 heightValue = 100,
                 onSelected = onMappingChanged,
                 defaultSelection = mappingSelection,
@@ -285,176 +361,79 @@ open class DModulatingRtuFragment : Fragment() {
         }
     }
 
-    /*
-    * This function is used to display the Analog Out Mapping view with the list items for selection
-    * */
     @Composable
-    fun SystemAnalogOutMappingViewWithList(
-        analogName: String,
-        analogOutState: Boolean = false,
-        onAnalogOutEnabled: (Boolean) -> Unit,
-        mappingSpace: Dp = 75.dp,
-        mapping: List<String>,
-        analogOutValList: List<String>,
-        mappingSelection: Int = 0,
-        onMappingChanged: (Int) -> Unit,
-        analogOutVal: Int = 0,
-        dropDownWidthPreview: Int = 160,
-        dropdownWidthExpanded: Int = 160,
-        onAnalogOutChanged: (Int) -> Unit,
-        mappingTextSpacer: Int = 155
-    ) {
-        Row (modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 25.dp, end = 20.dp), horizontalArrangement = Arrangement.Start) {
-            Row {
-                ToggleButtonStateful(
-                    defaultSelection = analogOutState,
-                    onEnabled = onAnalogOutEnabled
-                )
-                Spacer(modifier = Modifier.width(30.dp))
-                Column {
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(text = analogName, fontSize = 20.sp)
-                }
-            }
-            Spacer(modifier = Modifier.width(mappingSpace))
-            DropDownWithLabel(
-                label = "",
-                list = mapping,
-                previewWidth = 235,
-                expandedWidth = 253,
-                heightValue = 100,
-                onSelected = onMappingChanged,
-                defaultSelection = mappingSelection,
-                isEnabled = true
-            )
-            Spacer(modifier = Modifier.width(mappingTextSpacer.dp))
-            DropDownWithLabel(
-                label = "",
-                list = analogOutValList,
-                previewWidth = dropDownWidthPreview,
-                expandedWidth = dropdownWidthExpanded,
-                onSelected = onAnalogOutChanged,
-                defaultSelection = analogOutVal
-            )
-        }
+    fun AnalogInputConfig() {
+        val viewState = viewModel.viewState.value
+        AddInputWidget(
+            inputName = "Thermistor 1",
+            inputState = viewState.thermistor1Enabled,
+            onEnabled = {
+                viewState.thermistor1Enabled = it
+                viewModel.setStateChanged()
+            },
+            mapping = viewModel.thermistor1AssociationList,
+            onMappingChanged = {
+                viewState.thermistor1Association = it
+                viewModel.setStateChanged()
+            },
+            mappingSelection = viewState.thermistor1Association,
+            horizontalSpacer = 53,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        AddInputWidget(
+            inputName = "Thermistor 2",
+            inputState = viewState.thermistor2Enabled,
+            onEnabled = {
+                viewState.thermistor2Enabled = it
+                viewModel.setStateChanged()
+            },
+            mapping = viewModel.thermistor1AssociationList,
+            onMappingChanged = {
+                viewState.thermistor2Association = it
+                viewModel.setStateChanged()
+            },
+            mappingSelection = viewState.thermistor2Association,
+            horizontalSpacer = 53,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        AddInputWidget(
+            inputName = "Analog-In 1",
+            inputState = viewState.analogIn1Enabled,
+            onEnabled = {
+                viewState.analogIn1Enabled = it
+                viewModel.setStateChanged()
+            },
+            mapping = viewModel.analogIn1AssociationList,
+            onMappingChanged = {
+                viewState.analogIn1Association = it
+                viewModel.setStateChanged()
+            },
+            mappingSelection = viewState.analogIn1Association,
+            horizontalSpacer = 53,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        AddInputWidget(
+            inputName = "Analog-In 2",
+            inputState = viewState.analogIn2Enabled,
+            onEnabled = {
+                viewState.analogIn2Enabled = it
+                viewModel.setStateChanged()
+            },
+            mapping = viewModel.analogIn1AssociationList,
+            onMappingChanged = {
+                viewState.analogIn2Association = it
+                viewModel.setStateChanged()
+            },
+            mappingSelection = viewState.analogIn2Association,
+            horizontalSpacer = 53,
+        )
+        //Spacer(modifier = Modifier.height(12.dp))
     }
 
     @Composable
-    fun DcwbDisabledAnalogView(viewModel: DabModulatingRtuViewModel) {
+    fun DcwbComposable() {
+
         val viewState = viewModel.viewState
-        val dabModulatingViewModel: DabModulatingRtuViewModel by viewModels()
-
-        Spacer(modifier = Modifier.height(20.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 40.dp),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            DropDownWithLabel(label = "Analog-Out1 at\nMin Cooling",
-                list = (0..10).map { it.toString() }, isHeader = false,
-                defaultSelection = viewState.value.analogOut1CoolingMin,
-                onSelected = {
-                    viewState.value.analogOut1CoolingMin = it
-                    dabModulatingViewModel.setStateChanged()
-                },
-                isEnabled = viewState.value.isAnalog1OutputEnabled,
-                spacerLimit = 102,
-                previewWidth = 100,
-                expandedWidth = 120)
-            Spacer(modifier = Modifier.width(130.dp))
-            DropDownWithLabel(label = "Analog-Out1 at\nMax Cooling",
-                list = (0..10).map { it.toString() }, isHeader = false,
-                defaultSelection = viewState.value.analogOut1CoolingMax,
-                onSelected = {
-                    viewState.value.analogOut1CoolingMax = it
-                    dabModulatingViewModel.setStateChanged()
-                },
-                isEnabled = viewState.value.isAnalog1OutputEnabled,
-                spacerLimit = 147,
-                previewWidth = 100,
-                expandedWidth = 120)
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 40.dp),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            DropDownWithLabel(
-                label = "Analog-Out2 at\nMin Static Pressure",
-                list = (0..10).map { it.toString() }, isHeader = false,
-                defaultSelection = viewState.value.analog2MinFan,
-                onSelected = {
-                    viewState.value.analog2MinFan = it
-                    dabModulatingViewModel.setStateChanged()
-                },
-                isEnabled = viewState.value.isAnalog2OutputEnabled,
-                spacerLimit = 102,
-                previewWidth = 100,
-                expandedWidth = 120
-            )
-            Spacer(modifier = Modifier.width(130.dp))
-            DropDownWithLabel(
-                label = "Analog-Out2 at\nMax Static Pressure",
-                list = (0..10).map { it.toString() }, isHeader = false,
-                defaultSelection = viewState.value.analog2MaxFan,
-                onSelected = {
-                    viewState.value.analog2MaxFan = it
-                    dabModulatingViewModel.setStateChanged()
-                },
-                isEnabled = viewState.value.isAnalog2OutputEnabled,
-                spacerLimit = 147,
-                previewWidth = 100,
-                expandedWidth = 120
-            )
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 40.dp),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            DropDownWithLabel(
-                label = "Analog-Out3 at\nMin Heating",
-                list = (0..10).map { it.toString() }, isHeader = false,
-                defaultSelection = viewState.value.analog3MinHeating,
-                onSelected = {
-                    viewState.value.analog3MinHeating = it
-                    dabModulatingViewModel.setStateChanged()
-                },
-                isEnabled = viewState.value.isAnalog3OutputEnabled,
-                spacerLimit = 102,
-                previewWidth = 100,
-                expandedWidth = 120
-            )
-            Spacer(modifier = Modifier.width(130.dp))
-            DropDownWithLabel(
-                label = "Analog-Out3 at\nMax Heating",
-                list = (0..10).map { it.toString() }, isHeader = false,
-                defaultSelection = viewState.value.analog3MaxHeating,
-                onSelected = {
-                    viewState.value.analog3MaxHeating = it
-                    dabModulatingViewModel.setStateChanged()
-                },
-                isEnabled = viewState.value.isAnalog3OutputEnabled,
-                spacerLimit = 147,
-                previewWidth = 100,
-                expandedWidth = 120
-            )
-        }
-    }
-
-    @Composable
-    fun DcwbEnabledAnalogView(viewModel: DabModulatingRtuViewModel, mappedToDamper: Boolean) {
-        val viewState = viewModel.viewState
-        val dabModulatingViewModel: DabModulatingRtuViewModel by viewModels()
         Spacer(modifier = Modifier.height(14.dp))
         // State variable to track which toggle is selected
         var selectedSwitch by remember { mutableStateOf(viewState.value.ismaximizedExitWaterTempEnable) }
@@ -464,7 +443,7 @@ open class DModulatingRtuFragment : Fragment() {
                 .padding(16.dp)
                 .fillMaxWidth(),  // Makes the row take up the full width of the screen
         ) {
-            Spacer(modifier = Modifier.width(20.dp))
+            Spacer(modifier = Modifier.width(5.dp))
             Text(
                 text = "BTU Meter\nStatus",
                 fontSize = 20.sp,
@@ -485,12 +464,13 @@ open class DModulatingRtuFragment : Fragment() {
             }
         }
 
-        Spacer(modifier = Modifier.height(14.dp))
+        //Spacer(modifier = Modifier.height(14.dp))
         Row(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),  // Makes the row take up the full width of the screen
         ) {
+            Spacer(modifier = Modifier.width(5.dp))
             // First Switch
             SwitchWithLabel(
                 label = "Adaptive Delta T",
@@ -504,10 +484,10 @@ open class DModulatingRtuFragment : Fragment() {
                         viewState.value.isAdaptiveDeltaEnabled = !it
                         viewState.value.ismaximizedExitWaterTempEnable = it
                     }
-                    dabModulatingViewModel.setStateChanged()
+                    viewModel.setStateChanged()
                 }
             )
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(280.dp))
 
             // Second Switch
             SwitchWithLabel(
@@ -522,13 +502,13 @@ open class DModulatingRtuFragment : Fragment() {
                         viewState.value.isAdaptiveDeltaEnabled = it
                         viewState.value.ismaximizedExitWaterTempEnable = !it
                     }
-                    dabModulatingViewModel.setStateChanged()
+                    viewModel.setStateChanged()
                 }
             )
             Spacer(modifier = Modifier.weight(1f))
         }
         // Chilled water configuration
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(14.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -542,12 +522,12 @@ open class DModulatingRtuFragment : Fragment() {
                     defaultSelection = viewState.value.chilledWaterExitTemperatureMargin.toInt(),
                     onSelected = {
                         viewState.value.chilledWaterExitTemperatureMargin = it.toDouble()
-                        dabModulatingViewModel.setStateChanged()
+                        viewModel.setStateChanged()
                     },
                     isEnabled = true,
-                    spacerLimit = 102,
-                    previewWidth = 100,
-                    expandedWidth = 120
+                    spacerLimit = 35,
+                    previewWidth = 140,
+                    expandedWidth = 140
                 )
             } else {
                 DropDownWithLabel(
@@ -556,26 +536,26 @@ open class DModulatingRtuFragment : Fragment() {
                     defaultSelection = viewState.value.chilledWaterTargetDelta.toInt(),
                     onSelected = {
                         viewState.value.chilledWaterTargetDelta = it.toDouble()
-                        dabModulatingViewModel.setStateChanged()
+                        viewModel.setStateChanged()
                     },
                     isEnabled = true,
-                    spacerLimit = 102,
-                    previewWidth = 100,
-                    expandedWidth = 120
+                    spacerLimit = 35,
+                    previewWidth = 140,
+                    expandedWidth = 140
                 )
             }
-            Spacer(modifier = Modifier.width(130.dp))
+            Spacer(modifier = Modifier.width(90.dp))
             DropDownWithLabel(label = "Chilled water Max\nFlow rate(GPM)",
                 list = (0..200 step viewState.value.chilledWaterMaxFlowRateInc.toInt()).map { it.toDouble().toString() }, isHeader = false,
                 defaultSelection = viewState.value.chilledWaterMaxFlowRate.toInt(),
                 onSelected = {
                     viewState.value.chilledWaterMaxFlowRate = it.toDouble()
-                    dabModulatingViewModel.setStateChanged()
+                    viewModel.setStateChanged()
                 },
                 isEnabled = true,
-                spacerLimit = 147,
-                previewWidth = 100,
-                expandedWidth = 120)
+                spacerLimit = 60,
+                previewWidth = 140,
+                expandedWidth = 140)
         }
 
         // Analog in valve configuration
@@ -591,233 +571,598 @@ open class DModulatingRtuFragment : Fragment() {
                 defaultSelection = viewState.value.analog1ValveClosedPosition,
                 onSelected = {
                     viewState.value.analog1ValveClosedPosition = it
-                    dabModulatingViewModel.setStateChanged()
+                    viewModel.setStateChanged()
                 },
                 isEnabled = viewState.value.isAnalog1OutputEnabled,
-                spacerLimit = 102,
-                previewWidth = 100,
-                expandedWidth = 120)
-            Spacer(modifier = Modifier.width(130.dp))
+                spacerLimit = 35,
+                previewWidth = 140,
+                expandedWidth = 140)
+            Spacer(modifier = Modifier.width(90.dp))
             DropDownWithLabel(label = "Analog-In 1 at\nValve Full Position",
                 list = (0..10).map { it.toString() }, isHeader = false,
                 defaultSelection = viewState.value.analog1ValveFullPosition,
                 onSelected = {
                     viewState.value.analog1ValveFullPosition = it
-                    dabModulatingViewModel.setStateChanged()
+                    viewModel.setStateChanged()
                 },
                 isEnabled = viewState.value.isAnalog1OutputEnabled,
-                spacerLimit = 147,
-                previewWidth = 100,
-                expandedWidth = 120)
+                spacerLimit = 60,
+                previewWidth = 140,
+                expandedWidth = 140)
         }
 
-        // Analog out-1 CHW valve configuration
-        Spacer(modifier = Modifier.height(20.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 40.dp),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            DropDownWithLabel(label = "Analog-Out1 at\nMin CHW Valve",
-                list = (0..10).map { it.toString() }, isHeader = false,
-                // We are reusing the analogOut1CoolingMin which was used in non dcwb enabled case
-                defaultSelection = viewState.value.analogOut1CoolingMin,
-                onSelected = {
-                    viewState.value.analogOut1CoolingMin = it
-                    dabModulatingViewModel.setStateChanged()
-                },
-                isEnabled = viewState.value.isAnalog1OutputEnabled,
-                spacerLimit = 102,
-                previewWidth = 100,
-                expandedWidth = 120)
-            Spacer(modifier = Modifier.width(130.dp))
-            DropDownWithLabel(label = "Analog-Out1 at\nMax CHW Valve",
-                list = (0..10).map { it.toString() }, isHeader = false,
-                // We are reusing the analogOut1CoolingMax which was used in non dcwb enabled case
-                defaultSelection = viewState.value.analogOut1CoolingMax,
-                onSelected = {
-                    viewState.value.analogOut1CoolingMax = it
-                    dabModulatingViewModel.setStateChanged()
-                },
-                isEnabled = viewState.value.isAnalog1OutputEnabled,
-                spacerLimit = 147,
-                previewWidth = 100,
-                expandedWidth = 120)
-        }
+    }
 
-        // Analog-Out 2 fan speed configuration
-        Spacer(modifier = Modifier.height(20.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 40.dp),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            DropDownWithLabel(
-                label = "Analog-Out2 at\nMin Fan Speed",
-                list = (0..10).map { it.toString() }, isHeader = false,
-                defaultSelection = viewState.value.analog2MinFan,
-                onSelected = {
-                    viewState.value.analog2MinFan = it
-                    dabModulatingViewModel.setStateChanged()
-                },
-                isEnabled = viewState.value.isAnalog2OutputEnabled,
-                spacerLimit = 102,
-                previewWidth = 100,
-                expandedWidth = 120
-            )
-            Spacer(modifier = Modifier.width(130.dp))
-            DropDownWithLabel(
-                label = "Analog-Out2 at\nMax Fan Speed",
-                list = (0..10).map { it.toString() }, isHeader = false,
-                defaultSelection = viewState.value.analog2MaxFan,
-                onSelected = {
-                    viewState.value.analog2MaxFan = it
-                    dabModulatingViewModel.setStateChanged()
-                },
-                isEnabled = viewState.value.isAnalog2OutputEnabled,
-                spacerLimit = 147,
-                previewWidth = 100,
-                expandedWidth = 120
-            )
+    @Composable
+    fun AnalogOut1MinMaxConfig() {
+        if (!viewModel.viewState.value.isAnalog1OutputEnabled) {
+            return
         }
-
-        // Analog-Out 3 heating configuration
-        Spacer(modifier = Modifier.height(20.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 40.dp),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            DropDownWithLabel(
-                label = "Analog-Out3 at\nMin Heating",
-                list = (0..10).map { it.toString() }, isHeader = false,
-                defaultSelection = viewState.value.analog3MinHeating,
-                onSelected = {
-                    viewState.value.analog3MinHeating = it
-                    dabModulatingViewModel.setStateChanged()
-                },
-                isEnabled = viewState.value.isAnalog3OutputEnabled,
-                spacerLimit = 102,
-                previewWidth = 100,
-                expandedWidth = 120
-            )
-            Spacer(modifier = Modifier.width(130.dp))
-            DropDownWithLabel(
-                label = "Analog-Out3 at\nMax Heating",
-                list = (0..10).map { it.toString() }, isHeader = false,
-                defaultSelection = viewState.value.analog3MaxHeating,
-                onSelected = {
-                    viewState.value.analog3MaxHeating = it
-                    dabModulatingViewModel.setStateChanged()
-                },
-                isEnabled = viewState.value.isAnalog3OutputEnabled,
-                spacerLimit = 147,
-                previewWidth = 100,
-                expandedWidth = 120
-            )
-        }
-
-        // Analog-Out 4 cooling loop configuration
-        Spacer(modifier = Modifier.height(20.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 40.dp),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            if(mappedToDamper) {
-                DropDownWithLabel(
-                    label = "Analog-Out4 at\nMin Outside Damper",
-                    list = (0..10).map { it.toString() }, isHeader = false,
-                    defaultSelection = viewState.value.analogOut4FreshAirMin,
-                    onSelected = {
-                        viewState.value.analogOut4FreshAirMin = it
-                        dabModulatingViewModel.setStateChanged()
+        when (viewModel.viewState.value.analog1OutputAssociation) {
+            0 -> {
+                MinMaxConfiguration("Analog-out1 at Min \nFan Speed",
+                    "Analog-out1 at Max \nFan Speed",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog1OutMinMaxConfig.fanSignalConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog1OutMinMaxConfig.fanSignalConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog1OutMinMaxConfig.fanSignalConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
                     },
-                    isEnabled = viewState.value.isAnalog4OutputEnabled,
-                    spacerLimit = 102,
-                    previewWidth = 100,
-                    expandedWidth = 120
-                )
-            } else {
-                DropDownWithLabel(
-                    label = "Analog-Out4 at\nMin Cooling Loop",
-                    list = (0..10).map { it.toString() }, isHeader = false,
-                    defaultSelection = viewState.value.analogOut4MinCoolingLoop,
-                    onSelected = {
-                        viewState.value.analogOut4MinCoolingLoop = it
-                        dabModulatingViewModel.setStateChanged()
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog1OutMinMaxConfig.fanSignalConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
                     },
-                    isEnabled = viewState.value.isAnalog4OutputEnabled,
-                    spacerLimit = 102,
-                    previewWidth = 100,
-                    expandedWidth = 120
-                )
+                    paddingStart = 20)
             }
-
-            Spacer(modifier = Modifier.width(130.dp))
-            if(mappedToDamper) {
-                DropDownWithLabel(
-                    label = "Analog-Out4 at\nMax Outside Damper",
-                    list = (0..10).map { it.toString() }, isHeader = false,
-                    defaultSelection = viewState.value.analogOut4FreshAirMax,
-                    onSelected = {
-                        viewState.value.analogOut4FreshAirMax = it
-                        dabModulatingViewModel.setStateChanged()
+            1 -> {
+                MinMaxConfiguration("Analog-out1 at Min \nCompressor Speed",
+                    "Analog-out1 at Max \nCompressor Speed",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog1OutMinMaxConfig.compressorSpeedConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog1OutMinMaxConfig.compressorSpeedConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog1OutMinMaxConfig.compressorSpeedConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
                     },
-                    isEnabled = viewState.value.isAnalog4OutputEnabled,
-                    spacerLimit = 147,
-                    previewWidth = 100,
-                    expandedWidth = 120
-                )
-            } else {
-                DropDownWithLabel(
-                    label = "Analog-Out4 at\nMax Cooling Loop",
-                    list = (0..10).map { it.toString() }, isHeader = false,
-                    defaultSelection = viewState.value.analogOut4MaxCoolingLoop,
-                    onSelected = {
-                        viewState.value.analogOut4MaxCoolingLoop = it
-                        dabModulatingViewModel.setStateChanged()
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog1OutMinMaxConfig.compressorSpeedConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
                     },
-                    isEnabled = viewState.value.isAnalog4OutputEnabled,
-                    spacerLimit = 147,
-                    previewWidth = 100,
-                    expandedWidth = 120
-                )
+                    paddingStart = 20)
+            }
+            2 -> {
+                MinMaxConfiguration("Analog-out1 at Min \nOutside Air Damper",
+                    "Analog-out1 at Max \nOutside Air Damper",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog1OutMinMaxConfig.outsideAirDamperConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog1OutMinMaxConfig.outsideAirDamperConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog1OutMinMaxConfig.outsideAirDamperConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog1OutMinMaxConfig.outsideAirDamperConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+            3 -> {
+                MinMaxConfiguration("Analog-out1 at Min \nCooling Signal",
+                    "Analog-out1 at Max \nCooling Signal",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog1OutMinMaxConfig.coolingSignalConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog1OutMinMaxConfig.coolingSignalConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog1OutMinMaxConfig.coolingSignalConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog1OutMinMaxConfig.coolingSignalConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+            4 -> {
+                MinMaxConfiguration("Analog-out1 at Min \nHeating Signal",
+                    "Analog-out1 at Max \nHeating Signal",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog1OutMinMaxConfig.heatingSignalConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog1OutMinMaxConfig.heatingSignalConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog1OutMinMaxConfig.heatingSignalConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog1OutMinMaxConfig.heatingSignalConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+            5 -> {
+                MinMaxConfiguration("Analog-out1 at Min \nChilled Water Valve",
+                    "Analog-out1 at Max \nChilled Water Valve",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog1OutMinMaxConfig.chilledWaterValveConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog1OutMinMaxConfig.chilledWaterValveConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog1OutMinMaxConfig.chilledWaterValveConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog1OutMinMaxConfig.chilledWaterValveConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
             }
         }
     }
 
-    /**
-     * Composable to display the Analog Out whose toggle button toggles according to the DCWB toggle
-     */
     @Composable
-    fun SystemAnalogOutDynamicMappingView( analogName : String, analogOutState :Boolean = false, onAnalogOutEnabled: (Boolean) -> Unit,
-                                           mappingText : String, analogOutValList : List<String>, analogOutVal : Int = 0 , dropDownWidthPreview : Int = 160,dropdownWidthExpanded : Int = 160,
-                                           onAnalogOutChanged : (Int) -> Unit,mappingTextSpacer : Int = 155) {
-        Row (modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 25.dp, end = 20.dp), horizontalArrangement = Arrangement.Start){
-            Row {
-                SimpleSwitch(isChecked = analogOutState , onCheckedChange = onAnalogOutEnabled)
-                Spacer(modifier = Modifier.width(30.dp))
-                Column {
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(text = analogName, fontSize = 20.sp)
+    fun AnalogOut2MinMaxConfig() {
+        if (!viewModel.viewState.value.isAnalog2OutputEnabled) {
+            return
+        }
+        when (viewModel.viewState.value.analog2OutputAssociation) {
+            0 -> {
+                MinMaxConfiguration("Analog-out2 at Min \nFan Speed",
+                    "Analog-out2 at Max \nFan Speed",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog2OutMinMaxConfig.fanSignalConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog2OutMinMaxConfig.fanSignalConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog2OutMinMaxConfig.fanSignalConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog2OutMinMaxConfig.fanSignalConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+            1 -> {
+                MinMaxConfiguration("Analog-out2 at Min \nCompressor Speed",
+                    "Analog-out2 at Max \nCompressor Speed",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog2OutMinMaxConfig.compressorSpeedConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog2OutMinMaxConfig.compressorSpeedConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog2OutMinMaxConfig.compressorSpeedConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog2OutMinMaxConfig.compressorSpeedConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+            2 -> {
+                MinMaxConfiguration("Analog-out2 at Min \nOutside Air Damper",
+                    "Analog-out2 at Max \nOutside Air Damper",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog2OutMinMaxConfig.outsideAirDamperConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog2OutMinMaxConfig.outsideAirDamperConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog2OutMinMaxConfig.outsideAirDamperConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog2OutMinMaxConfig.outsideAirDamperConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+            3 -> {
+                MinMaxConfiguration("Analog-out2 at Min \nCooling Signal",
+                    "Analog-out2 at Max \nCooling Signal",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog2OutMinMaxConfig.coolingSignalConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog2OutMinMaxConfig.coolingSignalConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog2OutMinMaxConfig.coolingSignalConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog2OutMinMaxConfig.coolingSignalConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+            4 -> {
+                MinMaxConfiguration("Analog-out2 at Min \nHeating Signal",
+                    "Analog-out2 at Max \nHeating Signal",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog2OutMinMaxConfig.heatingSignalConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog2OutMinMaxConfig.heatingSignalConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog2OutMinMaxConfig.heatingSignalConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog2OutMinMaxConfig.heatingSignalConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+            5 -> {
+                MinMaxConfiguration("Analog-out2 at Min \nChilled Water Valve",
+                    "Analog-out2 at Max \nChilled Water Valve",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog2OutMinMaxConfig.chilledWaterValveConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog2OutMinMaxConfig.chilledWaterValveConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog2OutMinMaxConfig.chilledWaterValveConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog2OutMinMaxConfig.chilledWaterValveConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+        }
+    }
+
+    @Composable
+    fun AnalogOut3MinMaxConfig() {
+        if (!viewModel.viewState.value.isAnalog3OutputEnabled) {
+            return
+        }
+        when (viewModel.viewState.value.analog3OutputAssociation) {
+            0 -> {
+                MinMaxConfiguration("Analog-out3 at Min \nFan Speed",
+                    "Analog-out3 at Max \nFan Speed",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog3OutMinMaxConfig.fanSignalConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog3OutMinMaxConfig.fanSignalConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog3OutMinMaxConfig.fanSignalConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog3OutMinMaxConfig.fanSignalConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+            1 -> {
+                MinMaxConfiguration("Analog-out3 at Min \nCompressor Speed",
+                    "Analog-out3 at Max \nCompressor Speed",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog3OutMinMaxConfig.compressorSpeedConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog3OutMinMaxConfig.compressorSpeedConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog3OutMinMaxConfig.compressorSpeedConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog3OutMinMaxConfig.compressorSpeedConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+            2 -> {
+                MinMaxConfiguration("Analog-out3 at Min \nOutside Air Damper",
+                    "Analog-out3 at Max \nOutside Air Damper",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog3OutMinMaxConfig.outsideAirDamperConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog3OutMinMaxConfig.outsideAirDamperConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog3OutMinMaxConfig.outsideAirDamperConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog3OutMinMaxConfig.outsideAirDamperConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+            3 -> {
+                MinMaxConfiguration("Analog-out3 at Min \nCooling Signal",
+                    "Analog-out3 at Max \nCooling Signal",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog3OutMinMaxConfig.coolingSignalConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog3OutMinMaxConfig.coolingSignalConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog3OutMinMaxConfig.coolingSignalConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog3OutMinMaxConfig.coolingSignalConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+            4 -> {
+                MinMaxConfiguration("Analog-out3 at Min \nHeating Signal",
+                    "Analog-out3 at Max \nHeating Signal",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog3OutMinMaxConfig.heatingSignalConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog3OutMinMaxConfig.heatingSignalConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog3OutMinMaxConfig.heatingSignalConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog3OutMinMaxConfig.heatingSignalConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+            5 -> {
+                MinMaxConfiguration("Analog-out3 at Min \nChilled Water Valve",
+                    "Analog-out3 at Max \nChilled Water Valve",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog3OutMinMaxConfig.chilledWaterValveConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog3OutMinMaxConfig.chilledWaterValveConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog3OutMinMaxConfig.chilledWaterValveConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog3OutMinMaxConfig.chilledWaterValveConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+        }
+    }
+
+    @Composable
+    fun AnalogOut4MinMaxConfig() {
+        if (!viewModel.viewState.value.isAnalog4OutputEnabled) {
+            return
+        }
+        when (viewModel.viewState.value.analog4OutputAssociation) {
+            0 -> {
+                MinMaxConfiguration("Analog-out4 at Min \nFan Speed",
+                    "Analog-out4 at Max \nFan Speed",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog4OutMinMaxConfig.fanSignalConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog4OutMinMaxConfig.fanSignalConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog4OutMinMaxConfig.fanSignalConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog4OutMinMaxConfig.fanSignalConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+
+            1 -> {
+                MinMaxConfiguration("Analog-out4 at Min \nCompressor Speed",
+                    "Analog-out4 at Max \nCompressor Speed",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog4OutMinMaxConfig.compressorSpeedConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog4OutMinMaxConfig.compressorSpeedConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog4OutMinMaxConfig.compressorSpeedConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog4OutMinMaxConfig.compressorSpeedConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+
+            2 -> {
+                MinMaxConfiguration("Analog-out4 at Min \nOutside Air Damper",
+                    "Analog-out4 at Max \nOutside Air Damper",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog4OutMinMaxConfig.outsideAirDamperConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog4OutMinMaxConfig.outsideAirDamperConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog4OutMinMaxConfig.outsideAirDamperConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog4OutMinMaxConfig.outsideAirDamperConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+
+            3 -> {
+                MinMaxConfiguration("Analog-out4 at Min \nCooling Signal",
+                    "Analog-out4 at Max \nCooling Signal",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog4OutMinMaxConfig.coolingSignalConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog4OutMinMaxConfig.coolingSignalConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog4OutMinMaxConfig.coolingSignalConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog4OutMinMaxConfig.coolingSignalConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+
+            4 -> {
+                MinMaxConfiguration("Analog-out4 at Min \nHeating Signal",
+                    "Analog-out4 at Max \nHeating Signal",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog4OutMinMaxConfig.heatingSignalConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog4OutMinMaxConfig.heatingSignalConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog4OutMinMaxConfig.heatingSignalConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog4OutMinMaxConfig.heatingSignalConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+
+            5 -> {
+                MinMaxConfiguration("Analog-out4 at Min \nChilled Water Valve",
+                    "Analog-out4 at Max \nChilled Water Valve",
+                    viewModel.minMaxVoltage,
+                    "V",
+                    minDefault = viewModel.viewState.value.analog4OutMinMaxConfig.chilledWaterValveConfig.min.toString(),
+                    maxDefault = viewModel.viewState.value.analog4OutMinMaxConfig.chilledWaterValveConfig.max.toString(),
+                    onMinSelected = {
+                        viewModel.viewState.value.analog4OutMinMaxConfig.chilledWaterValveConfig.min =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    onMaxSelected = {
+                        viewModel.viewState.value.analog4OutMinMaxConfig.chilledWaterValveConfig.max =
+                            it.value.toInt()
+                        setStateChanged(viewModel)
+                    },
+                    paddingStart = 20)
+            }
+
+        }
+    }
+    fun setStateChanged(viewModel: DabModulatingRtuViewModel) {
+        viewModel.viewState.value.isStateChanged = true
+        viewModel.viewState.value.isSaveRequired = true
+    }
+
+    @Composable
+    fun ShowBtuMeterDialog(viewModel: DabModulatingRtuViewModel) {
+        AlertDialog(
+            onDismissRequest = {
+                // When the user clicks outside the dialog or back button do nothing. Keep the dialog ON
+            },
+            text = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically // Align icon and text vertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_dialog_alert),
+                        contentDescription = "Warning",
+                        modifier = Modifier
+                            .size(40.dp) // Adjust the size of the icon
+                            .padding(end = 8.dp) // Add space between icon and text
+                    )
+                    Text(
+                        text = "Please Configure the BTU meter's\nModbus parameters",
+                        fontSize = 16.sp
+                    )
+                }
+
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.viewState.value.isDcwbEnabled = true
+                        viewModel.viewState.value.isAdaptiveDeltaEnabled = true
+                        viewModel.shouldShowBtuDialog.value = false
+                        setStateChanged(viewModel)
+                    }
+                ) {
+                    Text("PROCEED")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        if (viewModel.viewState.value.analog1OutputAssociation ==
+                                    ModulatingProfileAnalogMapping.ChilledWaterValve.ordinal) {
+                            viewModel.viewState.value.isAnalog1OutputEnabled = false
+                        }
+                        if (viewModel.viewState.value.analog2OutputAssociation ==
+                                    ModulatingProfileAnalogMapping.ChilledWaterValve.ordinal) {
+                            viewModel.viewState.value.isAnalog2OutputEnabled = false
+                        }
+                        if (viewModel.viewState.value.analog3OutputAssociation ==
+                                    ModulatingProfileAnalogMapping.ChilledWaterValve.ordinal) {
+                            viewModel.viewState.value.isAnalog3OutputEnabled = false
+                        }
+                        if (viewModel.viewState.value.analog4OutputAssociation ==
+                                    ModulatingProfileAnalogMapping.ChilledWaterValve.ordinal) {
+                            viewModel.viewState.value.isAnalog4OutputEnabled = false
+                        }
+                        CcuLog.i(
+                            Domain.LOG_TAG,
+                            "BTU Meter Dialog Cancelled. Disabling DCWB"
+                        )
+                        viewModel.viewState.value.isDcwbEnabled = false
+                        viewModel.shouldShowBtuDialog.value = false
+                        setStateChanged(viewModel)
+                    }
+                ) {
+                    Text("CANCEL")
                 }
             }
-            Spacer(modifier=Modifier.width(41.dp))
-            Column {
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(text = mappingText, fontSize = 20.sp, modifier = Modifier
-                    .padding(start = 55.dp))
-            }
-            Spacer(modifier = Modifier.width(mappingTextSpacer.dp))
-            DropDownWithLabel(label = "", list = analogOutValList, previewWidth = dropDownWidthPreview, expandedWidth = dropdownWidthExpanded,
-                onSelected = onAnalogOutChanged, defaultSelection = analogOutVal)
-        }
+        )
     }
+
 }

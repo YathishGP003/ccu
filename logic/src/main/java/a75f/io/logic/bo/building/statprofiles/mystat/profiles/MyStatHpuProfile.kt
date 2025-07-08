@@ -29,7 +29,6 @@ import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.MyStatBasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
 import a75f.io.logic.bo.building.statprofiles.util.MyStatTuners
-import a75f.io.logic.bo.building.statprofiles.util.StatLoopController
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
 import a75f.io.logic.bo.building.statprofiles.util.fetchMyStatBasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.fetchMyStatTuners
@@ -105,6 +104,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
         val averageDesiredTemp = getAverageTemp(userIntents)
         val fanModeSaved = FanModeCacheStorage.getMyStatFanModeCache().getFanModeFromCache(equip.equipRef)
         val basicSettings = fetchMyStatBasicSettings(equip)
+        val controllerFactory = MyStatControlFactory(equip)
 
         logIt(
             "Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}"
@@ -117,7 +117,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
 
         loopController.initialise(tuners = myStatTuners)
         loopController.dumpLogs()
-        handleChangeOfDirection(currentTemp, userIntents)
+        handleChangeOfDirection(currentTemp, userIntents, controllerFactory, equip)
         updateOperatingMode(currentTemp, averageDesiredTemp, basicSettings.conditioningMode, equip.operatingMode)
 
         resetEquip(equip)
@@ -138,7 +138,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
             true, compressorLoopOutput, equip.compressorLoopOutput
         )
         if (basicSettings.fanMode != MyStatFanStages.OFF) {
-            operateRelays(config,  basicSettings, equip)
+            operateRelays(config,  basicSettings, equip, controllerFactory)
             operateAnalogOutputs(config, equip, basicSettings, equip.analogOutStages, relayLogicalPoints)
             if (basicSettings.fanMode == MyStatFanStages.AUTO) {
                 runFanOperationBasedOnAuxStages(equip.relayStages, equip.analogOutStages, config, relayLogicalPoints, analogLogicalPoints)
@@ -193,9 +193,9 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
     }
 
     private fun operateRelays(
-        config: MyStatHpuConfiguration, basicSettings: MyStatBasicSettings, equip: MyStatHpuEquip
+        config: MyStatHpuConfiguration, basicSettings: MyStatBasicSettings,
+        equip: MyStatHpuEquip, controllerFactory: MyStatControlFactory
     ) {
-        val controllerFactory = MyStatControlFactory(equip)
         controllerFactory.addControllers(config)
         runControllers(equip, basicSettings, config)
     }
@@ -282,8 +282,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
                     val mode = equip.fanOpMode.readPriorityVal().toInt()
                     return if (mode == StandaloneFanStage.AUTO.ordinal) {
                         (basicSettings.conditioningMode != StandaloneConditioningMode.OFF) &&
-                                (currentState || (fanEnabledStatus && fanLoopOutput > 0 && isLowestStageActive)
-                                || (isLowestStageActive && runFanLowDuringDoorWindow))
+                                (currentState || (isLowestStageActive && runFanLowDuringDoorWindow))
                     } else {
                         checkUserIntentAction(stage)
                     }

@@ -16,6 +16,7 @@ import a75f.io.logic.bo.building.system.util.getCurrentSystemEquip
 import a75f.io.logic.bo.building.system.util.getVavConnectEquip
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
+import a75f.io.renatus.BackgroundServiceInitiator
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.oao.updateOaoPoints
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
@@ -109,6 +110,8 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                     updateAhuRefForConnectModule()
                     // Send seed message when connect module is added
                     LSerial.getInstance().setResetSeedMessage(true)
+                    // Initialize background services after saving configuration
+                    context?.let { BackgroundServiceInitiator.initializeServices(it.applicationContext) }
                 }
                 updateConditioningMode()
                 hayStack.setCcuReady()

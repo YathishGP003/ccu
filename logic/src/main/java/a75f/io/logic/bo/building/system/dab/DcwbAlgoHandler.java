@@ -87,8 +87,8 @@ class DcwbAlgoHandler {
             //PI Loop may run beyond the normal limits based on the tuner values. Restrict it to the 0-100 range here.
             chilledWaterValveLoopOutput = Math.max(chilledWaterValveLoopOutput, MIN_PI_LOOP_OUTPUT);
             chilledWaterValveLoopOutput = Math.min(chilledWaterValveLoopOutput, MAX_PI_LOOP_OUTPUT);
-    
-            //PI loop operates with the intention of maintaining delta T. So we should invert the loop Output.
+            CcuLog.i(L.TAG_CCU_SYSTEM, "DCWB PI loop : " + chilledWaterValveLoopOutput);
+                    //PI loop operates with the intention of maintaining delta T. So we should invert the loop Output.
             if (adaptiveDelta && !AdaptiveDeltaTControlAlgo.Companion.getLinearModeLoop()) {
                 chilledWaterValveLoopOutput = 100 - chilledWaterValveLoopOutput;
             }

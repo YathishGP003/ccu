@@ -115,6 +115,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
         val averageDesiredTemp = getAverageTemp(userIntents)
         val fanModeSaved = FanModeCacheStorage.getHyperStatFanModeCache().getFanModeFromCache(equip.equipRef)
         val basicSettings = fetchBasicSettings(equip)
+        val controllerFactory = HyperStatControlFactory(equip)
 
         logicalPointsList = getHSLogicalPointList(equip, config!!)
         relayLogicalPoints = getHSRelayOutputPoints(equip)
@@ -136,16 +137,16 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
 
         loopController.initialise(tuners = hyperStatTuners)
         loopController.dumpLogs()
-        handleChangeOfDirection(currentTemp, userIntents)
+        handleChangeOfDirection(currentTemp, userIntents, controllerFactory, equip)
         updateOperatingMode(currentTemp, averageDesiredTemp, basicSettings.conditioningMode, equip.operatingMode)
 
         resetEquip(equip)
+        supplyWaterTempTh2 = equip.leavingWaterTemperature.readHisVal()
         evaluateLoopOutputs(userIntents, basicSettings, hyperStatTuners, config, equip)
         updateOccupancyDetection(equip)
 
         doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip)
         runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(userIntents)
-        supplyWaterTempTh2 = equip.leavingWaterTemperature.readHisVal()
 
         if (occupancyStatus == Occupancy.WINDOW_OPEN) resetLoopOutputs()
 
@@ -157,7 +158,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
             dcvLoopOutput, equip.dcvLoopOutput
         )
 
-        operateRelays(config as Pipe2Configuration, basicSettings, equip, userIntents)
+        operateRelays(config as Pipe2Configuration, basicSettings, equip, userIntents, controllerFactory)
         operateAnalogOutputs(config, equip, basicSettings, equip.analogOutStages, userIntents)
         processForWaterSampling(equip, hyperStatTuners, config, equip.relayStages, basicSettings)
         runAlgorithm(equip, basicSettings, equip.relayStages, equip.analogOutStages, config)
@@ -684,12 +685,9 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
     }
 
     private fun operateRelays(
-        config: Pipe2Configuration,
-        basicSettings: BasicSettings,
-        equip: Pipe2V2Equip,
-        userIntents: UserIntents
+        config: Pipe2Configuration, basicSettings: BasicSettings,
+        equip: Pipe2V2Equip, userIntents: UserIntents, controllerFactory: HyperStatControlFactory
     ) {
-        val controllerFactory = HyperStatControlFactory(equip)
         controllerFactory.addControllers(config)
         equip.waterValveLoop.data = waterValveLoop(userIntents).toDouble()
         runControllers(equip, basicSettings, config)
@@ -766,9 +764,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
                 ): Boolean {
                     val mode = equip.fanOpMode.readPriorityVal().toInt()
                     return if (isFanGoodToRun && mode == StandaloneFanStage.AUTO.ordinal) {
-                        (basicSettings.fanMode != StandaloneFanStage.OFF && (currentState ||
-                                        (fanEnabledStatus && fanLoopOutput > 0 && isLowestStageActive)
-                                        || (isLowestStageActive && runFanLowDuringDoorWindow)))
+                        (basicSettings.fanMode != StandaloneFanStage.OFF && (currentState || (isLowestStageActive && runFanLowDuringDoorWindow)))
                     } else {
                         checkUserIntentAction(stage)
                     }
@@ -793,7 +789,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
                 }
 
                 if (equip.fanLowSpeed.pointExists() && lowExist != null) {
-                    val isLowActive = if ((isHighActive && isConfigPresent(HsPipe2RelayMapping.FAN_HIGH_SPEED)) || (isConfigPresent(HsPipe2RelayMapping.FAN_MEDIUM_SPEED) || isMediumActive)) false else isStageActive(lowExist.first, lowExist.second, lowestStageFanLow)
+                    val isLowActive = if ((isHighActive && isConfigPresent(HsPipe2RelayMapping.FAN_HIGH_SPEED)) || (isConfigPresent(HsPipe2RelayMapping.FAN_MEDIUM_SPEED) && isMediumActive)) false else isStageActive(lowExist.first, lowExist.second, lowestStageFanLow)
                     updateRelayStage(Stage.FAN_1.displayName, isLowActive, equip.fanLowSpeed)
                 }
             }

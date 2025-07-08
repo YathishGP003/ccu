@@ -22,6 +22,7 @@ import a75f.io.domain.logic.ProfileEquipBuilder;
 import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.hvac.ModulatingProfileAnalogMapping;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
@@ -109,32 +110,36 @@ class ConfigPointUpdateHandler {
         if (systemProfile instanceof DabFullyModulatingRtu) {
             SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getDabModulatingRtuModelDef();
             DabModulatingRtuProfileConfig config = new DabModulatingRtuProfileConfig(model).getActiveConfiguration();
-            if (configPoint.getDomainName().contains(DomainName.analog1OutputEnable)) {
-                config.analog1OutputEnable.setEnabled(val > 0);
-            } else if (configPoint.getDomainName().contains(DomainName.analog2OutputEnable)) {
-                config.analog2OutputEnable.setEnabled(val > 0);
-            } else if (configPoint.getDomainName().contains(DomainName.analog3OutputEnable)) {
-                config.analog3OutputEnable.setEnabled(val > 0);
-            } else if (configPoint.getDomainName().contains(DomainName.analog4OutputEnable)) {
-                config.analog4OutputEnable.setEnabled(val > 0);
-            } else if (configPoint.getDomainName().contains(DomainName.relay3OutputEnable)) {
-                config.relay3OutputEnable.setEnabled(val > 0);
-            } else if (configPoint.getDomainName().contains(DomainName.relay7OutputEnable)) {
-                config.relay7OutputEnable.setEnabled(val > 0);
-            } else if (configPoint.getDomainName().contains(DomainName.dcwbEnable)) {
-                config.dcwbEnable.setEnabled(val > 0);
-                // When we enable the dcwb then set the adaptiva delta enabled by default
-                if(val > 0) {
-                    config.adaptiveDeltaEnable.setEnabled(true);
-                    config.maximizedExitWaterTempEnable.setEnabled(false);
+
+            config.getEnableConfigs().forEach( enableConfig -> {
+                if (configPoint.getDomainName().contains(enableConfig.getDomainName())) {
+                    enableConfig.setEnabled(val > 0);
                 }
-            } else if(configPoint.getDomainName().contains(DomainName.adaptiveDeltaEnable)){
+            });
+
+            boolean valveSelected = (config.analog1OutputEnable.getEnabled()
+                        && config.analog1OutputAssociation.getAssociationVal() == ModulatingProfileAnalogMapping.ChilledWaterValve.ordinal())
+                    || (config.analog2OutputEnable.getEnabled()
+                        && config.analog2OutputAssociation.getAssociationVal() == ModulatingProfileAnalogMapping.ChilledWaterValve.ordinal())
+                    || (config.analog3OutputEnable.getEnabled()
+                        && config.analog3OutputAssociation.getAssociationVal() == ModulatingProfileAnalogMapping.ChilledWaterValve.ordinal())
+                    || (config.analog4OutputEnable.getEnabled()
+                        && config.analog4OutputAssociation.getAssociationVal() == ModulatingProfileAnalogMapping.ChilledWaterValve.ordinal());
+            if (!config.dcwbEnable.getEnabled() && valveSelected) {
+                CcuLog.w(L.TAG_CCU_PUBNUB, "DCWB is not enabled but valve is enabled. Enabling DCWB.");
+                config.dcwbEnable.setEnabled(true);
+                config.adaptiveDeltaEnable.setEnabled(true);
+                config.maximizedExitWaterTempEnable.setEnabled(false);
+            }
+
+            if(configPoint.getDomainName().contains(DomainName.adaptiveDeltaEnable)){
                 config.adaptiveDeltaEnable.setEnabled(val > 0);
                 config.maximizedExitWaterTempEnable.setEnabled(val <= 0);
             } else if(configPoint.getDomainName().contains(DomainName.maximizedExitWaterTempEnable)){
                 config.maximizedExitWaterTempEnable.setEnabled(val > 0);
                 config.adaptiveDeltaEnable.setEnabled(val <= 0);
             }
+
             CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for DabFullyModulatingAhu" + config);
             ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
             HashMap<Object, Object> systemEquip = hayStack.readMapById(Domain.systemEquip.getEquipRef());
@@ -186,28 +191,18 @@ class ConfigPointUpdateHandler {
         } else if (systemProfile instanceof VavFullyModulatingRtu) {
             SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getVavModulatingRtuModelDef();
             ModulatingRtuProfileConfig config = new ModulatingRtuProfileConfig(model).getActiveConfiguration();
-            if (configPoint.getDomainName().contains(DomainName.analog1OutputEnable)) {
-                config.analog1OutputEnable.setEnabled(val > 0);
-            } else if (configPoint.getDomainName().contains(DomainName.analog2OutputEnable)) {
-                config.analog2OutputEnable.setEnabled(val > 0);
-            } else if (configPoint.getDomainName().contains(DomainName.analog3OutputEnable)) {
-                config.analog3OutputEnable.setEnabled(val > 0);
-            } else if (configPoint.getDomainName().contains(DomainName.analog4OutputEnable)) {
-                config.analog4OutputEnable.setEnabled(val > 0);
-            } else if (configPoint.getDomainName().contains(DomainName.relay3OutputEnable)) {
-                config.relay3OutputEnable.setEnabled(val > 0);
-            } else if (configPoint.getDomainName().contains(DomainName.relay7OutputEnable)) {
-                config.relay7OutputEnable.setEnabled(val > 0);
-            }
+            config.getEnableConfigs().forEach( enableConfig -> {
+                if (configPoint.getDomainName().contains(enableConfig.getDomainName())) {
+                    enableConfig.setEnabled(val > 0);
+                }
+            });
             CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for VavFullyModulatingAhu" + config);
             ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
             HashMap<Object, Object> systemEquip = hayStack.readMapById(Domain.systemEquip.getEquipRef());
             equipBuilder.updateEquipAndPoints(config, model, hayStack.getSite().getId(), systemEquip.get("dis").toString(), true);
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
             removeWritableTagFromCMDevicePort(configPoint, hayStack, val);
-            if (configPoint.getDomainName().contains(DomainName.analog1OutputEnable) || configPoint.getDomainName().contains(DomainName.analog3OutputEnable)) {
-                DesiredTempDisplayMode.setSystemModeForVav(hayStack);
-            }
+            DesiredTempDisplayMode.setSystemModeForVav(hayStack);
         } else if (systemProfile instanceof VavStagedRtu) {
 
             if (systemProfile instanceof VavAdvancedHybridRtu) {
@@ -294,14 +289,6 @@ class ConfigPointUpdateHandler {
                 config.analog1ValveClosedPosition.setCurrentVal(val);
             } else if (configPoint.getDomainName().contains(DomainName.analog1ValveFullPosition)) {
                 config.analog1ValveFullPosition.setCurrentVal(val);
-            } else if (configPoint.getDomainName().contains(DomainName.analogOut4MinCoolingLoop)) {
-                config.analogOut4MinCoolingLoop.setCurrentVal(val);
-            } else if (configPoint.getDomainName().contains(DomainName.analogOut4MaxCoolingLoop)) {
-                config.analogOut4MaxCoolingLoop.setCurrentVal(val);
-            } else if (configPoint.getDomainName().contains(DomainName.analog4MinOutsideDamper)) {
-                config.analogOut4FreshAirMin.setCurrentVal(val);
-            } else if (configPoint.getDomainName().contains(DomainName.analog4MaxOutsideDamper)) {
-                config.analogOut4FreshAirMax.setCurrentVal(val);
             }
             ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
             HashMap<Object, Object> systemEquip = hayStack.readMapById(Domain.systemEquip.getEquipRef());
@@ -326,11 +313,27 @@ class ConfigPointUpdateHandler {
         if (systemProfile instanceof DabFullyModulatingRtu) {
             SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getDabModulatingRtuModelDef();
             DabModulatingRtuProfileConfig config = new DabModulatingRtuProfileConfig(model).getActiveConfiguration();
-            if (configPoint.getDomainName().contains(DomainName.relay7OutputAssociation)) {
-                config.relay7Association.setAssociationVal((int) val);
-            } else if(configPoint.getDomainName().contains(DomainName.analog4OutputAssociation)) {
-                config.analog4Association.setAssociationVal((int) val);
+
+            config.getAssociationConfigs().forEach( associationConfig -> {
+                if (configPoint.getDomainName().contains(associationConfig.getDomainName())) {
+                    associationConfig.setAssociationVal((int) val);
+                }
+            });
+            boolean valveSelected = (config.analog1OutputEnable.getEnabled()
+                    && config.analog1OutputAssociation.getAssociationVal() == ModulatingProfileAnalogMapping.ChilledWaterValve.ordinal())
+                    || (config.analog2OutputEnable.getEnabled()
+                    && config.analog2OutputAssociation.getAssociationVal() == ModulatingProfileAnalogMapping.ChilledWaterValve.ordinal())
+                    || (config.analog3OutputEnable.getEnabled()
+                    && config.analog3OutputAssociation.getAssociationVal() == ModulatingProfileAnalogMapping.ChilledWaterValve.ordinal())
+                    || (config.analog4OutputEnable.getEnabled()
+                    && config.analog4OutputAssociation.getAssociationVal() == ModulatingProfileAnalogMapping.ChilledWaterValve.ordinal());
+            if (!config.dcwbEnable.getEnabled() && valveSelected) {
+                CcuLog.w(L.TAG_CCU_PUBNUB, "DCWB is not enabled but valve is selected. Enabling DCWB.");
+                config.dcwbEnable.setEnabled(true);
+                config.adaptiveDeltaEnable.setEnabled(true);
+                config.maximizedExitWaterTempEnable.setEnabled(false);
             }
+
             ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
             HashMap<Object, Object> systemEquip = hayStack.readMapById(Domain.systemEquip.getEquipRef());
             equipBuilder.updateEquipAndPoints(config, model, hayStack.getSite().getId(),systemEquip.get("dis").toString() , true);
@@ -375,9 +378,13 @@ class ConfigPointUpdateHandler {
         } else if (systemProfile instanceof VavFullyModulatingRtu) {
             SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getVavModulatingRtuModelDef();
             ModulatingRtuProfileConfig config = new ModulatingRtuProfileConfig(model).getActiveConfiguration();
-            if (configPoint.getDomainName().contains(DomainName.relay7OutputAssociation)) {
-                config.relay7Association.setAssociationVal((int) val);
-            }
+            config.getAssociationConfigs().forEach( associationConfig -> {
+                if (configPoint.getDomainName().contains(associationConfig.getDomainName())) {
+                    associationConfig.setAssociationVal((int) val);
+                }
+            });
+
+            CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigAssociation vavFullyModulatingRtu"+ config);
             ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
             HashMap<Object, Object> systemEquip = hayStack.readMapById(Domain.systemEquip.getEquipRef());
             equipBuilder.updateEquipAndPoints(config, model, hayStack.getSite().getId(),systemEquip.get("dis").toString() , true);

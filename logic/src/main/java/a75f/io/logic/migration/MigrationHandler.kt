@@ -45,7 +45,13 @@ import a75f.io.domain.equips.OtnEquip
 import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.TIEquip
 import a75f.io.domain.equips.VavEquip
+import a75f.io.domain.equips.hyperstat.CpuV2Equip
+import a75f.io.domain.equips.hyperstat.HpuV2Equip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
+import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
+import a75f.io.domain.equips.mystat.MyStatCpuEquip
+import a75f.io.domain.equips.mystat.MyStatHpuEquip
+import a75f.io.domain.equips.mystat.MyStatPipe2Equip
 import a75f.io.domain.logic.CCUBaseConfigurationBuilder
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager.addCmBoardDevice
@@ -61,9 +67,12 @@ import a75f.io.domain.util.MODEL_SN_OAO
 import a75f.io.domain.util.ModelCache
 import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.ModelLoader.getCMDeviceModel
+import a75f.io.domain.util.ModelLoader.getDabModulatingRtuModelDef
 import a75f.io.domain.util.ModelLoader.getDabStagedVfdRtuModelDef
 import a75f.io.domain.util.ModelLoader.getModelForDomainName
+import a75f.io.domain.util.ModelLoader.getVavModulatingRtuModelDef
 import a75f.io.domain.util.ModelLoader.getVavStagedVfdRtuModelDef
+import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
@@ -89,11 +98,27 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfigurat
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.MonitoringConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuUniInType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.util.getCpuFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getHpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getHsFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatCpuFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatHpuFanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe2FanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
+import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
 import a75f.io.logic.bo.building.system.DefaultSystemConfig
+import a75f.io.logic.bo.building.system.vav.config.DabModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
@@ -121,6 +146,8 @@ import a75f.io.logic.util.PreferenceUtil.setModbusKvtagsDataTypeUpdate
 import a75f.io.logic.util.addEquipScheduleStatusPoint
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.NETWORK_INTERFACE
+import a75f.io.logic.util.modifyConditioningMode
+import a75f.io.logic.util.modifyFanMode
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageInfo
@@ -450,6 +477,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if(!getMigrateDeleteRedundantOaoPointsBySystemEquip()) {
             deleteRedundantOaoPointsBasedOnCurrentSystemProfile()
         }
+        if (!PreferenceUtil.getUpdateEnumValuesForTerminalProfile()) {
+            updateEnumValueForTerminalProfile()
+            SystemProfileMigration.loadProfileForMigration()
+            SystemProfileMigration.updateEnumValuesForSystemProfile()
+            PreferenceUtil.setUpdateEnumValuesForTerminalProfile()
+        }
 
         if (!PreferenceUtil.getCopyModbusPoints()) {
             copyDefaultValueToLevel17()
@@ -473,6 +506,125 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
         hayStack.scheduleSync()
     }
+
+    private fun updateEnumValueForTerminalProfile() {
+        val standaloneEquip = hayStack.readAllEntities("equip and domainName and standalone")
+
+        standaloneEquip.forEach { equip ->
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating Enum Value for Equip: ${equip["id"]}")
+            val equipIdStr = equip["id"]?.toString() ?: return@forEach
+            if (equip["domainName"].toString().equals(DomainName.hyperstatSplitCpu, ignoreCase = true)) {
+                // For HyperStat Split CPU, we need to handle it separately
+                val equipId = HyperStatSplitEquip(equip["id"].toString())
+                val possibleConditioningMode =
+                    HSSplitHaystackUtil.getPossibleConditioningModeSettings(equipId)
+                val possibleFanMode = HSSplitHaystackUtil.getSplitPossibleFanModeSettings(
+                    equip["group"].toString().toInt()
+                )
+                modifyFanMode(possibleFanMode.ordinal, equipId.fanOpMode)
+                modifyConditioningMode(
+                    possibleConditioningMode.ordinal,
+                    equipId.conditioningMode,
+                    allStandaloneProfileConditions
+                )
+                return@forEach
+            } else if (equip["domainName"].toString().equals(DomainName.myStatCPU, ignoreCase = true) ||equip["domainName"].toString().equals(DomainName.mystat2PFCU, ignoreCase = true) || equip["domainName"].toString().equals(DomainName.myStatHPU, ignoreCase = true)) {
+                handleEnumUpdateForMyStatStatEquip(equip, equipIdStr)
+            } else if (equip["domainName"].toString().equals(DomainName.hyperstatHPU, ignoreCase = true) || equip["domainName"].toString().equals(DomainName.hyperstatCPU, ignoreCase = true) || equip["domainName"].toString().equals(DomainName.hyperstat2PFCU, ignoreCase = true)) {
+                handleEnumUpdateForHyperStatEquip(equip, equipIdStr)
+            }
+        }
+    }
+
+    private fun handleEnumUpdateForMyStatStatEquip(equip: HashMap<Any, Any>?, equipIdStr: String) {
+        // For MyStat CPU, HPU and Pipe2, we need to handle it separately
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Handling MyStat Equip Enum Update for $equipIdStr")
+        val (profileConfig, fanMode, equipId) = when (equip?.get("domainName").toString()) {
+            DomainName.myStatCPU -> {
+                val config = getMyStatConfiguration(equipIdStr) as MyStatCpuConfiguration
+                Triple(
+                    config,
+                    getMyStatPossibleFanModeSettings(getMyStatCpuFanLevel(config)),
+                    MyStatCpuEquip(equipIdStr)
+                )
+            }
+
+            DomainName.myStatHPU -> {
+                val config = getMyStatConfiguration(equipIdStr) as MyStatHpuConfiguration
+                Triple(
+                    config,
+                    getMyStatPossibleFanModeSettings(getMyStatHpuFanLevel(config)),
+                    MyStatHpuEquip(equipIdStr)
+                )
+            }
+
+            DomainName.mystat2PFCU -> {
+                val config = getMyStatConfiguration(equipIdStr) as MyStatPipe2Configuration
+                Triple(
+                    config,
+                    getMyStatPossibleFanModeSettings(getMyStatPipe2FanLevel(config)),
+                    MyStatPipe2Equip(equipIdStr)
+                )
+            }
+
+            else -> return
+        }
+        val possibleConditioningMode = getMyStatPossibleConditionMode(profileConfig)
+        modifyFanMode(fanMode, equipId.fanOpMode)
+        modifyConditioningMode(
+            possibleConditioningMode.ordinal,
+            equipId.conditioningMode,
+            allStandaloneProfileConditions
+        )
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Completed MyStat Equip Enum Update for $equipIdStr")
+
+    }
+
+    private fun handleEnumUpdateForHyperStatEquip(equip: HashMap<Any, Any>?, equipIdStr: String) {
+        // For HyperStat CPU, HPU and Pipe2, we need to handle it separately
+        val (profileConfig, fanMode, equipId) = when (equip?.get("domainName").toString()) {
+            DomainName.hyperstatCPU -> {
+                val config =
+                    getHsConfiguration(equipIdStr) as? CpuConfiguration ?: return
+                Triple(
+                    config,
+                    getHsPossibleFanModeSettings(getCpuFanLevel(config)),
+                    CpuV2Equip(equipIdStr)
+                )
+            }
+
+            DomainName.hyperstat2PFCU -> {
+                val config =
+                    getHsConfiguration(equipIdStr) as? Pipe2Configuration ?: return
+                Triple(
+                    config,
+                    getHsPossibleFanModeSettings(getHsFanLevel(config)),
+                    Pipe2V2Equip(equipIdStr)
+                )
+            }
+
+            DomainName.hyperstatHPU -> {
+                val config =
+                    getHsConfiguration(equipIdStr) as? HpuConfiguration ?: return
+                Triple(
+                    config,
+                    getHsPossibleFanModeSettings(getHpuFanLevel(config)),
+                    HpuV2Equip(equipIdStr)
+                )
+            }
+
+            else -> return
+        }
+        val conditionMode = getPossibleConditionMode(profileConfig)
+        modifyFanMode(fanMode.ordinal, equipId.fanOpMode)
+        modifyConditioningMode(
+            conditionMode.ordinal,
+            equipId.conditioningMode,
+            allStandaloneProfileConditions
+        )
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Completed HSStat Equip Enum Update for $equipIdStr")
+    }
+
 
     private fun reSyncHisPointsForDR() {
         val activationQuery = ("domainName == \"" + DomainName.demandResponseActivation + "\"")
@@ -3839,11 +3991,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun copyDefaultValueToLevel17() {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Copying default value to level 17 for writable points")
         hayStack.readAllEntities("equip and (modbus or bacnet) and zone and not scheduleType")
             .forEach { equip ->
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Processing equip: ${equip["dis"]} with id: ${equip["id"]}")
                 hayStack
-                    .readAllEntities("point and writable not scheduleStatus and equipRef==\"${equip["id"].toString()}\"")
+                    .readAllEntities("point and writable and not scheduleStatus and equipRef==\"${equip["id"].toString()}\"")
                     .forEach { point ->
+                        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Copying default value for point: ${point["dis"]} with id: ${point["id"]}")
                         hayStack.writePoint(
                             point["id"].toString(),
                             SYSTEM_DEFAULT_VAL_LEVEL,
@@ -3853,6 +4008,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                         )
                     }
             }
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Copying default value to level 17 completed")
     }
 
     private fun addEquipScheduleStatusEntityForTerminalExternalEquips() {
@@ -3875,5 +4031,200 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             hayStack.updateEquip(equip, equip.id)
         }
         CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating gatewayRef for mystat equips completed")
+    }
+
+    fun doModulatingProfileNormalization(analogConfigs : Map<String, Int>) {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Modulating Profile Normalization started")
+        val systemEquipDict = hayStack.readHDict(CommonQueries.SYSTEM_PROFILE)
+        if (systemEquipDict.get("domainName").toString().equals(DomainName.dabFullyModulatingAhu, ignoreCase = true)) {
+            doDabModulatingRtuProfileMigration(systemEquipDict, analogConfigs)
+        } else if (systemEquipDict.get("domainName").toString().equals(DomainName.vavFullyModulatingAhu, ignoreCase = true)) {
+            doVavModulatingRtuProfileMigration(systemEquipDict, analogConfigs)
+        } else {
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "System equip Modulating Profile Normalization not required")
+        }
+        PreferenceUtil.setMigrateModulatingProfileNormalization()
+    }
+
+    private fun doVavModulatingRtuProfileMigration(systemEquipDict: HDict, analogConfigs: Map<String, Int>) {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "VavModulatingRtuProfileMigration started")
+
+        val systemEquip = Equip.Builder().setHDict(systemEquipDict).build()
+        val vavModel = getVavModulatingRtuModelDef() as SeventyFiveFProfileDirective
+        val profileConfig = ModulatingRtuProfileConfig(vavModel).getActiveConfiguration()
+
+        if (profileConfig.analog1OutputEnable.enabled) {
+            profileConfig.analog1OutputAssociation.associationVal = 3 //Cooling
+            analogConfigs[DomainName.analog1MinCooling]?.let {
+                profileConfig.analog1OutMinMaxConfig.coolingSignalConfig.min = it
+            }
+            analogConfigs[DomainName.analog1MaxCooling]?.let {
+                profileConfig.analog1OutMinMaxConfig.coolingSignalConfig.max = it
+            }
+            profileConfig.analog1OutMinMaxConfig.coolingSignalConfig.min
+        }
+        if (profileConfig.analog2OutputEnable.enabled) {
+            profileConfig.analog2OutputAssociation.associationVal = 0 //FanSpeed
+            analogConfigs[DomainName.analog2MinFanSpeed]?.let {
+                profileConfig.analog2OutMinMaxConfig.fanSignalConfig.min = it
+            }
+            analogConfigs[DomainName.analog2MaxFanSpeed]?.let {
+                profileConfig.analog2OutMinMaxConfig.fanSignalConfig.max = it
+            }
+        }
+        if (profileConfig.analog3OutputEnable.enabled) {
+            profileConfig.analog3OutputAssociation.associationVal = 4 //Heating
+            analogConfigs[DomainName.analog3MinHeating]?.let {
+                profileConfig.analog3OutMinMaxConfig.heatingSignalConfig.min = it
+            }
+            analogConfigs[DomainName.analog3MaxHeating]?.let {
+                profileConfig.analog3OutMinMaxConfig.heatingSignalConfig.max = it
+            }
+        }
+        if (profileConfig.analog4OutputEnable.enabled) {
+            profileConfig.analog4OutputAssociation.associationVal = 2 //Outside Air
+            analogConfigs[DomainName.analog4MinOutsideDamper]?.let {
+                profileConfig.analog4OutMinMaxConfig.outsideAirDamperConfig.min = it
+            }
+            analogConfigs[DomainName.analog4MaxOutsideDamper]?.let {
+                profileConfig.analog4OutMinMaxConfig.outsideAirDamperConfig.max = it
+            }
+        }
+        if (profileConfig.relay3OutputEnable.enabled) {
+            profileConfig.relay3Association.associationVal = 4 //Fan Enable
+        }
+
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        equipBuilder.updateEquipAndPoints(
+            profileConfig,
+            vavModel,
+            hayStack.site!!.id,
+            systemEquip.displayName,
+            true
+        )
+
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "VavModulatingRtuProfileMigration completed for system equip: ${systemEquip.displayName}")
+    }
+
+    private fun doDabModulatingRtuProfileMigration(systemEquipDict: HDict, analogConfigs: Map<String, Int>) {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "DabModulatingRtuProfileMigration started")
+
+        val systemEquip = Equip.Builder().setHDict(systemEquipDict).build()
+        val dabModel = getDabModulatingRtuModelDef() as SeventyFiveFProfileDirective
+        val profileConfig = DabModulatingRtuProfileConfig(dabModel).getActiveConfiguration()
+
+        if (profileConfig.analog1OutputEnable.enabled) {
+            val dcwbEnabled = hayStack.readDefaultVal("system and domainName == \"${DomainName.dcwbEnable}\"")
+            if (dcwbEnabled > 0) {
+                profileConfig.analog1OutputAssociation.associationVal = 5 //valve
+                analogConfigs[DomainName.analog1MinCHWValve]?.let {
+                    profileConfig.analog1OutMinMaxConfig.chilledWaterValveConfig.min = it
+                }
+                analogConfigs[DomainName.analog1MaxCHWValve]?.let {
+                    profileConfig.analog1OutMinMaxConfig.chilledWaterValveConfig.max = it
+                }
+            } else {
+                analogConfigs[DomainName.analog1MinCooling]?.let {
+                    profileConfig.analog1OutputAssociation.associationVal = 3 //Cooling
+                    profileConfig.analog1OutMinMaxConfig.coolingSignalConfig.min = it
+                }
+                analogConfigs[DomainName.analog1MaxCooling]?.let {
+                    profileConfig.analog1OutMinMaxConfig.coolingSignalConfig.max = it
+                }
+            }
+        }
+        if (profileConfig.analog2OutputEnable.enabled) {
+            profileConfig.analog2OutputAssociation.associationVal = 0 //FanSpeed
+            analogConfigs[DomainName.analog2MinFanSpeed]?.let {
+                profileConfig.analog2OutMinMaxConfig.fanSignalConfig.min = it
+            }
+            analogConfigs[DomainName.analog2MaxFanSpeed]?.let {
+                profileConfig.analog2OutMinMaxConfig.fanSignalConfig.max = it
+            }
+        }
+        if (profileConfig.analog3OutputEnable.enabled) {
+            profileConfig.analog3OutputAssociation.associationVal = 4 //Heating
+            analogConfigs[DomainName.analog3MinHeating]?.let {
+                profileConfig.analog3OutMinMaxConfig.heatingSignalConfig.min = it
+            }
+            analogConfigs[DomainName.analog3MaxHeating]?.let {
+                profileConfig.analog3OutMinMaxConfig.heatingSignalConfig.max = it
+            }
+        }
+        if (profileConfig.analog4OutputEnable.enabled) {
+            analogConfigs[DomainName.analog4MinCooling]?.let {
+                profileConfig.analog4OutputAssociation.associationVal = 3 //Cooling
+                profileConfig.analog4OutMinMaxConfig.coolingSignalConfig.min = it
+            }
+            analogConfigs[DomainName.analog4MaxCooling]?.let {
+                profileConfig.analog4OutMinMaxConfig.coolingSignalConfig.max = it
+            }
+            analogConfigs[DomainName.analog4MinOutsideDamper]?.let {
+                profileConfig.analog4OutputAssociation.associationVal = 2 //Outside Air
+                profileConfig.analog4OutMinMaxConfig.outsideAirDamperConfig.min = it
+            }
+            analogConfigs[DomainName.analog4MaxOutsideDamper]?.let {
+                profileConfig.analog4OutMinMaxConfig.outsideAirDamperConfig.max = it
+            }
+        }
+        if (profileConfig.relay3OutputEnable.enabled) {
+            profileConfig.relay3Association.associationVal = 4 //Fan Enable
+        }
+
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        equipBuilder.updateEquipAndPoints(
+            profileConfig,
+            dabModel,
+            hayStack.site!!.id,
+            systemEquip.displayName,
+            true
+        )
+
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "DabModulatingRtuProfileMigration completed for system equip: ${systemEquip.displayName}")
+    }
+
+    fun fetchAnalogPointsForSystemProfile(hayStack: CCUHsApi) : Map<String, Int> {
+        val analogPoints = mutableMapOf<String, Int>()
+        val systemEquipDict = hayStack.readHDict(CommonQueries.SYSTEM_PROFILE)
+        val equipId = systemEquipDict[Tags.ID].toString()
+        val analogOut1Min = hayStack.readEntity("point and system and analog == 1 and min and equipRef == \"$equipId\"")
+        if (analogOut1Min.isNotEmpty()) {
+            val dcwbEnabled = hayStack.readDefaultVal("system and domainName == \"${DomainName.dcwbEnable}\"")
+            if (dcwbEnabled > 0) {
+                analogPoints[DomainName.analog1MinCHWValve] = hayStack.readDefaultValById(analogOut1Min["id"].toString()).toInt()
+                analogPoints[DomainName.analog1MaxCHWValve] = hayStack.readDefaultVal("point and system and analog == 1 and max and equipRef == \"$equipId\"").toInt()
+            } else {
+                analogPoints[DomainName.analog1MinCooling] = hayStack.readDefaultValById(analogOut1Min["id"].toString()).toInt()
+                analogPoints[DomainName.analog1MaxCooling] = hayStack.readDefaultVal("point and system and analog == 1 and max and equipRef == \"$equipId\"").toInt()
+            }
+        }
+
+        val analogOut2Min = hayStack.readEntity("point and system and analog == 2 and min and equipRef == \"$equipId\"")
+        if (analogOut2Min.isNotEmpty()) {
+            analogPoints[DomainName.analog2MinFanSpeed] = hayStack.readDefaultValById(analogOut2Min["id"].toString()).toInt()
+            analogPoints[DomainName.analog2MaxFanSpeed] = hayStack.readDefaultVal("point and system and analog == 2 and max and equipRef == \"$equipId\"").toInt()
+        }
+
+        val analogOut3Min = hayStack.readEntity("point and system and analog == 3 and min and equipRef == \"$equipId\"")
+        if (analogOut3Min.isNotEmpty()) {
+            analogPoints[DomainName.analog3MinHeating] = hayStack.readDefaultValById(analogOut3Min["id"].toString()).toInt()
+            analogPoints[DomainName.analog3MaxHeating] = hayStack.readDefaultVal("point and system and analog == 3 and max and equipRef == \"$equipId\"").toInt()
+        }
+
+        val analog4CoolingMin = hayStack.readEntity("point and system and analog == 4 and min and cooling and equipRef == \"$equipId\"")
+        if (analog4CoolingMin.isNotEmpty()) {
+            analogPoints[DomainName.analog4MinCooling] = hayStack.readDefaultValById(analog4CoolingMin["id"].toString()).toInt()
+            analogPoints[DomainName.analog4MaxCooling] = hayStack.readDefaultVal("point and system and analog == 4 and max and cooling and equipRef == \"$equipId\"").toInt()
+        } else {
+            val analog4OutsideDamper = hayStack.readEntity("point and system and analog == 4 and min and outside and damper and equipRef == \"$equipId\"")
+            if (analog4OutsideDamper.isNotEmpty()) {
+                analogPoints[DomainName.analog4MinOutsideDamper] = hayStack.readDefaultValById(analog4OutsideDamper["id"].toString()).toInt()
+                analogPoints[DomainName.analog4MaxOutsideDamper] = hayStack.readDefaultVal("point and system and analog == 4 and max and outside and damper and equipRef == \"$equipId\"").toInt()
+            }
+        }
+
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Analog Points for System Profile: $analogPoints")
+
+        return analogPoints
     }
 }

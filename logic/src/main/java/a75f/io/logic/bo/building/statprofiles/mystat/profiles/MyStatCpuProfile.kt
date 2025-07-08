@@ -58,13 +58,6 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
     private lateinit var curState: ZoneState
     override lateinit var occupancyStatus: Occupancy
 
-    // Flags for keeping tab of occupancy during linear fan operation(Only to be used in doAnalogFanActionCpu())
-    private var previousOccupancyStatus: Occupancy = Occupancy.NONE
-    private var previousFanStageStatus: MyStatFanStages = MyStatFanStages.OFF
-    private val defaultFanLoopOutput = 0.0
-    private var previousFanLoopVal = 0
-    private var previousFanLoopValStaged = 0
-    private var fanLoopCounter = 0
 
     override fun updateZonePoints() {
         cpuDeviceMap.forEach { (nodeAddress, equip) ->
@@ -95,6 +88,7 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
         val fanModeSaved = FanModeCacheStorage.getMyStatFanModeCache().getFanModeFromCache(equip.equipRef)
         val basicSettings = fetchMyStatBasicSettings(equip)
         val config = getMyStatConfiguration(equip.equipRef) as MyStatCpuConfiguration
+        val controllerFactory = MyStatControlFactory(equip)
 
         curState = ZoneState.DEADBAND
         logicalPointsList = getMyStatLogicalPointList(equip, config)
@@ -111,7 +105,8 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
 
         loopController.initialise(tuners = myStatTuners)
         loopController.dumpLogs()
-        handleChangeOfDirection(currentTemp, userIntents)
+
+        handleChangeOfDirection(currentTemp, userIntents, controllerFactory, equip)
         updateOperatingMode(currentTemp, averageDesiredTemp, basicSettings.conditioningMode, equip.operatingMode)
 
         resetEquip(equip)
@@ -133,7 +128,7 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
 
         updateTitle24LoopCounter(myStatTuners, basicSettings)
         if (basicSettings.fanMode != MyStatFanStages.OFF) {
-            operateRelays(config, basicSettings, equip)
+            operateRelays(config, basicSettings, equip, controllerFactory)
             operateAnalogOutputs(config, basicSettings, equip.analogOutStages, equip)
         } else {
             resetLogicalPoints()
@@ -520,9 +515,9 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
     }
 
     private fun operateRelays(
-        config: MyStatCpuConfiguration, basicSettings: MyStatBasicSettings, equip: MyStatCpuEquip
+        config: MyStatCpuConfiguration, basicSettings: MyStatBasicSettings,
+        equip: MyStatCpuEquip, controllerFactory: MyStatControlFactory
     ) {
-        val controllerFactory = MyStatControlFactory(equip)
         controllerFactory.addControllers(config)
         runControllers(equip, basicSettings, config)
     }
@@ -647,8 +642,7 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
                     val mode = equip.fanOpMode.readPriorityVal().toInt()
                     return if (mode == MyStatFanStages.AUTO.ordinal) {
                         (basicSettings.conditioningMode != StandaloneConditioningMode.OFF
-                                && (currentState || (fanEnabledStatus && fanLoopOutput > 0
-                                && isLowestStageActive)
+                                && (currentState || (fanEnabledStatus && fanLoopOutput > 0 && isLowestStageActive)
                                 || (isLowestStageActive && runFanLowDuringDoorWindow)))
                     } else {
                         checkUserIntentAction(stage)
@@ -675,7 +669,7 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
             }
 
             ControllerNames.FAN_ENABLED -> {
-                var isFanLoopCounterEnabled = false;
+                var isFanLoopCounterEnabled = false
                 if (previousFanLoopVal > 0 && fanLoopCounter > 0) {
                     isFanLoopCounterEnabled = true
                 }

@@ -29,7 +29,6 @@ import a75f.io.logic.bo.building.statprofiles.statcontrollers.SplitControllerFac
 import a75f.io.logic.bo.building.statprofiles.util.BaseStatTuners
 import a75f.io.logic.bo.building.statprofiles.util.BasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
-import a75f.io.logic.bo.building.statprofiles.util.StatLoopController
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoCooling
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoHeating
@@ -75,13 +74,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
     private var outsideAirLoopOutput = 0
     private var outsideAirFinalLoopOutput = 0
     // Flags for keeping tab of occupancy during linear fan operation(Only to be used in doAnalogFanActionCpu())
-    private var previousOccupancyStatus: Occupancy = Occupancy.NONE
-    private var previousFanStageStatus: StandaloneFanStage = StandaloneFanStage.OFF
-    private var previousFanLoopVal = 0
-    private var previousFanLoopValStaged = 0
-    private var fanLoopCounter = 0
-    private var hasZeroFanLoopBeenHandled = false
-    private val loopController = StatLoopController()
+
 
     private var economizingAvailable = false
     private var dcvAvailable = false
@@ -136,7 +129,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
 
         loopController.initialise(tuners = hyperStatSplitTuners)
         loopController.dumpLogs()
-        handleChangeOfDirection(userIntents)
+        handleChangeOfDirection(userIntents, controllerFactory)
 
         prePurgeEnabled = hssEquip.prePurgeEnable.readDefaultVal() > 0.0
         prePurgeOpeningValue = hssEquip.prePurgeOutsideDamperOpen.readDefaultVal()
@@ -317,17 +310,6 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         }
     }
 
-    private fun handleChangeOfDirection(userIntents: UserIntents) {
-        if (currentTemp > userIntents.coolingDesiredTemp && state != ZoneState.COOLING) {
-            loopController.resetCoolingControl()
-            state = ZoneState.COOLING
-            logIt("Resetting cooling")
-        } else if (currentTemp < userIntents.heatingDesiredTemp && state != ZoneState.HEATING) {
-            loopController.resetHeatingControl()
-            state = ZoneState.HEATING
-            logIt("Resetting heating")
-        }
-    }
 
     private fun evaluateLoopOutputs(
         userIntents: UserIntents, basicSettings: BasicSettings,

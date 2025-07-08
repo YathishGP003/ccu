@@ -67,6 +67,7 @@ public class SystemConfigMenuFragment extends Fragment {
 
     public static Handler SystemConfigMenuFragmentHandler;
     public static Handler SystemConfigNavigationHandler;
+    public static Boolean isSystemLevel = false;
 
     int listSelectorBackground;
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -121,12 +122,14 @@ public class SystemConfigMenuFragment extends Fragment {
         });
 
         view.findViewById(R.id.lil_oao).setOnClickListener(view1 -> {
+            isSystemLevel = true;
             if (SystemConfigFragment.SystemConfigFragmentHandler != null) {
                 SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(1);
             }
         });
 
         view.findViewById(R.id.lil_bypass).setOnClickListener(view1 -> {
+            isSystemLevel = true;
             if (SystemConfigFragment.SystemConfigFragmentHandler != null) {
                 SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(2);
             }
@@ -134,6 +137,7 @@ public class SystemConfigMenuFragment extends Fragment {
         });
 
         view.findViewById(R.id.lil_energy_meter).setOnClickListener(view1 -> {
+            isSystemLevel = true;
             if (SystemConfigFragment.SystemConfigFragmentHandler != null) {
                 SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(3);
             }
@@ -141,6 +145,7 @@ public class SystemConfigMenuFragment extends Fragment {
         });
 
         view.findViewById(R.id.lil_btu_meter).setOnClickListener(view1 -> {
+            isSystemLevel = true;
             if (SystemConfigFragment.SystemConfigFragmentHandler != null) {
                 SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(4);
             }

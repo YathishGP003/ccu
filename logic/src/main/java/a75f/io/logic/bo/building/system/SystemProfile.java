@@ -6,17 +6,24 @@ import static a75f.io.logic.bo.building.system.SystemProfileUtilKt.isAdvanceV2;
 import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.getConnectEquip;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import static a75f.io.logic.controlcomponents.util.ControllerNames.COMPRESSOR_RELAY_CONTROLLER;
 import static a75f.io.logic.controlcomponents.util.ControllerNames.COOLING_STAGE_CONTROLLER;
 import static a75f.io.logic.controlcomponents.util.ControllerNames.FAN_SPEED_CONTROLLER;
 import static a75f.io.logic.controlcomponents.util.ControllerNames.HEATING_STAGE_CONTROLLER;
+import static a75f.io.logic.controlcomponents.util.ControllerNames.LOAD_COOLING_STAGE_CONTROLLER;
+import static a75f.io.logic.controlcomponents.util.ControllerNames.LOAD_FAN_STAGE_CONTROLLER;
+import static a75f.io.logic.controlcomponents.util.ControllerNames.LOAD_HEATING_STAGE_CONTROLLER;
+import static a75f.io.logic.controlcomponents.util.ControllerNames.PRESSURE_FAN_STAGE_CONTROLLER;
+import static a75f.io.logic.controlcomponents.util.ControllerNames.SAT_COOLING_STAGE_CONTROLLER;
+import static a75f.io.logic.controlcomponents.util.ControllerNames.SAT_HEATING_STAGE_CONTROLLER;
 
 import android.content.Context;
 
 import org.projecthaystack.HDict;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,7 +43,6 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.api.PhysicalPoint;
-import a75f.io.domain.config.AssociationConfig;
 import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.domain.devices.CCUDevice;
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip;
@@ -62,13 +68,8 @@ import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.dab.DabSystemProfile;
 import a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt;
 import a75f.io.logic.bo.building.system.util.AdvancedHybridAhuConfig;
-import a75f.io.logic.bo.building.system.util.CmConfiguration;
-import a75f.io.logic.bo.building.system.util.ConnectConfiguration;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
-import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig;
-import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig;
-import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig;
 import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.controlcomponents.handlers.StageControlHandler;
 import a75f.io.logic.tuners.SystemTuners;
@@ -88,7 +89,7 @@ public abstract class SystemProfile
 
     public TRSystem trSystem;
 
-    public SystemEquip sysEquip;
+
     private String equipRef = null;
     private String siteRef;
     private String equipDis;
@@ -1110,17 +1111,26 @@ public abstract class SystemProfile
     }
 
     public void resetControllers(SystemControllerFactory factory, DomainEquip systemEquip) {
-        StageControlHandler coolingController = factory.getController(COOLING_STAGE_CONTROLLER, systemEquip);
-        if (coolingController != null) {
-            coolingController.resetController();
-        }
-        StageControlHandler heatingController = factory.getController(HEATING_STAGE_CONTROLLER, systemEquip);
-        if (heatingController != null) {
-            heatingController.resetController();
-        }
-        StageControlHandler fanController = factory.getController(FAN_SPEED_CONTROLLER, systemEquip);
-        if (fanController != null) {
-            fanController.resetController();
+        List<String> controllerTypes = Arrays.asList(
+                // Add controller here if any new stage controller is added
+                COOLING_STAGE_CONTROLLER,
+                HEATING_STAGE_CONTROLLER,
+                FAN_SPEED_CONTROLLER,
+                COMPRESSOR_RELAY_CONTROLLER,
+                LOAD_COOLING_STAGE_CONTROLLER,
+                LOAD_HEATING_STAGE_CONTROLLER,
+                LOAD_FAN_STAGE_CONTROLLER,
+                SAT_COOLING_STAGE_CONTROLLER,
+                SAT_HEATING_STAGE_CONTROLLER,
+                PRESSURE_FAN_STAGE_CONTROLLER
+        );
+
+        for (String controllerType : controllerTypes) {
+            StageControlHandler controller = factory.getController(controllerType, systemEquip);
+            if (controller != null) {
+                controller.resetController();
+            }
         }
     }
+
 }

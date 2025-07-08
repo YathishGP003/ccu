@@ -10,8 +10,8 @@ object DomainName {
 
     // Added all the profile names
     const val mystat2PFCU = "mystat2PFCU"
-    const val myStatHPU = "myStatHPU"
-    const val myStatCPU = "myStatCPU"
+    const val myStatHPU = "mystatHPU"
+    const val myStatCPU = "mystatCPU"
     const val vavStagedRtu = "vavStagedRtu"
     const val vavStagedRtuVfdFan = "vavStagedRtuVfdFan"
     const val vavAdvancedHybridAhuV2 = "vavAdvancedHybridAhuV2"
@@ -72,7 +72,6 @@ object DomainName {
     const val vavAdvancedHybridAhuV2_connectModule = "vavAdvancedHybridAhuV2_connectModule"
     const val connectModuleDevice = "connectModuleDevice"
     const val connectNodeDevice = "connectNodeDevice"
-
 
     // Profiles
     const val vavReheatNoFan = "vavReheatNoFan"
@@ -1425,7 +1424,22 @@ object DomainName {
     const val sequenceMetadataName = "sequenceMetadataName"
     const val sequenceMetadataLength = "sequenceMetadataLength"
     const val sequenceMetadataIdentity = "sequenceMetadataIdentity"
+    const val analog1MinOutsideDamper = "analog1MinOutsideDamper"
+    const val analog1MaxOutsideDamper = "analog1MaxOutsideDamper"
+    const val analog2MinOutsideDamper = "analog2MinOutsideDamper"
+    const val analog2MaxOutsideDamper = "analog2MaxOutsideDamper"
+    const val analog3MinOutsideDamper = "analog3MinOutsideDamper"
+    const val analog3MaxOutsideDamper = "analog3MaxOutsideDamper"
     const val sequenceVersion = "sequenceVersion"
+
+    const val analog1MinCHWValve = "analog1MinCHWValve"
+    const val analog1MaxCHWValve = "analog1MaxCHWValve"
+    const val analog2MinCHWValve = "analog2MinCHWValve"
+    const val analog2MaxCHWValve = "analog2MaxCHWValve"
+    const val analog3MinCHWValve = "analog3MinCHWValve"
+    const val analog3MaxCHWValve = "analog3MaxCHWValve"
+    const val analog4MinCHWValve = "analog4MinCHWValve"
+    const val analog4MaxCHWValve = "analog4MaxCHWValve"
 
 }
 

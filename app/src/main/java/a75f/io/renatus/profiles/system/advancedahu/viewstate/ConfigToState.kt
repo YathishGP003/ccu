@@ -163,6 +163,8 @@ fun updateAnalogOutMinMax(analogOutMinMax: MinMaxVoltage, analogMinMaxVoltage: A
         fanMaxVoltage = analogMinMaxVoltage.fanMaxVoltage.currentVal.toInt()
         damperPosMinVoltage = analogMinMaxVoltage.damperPosMinVoltage.currentVal.toInt()
         damperPosMaxVoltage = analogMinMaxVoltage.damperPosMaxVoltage.currentVal.toInt()
+        compressorMinVoltage = analogMinMaxVoltage.compressorMinVoltage.currentVal.toInt()
+        compressorMaxVoltage = analogMinMaxVoltage.compressorMaxVoltage.currentVal.toInt()
     }
 }
 
@@ -318,10 +320,10 @@ fun configConnectAnalogOut(config: AdvancedHybridAhuConfig, state: AdvancedHybri
 private fun updateConnectAnalogOutDynamicConfig(config: AdvancedHybridAhuConfig, state: AdvancedHybridAhuState) {
 
     state.connectDamperConfig.apply {
-        damperControlAssociation = config.cmConfiguration.damperControlAssociation.associationVal
-        co2Target = config.cmConfiguration.co2Target.currentVal
-        co2Threshold = config.cmConfiguration.co2Threshold.currentVal
-        openingRate = config.cmConfiguration.damperOpeningRate.currentVal
+        damperControlAssociation = config.connectConfiguration.damperControlAssociation.associationVal
+        co2Target = config.connectConfiguration.co2Target.currentVal
+        co2Threshold = config.connectConfiguration.co2Threshold.currentVal
+        openingRate = config.connectConfiguration.damperOpeningRate.currentVal
     }
     updateAnalogOutMinMax(state.connectAnalogOut1MinMax, config.connectConfiguration.analog1MinMaxVoltage)
     updateAnalogOutMinMax(state.connectAnalogOut2MinMax, config.connectConfiguration.analog2MinMaxVoltage)

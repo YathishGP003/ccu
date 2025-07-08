@@ -378,6 +378,7 @@ fun AddInputWidget(
     mapping: List<String>,
     onMappingChanged: (Int) -> Unit,
     mappingSelection: Int,
+    horizontalSpacer: Int = 67
 ) {
     Row(
         modifier = Modifier
@@ -392,7 +393,7 @@ fun AddInputWidget(
                 Text(text = inputName, fontSize = 20.sp, modifier = Modifier.width(135.dp)  )
             }
         }
-        Spacer(modifier = Modifier.width(67.dp))
+        Spacer(modifier = Modifier.width(horizontalSpacer.dp))
 
         DropDownWithLabel(
             label = "",

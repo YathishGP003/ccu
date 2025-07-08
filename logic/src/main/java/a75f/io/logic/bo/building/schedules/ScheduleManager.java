@@ -730,6 +730,7 @@ public class ScheduleManager {
 
     public void updateSystemOccupancy(CCUHsApi hayStack) {
 
+        CcuLog.i(TAG_CCU_SCHEDULER, "updateSystemOccupancy ->");
         if (L.ccu().systemProfile == null || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
             systemOccupancy = NONE;
             currentOccupiedInfo = null;

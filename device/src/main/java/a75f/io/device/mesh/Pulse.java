@@ -1005,6 +1005,11 @@ public class Pulse
 
 	private static void updateCMPhysicalPoints(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t) {
 
+        // ControlMotoMessageHandler class is already handling the updates for Advance ahu v2 so no need to update here.
+        if (L.ccu().systemProfile instanceof VavAdvancedAhu || L.ccu().systemProfile instanceof DabAdvancedAhu) {
+            return;
+        }
+
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		HashMap device = hayStack.read("device and cm");
 		if (!device.isEmpty()) {

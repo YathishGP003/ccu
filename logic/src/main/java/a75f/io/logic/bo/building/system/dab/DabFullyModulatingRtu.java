@@ -4,16 +4,17 @@ import android.content.Intent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.PhysicalPoint;
 import a75f.io.domain.api.Point;
 import a75f.io.domain.equips.DabModulatingRtuSystemEquip;
 import a75f.io.domain.util.CommonQueries;
+import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
@@ -21,11 +22,29 @@ import a75f.io.logic.L;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.hvac.ModulatingProfileAnalogMapping;
+import a75f.io.logic.bo.building.hvac.ModulatingProfileRelayMapping;
+import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.system.SystemControllerFactory;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.SystemStageHandler;
+import a75f.io.logic.bo.building.system.vav.VavSystemController;
+import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuAnalogOutMinMaxConfig;
+import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig;
 import a75f.io.logic.bo.util.CCUUtils;
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
 
 import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getAnalogMax;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getAnalogMin;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getChilledWaterValveSignal;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getCompressorSpeedSignal;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getFanSpeedSignal;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getHeatingSignal;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getModulatedAnalogVal;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getModulatedAnalogValDuringEcon;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getOutsideAirDamperSignal;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
@@ -34,7 +53,10 @@ public class DabFullyModulatingRtu extends DabSystemProfile
 {
     private static final int ANALOG_SCALE = 10;
     public DabModulatingRtuSystemEquip systemEquip;
-    
+
+    private final SystemControllerFactory factory = new SystemControllerFactory();
+    private SystemStageHandler systemStatusHandler;
+
     public String getProfileName() {
         if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
             return "VVT-C Fully Modulating AHU";
@@ -56,16 +78,12 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     
     @Override
     public boolean isCoolingAvailable() {
-        if (isDcwbEnabled()) {
-            return systemEquip.getAnalog4OutputEnable().readDefaultVal() > 0;
-        } else {
-            return systemEquip.getAnalog1OutputEnable().readDefaultVal() > 0;
-        }
+        return systemEquip.getCoolingSignal().pointExists() || systemEquip.getCompressorSpeed().pointExists();
     }
     
     @Override
     public boolean isHeatingAvailable() {
-        return systemEquip.getAnalog3OutputEnable().readDefaultVal() > 0;
+        return systemEquip.getHeatingSignal().pointExists() || systemEquip.getCompressorSpeed().pointExists();
     }
     
     @Override
@@ -84,11 +102,12 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     private synchronized void updateSystemPoints() {
 
         systemEquip = (DabModulatingRtuSystemEquip) Domain.systemEquip;
+        addControllers();
         updateOutsideWeatherParams();
         updateMechanicalConditioning(CCUHsApi.getInstance());
         
         DabSystemController dabSystem = DabSystemController.getInstance();
-        
+
         if (isDcwbEnabled()) {
             boolean isAdaptiveDelta = systemEquip.getAdaptiveDeltaEnable().readDefaultVal() > 0;
 
@@ -98,30 +117,31 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 // Update separately in else block since the above if block is entered only once.
                 dcwbAlgoHandler.setAdaptiveDelta(isAdaptiveDelta);
             }
-    
-            //Analog1 controls water valve when the DCWB enabled.
-            updateAnalog1DcwbOutput(dabSystem);
-    
-            //Could be mapped to cooling or co2 based on configuration.
-            updateAnalog4Output(dabSystem);
-            
-        } else {
-            //Analog1 controls cooling when the DCWB is disabled
-            if(L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
-                updateAnalog1DabOutput(dabSystem, true);
-            } else {
-                updateAnalog1DabOutput(dabSystem, false);
-            }
         }
-        
-        //Analog2 controls Central Fan
-        updateAnalog2Output(dabSystem);
-        
-        //Analog3 controls heating.
-        updateAnalog3Output(dabSystem);
-        
-        updateRelayOutputs(dabSystem);
-        
+        updateSystemDcwbLoopOutput(dabSystem);
+        updateCoolingLoopOutput(dabSystem);
+        updateFanLoop(dabSystem);
+        updateSystemHeatingLoopOutput(dabSystem);
+        updateCompressorLoopOutput(dabSystem);
+        updateSystemCo2LoopOp();
+
+        SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getVavModulatingRtuModelDef();
+        ModulatingRtuProfileConfig config = new ModulatingRtuProfileConfig(model).getActiveConfiguration();
+
+        Domain.cmBoardDevice.getAnalog1Out().writePointValue(getAnalog1Output(config));
+        Domain.cmBoardDevice.getAnalog2Out().writePointValue(getAnalog2Output(config));
+        Domain.cmBoardDevice.getAnalog3Out().writePointValue(getAnalog3Output(config));
+        Domain.cmBoardDevice.getAnalog4Out().writePointValue(getAnalog4Output(config));
+
+        CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp "+systemCoolingLoopOp+ " systemHeatingLoopOp "+ systemHeatingLoopOp
+                +" systemFanLoopOp "+systemFanLoopOp+" systemCompressorLoopOp "+systemCompressorLoop
+                +" systemCo2LoopOp "+systemCo2LoopOp+" systemDCWBValveLoopOutput "+systemDCWBValveLoopOutput);
+
+        updatePrerequisite();
+        systemStatusHandler.runControllersAndUpdateStatus(systemEquip, (int) systemEquip.getConditioningMode().readPriorityVal());
+        updateRelays();
+
+
         systemEquip.getOperatingMode().writeHisVal(dabSystem.systemState.ordinal());
         String systemStatus = getStatusMessage();
         String scheduleStatus = ScheduleManager.getInstance().getSystemStatusString();
@@ -137,65 +157,10 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         }
     }
 
-    /**
-     * @brief Determines the current status of the humidifier and returns a string message.
-     *
-     * This function checks the status of the humidifier based on relay settings and other conditions.
-     * If the current humidifier type is 1.0 or Relay 7 output is disabled, it checks the value of the humidifier
-     * and returns either "Humidifier ON" or "Humidifier OFF" accordingly.
-     *
-     * @return A string indicating the humidifier status:
-     *         - " | Humidifier ON " if the humidifier is on.
-     *         - " | Humidifier OFF " if the humidifier is off.
-     *         - An empty string if the humidifier facility is not available.
-     */
-    public String isHumidifierOn() {
-        double isHumidifierOn = systemEquip.getHumidifier().readHisVal();
-        double curHumidifierType = systemEquip.getRelay7OutputAssociation().readDefaultVal();
-        boolean isRelay7OutputEnabled = systemEquip.getRelay7OutputEnable().readDefaultVal() > 0;
-
-        if(curHumidifierType == 1.0 || !isRelay7OutputEnabled){
-            return "";
-        }else {
-            if(isHumidifierOn > 0){
-                return " | Humidifier ON ";
-            }else {
-                return " | Humidifier OFF ";
-            }
-        }
-    }
-
-    /**
-     * @brief Determines the current status of the dehumidifier and returns a string message.
-     *
-     * This function checks the status of the dehumidifier based on relay settings and other conditions.
-     * it checks the value of the dehumidifier and returns either "DeHumidifier ON" or "DeHumidifier OFF" accordingly.
-     *
-     * @return A string indicating the dehumidifier status:
-     *         - " | DeHumidifier ON " if the dehumidifier is on.
-     *         - " | DeHumidifier OFF " if the dehumidifier is off.
-     *         - An empty string if the dehumidifier facility is not available.
-     */
-    public String isDeHumidifierOn() {
-        double isDeHumidifierOn = systemEquip.getDehumidifier().readHisVal();
-        double curHumidifierType = systemEquip.getRelay7OutputAssociation().readDefaultVal();
-        boolean isRelay7OutputEnabled = systemEquip.getRelay7OutputEnable().readDefaultVal() > 0;
-
-        if(curHumidifierType == 0.0 || !isRelay7OutputEnabled){
-            return "";
-        }else {
-            if(isDeHumidifierOn > 0){
-                return " | Dehumidifier ON ";
-            }else {
-                return " | Dehumidifier OFF ";
-            }
-        }
-    }
-
     @Override
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();
-        Boolean economizingOn = systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable();
+        boolean economizingOn = systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable();
         status.append((systemFanLoopOp > 0 || Domain.cmBoardDevice.getRelay3().readPointValue() > 0) ? " Fan ON ": "");
         if(economizingOn) {
             double economizingToMainCoolingLoopMap =  L.ccu().oaoProfile.getOAOEquip().getEconomizingToMainCoolingLoopMap().readPriorityVal();
@@ -207,12 +172,30 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         if (economizingOn) {
             status.insert(0, "Free Cooling Used |");
         }
-        return status.toString().equals("")? "System OFF" + isDeHumidifierOn() + isHumidifierOn() : status.toString() + isDeHumidifierOn() + isHumidifierOn();
+
+        if (systemEquip.getRelay3OutputEnable().readDefaultVal() > 0) {
+            double relay3Association = systemEquip.getRelay3OutputAssociation().readDefaultVal();
+            if (relay3Association == ModulatingProfileRelayMapping.HUMIDIFIER.ordinal()) {
+                status.append((systemEquip.getHumidifier().readHisVal() > 0) ? " | Humidifier ON " : " | Humidifier OFF ");
+            } else if (relay3Association == ModulatingProfileRelayMapping.DEHUMIDIFIER.ordinal()) {
+                status.append((systemEquip.getDehumidifier().readHisVal() > 0) ? " | Dehumidifier ON " : " | Dehumidifier OFF ");
+            }
+        }
+        if (systemEquip.getRelay7OutputEnable().readDefaultVal() > 0) {
+            double relay7Association = systemEquip.getRelay7OutputAssociation().readDefaultVal();
+            if (relay7Association == ModulatingProfileRelayMapping.HUMIDIFIER.ordinal()) {
+                status.append((systemEquip.getHumidifier().readHisVal() > 0) ? " | Humidifier ON " : " | Humidifier OFF ");
+            } else if (relay7Association == ModulatingProfileRelayMapping.DEHUMIDIFIER.ordinal()) {
+                status.append((systemEquip.getDehumidifier().readHisVal() > 0) ? " | Dehumidifier ON " : " | Dehumidifier OFF ");
+            }
+        }
+        return status.toString().isEmpty() ? "System OFF" : status.toString();
     }
     
     public void addSystemEquip() {
         systemEquip = (DabModulatingRtuSystemEquip) Domain.systemEquip;
-        updateSystemPoints();
+        systemStatusHandler = new SystemStageHandler(systemEquip.getConditioningStages());
+        //updateSystemPoints();
     }
     
     @Override
@@ -233,243 +216,41 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         removeSystemEquipBacnet();
         deleteSystemConnectModule();
     }
-    
-    private void updateAnalog1DabOutput(DabSystemController dabSystem, Boolean economizingOn) {
-        
-        double signal = 0;
-        if (dabSystem.getSystemState() == COOLING) {
-                systemCoolingLoopOp = dabSystem.getCoolingSignal();
-        } else {
-                systemCoolingLoopOp = 0;
-        }
-        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
-            systemEquip.getCoolingLoopOutput().writePointValue(systemCoolingLoopOp);
-            systemCoolingLoopOp = systemEquip.getCoolingLoopOutput().readHisVal();
-        }
-        systemEquip.getCoolingLoopOutput().writePointValue(systemCoolingLoopOp);
 
-        if (systemEquip.getAnalog1OutputEnable().readPriorityVal() > 0) {
-            double analogMin = systemEquip.getAnalog1MinCooling().readPriorityVal();
-            double analogMax = systemEquip.getAnalog1MaxCooling().readPriorityVal();
-            CcuLog.d(L.TAG_CCU_SYSTEM, "analog1Min: "+analogMin+" analog1Max: "+analogMax+" systemCoolingLoop : "+systemCoolingLoopOp);
-    
-            if (isCoolingLockoutActive()) {
-                signal = analogMin * ANALOG_SCALE;
-            } else {
-                double economizingToMainCoolingLoopMap = 0;
-                if(L.ccu().oaoProfile != null) {
-                    economizingToMainCoolingLoopMap =  L.ccu().oaoProfile.getOAOEquip().getEconomizingToMainCoolingLoopMap().readPriorityVal();
-                }
-                if(!economizingOn) {
-                    /* OAT > Max Economizing Temp */
-                    signal = getModulatedAnalogVal(analogMin, analogMax, systemCoolingLoopOp);
-                } else if (economizingOn && systemCoolingLoopOp < economizingToMainCoolingLoopMap) {
-                    /* When only Economizing is active, (CLO < 30% (economizingToMainCoolingLoopMap) */
-                    signal = analogMin * ANALOG_SCALE;
-                } else if (economizingOn && systemCoolingLoopOp >= economizingToMainCoolingLoopMap) {
-                    /* Economizing + Analog Cooling */
-                    signal = getModulatedAnalogValDuringEcon(analogMin, analogMax, systemCoolingLoopOp, economizingToMainCoolingLoopMap);
-                }
-            }
-        }
-        
-        if (signal != systemEquip.getCoolingSignal().readHisVal()) {
-            systemEquip.getCoolingSignal().writeHisVal(signal);
-        }
-        Domain.cmBoardDevice.getAnalog1Out().writeHisVal(signal);
-    }
-    
-    private void updateAnalog1DcwbOutput(DabSystemController dabSystem) {
-        
-        boolean isAnalog1Enabled = systemEquip.getAnalog1OutputEnable().readPriorityVal() > 0;
-
-        if (isAnalog1Enabled && dabSystem.getSystemState() == COOLING) {
-            dcwbAlgoHandler.runLoopAlgorithm();
-            systemDCWBValveLoopOutput = CCUUtils.roundToTwoDecimal(dcwbAlgoHandler.getChilledWaterValveLoopOutput());
-        } else {
-            systemDCWBValveLoopOutput = 0;
-            dcwbAlgoHandler.resetChilledWaterValveLoop();
-        }
-    
-        double signal = 0;
-    
-        if (isAnalog1Enabled) {
-            double analogMin = systemEquip.getAnalog1MinCooling().readPriorityVal();
-            double analogMax = systemEquip.getAnalog1MaxCooling().readPriorityVal();
-
-            CcuLog.d(L.TAG_CCU_SYSTEM, "analog1Min: "+analogMin+" analog1Max: "+analogMax+" systemDCWBValveLoopOutput : "+systemDCWBValveLoopOutput);
-            signal = getModulatedAnalogVal(analogMin, analogMax, systemDCWBValveLoopOutput);
-        }
-    
-        systemEquip.getSystemDCWBValveLoopOutput().writePointValue(systemDCWBValveLoopOutput);
-    
-        if (signal != systemEquip.getChilledWaterValveSignal().readHisVal()) {
-            systemEquip.getChilledWaterValveSignal().writeHisVal(signal);
-        }
-        Domain.cmBoardDevice.getAnalog1Out().writePointValue(signal);
-
-        systemEquip.getChilledWaterExitTemperatureTarget().writePointValue(dcwbAlgoHandler.getChilledWaterTargetExitTemperature());
-    }
-    
-    private void updateAnalog2Output(DabSystemController dabSystem) {
-        updateFanLoop(dabSystem);
-    
-        double signal = 0;
-        if (systemEquip.getAnalog2OutputEnable().readPriorityVal() > 0) {
-            double analogMin = systemEquip.getAnalog2MinFan().readPriorityVal();
-            double analogMax = systemEquip.getAnalog2MaxFan().readPriorityVal();
-
-            CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" systemFanLoopOp: "+systemFanLoopOp);
-
-            if (!isSystemOccupied() && isLockoutActiveDuringUnoccupied()) {
-                signal = (int) (analogMin * ANALOG_SCALE);
-            } else {
-                signal = getModulatedAnalogVal(analogMin, analogMax, systemFanLoopOp);
-            }
-        }
-        
-        if (signal != systemEquip.getFanSignal().readHisVal()) {
-            systemEquip.getFanSignal().writeHisVal(signal);
-        }
-        Domain.cmBoardDevice.getAnalog2Out().writePointValue(signal);
-    }
-    
-    private void updateAnalog3Output(DabSystemController dabSystem) {
-        double signal = 0;
-        if (dabSystem.getSystemState() == HEATING) {
-            systemHeatingLoopOp = dabSystem.getHeatingSignal();
-        } else {
-            systemHeatingLoopOp = 0;
-        }
-
-        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
-            systemEquip.getHeatingLoopOutput().writeHisVal(systemHeatingLoopOp);
-            systemHeatingLoopOp = systemEquip.getHeatingLoopOutput().readHisVal();
-        }
-        systemEquip.getHeatingLoopOutput().writeHisVal(systemHeatingLoopOp);
-    
-        if (systemEquip.getAnalog3OutputEnable().readPriorityVal() > 0) {
-            double analogMin = systemEquip.getAnalog3MinHeating().readPriorityVal();
-            double analogMax = systemEquip.getAnalog3MaxHeating().readPriorityVal();
-
-            CcuLog.d(L.TAG_CCU_SYSTEM, "analog3Min: "+analogMin+" analog3Max: "+analogMax+" systemHeatingLoop : "+systemHeatingLoopOp);
-    
-            if (isHeatingLockoutActive()) {
-                signal = analogMin * ANALOG_SCALE;
-            } else {
-                signal = getModulatedAnalogVal(analogMin, analogMax, systemHeatingLoopOp);
-            }
-        }
-        
-        if (signal != systemEquip.getHeatingSignal().readHisVal()) {
-            systemEquip.getHeatingSignal().writeHisVal(signal);
-        }
-        Domain.cmBoardDevice.getAnalog3Out().writePointValue(signal);
-    }
-    
-    private void updateAnalog4Output(DabSystemController dabSystem) {
-        double loopType = systemEquip.getAnalog4OutputAssociation().readPriorityVal();
-
-        double signal = 0;
+    private void updateCoolingLoopOutput(DabSystemController dabSystem) {
         if (dabSystem.getSystemState() == COOLING) {
             systemCoolingLoopOp = dabSystem.getCoolingSignal();
         } else {
             systemCoolingLoopOp = 0;
         }
-
-        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
-            writeSystemLoopOutputValue(Tags.COOLING,systemCoolingLoopOp);
-            systemCoolingLoopOp = getSystemLoopOutputValue(Tags.COOLING);
-        }
         systemEquip.getCoolingLoopOutput().writePointValue(systemCoolingLoopOp);
-
-        systemCo2LoopOp = getCo2LoopOp();
-        systemEquip.getCo2LoopOutput().writePointValue(systemCo2LoopOp);
-    
-        if (systemEquip.getAnalog4OutputEnable().readPriorityVal() > 0) {
-
-            double analogMin = loopType > 0 ? systemEquip.getAnalog4MinOutsideDamper().readPriorityVal() : systemEquip.getAnalogOut4MinCoolingLoop().readPriorityVal();
-            double analogMax = loopType > 0 ? systemEquip.getAnalog4MaxOutsideDamper().readPriorityVal() : systemEquip.getAnalogOut4MaxCoolingLoop().readPriorityVal();
-        
-            CcuLog.d(L.TAG_CCU_SYSTEM, "analog4Min: "+analogMin+" analog4Max: "+analogMax+
-                                       " systemCoolingLoopOp : "+systemCoolingLoopOp + " systemCo2LoopOp : "+systemCo2LoopOp);
-            if (loopType == 0 && isCoolingLockoutActive()) {
-                signal = analogMin * ANALOG_SCALE;
-            } else {
-                signal = getModulatedAnalogVal(analogMin, analogMax,
-                                               loopType == 0 ? systemCoolingLoopOp : systemCo2LoopOp);
-            }
-        }
-    
-        if (signal != systemEquip.getCoolingSignal().readHisVal()) {
-            systemEquip.getCoolingSignal().writePointValue(signal);
-        }
-        Domain.cmBoardDevice.getAnalog4Out().writePointValue(signal);
+        systemCoolingLoopOp = systemEquip.getCoolingLoopOutput().readHisVal();
     }
-    
-    private void updateRelayOutputs(DabSystemController dabSystem) {
-        
-        double signal = 0;
-        SystemMode systemMode = SystemMode.values()[(int)systemEquip.getConditioningMode().readPriorityVal()];
-        if (systemEquip.getRelay3OutputEnable().readPriorityVal() > 0 && systemMode != SystemMode.OFF) {
-            if (!isSystemOccupied() && isLockoutActiveDuringUnoccupied()) {
-                signal = 0;
-            } else{
-                signal = (isSystemOccupied() || systemFanLoopOp > 0) ? 1 : 0;
-            }
-        }
-        if(signal != systemEquip.getOccupancySignal().readHisVal()) {
-            systemEquip.getOccupancySignal().writeHisVal(signal);
-        }
-        systemEquip.getFanEnable().writeHisVal(signal);
-        Domain.cmBoardDevice.getRelay3().writePointValue(signal);
-        if (systemEquip.getRelay7OutputEnable().readPriorityVal() > 0 && systemMode != SystemMode.OFF
-                    && isSystemOccupied()) {
 
-            double humidity = dabSystem.getAverageSystemHumidity();
-            double targetMinHumidity = systemEquip.getSystemtargetMinInsideHumidity().readPriorityVal();
-            double targetMaxHumidity = systemEquip.getSystemtargetMaxInsideHumidity().readPriorityVal();
-
-            boolean humidifier = systemEquip.getRelay7OutputAssociation().readPriorityVal() > 0;
-
-            double humidityHysteresis = systemEquip.getDabHumidityHysteresis().readPriorityVal();
-            int curSignal = (int)Domain.cmBoardDevice.getRelay7().readHisVal();
-            if(humidity == 0) {
-                signal = 0;
-                CcuLog.d(L.TAG_CCU_SYSTEM, "Humidity is 0");
+    private void updateSystemDcwbLoopOutput(DabSystemController dabSystem) {
+        if (isDcwbEnabled()) {
+            if (dabSystem.getSystemState() == COOLING) {
+                dcwbAlgoHandler.runLoopAlgorithm();
+                systemDCWBValveLoopOutput = CCUUtils.roundToTwoDecimal(dcwbAlgoHandler.getChilledWaterValveLoopOutput());
             } else {
-                if (!humidifier) {
-                    //Humidification
-                    if (humidity < targetMinHumidity) {
-                        signal = 1;
-                    } else if (humidity > (targetMinHumidity + humidityHysteresis)) {
-                        signal = 0;
-                    } else {
-                        signal = curSignal;
-                    }
-                    systemEquip.getHumidifier().writeHisVal(signal);
-                } else {
-                    //Dehumidification
-                    if (humidity > targetMaxHumidity) {
-                        signal = 1;
-                    } else if (humidity < (targetMaxHumidity - humidityHysteresis)) {
-                        signal = 0;
-                    } else {
-                        signal = curSignal;
-                    }
-                    systemEquip.getDehumidifier().writeHisVal(signal);
-                }
-                CcuLog.d(L.TAG_CCU_SYSTEM,"humidity :"+humidity+" targetMinHumidity: "+targetMinHumidity+" humidityHysteresis: "+humidityHysteresis+
-                        " targetMaxHumidity: "+targetMaxHumidity+" signal: "+signal*100);
+                systemDCWBValveLoopOutput = 0;
+                dcwbAlgoHandler.resetChilledWaterValveLoop();
             }
-
-            Domain.cmBoardDevice.getRelay7().writeHisVal(signal);
         } else {
-            systemEquip.getHumidifier().writeHisVal(0);
-            systemEquip.getDehumidifier().writeHisVal(0);
-            Domain.cmBoardDevice.getRelay7().writePointValue(0);
+            systemDCWBValveLoopOutput = 0;
         }
-    
+        systemEquip.getSystemDCWBValveLoopOutput().writePointValue(systemDCWBValveLoopOutput);
+        systemDCWBValveLoopOutput = systemEquip.getSystemDCWBValveLoopOutput().readHisVal();
+    }
+
+    private void updateSystemHeatingLoopOutput(DabSystemController dabSystem) {
+        if (dabSystem.getSystemState() == HEATING) {
+            systemHeatingLoopOp = dabSystem.getHeatingSignal();
+        } else {
+            systemHeatingLoopOp = 0;
+        }
+        systemEquip.getHeatingLoopOutput().writePointValue(systemHeatingLoopOp);
+        systemHeatingLoopOp = systemEquip.getHeatingLoopOutput().readHisVal();
     }
     
     private void updateFanLoop(DabSystemController dabSystem) {
@@ -512,47 +293,138 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             systemFanLoopOp = systemEquip.getFanLoopOutput().readHisVal();
         }
         systemEquip.getFanLoopOutput().writePointValue(systemFanLoopOp);
-
-    
     }
 
-    /**
-     * Calculates a modulated analog value during economizing based on the given range,
-     * the input percentage value, and the economizing threshold.
-     *
-     * @param analogMin                        The minimum value of the analog range.
-     * @param analogMax                        The maximum value of the analog range.
-     * @param val                              The current cooling loop percentage (expected between 0 and 100)
-     *                                         representing the position within the range.
-     * @param economizingToMainCoolingLoopMap  The threshold percentage value at which economizing ends
-     *                                         and modulation begins.
-     * @return                                 analogMin if loop output is less than economizingToMainCoolingLoopMap or return
-     *                                         the scaled value between analogMin and analogMax based on the input percentage.
-     */
-    private double getModulatedAnalogValDuringEcon(double analogMin, double analogMax, double val, double economizingToMainCoolingLoopMap) {
-        double modulatedVal;
-        if(val < economizingToMainCoolingLoopMap) {
-            return analogMin * ANALOG_SCALE;
-        }
-        if(economizingToMainCoolingLoopMap >= 100) {
-            return analogMax * ANALOG_SCALE;
-        }
-        if (analogMax > analogMin) {
-            modulatedVal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * ((val - economizingToMainCoolingLoopMap) / (100 - economizingToMainCoolingLoopMap))));
+    private void updateCompressorLoopOutput(DabSystemController dabSystem) {
+        if (dabSystem.getSystemState() == COOLING && !isCoolingLockoutActive()) {
+            systemCompressorLoop = systemCoolingLoopOp;
+        } else if (dabSystem.getSystemState() == HEATING && !isHeatingLockoutActive()) {
+            systemCompressorLoop = systemHeatingLoopOp;
         } else {
-            modulatedVal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * ((val - economizingToMainCoolingLoopMap) / (100 - economizingToMainCoolingLoopMap))));
+            systemCompressorLoop = 0;
         }
-        return modulatedVal;
+        systemEquip.getCompressorLoopOutput().writePointValue(systemCompressorLoop);
+        systemCompressorLoop = systemEquip.getCompressorLoopOutput().readHisVal();
     }
 
-    private double getModulatedAnalogVal(double analogMin, double analogMax, double val) {
-        double modulatedVal;
-        if (analogMax > analogMin) {
-            modulatedVal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (val/100)));
+    private void updateSystemCo2LoopOp() {
+        systemCo2LoopOp = getCo2LoopOp();
+        systemEquip.getCo2LoopOutput().writePointValue(systemCo2LoopOp);
+        systemCo2LoopOp = systemEquip.getCo2LoopOutput().readHisVal();
+
+        systemEquip.getDcvLoopOutput().writePointValue(systemCo2LoopOp);
+        systemDcvLoopOp = systemEquip.getDcvLoopOutput().readHisVal();
+    }
+
+    private int getCoolingSignal(ModulatingRtuAnalogOutMinMaxConfig minMaxConfig, ModulatingProfileAnalogMapping analogMapping) {
+        double analogMin = getAnalogMin(minMaxConfig, analogMapping);
+        double analogMax = getAnalogMax(minMaxConfig, analogMapping);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" SAT: "+getSystemSAT());
+        if (isCoolingLockoutActive()) {
+            return  (int)(analogMin * ANALOG_SCALE);
         } else {
-            modulatedVal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (val/100)));
+            double economizingToMainCoolingLoopMap = 0;
+            boolean economizingOn = false;
+
+            if(L.ccu().oaoProfile != null) {
+                economizingToMainCoolingLoopMap =  L.ccu().oaoProfile.getOAOEquip().getEconomizingToMainCoolingLoopMap().readPriorityVal();
+                economizingOn =L.ccu().oaoProfile.isEconomizingAvailable();
+            }
+            if(!economizingOn) {
+                /* OAT > Max Economizing Temp */
+                return getModulatedAnalogVal(analogMin, analogMax, systemCoolingLoopOp);
+            } else if (economizingOn && systemCoolingLoopOp < economizingToMainCoolingLoopMap) {
+                /* When only Economizing is active, (CLO < 30% (economizingToMainCoolingLoopMap) */
+                return  (int) (analogMin * ANALOG_SCALE);
+            } else if  (economizingOn && systemCoolingLoopOp >= economizingToMainCoolingLoopMap) {
+                /* Economizing + Analog Cooling */
+                return (int)getModulatedAnalogValDuringEcon(analogMin, analogMax, systemCoolingLoopOp, economizingToMainCoolingLoopMap);
+            }
         }
-        return modulatedVal;
+        return  (int)(analogMin * ANALOG_SCALE);
+    }
+
+    private double getAnalog1Output(ModulatingRtuProfileConfig config) {
+        double signal = 0;
+        if (config.analog1OutputEnable.getEnabled()) {
+            ModulatingRtuAnalogOutMinMaxConfig minMaxConfig = config.getAnalog1OutMinMaxConfig();
+            int analog1Association = config.analog1OutputAssociation.getAssociationVal();
+            ModulatingProfileAnalogMapping analogMapping = ModulatingProfileAnalogMapping.values()[analog1Association];
+            signal = getAnalogOut(minMaxConfig, analogMapping);
+        }
+        return signal;
+    }
+
+    private double getAnalog2Output(ModulatingRtuProfileConfig config) {
+        double signal = 0;
+        if (config.analog2OutputEnable.getEnabled()) {
+            ModulatingRtuAnalogOutMinMaxConfig minMaxConfig = config.getAnalog2OutMinMaxConfig();
+            int analog2Association = config.analog2OutputAssociation.getAssociationVal();
+            ModulatingProfileAnalogMapping analogMapping = ModulatingProfileAnalogMapping.values()[analog2Association];
+            signal = getAnalogOut(minMaxConfig, analogMapping);
+        }
+        return signal;
+    }
+
+    private double getAnalog3Output(ModulatingRtuProfileConfig config) {
+        double signal = 0;
+        if (config.analog3OutputEnable.getEnabled()) {
+            ModulatingRtuAnalogOutMinMaxConfig minMaxConfig = config.getAnalog3OutMinMaxConfig();
+            int analog3Association = config.analog3OutputAssociation.getAssociationVal();
+            ModulatingProfileAnalogMapping analogMapping = ModulatingProfileAnalogMapping.values()[analog3Association];
+            signal = getAnalogOut(minMaxConfig, analogMapping);
+        }
+        return signal;
+    }
+
+    private double getAnalog4Output(ModulatingRtuProfileConfig config) {
+        double signal = 0;
+        if (config.analog4OutputEnable.getEnabled()) {
+            ModulatingRtuAnalogOutMinMaxConfig minMaxConfig = config.getAnalog4OutMinMaxConfig();
+            int analog4Association = config.analog4OutputAssociation.getAssociationVal();
+            ModulatingProfileAnalogMapping analogMapping = ModulatingProfileAnalogMapping.values()[analog4Association];
+            signal = getAnalogOut(minMaxConfig, analogMapping);
+        }
+        return signal;
+    }
+
+    private double getAnalogOut(ModulatingRtuAnalogOutMinMaxConfig minMaxConfig,
+                                ModulatingProfileAnalogMapping analogMapping) {
+        double signal = 0;
+        switch (analogMapping) {
+            case FanSpeed:
+                signal = getFanSpeedSignal(minMaxConfig, analogMapping, systemFanLoopOp);
+                systemEquip.getFanSignal().writePointValue(signal);
+                signal = systemEquip.getFanSignal().readHisVal();
+                break;
+            case CompressorSpeed:
+                signal = getCompressorSpeedSignal(minMaxConfig, analogMapping, systemCompressorLoop);
+                systemEquip.getCompressorSpeed().writePointValue(signal);
+                signal = systemEquip.getCompressorSpeed().readHisVal();
+                break;
+            case OutsideAirDamper:
+                signal = getOutsideAirDamperSignal(minMaxConfig, analogMapping, systemCo2LoopOp);
+                systemEquip.getOutsideAirDamper().writePointValue(signal);
+                signal = systemEquip.getOutsideAirDamper().readHisVal();
+                break;
+            case Cooling:
+                signal = getCoolingSignal(minMaxConfig, analogMapping);
+                systemEquip.getCoolingSignal().writePointValue(signal);
+                signal = systemEquip.getCoolingSignal().readHisVal();
+                break;
+            case Heating:
+                signal = getHeatingSignal(minMaxConfig, analogMapping, isHeatingLockoutActive(), systemHeatingLoopOp);
+                systemEquip.getHeatingSignal().writePointValue(signal);
+                signal = systemEquip.getHeatingSignal().readHisVal();
+                break;
+            case ChilledWaterValve:
+                signal = getChilledWaterValveSignal(minMaxConfig, analogMapping, systemDCWBValveLoopOutput);
+                systemEquip.getChilledWaterValveSignal().writePointValue(signal);
+                signal = systemEquip.getChilledWaterValveSignal().readHisVal();
+                break;
+        }
+        CcuLog.d(L.TAG_CCU_SYSTEM, "Analog Out Mapping: " + analogMapping + " Signal: " + signal);
+        return signal;
     }
 
     public double getConfigVal(String tags) {
@@ -593,5 +465,93 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         map.put(systemEquip.getRelay3OutputEnable(), Domain.cmBoardDevice.getRelay3());
         map.put(systemEquip.getRelay7OutputEnable(), Domain.cmBoardDevice.getRelay7());
         return map;
+    }
+
+    public void addControllers() {
+        factory.addHumidifierController(systemEquip,
+                systemEquip.getAverageHumidity(),
+                systemEquip.getSystemtargetMinInsideHumidity(),
+                systemEquip.getDabRelayDeactivationHysteresis(),
+                systemEquip.getCurrentOccupancy()
+        );
+
+        factory.addDeHumidifierController(systemEquip,
+                systemEquip.getAverageHumidity(),
+                systemEquip.getSystemtargetMaxInsideHumidity(),
+                systemEquip.getDabRelayDeactivationHysteresis(),
+                systemEquip.getCurrentOccupancy()
+        );
+
+        factory.addChangeCoolingChangeOverRelay(systemEquip, systemEquip.getCoolingLoopOutput());
+        factory.addChangeHeatingChangeOverRelay(systemEquip, systemEquip.getHeatingLoopOutput());
+        factory.addOccupiedEnabledController(systemEquip, systemEquip.getCurrentOccupancy());
+        factory.addFanEnableController(
+                systemEquip, systemEquip.getFanLoopOutput(), systemEquip.getCurrentOccupancy()
+        );
+        factory.addDcvDamperController(
+                systemEquip,
+                systemEquip.getDcvLoopOutput(),
+                systemEquip.getDabRelayDeactivationHysteresis(),
+                systemEquip.getCurrentOccupancy()
+        );
+    }
+
+    private void updatePrerequisite() {
+        systemEquip.getCurrentOccupancy().setData(ScheduleManager.getInstance().getSystemOccupancy().ordinal());
+        double economization = 0.0;
+        if (systemCoolingLoopOp > 0) {
+            economization = L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable() ? 1.0 : 0.0;
+        }
+        systemEquip.getEconomizationAvailable().setData(economization);
+        if (systemStatusHandler == null) {
+            systemStatusHandler = new SystemStageHandler(systemEquip.getConditioningStages());
+        }
+    }
+
+    private void updateRelays() {
+        getRelayAssiciationMap().forEach( (relay, association) -> {
+            double newState = 0;
+            if (relay.readDefaultVal() > 0) {
+                ModulatingProfileRelayMapping mappedStage = ModulatingProfileRelayMapping.values()[(int) association.readDefaultVal()];
+                newState = getStageStatus(mappedStage);
+                getLogicalPhysicalMap().get(relay).writePointValue(newState);
+                CcuLog.i(L.TAG_CCU_SYSTEM, "Relay updated: " + relay.getDomainName() + ", Stage: " + mappedStage + ", State: " + newState);
+            }
+        });
+    }
+
+    private Map<a75f.io.domain.api.Point, a75f.io.domain.api.Point> getRelayAssiciationMap() {
+        Map<a75f.io.domain.api.Point, a75f.io.domain.api.Point> associations = new LinkedHashMap<>();
+        if (systemEquip == null) {
+            return associations;
+        }
+        associations.put(systemEquip.getRelay3OutputEnable(), systemEquip.getRelay3OutputAssociation());
+        associations.put(systemEquip.getRelay7OutputEnable(), systemEquip.getRelay7OutputAssociation());
+        return associations;
+    }
+
+    private double getStageStatus(ModulatingProfileRelayMapping stage) {
+        return getDomainPointForStage(stage).readHisVal();
+    }
+
+    protected a75f.io.domain.api.Point getDomainPointForStage(ModulatingProfileRelayMapping stage) {
+        switch (stage) {
+            case HUMIDIFIER:
+                return systemEquip.getConditioningStages().getHumidifierEnable();
+            case DEHUMIDIFIER:
+                return systemEquip.getConditioningStages().getDehumidifierEnable();
+            case CHANGE_OVER_COOLING:
+                return systemEquip.getConditioningStages().getChangeOverCooling();
+            case CHANGE_OVER_HEATING:
+                return systemEquip.getConditioningStages().getChangeOverHeating();
+            case FAN_ENABLE:
+                return systemEquip.getConditioningStages().getFanEnable();
+            case OCCUPIED_ENABLED:
+                return systemEquip.getConditioningStages().getOccupiedEnabled();
+            case DCV_DAMPER:
+                return systemEquip.getConditioningStages().getDcvDamper();
+        }
+        CcuLog.e(L.TAG_CCU_SYSTEM, "No domain point found for stage: " + stage);
+        return null;
     }
 }

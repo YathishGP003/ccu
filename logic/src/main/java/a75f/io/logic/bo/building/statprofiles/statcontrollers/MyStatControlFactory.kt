@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.statprofiles.statcontrollers
 
+import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
@@ -13,6 +14,7 @@ import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configur
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2RelayMapping
 import a75f.io.logic.bo.building.statprofiles.util.getInCalibratedPointPoint
 import a75f.io.logic.controlcomponents.controls.ControllerFactory
+import a75f.io.logic.controlcomponents.handlers.StageControlHandler
 import a75f.io.logic.controlcomponents.util.ControllerNames
 
 
@@ -324,6 +326,13 @@ class MyStatControlFactory(
                 MyStatHpuRelayMapping.EXTERNALLY_MAPPED -> {}
             }
 
+        }
+    }
+
+    fun getController(controllerName: String, equip: DomainEquip): StageControlHandler? {
+        return if (equip.controllers.containsKey(controllerName)) equip.controllers[controllerName] as StageControlHandler
+        else {
+            return null
         }
     }
 

@@ -25,7 +25,7 @@ import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
 import a75f.io.renatus.util.SystemProfileUtil
 import a75f.io.renatus.util.TestSignalManager
-import a75f.io.renatus.util.modifyConditioningMode
+import a75f.io.logic.util.modifyConditioningMode
 import android.app.Activity
 import android.content.Context
 import androidx.compose.runtime.MutableState
@@ -49,9 +49,12 @@ open class DModulatingRtuViewModel : ViewModel() {
 
     lateinit var context: Context
     lateinit var hayStack: CCUHsApi
-    lateinit var relay7AssociationList: List<String>
-    lateinit var analog4AssociationList: List<String>
+    lateinit var analog1AssociationList: List<String>
+    lateinit var relay3AssociationList: List<String>
+    lateinit var thermistor1AssociationList : List<String>
+    lateinit var analogIn1AssociationList : List<String>
 
+    var shouldShowBtuDialog = mutableStateOf(false)
     private lateinit var equipBuilder: ProfileEquipBuilder
     private lateinit var deviceBuilder: DeviceBuilder
     lateinit var initialPortValues: HashMap<String, Boolean>
@@ -72,10 +75,12 @@ open class DModulatingRtuViewModel : ViewModel() {
     }
 
     private fun initializeLists() {
-        relay7AssociationList =
-            Domain.getListByDomainName(DomainName.relay7OutputAssociation, model)
-        analog4AssociationList =
-            Domain.getListByDomainName(DomainName.analog4OutputAssociation, model)
+        analog1AssociationList =
+            Domain.getListOfDisNameByDomainName(DomainName.analog1OutputAssociation, model)
+        relay3AssociationList =
+            Domain.getListOfDisNameByDomainName(DomainName.relay3OutputAssociation, model)
+        thermistor1AssociationList = Domain.getListOfDisNameByDomainName(DomainName.thermistor1InputAssociation, model)
+        analogIn1AssociationList = Domain.getListOfDisNameByDomainName(DomainName.analog1InputAssociation, model)
     }
 
     fun createNewEquip(id: String): String {

@@ -46,7 +46,8 @@ fun updateFanEnums(
     lowAvailable: Boolean = true,
     mediumAvailable: Boolean = true,
     highAvailable: Boolean = true,
-    onlyAuto: Boolean = false
+    onlyAuto: Boolean = false,
+    isMyStatProfile: Boolean = false
 ) {
     val disabledEnums = mutableListOf<String>()
 
@@ -68,7 +69,7 @@ fun updateFanEnums(
             disabledEnums.add("Fan Low Occupied Period")
             disabledEnums.add("Fan Low All Times")
         }
-        if (!mediumAvailable) {
+        if (!mediumAvailable && !isMyStatProfile) {
             disabledEnums.add("Fan Medium Current Occupied Period")
             disabledEnums.add("Fan Medium Occupied Period")
             disabledEnums.add("Fan Medium All Times")

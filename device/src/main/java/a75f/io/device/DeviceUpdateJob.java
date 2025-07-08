@@ -30,6 +30,7 @@ import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.SystemProperties;
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
 import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.logic.watchdog.WatchdogMonitor;
@@ -72,14 +73,14 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         diagUpdateJob.scheduleJob("diagUpdateJob", Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                         .getInt("control_loop_frequency",60), 45, TimeUnit.SECONDS);
 
-        //TODO - TEMP code for performance testing to simulate device load. Remove this code after performance issue resolved
-       //injectTestInputMessage(1);
+        if (SystemProperties.getBoolean("ccu_inject_message", false)) {
+            injectTestInputMessage(1);
+        }
     }
 
     public void doJob()
     {
         watchdogMonitor = false;
-//        ConnectModbusSerialComm.testReadOp();
         CcuLog.d(L.TAG_CCU_JOB, "DeviceUpdateJob -> ");
         if (!CCUHsApi.getInstance().isCCUConfigured() || Globals.getInstance().isRecoveryMode() ||
                 Globals.getInstance().isSafeMode()) {
@@ -163,7 +164,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                 List<HashMap<Object, Object>> hsDevices = CCUHsApi.getInstance().readAllEntities("device and hyperstat");
                 CcuLog.i(L.TAG_CCU_DEVICE, "Injecting test messages for " + hsDevices.size() + " hyperstat devices");
                 hsDevices.forEach(device -> {
-                    //injectTestRegularUpdateMessage(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
+                    injectTestRegularUpdateMessage(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
                     try {
                         sleep(500);
                     } catch (InterruptedException e) {
@@ -174,7 +175,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                 List<HashMap<Object, Object>> snDevices = CCUHsApi.getInstance().readAllEntities("device and smartnode");
                 CcuLog.i(L.TAG_CCU_DEVICE, "Injecting test messages for " + snDevices.size() + " smartnode devices");
                 snDevices.forEach(device -> {
-                    //injectTestRegularUpdateMessageSmartNode(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
+                    injectTestRegularUpdateMessageSmartNode(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
                     try {
                         sleep(500);
                     } catch (InterruptedException e) {
@@ -191,7 +192,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                 List<HashMap<Object, Object>> msDevices = CCUHsApi.getInstance().readAllEntities("device and mystat");
                 CcuLog.i(L.TAG_CCU_DEVICE, "Injecting test messages for " + msDevices.size() + " mystat devices");
                 msDevices.forEach(device -> {
-                    //injectTestMyStatRegularUpdateMessage(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
+                    injectTestMyStatRegularUpdateMessage(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
                     try {
                         sleep(500);
                     } catch (InterruptedException e) {
@@ -199,15 +200,15 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                     }
                 });
 
-                //injectRegularCMUpdate();
+                injectRegularCMUpdate();
             }
         }).start();
     }
     private static void injectTestRegularUpdateMessage(int address, CCUHsApi hayStack) {
 
         Random randomNumGenerator = new Random();
-        a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t regularUpdateMessage = HyperStat.HyperStatRegularUpdateMessage_t.newBuilder()
-                .setRoomTemperature(650 + randomNumGenerator.nextInt(150))
+        a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t regularUpdateMessage = a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t.newBuilder()
+                .setRoomTemperature(SystemProperties.getInt("ccu_inject_temp", 650) + randomNumGenerator.nextInt(60))
                 .setHumidity(200 + randomNumGenerator.nextInt(400))
                 .setExternalThermistorInput1(randomNumGenerator.nextInt(20000))
                 .setExternalThermistorInput2(randomNumGenerator.nextInt(20000))
@@ -215,7 +216,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                 .setExternalAnalogVoltageInput2(randomNumGenerator.nextInt(10000))
                 .setOccupantDetected(randomNumGenerator.nextBoolean())
                 .setIlluminance(randomNumGenerator.nextInt(500))
-                .addSensorReadings(HyperStat.SensorReadingPb_t.newBuilder().setSensorType(5).setSensorData(randomNumGenerator.nextInt(1000)))
+                .addSensorReadings(a75f.io.device.HyperStat.SensorReadingPb_t.newBuilder().setSensorType(5).setSensorData(randomNumGenerator.nextInt(1000)))
                 .build();
         //handleRegularUpdate(regularUpdateMessage, nodeAddress, hayStack);
         int FIXED_INT_BYTES_SIZE = 4;
@@ -244,13 +245,13 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
 
         Random randomNumGenerator = new Random();
 
-        MyStat.MyStatRegularUpdateCommon_t regularUpdateMessageCommand = MyStat.MyStatRegularUpdateCommon_t.newBuilder()
-                .setRoomTemperature(780)
+        a75f.io.device.MyStat.MyStatRegularUpdateCommon_t regularUpdateMessageCommand = a75f.io.device.MyStat.MyStatRegularUpdateCommon_t.newBuilder()
+                .setRoomTemperature(SystemProperties.getInt("ccu_inject_temp", 650))
                 .setHumidity(200 + randomNumGenerator.nextInt(400))
                 .setOccupantDetected(true)
                 .build();
 
-        MyStat.MyStatRegularUpdateMessage_t regularUpdateMessage = MyStat.MyStatRegularUpdateMessage_t.newBuilder()
+        a75f.io.device.MyStat.MyStatRegularUpdateMessage_t regularUpdateMessage = a75f.io.device.MyStat.MyStatRegularUpdateMessage_t.newBuilder()
                 .setRegularUpdateCommon(regularUpdateMessageCommand)
                 .setUniversalInput1Value(56000)
                 .setDoorWindowSensor(15000)
@@ -284,7 +285,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         Random randomNumGenerator = new Random();
         CmToCcuOverUsbSnRegularUpdateMessage_t msg = new CmToCcuOverUsbSnRegularUpdateMessage_t();
         msg.update.smartNodeAddress.set(address);
-        msg.update.roomTemperature.set(65+randomNumGenerator.nextInt(10));
+        msg.update.roomTemperature.set(SystemProperties.getInt("ccu_inject_temp", 650)+randomNumGenerator.nextInt(60));
         msg.update.externalAnalogVoltageInput1.set(randomNumGenerator.nextInt(10000));
         msg.update.externalThermistorInput1.set(randomNumGenerator.nextInt(10000));
         msg.update.externalAnalogVoltageInput2.set(randomNumGenerator.nextInt(10000));
@@ -296,7 +297,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
 
         SmartNodeSensorReading_t sensorReadingCO2 = new SmartNodeSensorReading_t();
         sensorReadingCO2.sensorType.set(2);//CO2
-        sensorReadingCO2.sensorData.set(400+randomNumGenerator.nextInt(1000));
+        sensorReadingCO2.sensorData.set(800+randomNumGenerator.nextInt(400));
         msg.update.sensorReadings[1] = sensorReadingCO2;
 
         SmartNodeSensorReading_t sensorReadingCO = new SmartNodeSensorReading_t();
@@ -314,7 +315,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     private static void injectRegularCMUpdate() {
         Random randomNumGenerator = new Random();
         CmToCcuOverUsbCmRegularUpdateMessage_t msg = new CmToCcuOverUsbCmRegularUpdateMessage_t();
-        msg.roomTemperature.set(650 + randomNumGenerator.nextInt(150));
+        msg.roomTemperature.set(SystemProperties.getInt("ccu_inject_temp", 650) + randomNumGenerator.nextInt(60));
         msg.humidity.set((short) randomNumGenerator.nextInt(100));
         msg.thermistor1.set((short) randomNumGenerator.nextInt(10000));
         msg.thermistor2.set((short) randomNumGenerator.nextInt(10000));

@@ -655,8 +655,12 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
                 TextView tabTextView = (TextView) tabLayout.getChildAt(1);
 
                 tabTextView.setTextAppearance(tabLayout.getContext(), R.attr.RenatusTabTextSelected);
-                if (btnTabs.getSelectedTabPosition() == 0 &&  mTabLayout.getSelectedTabPosition() != 0) { //This method wills when we switch from floor to other tab in settings
+                if (btnTabs.getSelectedTabPosition() == 0 && mTabLayout.getSelectedTabPosition() != 0) { //This method wills when we switch from floor to other tab in settings
                     FloorPlanFragment.getInstance().destroyActionBar();
+                }
+                if (btnTabs.getSelectedTabPosition() == 0  && mTabLayout.getSelectedTabPosition() != 1) {
+                    //This method will call when we switch from other tab to floor tab
+                    SystemConfigMenuFragment.isSystemLevel = false;
                 }
 
             }

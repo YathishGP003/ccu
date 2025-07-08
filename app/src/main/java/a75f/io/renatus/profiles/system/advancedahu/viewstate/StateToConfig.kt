@@ -152,6 +152,8 @@ private fun configToMinMaxUpdate(analogMinMaxConfig: AnalogOutMinMaxVoltage, min
         fanMaxVoltage.currentVal = minMaxState.fanMaxVoltage.toDouble()
         damperPosMinVoltage.currentVal = minMaxState.damperPosMinVoltage.toDouble()
         damperPosMaxVoltage.currentVal = minMaxState.damperPosMaxVoltage.toDouble()
+        compressorMinVoltage.currentVal = minMaxState.compressorMinVoltage.toDouble()
+        compressorMaxVoltage.currentVal = minMaxState.compressorMaxVoltage.toDouble()
     }
 }
 

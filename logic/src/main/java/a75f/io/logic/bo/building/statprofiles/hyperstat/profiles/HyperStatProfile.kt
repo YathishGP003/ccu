@@ -3,7 +3,6 @@ package a75f.io.logic.bo.building.statprofiles.hyperstat.profiles
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.equips.hyperstat.HpuV2Equip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
-import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.ZoneProfile
 import a75f.io.logic.bo.building.ZoneState
@@ -14,6 +13,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HyperStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.statcontrollers.HyperStatControlFactory
 import a75f.io.logic.bo.building.statprofiles.util.BasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.HyperStatProfileTuners
@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.updateLoopOutputs
+import a75f.io.logic.controlcomponents.util.ControllerNames
 import a75f.io.logic.controlcomponents.util.isOccupiedDcvHumidityControl
 import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler
 import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler.Companion.hyperStatStatus
@@ -42,13 +43,19 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
     var dcvLoopOutput = 0
     var compressorLoopOutput = 0
 
+    // These are require parameter for CPU profile
+    var defaultFanLoopOutput = 0.0
+    var previousFanLoopVal = 0
+    var previousFanLoopValStaged = 0
+    var fanLoopCounter = 0
+    var hasZeroFanLoopBeenHandled = false
+
     var previousOccupancyStatus: Occupancy = Occupancy.NONE
     var occupancyBeforeDoorWindow: Occupancy = Occupancy.NONE
     var curState = ZoneState.DEADBAND
 
     var logicalPointsList = HashMap<Port, String>()
     var occupancyStatus: Occupancy = Occupancy.NONE
-
 
     var doorWindowSensorOpenStatus = false
     var runFanLowDuringDoorWindow = false
@@ -116,13 +123,42 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
         compressorLoopOutput = 0
     }
 
-    fun handleChangeOfDirection(currentTemp: Double, userIntents: UserIntents) {
+    private fun resetControllers(factory: HyperStatControlFactory, statEquip: HyperStatEquip) {
+        // Add controller here if any new stage controller is added
+        listOf(
+            ControllerNames.COOLING_STAGE_CONTROLLER,
+            ControllerNames.HEATING_STAGE_CONTROLLER,
+            ControllerNames.FAN_SPEED_CONTROLLER,
+            ControllerNames.COMPRESSOR_RELAY_CONTROLLER,
+        ).forEach {
+            val controller = factory.getController(it, statEquip)
+            controller?.resetController()
+        }
+
+        defaultFanLoopOutput = 0.0
+        previousFanLoopVal = 0
+        previousFanLoopValStaged = 0
+        fanLoopCounter = 0
+        hasZeroFanLoopBeenHandled = false
+        resetLoopOutputs()
+        resetLogicalPoints()
+        statEquip.analogOutStages.clear()
+        statEquip.relayStages.clear()
+
+    }
+
+    fun handleChangeOfDirection(
+        currentTemp: Double, userIntents: UserIntents,
+        factory: HyperStatControlFactory, equip: HyperStatEquip
+        ) {
         if (currentTemp > userIntents.coolingDesiredTemp && state != ZoneState.COOLING) {
             loopController.resetCoolingControl()
             state = ZoneState.COOLING
+            resetControllers(factory, equip)
         } else if (currentTemp < userIntents.heatingDesiredTemp && state != ZoneState.HEATING) {
             loopController.resetHeatingControl()
             state = ZoneState.HEATING
+            resetControllers(factory, equip)
         }
     }
 

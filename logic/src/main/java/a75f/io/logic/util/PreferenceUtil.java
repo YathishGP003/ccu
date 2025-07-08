@@ -114,6 +114,7 @@ public class PreferenceUtil {
     private static final String NON_DM_POINTS_REMOVE_STATUS = "nonDmPointsRemoveStatus";
     private static final String FLOOR_REF_UPDATE_STATUS = "floorRefUpdateStatus";
     private static final String MODBUS_KVTAGS_DATA_TYPE_UPDATED = "modbusKVTagsDataTypeUpdated";
+    private static final String  UPDATE_ENUM_VALUES_FOR_TERMINAL_SYSTEM_PROFILE = "updatingEnumValuesForTerminalSystemProfile";
     private static final String CLEAR_UNSYNCED_LIST = "clearUnSyncedList";
 
 
@@ -131,6 +132,7 @@ public class PreferenceUtil {
     private static final String MIGRATE_VFD_FAN_MODE = "migrateVfdFanMode";
     private static final String UPDATE_MYSTAT_GATEWAY_REF_FLAG = "updateMystatGatewayRefFlag";
     private static final String IS_REBOOT_REQUIRED_AFTER_REPLACE = "isRebootRequiredAfterReplace";
+    private static final String MIGRATE_MODULATING_PROFILE_NORMALIZATION = "migrateModulatingProfileNormalization";
 
     public static void setContext(Context c) {
         context= c;
@@ -1027,5 +1029,20 @@ public class PreferenceUtil {
 
     public static void setUpdateMystatGatewayRefFlag() {
         setBooleanPreference(UPDATE_MYSTAT_GATEWAY_REF_FLAG, true);
+    }
+
+    public static boolean getUpdateEnumValuesForTerminalProfile() {
+        return getBooleanPreference(UPDATE_ENUM_VALUES_FOR_TERMINAL_SYSTEM_PROFILE);
+
+    }
+    public static void setUpdateEnumValuesForTerminalProfile() {
+        setBooleanPreference(UPDATE_ENUM_VALUES_FOR_TERMINAL_SYSTEM_PROFILE, true);
+    }
+
+    public static boolean getMigrateModulatingProfileNormalization() {
+        return getBooleanPreference(MIGRATE_MODULATING_PROFILE_NORMALIZATION);
+    }
+    public static void setMigrateModulatingProfileNormalization() {
+        setBooleanPreference(MIGRATE_MODULATING_PROFILE_NORMALIZATION, true);
     }
 }

@@ -1,17 +1,18 @@
 package a75f.io.logic.bo.building.statprofiles.statcontrollers
 
 import a75f.io.domain.HyperStatSplitEquip
+import a75f.io.domain.equips.DomainEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
-import a75f.io.logic.bo.building.statprofiles.util.getInCalibratedPointPoint
 import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isUserIntentFanMode
 import a75f.io.logic.controlcomponents.controls.Constraint
 import a75f.io.logic.controlcomponents.controls.ControllerFactory
 import a75f.io.logic.controlcomponents.handlers.ExhaustFanController
+import a75f.io.logic.controlcomponents.handlers.StageControlHandler
 import a75f.io.logic.controlcomponents.util.ControllerNames
 
 /**
@@ -315,5 +316,12 @@ class SplitControllerFactory(var equip: HyperStatSplitEquip) {
             offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
             logTag = L.TAG_CCU_HSSPLIT_CPUECON
         )
+    }
+
+    fun getController(controllerName: String, equip: DomainEquip): StageControlHandler? {
+        return if (equip.controllers.containsKey(controllerName)) equip.controllers[controllerName] as StageControlHandler
+        else {
+            return null
+        }
     }
 }

@@ -31,7 +31,6 @@ class StagedBooleanControllerImpl(
 
         logIt(logTag, "-------- On constrains ----------------------")
         onConstraints.toSortedMap().forEach { (stage, constraints) ->
-            logIt(logTag, "onConstraints $stage : ${constraints.toList()}")
             val shouldTurnOn = constraints.any { it() }
             if (stageUpTimer.readPriorityVal() > 0) {
                 if (shouldTurnOn && !isStageUpTimerActive() && !currentStages.getOrDefault(stage, false)) {
@@ -47,7 +46,6 @@ class StagedBooleanControllerImpl(
         }
         logIt(logTag, "\n-------- Off constrains -------------------------------------")
         offConstraints.toSortedMap().forEach { (stage, constraints) ->
-            logIt(logTag, "offConstraints $stage : ${constraints.toList()}")
             if (newState.containsKey(stage) && newState[stage]!!) {
                 return@forEach
             }

@@ -15,48 +15,28 @@ import a75f.io.logic.bo.haystack.device.ControlMote.getCMUnusedPorts
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
 
-open class DabModulatingRtuProfileConfig(val model: SeventyFiveFProfileDirective) :
-    ProfileConfiguration(99, "", 0, "SYSTEM", "SYSTEM", model.domainName) {
+open class DabModulatingRtuProfileConfig(override val model: SeventyFiveFProfileDirective) : ModulatingRtuProfileConfig(model) {
 
-    lateinit var analog1OutputEnable: EnableConfig
-    lateinit var analog2OutputEnable: EnableConfig
-    lateinit var analog3OutputEnable: EnableConfig
-    lateinit var analog4OutputEnable: EnableConfig
-    lateinit var relay3OutputEnable: EnableConfig
-    lateinit var relay7OutputEnable: EnableConfig
     lateinit var adaptiveDeltaEnable: EnableConfig
     lateinit var maximizedExitWaterTempEnable: EnableConfig
     lateinit var dcwbEnable: EnableConfig
-    lateinit var relay7Association: AssociationConfig
-    lateinit var analog4Association: AssociationConfig
-
-
-    lateinit var analogOut1CoolingMin : ValueConfig
-    lateinit var analogOut1CoolingMax : ValueConfig
-    lateinit var analogOut2StaticPressureMin : ValueConfig
-    lateinit var analogOut2StaticPressureMax : ValueConfig
-    lateinit var  analogOut3HeatingMin : ValueConfig
-    lateinit var analogOut3HeatingMax : ValueConfig
-    lateinit var analogOut4FreshAirMin : ValueConfig
-    lateinit var analogOut4FreshAirMax : ValueConfig
-    lateinit var unusedPorts: HashMap<String, Boolean>
     lateinit var chilledWaterTargetDelta: ValueConfig
     lateinit var chilledWaterExitTemperatureMargin: ValueConfig
     lateinit var chilledWaterExitTemperatureTarget: ValueConfig
     lateinit var chilledWaterMaxFlowRate: ValueConfig
     lateinit var analog1ValveClosedPosition: ValueConfig
     lateinit var analog1ValveFullPosition: ValueConfig
-    lateinit var analog2MinFan: ValueConfig
+    /*lateinit var analog2MinFan: ValueConfig
     lateinit var analog2MaxFan: ValueConfig
     lateinit var analog3MinHeating: ValueConfig
     lateinit var analog3MaxHeating: ValueConfig
     lateinit var analogOut4MinCoolingLoop: ValueConfig
-    lateinit var analogOut4MaxCoolingLoop: ValueConfig
+    lateinit var analogOut4MaxCoolingLoop: ValueConfig*/
 
 
-    open fun getDefaultConfiguration(): DabModulatingRtuProfileConfig {
-
-        analog1OutputEnable = getDefaultEnableConfig(DomainName.analog1OutputEnable, model)
+    override fun getDefaultConfiguration(): DabModulatingRtuProfileConfig {
+        super.getDefaultConfiguration()
+        /*analog1OutputEnable = getDefaultEnableConfig(DomainName.analog1OutputEnable, model)
         analog2OutputEnable = getDefaultEnableConfig(DomainName.analog2OutputEnable, model)
         analog3OutputEnable = getDefaultEnableConfig(DomainName.analog3OutputEnable, model)
         analog4OutputEnable = getDefaultEnableConfig(DomainName.analog4OutputEnable, model)
@@ -66,36 +46,45 @@ open class DabModulatingRtuProfileConfig(val model: SeventyFiveFProfileDirective
         maximizedExitWaterTempEnable = getDefaultEnableConfig(DomainName.maximizedExitWaterTempEnable, model)
         dcwbEnable = getDefaultEnableConfig(DomainName.dcwbEnable, model)
 
-        analog4Association = getDefaultAssociationConfig(DomainName.analog4OutputAssociation, model)
-        relay7Association = getDefaultAssociationConfig(DomainName.relay7OutputAssociation, model)
+        analog1OutputAssociation = getDefaultAssociationConfig(DomainName.analog1OutputAssociation, model)
+        analog2OutputAssociation = getDefaultAssociationConfig(DomainName.analog2OutputAssociation, model)
+        analog3OutputAssociation = getDefaultAssociationConfig(DomainName.analog3OutputAssociation, model)
+        analog4OutputAssociation = getDefaultAssociationConfig(DomainName.analog4OutputAssociation, model)
+        relay3Association = getDefaultAssociationConfig(DomainName.relay3OutputAssociation, model)
 
-        analogOut1CoolingMin = getDefaultValConfig(DomainName.analog1MinCooling, model)
+        //analog4Association = getDefaultAssociationConfig(DomainName.analog4OutputAssociation, model)
+        relay7Association = getDefaultAssociationConfig(DomainName.relay7OutputAssociation, model)*/
+
+        /*analogOut1CoolingMin = getDefaultValConfig(DomainName.analog1MinCooling, model)
         analogOut1CoolingMax = getDefaultValConfig(DomainName.analog1MaxCooling, model)
         analogOut2StaticPressureMin = getDefaultValConfig(DomainName.analog2MinStaticPressure, model)
         analogOut2StaticPressureMax = getDefaultValConfig(DomainName.analog2MaxStaticPressure, model)
         analogOut3HeatingMin = getDefaultValConfig(DomainName.analog3MinHeating, model)
         analogOut3HeatingMax = getDefaultValConfig(DomainName.analog3MaxHeating, model)
         analogOut4FreshAirMin = getDefaultValConfig(DomainName.analog4MinOutsideDamper, model)
-        analogOut4FreshAirMax = getDefaultValConfig(DomainName.analog4MaxOutsideDamper, model)
+        analogOut4FreshAirMax = getDefaultValConfig(DomainName.analog4MaxOutsideDamper, model)*/
+        adaptiveDeltaEnable = getDefaultEnableConfig(DomainName.adaptiveDeltaEnable, model)
+        maximizedExitWaterTempEnable = getDefaultEnableConfig(DomainName.maximizedExitWaterTempEnable, model)
+        dcwbEnable = getDefaultEnableConfig(DomainName.dcwbEnable, model)
         chilledWaterTargetDelta = getDefaultValConfig(DomainName.chilledWaterTargetDelta, model)
         chilledWaterExitTemperatureMargin = getDefaultValConfig(DomainName.chilledWaterExitTemperatureMargin, model)
         chilledWaterExitTemperatureTarget = getDefaultValConfig(DomainName.chilledWaterExitTemperatureTarget, model)
         chilledWaterMaxFlowRate = getDefaultValConfig(DomainName.chilledWaterMaxFlowRate, model)
         analog1ValveClosedPosition = getDefaultValConfig(DomainName.analog1ValveClosedPosition, model)
         analog1ValveFullPosition = getDefaultValConfig(DomainName.analog1ValveFullPosition, model)
-        analog2MinFan = getDefaultValConfig(DomainName.analog2MinFan, model)
+        /*analog2MinFan = getDefaultValConfig(DomainName.analog2MinFan, model)
         analog2MaxFan = getDefaultValConfig(DomainName.analog2MaxFan, model)
         analog3MinHeating = getDefaultValConfig(DomainName.analog3MinHeating, model)
         analog3MaxHeating = getDefaultValConfig(DomainName.analog3MaxHeating, model)
         analogOut4MinCoolingLoop = getDefaultValConfig(DomainName.analogOut4MinCoolingLoop, model)
-        analogOut4MaxCoolingLoop = getDefaultValConfig(DomainName.analogOut4MaxCoolingLoop, model)
+        analogOut4MaxCoolingLoop = getDefaultValConfig(DomainName.analogOut4MaxCoolingLoop, model)*/
 
-        unusedPorts = getAllUnusedPorts()
-        isDefault = true
+        //unusedPorts = getAllUnusedPorts()
+        //isDefault = true
         return this
     }
 
-    open fun getActiveConfiguration(): DabModulatingRtuProfileConfig {
+    override fun getActiveConfiguration(): DabModulatingRtuProfileConfig {
 
         val equip = Domain.hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
         if (equip.isEmpty()) {
@@ -123,6 +112,11 @@ open class DabModulatingRtuProfileConfig(val model: SeventyFiveFProfileDirective
         dcwbEnable.enabled =
             dabModulatingRtuSystemEquip.dcwbEnable.readDefaultVal() > 0
 
+        thermistor1Enabled.enabled = dabModulatingRtuSystemEquip.thermistor1InputEnable.readDefaultVal() > 0
+        thermistor2Enabled.enabled = dabModulatingRtuSystemEquip.thermistor2InputEnable.readDefaultVal() > 0
+        analogIn1Enabled.enabled = dabModulatingRtuSystemEquip.analog1InputEnable.readDefaultVal() > 0
+        analogIn2Enabled.enabled = dabModulatingRtuSystemEquip.analog2InputEnable.readDefaultVal() > 0
+
         chilledWaterTargetDelta.currentVal = if(dcwbEnable.enabled && adaptiveDeltaEnable.enabled) {
             dabModulatingRtuSystemEquip.chilledWaterTargetDelta.readDefaultVal()
         } else {
@@ -139,10 +133,40 @@ open class DabModulatingRtuProfileConfig(val model: SeventyFiveFProfileDirective
             getDefaultValConfig(DomainName.chilledWaterExitTemperatureMargin, model).currentVal
         }
 
-        analog4Association.associationVal = if (analog4OutputEnable.enabled) {
+        analog1OutputAssociation.associationVal = if (analog1OutputEnable.enabled) {
+            dabModulatingRtuSystemEquip.analog1OutputAssociation.readDefaultVal().toInt()
+        } else {
+            getDefaultAssociationConfig(DomainName.analog1OutputAssociation, model).associationVal
+        }
+
+        analog2OutputAssociation.associationVal = if (analog2OutputEnable.enabled) {
+            dabModulatingRtuSystemEquip.analog2OutputAssociation.readDefaultVal().toInt()
+        } else {
+            getDefaultAssociationConfig(DomainName.analog2OutputAssociation, model).associationVal
+        }
+
+        analog3OutputAssociation.associationVal = if (analog3OutputEnable.enabled) {
+            dabModulatingRtuSystemEquip.analog3OutputAssociation.readDefaultVal().toInt()
+        } else {
+            getDefaultAssociationConfig(DomainName.analog3OutputAssociation, model).associationVal
+        }
+
+        analog3OutputAssociation.associationVal = if (analog3OutputEnable.enabled) {
+            dabModulatingRtuSystemEquip.analog3OutputAssociation.readDefaultVal().toInt()
+        } else {
+            getDefaultAssociationConfig(DomainName.analog3OutputAssociation, model).associationVal
+        }
+
+        analog4OutputAssociation.associationVal = if (analog4OutputEnable.enabled) {
             dabModulatingRtuSystemEquip.analog4OutputAssociation.readDefaultVal().toInt()
         } else {
             getDefaultAssociationConfig(DomainName.analog4OutputAssociation, model).associationVal
+        }
+
+        relay3Association.associationVal = if (relay3OutputEnable.enabled) {
+            dabModulatingRtuSystemEquip.relay3OutputAssociation.readDefaultVal().toInt()
+        } else {
+            getDefaultAssociationConfig(DomainName.relay3OutputAssociation, model).associationVal
         }
 
         relay7Association.associationVal = if (relay7OutputEnable.enabled) {
@@ -151,7 +175,12 @@ open class DabModulatingRtuProfileConfig(val model: SeventyFiveFProfileDirective
             getDefaultAssociationConfig(DomainName.relay7OutputAssociation, model).associationVal
         }
 
-        if(dabModulatingRtuSystemEquip.analog1OutputEnable.readDefaultVal() > 0 && !dcwbEnable.enabled) {
+        updateAnalogActiveConfig(dabModulatingRtuSystemEquip)
+
+        analog1ValveClosedPosition.currentVal = dabModulatingRtuSystemEquip.analog1ValveClosedPosition.readDefaultVal()
+        analog1ValveFullPosition.currentVal = dabModulatingRtuSystemEquip.analog1ValveFullPosition.readDefaultVal()
+
+        /*if(dabModulatingRtuSystemEquip.analog1OutputEnable.readDefaultVal() > 0 && !dcwbEnable.enabled) {
             analogOut1CoolingMin.currentVal = dabModulatingRtuSystemEquip.analog1MinCooling.readDefaultVal()
             analogOut1CoolingMax.currentVal = dabModulatingRtuSystemEquip.analog1MaxCooling.readDefaultVal()
         } else if(dabModulatingRtuSystemEquip.analog1OutputEnable.readDefaultVal() > 0 && dcwbEnable.enabled) {
@@ -179,8 +208,8 @@ open class DabModulatingRtuProfileConfig(val model: SeventyFiveFProfileDirective
             analogOut3HeatingMin = getDefaultValConfig(DomainName.analog3MinHeating, model)
             analogOut3HeatingMax = getDefaultValConfig(DomainName.analog3MaxHeating, model)
         }
-
-        if(dabModulatingRtuSystemEquip.analog4OutputEnable.readDefaultVal() > 0 && dcwbEnable.enabled
+*/
+        /*if(dabModulatingRtuSystemEquip.analog4OutputEnable.readDefaultVal() > 0 && dcwbEnable.enabled
             && dabModulatingRtuSystemEquip.analog4OutputAssociation.readDefaultVal() > 0) {
             // When the analog4OutputAssociation is mapped to damper
             analogOut4FreshAirMin.currentVal = dabModulatingRtuSystemEquip.analog4MinOutsideDamper.readDefaultVal()
@@ -193,16 +222,20 @@ open class DabModulatingRtuProfileConfig(val model: SeventyFiveFProfileDirective
             analogOut4FreshAirMin = getDefaultValConfig(DomainName.analogOut4MinCoolingLoop, model)
             analogOut4FreshAirMax = getDefaultValConfig(DomainName.analogOut4MaxCoolingLoop, model)
         }
-
+*/
         unusedPorts = getCMUnusedPorts(Domain.hayStack)
         isDefault = false
         return this
     }
 
 
-    override fun getAssociationConfigs(): List<AssociationConfig> {
+    /*override fun getAssociationConfigs(): List<AssociationConfig> {
         return mutableListOf<AssociationConfig>().apply {
-            add(analog4Association)
+            add(analog1OutputAssociation)
+            add(analog2OutputAssociation)
+            add(analog3OutputAssociation)
+            add(analog4OutputAssociation)
+            add(relay3Association)
             add(relay7Association)
         }
     }
@@ -218,51 +251,233 @@ open class DabModulatingRtuProfileConfig(val model: SeventyFiveFProfileDirective
             add(analogOut4FreshAirMin)
             add(analogOut4FreshAirMax)
         }
-    }
+    }*/
 
     override fun getEnableConfigs(): List<EnableConfig> {
-        return mutableListOf<EnableConfig>().apply {
-            add(analog1OutputEnable)
-            add(analog2OutputEnable)
-            add(analog3OutputEnable)
-            add(analog4OutputEnable)
-            add(relay3OutputEnable)
-            add(relay7OutputEnable)
+        return super.getEnableConfigs() + mutableListOf<EnableConfig>().apply {
             add(adaptiveDeltaEnable)
             add(maximizedExitWaterTempEnable)
             add(dcwbEnable)
         }
     }
 
+    private fun updateAnalogActiveConfig(dabModulatingRtuSystemEquip : DabModulatingRtuSystemEquip) {
+        analog1OutMinMaxConfig.apply {
+            when (analog1OutputAssociation.associationVal) {
+                0 -> {
+                    fanSignalConfig.min =
+                        dabModulatingRtuSystemEquip.analog1MinFan.readDefaultVal().toInt()
+                    fanSignalConfig.max =
+                        dabModulatingRtuSystemEquip.analog1MaxFan.readDefaultVal().toInt()
+                }
+
+                1 -> {
+                    compressorSpeedConfig.min =
+                        dabModulatingRtuSystemEquip.analog1MinCompressorSpeed.readDefaultVal()
+                            .toInt()
+                    compressorSpeedConfig.max =
+                        dabModulatingRtuSystemEquip.analog1MaxCompressorSpeed.readDefaultVal()
+                            .toInt()
+                }
+
+                2 -> {
+                    outsideAirDamperConfig.min =
+                        dabModulatingRtuSystemEquip.analog1MinOutsideDamper.readDefaultVal().toInt()
+                    outsideAirDamperConfig.max =
+                        dabModulatingRtuSystemEquip.analog1MaxOutsideDamper.readDefaultVal().toInt()
+                }
+
+                3 -> {
+                    coolingSignalConfig.min =
+                        dabModulatingRtuSystemEquip.analog1MinCooling.readDefaultVal().toInt()
+                    coolingSignalConfig.max =
+                        dabModulatingRtuSystemEquip.analog1MaxCooling.readDefaultVal().toInt()
+                }
+
+                4 -> {
+                    heatingSignalConfig.min =
+                        dabModulatingRtuSystemEquip.analog1MinHeating.readDefaultVal().toInt()
+                    heatingSignalConfig.max =
+                        dabModulatingRtuSystemEquip.analog1MaxHeating.readDefaultVal().toInt()
+                }
+
+                5 -> {
+                    chilledWaterValveConfig.min =
+                        dabModulatingRtuSystemEquip.analog1MinCHWValve.readDefaultVal()
+                            .toInt()
+                    chilledWaterValveConfig.max =
+                        dabModulatingRtuSystemEquip.analog1MaxCHWValve.readDefaultVal()
+                            .toInt()
+                }
+            }
+        }
+
+        analog2OutMinMaxConfig.apply {
+            when (analog2OutputAssociation.associationVal) {
+                0 -> {
+                    fanSignalConfig.min =
+                        dabModulatingRtuSystemEquip.analog2MinFan.readDefaultVal().toInt()
+                    fanSignalConfig.max =
+                        dabModulatingRtuSystemEquip.analog2MaxFan.readDefaultVal().toInt()
+                }
+
+                1 -> {
+                    compressorSpeedConfig.min =
+                        dabModulatingRtuSystemEquip.analog2MinCompressorSpeed.readDefaultVal()
+                            .toInt()
+                    compressorSpeedConfig.max =
+                        dabModulatingRtuSystemEquip.analog2MaxCompressorSpeed.readDefaultVal()
+                            .toInt()
+                }
+
+                2 -> {
+                    outsideAirDamperConfig.min =
+                        dabModulatingRtuSystemEquip.analog2MinOutsideDamper.readDefaultVal().toInt()
+                    outsideAirDamperConfig.max =
+                        dabModulatingRtuSystemEquip.analog2MaxOutsideDamper.readDefaultVal().toInt()
+                }
+
+                3 -> {
+                    coolingSignalConfig.min =
+                        dabModulatingRtuSystemEquip.analog2MinCooling.readDefaultVal().toInt()
+                    coolingSignalConfig.max =
+                        dabModulatingRtuSystemEquip.analog2MaxCooling.readDefaultVal().toInt()
+                }
+
+                4 -> {
+                    heatingSignalConfig.min =
+                        dabModulatingRtuSystemEquip.analog2MinHeating.readDefaultVal().toInt()
+                    heatingSignalConfig.max =
+                        dabModulatingRtuSystemEquip.analog2MaxHeating.readDefaultVal().toInt()
+                }
+
+                5 ->  {
+                    chilledWaterValveConfig.min =
+                        dabModulatingRtuSystemEquip.analog2MinCHWValve.readDefaultVal().toInt()
+                    chilledWaterValveConfig.max =
+                        dabModulatingRtuSystemEquip.analog2MaxCHWValve.readDefaultVal().toInt()
+                }
+            }
+        }
+
+        analog3OutMinMaxConfig.apply {
+            when (analog3OutputAssociation.associationVal) {
+                0 -> {
+                    fanSignalConfig.min =
+                        dabModulatingRtuSystemEquip.analog3MinFan.readDefaultVal().toInt()
+                    fanSignalConfig.max =
+                        dabModulatingRtuSystemEquip.analog3MaxFan.readDefaultVal().toInt()
+                }
+
+                1 -> {
+                    compressorSpeedConfig.min =
+                        dabModulatingRtuSystemEquip.analog3MinCompressorSpeed.readDefaultVal()
+                            .toInt()
+                    compressorSpeedConfig.max =
+                        dabModulatingRtuSystemEquip.analog3MaxCompressorSpeed.readDefaultVal()
+                            .toInt()
+                }
+
+                2 -> {
+                    outsideAirDamperConfig.min =
+                        dabModulatingRtuSystemEquip.analog3MinOutsideDamper.readDefaultVal().toInt()
+                    outsideAirDamperConfig.max =
+                        dabModulatingRtuSystemEquip.analog3MaxOutsideDamper.readDefaultVal().toInt()
+                }
+
+                3 -> {
+                    coolingSignalConfig.min =
+                        dabModulatingRtuSystemEquip.analog3MinCooling.readDefaultVal().toInt()
+                    coolingSignalConfig.max =
+                        dabModulatingRtuSystemEquip.analog3MaxCooling.readDefaultVal().toInt()
+                }
+
+                4 -> {
+                    heatingSignalConfig.min =
+                        dabModulatingRtuSystemEquip.analog3MinHeating.readDefaultVal().toInt()
+                    heatingSignalConfig.max =
+                        dabModulatingRtuSystemEquip.analog3MaxHeating.readDefaultVal().toInt()
+                }
+
+                5 -> {
+                    chilledWaterValveConfig.min =
+                        dabModulatingRtuSystemEquip.analog3MinCHWValve.readDefaultVal().toInt()
+                    chilledWaterValveConfig.max =
+                        dabModulatingRtuSystemEquip.analog3MaxCHWValve.readDefaultVal().toInt()
+                }
+            }
+        }
+
+        analog4OutMinMaxConfig.apply {
+            when (analog4OutputAssociation.associationVal) {
+                0 -> {
+                    fanSignalConfig.min =
+                        dabModulatingRtuSystemEquip.analog4MinFan.readDefaultVal().toInt()
+                    fanSignalConfig.max =
+                        dabModulatingRtuSystemEquip.analog4MaxFan.readDefaultVal().toInt()
+                }
+
+                1 -> {
+                    compressorSpeedConfig.min =
+                        dabModulatingRtuSystemEquip.analog4MinCompressorSpeed.readDefaultVal()
+                            .toInt()
+                    compressorSpeedConfig.max =
+                        dabModulatingRtuSystemEquip.analog4MaxCompressorSpeed.readDefaultVal()
+                            .toInt()
+                }
+
+                2 -> {
+                    outsideAirDamperConfig.min =
+                        dabModulatingRtuSystemEquip.analog4MinOutsideDamper.readDefaultVal().toInt()
+                    outsideAirDamperConfig.max =
+                        dabModulatingRtuSystemEquip.analog4MaxOutsideDamper.readDefaultVal().toInt()
+                }
+
+                3 -> {
+                    coolingSignalConfig.min =
+                        dabModulatingRtuSystemEquip.analog4MinCooling.readDefaultVal().toInt()
+                    coolingSignalConfig.max =
+                        dabModulatingRtuSystemEquip.analog4MaxCooling.readDefaultVal().toInt()
+                }
+
+                4 -> {
+                    heatingSignalConfig.min =
+                        dabModulatingRtuSystemEquip.analog4MinHeating.readDefaultVal().toInt()
+                    heatingSignalConfig.max =
+                        dabModulatingRtuSystemEquip.analog4MaxHeating.readDefaultVal().toInt()
+                }
+
+                5 -> {
+                    chilledWaterValveConfig.min =
+                        dabModulatingRtuSystemEquip.analog4MinCHWValve.readDefaultVal().toInt()
+                    chilledWaterValveConfig.max =
+                        dabModulatingRtuSystemEquip.analog4MaxCHWValve.readDefaultVal().toInt()
+                }
+            }
+        }
+    }
+
     override fun getValueConfigs(): List<ValueConfig> {
-        return mutableListOf<ValueConfig>().apply {
+        return super.getValueConfigs() + mutableListOf<ValueConfig>().apply {
             add(chilledWaterTargetDelta)
             add(chilledWaterExitTemperatureMargin)
             add(chilledWaterMaxFlowRate)
             add(analog1ValveClosedPosition)
             add(analog1ValveFullPosition)
-            add(analog2MinFan)
-            add(analog2MaxFan)
-            add(analog3MinHeating)
-            add(analog3MaxHeating)
-            add(analogOut4MinCoolingLoop)
-            add(analogOut4MaxCoolingLoop)
-            add(analogOut1CoolingMin)
-            add(analogOut1CoolingMax)
-            add(analogOut2StaticPressureMin)
-            add(analogOut2StaticPressureMax)
-            add(analogOut3HeatingMin)
-            add(analogOut3HeatingMax)
-            add(analogOut4FreshAirMin)
-            add(analogOut4FreshAirMax)
         }
     }
 
     override fun toString(): String {
-        return "analog1OutputEnable ${analog1OutputEnable.enabled} analog2OutputEnable ${analog2OutputEnable.enabled} analog3OutputEnable ${analog3OutputEnable.enabled}" +
-                " analog4OutputEnable ${analog4OutputEnable.enabled} relay3OutputEnable ${relay3OutputEnable.enabled} relay7OutputEnable ${relay7OutputEnable.enabled}" +
-                " relay7Association ${relay7Association.associationVal}" + " adaptiveDeltaEnable ${adaptiveDeltaEnable.enabled}" +
-                " maximizedExitWaterTempEnable ${maximizedExitWaterTempEnable.enabled}" + " dcwbEnable ${dcwbEnable.enabled}"
+        return super.toString()+" DabModulatingRtuProfileConfig(model=$model, " +
+                "adaptiveDeltaEnable=${adaptiveDeltaEnable.enabled}, " +
+                "maximizedExitWaterTempEnable=${maximizedExitWaterTempEnable.enabled}, " +
+                "dcwbEnable=${dcwbEnable.enabled}, " +
+                "chilledWaterTargetDelta=${chilledWaterTargetDelta.currentVal}, " +
+                "chilledWaterExitTemperatureMargin=${chilledWaterExitTemperatureMargin.currentVal}, " +
+                "chilledWaterExitTemperatureTarget=${chilledWaterExitTemperatureTarget.currentVal}, " +
+                "chilledWaterMaxFlowRate=${chilledWaterMaxFlowRate.currentVal}, "+
+                "analog1ValveClosedPosition=${analog1ValveClosedPosition.currentVal}, " +
+                "analog1ValveFullPosition=${analog1ValveFullPosition.currentVal} "
     }
 
 }

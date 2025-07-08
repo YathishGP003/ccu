@@ -1,8 +1,10 @@
 package a75f.io.logic.bo.building;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.controlcomponents.util.ControllerNames.COOLING_STAGE_CONTROLLER;
+import static a75f.io.logic.controlcomponents.util.ControllerNames.FAN_SPEED_CONTROLLER;
+import static a75f.io.logic.controlcomponents.util.ControllerNames.HEATING_STAGE_CONTROLLER;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
@@ -11,13 +13,15 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.domain.config.ProfileConfiguration;
+import a75f.io.domain.equips.DomainEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
 import a75f.io.logic.bo.building.schedules.EquipOccupancyHandler;
 import a75f.io.logic.bo.building.schedules.EquipScheduleHandler;
-import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.statprofiles.statcontrollers.SplitControllerFactory;
+import a75f.io.logic.controlcomponents.handlers.StageControlHandler;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -69,18 +73,7 @@ public abstract class ZoneProfile
     {
         this.mProfileConfiguration = baseProfileConfiguration;
     }
-    
-    
-    public void removeProfileConfiguration(Short selectedModule)
-    {
-        this.mProfileConfiguration.remove(selectedModule);
-    }
-    
-    
-    public void refreshRoomDataInterface() {
-        if (mInterface != null)
-            mInterface.refreshView();
-    }
+
     public boolean isRFDead() {
         Equip equip = getEquip();
         if (equip == null) {
@@ -202,26 +195,5 @@ public abstract class ZoneProfile
         return equipOccupancyHandler;
     }
 
-    public boolean isOccupancyModeIsOccupied(Occupancy occupancyStatus) {
-        return  EnumSet.of(Occupancy.OCCUPIED,
-                Occupancy.DEMAND_RESPONSE_OCCUPIED,
-                Occupancy.AUTOAWAY,
-                Occupancy.KEYCARD_AUTOAWAY).contains(occupancyStatus);
-    }
-
-    public boolean isOccupancyModeIsUnOccupied(Occupancy occupancyStatus) {
-        return EnumSet.of(Occupancy.UNOCCUPIED,
-                Occupancy.PRECONDITIONING,
-                Occupancy.FORCEDOCCUPIED,
-                Occupancy.DEMAND_RESPONSE_UNOCCUPIED,
-                Occupancy.VACATION,
-                Occupancy.OCCUPANCYSENSING,
-                Occupancy.AUTOFORCEOCCUPIED,
-                Occupancy.EMERGENCY_CONDITIONING,
-                Occupancy.WINDOW_OPEN,
-                Occupancy.NO_CONDITIONING
-                ).contains(occupancyStatus);
-    }
-    
 }
 

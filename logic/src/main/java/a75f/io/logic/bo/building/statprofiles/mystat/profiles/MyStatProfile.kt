@@ -12,6 +12,8 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.statcontrollers.MyStatControlFactory
+import a75f.io.logic.bo.building.statprofiles.statcontrollers.SplitControllerFactory
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.MyStatBasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
@@ -19,6 +21,7 @@ import a75f.io.logic.bo.building.statprofiles.util.MyStatTuners
 import a75f.io.logic.bo.building.statprofiles.util.StatLoopController
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
 import a75f.io.logic.bo.building.statprofiles.util.updateLogicalPoint
+import a75f.io.logic.controlcomponents.util.ControllerNames
 import a75f.io.logic.controlcomponents.util.isOccupiedDcvHumidityControl
 import a75f.io.logic.util.uiutils.MyStatUserIntentHandler
 import a75f.io.logic.util.uiutils.MyStatUserIntentHandler.Companion.myStatStatus
@@ -47,6 +50,13 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
     var fanLoopOutput = 0
     var dcvLoopOutput = 0
     var compressorLoopOutput = 0 // used in HPU
+
+    var previousOccupancyStatus: Occupancy = Occupancy.NONE
+    var previousFanStageStatus: MyStatFanStages = MyStatFanStages.OFF
+    var defaultFanLoopOutput = 0.0
+    var previousFanLoopVal = 0
+    var previousFanLoopValStaged = 0
+    var fanLoopCounter = 0
 
     val loopController = StatLoopController()
 
@@ -106,12 +116,39 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
         fanEnabledStatus = false
     }
 
-    fun handleChangeOfDirection(currentTemp: Double, userIntents: UserIntents) {
+    private fun resetControllers(factory: MyStatControlFactory, myStatEquip: MyStatEquip) {
+        // Add controller here if any new stage controller is added
+        listOf(
+            ControllerNames.COOLING_STAGE_CONTROLLER,
+            ControllerNames.HEATING_STAGE_CONTROLLER,
+            ControllerNames.FAN_SPEED_CONTROLLER,
+            ControllerNames.COMPRESSOR_RELAY_CONTROLLER,
+        ).forEach {
+            val controller = factory.getController(it, myStatEquip)
+            controller?.resetController()
+        }
+
+        defaultFanLoopOutput = 0.0
+        previousFanLoopVal = 0
+        previousFanLoopValStaged = 0
+        fanLoopCounter = 0
+        resetLoopOutputs()
+        resetLogicalPoints()
+        myStatEquip.analogOutStages.clear()
+        myStatEquip.relayStages.clear()
+    }
+
+    fun handleChangeOfDirection(
+        currentTemp: Double, userIntents: UserIntents,
+        factory: MyStatControlFactory, equip: MyStatEquip
+    ) {
         if (currentTemp > userIntents.coolingDesiredTemp && state != ZoneState.COOLING) {
             loopController.resetCoolingControl()
             state = ZoneState.COOLING
+            resetControllers(factory, equip)
         } else if (currentTemp < userIntents.heatingDesiredTemp && state != ZoneState.HEATING) {
             loopController.resetHeatingControl()
+            resetControllers(factory, equip)
             state = ZoneState.HEATING
         }
     }

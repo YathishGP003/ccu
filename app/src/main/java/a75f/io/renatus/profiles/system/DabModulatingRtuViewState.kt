@@ -5,26 +5,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
-open class DabModulatingRtuViewState {
+class DabModulatingRtuViewState : ModulatingRtuViewState(){
 
-    var isAnalog1OutputEnabled by mutableStateOf (false)
+   /* var isAnalog1OutputEnabled by mutableStateOf (false)
     var isAnalog2OutputEnabled by mutableStateOf (false)
     var isAnalog3OutputEnabled by mutableStateOf (false)
     var isAnalog4OutputEnabled by mutableStateOf (false)
     var isRelay3OutputEnabled by mutableStateOf (false)
-    var isRelay7OutputEnabled by mutableStateOf (false)
+    var isRelay7OutputEnabled by mutableStateOf (false)*/
     var isAdaptiveDeltaEnabled by mutableStateOf (false)
     var ismaximizedExitWaterTempEnable by mutableStateOf (false)
     var isDcwbEnabled by mutableStateOf (false)
-    var relay7Association by mutableStateOf (0)
-    var analog4Association by mutableStateOf (0)
+    //var relay7Association by mutableStateOf (0)
+    //var analog4Association by mutableStateOf (0)
 
-    var analogOut1CoolingMin by mutableStateOf(2)
+    /*var analogOut1CoolingMin by mutableStateOf(2)
     var analogOut1CoolingMax by mutableStateOf(10)
     var analogOut2StaticPressureMin by mutableStateOf(2)
     var analogOut2StaticPressureMax by mutableStateOf(10)
     var analogOut4FreshAirMin by mutableStateOf(2)
-    var analogOut4FreshAirMax by mutableStateOf(10)
+    var analogOut4FreshAirMax by mutableStateOf(10)*/
     var chilledWaterTargetDelta by mutableStateOf(15.0)
     var chilledWaterExitTemperatureMargin by mutableStateOf(4.0)
     var chilledWaterExitTemperatureTarget by mutableStateOf(4.0)
@@ -38,7 +38,7 @@ open class DabModulatingRtuViewState {
     var analogOut4MinCoolingLoop by mutableStateOf(2)
     var analogOut4MaxCoolingLoop by mutableStateOf(10)
 
-    var unusedPortState by mutableStateOf(hashMapOf<String, Boolean>())
+    /*var unusedPortState by mutableStateOf(hashMapOf<String, Boolean>())
     var analogOut1CoolingTestSignal by  mutableStateOf (0.0)
     var analogOut2FanSpeedTestSignal by mutableStateOf (0.0)
     var analogOut3HeatingTestSignal by mutableStateOf (0.0)
@@ -48,7 +48,7 @@ open class DabModulatingRtuViewState {
     var relay7Test by mutableStateOf (false)
 
     var isStateChanged by mutableStateOf(false)
-    var isSaveRequired by mutableStateOf(false)
+    var isSaveRequired by mutableStateOf(false)*/
 
     var chilledWaterMaxFlowRateInc by mutableStateOf(1.0)
 
@@ -70,10 +70,16 @@ open class DabModulatingRtuViewState {
                 this.chilledWaterMaxFlowRate = config.chilledWaterMaxFlowRate.currentVal
                 this.chilledWaterMaxFlowRateInc = config.chilledWaterMaxFlowRate.incVal
 
-                this.relay7Association = config.relay7Association.associationVal
-                this.analog4Association = config.analog4Association.associationVal
+                this.analog1OutputAssociation = config.analog1OutputAssociation.associationVal
+                this.analog2OutputAssociation = config.analog2OutputAssociation.associationVal
+                this.analog3OutputAssociation = config.analog3OutputAssociation.associationVal
+                this.analog4OutputAssociation = config.analog4OutputAssociation.associationVal
+                this.relay3Association = config.relay3Association.associationVal
 
-                this.analogOut1CoolingMin = config.analogOut1CoolingMin.currentVal.toInt()
+                this.relay7Association = config.relay7Association.associationVal
+                //this.analog4Association = config.analog4Association.associationVal
+
+                /*this.analogOut1CoolingMin = config.analogOut1CoolingMin.currentVal.toInt()
                 this.analogOut1CoolingMax = config.analogOut1CoolingMax.currentVal.toInt()
                 this.analogOut2StaticPressureMin = config.analogOut2StaticPressureMin.currentVal.toInt()
                 this.analogOut2StaticPressureMax = config.analogOut2StaticPressureMax.currentVal.toInt()
@@ -86,7 +92,25 @@ open class DabModulatingRtuViewState {
                 this.analog3MinHeating = config.analog3MinHeating.currentVal.toInt()
                 this.analog3MaxHeating = config.analog3MaxHeating.currentVal.toInt()
                 this.analogOut4MinCoolingLoop = config.analogOut4MinCoolingLoop.currentVal.toInt()
-                this.analogOut4MaxCoolingLoop = config.analogOut4MaxCoolingLoop.currentVal.toInt()
+                this.analogOut4MaxCoolingLoop = config.analogOut4MaxCoolingLoop.currentVal.toInt()*/
+
+                this.thermistor1Enabled = config.thermistor1Enabled.enabled
+                this.thermistor2Enabled = config.thermistor2Enabled.enabled
+                this.thermistor1Association = config.thermistor1InAssociation.associationVal
+                this.thermistor2Association = config.thermistor2InAssociation.associationVal
+                this.analogIn1Enabled = config.analogIn1Enabled.enabled
+                this.analogIn2Enabled = config.analogIn2Enabled.enabled
+                this.analogIn1Association = config.analogIn1Association.associationVal
+                this.analogIn2Association = config.analogIn2Association.associationVal
+
+                this.analog1ValveClosedPosition = config.analog1ValveClosedPosition.currentVal.toInt()
+                this.analog1ValveFullPosition = config.analog1ValveFullPosition.currentVal.toInt()
+
+                this.analog1OutMinMaxConfig = config.analog1OutMinMaxConfig
+                this.analog2OutMinMaxConfig = config.analog2OutMinMaxConfig
+                this.analog3OutMinMaxConfig = config.analog3OutMinMaxConfig
+                this.analog4OutMinMaxConfig = config.analog4OutMinMaxConfig
+
                 this.unusedPortState = config.unusedPorts
             }
         }
@@ -108,10 +132,25 @@ open class DabModulatingRtuViewState {
         config.chilledWaterExitTemperatureTarget.currentVal = this.chilledWaterExitTemperatureTarget
         config.chilledWaterMaxFlowRate.currentVal = this.chilledWaterMaxFlowRate
 
+        config.analog1OutputAssociation.associationVal = this.analog1OutputAssociation
+        config.analog2OutputAssociation.associationVal = this.analog2OutputAssociation
+        config.analog3OutputAssociation.associationVal = this.analog3OutputAssociation
+        config.analog4OutputAssociation.associationVal = this.analog4OutputAssociation
+        config.relay3Association.associationVal = this.relay3Association
         config.relay7Association.associationVal = this.relay7Association
-        config.analog4Association.associationVal = this.analog4Association
 
-        config.analogOut1CoolingMin.currentVal = this.analogOut1CoolingMin.toDouble()
+        config.thermistor1Enabled.enabled = this.thermistor1Enabled
+        config.thermistor2Enabled.enabled = this.thermistor2Enabled
+        config.analogIn1Enabled.enabled = this.analogIn1Enabled
+        config.analogIn2Enabled.enabled = this.analogIn2Enabled
+        config.thermistor1InAssociation.associationVal = this.thermistor1Association
+        config.thermistor2InAssociation.associationVal = this.thermistor2Association
+        config.analogIn1Association.associationVal = this.analogIn1Association
+        config.analogIn2Association.associationVal = this.analogIn2Association
+
+        //config.analog4Association.associationVal = this.analog4Association
+
+        /*config.analogOut1CoolingMin.currentVal = this.analogOut1CoolingMin.toDouble()
         config.analogOut1CoolingMax.currentVal = this.analogOut1CoolingMax.toDouble()
         config.analogOut2StaticPressureMin.currentVal = this.analogOut2StaticPressureMin.toDouble()
         config.analogOut2StaticPressureMax.currentVal = this.analogOut2StaticPressureMax.toDouble()
@@ -124,7 +163,15 @@ open class DabModulatingRtuViewState {
         config.analog3MinHeating.currentVal = this.analog3MinHeating.toDouble()
         config.analog3MaxHeating.currentVal = this.analog3MaxHeating.toDouble()
         config.analogOut4MinCoolingLoop.currentVal = this.analogOut4MinCoolingLoop.toDouble()
-        config.analogOut4MaxCoolingLoop.currentVal = this.analogOut4MaxCoolingLoop.toDouble()
+        config.analogOut4MaxCoolingLoop.currentVal = this.analogOut4MaxCoolingLoop.toDouble()*/
+
+        config.analog1ValveClosedPosition.currentVal = this.analog1ValveClosedPosition.toDouble()
+        config.analog1ValveFullPosition.currentVal = this.analog1ValveFullPosition.toDouble()
+        config.analog1OutMinMaxConfig = this.analog1OutMinMaxConfig
+        config.analog2OutMinMaxConfig = this.analog2OutMinMaxConfig
+        config.analog3OutMinMaxConfig = this.analog3OutMinMaxConfig
+        config.analog4OutMinMaxConfig = this.analog4OutMinMaxConfig
+
         config.unusedPorts = this.unusedPortState
     }
 }

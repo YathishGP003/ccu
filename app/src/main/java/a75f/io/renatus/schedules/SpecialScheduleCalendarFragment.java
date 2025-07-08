@@ -24,7 +24,7 @@ import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.renatus.R;
 
 public class SpecialScheduleCalendarFragment extends DialogFragment{
-    private static final int SPECIAL_SCHEDULE_DAYS_LIMIT = 365;
+    private static final int SPECIAL_SCHEDULE_DAYS_LIMIT = 7;
     private static final int DAYS_IN_YEAR = 365;
     private MaterialCalendarView calendarView;
     private HDict specialScheduleHDict;

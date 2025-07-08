@@ -102,6 +102,7 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
         val averageDesiredTemp = getAverageTemp(userIntents)
         val fanModeSaved = FanModeCacheStorage.getHyperStatFanModeCache().getFanModeFromCache(equip.equipRef)
         val basicSettings = fetchBasicSettings(equip)
+        val controllerFactory = HyperStatControlFactory(equip)
 
         logicalPointsList = getHSLogicalPointList(equip, config!!)
         curState = ZoneState.DEADBAND
@@ -118,7 +119,7 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
 
         loopController.initialise(tuners = hyperStatTuners)
         loopController.dumpLogs()
-        handleChangeOfDirection(currentTemp, userIntents)
+        handleChangeOfDirection(currentTemp, userIntents, controllerFactory, equip)
 
         resetEquip(equip)
         evaluateLoopOutputs(userIntents, basicSettings, hyperStatTuners, config, equip)
@@ -138,7 +139,7 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
             compressorLoopOutput, equip.compressorLoopOutput
         )
         if (basicSettings.fanMode != StandaloneFanStage.OFF) {
-            operateRelays(config as HpuConfiguration, basicSettings, equip)
+            operateRelays(config as HpuConfiguration, basicSettings, equip, controllerFactory)
             operateAnalogOutputs(
                 config,
                 equip,
@@ -494,9 +495,9 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
 
 
     private fun operateRelays(
-        config: HpuConfiguration, basicSettings: BasicSettings, equip: HpuV2Equip
+        config: HpuConfiguration, basicSettings: BasicSettings, equip: HpuV2Equip,
+        controllerFactory: HyperStatControlFactory
     ) {
-        val controllerFactory = HyperStatControlFactory(equip)
         controllerFactory.addControllers(config)
         runControllers(equip, basicSettings, config)
     }
@@ -587,9 +588,7 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
                 ): Boolean {
                     val mode = equip.fanOpMode.readPriorityVal().toInt()
                     return if (mode == StandaloneFanStage.AUTO.ordinal) {
-                        (canWeRunFan(basicSettings) && (currentState
-                                || (fanEnabledStatus && fanLoopOutput > 0 && isLowestStageActive)
-                                || (isLowestStageActive && runFanLowDuringDoorWindow)))
+                        (canWeRunFan(basicSettings) && (currentState || (isLowestStageActive && runFanLowDuringDoorWindow)))
                     } else {
                         checkUserIntentAction(stage)
                     }

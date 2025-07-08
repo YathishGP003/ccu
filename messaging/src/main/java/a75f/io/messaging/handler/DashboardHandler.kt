@@ -90,9 +90,6 @@ fun getDashboardConfiguration() {
     })
 }
 
-fun setDashboardListener(listener: DashboardListener) {
-    DashboardHandler.dashboardListener = listener
-}
 
 
 

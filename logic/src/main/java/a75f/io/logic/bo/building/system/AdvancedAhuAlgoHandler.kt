@@ -230,6 +230,9 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
             AdvancedAhuRelayAssociationType.AHU_FRESH_AIR_FAN_COMMAND -> getAhuFreshAirFanRunCommandRelayState(
                     systemOccupied, ahuSettings.systemEquip.co2LoopOutput.readHisVal())
             AdvancedAhuRelayAssociationType.EXHAUST_FAN -> getExhaustFan1CommandRelayState(ahuSettings, stageIndex)
+            AdvancedAhuRelayAssociationType.COMPRESSOR_SPEED -> TODO()
+            AdvancedAhuRelayAssociationType.CHANGE_OVER_O_COOLING -> TODO()
+            AdvancedAhuRelayAssociationType.CHANGE_OVER_B_HEATING -> TODO()
         }
         return Pair(associatedPoint, pointVal)
     }
@@ -333,4 +336,5 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
         return ((ahuSettings.isMechanicalCoolingAvailable && ahuSettings.systemState == State.COOLING) ||
                 (ahuSettings.isMechanicalHeatingAvailable && ahuSettings.systemState == State.HEATING))
     }
+
 }

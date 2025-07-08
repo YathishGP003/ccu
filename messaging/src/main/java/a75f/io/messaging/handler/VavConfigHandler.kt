@@ -38,7 +38,9 @@ class VavConfigHandler {
             if ((config.profileType == ProfileType.VAV_REHEAT.name) && relay2OpEnabled){
                 relay2Point.setPointRef(reheatCmdPoint["id"].toString())
             } else {
-                relay2Point.setPointRef(null)
+                if (config.profileType == ProfileType.VAV_REHEAT.name) {
+                    relay2Point.setPointRef(null)
+                }
             }
             hayStack.updatePoint(relay2Point.build(), relay2["id"].toString())
 

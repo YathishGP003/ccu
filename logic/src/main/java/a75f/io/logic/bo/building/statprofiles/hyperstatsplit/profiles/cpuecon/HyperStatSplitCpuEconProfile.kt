@@ -415,6 +415,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
 
             // If Conditioning Mode is AUTO or COOL_ONLY, run full economizer loop algo
             if (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO || basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
+                if (matTemp < oaoDamperMatTarget) matThrottle = true
                 if (outsideAirLoopOutput > effectiveOutsideDamperMinOpen) {
                     outsideAirFinalLoopOutput =
                         if (matTemp < oaoDamperMatTarget && matTemp > oaoDamperMatMin) {
@@ -422,7 +423,6 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
                         } else {
                             if (matTemp <= oaoDamperMatMin) 0 else outsideAirLoopOutput
                         }
-                    if (matTemp < oaoDamperMatTarget) matThrottle = true
                 } else {
                     outsideAirFinalLoopOutput = effectiveOutsideDamperMinOpen
                 }
@@ -450,6 +450,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
             // Continue to use same the mixed air low-limit and high-limit as full economizing scenario.
             else {
                 val dcvOnlyOutsideAirLoopOutput = max(dcvLoopOutput, effectiveOutsideDamperMinOpen)
+                if (matTemp < oaoDamperMatTarget) matThrottle = true
 
                 if (dcvOnlyOutsideAirLoopOutput > effectiveOutsideDamperMinOpen) {
                     outsideAirFinalLoopOutput =
@@ -458,7 +459,6 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
                         } else {
                             if (matTemp <= oaoDamperMatMin) 0 else dcvOnlyOutsideAirLoopOutput
                         }
-                    if (matTemp < oaoDamperMatTarget) matThrottle = true
                 } else {
                     outsideAirFinalLoopOutput = effectiveOutsideDamperMinOpen
                 }

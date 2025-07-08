@@ -378,8 +378,9 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
         else mNext.setVisibility(View.GONE);
 
         if (!isFreshRegister) {
-            ArrayList<HashMap> equips = ccuHsApi.readAll("equip and (zone or bypassDamper or oao)");
-            mAddressBandSpinner.setEnabled(equips == null || equips.isEmpty());
+            List<HashMap<Object, Object>> equips = ccuHsApi.readAllEntities("equip and (zone or bypassDamper or oao)");
+            List<HashMap<Object, Object>> connectModules = ccuHsApi.readAllEntities("device and connectModule");
+            mAddressBandSpinner.setEnabled(equips.isEmpty() && connectModules.isEmpty());
         }
 
         imageTemp.setOnClickListener(view -> {
@@ -1007,8 +1008,9 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
 
             if (intent.getAction().equals(ACTION_SETTING_SCREEN)) {
                 if (mAddressBandSpinner != null) {
-                    ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and (zone or bypassDamper or oao)");
-                    mAddressBandSpinner.setEnabled(equips == null || equips.isEmpty());
+                    List<HashMap<Object, Object>>  equips = CCUHsApi.getInstance().readAllEntities("equip and (zone or bypassDamper or oao)");
+                    List<HashMap<Object, Object>> connectModule = CCUHsApi.getInstance().readAllEntities("device and connectModule");
+                    mAddressBandSpinner.setEnabled(equips.isEmpty() && connectModule.isEmpty());
                 }
             }
         }

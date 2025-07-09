@@ -1,44 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="a75f.io.renatus">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="a75f.io.renatus">
 
-    <uses-feature android:name="android.hardware.usb.host"/>
-    <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
-    <uses-feature android:name="android.hardware.bluetooth" android:required="true"/>
-    <uses-permission android:name="android.permission.ACCESS_ALL_DOWNLOADS"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_SUPERUSER"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-feature android:name="android.hardware.usb.host" />
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="true" />
+
+    <uses-permission android:name="android.permission.ACCESS_ALL_DOWNLOADS" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_SUPERUSER" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"  android:usesPermissionFlags="neverForLocation" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
-    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED"
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_PRIVILEGED"
         tools:ignore="ProtectedPermissions" />
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.MANAGE_USB" tools:ignore="ProtectedPermissions"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_LOGS" tools:ignore="ProtectedPermissions"/>
-    <uses-permission android:name="android.permission.REBOOT" tools:ignore="protectedPermissions"/>
-    <uses-permission android:name="android.permission.SET_TIME" tools:ignore="ProtectedPermissions"/>
-    <uses-permission android:name="android.permission.SET_TIME_ZONE" tools:ignore="ProtectedPermissions"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:name="android.permission.MANAGE_USB"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.READ_LOGS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.REBOOT"
+        tools:ignore="protectedPermissions" />
+    <uses-permission
+        android:name="android.permission.SET_TIME"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.SET_TIME_ZONE"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.USB_PERMISSION" />
+    <uses-permission android:name="android.hardware.usb.host" />
 
     <queries>
         <!-- Explicit package name -->
@@ -54,22 +75,21 @@
     </queries>
 
 
-
     <application
-            android:name=".RenatusApp"
-            android:allowBackup="false"
-            android:icon="${appicon}"
-            android:label="${applicationLabel}"
-            android:roundIcon="${roundicon}"
-            android:supportsRtl="true"
-            android:theme="@style/RenatusApp75FTheme"
-            android:usesCleartextTraffic="true"
-            android:largeHeap="true"
-            tools:replace="android:label">
+        android:name=".RenatusApp"
+        android:allowBackup="false"
+        android:icon="${appicon}"
+        android:label="${applicationLabel}"
+        android:largeHeap="true"
+        android:roundIcon="${roundicon}"
+        android:supportsRtl="true"
+        android:theme="@style/RenatusApp75FTheme"
+        android:usesCleartextTraffic="true"
+        tools:replace="android:label">
 
-        <service android:name=".bluetooth.BLEProvisionService"/>
-        <service android:name=".ota.OTAUpdateHandlerService"/>
-        <service android:name=".ota.OTAUpdateService"/>
+        <service android:name=".bluetooth.BLEProvisionService" />
+        <service android:name=".ota.OTAUpdateHandlerService" />
+        <service android:name=".ota.OTAUpdateService" />
         <service
             android:name="a75f.io.usbserial.UsbService"
             android:enabled="true"
@@ -84,32 +104,33 @@
             android:foregroundServiceType="connectedDevice" />
 
         <!-- TODO we don't want this and shouldn't need it, we should monitor the USB connection, not kick the application whenever it restarts -->
-        <receiver android:name=".util.Receiver.ConnectionChangeReceiver"
+        <receiver
+            android:name=".util.Receiver.ConnectionChangeReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".RebootHandlerService"
+        <receiver
+            android:name=".RebootHandlerService"
             android:enabled="true"
-            android:exported="true"/>
+            android:exported="true" />
 
         <activity
-                android:name=".SplashActivity"
+            android:name=".SplashActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:resizeableActivity="false"
-                >
+            android:resizeableActivity="false">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <action android:name="a75f.io.renatus.SPLASH_ACTIVITY"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="a75f.io.renatus.SPLASH_ACTIVITY" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-                android:name=".registration.FreshRegistration"
-                android:screenOrientation="sensorLandscape"></activity>
+            android:name=".registration.FreshRegistration"
+            android:screenOrientation="sensorLandscape"></activity>
 
         <activity
             android:name=".RenatusLandingActivity"
@@ -117,47 +138,45 @@
             android:label="RenatusLandingActivity"
             android:launchMode="singleTask"
             android:resizeableActivity="false"
-            android:screenOrientation="sensorLandscape"
-            >
+            android:screenOrientation="sensorLandscape">
 
 
         </activity>
 
-        <activity
-                android:name=".ENGG.RenatusEngineeringActivity"></activity>
+        <activity android:name=".ENGG.RenatusEngineeringActivity"></activity>
 
-        <activity
-                android:name=".RegisterGatherSiteDetails"></activity>
+        <activity android:name=".RegisterGatherSiteDetails"></activity>
 
 
+        <activity android:name=".RegisterGatherCCUDetails"></activity>
 
-        <activity
-                android:name=".RegisterGatherCCUDetails"></activity>
+        <activity android:name=".safemode.SafeModeActivity"></activity>
 
-        <activity
-            android:name=".safemode.SafeModeActivity"></activity>
-
-        <service android:name="com.raygun.raygun4android.services.CrashReportingPostService"
+        <service
+            android:name="com.raygun.raygun4android.services.CrashReportingPostService"
             android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
+            android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <!--        Comment next line out so raygun stays in current process, not firing up its own process and application instance. -->
         <!--        This may cause some crash reports to not make it to the server. -->
         <!--        Can uncomment once Application is a lot lighter, i.e. new ProcessJob instances don't automatically kickoff etc. -->
         <!--           android:process=":crashreportingpostservice"/>-->
 
-        <service android:name="com.raygun.raygun4android.services.RUMPostService"
+        <service
+            android:name="com.raygun.raygun4android.services.RUMPostService"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE"
             android:process=":rumpostservice" />
 
-        <meta-data android:name="com.raygun.raygun4android.apikey"
+        <meta-data
+            android:name="com.raygun.raygun4android.apikey"
             android:value="7jO0gpjtHlBZhyN4cZuHQ" />
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
-        <service android:name=".WeatherDataDownloadService"
+        <service
+            android:name=".WeatherDataDownloadService"
             tools:ignore="Instantiatable" />
 
         <receiver

@@ -11,6 +11,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.interfaces.ModbusDataInterface
+import a75f.io.logic.interfaces.MstpDataInterface
 import a75f.io.logic.interfaces.ZoneDataInterface
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.HTTP_SERVER_STATUS
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED
@@ -71,6 +72,7 @@ class HttpServer {
     private val HTTP_SERVER = "HttpServer"
 
     companion object{
+        var mstpDataInterface: MstpDataInterface? = null
         var currentTempInterface: ZoneDataInterface? = null
         var modbusDataInterface: ModbusDataInterface? = null
         var sharedPreferences: SharedPreferences? = null
@@ -250,7 +252,7 @@ class HttpServer {
                             }  else {
                                 CcuLog.d(L.TAG_CCU_BACNET_MSTP, "BACnet MSTP Stack initialization failed. Not sending COV Subscription")
                             }
-
+                            mstpDataInterface?.updateMstpBacnetUi(stackStatus.toBoolean(), "", "")
                         }
                     }
                     call.respond(HttpStatusCode.OK)

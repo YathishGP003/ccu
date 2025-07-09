@@ -265,8 +265,12 @@ public class UsbModbusService extends Service {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
+        CcuLog.d(TAG, "--onDestroy--");
+        shouldStop = true;
+        running.interrupt();
+        unregisterReceiver(usbReceiver);
         UsbModbusService.SERVICE_CONNECTED = false;
+        super.onDestroy();
     }
 
 
@@ -424,13 +428,15 @@ public class UsbModbusService extends Service {
     
     private final LinkedBlockingQueue<byte[]> modbusQueue = new LinkedBlockingQueue<byte[]>();
 
+    private volatile boolean shouldStop = false;
+
     Thread running = new Thread() {
         @Override
         public void run() {
             super.run();
             byte[] data;
 
-            while (true) {
+            while (!shouldStop) {
                 try {
                     if (!serialPortConnected) {
                         CcuLog.i(TAG, "MB Serial Port is not connected sleeping");
@@ -447,7 +453,7 @@ public class UsbModbusService extends Service {
                         sleep(5000);
                         continue;
                     }
-                    
+
                     if (serialPort != null ) {
                         data = modbusQueue.poll(1, TimeUnit.SECONDS);
                         if (data != null && data.length > 0) {

@@ -6,6 +6,7 @@ import a75f.io.domain.util.CommonQueries
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil
+import a75f.io.logic.util.PreferenceUtil
 import a75f.io.renatus.ota.OTAUpdateHandlerService
 import a75f.io.usbserial.UsbConnectService
 import a75f.io.usbserial.UsbModbusService
@@ -83,12 +84,16 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
                 usbConnection,
                 null
             ) // Start UsbService(if it was not started before) and
-            CcuLog.d(TAG_CCU_SERVICE_INIT, "startService for UsbModbusService")
-            startUsbModbusService(
-                UsbModbusService::class.java,
-                usbModbusConnection,
-                null
-            ) // Start UsbService(if it was not
+            if(!UtilityApplication.isBacnetMstpInitialized()){
+                startUsbModbusService(
+                    UsbModbusService::class.java,
+                    usbModbusConnection,
+                    null
+                ) // Start UsbService(if it was not
+                CcuLog.d(TAG_CCU_SERVICE_INIT, "startService for UsbModbusService")
+            }else{
+                CcuLog.d(TAG_CCU_SERVICE_INIT, "--mstp is initialized not starting modbus service--")
+            }
             CcuLog.d(TAG_CCU_SERVICE_INIT, "startService for UsbConnectService")
             startConnectService(UsbConnectService::class.java, usbConnectConnection, null)
         }
@@ -323,6 +328,15 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
             context.unbindService(usbConnection)
             context.unbindService(usbModbusConnection)
             context.unbindService(usbConnectConnection)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun unbindModbusServices() {
+        try {
+            CcuLog.d(TAG_CCU_SERVICE_INIT, "Unbinding modbus service")
+            context.unbindService(usbModbusConnection)
         } catch (e: Exception) {
             e.printStackTrace()
         }

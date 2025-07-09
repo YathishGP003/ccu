@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.L.TAG_CCU_BACNET_MSTP;
 import static a75f.io.logic.bo.building.bacnet.BacnetEquip.TAG_BACNET;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE;
@@ -101,8 +102,11 @@ import a75f.io.renatus.util.DataFdObj;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
 import a75f.io.renatus.util.TestSignalManager;
+import a75f.io.renatus.util.UsbHelper;
 import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
 import a75f.io.renatus.util.remotecommand.bundle.BundleInstallManager;
+import a75f.io.usbserial.UsbModbusService;
+import a75f.io.usbserial.UsbPortTrigger;
 import a75f.io.usbserial.UsbServiceActions;
 import kotlin.Pair;
 
@@ -375,6 +379,26 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
         }
 
         checkBacnetDeviceType();
+        if(UtilityApplication.isBacnetMstpInitialized()) {
+            CcuLog.i(TAG_CCU_BACNET_MSTP,"--renatus landing act mstp is initialized check for serial ports--");
+            executorService.submit(() -> {
+                RenatusApp.backgroundServiceInitiator.unbindServices();
+                CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 1--unbind modbus service--");
+
+                Intent intent = new Intent(getApplicationContext(), UsbModbusService.class);
+                getApplicationContext().stopService(intent);
+                CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 2--stop modbus service--");
+
+                CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 3--apply permissions--");
+                UsbHelper.runChmodUsbDevices();
+                UsbPortTrigger.triggerUsbSerialBinding(getApplicationContext());
+                UsbHelper.listUsbDevices(getApplicationContext());
+                UsbHelper.runAsRoot("ls /dev/tty*");
+                UsbHelper.getPortAddressMstpDevices(getApplicationContext());
+            });
+        }else{
+            CcuLog.i(TAG,"--no mstp dont check for serial ports--");
+        }
     }
 
     public void showFloorIcon() {
@@ -1080,4 +1104,5 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
             }
         }
     }
+
 }

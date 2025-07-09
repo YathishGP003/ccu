@@ -102,6 +102,7 @@ import java.util.concurrent.Executors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.interfaces.MstpDataInterface;
 import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -114,14 +115,17 @@ import a75f.io.renatus.util.DataFd;
 import a75f.io.renatus.util.DataFdObj;
 import a75f.io.renatus.util.DataMstp;
 import a75f.io.renatus.util.DataMstpObj;
+import a75f.io.renatus.util.UsbHelper;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.restserver.server.HttpServer;
+import a75f.io.usbserial.UsbModbusService;
+import a75f.io.usbserial.UsbPortTrigger;
 import a75f.io.util.DashboardUtilKt;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class Communication extends Fragment {
+public class Communication extends Fragment implements MstpDataInterface {
     
     private final String PREF_MB_BAUD_RATE = "mb_baudrate";
     private final String PREF_MB_PARITY = "mb_parity";
@@ -317,8 +321,21 @@ public class Communication extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        HttpServer.Companion.setMstpDataInterface(this);
         this.rootView = view;
-//        runChmodUsbDevices();
+        if(UtilityApplication.isBacnetMstpInitialized()) {
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "mstp config found prepare for mstp init");
+            executorService.submit(() -> {
+                UsbHelper.runChmodUsbDevices();
+                UsbPortTrigger.triggerUsbSerialBinding(requireContext());
+                UsbHelper.listUsbDevices(requireContext());
+                UsbHelper.runAsRoot("ls /dev/tty*");
+                updateMstpUi();
+            });
+        }else{
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "no mstp config found");
+        }
+
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
         String selectedDeviceType = sharedPreferences.getString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_NORMAL);
@@ -328,20 +345,6 @@ public class Communication extends Fragment {
             mstpConfigLayout.setVisibility(View.VISIBLE);
         } else {
             mstpConfigLayout.setVisibility(View.GONE);
-        }
-
-        ArrayList<String> usbSerialPorts = getPortAddressMstpDevices();
-
-        if(!usbSerialPorts.isEmpty() && usbSerialPorts.get(0).contains("USB")) {
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "USB Serial Ports found: " + usbSerialPorts);
-            usbSerial.setText("Connected");
-            portAddress = usbSerialPorts.get(0);
-            isUSBSerialPortAvailable = true;
-        } else {
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "No USB Serial Ports found");
-            usbSerial.setText("Not Connected");
-            usbSerial.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
-            isUSBSerialPortAvailable = false;
         }
 
         ArrayAdapter<String> spinnerBaudRateAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.mb_config_baudrate_array))));
@@ -470,47 +473,11 @@ public class Communication extends Fragment {
         }
 
         btnMstpInitialize.setOnClickListener(v -> {
-            writeIntPref(PREF_MSTP_BAUD_RATE, Integer.parseInt(mstpSpinnerBaudRate.getSelectedItem().toString()));
-            writeIntPref(PREF_MSTP_SOURCE_ADDRESS, Integer.parseInt(etMstpSourceAddress.getText().toString()));
-            writeIntPref(PREF_MSTP_MAX_MASTER, Integer.parseInt(etMstpMaxMaster.getText().toString()));
-            writeIntPref(PREF_MSTP_MAX_FRAME, Integer.parseInt(etMstpMaxFrame.getText().toString()));
-            writeIntPref(PREF_MSTP_DEVICE_ID, Integer.parseInt(etMstpDeviceId.getText().toString()));
-
-            if (!HttpServer.Companion.getInstance(context).isServerRunning()) {
-                startRestServer();
-            }
-
-            DataMstpObj dataMstpObj = new DataMstpObj();
-            dataMstpObj.setDataMstp(new DataMstp(
-                    Integer.parseInt(mstpSpinnerBaudRate.getSelectedItem().toString()),
-                    Integer.parseInt(etMstpSourceAddress.getText().toString()),
-                    Integer.parseInt(etMstpMaxMaster.getText().toString()),
-                    Integer.parseInt(etMstpMaxFrame.getText().toString()),
-                    Integer.parseInt(etMstpDeviceId.getText().toString()),
-                    portAddress
-            ));
-
-            String jsonString = new Gson().toJson(dataMstpObj);
-            CcuLog.d(TAG_CCU_BACNET, "MSTP output-->" + jsonString);
-            sharedPreferences.edit().putString(BACNET_MSTP_CONFIGURATION, jsonString).apply();
-            sharedPreferences.edit().putBoolean(IS_BACNET_MSTP_INITIALIZED, true).apply();
-
-            hideMstpConfigView();
-            if (BacnetUtilKt.isAppRunning(BAC_APP_PACKAGE_NAME)) {
-                Intent intent = new Intent("MSTP_CONFIGURATION");
-                intent.putExtra("message", "MSTP");
-                intent.putExtra("data", jsonString);
-                context.sendBroadcast(intent);
-            } else {
-                BacnetUtilKt.launchBacApp(context, BROADCAST_BACNET_APP_START, "Start BACnet App", ipDeviceInstanceNumber.getText().toString(),true);
-            }
-
-            displayCustomToastMessageOnSuccess("BACnet - MSTP Configuration initialized successfully");
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "MSTP configuration initialized");
-
+            prepareMstpInit();
         });
 
         btnMstpDisable.setOnClickListener(v -> {
+            RenatusApp.backgroundServiceInitiator.initServices();
             sharedPreferences.edit().putBoolean(IS_BACNET_MSTP_INITIALIZED, false).apply();
             Intent intent = new Intent("MSTP_STOP");
             context.sendBroadcast(intent);
@@ -631,6 +598,26 @@ public class Communication extends Fragment {
         tvMstpDeviceId.setVisibility(View.GONE);
     }
 
+    private void updateMstpUi(){
+        String textMessage;
+        ArrayList<String> usbSerialPorts = getPortAddressMstpDevices();
+
+        if(!usbSerialPorts.isEmpty() && usbSerialPorts.get(0).contains("USB")) {
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "USB Serial Ports found: " + usbSerialPorts);
+            portAddress = usbSerialPorts.get(0);
+            isUSBSerialPortAvailable = true;
+            textMessage = "Connected";
+        } else {
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "No USB Serial Ports found");
+            usbSerial.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
+            isUSBSerialPortAvailable = false;
+            textMessage = "Not Connected";
+        }
+
+        String finalTextMessage = textMessage;
+        requireActivity().runOnUiThread(() -> usbSerial.setText(finalTextMessage));
+    }
+
     private void hideMstpConfigView() {
         mstpSpinnerBaudRate.setVisibility(View.GONE);
         tvMstpBaudRate.setText(String.valueOf(readIntPref(PREF_MSTP_BAUD_RATE, 38400)));
@@ -657,7 +644,7 @@ public class Communication extends Fragment {
         if(etMstpDeviceId.getText().toString().isEmpty() || !CCUUiUtil.isValidNumber(Integer.parseInt(etMstpDeviceId.getText().toString()), 1, 4194302, 1)) {
             return false;
         }
-        return isUSBSerialPortAvailable;
+        return true;
     }
 
     private void validateAndUpdateMstpConfig(EditText view, String key, String value, int min, int max, int multiplier, String errorMessage) {
@@ -1111,6 +1098,20 @@ public class Communication extends Fragment {
         } else {
             bacnetConfigSpinner.setSelection(BACnetConfigurationType.NORMAL.ordinal());
         }
+    }
+
+    @Override
+    public void updateMstpBacnetUi(Boolean isInitSuccess, String message, String errorCode) {
+        CcuLog.d(TAG_CCU_BACNET_MSTP, "updateMstpBacnetUi-->"+isInitSuccess);
+        requireActivity().runOnUiThread(() -> {
+            if(isInitSuccess){
+                displayCustomToastMessageOnSuccess("BACnet - MSTP Configuration initialized successfully");
+                hideMstpConfigView();
+            }else{
+                enableMstpConfigView();
+                Toast.makeText(requireContext(), "MSTP initialization Failed.", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private class EditTextWatcher implements TextWatcher {
@@ -1903,28 +1904,103 @@ public class Communication extends Fragment {
     }
 
     private void runChmodUsbDevices() {
+        CcuLog.e(TAG_CCU_BACNET_MSTP, "--runChmodUsbDevices--");
         try {
             // Start root shell
             Process process = Runtime.getRuntime().exec("su");
 
-            // Command to run
-            String command = "chmod 666 /dev/bus/usb/*\n";
+            String[] commands = {
+                    "chmod 755 /dev/bus/usb\n",
+                    "chmod 755 /dev/bus/usb/*\n",
+                    "chmod 666 /dev/bus/usb/*/*\n",
+                    "exit\n"
+            };
 
-            // Write the command to the process's output stream
+            // Send commands to the shell
             DataOutputStream os = new DataOutputStream(process.getOutputStream());
-            os.writeBytes(command);
-            os.writeBytes("exit\n");
+            for (String command : commands) {
+                os.writeBytes(command);
+            }
             os.flush();
 
             // Wait for the command to complete
             process.waitFor();
 
-            // Optional: log result
+            // Log exit code
             CcuLog.d(TAG_CCU_BACNET_MSTP, "chmod executed with exit code: " + process.exitValue());
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             CcuLog.e(TAG_CCU_BACNET_MSTP, "Error executing chmod", e);
         }
+    }
+
+    private void prepareMstpInit(){
+        executorService.submit(() -> {
+            RenatusApp.backgroundServiceInitiator.unbindServices();
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 1--unbind modbus service--");
+
+            Intent intent = new Intent(requireContext(), UsbModbusService.class);
+            requireContext().stopService(intent);
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 2--stop modbus service--");
+
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 3--apply permissions--");
+
+            UsbHelper.runChmodUsbDevices();
+            UsbPortTrigger.triggerUsbSerialBinding(requireContext());
+            UsbHelper.listUsbDevices(requireContext());
+            UsbHelper.runAsRoot("ls /dev/tty*");
+
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 4--update ui--");
+            updateMstpUi();
+
+            if(!isUSBSerialPortAvailable){
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "Check USB connection, MSTP can not initialized.", Toast.LENGTH_LONG).show();
+                });
+                CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 4--update ui Check USB connection, mstp can not initialized.--");
+                return;
+            }
+
+            writeIntPref(PREF_MSTP_BAUD_RATE, Integer.parseInt(mstpSpinnerBaudRate.getSelectedItem().toString()));
+            writeIntPref(PREF_MSTP_SOURCE_ADDRESS, Integer.parseInt(etMstpSourceAddress.getText().toString()));
+            writeIntPref(PREF_MSTP_MAX_MASTER, Integer.parseInt(etMstpMaxMaster.getText().toString()));
+            writeIntPref(PREF_MSTP_MAX_FRAME, Integer.parseInt(etMstpMaxFrame.getText().toString()));
+            writeIntPref(PREF_MSTP_DEVICE_ID, Integer.parseInt(etMstpDeviceId.getText().toString()));
+
+            if (!HttpServer.Companion.getInstance(context).isServerRunning()) {
+                startRestServer();
+            }
+
+            DataMstpObj dataMstpObj = new DataMstpObj();
+            dataMstpObj.setDataMstp(new DataMstp(
+                    Integer.parseInt(mstpSpinnerBaudRate.getSelectedItem().toString()),
+                    Integer.parseInt(etMstpSourceAddress.getText().toString()),
+                    Integer.parseInt(etMstpMaxMaster.getText().toString()),
+                    Integer.parseInt(etMstpMaxFrame.getText().toString()),
+                    Integer.parseInt(etMstpDeviceId.getText().toString()),
+                    portAddress
+            ));
+
+            String jsonString = new Gson().toJson(dataMstpObj);
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 5--create mstp init json--"+jsonString);
+            sharedPreferences.edit().putString(BACNET_MSTP_CONFIGURATION, jsonString).apply();
+            sharedPreferences.edit().putBoolean(IS_BACNET_MSTP_INITIALIZED, true).apply();
+
+
+            if (BacnetUtilKt.isAppRunning(BAC_APP_PACKAGE_NAME)) {
+                Intent intentBacApp = new Intent("MSTP_CONFIGURATION");
+                intentBacApp.putExtra("message", "MSTP");
+                intentBacApp.putExtra("data", jsonString);
+                context.sendBroadcast(intentBacApp);
+            } else {
+                BacnetUtilKt.launchBacApp(context, BROADCAST_BACNET_APP_START, "Start BACnet App", ipDeviceInstanceNumber.getText().toString(),true);
+            }
+            requireActivity().runOnUiThread(() -> {
+                hideMstpConfigView();
+            });
+
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "MSTP configuration initialized");
+        });
     }
 }

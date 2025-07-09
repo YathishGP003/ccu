@@ -84,6 +84,7 @@ import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
+import a75f.io.logic.bo.building.pointscheduling.model.CustomScheduleManager;
 import a75f.io.logic.bo.util.ByteArrayUtils;
 import a75f.io.logic.diag.otastatus.OtaState;
 import a75f.io.logic.diag.otastatus.OtaStatus;
@@ -571,6 +572,14 @@ public class OTAUpdateService extends IntentService {
     private void handleSequenceComplete() {
         CcuLog.d(TAG, "Sequence OTA update complete");
         ConnectNodeDevice connectNodeEquip = ConnectNodeUtil.Companion.connectNodeEquip(mCurrentLwMeshAddress);
+        HashMap<Object, Object> deviceMap = CCUHsApi.getInstance().readMapById(connectNodeEquip.getId());
+        if(deviceMap.containsKey("roomRef")){
+            String roomId = deviceMap.get("roomRef").toString();
+            CustomScheduleManager.Companion.getInstance().getReconfiguredRooms().add(roomId);
+            CcuLog.i(TAG, "Reconfigured room: "+roomId+" for device: "+connectNodeEquip.getId());
+        }
+        CcuLog.d(TAG, "Sequence OTA - ReconfiguredRooms:  "+
+                CustomScheduleManager.Companion.getInstance().getReconfiguredRooms());
         ConnectNodeUtil.Companion.updateOtaSequenceStatus(SequenceOtaStatus.SEQ_SUCCEEDED, mCurrentLwMeshAddress);
         // Update the delivery time
         connectNodeEquip.updateConfirmedTime(HDateTime.make(System.currentTimeMillis(), HTimeZone.make("UTC")));

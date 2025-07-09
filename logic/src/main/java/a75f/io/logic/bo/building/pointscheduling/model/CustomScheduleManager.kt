@@ -11,8 +11,6 @@ import a75f.io.api.haystack.util.TimeUtil
 import a75f.io.api.haystack.util.getCurrentDateTime
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.system.doMakeRequest
-import a75f.io.logic.bo.building.system.getObjectType
 import a75f.io.logic.bo.util.getValueByEnum
 import a75f.io.logic.interfaces.ModbusWritableDataInterface
 import a75f.io.logic.util.bacnet.sendWriteRequestToMstpEquip
@@ -31,6 +29,8 @@ import kotlin.system.measureTimeMillis
 class CustomScheduleManager {
 
     val haystack: CCUHsApi = CCUHsApi.getInstance()
+    val reconfiguredRooms = mutableListOf<String>()
+    var areRoomEquipsReconfigured = false
 
 
     companion object {
@@ -211,10 +211,21 @@ class CustomScheduleManager {
     fun processPointSchedules() {
         val rooms = haystack.readAllEntities("room")
         rooms.forEach { room ->
+            val roomId = room["id"].toString()
+            CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "Processing room: ${room["dis"].toString()} and id $roomId")
+            CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "reconfigured rooms $reconfiguredRooms")
+            if(reconfiguredRooms.contains(roomId)) {
+                CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "Room ${room["dis"].toString()} is reconfigured. id: $roomId")
+                areRoomEquipsReconfigured = true
+            }
             val equips = haystack
                 .readAllEntities("equip and (modbus or connectModule or bacnet or pcn) " +
                         "and roomRef == \"" + room["id"].toString()+"\"")
-            equips.forEach { equip ->
+            CcuLog.d(
+                L.TAG_CCU_POINT_SCHEDULE,
+                "Fetched ${equips.size} equip(s) for room: ${room["dis"].toString()}"
+            )
+            equips.forEach EquipLoop@{ equip ->
                 CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "fetched>>>>>>>>> Equip: ${equip["dis"].toString()}")
                 // kumar-to-do  -- below query we need to change - mandate schedulable tag
                 val points = haystack.readAllHDictByQuery(
@@ -228,7 +239,7 @@ class CustomScheduleManager {
                         "NA"
                     )
                     CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "No points found for equip: ${equip["dis"].toString()}")
-                    return@forEach
+                    return@EquipLoop
                 }
                 val equipScheduleStatus = StringBuilder()
                 CcuLog.d(
@@ -274,6 +285,10 @@ class CustomScheduleManager {
                     scheduleStatusMessage
                 )
             }
+
+            areRoomEquipsReconfigured = false
+            reconfiguredRooms.remove(roomId)
+            CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "updated reconfigured rooms $reconfiguredRooms")
         }
     }
 
@@ -374,7 +389,22 @@ class CustomScheduleManager {
                                         };\n"
                             )
 
-                            if (defaultValue == customValue) {
+                            if (areRoomEquipsReconfigured) {
+                                CcuLog.d(
+                                    L.TAG_CCU_POINT_SCHEDULE,
+                                    "reconfigured so, writing value ($customValue) to ${point.id()}, eventScheduleId: $eventScheduleId"
+                                )
+                                if (point.has("his")) {
+                                    haystack.writeHisValById(
+                                        pointId,
+                                        customValue
+                                    )
+                                }
+                                haystack.writeDefaultValById(pointId, customValue)
+                                writeToPhysical(equip, point, customValue)
+                                valueWritten = true
+                                break
+                            } else if (defaultValue == customValue) {
                                 CcuLog.d(
                                     L.TAG_CCU_POINT_SCHEDULE,
                                     "No change in value for pointId=$pointId, currentDefaultVal=$defaultValue  value=$customValue"
@@ -400,7 +430,21 @@ class CustomScheduleManager {
                     // if no event found for this point, write the default value
                     if (!valueWritten) {
                         defaultValue = haystack.readDefaultValById(pointId)
-                        if (defaultValue == customValue) {
+
+                        if (areRoomEquipsReconfigured) {
+                            CcuLog.d(
+                                L.TAG_CCU_POINT_SCHEDULE,
+                                "reconfigured so, writing default value ($defaultValue) to ${point.id()}"
+                            )
+                            if (point.has("his")) {
+                                haystack.writeHisValById(
+                                    pointId,
+                                    defaultValue
+                                )
+                            }
+                            haystack.writeDefaultValById(pointId, defaultValue)
+                            writeToPhysical(equip, point, defaultValue)
+                        } else if (defaultValue == customValue) {
                             CcuLog.d(
                                 L.TAG_CCU_POINT_SCHEDULE,
                                 "No change in value for pointId=$pointId, " +
@@ -660,8 +704,20 @@ class CustomScheduleManager {
                         L.TAG_CCU_POINT_SCHEDULE,
                         "Point schedule found: pointId=$pointID, value=$value"
                     )
-
-                    if (currentDefaultVal == value) {
+                    if (areRoomEquipsReconfigured) {
+                        CcuLog.d(
+                            L.TAG_CCU_POINT_SCHEDULE,
+                            "reconfigured so, writing value ($value) to ${pointID}"
+                        )
+                        if (pointDict.has("his")) {
+                            haystack.writeHisValById(
+                                pointID,
+                                value
+                            )
+                        }
+                        haystack.writeDefaultValById(pointID, value)
+                        writeToPhysical(equip, pointDict, value)
+                    } else if (currentDefaultVal == value) {
                         CcuLog.d(
                             L.TAG_CCU_POINT_SCHEDULE,
                             "No change in value for pointId=$pointID, currentDefaultVal=$currentDefaultVal  value=$value"
@@ -746,8 +802,20 @@ class CustomScheduleManager {
                         (pointDis[pointDis.size - 1]) + " is " + updatedDefaultVal+ ", and changes to " + updatedValue +
                                 " at " + formatTimeValue(day?.sthh.toString()) + ":" + formatTimeValue(day?.stmm.toString()) + ";\n"
                     )
-
-                    if (currentDefaultVal == value) {
+                    if (areRoomEquipsReconfigured) {
+                        CcuLog.d(
+                            L.TAG_CCU_POINT_SCHEDULE,
+                            "reconfigured so, writing value (${pointDefinition.defaultValue}) to ${pointID}"
+                        )
+                        if (pointDict.has("his")) {
+                            haystack.writeHisValById(
+                                pointID,
+                                pointDefinition.defaultValue
+                            )
+                        }
+                        haystack.writeDefaultValById(pointID, pointDefinition.defaultValue)
+                        writeToPhysical(equip, pointDict, pointDefinition.defaultValue)
+                    } else if (currentDefaultVal == value) {
                         CcuLog.d(
                             L.TAG_CCU_POINT_SCHEDULE,
                             "No change in value for pointId=$pointID, currentDefaultVal=$currentDefaultVal  value=$value"

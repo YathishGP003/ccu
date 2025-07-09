@@ -466,6 +466,9 @@ public class CCUUtils
     public static Date getLastUpdatedTimeForCN(String deviceRef) {
         HashMap<Object, Object> point = CCUHsApi.getInstance()
                 .readEntity("domainName == \"" + DomainName.heartBeat + "\" and deviceRef == \"" + deviceRef + "\"");
+        if (point.isEmpty()) {
+            return null;
+        }
         HisItem hisItem = CCUHsApi.getInstance().curRead(point.get("id").toString());
         return (hisItem == null) ? null : hisItem.getDate();
     }

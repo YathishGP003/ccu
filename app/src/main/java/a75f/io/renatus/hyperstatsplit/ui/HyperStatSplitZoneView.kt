@@ -174,7 +174,18 @@ private fun setUpConditionFanConfig(
 
     try {
         fanModeSpinner.adapter = fanModeAdapter
+        if (fanMode > fanModeAdapter.count - 1) {
+            // This is just a hack to fall back to OFF mode if the fan mode is not found in the adapter
+            fanMode = 0
+            handleFanMode(
+                hssEquip, fanMode, profileType, true
+            )
+        }
         fanModeSpinner.setSelection(fanMode, false)
+
+        setSpinnerListenerForHyperstatSplit(
+            fanModeSpinner, StatZoneStatus.FAN_MODE, hssEquip, profileType
+        )
     } catch (e: Exception) {
         CcuLog.e(
             L.TAG_CCU_ZONE,
@@ -185,9 +196,7 @@ private fun setUpConditionFanConfig(
     setSpinnerListenerForHyperstatSplit(
         conditioningModeSpinner, StatZoneStatus.CONDITIONING_MODE, hssEquip, profileType
     )
-    setSpinnerListenerForHyperstatSplit(
-        fanModeSpinner, StatZoneStatus.FAN_MODE, hssEquip, profileType
-    )
+
 }
 
 

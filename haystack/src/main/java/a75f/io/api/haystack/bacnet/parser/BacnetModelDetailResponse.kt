@@ -2,6 +2,7 @@ package a75f.io.api.haystack.bacnet.parser
 
 import a75f.io.api.haystack.Tags
 import com.google.gson.annotations.SerializedName
+import android.util.Pair
 
 data class BacnetModelDetailResponse(
     @SerializedName("id") var id: String,
@@ -26,7 +27,7 @@ data class BacnetZoneViewItem(
     val isVisibleOnUi: Boolean,
     val bacnetObj: BacnetPoint,
     val isWritable: Boolean,
-    val spinnerValues: MutableList<String>,
+    val spinnerValues: MutableList<Pair<String,Int>>,
     val objectType : String
 )
 

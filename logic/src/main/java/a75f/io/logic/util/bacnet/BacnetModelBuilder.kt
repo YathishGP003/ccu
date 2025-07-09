@@ -133,7 +133,11 @@ private fun getRegister(rawMap: HashMap<Any, Any>): BacnetPoint {
                 val parts = it.split("=")
                 if (parts.isNotEmpty() && parts[0].isNotBlank()) {
                     val value = parts[0]
-                    allowedValues.add(AllowedValues(index, value, value))
+                    if (parts.size > 1 && parts[1].isNotBlank()) {
+                        allowedValues.add(AllowedValues(parts[1].toInt(), value, value))
+                    } else {
+                        allowedValues.add(AllowedValues(index, value, value))
+                    }
                 } else {
                     allowedValues.add(AllowedValues(index, it, it))
                 }

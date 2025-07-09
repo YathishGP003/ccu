@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -114,7 +115,8 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
         if(bacnetZoneViewItem.isWritable()) {
             viewHolder.spValue.setVisibility(View.VISIBLE);
             viewHolder.tvParamValue.setVisibility(View.GONE);
-            viewHolder.spValue.setAdapter(getAdapterValue((ArrayList) bacnetZoneViewItem.getSpinnerValues()));
+            List<String> spinnerValues = getSpinnerValues(bacnetZoneViewItem.getSpinnerValues());
+            viewHolder.spValue.setAdapter(getAdapterValue((ArrayList) spinnerValues));
 
             String enumValues = (String) CCUHsApi.getInstance().readMapById(bacnetZoneViewItem.getBacnetObj().getId()).get("enum");
             int itemIndex = 0;
@@ -164,14 +166,14 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
                     return;
                 }
 
-                String value = bacnetZoneViewItem.getSpinnerValues().get(i);
+                Pair<String,Integer> selectedValue = bacnetZoneViewItem.getSpinnerValues().get(i);
 
-                if (NumberUtils.isCreatable(value)) {
-                    writeValue(bacnetZoneViewItem, value);
+                if (NumberUtils.isCreatable(selectedValue.first)) {
+                    writeValue(bacnetZoneViewItem, selectedValue.first);
                 } else {
-                    writeValue(bacnetZoneViewItem, String.valueOf(i));
+                    writeValue(bacnetZoneViewItem, selectedValue.second.toString());
                 }
-                CcuLog.d(TAG, "onItemSelected: " + value + " " + bacnetZoneViewItem.getBacnetConfig());
+                CcuLog.d(TAG, "onItemSelected: " + selectedValue.first + " " + bacnetZoneViewItem.getBacnetConfig());
                 isUserInteraction.set(false);
             }
 
@@ -180,6 +182,14 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
 
             }
         });
+    }
+
+    private List<String> getSpinnerValues(List<Pair<String, Integer>> spinnerValues) {
+        List<String> values = new ArrayList<>();
+        for (Pair<String, Integer> pair : spinnerValues) {
+            values.add(pair.first);
+        }
+        return values;
     }
 
     private void writeValue(BacnetZoneViewItem bacnetZoneViewItem, String selectedValue) {
@@ -245,7 +255,7 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
             } else {
                 dataType = BacNetConstants.DataTypes.BACNET_DT_UNSIGNED.ordinal() + 1;
             }
-            selectedValueAsPerType = String.valueOf(Integer.parseInt(selectedValue)+1);
+            selectedValueAsPerType = String.valueOf(Integer.parseInt(selectedValue));
         }
 
         ObjectIdentifierBacNet objectIdentifierBacNet = new ObjectIdentifierBacNet(BacNetConstants.ObjectType.valueOf(objectType).getValue(), String.valueOf(objectId));
@@ -309,11 +319,11 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
         return new CustomSpinnerDropDownAdapter(context, R.layout.spinner_item_bacnet_property, values);
     }
 
-    private int findItemPosition(List<String> numberStrings, double targetValue) {
+    private int findItemPosition(List<Pair<String,Integer>> numberStrings, double targetValue) {
         int index = -1;
 
         for (int i = 0; i < numberStrings.size(); i++) {
-            String str = numberStrings.get(i);
+            String str = numberStrings.get(i).first;
             double value = Double.parseDouble(str);
             if (value == targetValue) {
                 index = i;
@@ -325,7 +335,7 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
 
     private String searchKeyForValue(String enumString,
                                                    String inputValue) {
-        CcuLog.d(TAG_BACNET, "---------searchRealValueForOperatingMode------one----" + enumString
+        CcuLog.d(TAG, "---------searchRealValueForOperatingMode------one----" + enumString
                 + "<--inputValue-->" + inputValue);
         try {
             Map<String, String> reverseMapOne = getStringReverseMap(enumString);

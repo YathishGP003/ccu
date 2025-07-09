@@ -43,6 +43,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Html;
+import android.util.Pair;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.InflateException;
@@ -1721,7 +1722,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			boolean isWritable = false;
 			String objectTypeFromProtocolData = bacnetPoint.getProtocolData().getBacnet().getObjectType();
 			String objectType = BacNetConstants.ObjectType.OBJECT_ANALOG_VALUE.getKey();
-			List<String> spinnerValues = new ArrayList<>();
+			List<Pair<String,Integer>> spinnerValues = new ArrayList<>();
 			if(bacnetPoint.getEquipTagNames().contains("writable")){
 				isWritable = true;
 				PresentationData presentationData = bacnetPoint.getPresentationData();
@@ -1744,10 +1745,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						CcuLog.d(BACNET, "For point id--> " + bacnetPoint.getId() + " MinValue: " + minValue + " MaxValue: " + maxValue + " Increment Value: " + step);
 					}else {
 						CcuLog.d(BACNET, "For point id--> " + bacnetPoint.getId() + " there is no min max value checking multi state");
-						List<String> finalSpinnerValues = spinnerValues;
+						List<Pair<String,Integer>> finalSpinnerValues = spinnerValues;
 						valueConstraint.getAllowedValues().forEach(allowedValue -> {
 							CcuLog.d(BACNET, "For point id--> " + bacnetPoint.getId() + " Allowed Value: " + allowedValue);
-							finalSpinnerValues.add(allowedValue.getValue());
+							finalSpinnerValues.add(new Pair<>(allowedValue.getValue(), allowedValue.getIndex()));
 						});
 					}
 				}
@@ -1773,12 +1774,12 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		return listBacnetZoneViewItems;
 	}
 
-	public List<String> generateValuesForSpinner(double minValue, double maxValue, double step) {
-		List<String> arrayList = new ArrayList<>();
+	public List<Pair<String,Integer>> generateValuesForSpinner(double minValue, double maxValue, double step) {
+		List<Pair<String,Integer>> arrayList = new ArrayList<>();
 		DecimalFormat df = new DecimalFormat("#.##");
 		for (double value = minValue; value <= maxValue; value += step) {
 			String formattedValue = df.format(value);
-			arrayList.add(formattedValue);
+			arrayList.add(new Pair<>(formattedValue,Integer.valueOf(0)));
 		}
 		return arrayList;
 	}

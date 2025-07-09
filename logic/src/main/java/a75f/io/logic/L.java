@@ -247,7 +247,7 @@ public class L
     public static short generateBacnetNodeAddres() {
 
         short currentBand = 500;
-        ArrayList<HashMap<Object,Object>> nodes = CCUHsApi.getInstance().readAllEntities("bacnet and equip");
+        ArrayList<HashMap<Object,Object>> nodes = CCUHsApi.getInstance().readAllEntities("bacnet and device");
         if (nodes.size() == 0) {
             return currentBand;
         }
@@ -258,7 +258,7 @@ public class L
         {
             for (HashMap<Object,Object> node : nodes)
             {
-                if (node.get("group").toString().equals(String.valueOf(nextAddr))) {
+                if (node.get("addr").toString().equals(String.valueOf(nextAddr))) {
                     nextAddr++;
                     addrUsed = true;
                     break;

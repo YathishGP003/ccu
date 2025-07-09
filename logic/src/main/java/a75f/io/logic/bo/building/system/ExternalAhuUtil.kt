@@ -1187,7 +1187,7 @@ private fun generateWriteObject(
         selectedValueAsPerType = selectedValue //String.valueOf(Integer.parseInt(selectedValue)+1);
     } else {
         dataType = BacNetConstants.DataTypes.BACNET_DT_UNSIGNED.ordinal + 1
-        selectedValueAsPerType = (selectedValue.toDouble().toInt() + 1).toString()
+        selectedValueAsPerType = (selectedValue.toDouble().toInt()).toString()
     }
     val objectIdentifierBacNet = ObjectIdentifierBacNet(
         BacNetConstants.ObjectType.valueOf(objectType).value,

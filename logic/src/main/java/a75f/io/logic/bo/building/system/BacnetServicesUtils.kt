@@ -183,7 +183,7 @@ class BacnetServicesUtils: BacnetRequestUtil {
         ) {
             selectedValue
         } else {
-            (selectedValue.toDouble().toInt() + 1).toString()
+            (selectedValue.toDouble().toInt()).toString()
         }
 
         val objectIdentifierBacNet = ObjectIdentifierBacNet(objectTypeEnum.value, objectId.toString())

@@ -414,7 +414,7 @@ class HttpServer {
                         var updatedObjectType = getBacNetType( ObjectType.values()[objectType.toInt()].key.replace("OBJECT_", ""))
                         CcuLog.i(HTTP_SERVER, "MSTP -> updatedObjectType: $updatedObjectType")
                         CcuLog.i(HTTP_SERVER, "MSTP -> objectId: $objectId")
-                        val query = "point and bacnetDeviceMacAddr == $macAddr and bacnetObjectId==$objectId and bacnetType==\"$updatedObjectType\""
+                        val query = "point and bacnetDeviceMacAddr == \"$macAddr\" and bacnetObjectId==$objectId and bacnetType==\"$updatedObjectType\""
                         CcuLog.i(HTTP_SERVER, "MSTP -> query: $query")
                         val pointMap  = CCUHsApi.getInstance().read(query)
                         val id = pointMap?.get("id")?.toString()

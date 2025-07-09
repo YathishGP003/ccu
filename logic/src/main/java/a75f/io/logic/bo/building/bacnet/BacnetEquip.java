@@ -122,13 +122,13 @@ public class BacnetEquip {
                     .addTag("version", HStr.make(modelVersion))
                     .addTag("bacnetConfig", HStr.make(configParam))
                     .addTag("modelConfig", HStr.make(modelConfig))
+                    .addTag(CONST_BACNET_DEVICE_MAC_ADDR, HStr.make(macAddress))
                     .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(slaveId));
 
         if (configurationType.equals(IP_CONFIGURATION)) {
             bacNetEquip.addMarker(CONST_BACNET_CUR);
         } else {
-            bacNetEquip.addMarker(CONST_BACNET_MSTP)
-            .addTag(CONST_BACNET_DEVICE_MAC_ADDR, HNum.make(Integer.parseInt(macAddress)));
+            bacNetEquip.addMarker(CONST_BACNET_MSTP);
         }
 
         if (parentEquipId != null) {
@@ -249,14 +249,14 @@ public class BacnetEquip {
                         .setFloorRef(floorRef).addMarker(CONST_LOGICAL)
                         .addMarker(CONST_BACNET)
                         .addTag(CONST_BACNET_DEVICE_ID, HNum.make(Integer.parseInt(deviceId)))
+                        .addTag(CONST_BACNET_DEVICE_MAC_ADDR, HStr.make(macAddress))
                         .setGroup(String.valueOf(slaveId))
                         .setTz(tz);
 
                 if (configurationType.equals(IP_CONFIGURATION)) {
                     logicalParamPoint.addMarker(CONST_BACNET_CUR);
                 } else {
-                    logicalParamPoint.addMarker(CONST_BACNET_MSTP)
-                    .addTag(CONST_BACNET_DEVICE_MAC_ADDR, HNum.make(Integer.parseInt(macAddress)));
+                    logicalParamPoint.addMarker(CONST_BACNET_MSTP);
                 }
 
                 CcuLog.d(TAG, "point to add start-->" + point.getName() + "------checking allowed values-----");
@@ -354,6 +354,12 @@ public class BacnetEquip {
                         String minValue = getValue(bacnetProperty);
                         if (minValue != null && !minValue.equals("null") && !minValue.equals("") && !minValue.equals("NA")) {
                             logicalParamPoint.setMaxVal(minValue);
+                        }
+
+                    } else if (bacnetProperty.getName().equals("COV_INCREMENT")) {
+                        String covIncrement = getValue(bacnetProperty);
+                        if (covIncrement != null && !covIncrement.equals("null") && !covIncrement.equals("") && !covIncrement.equals("NA")) {
+                            logicalParamPoint.setIncrementVal(covIncrement);
                         }
                     } else {
                         try {

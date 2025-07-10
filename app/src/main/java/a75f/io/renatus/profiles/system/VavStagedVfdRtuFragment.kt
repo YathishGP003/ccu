@@ -103,56 +103,38 @@ class VavStagedVfdRtuFragment(loadingListener: onLoadingCompleteListener) : Stag
     }
 
     private fun coolingStageSelected(stage : Int): Boolean {
-        when(stage){
-            1 ->{
-                return checkAssociation(0)
-            }
-            2 ->{
-                return checkAssociation(1)
-            }
-            3 ->{
-                return checkAssociation(2)
-            }
-            4 ->{
-                return checkAssociation(3)
-            }
-            5 ->{
-                return checkAssociation(4)
-            }
-            else -> {
-                return false
-            }
+        return when (stage) {
+            1 -> (checkAssociation(0) || compressorStageSelected(stage))
+            2 -> (checkAssociation(1) || compressorStageSelected(stage))
+            3 -> (checkAssociation(2) || compressorStageSelected(stage))
+            4 -> (checkAssociation(3) || compressorStageSelected(stage))
+            5 -> (checkAssociation(4) || compressorStageSelected(stage))
+            else -> false
         }
     }
-
 
     private fun heatingStageSelected(stage : Int): Boolean {
-        when (stage) {
-            1 -> {
-                return checkAssociation(5)
-            }
-
-            2 -> {
-                return checkAssociation(6)
-            }
-
-            3 -> {
-                return checkAssociation(7)
-            }
-
-            4 -> {
-                return checkAssociation(8)
-            }
-
-            5 -> {
-                return checkAssociation(9)
-            }
-
-            else -> {
-                return false
-            }
+        return when (stage) {
+            1 -> (checkAssociation(5) || compressorStageSelected(stage))
+            2 -> (checkAssociation(6) || compressorStageSelected(stage))
+            3 -> (checkAssociation(7) || compressorStageSelected(stage))
+            4 -> (checkAssociation(8) || compressorStageSelected(stage))
+            5 -> (checkAssociation(9) || compressorStageSelected(stage))
+            else -> false
         }
     }
+
+    private fun compressorStageSelected(stage: Int): Boolean {
+        return when (stage) {
+            1 -> checkAssociation(17)
+            2 -> checkAssociation(18)
+            3 -> checkAssociation(19)
+            4 -> checkAssociation(20)
+            5 -> checkAssociation(21)
+            else -> false
+        }
+    }
+
     private fun checkAssociation(associationIndex : Int): Boolean {
         return (viewState.value.relay1Enabled && viewState.value.relay1Association == associationIndex)
                 || (viewState.value.relay2Enabled && viewState.value.relay2Association == associationIndex)

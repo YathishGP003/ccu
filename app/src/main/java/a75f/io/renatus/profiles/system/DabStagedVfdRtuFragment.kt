@@ -72,6 +72,14 @@ enum class HeatingStage(val index: Int) {
     STAGE_5(9)
 }
 
+enum class Compressor(val index: Int) {
+    COMPRESSOR_STAGE_1(17),
+    COMPRESSOR_STAGE_2(18),
+    COMPRESSOR_STAGE_3(19),
+    COMPRESSOR_STAGE_4(20),
+    COMPRESSOR_STAGE_5(21)
+}
+
 class DabStagedVfdRtuFragment : DStagedRtuFragment() {
     private val viewModel : DabStagedVfdRtuViewModel by viewModels()
     var viewState: MutableState<StagedRtuVfdViewState> = mutableStateOf(StagedRtuVfdViewState())
@@ -127,21 +135,31 @@ class DabStagedVfdRtuFragment : DStagedRtuFragment() {
 
     private fun coolingStageSelected(stage : CoolingStage): Boolean {
         return when(stage) {
-            CoolingStage.STAGE_1 -> checkAssociation(CoolingStage.STAGE_1.index)
-            CoolingStage.STAGE_2 -> checkAssociation(CoolingStage.STAGE_2.index)
-            CoolingStage.STAGE_3 -> checkAssociation(CoolingStage.STAGE_3.index)
-            CoolingStage.STAGE_4 -> checkAssociation(CoolingStage.STAGE_4.index)
-            CoolingStage.STAGE_5 -> checkAssociation(CoolingStage.STAGE_5.index)
+            CoolingStage.STAGE_1 -> checkAssociation(CoolingStage.STAGE_1.index) || compressorStageSelected(Compressor.COMPRESSOR_STAGE_1)
+            CoolingStage.STAGE_2 -> checkAssociation(CoolingStage.STAGE_2.index) || compressorStageSelected(Compressor.COMPRESSOR_STAGE_2)
+            CoolingStage.STAGE_3 -> checkAssociation(CoolingStage.STAGE_3.index) || compressorStageSelected(Compressor.COMPRESSOR_STAGE_3)
+            CoolingStage.STAGE_4 -> checkAssociation(CoolingStage.STAGE_4.index) || compressorStageSelected(Compressor.COMPRESSOR_STAGE_4)
+            CoolingStage.STAGE_5 -> checkAssociation(CoolingStage.STAGE_5.index) || compressorStageSelected(Compressor.COMPRESSOR_STAGE_5)
         }
     }
 
     private fun heatingStageSelected(stage : HeatingStage): Boolean {
         return when(stage) {
-            HeatingStage.STAGE_1 -> checkAssociation(HeatingStage.STAGE_1.index)
-            HeatingStage.STAGE_2 -> checkAssociation(HeatingStage.STAGE_2.index)
-            HeatingStage.STAGE_3 -> checkAssociation(HeatingStage.STAGE_3.index)
-            HeatingStage.STAGE_4 -> checkAssociation(HeatingStage.STAGE_4.index)
-            HeatingStage.STAGE_5 -> checkAssociation(HeatingStage.STAGE_5.index)
+            HeatingStage.STAGE_1 -> checkAssociation(HeatingStage.STAGE_1.index) || compressorStageSelected(Compressor.COMPRESSOR_STAGE_1)
+            HeatingStage.STAGE_2 -> checkAssociation(HeatingStage.STAGE_2.index) || compressorStageSelected(Compressor.COMPRESSOR_STAGE_2)
+            HeatingStage.STAGE_3 -> checkAssociation(HeatingStage.STAGE_3.index) || compressorStageSelected(Compressor.COMPRESSOR_STAGE_3)
+            HeatingStage.STAGE_4 -> checkAssociation(HeatingStage.STAGE_4.index) || compressorStageSelected(Compressor.COMPRESSOR_STAGE_4)
+            HeatingStage.STAGE_5 -> checkAssociation(HeatingStage.STAGE_5.index) || compressorStageSelected(Compressor.COMPRESSOR_STAGE_5)
+        }
+    }
+
+    private fun compressorStageSelected(stage: Compressor): Boolean {
+        return when (stage) {
+            Compressor.COMPRESSOR_STAGE_1 -> checkAssociation(Compressor.COMPRESSOR_STAGE_1.index)
+            Compressor.COMPRESSOR_STAGE_2 -> checkAssociation(Compressor.COMPRESSOR_STAGE_2.index)
+            Compressor.COMPRESSOR_STAGE_3 -> checkAssociation(Compressor.COMPRESSOR_STAGE_3.index)
+            Compressor.COMPRESSOR_STAGE_4 -> checkAssociation(Compressor.COMPRESSOR_STAGE_4.index)
+            Compressor.COMPRESSOR_STAGE_5 -> checkAssociation(Compressor.COMPRESSOR_STAGE_5.index)
         }
     }
 

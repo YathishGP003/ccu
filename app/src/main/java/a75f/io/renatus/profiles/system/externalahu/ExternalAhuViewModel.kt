@@ -223,7 +223,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                 setCurrentConfig(configuration)
             } else {
                 // Initial configuration based on the model
-                configModel.value.toConfig(profileModelDefinition)
+//                configModel.value.toConfig(profileModelDefinition)
             }
             slaveIdList.value = getSlaveIds(true)
             childSlaveIdList.value = getSlaveIds(false)
@@ -800,6 +800,8 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         initialConfig: ExternalAhuConfiguration,
         config: ExternalAhuConfiguration
     ): Boolean {
+        CcuLog.d("USER_TEST", "initialConfig: $initialConfig")
+        CcuLog.d("USER_TEST", "config: $config")
         return initialConfig.setPointControl.enabled != config.setPointControl.enabled ||
                 initialConfig.dualSetPointControl.enabled != config.dualSetPointControl.enabled ||
                 initialConfig.fanStaticSetPointControl.enabled != config.fanStaticSetPointControl.enabled ||

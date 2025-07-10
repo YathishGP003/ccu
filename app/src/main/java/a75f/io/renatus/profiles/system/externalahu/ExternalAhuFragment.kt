@@ -1529,6 +1529,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
         // This index -1 refers to parameters equip and other index 0 to n refers index of sub equips
         ParametersListView(data = viewModel.equipModel, indexForSelectAllRelay = -1)
         SubEquipments(viewModel.equipModel)
+        setStateChanged()
     }
 
     @Composable
@@ -1859,15 +1860,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
         viewModel.configModel.value.coolingMaxSp = viewModel.getDefaultValByDomain(systemCoolingSATMaximum)
 
         viewModel.configModel.value.fanStaticSetPointControl = false
-        viewModel.configModel.value.fanMinSp = viewModel.getDefaultValByDomain(systemStaticPressureMinimum)
-        viewModel.configModel.value.fanMaxSp = viewModel.getDefaultValByDomain(systemStaticPressureMaximum)
 
         viewModel.configModel.value.dcvControl = false
-        viewModel.configModel.value.dcvMin = viewModel.getDefaultValByDomain(systemDCVDamperPosMinimum)
-        viewModel.configModel.value.dcvMax = viewModel.getDefaultValByDomain(systemDCVDamperPosMaximum)
-        viewModel.configModel.value.co2Threshold = viewModel.getDefaultValByDomain(systemCO2Threshold)
-        viewModel.configModel.value.co2Target = viewModel.getDefaultValByDomain(systemCO2Target)
-        viewModel.configModel.value.damperOpeningRate = viewModel.getDefaultValByDomain(systemCO2DamperOpeningRate)
 
         viewModel.configModel.value.occupancyMode = false
         viewModel.configModel.value.humidifierControl = false

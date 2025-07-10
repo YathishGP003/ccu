@@ -5,6 +5,7 @@ import static a75f.io.logic.L.TAG_CCU_BACNET_MSTP;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.APDU_SEGMENT_TIMEOUT;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.APDU_TIMEOUT;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_BBMD_CONFIGURATION;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_BBMD_CONFIGURATION_BACKUP;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_BBMD;
@@ -12,6 +13,7 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_NORMAL;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_FD_AUTO_STATE;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_FD_CONFIGURATION;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_FD_CONFIGURATION_BACKUP;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_MSTP_CONFIGURATION;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_CONFIGURATION_TYPE;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_START;
@@ -42,6 +44,7 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_PORT_ADD
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_SOURCE_ADDRESS;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.VIRTUAL_NETWORK_NUMBER;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.ZONE_TO_VIRTUAL_DEVICE_MAPPING;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.cancelScheduleJobToResubscribeBacnetMstpCOV;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.sendBroadCast;
 import static a75f.io.logic.L.TAG_CCU_BACNET;
 import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
@@ -486,6 +489,7 @@ public class Communication extends Fragment implements MstpDataInterface {
                 stopRestServer();
             }
             enableMstpConfigView();
+            cancelScheduleJobToResubscribeBacnetMstpCOV("BACnet Mstp was disabled, cancelling COV subscription");
         });
 
         ////////////////////
@@ -702,6 +706,7 @@ public class Communication extends Fragment implements MstpDataInterface {
                         CcuLog.d(TAG_CCU_BACNET, "bbmd output-->" + jsonString);
                         sharedPreferences.edit().putString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_BBMD).apply();
                         sharedPreferences.edit().putString(BACNET_BBMD_CONFIGURATION, jsonString).apply();
+                        sharedPreferences.edit().putString(BACNET_BBMD_CONFIGURATION_BACKUP, jsonString).apply(); // Backup BBMD configuration
 
                         sharedPreferences.edit().remove(BACNET_FD_CONFIGURATION).apply(); // Clearing FD configuration if any
 
@@ -733,6 +738,7 @@ public class Communication extends Fragment implements MstpDataInterface {
 
                         sharedPreferences.edit().putString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_FD).apply();
                         sharedPreferences.edit().putString(BACNET_FD_CONFIGURATION, jsonString).apply();
+                        sharedPreferences.edit().putString(BACNET_FD_CONFIGURATION_BACKUP, jsonString).apply(); // Backup FD configuration
 
                         sharedPreferences.edit().remove(BACNET_BBMD_CONFIGURATION).apply(); // Clearing BBMD configuration if any
 

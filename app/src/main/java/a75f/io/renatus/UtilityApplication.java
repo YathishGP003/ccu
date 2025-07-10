@@ -5,6 +5,8 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALI
 import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
 import static a75f.io.logic.util.PreferenceUtil.getSyncStartTime;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_MSTP_INITIALIZED;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.cancelScheduleJobToResubscribeBacnetMstpCOV;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.scheduleJobToResubscribeBacnetMstpCOV;
 
 import android.app.Application;
 import android.content.Context;
@@ -216,6 +218,13 @@ public abstract class UtilityApplication extends Application implements Globals.
         CcuLog.i(L.TAG_CCU_INIT, "Initializing BacnetServicesUtils callback implementation");
         BacnetServicesUtils callbackImpl = new BacnetServicesUtils();
         BacnetRequestProcessor.setCallback(callbackImpl);
+        if (isBacnetMstpInitialized()) {
+            CcuLog.i(L.TAG_CCU_INIT, "Bacnet MSTP is initialized, scheduling job to resubscribe COV");
+            scheduleJobToResubscribeBacnetMstpCOV();
+        } else {
+            CcuLog.i(L.TAG_CCU_INIT, "Bacnet MSTP is not initialized, skipping resubscribe job");
+            cancelScheduleJobToResubscribeBacnetMstpCOV("Bacnet MSTP not initialized");
+        }
 
     }
 

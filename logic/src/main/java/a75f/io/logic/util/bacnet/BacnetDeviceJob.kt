@@ -11,6 +11,8 @@ import a75f.io.logic.bo.building.system.WhoIsRequest
 import a75f.io.logic.bo.building.system.client.BaseResponse
 import a75f.io.logic.bo.building.system.client.CcuService
 import a75f.io.logic.bo.building.system.client.ServiceManager
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_JOB_TASK_TYPE
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_PERIODIC_RESUBSCRIBE_COV
 import android.content.Context
 import android.preference.PreferenceManager
 import androidx.work.CoroutineWorker
@@ -29,7 +31,18 @@ class BacnetDeviceJob(appContext: Context, workerParams: WorkerParameters) :
 
     override suspend fun doWork(): Result {
         CcuLog.d(BACNET_DEVICE_JOB, "BacnetDeviceJob Work is running...")
-        handleDoWork(Globals.getInstance().applicationContext)
+        when (val taskType = inputData.getString(BACNET_JOB_TASK_TYPE)) {
+            BACNET_DEVICE_JOB -> {
+                CcuLog.d(BACNET_DEVICE_JOB, "BacnetDeviceJob task type is BACNET_DEVICE_JOB")
+                handleDoWork(Globals.getInstance().applicationContext)
+            }
+            BACNET_PERIODIC_RESUBSCRIBE_COV -> {
+                CcuLog.d(BACNET_DEVICE_JOB, "BacnetDeviceJob task type is BACNET_PERIODIC_RESUBSCRIBE_COV")
+                // Handle periodic resubscribe COV logic here if needed
+                updateBacnetMstpLinearAndCovSubscription(true)
+            }
+            else -> CcuLog.d(BACNET_DEVICE_JOB, "BacnetDeviceJob unknown task type: $taskType")
+        }
         return Result.success()
     }
 

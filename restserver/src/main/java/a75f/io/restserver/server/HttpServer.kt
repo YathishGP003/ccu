@@ -19,6 +19,7 @@ import a75f.io.logic.util.bacnet.ObjectType
 import a75f.io.logic.util.bacnet.getBacNetType
 import a75f.io.logic.util.bacnet.reInitialiseBacnetStack
 import a75f.io.logic.util.bacnet.readExternalBacnetJsonFile
+import a75f.io.logic.util.bacnet.scheduleJobToResubscribeBacnetMstpCOV
 import a75f.io.logic.util.bacnet.sendWriteRequestToMstpEquip
 import a75f.io.logic.util.bacnet.updateBacnetHeartBeat
 import a75f.io.logic.util.bacnet.updateBacnetIpModeConfigurations
@@ -249,6 +250,7 @@ class HttpServer {
                             if (stackStatus.toBoolean()) {
                                 CcuLog.d(L.TAG_CCU_BACNET_MSTP, "BACnet MSTP Stack initialized successfully!!!. Sending COV Subscription....")
                                 updateBacnetMstpLinearAndCovSubscription(isInitProcessRequired = true)
+                                scheduleJobToResubscribeBacnetMstpCOV()
                             }  else {
                                 CcuLog.d(L.TAG_CCU_BACNET_MSTP, "BACnet MSTP Stack initialization failed. Not sending COV Subscription")
                             }

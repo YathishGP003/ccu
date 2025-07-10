@@ -35,8 +35,10 @@ import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_FD
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_NORMAL
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_HEART_BEAT
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_ID
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_JOB_TASK_TYPE
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_MSTP_CONFIGURATION
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_MSTP_HEART_BEAT
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_PERIODIC_RESUBSCRIBE_COV
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_CONFIGURATION_TYPE
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_START
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_STOP
@@ -83,6 +85,7 @@ import android.text.format.Formatter
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import androidx.work.workDataOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -704,6 +707,7 @@ private fun updatePointPresentValue(readResponse: MultiReadResponse?,deviceId: S
 
 fun scheduleJobToCheckBacnetDeviceOnline(){
     val workRequest = PeriodicWorkRequestBuilder<BacnetDeviceJob>(15, TimeUnit.MINUTES)
+        .setInputData(workDataOf(BACNET_JOB_TASK_TYPE to BACNET_DEVICE_JOB))
         .build()
 
     WorkManager.getInstance(Globals.getInstance().applicationContext)
@@ -718,6 +722,26 @@ fun scheduleJobToCheckBacnetDeviceOnline(){
 fun cancelScheduleJobToCheckBacnet(reason : String){
     CcuLog.d(BACNET_DEVICE_JOB, "--cancelScheduleJobToCheckBacnet--$reason")
     WorkManager.getInstance(Globals.getInstance().applicationContext).cancelUniqueWork(BACNET_DEVICE_JOB)
+}
+
+fun scheduleJobToResubscribeBacnetMstpCOV() {
+    val workRequest = PeriodicWorkRequestBuilder<BacnetDeviceJob>(1, TimeUnit.HOURS)
+        .setInputData(workDataOf(BACNET_JOB_TASK_TYPE to BACNET_PERIODIC_RESUBSCRIBE_COV))
+        .build()
+
+
+    WorkManager.getInstance(Globals.getInstance().applicationContext)
+        .enqueueUniquePeriodicWork(
+            BACNET_PERIODIC_RESUBSCRIBE_COV,
+            ExistingPeriodicWorkPolicy.REPLACE,
+            workRequest
+        )
+    CcuLog.d(TAG_CCU_BACNET_MSTP, "--created work request for resubscribing bacnet mstp cov--")
+}
+
+fun cancelScheduleJobToResubscribeBacnetMstpCOV(reason: String) {
+    CcuLog.d(TAG_CCU_BACNET_MSTP, "--cancelScheduleJobToResubscribeBacnetMstpCOV--$reason")
+    WorkManager.getInstance(Globals.getInstance().applicationContext).cancelUniqueWork(BACNET_PERIODIC_RESUBSCRIBE_COV)
 }
 
 fun updateBacnetIpModeConfigurations(isStackInitSuccess: Boolean) {

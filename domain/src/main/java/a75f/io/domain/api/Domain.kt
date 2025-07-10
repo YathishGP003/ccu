@@ -178,6 +178,11 @@ object Domain {
     }
 
     @JvmStatic
+    fun getEquip(equipRef: String): DomainEquip? {
+        return equips[equipRef]
+    }
+
+    @JvmStatic
     fun readPoint(domainName: String) : Map<Any,Any> {
         return hayStack.readEntity("point and domainName == \"$domainName\"")
     }

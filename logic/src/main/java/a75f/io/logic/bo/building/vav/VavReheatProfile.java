@@ -12,6 +12,9 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.equips.DabEquip;
+import a75f.io.domain.equips.VavEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
@@ -46,12 +49,16 @@ public class VavReheatProfile extends VavProfile
     //ASHRAE RP-1455: Advanced Control Sequences for HVAC Systems Phase I, Air Distribution and Terminal Systems
     @Override
     public void updateZonePoints() {
-        
+        CcuLog.i(L.TAG_CCU_ZONE, "--->VavReheatProfile<--- "+nodeAddr);
+        vavEquip = (VavEquip) Domain.getEquip(equipRef);
+        if (vavEquip == null) {
+            CcuLog.e(L.TAG_CCU_ZONE, "No domain equip found for equipRef: " + equipRef);
+            vavEquip = new VavEquip(equipRef);
+        }
         if(mInterface != null)
         {
             mInterface.refreshView();
         }
-        CcuLog.i(L.TAG_CCU_ZONE, "--->VavReheatProfile<--- "+nodeAddr);
         if (isRFDead()) {
             handleRFDead();
             return;

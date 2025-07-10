@@ -8,6 +8,8 @@ import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.equips.VavEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
@@ -41,7 +43,13 @@ public class VavParallelFanProfile extends VavProfile
     @Override
     public void updateZonePoints() {
         CcuLog.i(L.TAG_CCU_ZONE, "--->VavParallelFanProfile<--- "+nodeAddr);
-        
+
+        vavEquip = (VavEquip) Domain.getEquip(equipRef);
+        if (vavEquip == null) {
+            CcuLog.e(L.TAG_CCU_ZONE, "No domain equip found for equipRef: " + equipRef);
+            vavEquip = new VavEquip(equipRef);
+        }
+
         if(mInterface != null) {
             mInterface.refreshView();
         }

@@ -17,8 +17,10 @@ import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.domain.api.Domain;
 import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.domain.equips.DabEquip;
+import a75f.io.domain.logic.DomainManager;
 import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
@@ -92,7 +94,11 @@ public class DabProfile extends ZoneProfile
         if (equipMap != null && !equipMap.isEmpty())
         {
             equipRef = equipMap.get("id").toString();
-            dabEquip = new DabEquip(equipRef);
+            dabEquip = (DabEquip) Domain.getEquip(equipRef);
+            if (dabEquip == null) {
+                CcuLog.e(L.TAG_CCU_ZONE, "No domain equip found during init for equipRef: " + equipRef);
+                dabEquip = new DabEquip(equipRef);
+            }
             damperController = new GenericPIController();
             damperController.setMaxAllowedError(dabEquip.getDabTemperatureProportionalRange().readPriorityVal());
             damperController.setIntegralGain(dabEquip.getDabIntegralKFactor().readPriorityVal());
@@ -147,6 +153,12 @@ public class DabProfile extends ZoneProfile
 
     @Override
     public void updateZonePoints() {
+
+        dabEquip = (DabEquip) Domain.getEquip(equipRef);
+        if (dabEquip == null) {
+            CcuLog.e(L.TAG_CCU_ZONE, "No domain equip found for equipRef: " + equipRef);
+            dabEquip = new DabEquip(equipRef);
+        }
 
         if (isRFDead()) {
             updateRFDead();

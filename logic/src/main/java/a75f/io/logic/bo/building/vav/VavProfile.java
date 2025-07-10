@@ -25,6 +25,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.domain.VavAcbEquip;
+import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.domain.equips.VavEquip;
@@ -164,20 +165,30 @@ public abstract class VavProfile extends ZoneProfile {
         switch (profileType) {
             case VAV_REHEAT:
                 vavUnit = new VavUnit();
-                vavEquip = new VavEquip(equipRef);
                 break;
             case VAV_SERIES_FAN:
                 vavUnit = new SeriesFanVavUnit();
-                vavEquip = new VavEquip(equipRef);
                 break;
             case VAV_PARALLEL_FAN:
                 vavUnit = new ParallelFanVavUnit();
-                vavEquip = new VavEquip(equipRef);
                 break;
             case VAV_ACB:
                 vavUnit = new VavAcbUnit();
-                vavEquip = new VavAcbEquip(equipRef);
         }
+        if (profileType == ProfileType.VAV_ACB) {
+            vavEquip = (VavAcbEquip) Domain.getEquip(equipRef);
+            if (vavEquip == null) {
+                CcuLog.e(L.TAG_CCU_ZONE, "No domain equip found during init for equipRef: " + equipRef);
+                vavEquip = new VavAcbEquip(equipRef);
+            }
+        } else {
+            vavEquip = (VavEquip) Domain.getEquip(equipRef);
+            if (vavEquip == null) {
+                CcuLog.e(L.TAG_CCU_ZONE, "No domain equip found during init for equipRef: " + equipRef);
+                vavEquip = new VavEquip(equipRef);
+            }
+        }
+
 
         if (equipMap != null && equipMap.size() > 0) {
             String equipId = equipMap.get("id").toString();

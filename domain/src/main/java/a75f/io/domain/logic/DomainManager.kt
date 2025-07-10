@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.BypassDamperEquip
 import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.OAOEquip
+import a75f.io.domain.VavAcbEquip
 import a75f.io.domain.api.Device
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
@@ -112,7 +113,13 @@ object DomainManager {
                 CcuLog.i(Domain.LOG_TAG, "Build domain $it")
 
                 when{
-                    it.contains("vav") -> Domain.equips[it["id"].toString()] = VavEquip(it["id"].toString())
+                    it["domainName"]?.toString().equals("smartnodeActiveChilledBeam", true) -> {
+                        Domain.equips[it["id"].toString()] = VavAcbEquip(it["id"].toString())
+                    }
+                    it.contains("vav") -> {
+                        Domain.equips[it["id"].toString()] = VavEquip(it["id"].toString())
+                        CcuLog.i(Domain.LOG_TAG, "Build domain vavEquip $it")
+                    }
                     it.contains("dab") -> Domain.equips[it["id"].toString()] = DabEquip(it["id"].toString())
                     it.contains("sse") -> Domain.equips[it["id"].toString()] = SseEquip(it["id"].toString())
                     (it.contains("hyperstat") && it.contains("cpu")) -> Domain.equips[it["id"].toString()] = CpuV2Equip(it["id"].toString())
@@ -271,6 +278,9 @@ object DomainManager {
     }
     fun updateDomainEquip(equip: a75f.io.api.haystack.Equip) {
         when {
+            equip.domainName.contains("smartnodeActiveChilledBeam") ->  {
+                Domain.equips[equip.id] = VavAcbEquip(equip.id)
+            }
             equip.markers.contains("vav") -> Domain.equips[equip.id] = VavEquip(equip.id)
             equip.markers.contains("dab") -> Domain.equips[equip.id] = DabEquip(equip.id)
             equip.markers.contains("pid") -> Domain.equips[equip.id] = PlcEquip(equip.id)

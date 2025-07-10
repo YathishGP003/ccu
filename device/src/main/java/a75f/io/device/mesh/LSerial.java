@@ -538,6 +538,10 @@ public class LSerial
             CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(new Zone.Builder().setDisplayName("OAO").build(),
                     (short)L.ccu().oaoProfile.getNodeAddress(), ccu().oaoProfile.getEquipRef(),"oao");
             sendStructToCM(seedMessage);
+            CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING OAO SN SETTING2 Message =====================");
+            CcuToCmOverUsbSnSettings2Message_t settings2Message = LSmartNode.getSettings2Message(new Zone.Builder().setDisplayName("OAO").build()
+                    , (short)L.ccu().oaoProfile.getNodeAddress(), ccu().oaoProfile.getEquipRef(), "oao");
+            sendStructToCM(settings2Message);
             LSerial.getInstance().setNodeSeeding(false);
         }
     }

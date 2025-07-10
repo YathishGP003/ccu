@@ -294,6 +294,12 @@ public class MeshNetwork extends DeviceNetwork
                     CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(new Zone.Builder().setDisplayName("OAO").build(),
                             (short)L.ccu().oaoProfile.getNodeAddress(), ccu().oaoProfile.getEquipRef(),"oao");
                     sendStructToCM(seedMessage);
+
+                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING OAO SN SETTING2 Message =====================");
+                    CcuToCmOverUsbSnSettings2Message_t settings2Message = LSmartNode.getSettings2Message(new Zone.Builder().setDisplayName("OAO").build()
+                            , (short)L.ccu().oaoProfile.getNodeAddress(), ccu().oaoProfile.getEquipRef(), "oao");
+                    tempLogdStructAsJson(settings2Message);
+                    sendStructToCM(settings2Message);
                 }
                 else
                 {
@@ -310,6 +316,10 @@ public class MeshNetwork extends DeviceNetwork
                         controlsMessage = LSmartNode.getCurrentTimeForControlMessage(controlsMessage);
                         sendStructToNodes(controlsMessage);
                     }
+                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING OAO SN Settings2=====================");
+                    CcuToCmOverUsbSnSettings2Message_t settings2Message = LSmartNode.getSettings2Message(new Zone.Builder().setDisplayName("OAO").build()
+                            , (short)L.ccu().oaoProfile.getNodeAddress(), ccu().oaoProfile.getEquipRef(), "oao");
+                    sendStruct((short) settingsMessage.smartNodeAddress.get(), settings2Message);
                 }
             }
 

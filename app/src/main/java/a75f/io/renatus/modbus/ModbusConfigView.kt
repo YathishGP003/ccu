@@ -6,11 +6,11 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.bacnet.util.SELECT_MODEL
 import a75f.io.renatus.compose.ButtonListRow
+import a75f.io.renatus.compose.ExternalConfigDropdownSelector
 import a75f.io.renatus.compose.FormattedTableWithoutHeader
 import a75f.io.renatus.compose.HeaderLeftAlignedTextView
 import a75f.io.renatus.compose.HeaderTextView
 import a75f.io.renatus.compose.LabelTextView
-import a75f.io.renatus.compose.ExternalConfigDropdownSelector
 import a75f.io.renatus.compose.ParameterLabel
 import a75f.io.renatus.compose.SaveTextView
 import a75f.io.renatus.compose.TableHeaderRow
@@ -133,21 +133,12 @@ class ModbusConfigView : BaseDialogFragment() {
     fun RootView(filter : String ="") {
         if (filter == "btu" || filter == "emr") {
             Column {
-                val isDisabled by viewModel.isDisabled.observeAsState(false)
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
                         viewModel.configModelDefinition(requireContext())
                     item {
-                        Box {
-                            if (isDisabled) {
-                                PasteBannerFragment.PasteCopiedConfiguration(
-                                    onPaste = { viewModel.applyCopiedConfiguration() },
-                                    onClose = { viewModel.disablePasteConfiguration() }
-                                )
-                            }
-                        }
                         Column(modifier = Modifier.padding(10.dp)) {
                             Box(
                                 modifier = Modifier.fillMaxWidth(),
@@ -278,8 +269,7 @@ class ModbusConfigView : BaseDialogFragment() {
 
                     // Configuring the View Model for display
                     viewModel.configModelDefinition(requireContext())
-
-                    // Displaying the Paste Banner if applicable
+                    // Displaying the Mandatory Modbus Configuration Components
                     item {
                         Box {
                             val isDisabled by viewModel.isDisabled.observeAsState(false)
@@ -290,10 +280,6 @@ class ModbusConfigView : BaseDialogFragment() {
                                 )
                             }
                         }
-                    }
-
-                    // Displaying the Mandatory Modbus Configuration Components
-                    item {
                         Column(
                             modifier = Modifier.padding(
                                 start = 40.dp,

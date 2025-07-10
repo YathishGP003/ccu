@@ -436,21 +436,29 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         return  (int)(analogMin * ANALOG_SCALE);
     }
 
+
     @Override
-    public String getStatusMessage(){
+    public String getStatusMessage() {
+
         StringBuilder status = new StringBuilder();
         boolean economizingOn = systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable();
         status.append((systemFanLoopOp > 0 || Domain.cmBoardDevice.getRelay3().readHisVal() > 0.01 ) ? " Fan ON ": "");
+
         if(economizingOn) {
             double economizingToMainCoolingLoopMap =  L.ccu().oaoProfile.getOAOEquip().getEconomizingToMainCoolingLoopMap().readPriorityVal();
             status.append((systemCoolingLoopOp >= economizingToMainCoolingLoopMap && !isCoolingLockoutActive())? " | Cooling ON ":"");
         } else {
             status.append((systemCoolingLoopOp > 0 && !isCoolingLockoutActive())? " | Cooling ON ":"");
         }
+
         status.append((systemHeatingLoopOp > 0 && !isHeatingLockoutActive())? " | Heating ON ":"");
         
         if (economizingOn) {
             status.insert(0, "Free Cooling Used |");
+        }
+
+        if (status.toString().isEmpty() && systemEquip.getFanEnable().readHisVal() > 0) {
+            status.append("Fan ON");
         }
 
         if (systemEquip.getRelay3OutputEnable().readDefaultVal() > 0) {
@@ -461,6 +469,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                 status.append((systemEquip.getDehumidifier().readHisVal() > 0) ? " | Dehumidifier ON " : " | Dehumidifier OFF ");
             }
         }
+
         if (systemEquip.getRelay7OutputEnable().readDefaultVal() > 0) {
             double relay7Association = systemEquip.getRelay7OutputAssociation().readDefaultVal();
             if (relay7Association == ModulatingProfileRelayMapping.HUMIDIFIER.ordinal()) {

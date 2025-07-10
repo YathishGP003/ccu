@@ -389,6 +389,9 @@ public class DabStagedRtu extends DabSystemProfile
             status.insert(0, "Free Cooling Used | ");
         }
 
+        if (status.toString().isEmpty() && systemEquip.getConditioningStages().getFanEnable().readHisVal() > 0) {
+            status.append("Fan ON");
+        }
 
         if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU) {
             return status.toString().isEmpty() ? "System OFF" + SystemProfileUtil.isDeHumidifierOn()

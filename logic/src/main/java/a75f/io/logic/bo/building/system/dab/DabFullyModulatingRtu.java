@@ -173,6 +173,10 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             status.insert(0, "Free Cooling Used |");
         }
 
+        if (status.toString().isEmpty() && systemEquip.getConditioningStages().getFanEnable().readHisVal() > 0) {
+            status.append("Fan ON");
+        }
+
         if (systemEquip.getRelay3OutputEnable().readDefaultVal() > 0) {
             double relay3Association = systemEquip.getRelay3OutputAssociation().readDefaultVal();
             if (relay3Association == ModulatingProfileRelayMapping.HUMIDIFIER.ordinal()) {

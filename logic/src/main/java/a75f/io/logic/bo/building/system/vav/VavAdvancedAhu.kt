@@ -768,9 +768,17 @@ open class VavAdvancedAhu : VavSystemProfile() {
         if (analogStatus.isNotEmpty()) {
             analogStatus.insert(0, " | Analog ")
         }
-        systemStatus.append(coolingStatus)
-            .append(heatingStatus)
-            .append(analogStatus)
+
+        if (coolingStatus.toString().isEmpty()
+                && heatingStatus.toString().isEmpty()
+                && analogStatus.toString().isEmpty()
+                && systemEquip.cmEquip.conditioningStages.fanEnable.readHisVal() > 0) {
+            systemStatus.append("Fan ON ")
+        } else {
+            systemStatus.append(coolingStatus)
+                .append(heatingStatus)
+                .append(analogStatus)
+        }
 
         return if (systemStatus.toString() == "") "System OFF$humidifierStatus$dehumidifierStatus" else systemStatus.toString() + humidifierStatus + dehumidifierStatus
     }

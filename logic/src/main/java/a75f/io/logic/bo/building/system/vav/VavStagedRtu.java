@@ -72,8 +72,7 @@ import a75f.io.logic.util.SystemProfileUtil;
  * Created by samjithsadasivan on 8/14/18.
  */
 
-public class VavStagedRtu extends VavSystemProfile
-{
+public class VavStagedRtu extends VavSystemProfile {
     private static final int CO2_MAX = 1000;
     private static final int CO2_MIN = 400;
     
@@ -558,6 +557,10 @@ public class VavStagedRtu extends VavSystemProfile
         if (L.ccu().systemProfile instanceof VavStagedRtuWithVfd) {
             VavStagedVfdSystemEquip vfdSystemEquip = (VavStagedVfdSystemEquip) Domain.systemEquip;
             status.append(vfdSystemEquip.getFanSignal().readHisVal() > 0 ? " Analog Fan ON " : "");
+        }
+
+        if (status.toString().isEmpty() && systemEquip.getConditioningStages().getFanEnable().readHisVal() > 0) {
+            status.append("Fan ON");
         }
 
         if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU) {

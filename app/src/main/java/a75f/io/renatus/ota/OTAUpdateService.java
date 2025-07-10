@@ -102,6 +102,9 @@ public class OTAUpdateService extends IntentService {
     public static final String MPY_FILE_FORMAT = ".mpy";
 
     private static final String TAG = "OTA_PROCESS";
+    private static final int SEQ_TYPE = 0x03;
+    private static final int NODE_STATUS_FW_OTA_VALUE_MASK = 0xF8;
+    private static final int NODE_STATUS_VALUE_SEQ_OTA_SUCCESS = 0;
 
     private static final String DOWNLOAD_BASE_URL = "https://updates.75f.io/";
     private static final File DOWNLOAD_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -550,10 +553,6 @@ public class OTAUpdateService extends IntentService {
                     mUpdateLengthSq / MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE,
                     msg.data.get(), mCurrentLwMeshAddress
             );
-        } else if (msg.currentState.get() == SequenceOtaState.SEQUENCE_UPDATE_COMPLETE.ordinal()) {
-            handleSequenceComplete();
-        } else if ( msg.currentState.get() == SequenceOtaState.SEQUENCE_UPDATE_FAILED.ordinal()) {
-            handleSequenceOtaFail();
         }
         else if ( msg.currentState.get() == SequenceOtaState.CM_DEVICE_TIMEOUT.ordinal()) {
             sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_TIMED_OUT));
@@ -628,6 +627,19 @@ public class OTAUpdateService extends IntentService {
                         // changed Smart node to Smart Device as it is indicating the general name (US:9387)
                         "." + versionMinor, getDeviceId(String.valueOf(mFirmwareDeviceType), mCurrentLwMeshAddress));
                 CcuLog.d(TAG, mUpdateWaitingToComplete + " - " + versionMajor + " - " + versionMinor);
+                // Check if the reboot message is after sequence update
+                if ((msg.nodeStatus.get() & 0x07) == SEQ_TYPE) {
+                    // Extract bits 3-7 (last 5 bits) using bitmask 0xF8 (11111000 in binary)
+                    int last5Bits = msg.nodeStatus.get() & NODE_STATUS_FW_OTA_VALUE_MASK;  // Mask keeps only bits 3-7
+                    if (last5Bits == NODE_STATUS_VALUE_SEQ_OTA_SUCCESS) {
+                        CcuLog.d(TAG, "Sequence OTA update completed for Node: " + mCurrentLwMeshAddress);
+                        handleSequenceComplete();
+                    } else {
+                        CcuLog.d(TAG, "Sequence OTA update failed for Node: " + mCurrentLwMeshAddress);
+                        handleSequenceOtaFail();
+                    }
+                    return;
+                }
                 if (mUpdateWaitingToComplete && versionMatches(versionMajor, versionMinor)) {
                     CcuLog.d(TAG, "[UPDATE] [SUCCESSFUL]"
                             + " [Node Address:" + mCurrentLwMeshAddress + "]"   // updated to Node address from SN as
@@ -934,6 +946,8 @@ public class OTAUpdateService extends IntentService {
         }
 
         mUpdateInProgress = true;
+        // update the device type to be used later during reboot message
+        mFirmwareDeviceType = FirmwareComponentType_t.CONNECT_MODULE_SEQUENCE_TYPE;
         if(eraseSequence) {
             sendPacketEraseSequence(mLwMeshSeqAddresses.get(0));
             mLwMeshSeqAddresses.remove(0);
@@ -1617,6 +1631,8 @@ public class OTAUpdateService extends IntentService {
         if(mLwMeshSeqAddresses != null && !mLwMeshSeqAddresses.isEmpty()) {
             ConnectNodeDevice connectNodeEquip = ConnectNodeUtil.Companion.connectNodeEquip(mCurrentLwMeshAddress);
             connectNodeEquip.getSequenceStatus().writePointValue(SequenceOtaStatus.SEQ_UPDATE_STARTED.ordinal());
+            // update the device type to be used later during reboot message
+            mFirmwareDeviceType = FirmwareComponentType_t.CONNECT_MODULE_SEQUENCE_TYPE;
             if(!mSequenceEmptyRequest) {
                 extractFileSequenceMeta(mSequenceMetaFileName, mCurrentLwMeshAddress, seqVersion);
                 extractFileSequenceOta(mSequenceSeqFileName);

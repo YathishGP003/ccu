@@ -379,7 +379,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
 
         if (!isFreshRegister) {
             List<HashMap<Object, Object>> equips = ccuHsApi.readAllEntities("equip and (zone or bypassDamper or oao)");
-            List<HashMap<Object, Object>> connectModules = ccuHsApi.readAllEntities("device and connectModule");
+            List<HashMap<Object, Object>> connectModules = ccuHsApi.readAllEntities("domainName == \"connectNodeDevice\"");
             mAddressBandSpinner.setEnabled(equips.isEmpty() && connectModules.isEmpty());
         }
 
@@ -1009,7 +1009,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
             if (intent.getAction().equals(ACTION_SETTING_SCREEN)) {
                 if (mAddressBandSpinner != null) {
                     List<HashMap<Object, Object>>  equips = CCUHsApi.getInstance().readAllEntities("equip and (zone or bypassDamper or oao)");
-                    List<HashMap<Object, Object>> connectModule = CCUHsApi.getInstance().readAllEntities("device and connectModule");
+                    List<HashMap<Object, Object>> connectModule = CCUHsApi.getInstance().readAllEntities("domainName == \"connectNodeDevice\"");
                     mAddressBandSpinner.setEnabled(equips.isEmpty() && connectModule.isEmpty());
                 }
             }

@@ -248,7 +248,11 @@ class ConnectNodeUtil {
 
         fun updateOtaSequenceState(state: Short, slaveId: Int) {
             val connectNodeEquip = connectNodeEquip(slaveId)
-            connectNodeEquip.sequenceUpdateState.writeHisVal(state.toDouble())
+            try {
+                connectNodeEquip.sequenceUpdateState.writeHisVal(state.toDouble())
+            } catch (e: Exception) {
+                CcuLog.e(L.TAG_CONNECT_NODE, "Error updating OTA sequenceUpdateState: ${e.message}")
+            }
         }
 
         fun getAddressByDeviceId(

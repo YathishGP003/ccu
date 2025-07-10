@@ -25,7 +25,17 @@ class ConnectNodeDevice(deviceRef: String) : DomainDevice(deviceRef) {
 
 
     fun updateDeliveryTime(deliveryReceipt: HDateTime) {
-        hayStack.updatePoint(otaStatusSequence.readPoint().apply {tags["deliveryDateTime"] = deliveryReceipt}, otaStatusSequence.id)
+        // Safely get the point
+        val point = try {
+            otaStatusSequence.readPoint()
+        } catch (e: Exception) {
+            CcuLog.e("CONNECT_NODE", "Error reading point for device $deviceRef: ${e.message}")
+            return
+        }
+        val id = otaStatusSequence.id
+        // Update point and log
+        point.tags["deliveryDateTime"] = deliveryReceipt
+        hayStack.updatePoint(point, id)
         CcuLog.i("CONNECT_NODE", "Delivery time updated for device $deviceRef: $deliveryReceipt")
     }
 

@@ -285,42 +285,53 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
             return true;
         } else {
             RxjavaUtil.executeBackgroundTask(
-                    () -> ProgressDialogUtils.showProgressDialog(getActivity(),
-                            "Fetching Zone Schedules..."),
+                    () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Fetching Zone Schedules..."),
                     () -> {
                         scheduleImpacts.clear();
-                        HashMap<String, ArrayList<Interval>> spillsMap = days == null ? buildingOccupancyViewModel.getRemoveScheduleSpills(buildingOccupancy) :
-                                buildingOccupancyViewModel.getScheduleSpills(daysList, buildingOccupancy);
+                        HashMap<String, ArrayList<Interval>> spillsMap = (days == null)
+                                ? buildingOccupancyViewModel.getRemoveScheduleSpills(buildingOccupancy)
+                                : buildingOccupancyViewModel.getScheduleSpills(daysList, buildingOccupancy);
+
                         if (spillsMap != null && !spillsMap.isEmpty() && position != ManualSchedulerDialogFragment.NO_REPLACE) {
                             scheduleImpacts = buildingOccupancyViewModel.getWarningMessage(spillsMap);
-                        } else {
-                            if ((!NetworkUtil.isNetworkConnected(getActivity()) || !isCloudConnected) && !OfflineModeUtilKt.isOfflineMode()) {
-                                getActivity().runOnUiThread(() -> {
-                                    ProgressDialogUtils.hideProgressDialog();
-                                    Toast.makeText(getActivity(), "Building Occupancy cannot be edited when CCU is offline. Please " +
-                                            "connect to network.", Toast.LENGTH_LONG).show();
-                                });
-                                return;
-                            }
-                            if (removeEntry != null && buildingOccupancy.getDays().contains(removeEntry)) {
-                                buildingOccupancy.getDays().remove(removeEntry);
-                            }
-                            buildingOccupancy.getDays().addAll(daysList);
-                            doScheduleUpdate(false);
-                            buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
                         }
                     },
 
                     () -> {
-                        if (scheduleImpacts != null && !scheduleImpacts.isEmpty()) {
-                            showScheduleImpactDialogFragment(scheduleImpacts);
+                        try {
+                            if (scheduleImpacts != null && !scheduleImpacts.isEmpty()) {
+                                showScheduleImpactDialogFragment(scheduleImpacts);
+                            } else {
+                                proceedWithScheduleUpdate(daysList, removeEntry, isCloudConnected);
+                            }
+                        } finally {
+                            ProgressDialogUtils.hideProgressDialog();
                         }
-                        ProgressDialogUtils.hideProgressDialog();
-                    });
+                    }
+            );
+
         }
 
         return true;
     }
+
+    private void proceedWithScheduleUpdate(List<BuildingOccupancy.Days> daysList, BuildingOccupancy.Days removeEntry, boolean isCloudConnected) {
+        if ((!NetworkUtil.isNetworkConnected(getActivity()) || !isCloudConnected) && !OfflineModeUtilKt.isOfflineMode()) {
+            getActivity().runOnUiThread(() -> {
+                ProgressDialogUtils.hideProgressDialog();
+                Toast.makeText(getActivity(), "Building Occupancy cannot be edited when CCU is offline. Please " +
+                        "connect to network.", Toast.LENGTH_LONG).show();
+            });
+            return;
+        }
+        if (removeEntry != null && buildingOccupancy.getDays().contains(removeEntry)) {
+            buildingOccupancy.getDays().remove(removeEntry);
+        }
+        buildingOccupancy.getDays().addAll(daysList);
+        doScheduleUpdate(false);
+        buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();

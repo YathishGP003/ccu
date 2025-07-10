@@ -515,10 +515,12 @@ public class MasterControlUtil {
         return ((isSchedulableAvailable != null && SchedulableMigrationKt.validateMigration()));
     }
 
-    public static boolean isNonTempModule(String profileType){
-        return  (profileType.contains(ProfileType.EMR.toString()) || profileType.contains(ProfileType.PLC.toString())
+    public static boolean isNonTempModule(String profileType) {
+        return (profileType.contains(ProfileType.EMR.toString()) || profileType.contains(ProfileType.PLC.toString())
                 || profileType.contains(ProfileType.TEMP_MONITOR.toString())
-                || profileType.contains("MODBUS") || profileType.contains(ProfileType.HYPERSTAT_MONITORING.toString()));
+                || profileType.contains("MODBUS") || profileType.contains(ProfileType.HYPERSTAT_MONITORING.toString())
+                || profileType.contains(ProfileType.CONNECTNODE.toString())
+                || profileType.contains(ProfileType.BACNET_DEFAULT.toString()));
     }
 
 

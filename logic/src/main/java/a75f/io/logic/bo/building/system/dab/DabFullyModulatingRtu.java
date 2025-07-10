@@ -24,12 +24,10 @@ import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.ModulatingProfileAnalogMapping;
 import a75f.io.logic.bo.building.hvac.ModulatingProfileRelayMapping;
-import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemControllerFactory;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemStageHandler;
-import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuAnalogOutMinMaxConfig;
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -49,8 +47,7 @@ import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
 
-public class DabFullyModulatingRtu extends DabSystemProfile
-{
+public class DabFullyModulatingRtu extends DabSystemProfile {
     private static final int ANALOG_SCALE = 10;
     public DabModulatingRtuSystemEquip systemEquip;
 
@@ -78,12 +75,14 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     
     @Override
     public boolean isCoolingAvailable() {
-        return systemEquip.getCoolingSignal().pointExists() || systemEquip.getCompressorSpeed().pointExists();
+        return systemEquip.getCoolingSignal().pointExists()
+                || systemEquip.getCompressorSpeed().pointExists();
     }
     
     @Override
     public boolean isHeatingAvailable() {
-        return systemEquip.getHeatingSignal().pointExists() || systemEquip.getCompressorSpeed().pointExists();
+        return systemEquip.getHeatingSignal().pointExists()
+                || systemEquip.getCompressorSpeed().pointExists();
     }
     
     @Override
@@ -96,8 +95,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         return systemHeatingLoopOp > 0;
     }
     
-    public double systemDCWBValveLoopOutput;
-    DcwbAlgoHandler dcwbAlgoHandler = null;
+    private double systemDCWBValveLoopOutput;
+    private DcwbAlgoHandler dcwbAlgoHandler = null;
 
     private synchronized void updateSystemPoints() {
 
@@ -312,7 +311,11 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     }
 
     private void updateSystemCo2LoopOp() {
-        systemCo2LoopOp = getCo2LoopOp();
+        if (systemEquip.getConditioningMode().readPriorityVal() != SystemMode.OFF.ordinal()) {
+            systemCo2LoopOp = getCo2LoopOp();
+        } else {
+            systemCo2LoopOp = 0;
+        }
         systemEquip.getCo2LoopOutput().writePointValue(systemCo2LoopOp);
         systemCo2LoopOp = systemEquip.getCo2LoopOutput().readHisVal();
 

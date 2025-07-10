@@ -50,8 +50,7 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
 /**
  * Default System handles PI controlled op
  */
-public class VavFullyModulatingRtu extends VavSystemProfile
-{
+public class VavFullyModulatingRtu extends VavSystemProfile {
     private static final int CO2_MAX = 1000;
     private static final int CO2_MIN = 400;
     

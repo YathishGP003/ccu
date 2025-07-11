@@ -22,6 +22,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 public class MessagingClient implements BearerTokenManager.OnBearerTokenRefreshListener {
@@ -159,8 +160,12 @@ public class MessagingClient implements BearerTokenManager.OnBearerTokenRefreshL
                 .build();
 
         CcuLog.d("CCU_HTTP_REQUEST", "MessagingClient: [GET] " + subscribeUrl + " - Token: " + bearerToken);
-
-        okSse = new OkSse();
+        // added readTimeout of 0 to allow for long-lived SSE connections
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(0, TimeUnit.SECONDS)
+                .build();
+        OkSse okSse = new OkSse(client);
         sse = okSse.newServerSentEvent(request, new MessagingListener(siteId, ccuId, messagingUrl));
         sse.setTimeout(1, TimeUnit.MINUTES);
     }

@@ -483,14 +483,15 @@ public class FloorPlanFragment extends Fragment {
         HashMap<Object, Object> connectNodeDevice = ConnectNodeUtil.Companion.getConnectNodeForZone(zone.getId(), CCUHsApi.getInstance());
         if (zoneEquips != null && (!zoneEquips.isEmpty())) {
             mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(zoneEquips, connectNodeDevice), moduleListActionMenuListener.seletedModules, new ArrayList<>());
+            requireActivity().runOnUiThread(() -> moduleListView.setAdapter(mModuleListAdapter));
         } else if (ConnectNodeUtil.Companion.isZoneContainingEmptyConnectNode(zone.getId(), CCUHsApi.getInstance())) {
             mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(),
                     R.layout.listviewitem, createAddressListByDevice(connectNodeDevice),
                     moduleListActionMenuListener.seletedModules, new ArrayList<>());
+            requireActivity().runOnUiThread(() -> moduleListView.setAdapter(mModuleListAdapter));
         } else {
-            mModuleListAdapter = null;
+            requireActivity().runOnUiThread(() -> moduleListView.setAdapter(null));
         }
-        requireActivity().runOnUiThread(() -> moduleListView.setAdapter(mModuleListAdapter));
     }
 
     private ArrayList<String> createAddressList(List<Equip> equips, HashMap<Object, Object> connectNodeDevice) {

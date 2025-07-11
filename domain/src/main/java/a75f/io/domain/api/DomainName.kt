@@ -203,6 +203,11 @@ object DomainName {
     const val dabHeatingDeadbandMultiplier = "dabHeatingDeadbandMultiplier"
     const val vavReheatRelayActivationHysteresis = "vavReheatRelayActivationHysteresis"
 
+    const val vavReheatTemperatureProportionalRange = "vavReheatTemperatureProportionalRange"
+    const val vavReheatTemperatureIntegralTime = "vavReheatTemperatureIntegralTime"
+    const val vavReheatIntegralKFactor = "vavReheatIntegralKFactor"
+    const val vavReheatProportionalKFactor = "vavReheatProportionalKFactor"
+
     //ACB-Zone
     const val valveType = "valveType"
     const val thermistor2Type = "thermistor2Type"

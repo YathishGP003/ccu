@@ -42,7 +42,7 @@ public class GenericPIController
         else
             calculateIEWithoutNegativeCE();
         calculateControlVariable();
-        
+
     }
     
     public void applyErrorLimits() {
@@ -56,7 +56,7 @@ public class GenericPIController
         } else {
             limitedError = error;
         }
-        
+
     }
     
     public void calculateProportionalError() {
@@ -78,7 +78,7 @@ public class GenericPIController
     
         cumulativeError = Math.min(cumulativeError, integralLimit);
         cumulativeError = Math.max(cumulativeError, negativeIntLimit);
-        
+
     }
     // Calculate the integral Error without negative Cumulative error
     public void calculateIEWithoutNegativeCE() {

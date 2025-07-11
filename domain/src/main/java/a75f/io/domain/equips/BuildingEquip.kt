@@ -73,6 +73,10 @@ class BuildingEquip (equipRef : String) : DomainEquip(equipRef) {
     val reheatZoneDischargeTempOffset = Point(DomainName.reheatZoneDischargeTempOffset, equipRef)
     val vavModeChangeOverHysteresis = Point(DomainName.vavModeChangeOverHysteresis, equipRef)
     val vavTemperatureIntegralTime = Point(DomainName.vavTemperatureIntegralTime, equipRef)
+    val vavReheatTemperatureProportionalRange = Point(DomainName.vavReheatTemperatureProportionalRange, equipRef)
+    val vavReheatTemperatureIntegralTime = Point(DomainName.vavReheatTemperatureIntegralTime, equipRef)
+    val vavReheatIntegralKFactor = Point(DomainName.vavReheatIntegralKFactor, equipRef)
+    val vavReheatProportionalKFactor = Point(DomainName.vavReheatProportionalKFactor, equipRef)
 
     val satIgnoreRequest = Point(DomainName.satIgnoreRequest, equipRef)
     val satSPMax = Point(DomainName.satSPMax, equipRef)

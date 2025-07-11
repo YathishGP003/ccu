@@ -267,7 +267,6 @@ public class VavReheatProfile extends VavProfile
         valveController.updateControlVariable(dischargeSp, dischargeTemp);
         valveController.dump();
         int valvePosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
-    
         CcuLog.d(L.TAG_CCU_ZONE,
                  "updateReheatDuringSystemCooling :  supplyAirTemp: " + supplyAirTemp +  " datMax: " + datMax+
                  " dischargeTemp: " + dischargeTemp +" dischargeSp "+dischargeSp);

@@ -110,4 +110,9 @@ open class VavEquip (equipRef : String) : DomainEquip(equipRef){
     val fanControlOnFixedTimeDelay = Point(DomainName.fanControlOnFixedTimeDelay, equipRef)
 
     val demandResponseSetback = Point(DomainName.demandResponseSetback, equipRef)
+
+    val vavReheatTemperatureProportionalRange = Point(DomainName.vavReheatTemperatureProportionalRange, equipRef)
+    val vavReheatTemperatureIntegralTime = Point(DomainName.vavReheatTemperatureIntegralTime, equipRef)
+    val vavReheatIntegralKFactor = Point(DomainName.vavReheatIntegralKFactor, equipRef)
+    val vavReheatProportionalKFactor = Point(DomainName.vavReheatProportionalKFactor, equipRef)
 }

@@ -123,10 +123,6 @@ public abstract class VavProfile extends ZoneProfile {
         heatingLoop = new ControlLoop();
         co2Loop = new CO2Loop();
         valveController = new GenericPIController();
-        valveController.setIntegralMaxTimeout(integralMaxTimeout);
-        valveController.setMaxAllowedError(proportionalSpread);
-        valveController.setProportionalGain(proportionalGain);
-        valveController.setIntegralGain(integralGain);
 
         satResetRequest = new TrimResponseRequest();
         co2ResetRequest = new TrimResponseRequest();
@@ -209,6 +205,9 @@ public abstract class VavProfile extends ZoneProfile {
                     +" integralMaxTimeout "+integralMaxTimeout);
 
             initializeCfmController(equipId);
+            if(profileType != ProfileType.VAV_ACB) {
+                initializeReheatValveController();
+            }
         }
 
         coolingLoop.setProportionalGain(proportionalGain);
@@ -276,6 +275,16 @@ public abstract class VavProfile extends ZoneProfile {
         cfmController.setProportionalSpread(cfmProportionalSpread);
         cfmController.setIntegralMaxTimeout(cfmIntegralMaxTimeout);
 
+        double reheatProportionalGain = (vavEquip.getVavReheatProportionalKFactor().readPriorityVal() > 0) ? vavEquip.getVavReheatProportionalKFactor().readPriorityVal() : proportionalGain;
+        double reheatIntegralGain = (vavEquip.getVavReheatIntegralKFactor().readPriorityVal() > 0) ? vavEquip.getVavReheatIntegralKFactor().readPriorityVal() : integralGain;
+        int reheatMaxAllowedError = (vavEquip.getVavReheatTemperatureProportionalRange().readPriorityVal() > 0.0) ? (int)vavEquip.getVavReheatTemperatureProportionalRange().readPriorityVal(): proportionalSpread;
+        int reheatIntegralMaxTimeout = (vavEquip.getVavReheatTemperatureIntegralTime().readPriorityVal() > 0.0) ? (int)vavEquip.getVavReheatTemperatureIntegralTime().readPriorityVal() : integralMaxTimeout;
+
+        valveController.setProportionalGain(reheatProportionalGain);
+        valveController.setIntegralGain(reheatIntegralGain);
+        valveController.setMaxAllowedError(reheatMaxAllowedError);
+        valveController.setIntegralMaxTimeout(reheatIntegralMaxTimeout);
+
         co2Target = (int) vavEquip.getVavZoneCo2Target().readPriorityVal();
         co2Threshold = (int) vavEquip.getVavZoneCo2Threshold().readPriorityVal();
 
@@ -304,7 +313,26 @@ public abstract class VavProfile extends ZoneProfile {
         cfmController.reset();
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile initializeCfmController Done");
     }
-    
+
+    private void initializeReheatValveController() {
+        CcuLog.i(L.TAG_CCU_ZONE, "VavProfile initializeReheatController");
+        double reheatProportionalGain = (vavEquip.getVavReheatProportionalKFactor().readPriorityVal() > 0) ? vavEquip.getVavReheatProportionalKFactor().readPriorityVal() : proportionalGain;
+        double reheatIntegralGain = (vavEquip.getVavReheatIntegralKFactor().readPriorityVal() > 0) ? vavEquip.getVavReheatIntegralKFactor().readPriorityVal() : integralGain;
+        int reheatMaxAllowedError = (vavEquip.getVavReheatTemperatureProportionalRange().readPriorityVal() > 0.0) ? (int)vavEquip.getVavReheatTemperatureProportionalRange().readPriorityVal(): proportionalSpread;
+        int reheatIntegralMaxTimeout = (vavEquip.getVavReheatTemperatureIntegralTime().readPriorityVal() > 0.0) ? (int)vavEquip.getVavReheatTemperatureIntegralTime().readPriorityVal() : integralMaxTimeout;
+
+        CcuLog.i(L.TAG_CCU_ZONE,"node "+nodeAddr+" reheatProportionalGain "+reheatProportionalGain
+                +" reheatIntegralGain "+reheatIntegralGain
+                +" reheatMaxAllowedError "+reheatMaxAllowedError
+                +" reheatIntegralMaxTimeout "+reheatIntegralMaxTimeout);
+        valveController.setProportionalGain(reheatProportionalGain);
+        valveController.setIntegralGain(reheatIntegralGain);
+        valveController.setMaxAllowedError(reheatMaxAllowedError);
+        valveController.setIntegralMaxTimeout(reheatIntegralMaxTimeout);
+        valveController.reset();
+        CcuLog.i(L.TAG_CCU_ZONE, "VavProfile initializeReheatValveController Done");
+    }
+
     public void initTRSystem() {
         trSystem = (VavTRSystem) L.ccu().systemProfile.trSystem;
         trSystem.getSystemSATTRProcessor().addTRListener(satResetListener);

@@ -4197,6 +4197,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     fun fetchAnalogPointsForSystemProfile(hayStack: CCUHsApi) : Map<String, Int> {
         val analogPoints = mutableMapOf<String, Int>()
         val systemEquipDict = hayStack.readHDict(CommonQueries.SYSTEM_PROFILE)
+        if (systemEquipDict.isEmpty) {
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "System profile not found")
+            return analogPoints
+        }
         val equipId = systemEquipDict[Tags.ID].toString()
         val analogOut1Min = hayStack.readEntity("point and system and analog == 1 and min and equipRef == \"$equipId\"")
         if (analogOut1Min.isNotEmpty()) {

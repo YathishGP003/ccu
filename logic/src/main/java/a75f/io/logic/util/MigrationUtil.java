@@ -47,6 +47,7 @@ import a75f.io.logic.autocommission.remoteSession.RemoteSessionStatus;
 import a75f.io.logic.bo.building.ccu.RoomTempSensor;
 import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.definitions.UtilKt;
 import a75f.io.logic.bo.haystack.device.SmartNode;
@@ -207,6 +208,12 @@ public class MigrationUtil {
         if(!PreferenceUtil.getNullIdRemovalStatus()) {
             removeNullIdPoint(ccuHsApi);
             PreferenceUtil.setNullIdRemovalStatus();
+        }
+        if(!PreferenceUtil.getMigrateStage1DabReheatMapping()) {
+            CcuLog.d(TAG, "migrateStage1DabReheatMapping started");
+            migrateStage1DabReheatMapping(ccuHsApi);
+            PreferenceUtil.setMigrateStage1DabReheatMapping();
+            CcuLog.d(TAG, "migrateStage1DabReheatMapping ended");
         }
         ccuHsApi.scheduleSync();
     }
@@ -1248,5 +1255,28 @@ public class MigrationUtil {
     private static void removeNullIdPoint(CCUHsApi ccuHsApi) {
         ccuHsApi.removeEntity("null");
         CcuLog.d(TAG, "removeNullIdPoint completed");
+    }
+
+    private static void migrateStage1DabReheatMapping(CCUHsApi ccuHsApi) {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "migrateStage1DabReheatMapping started");
+        ArrayList<HashMap<Object, Object>> dabReheatPoints = ccuHsApi.readAllEntities("point and dab and domainName == \"" + DomainName.reheatType + "\"");
+        for (HashMap<Object, Object> dabReheatPoint : dabReheatPoints) {
+            Object pointId = dabReheatPoint.get("id");
+            if (pointId != null) {
+                double reheatType = ccuHsApi.readPointPriorityVal(pointId.toString());
+                if (reheatType == ReheatType.OneStage.ordinal() + 1) {
+                    HashMap<Object,Object> normalizedDamper2Cmd = ccuHsApi.readEntity("point and equipRef == \"" + dabReheatPoint.get("equipRef") +
+                                                "\" and domainName == \"" + DomainName.normalizedDamper2Cmd + "\"");
+                    if (!normalizedDamper2Cmd.isEmpty()) {
+                        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating domain physical point ref for " + normalizedDamper2Cmd);
+                        SmartNode.updateDomainPhysicalPointRef(
+                                Integer.parseInt(normalizedDamper2Cmd.get("group").toString()), DomainName.analog2Out, normalizedDamper2Cmd.get("id").toString()
+                        );
+                    }
+                }
+            }
+
+        }
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "migrateStage1DabReheatMapping completed");
     }
 }

@@ -375,7 +375,7 @@ class DabProfileViewModel : ViewModel() {
         deviceBuilder.updatePoint(analog1Def!!, config, device, analog1out)
         fun getAnalog2PointRef() : String? {
             if (reheatType >= 0 ) {
-                if (reheatType <= ReheatType.OneStage.ordinal) {
+                if (reheatType < ReheatType.OneStage.ordinal) {
                     return reheatCmdPoint["id"].toString()
                 }
                 if (damperType2.toInt() != DamperType.MAT.ordinal) {

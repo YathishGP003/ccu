@@ -133,6 +133,7 @@ public class PreferenceUtil {
     private static final String UPDATE_MYSTAT_GATEWAY_REF_FLAG = "updateMystatGatewayRefFlag";
     private static final String IS_REBOOT_REQUIRED_AFTER_REPLACE = "isRebootRequiredAfterReplace";
     private static final String MIGRATE_MODULATING_PROFILE_NORMALIZATION = "migrateModulatingProfileNormalization";
+    private static final String MIGRATE_STAGE1_DAB_REHEAT_MAPPING = "migrateStage1ReheatMapping";
     private static final String MIGRATION_SYSTEM_FLAG_CCU_REBOOT = "migrationSystemFlagCcuReboot";
 
     public static void setContext(Context c) {
@@ -1052,5 +1053,11 @@ public class PreferenceUtil {
     }
     public static void setMigrateModulatingProfileNormalization() {
         setBooleanPreference(MIGRATE_MODULATING_PROFILE_NORMALIZATION, true);
+    }
+    public static boolean getMigrateStage1DabReheatMapping() {
+        return getBooleanPreference(MIGRATE_STAGE1_DAB_REHEAT_MAPPING);
+    }
+    public static void setMigrateStage1DabReheatMapping() {
+        setBooleanPreference(MIGRATE_STAGE1_DAB_REHEAT_MAPPING, true);
     }
 }

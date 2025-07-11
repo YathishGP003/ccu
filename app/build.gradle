@@ -15,13 +15,13 @@ repositories {
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-   lintOptions {
+    lintOptions {
         checkReleaseBuilds true
         // Or, if you prefer, you can continue to check for errors in release builds,
         // but continue the build even when errors are found:
         abortOnError false
     }
-    
+
     dataBinding {
         enabled = true
     }
@@ -81,21 +81,21 @@ android {
             signingConfig signingConfigs.debug
             versionNameSuffix "_" + 'local' + "_" + versionSuffix
             debuggable false
-            manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
+            manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg", raygunApiKey: "63djuqcTsaBxT798nqcXFA"]
         }
         dev {
             minifyEnabled false
             signingConfig signingConfigs.debug
             versionNameSuffix "_" + 'dev' + "_" + versionSuffix
             debuggable false
-            manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
+            manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg", raygunApiKey: "63djuqcTsaBxT798nqcXFA"]
         }
         dev_qa {
             minifyEnabled false
             signingConfig signingConfigs.debug
             versionNameSuffix "_" + 'dev_qa' + "_" + versionSuffix
             debuggable true
-            manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
+            manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg", raygunApiKey: "63djuqcTsaBxT798nqcXFA"]
         }
         prod {
             minifyEnabled false
@@ -104,7 +104,7 @@ android {
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
             versionNameSuffix "_" + 'prod' + "_" + versionSuffix
-            manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
+            manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg", raygunApiKey: "NVKN4TA92WCb35qlV0FWQQ"]
         }
         qa {
             minifyEnabled false
@@ -112,7 +112,7 @@ android {
             signingConfig signingConfigs.debug
             versionNameSuffix "_" + 'qa' + "_" + versionSuffix
             debuggable true
-            manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
+            manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg", raygunApiKey: "63djuqcTsaBxT798nqcXFA"]
         }
         carrier_prod {
             minifyEnabled false
@@ -120,14 +120,14 @@ android {
             signingConfig signingConfigs.debug
             versionNameSuffix "_" + 'carrier_prod' + "_" + versionSuffix
             debuggable false
-            manifestPlaceholders = [ applicationLabel:"@string/app_carrier",appicon:"@drawable/appicon_carrier",roundicon:"@drawable/appicon_carrier"]
+            manifestPlaceholders = [ applicationLabel:"@string/app_carrier",appicon:"@drawable/appicon_carrier",roundicon:"@drawable/appicon_carrier", raygunApiKey: "NVKN4TA92WCb35qlV0FWQQ"]
         }
         staging {
             minifyEnabled false
 //            shrinkResources true
             signingConfig signingConfigs.debug
             versionNameSuffix "_" + 'staging' + "_" + versionSuffix
-            manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
+            manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg", raygunApiKey: "63djuqcTsaBxT798nqcXFA"]
         }
         daikin_prod {
             minifyEnabled false
@@ -136,7 +136,7 @@ android {
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
             versionNameSuffix "_" + 'daikin_prod' + "_" + versionSuffix
-            manifestPlaceholders = [ applicationLabel:"@string/app_daikin",appicon:"@drawable/daikin",roundicon:"@drawable/daikin"]
+            manifestPlaceholders = [ applicationLabel:"@string/app_daikin",appicon:"@drawable/daikin",roundicon:"@drawable/daikin", raygunApiKey: "NVKN4TA92WCb35qlV0FWQQ"]
         }
         airoverse_prod {
             minifyEnabled false
@@ -144,7 +144,7 @@ android {
             signingConfig signingConfigs.debug
             versionNameSuffix "_" + 'airoverse_prod' + "_" + versionSuffix
             debuggable false
-            manifestPlaceholders = [ applicationLabel:"@string/app_airoverse",appicon:"@drawable/appicon_airoverse",roundicon:"@drawable/appicon_airoverse"]
+            manifestPlaceholders = [ applicationLabel:"@string/app_airoverse",appicon:"@drawable/appicon_airoverse",roundicon:"@drawable/appicon_airoverse", raygunApiKey: "NVKN4TA92WCb35qlV0FWQQ"]
         }
     }
 

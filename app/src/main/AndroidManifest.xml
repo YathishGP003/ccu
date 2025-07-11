@@ -168,15 +168,13 @@
             android:permission="android.permission.BIND_JOB_SERVICE"
             android:process=":rumpostservice" />
 
-        <meta-data
-            android:name="com.raygun.raygun4android.apikey"
-            android:value="7jO0gpjtHlBZhyN4cZuHQ" />
+        <meta-data android:name="com.raygun.raygun4android.apikey"
+            android:value="${raygunApiKey}" />
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
-        <service
-            android:name=".WeatherDataDownloadService"
+        <service android:name=".WeatherDataDownloadService"
             tools:ignore="Instantiatable" />
 
         <receiver

@@ -9,6 +9,7 @@ import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.pointscheduling.model.CustomScheduleManager.Companion.modbusWritableDataInterface
 import a75f.io.logic.bo.building.system.util.readEntity
 import a75f.io.logic.connectnode.ModelMetadata
 import a75f.io.logic.connectnode.PointData
@@ -351,6 +352,28 @@ class ConnectNodeUtil {
                 "device and domainName == \"" + DomainName.connectNodeDevice + "\" and addr == \"$address\""
             )
             return ccuHsApi.readMapById(connectNode["roomRef"].toString())[Tags.DIS].toString()
+        }
+
+        fun rewriteConnectNodeDetails(roomId: String) {
+            val equips = CCUHsApi.getInstance()
+                .readAllEntities(
+                    "equip and connectModule " +
+                            "and roomRef == \"" + roomId + "\""
+                )
+
+            equips.forEach { equip ->
+                val points = CCUHsApi.getInstance()
+                    .readAllHDictByQuery("registerNumber and point and equipRef == \"${equip[Tags.ID]}\"")
+                points.forEach {
+                    val slaveId = it["group"].toString().toDouble().toInt()
+                    val registerAddress = it["registerNumber"].toString().toDouble().toInt()
+                    val priorityVal = CCUHsApi.getInstance().readPointPriorityVal(it["id"].toString())
+
+                    modbusWritableDataInterface?.writeConnectModbusRegister(
+                        slaveId, registerAddress, priorityVal
+                    )
+                }
+            }
         }
     }
 }

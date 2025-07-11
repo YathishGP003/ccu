@@ -609,6 +609,14 @@ public class OTAUpdateService extends IntentService {
                 return;
             }
             CcuLog.d(TAG, "Node: " + msg.smartNodeAddress.get() + " Device :" + msg.smartNodeDeviceType.get() + " Device Rebooted");
+            HashMap<Object, Object> map = ConnectNodeUtil.Companion.getConnectNodeByNodeAddress(
+                    String.valueOf(msg.smartNodeAddress.get()), CCUHsApi.getInstance());
+
+            if(!map.isEmpty()) {
+                String roomId = map.get("roomRef").toString();
+                CustomScheduleManager.Companion.getInstance().getReconfiguredRooms().add(roomId);
+                ConnectNodeUtil.Companion.rewriteConnectNodeDetails(roomId);
+            }
             if (msg.smartNodeDeviceType.get() != FirmwareDeviceType_t.FIRMWARE_DEVICE_CONTROL_MOTE
                     && mCurrentLwMeshAddress != msg.smartNodeAddress.get()) {
                 CcuLog.d(TAG, mCurrentLwMeshAddress + " != " + msg.smartNodeAddress.get());

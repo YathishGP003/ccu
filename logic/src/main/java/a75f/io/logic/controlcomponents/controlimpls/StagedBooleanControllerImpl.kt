@@ -45,7 +45,7 @@ class StagedBooleanControllerImpl(
             newState[stage] = shouldTurnOn
         }
         logIt(logTag, "\n-------- Off constrains -------------------------------------")
-        offConstraints.toSortedMap().forEach { (stage, constraints) ->
+        offConstraints.toSortedMap(compareByDescending { it }).forEach { (stage, constraints) ->
             if (newState.containsKey(stage) && newState[stage]!!) {
                 return@forEach
             }

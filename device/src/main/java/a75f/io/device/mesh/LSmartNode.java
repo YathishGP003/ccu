@@ -513,6 +513,8 @@ public class LSmartNode
         switch (th1Input) {
             case 1: return InputSensorType_t.INPUT_SENSOR_10K_TYPE2_PROBE;
             case 2: return InputSensorType_t.INPUT_SENSOR_GENERIC_1K_100K;
+            case 3: return InputSensorType_t.INPUT_SENSOR_GENERIC_NC;
+            case 4: return InputSensorType_t.INPUT_SENSOR_GENERIC_NO;
         }
 
         int nativeSensorInput = hsApi.readDefaultVal("point and domainName == \""+DomainName.nativeSensorType+"\" and group == \""+address+"\"").intValue();

@@ -4,6 +4,7 @@ import EventDefinition
 import PointDefinition
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.api.haystack.HayStackConstants.DEFAULT_INIT_VAL_LEVEL
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
@@ -247,8 +248,8 @@ class CustomScheduleManager {
                 )
                 points.forEach { point ->
                     CcuLog.d(
-                        L.TAG_CCU_POINT_SCHEDULE, "\npoint: ${point.id()}"
-                    )
+                        L.TAG_CCU_POINT_SCHEDULE,"\n__________________________________________________\n" +
+                                "point: ${point.id()}")
                     try {
                         if (point.has(Tags.EVENT_REF)) {
                             val eventProcessTime = measureTimeMillis {
@@ -269,6 +270,25 @@ class CustomScheduleManager {
                             )
                         } else {
                             CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "No point schedule or event found: $point")
+
+                            val level8Value = haystack.readDefaultValById(point.id().toString())
+                            val level17Value = haystack.readDefaultValByLevel(
+                                point.id().toString(),
+                                DEFAULT_INIT_VAL_LEVEL
+                            )
+                            if (level17Value != level8Value) {
+                                haystack.writeDefaultValById(
+                                    point.id().toString(),
+                                    level17Value
+                                )
+
+                                if(point.has("his")){
+                                    haystack.writeHisValById(
+                                        point.id().toString(),
+                                        level17Value
+                                    )
+                                }
+                            }
                         }
                     } catch (e: Exception) {
                         // we don't want to crash the app if there is an error in processing this point
@@ -395,9 +415,10 @@ class CustomScheduleManager {
                                     "reconfigured so, writing value ($customValue) to ${point.id()}, eventScheduleId: $eventScheduleId"
                                 )
                                 if (point.has("his")) {
+                                    val priorityValue = haystack.readPointPriorityVal(pointId)
                                     haystack.writeHisValById(
                                         pointId,
-                                        customValue
+                                        priorityValue
                                     )
                                 }
                                 haystack.writeDefaultValById(pointId, customValue)
@@ -415,9 +436,10 @@ class CustomScheduleManager {
                                     "writing value ($customValue) to ${point.id()}, eventScheduleId: $eventScheduleId"
                                 )
                                 if (point.has("his")) {
+                                    val priorityValue = haystack.readPointPriorityVal(pointId)
                                     haystack.writeHisValById(
                                         pointId,
-                                        customValue
+                                        priorityValue
                                     )
                                 }
                                 haystack.writeDefaultValById(pointId, customValue)
@@ -437,9 +459,10 @@ class CustomScheduleManager {
                                 "reconfigured so, writing default value ($defaultValue) to ${point.id()}"
                             )
                             if (point.has("his")) {
+                                val priorityValue = haystack.readPointPriorityVal(pointId)
                                 haystack.writeHisValById(
                                     pointId,
-                                    defaultValue
+                                    priorityValue
                                 )
                             }
                             haystack.writeDefaultValById(pointId, defaultValue)
@@ -452,9 +475,10 @@ class CustomScheduleManager {
                             )
                         } else {
                             if (point.has("his")) {
+                                val priorityValue = haystack.readPointPriorityVal(pointId)
                                 haystack.writeHisValById(
                                     pointId,
-                                    defaultValue
+                                    priorityValue
                                 )
                             }
                             haystack.writeDefaultValById(pointId, defaultValue)
@@ -696,7 +720,7 @@ class CustomScheduleManager {
                 val isPointScheduleExist : Map<Boolean, Day> = isPointScheduleActiveNow(pointDefinition)
                 val pointID = pointDict["id"].toString()
                 val pointDis = pointDict.get("dis").toString().split("-")
-                val currentDefaultVal = haystack.readDefaultValById(pointID);
+                val currentDefaultVal = haystack.readDefaultValById(pointID)
                 if(isPointScheduleExist.containsKey(true)) {
                     val day : Day = isPointScheduleExist[true]!!
                     val value = day?.`val`.toString().toDouble()
@@ -741,11 +765,15 @@ class CustomScheduleManager {
                     var pointDefinitionDefaultVal = pointDefinition.defaultValue
                     if(pointDefinitionCustomVal != value){
                         pointDefinitionDefaultVal = pointDefinitionCustomVal!!
+                        CcuLog.d(
+                            L.TAG_CCU_POINT_SCHEDULE,
+                            "Upcoming schedule's custom value: $pointDefinitionCustomVal"
+                        )
                     }
 
                     CcuLog.d(
                         L.TAG_CCU_POINT_SCHEDULE,
-                        "upcoming change value: $pointDefinitionCustomVal"
+                        "pointDefinitionCustomVal : $pointDefinitionCustomVal"
                     )
 
                     // Converts a value and default value based on enum and unit information,
@@ -815,7 +843,7 @@ class CustomScheduleManager {
                         }
                         haystack.writeDefaultValById(pointID, pointDefinition.defaultValue)
                         writeToPhysical(equip, pointDict, pointDefinition.defaultValue)
-                    } else if (currentDefaultVal == value) {
+                    } else if (currentDefaultVal == pointDefinition.defaultValue) {
                         CcuLog.d(
                             L.TAG_CCU_POINT_SCHEDULE,
                             "No change in value for pointId=$pointID, currentDefaultVal=$currentDefaultVal  value=$value"
@@ -978,7 +1006,7 @@ class CustomScheduleManager {
     }
 
     private fun upcomingSlot(currentDay: Int, currentMins: Int, list: List<Day>): Day? {
-        for (offset in 0..6) {
+        for (offset in 0..7) {
             val dayToCheck = (currentDay + offset) % 7
             val slots = list.filter { it.day == dayToCheck }
                 .sortedBy { it.sthh * 60 + it.stmm }

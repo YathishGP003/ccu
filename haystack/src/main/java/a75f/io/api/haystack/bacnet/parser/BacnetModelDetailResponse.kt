@@ -55,14 +55,15 @@ data class BacnetPoint(
     @SerializedName("disName") val disName: String = "",
     @SerializedName("defaultWriteLevel") var defaultWriteLevel: String = "8",
     @SerializedName("isSystem") var isSystem : Boolean = false,
-    var isSchedulable: Boolean = false
+    var isSchedulable: Boolean = false,
+    @SerializedName("bacnetObjectId") var bacnetObjectId: Int? = 0
 ){
     fun initailizeSchedulableForFreshPairing() {
         isSchedulable = equipTagNames.contains(Tags.WRITABLE) && equipTagNames.contains(Tags.SCHEDULABLE)
     }
 
     constructor() : this("", "", "", "", null,null, "", null, "", ""
-        , mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf(), null,true, true, "", isSchedulable = false)
+        , mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf(), null,true, true, "", isSchedulable = false, bacnetObjectId = 0)
 }
 
 data class PresentationData(

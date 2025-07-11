@@ -1,6 +1,7 @@
 package a75f.io.restserver.server
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.logger.CcuLog
 import a75f.io.logic.util.bacnet.BacnetConfigConstants
 import org.json.JSONException
 import org.json.JSONObject
@@ -22,6 +23,7 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
         var extractedGroup = ""
         var extractedZoneRef = ""
         var bacnetId = ""
+        var bacnetObjectId = ""
         var isEquip = false
         var extractedEquipRef = ""
         var isSystem = false
@@ -32,6 +34,7 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
         var isBtu = false
         var isConnect = false
         var isBacnetMstp = false
+        var isExternal = false
         while (rowIterator.hasNext()) {
             val e: HDict.MapEntry = (rowIterator.next() as HDict.MapEntry)
             when (e.value!!) {
@@ -78,11 +81,17 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
             if (e.key.toString() == "bacnetId") {
                 bacnetId = e.value.toString()
             }
+            if (e.key.toString() == "bacnetObjectId") {
+                bacnetObjectId = e.value.toString()
+            }
             if (e.key.toString() == "equipRef") {
                 extractedEquipRef = e.value.toString()
             }
             if (e.key.toString() == "bacnetMstp") {
                 isBacnetMstp = true
+            }
+            if (e.key.toString() == "external") {
+                isExternal = true
             }
         }
             val zoneName = CCUHsApi.getInstance()
@@ -105,7 +114,9 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
             }
         }
 
-        if(isModbus && !isEquip && isVirtualZoneEnabled){
+        if(isExternal && !isEquip && isVirtualZoneEnabled){
+            hDictBuilder.add("bacnetId" , bacnetObjectId.toLong())
+        } else if(isModbus && !isEquip && isVirtualZoneEnabled){
             val bacnetIdAfterModification = removeLeadingZeros(removeFirstNumberofChars(bacnetId,4)) //removeGroup(extractedGroup, bacnetId)
             hDictBuilder.add("bacnetId" , bacnetIdAfterModification.toLong())
         }

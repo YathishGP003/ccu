@@ -1,5 +1,8 @@
 package a75f.io.logic.bo.building.bacnet;
 
+import static a75f.io.logic.bo.building.modbus.ModbusEquip.isDouble;
+import static a75f.io.logic.bo.building.modbus.ModbusEquip.isInt;
+import static a75f.io.logic.bo.building.modbus.ModbusEquip.isLong;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_CONFIGURATION;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.encodeBacnetId;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.getBacNetType;
@@ -226,7 +229,12 @@ public class BacnetEquip {
                 int groupId = (int) (slaveId);
                 int bacnetId = -1;
                 try {
-                    bacnetId = Integer.parseInt(String.valueOf(groupId) + ObjectType.valueOf("OBJECT_"+objectType).getValue() + objectId) ;
+                    if (isSystemEquip) {
+                        bacnetId = Integer.parseInt("9"+ObjectType.valueOf("OBJECT_" + objectType).getValue() + "" + objectId) ;
+                        CcuLog.d(TAG, "point to add start-->objectType-->"+objectType+"<-value->"+ObjectType.valueOf("OBJECT_"+objectType).getValue()+ "<-object id->"+objectId + "<--bacnetId-->"+bacnetId);
+                    }else{
+                        bacnetId = Integer.parseInt(String.valueOf(groupId) + ObjectType.valueOf("OBJECT_"+objectType).getValue() + objectId) ;
+                    }
                 }catch(Exception e){
                     e.printStackTrace();
 
@@ -317,8 +325,17 @@ public class BacnetEquip {
                                     CcuLog.d(TAG, "skipping this tag >>> " + tagItem.getName());
                                     continue;
                                 }
-                                logicalParamPoint.addTag(tagItem.getName().toLowerCase(),
-                                        HStr.make(tagItem.getDefaultValue() + ""));
+                                if (tagItem.getDefaultValue() != null) {
+                                    if (isInt(tagItem.getDefaultValue().toString())) {
+                                        logicalParamPoint.addTag(tagItem.getName().toLowerCase(), HNum.make(Integer.parseInt(tagItem.getDefaultValue().toString())));
+                                    } else if (isLong(tagItem.getDefaultValue().toString())) {
+                                        logicalParamPoint.addTag(tagItem.getName().toLowerCase(), HNum.make(Long.parseLong(tagItem.getDefaultValue().toString())));
+                                    } else if (isDouble(tagItem.getDefaultValue().toString())) {
+                                        logicalParamPoint.addTag(tagItem.getName().toLowerCase(), HNum.make(Double.parseDouble(tagItem.getDefaultValue().toString())));
+                                    } else {
+                                        logicalParamPoint.addTag(tagItem.getName().toLowerCase(), HStr.make(tagItem.getDefaultValue().toString()));
+                                    }
+                                }
                             } catch (Exception e) {
                                 CcuLog.d(TAG, "hit exception 5-->" + e.getMessage());
                             }
@@ -392,6 +409,7 @@ public class BacnetEquip {
 
                 if (isSystemEquip) {
                     logicalParamPoint.addMarker("system");
+                    logicalParamPoint.addMarker("external");
                     int uniqueId = BACNET_RANGE_SYSTEM_POINT + bacnetId;
                     logicalParamPoint.setBacnetId(uniqueId);
                     logicalParamPoint.addMarker(CONST_BACNET_CUR);

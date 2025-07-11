@@ -5,4 +5,6 @@ package a75f.io.util
  */
 interface BacnetRequestUtil {
     fun callbackForBacnetMstpRequest(id:String, level:String, value:String)
+
+    fun callbackForBacnetRequest(id:String, level:String, value:String)
 }

@@ -202,13 +202,11 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
             String value = keyValue[1];
             configMap.put(key, value);
         }
-        /*if(configMap.get(DESTINATION_IP) == null || configMap.get(DESTINATION_PORT) == null || configMap.get(DEVICE_ID) == null || configMap.get(MAC_ADDRESS) == null){
-            CcuLog.e(TAG, "writeValue: Invalid config map");
-            Toast.makeText(context, "Invalid configuration please check ip, port, deviceId and mac address", Toast.LENGTH_SHORT).show();
-            return;
-        }*/
 
         int objectId = (int) Double.parseDouble(CCUHsApi.getInstance().readMapById(bacnetZoneViewItem.getBacnetObj().getId()).get(Tags.BACNET_OBJECT_ID).toString());
+        //int objectId = bacnetZoneViewItem.getBacnetObj().getBacnetObjectId();
+        CcuLog.d(TAG_BACNET, "--####this is a system point, objectId--"+objectId);
+        String objectType = bacnetZoneViewItem.getObjectType();
         boolean isMstpEquip = isValidMstpMacAddress(Objects.requireNonNull(configMap.getOrDefault(MAC_ADDRESS, "")));
         BacnetServicesUtils bacnetServicesUtils = new BacnetServicesUtils();
         if(bacnetZoneViewItem.getBacnetObj().isSystem()){
@@ -316,6 +314,7 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
     }
 
     private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        CcuLog.d(TAG, "---values for adapter-->"+values);
         return new CustomSpinnerDropDownAdapter(context, R.layout.spinner_item_bacnet_property, values);
     }
 

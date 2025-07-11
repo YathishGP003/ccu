@@ -254,26 +254,33 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             if(PreferenceUtil.getSelectedProfileWithAhu() != "") {
                 if(PreferenceUtil.getSelectedProfileWithAhu() == "bacnet" && iBacnetSystemProfileEnabled().size > 0){
                     configTypeRadioOption.value = ConfigType.BACNET
+                    CcuLog.d(TAG_BACNET, "-configType changed to bacnet--")
                     configType.value = ConfigType.BACNET
                 }else if(PreferenceUtil.getSelectedProfileWithAhu() == "modbus" && isModbusSystemProfileEnabled().size > 0){
                     configTypeRadioOption.value = ConfigType.MODBUS
+                    CcuLog.d(TAG_BACNET, "-configType changed to modbus--")
                     configType.value = ConfigType.MODBUS
                 }
             }else{
+                CcuLog.d(TAG_BACNET, "-configType changed to bacnet--5")
                 configTypeRadioOption.value = ConfigType.BACNET
+                configType.value = ConfigType.BACNET
             }
         }else{
             // bacnet is disabled
             if(PreferenceUtil.getSelectedProfileWithAhu() != "") {
                 if(PreferenceUtil.getSelectedProfileWithAhu() == "bacnet" && iBacnetSystemProfileEnabled().size > 0){
                     configTypeRadioOption.value = ConfigType.BACNET
+                    CcuLog.d(TAG_BACNET, "-configType changed to bacnet--1")
                     configType.value = ConfigType.BACNET
                 }else if(PreferenceUtil.getSelectedProfileWithAhu() == "modbus" && isModbusSystemProfileEnabled().size > 0){
                     configTypeRadioOption.value = ConfigType.MODBUS
+                    CcuLog.d(TAG_BACNET, "-configType changed to modbus--2")
                     configType.value = ConfigType.MODBUS
                 }
             }else{
                 configTypeRadioOption.value = ConfigType.MODBUS
+                CcuLog.d(TAG_BACNET, "-configType changed to modbus--3")
                 configType.value = ConfigType.MODBUS
             }
         }
@@ -308,6 +315,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         if (PreferenceUtil.getIsNewExternalAhu()) modbusEquip.clear()
 
         if (modbusEquip != null && modbusEquip.isNotEmpty()) {
+            CcuLog.d(TAG_BACNET, "-configType changed to modbus--6")
             configType.value = ConfigType.MODBUS
             configTypeRadioOption.value = ConfigType.MODBUS
             modbusProfile = ModbusProfile()
@@ -347,6 +355,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         }
         if (PreferenceUtil.getIsNewExternalAhu()) bacnetSystemEquip.clear()
         if(bacnetSystemEquip != null && bacnetSystemEquip.isNotEmpty()){
+            CcuLog.d(TAG_BACNET, "-configType changed to bacnet--7")
             configType.value = ConfigType.BACNET
             configTypeRadioOption.value = ConfigType.BACNET
             configModelDefinitionBacnet(context, bacnetSystemEquip)
@@ -428,6 +437,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private fun checkValidConfiguration(): Boolean {
+        CcuLog.d(TAG_BACNET, "::::::> checkValidConfiguration >${configType.value}")
         if (configType.value == ConfigType.MODBUS && (!isValidConfiguration())) return false
         if (configType.value == ConfigType.BACNET && (!isValidConfigurationBacnet())) return false
 
@@ -1254,7 +1264,14 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             )
         }
         if(bacnetPointState.equipTagNames.contains("writable")){
-            for (i in 0..15) {
+//            list.add(
+//                PropertyReference(
+//                    87,
+//                    -1
+//                )
+//            )
+
+            for (i in 1..15) {
                 list.add(
                     PropertyReference(
                         87,
@@ -1471,8 +1488,15 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                     for (item in results) {
                         if(item.propertyValue.type == "34"){
                             if(item.propertyArrayIndex != null){
-                                point.defaultWriteLevel = item.propertyArrayIndex!!
-                                CcuLog.d(TAG,"default write level is -->${item.propertyArrayIndex}")
+                                var priority = 0
+                                try {
+                                    priority = (item.propertyArrayIndex!!).toInt()
+                                }catch (numberFormatException : NumberFormatException){
+                                    CcuLog.d(TAG,"problematic priority array -->${0}<--make it 0-->${numberFormatException.message}")
+                                }
+                                priority++
+                                point.defaultWriteLevel = priority.toString()
+                                CcuLog.d(TAG,"default write level is -->$priority")
                                 break
                             }
                         }
@@ -1577,9 +1601,11 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
 
     fun getExternalProfileSelected(){
         if(PreferenceUtil.getSelectedProfileWithAhu() == "bacnet"){
+            CcuLog.d(TAG_BACNET, "-configType changed to bacnet--8")
             configType.value = ConfigType.BACNET
             configTypeRadioOption.value = ConfigType.BACNET
         }else if(PreferenceUtil.getSelectedProfileWithAhu() == "modbus"){
+            CcuLog.d(TAG_BACNET, "-configType changed to modbus--9")
             configType.value = ConfigType.MODBUS
             configTypeRadioOption.value = ConfigType.MODBUS
         }

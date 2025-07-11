@@ -45,6 +45,7 @@ import a75f.io.renatus.compose.ParameterLabel_ForOneColumn
 import a75f.io.renatus.compose.RadioButtonCompose
 import a75f.io.renatus.compose.RadioButtonComposeBacnet
 import a75f.io.renatus.compose.RadioButtonComposeSelectModelCustom
+import a75f.io.renatus.compose.RadioButtonComposeWithToast
 import a75f.io.renatus.compose.SaveTextView
 import a75f.io.renatus.compose.SetPointConfig
 import a75f.io.renatus.compose.SetPointControlCompose
@@ -119,6 +120,7 @@ import androidx.lifecycle.ViewModelProvider
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import org.json.JSONException
 import org.json.JSONObject
+import androidx.compose.foundation.lazy.items
 
 
 /**
@@ -592,7 +594,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                             }else{
                                 disabledOptions = listOf()
                             }
-                            RadioButtonCompose(
+                            RadioButtonComposeWithToast(
+                                requireContext(),
                                 radioOptions, viewModel.configTypeRadioOption.value.ordinal,
                                 disabledOptions = disabledOptions
                             ) {
@@ -622,6 +625,16 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                         } else {
                             BacnetConfig()
                         }
+                    }
+                    items(
+                        viewModel.bacnetModel.value.points.filter { !it.equipTagNames.contains("heartbeat") }
+                    ) { item ->
+                        if (viewModel.configTypeRadioOption.value == ExternalAhuViewModel.ConfigType.BACNET) {
+                            ParametersListItem(item)
+                        }
+                    }
+                    item {
+                        BacnetButtons()
                     }
                     item {
                         SaveConfig()
@@ -792,8 +805,6 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
         Row(modifier = Modifier.padding(start = 10.dp)) {
             ParameterLabel()
         }
-        ParametersListViewBacnet(data = viewModel.bacnetModel)
-        BacnetButtons()
     }
 
     @Composable
@@ -1605,6 +1616,64 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                 }
             }
         }
+    }
+
+    @Composable
+    private fun ParametersListItem(item: BacnetPointState) {
+        Row {
+            Box(modifier = Modifier
+                .weight(3f)
+                .padding(top = 10.dp, bottom = 10.dp)) {
+                Row {
+                    val images = listOf(
+                        R.drawable.ic_arrow_down,
+                        R.drawable.ic_arrow_right
+                    )
+                    var clickedImageIndex by remember { mutableStateOf(0) }
+                    ImageViewComposable(images, "") {
+                        clickedImageIndex =
+                            (clickedImageIndex + 1) % images.size
+                        item.displayInEditor.value = !item.displayInEditor.value
+                    }
+                    Box(modifier = Modifier.width(20.dp)) { }
+                    if (item.disName.isNotEmpty()) {
+                        HeaderTextViewMultiLine(item.disName)
+                    } else {
+                        HeaderTextViewMultiLine(item.name)
+                    }
+
+                }
+            }
+
+            Box(modifier =
+            Modifier
+                .weight(3f)
+                .padding(top = 10.dp, bottom = 10.dp)
+            ) {
+                ToggleButton(item.displayInUi.value) {
+                    // need to fix below 2 lines
+                    item.displayInUi.value = it
+                    viewModel.updateSelectAll(it, item)
+                    setStateChanged()
+                }
+            }
+            val pointDisplayValue: String = if(item.defaultValue == "null" || item.defaultValue == null)
+                "-" else{
+                "${item.defaultValue} ${item.defaultUnit}"
+            }
+
+            Box(modifier =
+            Modifier
+                .weight(1f)
+                .padding(top = 10.dp, bottom = 10.dp), contentAlignment = Alignment.Center
+            ) { LabelTextView(pointDisplayValue, fontSize = 22) }
+        }
+
+        if (item.displayInEditor.value) {
+            populateProperties(item)
+        }
+
+        Divider(color = Color.Gray, modifier = Modifier.padding(0.dp, 5.dp, 0.dp, 5.dp))
     }
 
     @Composable

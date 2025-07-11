@@ -99,6 +99,15 @@ public class UpdatePointHandler implements MessageHandler
             BacnetRequestProcessor.sendCallBackMstpWriteRequest(localPoint.getId(), String.valueOf(pointLevel), value);
         }
 
+        if (localPoint.getMarkers().contains("external")) {
+            String value = msgObject.get(WRITABLE_ARRAY_VAL).getAsString();
+            if (value.isEmpty()) {
+                value = String.valueOf(hayStack.readPointPriorityVal(localPoint.getId()));
+            }
+            CcuLog.d(L.TAG_CCU_BACNET, "Message Handler -> external bacnet point, share this with bacnet app id is ->"+localPoint.getId()+"<--level-->"+pointLevel+"<--value-->"+value);
+            BacnetRequestProcessor.sendCallBackBacnetWriteRequest(localPoint.getId(), String.valueOf(pointLevel), value);
+        }
+
         //move this class to a separate file
         if(HSUtil.isPhysicalPointUpdate(localPoint)){
             String value = msgObject.get(WRITABLE_ARRAY_VAL).getAsString();

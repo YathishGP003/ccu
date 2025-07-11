@@ -155,6 +155,7 @@ private fun getRegister(rawMap: HashMap<Any, Any>): BacnetPoint {
     val bacnetProperty = mutableListOf<BacnetProperty>()
     val shortDisplayName = if (physicalPoint.shortDis != null) physicalPoint.shortDis else physicalPoint.displayName
     val unit = if(physicalPoint.unit == null) "" else physicalPoint.unit
+    val bacnetObjectId = physicalPoint.tags["bacnetObjectId"]?.toString()?.toDouble()?.toInt()
     return BacnetPoint(
         physicalPoint.id,
         physicalPoint.displayName,
@@ -174,7 +175,8 @@ private fun getRegister(rawMap: HashMap<Any, Any>): BacnetPoint {
         disName = shortDisplayName,
         defaultWriteLevel = defaultWriteLevel,
         isSystem = isSystem,
-        isSchedulable = isSchedulable
+        isSchedulable = isSchedulable,
+        bacnetObjectId = bacnetObjectId
     )
 }
 

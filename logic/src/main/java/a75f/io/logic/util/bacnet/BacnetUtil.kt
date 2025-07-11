@@ -24,6 +24,8 @@ import a75f.io.logic.bo.building.system.client.BaseResponse
 import a75f.io.logic.bo.building.system.client.MultiReadResponse
 import a75f.io.logic.bo.building.system.client.RemotePointUpdateInterface
 import a75f.io.logic.bo.building.system.client.ServiceManager
+import a75f.io.logic.bo.building.system.doMakeRequest
+import a75f.io.logic.bo.building.system.getObjectType
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.APDU_SEGMENT_TIMEOUT
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.APDU_TIMEOUT
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.APPLICATION_SOFTWARE_VERSION
@@ -859,6 +861,66 @@ fun sendWriteRequestToMstpEquip(id : String, level: String, value: String, isMst
             serverIpAddress, remotePointUpdateInterface, value, pointId, isMstpEquip)
     }
 
+}
+
+fun sendWriteRequestToBacnetEquip(
+    id: String,
+    level: String,
+    value: String
+) {
+    var pointId = id
+    if (!pointId.startsWith("@")) {
+        pointId = "@$pointId"
+    }
+    val pointMap = CCUHsApi.getInstance().readMapById(pointId)
+    if (pointMap.isEmpty()) {
+        CcuLog.e(L.TAG_CCU_BACNET, "Point with id $id not found")
+        return
+    }
+    val defaultPriority = pointMap["defaultWriteLevel"].toString()
+    var bacnetObjectId = pointMap[Tags.BACNET_OBJECT_ID]?.toString()?.toDouble()?.toInt()
+    val group = pointMap[Tags.GROUP]?.toString()?.toIntOrNull()
+    val objectType =
+        pointMap[Tags.BACNET_TYPE]?.toString()?.let { BacnetTypeMapper.getObjectType(it) }
+    val objectTypeWithSuffix = "OBJECT_$objectType"
+    CcuLog.d(TAG_CCU_BACNET, "sendWriteRequestToBacnetEquip--->$objectType<-->$objectTypeWithSuffix<-bacnetObjectId->$bacnetObjectId<-pointId->$pointId<-bacnetObjectId->$bacnetObjectId")
+    if (bacnetObjectId == null || group == null || objectType == null) {
+        CcuLog.e(
+            L.TAG_CCU_BACNET,
+            "Bacnet ID or Group or Bacnet Type not found for point with id $id"
+        )
+        return
+    }
+
+    val equipId = pointMap[Tags.EQUIPREF]?.toString()
+    val equip = CCUHsApi.getInstance().readMapById(equipId ?: "")
+    val bacnetConfig = equip["bacnetConfig"].toString()
+    if (BacNetConstants.ObjectType.OBJECT_MULTI_STATE_VALUE.key == objectTypeWithSuffix
+        || BacNetConstants.ObjectType.OBJECT_MULTI_STATE_OUTPUT.key == objectTypeWithSuffix
+        || BacNetConstants.ObjectType.OBJECT_MULTI_STATE_INPUT.key == objectTypeWithSuffix
+        || BacNetConstants.ObjectType.OBJECT_BINARY_VALUE.key == objectTypeWithSuffix
+        || BacNetConstants.ObjectType.OBJECT_BINARY_OUTPUT.key == objectTypeWithSuffix
+        || BacNetConstants.ObjectType.OBJECT_BINARY_INPUT.key == objectTypeWithSuffix
+        ) {
+        val wholeNumber = value.toInt()
+        doMakeRequest(
+            BacnetServicesUtils().getConfig(bacnetConfig),
+            bacnetObjectId,
+            wholeNumber.toString(),
+            objectTypeWithSuffix,
+            defaultPriority,
+            pointId
+        )
+    } else {
+        doMakeRequest(
+            BacnetServicesUtils().getConfig(bacnetConfig),
+            bacnetObjectId,
+            value.toString(),
+            objectTypeWithSuffix,
+            defaultPriority,
+            pointId
+        )
+    }
 }
 
 fun encodeBacnetId(slaveId: Int, objectType: Int, objectId: Int): Int {

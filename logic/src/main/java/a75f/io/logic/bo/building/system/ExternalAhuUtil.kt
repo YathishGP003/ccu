@@ -87,7 +87,7 @@ const val SINGLE_SAT_SET_POINT = "air and discharge and sp and temp"
 const val HEATING_SAT_SET_POINT = "air and heating and sp and temp"
 const val COOLING_SAT_SET_POINT = "air and cooling and sp and temp"
 const val DUCT_STATIC_PRESSURE = "pressure and air and discharge and sp"
-const val DAMPER_CMD = "cmd and outside and dcv and damper"
+const val DAMPER_CMD = "sp and outside and dcv and damper"
 const val HUMIDIFIER_CMD = "cmd and enable and humidifier"
 const val DEHUMIDIFIER_CMD = "cmd and dessicantDehumidifier"
 const val OCCUPANCY_MODE = "mode and occupied and sp"
@@ -319,22 +319,21 @@ fun mapBacnetPoint(
     val equip = haystack.readEntity("id == $equipId")
     val point = haystack.readEntity("$query and equipRef == \"$equipId\"")
     val pointId = point[Tags.ID].toString()
+    CcuLog.d(TAG_BACNET, "--mapBacnetPoint-->$pointId<---")
+    if(pointId == null || pointId.isEmpty() || pointId.equals("null", true)){
+        return
+    }
     val objectIdFromPoint = point["bacnetId"].toString().toInt()
+    val bacnetObjectId = point["bacnetObjectId"].toString().toInt()
     val objectType = point["bacnetType"].toString()
     val bacnetConfig = equip["bacnetConfig"].toString()
     val defaultPriority = point["defaultWriteLevel"].toString()
     //val isSystemPoint = point["system"]
-    var objectId = 0
+    //var objectId = 0
     CcuLog.d(TAG_BACNET, "--checking bool--")
-    try {
-        objectId = objectIdFromPoint - 1100000
 
-    }catch (e : Exception){
-        e.printStackTrace()
-        CcuLog.d(TAG_BACNET, "--we landed in error")
-    }
 
-    CcuLog.d(TAG_BACNET, "mapBacnetPoint objectId-->$objectId--objectType--$objectType--bacnetConfig--$bacnetConfig--defaultPriority--$defaultPriority--pointId--$pointId")
+    CcuLog.d(TAG_BACNET, "mapBacnetPoint bacnetObjectId-->$bacnetObjectId--objectType--$objectType--bacnetConfig--$bacnetConfig--defaultPriority--$defaultPriority--pointId--$pointId")
 
     if (point.isNotEmpty()) {
         CcuLog.i(TAG_BACNET, " point found $query-----#going to update local point and remote point--value--$value")
@@ -342,15 +341,15 @@ fun mapBacnetPoint(
             val wholeNumber = value.toInt()
             //val bacnetWholeNumber = wholeNumber
             updatePointValueChanges(pointId, haystack, setPointsList, wholeNumber.toDouble())
-            doMakeRequest(BacnetServicesUtils().getConfig(bacnetConfig), objectId, wholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
+            doMakeRequest(BacnetServicesUtils().getConfig(bacnetConfig), bacnetObjectId, wholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
         }else if(BacNetConstants.ObjectType.OBJECT_BINARY_VALUE.key == getObjectType(objectType)){
             val wholeNumber = value.toInt()
             //  val bacnetWholeNumber = wholeNumber - 1
             updatePointValueChanges(pointId, haystack, setPointsList, wholeNumber.toDouble())
-            doMakeRequest(BacnetServicesUtils().getConfig(bacnetConfig), objectId, wholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
+            doMakeRequest(BacnetServicesUtils().getConfig(bacnetConfig), bacnetObjectId, wholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
         }else{
             updatePointValueChanges(pointId, haystack, setPointsList, value)
-            doMakeRequest(BacnetServicesUtils().getConfig(bacnetConfig), objectId, value.toString(),getObjectType(objectType), defaultPriority, pointId)
+            doMakeRequest(BacnetServicesUtils().getConfig(bacnetConfig), bacnetObjectId, value.toString(),getObjectType(objectType), defaultPriority, pointId)
         }
 
     } else {

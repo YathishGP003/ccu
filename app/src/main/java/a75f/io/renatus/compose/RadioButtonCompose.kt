@@ -1,6 +1,10 @@
 package a75f.io.renatus.compose
 
+import android.content.Context
+import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -82,6 +86,79 @@ fun RadioButtonCompose(radioOptions: List<String>, default: Int,
                     )
                 )
                 Text(text = label, style =  TextStyle( fontFamily = ComposeUtil.myFontFamily,fontSize = 20.sp,  fontWeight = FontWeight.Normal))
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun RadioButtonComposeWithToast(
+    context : Context,
+    radioOptions: List<String>,
+    default: Int,
+    disabledOptions: List<String> = emptyList(),
+    onSelect: (String) -> Unit
+) {
+    var selectedItem by remember { mutableStateOf(radioOptions[default]) }
+
+    if (selectedItem != radioOptions[default]) {
+        selectedItem = radioOptions[default]
+    }
+
+    Row(
+        modifier = Modifier
+            .selectableGroup()
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start,
+    ) {
+        radioOptions.forEachIndexed { index, label ->
+            val isDisabled = disabledOptions.contains(label)
+            val isSelected = selectedItem == label
+
+            val backgroundModifier = Modifier
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .then(backgroundModifier)
+                    .wrapContentSize()
+                    .height(56.dp)
+                    .combinedClickable(
+                        onClick = {
+                            if (isDisabled) {
+                                Toast.makeText(context, "$label is disabled", Toast.LENGTH_LONG).show()
+                            } else {
+                                selectedItem = label
+                                onSelect(selectedItem)
+                            }
+                        },
+                        enabled = true,
+                        role = Role.RadioButton
+                    )
+                    .padding(horizontal = 16.dp)
+            ) {
+                RadioButton(
+                    modifier = Modifier.padding(end = 10.dp),
+                    selected = isSelected,
+                    onClick = null,
+                    enabled = !isDisabled,
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = ComposeUtil.primaryColor,
+                        unselectedColor = ComposeUtil.primaryColor,
+                        disabledSelectedColor = Color.Gray,
+                        disabledUnselectedColor = Color.Gray
+                    )
+                )
+                Text(
+                    text = label,
+                    style = TextStyle(
+                        fontFamily = ComposeUtil.myFontFamily,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                )
             }
         }
     }

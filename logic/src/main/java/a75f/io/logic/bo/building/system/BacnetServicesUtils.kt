@@ -13,6 +13,7 @@ import a75f.io.logic.util.bacnet.BacnetConfigConstants.DEVICE_ID
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.DEVICE_NETWORK
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.MAC_ADDRESS
 import a75f.io.logic.util.bacnet.ObjectType
+import a75f.io.logic.util.bacnet.sendWriteRequestToBacnetEquip
 import a75f.io.logic.util.bacnet.sendWriteRequestToMstpEquip
 import a75f.io.util.BacnetRequestUtil
 import android.preference.PreferenceManager
@@ -240,5 +241,14 @@ class BacnetServicesUtils: BacnetRequestUtil {
     override fun callbackForBacnetMstpRequest(id: String, level: String, value: String) {
         CcuLog.d("CCU_BACNET", "--callbackForBacnetMstpRequest::>> id: $id, level: $level, value: $value")
         sendWriteRequestToMstpEquip(id,level,value)
+    }
+
+    override fun callbackForBacnetRequest(
+        id: String,
+        level: String,
+        value: String
+    ) {
+        CcuLog.d("CCU_BACNET", "--callbackForBacnetRequest::>> id: $id, level: $level, value: $value")
+        sendWriteRequestToBacnetEquip(id,level,value)
     }
 }

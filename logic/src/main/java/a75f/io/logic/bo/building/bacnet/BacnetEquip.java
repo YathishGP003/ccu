@@ -341,18 +341,18 @@ public class BacnetEquip {
                 point.getBacnetProperties().forEach((bacnetProperty) -> {
                     if (bacnetProperty.getName().equals("PRESENT_VALUE")) {
                         String presentVal = getValue(bacnetProperty);
-                        if (presentVal != null && !presentVal.equals("null") && !presentVal.equals("") && !presentVal.equals("NA")) {
+                        if (presentVal != null && !presentVal.equals("null") && !presentVal.equals("") && !presentVal.equals("-")) {
                             hasPresentValue.set(true);
                             presentValue.set(presentVal);
                         }
                     } else if (bacnetProperty.getName().equals("MIN_PRESENT_VALUE")) {
                         String minValue = getValue(bacnetProperty);
-                        if (minValue != null && !minValue.equals("null") && !minValue.equals("") && !minValue.equals("NA")) {
+                        if (minValue != null && !minValue.equals("null") && !minValue.equals("") && !minValue.equals("-")) {
                             logicalParamPoint.setMinVal(minValue);
                         }
                     } else if (bacnetProperty.getName().equals("MAX_PRESENT_VALUE")) {
                         String minValue = getValue(bacnetProperty);
-                        if (minValue != null && !minValue.equals("null") && !minValue.equals("") && !minValue.equals("NA")) {
+                        if (minValue != null && !minValue.equals("null") && !minValue.equals("") && !minValue.equals("-")) {
                             logicalParamPoint.setMaxVal(minValue);
                         }
 
@@ -365,7 +365,7 @@ public class BacnetEquip {
                         try {
                             String value = String.valueOf(bacnetProperty.getSelectedValue());
                             CcuLog.d(TAG, "tag to add-->" + bacnetProperty.getName().toLowerCase() + " value-->" + HStr.make(value));
-                            if (value != null && !value.equals("null") && !value.equals("") && !value.equals("NA")) {
+                            if (value != null && !value.equals("null") && !value.equals("") && !value.equals("-")) {
                                 logicalParamPoint.addTag(bacnetProperty.getName().toLowerCase(), HStr.make(value));
                             }
                         } catch (Exception e) {
@@ -405,7 +405,7 @@ public class BacnetEquip {
                 CcuLog.d(TAG, "logicalParamId----->$logicalParamId");
                 if (hasPresentValue.get()) {
                     try {
-                        if (presentValue.get() != null && !presentValue.get().equals("null") && !presentValue.get().equals("") && !presentValue.get().equals("NA")) {
+                        if (presentValue.get() != null && !presentValue.get().equals("null") && !presentValue.get().equals("") && !presentValue.get().equals("-")) {
                             Log.d(TAG, "write present value to the point id-->" + logicalParamId + " value-->" + presentValue + "<--is writable-->" + isWritable);
                             double presentVal = Double.parseDouble(presentValue.get());
                             CCUHsApi.getInstance().writeDefaultValById(logicalParamId, presentVal);

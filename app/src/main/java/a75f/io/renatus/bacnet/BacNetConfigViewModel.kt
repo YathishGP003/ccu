@@ -66,6 +66,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -749,6 +750,11 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         connectedDevices = mutableStateOf(emptyList())
         connectedDevices.value = list
 
+        if (connectedDevices.value.isEmpty() ) {
+            ProgressDialogUtils.hideProgressDialog()
+            Toast.makeText(context, "No devices found", Toast.LENGTH_SHORT).show()
+        }
+
         fetchDeviceNames()
 
     }
@@ -879,6 +885,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                     CcuLog.d(TAG,"result map size-->${bacNetItemsMap.size}")
                     updateBacnetProperties()
                     bacnetPropertiesFetched.value = true
+                    Toast.makeText(context, "Fetched Properties from Bacnet", Toast.LENGTH_LONG).show()
                 }else{
                     CcuLog.d(TAG,"BAC app failed check logs--")
                     bacnetRequestFailed.value = true
@@ -909,7 +916,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
             point.bacnetProperties?.forEach { bacnetProperty ->
                 val key = "${point.protocolData?.bacnet?.objectId}-${BacNetConstants.ObjectType.valueOf("OBJECT_"+point.protocolData?.bacnet?.objectType).value}-${bacnetProperty.id}"
                 bacnetProperty.fetchedValue =
-                    bacNetItemsMap[key]?.results?.get(0)?.propertyValue?.value ?: "NA"
+                    bacNetItemsMap[key]?.results?.get(0)?.propertyValue?.value ?: "-"
                 CcuLog.d(TAG, "Fetching key is -->$key and value is -->${bacNetItemsMap[key]} and fetched value is ${bacnetProperty.fetchedValue} and default value is ${bacnetProperty.defaultValue}")
                 if(bacnetProperty.defaultValue != bacnetProperty.fetchedValue && !isChangeInProperty){
                     point.displayInEditor.value = true
@@ -963,25 +970,31 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         val testBacnetModel = bacnetModel.value
         for (point in testBacnetModel.points) {
             point.bacnetProperties?.forEach { bacnetProperty ->
-                if (b) {
+                if (b && ( bacnetProperty.fetchedValue != "-" && !bacnetProperty.fetchedValue.isNullOrEmpty()) ) {
                     bacnetProperty.selectedValue = 1
+                    CcuLog.d(TAG, "bacnetProperty.fetchedValue is ${bacnetProperty.fetchedValue} and selected value is 1")
                 } else {
                     bacnetProperty.selectedValue = 0
+                    CcuLog.d(TAG, "bacnetProperty.fetchedValue is ${bacnetProperty.fetchedValue} and selected value is 0")
                 }
             }
         }
-        bacnetModel.value = testBacnetModel
-        isStateChanged.value = !isStateChanged.value
 
         for (point in bacnetModel.value.equipDevice.value.points) {
             point.bacnetProperties.forEach() { bacnetProperty ->
-                if (b) {
+                if (b && (bacnetProperty.fetchedValue != "-" && !bacnetProperty.fetchedValue.isNullOrEmpty())) {
+                    CcuLog.d(TAG, "bacnetProperty.fetchedValue is ${bacnetProperty.fetchedValue} and selected value is 1")
                     bacnetProperty.selectedValue = 1
                 } else {
+                    CcuLog.d(TAG, "bacnetProperty.fetchedValue is ${bacnetProperty.fetchedValue} and selected value is 0")
                     bacnetProperty.selectedValue = 0
                 }
             }
         }
+
+        bacnetModel.value = testBacnetModel
+        isStateChanged.value = !isStateChanged.value
+
     }
 
     private fun updateOriginalModel() {

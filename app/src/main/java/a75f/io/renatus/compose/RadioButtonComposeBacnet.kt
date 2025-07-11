@@ -106,20 +106,24 @@ fun RadioButtonComposeBacnetTerminal(
                 selected = (selectedItem.value == label), onClick = {
                     selectedItem.value = label
                     onSelect(selectedItem.value)
-                }, role = Role.RadioButton
+                }, role = Role.RadioButton,
+                enabled = !(radioTexts[label] == "-" || radioTexts[label] == null)
             )
     ) {
-        RadioButton(
-            modifier = Modifier
-                .padding(end = 10.dp),
-            selected = (selectedItem.value == label),
-            onClick = null,
-            colors = RadioButtonDefaults.colors(
-                selectedColor = ComposeUtil.primaryColor,
-                unselectedColor = Color.Gray
+        var tValue = radioTexts[label] ?: "-"
+        if (tValue != "-") {
+
+            RadioButton(
+                modifier = Modifier
+                    .padding(end = 10.dp),
+                selected = (selectedItem.value == label),
+                onClick = null,
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = ComposeUtil.primaryColor,
+                    unselectedColor = Color.Gray
+                )
             )
-        )
-        val tValue = radioTexts[label] ?: "-"
+        }
         Text(
             text = tValue,
             style = TextStyle(

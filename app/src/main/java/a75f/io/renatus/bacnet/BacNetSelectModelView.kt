@@ -186,16 +186,9 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
             viewModel.bacnetRequestFailed.value = false
         }
 
-        if(viewModel.bacnetPropertiesFetched.value){
-            Toast.makeText(requireContext(), "Fetched Properties from Bacnet", Toast.LENGTH_LONG).show()
-        }
-
         if(viewModel.isConnectedDevicesSearchFinished.value){
             viewModel.isConnectedDevicesSearchFinished.value = false
-            if(viewModel.connectedDevices.value.isEmpty()){
-                ProgressDialogUtils.hideProgressDialog()
-                Toast.makeText(requireContext(), "No devices found", Toast.LENGTH_SHORT).show()
-            }else{
+            if(viewModel.connectedDevices.value.isNotEmpty()) {
                 showDialogFragment(
                     BacnetDeviceSelectionFragment.newInstance(
                         viewModel.connectedDevices,
@@ -203,8 +196,8 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                         viewModel.configurationType.value == MSTP_CONFIGURATION
                     ), BacnetDeviceSelectionFragment.ID
                 )
-                ProgressDialogUtils.hideProgressDialog()
             }
+            ProgressDialogUtils.hideProgressDialog()
         }
 
         val state by remember { viewModel.isStateChanged }
@@ -331,8 +324,8 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                 val pointName = item.name
 
                 val dropdownImageList = listOf(
-                    R.drawable.arrow_right_disabled,
-                    R.drawable.arrow_down
+                    R.drawable.arrow_down,
+                    R.drawable.arrow_right_disabled
                 )
                 var clickedImageIndex by remember { mutableStateOf(0) }
                 val imageClickEvent = {
@@ -414,7 +407,7 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
 
                                 // column data for Parameter Name
                                 val imageList = listOf(
-                                                R.drawable.arrow_right_disabled
+                                                R.drawable.arrow_down
                                             )
                                 rowDataList.add(Pair("text_with_dropdown", Triple(item.disName, imageList) {}))
 
@@ -535,7 +528,7 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                     onDispose { /* Cleanup logic if needed */ }
                 }
                 val radioTexts = listOf(testProperty.value.defaultValue?.toString(), testProperty.value.fetchedValue)
-                val radioButtonDefaultState = if(viewModel.isDeviceValueSelected.value) 1 else testProperty.value.selectedValue
+                val radioButtonDefaultState = testProperty.value.selectedValue
                 val radioOptions = listOf(BacnetSelectedValue.DEVICE.ordinal, BacnetSelectedValue.FETCHED.ordinal)
                 val selectedItem = remember { mutableStateOf(radioOptions[radioButtonDefaultState]) }
                 val pointId = item.id

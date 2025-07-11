@@ -1,5 +1,7 @@
 package a75f.io.renatus.util;
 
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_RESTART;
+import static a75f.io.alerts.model.AlertCauses.CCU_RESTART;
 import static a75f.io.renatus.UtilityApplication.context;
 
 import android.app.Activity;
@@ -33,6 +35,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -78,6 +81,7 @@ public class CCUUiUtil {
     public static void triggerRestart(Context context) {
         AlertManager.getInstance().clearAlertsWhenAppClose();
         AlertManager.getInstance().getRepo().setRestartAppToTrue();
+        UpdateAppRestartCause(CCU_RESTART);
         Domain.diagEquip.getAppRestart().writeHisVal(1.0);
         PackageManager packageManager = context.getPackageManager();
         Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
@@ -96,7 +100,10 @@ public class CCUUiUtil {
                                  .setTitle("Serial Disconnected")
                                  .setMessage("No serial port connection detected for 30 minutes.Tablet will reboot " +
                                              "and try to reconnect. \n \n Press Cancel to avoid reboot.")
-                                 .setPositiveButton(android.R.string.yes, (dialog1, which) -> RenatusApp.rebootTablet())
+                                 .setPositiveButton(android.R.string.yes, (dialog1, which) -> {
+                                     UpdateAppRestartCause(DEVICE_RESTART);
+                                           RenatusApp.rebootTablet();
+                                 })
                                  .setNegativeButton(android.R.string.no, null)
                                  .create();
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
@@ -321,6 +328,13 @@ public class CCUUiUtil {
             e.printStackTrace();
             return null; // app not installed
         }
+    }
+
+    public static void UpdateAppRestartCause(String cause) {
+        Globals.getInstance().getApplicationContext().getSharedPreferences("crash_preference", Context.MODE_PRIVATE)
+                .edit()
+                .putString("app_restart_cause", cause).commit();
+        CcuLog.i("USER_TEST", "App restart cause updated to: " + cause);
     }
 
 }

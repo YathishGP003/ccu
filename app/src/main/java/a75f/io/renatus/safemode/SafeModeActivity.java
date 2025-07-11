@@ -1,7 +1,10 @@
 package a75f.io.renatus.safemode;
 
 
+import static a75f.io.alerts.model.AlertCauses.CCU_EXIT_SAFE_MODE;
+
 import static a75f.io.renatus.UtilityApplication.context;
+import static a75f.io.renatus.util.CCUUiUtil.UpdateAppRestartCause;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -72,8 +75,10 @@ public class SafeModeActivity extends AppCompatActivity implements SafeModeInter
         SharedPreferences.Editor editor = crashPreference.edit();
         editor.clear();
         editor.commit();
+        editor.putBoolean("SafeModeExit", true).commit();
         AlertManager.getInstance().fixSafeMode();
         AlertManager.getInstance().fixPreviousCrashAlert();
+        UpdateAppRestartCause(CCU_EXIT_SAFE_MODE);
         RenatusApp.closeApp();
     }
 

@@ -1,5 +1,7 @@
 package a75f.io.renatus.util.remotecommand;
 
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_RESTART;
+import static a75f.io.alerts.model.AlertCauses.REMOTE_COMMAND_RESTART;
 import static a75f.io.logic.L.TAG_CCU_DOWNLOAD;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.CMD_TYPE;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.OTA_UPDATE_BUNDLE;
@@ -17,6 +19,7 @@ import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.SAVE_SEQUENCE
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.UPDATE_CCU;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.UPDATE_CCU_LOG_LEVEL;
 import static a75f.io.renatus.ENGG.AppInstaller.DOWNLOAD_BASE_URL;
+import static a75f.io.renatus.util.CCUUiUtil.UpdateAppRestartCause;
 
 
 import android.app.DownloadManager;
@@ -120,10 +123,12 @@ public class RemoteCommandHandlerUtil {
 
         switch (commands) {
             case RESTART_CCU:
+                UpdateAppRestartCause(REMOTE_COMMAND_RESTART);
                 RenatusApp.restartApp();
                 break;
             case RESTART_TABLET:
-                AlertManager.getInstance().generateAlert(AlertsConstantsKt.DEVICE_RESTART, "Tablet Restart request sent for  - " + CCUHsApi.getInstance().getCcuName());
+                UpdateAppRestartCause(DEVICE_RESTART);
+                AlertManager.getInstance().generateAlert(DEVICE_RESTART, "Tablet Restart request sent for  - " + CCUHsApi.getInstance().getCcuName());
                 RenatusApp.rebootTablet();
                 break;
             case SAVE_CCU_LOGS:

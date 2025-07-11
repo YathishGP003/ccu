@@ -1,7 +1,10 @@
 package a75f.io.renatus;
 
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_RESTART;
+import static a75f.io.alerts.model.AlertCauses.CCU_RESTART;
 import static a75f.io.logic.L.TAG_CCU_BACNET_MSTP;
 import static a75f.io.logic.bo.building.bacnet.BacnetEquip.TAG_BACNET;
+import static a75f.io.logic.bo.util.CCUUtils.isRecommendedVersionCheckIsNotFalse;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_BBMD;
@@ -12,7 +15,6 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_FD_CONFIGUR
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.getUpdatedExistingBacnetConfigDeviceData;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.populateBacnetConfigurationObject;
-import static a75f.io.logic.bo.util.CCUUtils.isRecommendedVersionCheckIsNotFalse;
 import static a75f.io.renatus.CcuRefReceiver.REQUEST_CCU_REF_ACTION;
 import static a75f.io.renatus.Communication.isPortAvailable;
 import static a75f.io.renatus.UtilityApplication.context;
@@ -20,6 +22,7 @@ import static a75f.io.renatus.UtilityApplication.unRegisterEthernetListener;
 import static a75f.io.renatus.bacnet.BacnetBackgroundTaskHandler.BACNET_FD_INTERVAL;
 import static a75f.io.renatus.bacnet.BacnetBackgroundTaskHandler.BACNET_FD_IS_AUTO_ENABLED;
 import static a75f.io.renatus.registration.UpdateCCUFragment.abortCCUDownloadProcess;
+import static a75f.io.renatus.util.CCUUiUtil.UpdateAppRestartCause;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT;
 import static a75f.io.util.DashboardUtilKt.isDashboardConfig;
 
@@ -365,6 +368,7 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
         if(PreferenceUtil.getIsRebootRequiredAfterReplaceFlag()){
             PreferenceUtil.setIsRebootRequiredAfterReplaceFlag(false);
             CcuLog.d(TAG, "restarting after home app install");
+            UpdateAppRestartCause(DEVICE_RESTART);
             RenatusApp.rebootTablet();
         } else{
             CcuLog.d(TAG, "no restart required after home app install");
@@ -793,6 +797,7 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
         mCloudConnectionStatus.stopThread();
         L.saveCCUState();
         ccuLaunched();
+        UpdateAppRestartCause(CCU_RESTART);
         unRegisterEthernetListener();
         AlertManager.getInstance().clearAlertsWhenAppClose();
         appRestarted();

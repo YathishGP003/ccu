@@ -1,5 +1,7 @@
 package a75f.io.renatus.util.remotecommand.bundle
 
+import a75f.io.alerts.model.AlertCauses.Companion.BUNDLE_UPDATE_DEVICE_REBOOT
+import a75f.io.alerts.model.AlertCauses.Companion.CCU_UPDATE
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
@@ -9,10 +11,10 @@ import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.updateBundleOta
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.updateBundleVersion
 import a75f.io.logic.util.PreferenceUtil
 import a75f.io.renatus.BuildConfig
-import a75f.io.renatus.ENGG.AppInstaller
 import a75f.io.renatus.ENGG.AppInstaller.DOWNLOAD_BASE_URL
 import a75f.io.renatus.RenatusApp
 import a75f.io.renatus.registration.UpdateCCUFragment
+import a75f.io.renatus.util.CCUUiUtil.UpdateAppRestartCause
 import a75f.io.renatus.util.remotecommand.bundle.exception.DownloadFailedException
 import a75f.io.renatus.util.remotecommand.bundle.models.APKVersion
 import a75f.io.renatus.util.remotecommand.bundle.models.ArtifactDTO
@@ -190,6 +192,7 @@ class BundleInstallManager: BundleInstallListener {
                         if (bundleInstallState.rebootRequired) {
                             // Reboot the tablet
                             Log.d(TAG, "completeBundleInstallIfNecessary: Restarting tablet")
+                            UpdateAppRestartCause(BUNDLE_UPDATE_DEVICE_REBOOT)
                             RenatusApp.rebootTablet()
                         }
                     }
@@ -1040,9 +1043,11 @@ class BundleInstallManager: BundleInstallListener {
             // Everything has completed successfully, deal with any restart/reboot requirements
             if (restartTablet) {
                 Log.d(TAG, "initiateBundleUpgrade: Restarting tablet")
+                UpdateAppRestartCause(BUNDLE_UPDATE_DEVICE_REBOOT)
                 RenatusApp.rebootTablet()
             } else if (restartCCU) {
                 Log.d(TAG, "initiateBundleUpgrade: Restarting CCU")
+                UpdateAppRestartCause(CCU_UPDATE)
                 RenatusApp.restartApp()
             }
 

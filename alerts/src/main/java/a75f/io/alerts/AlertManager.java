@@ -310,6 +310,12 @@ public class AlertManager implements CCUHsApi.EntityDeletedListener
             fixAlert(a);
         }
     }
+    public void fixActiveAlertDef(String alertDef) {
+        if (! repoCheck()) return;
+        for (Alert a: repo.getActiveAlert(alertDef)) {
+            fixAlert(a);
+        }
+    }
 
     public void generateCrashAlert(String title, String msg){
         if (! repoCheck()) return;

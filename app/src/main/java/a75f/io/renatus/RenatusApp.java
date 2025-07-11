@@ -1,5 +1,9 @@
 package a75f.io.renatus;
+
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_RESTART;
+import static a75f.io.alerts.model.AlertCauses.CCU_UPDATE;
 import static a75f.io.logic.L.TAG_CCU_DOWNLOAD;
+import static a75f.io.renatus.util.CCUUiUtil.UpdateAppRestartCause;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -139,10 +143,12 @@ public class RenatusApp extends UtilityApplication
 					CcuLog.d(TAG_CCU_DOWNLOAD, "RenatusAPP ExecuteAsRoot END===>"+(appInfo2.flags & ApplicationInfo.FLAG_SYSTEM));
 
 					if (restartTabletAfterInstall) {
+						UpdateAppRestartCause(DEVICE_RESTART);
 						CcuLog.i(TAG_CCU_DOWNLOAD, "Tablet reboot requested");
 						rebootTablet();
 					} else if (restartCCUAppAfterInstall) {
 						CcuLog.i(TAG_CCU_DOWNLOAD, "CCU app restart requested");
+						UpdateAppRestartCause(CCU_UPDATE);
 						restartApp();
 					}
 				} else {

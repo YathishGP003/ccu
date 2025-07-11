@@ -128,6 +128,7 @@ import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.haystack.device.SmartNode
 import a75f.io.logic.bo.util.CCUUtils.getNodeType
 import a75f.io.logic.bo.util.CCUUtils.getProfileType
+import a75f.io.logic.bo.util.CCUUtils.setCCUReadyPropertyByName
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
 import a75f.io.logic.migration.VavAndAcbProfileMigration.Companion.cleanACBDuplicatePoints
@@ -231,6 +232,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             return
         }
         isMigrationOngoing = true
+        CcuLog.i(TAG_CCU_MIGRATION_UTIL, "---- Migration Started ----")
+        Globals.getInstance().applicationContext.getSharedPreferences("crash_preference", Context.MODE_PRIVATE)
+            .edit()
+            .putString("app_restart_cause", "CCU_UPDATE")
+            .apply()
+
         if (hayStack.readEntity(Tags.SITE).isNotEmpty()) {
             // After DM integration skipping migration for DR mode
 //            migrationForDRMode()
@@ -502,6 +509,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if (!PreferenceUtil.getUpdateMystatGatewayRefFlag()) {
             updateGatewayRefForMystatEquips();
             PreferenceUtil.setUpdateMystatGatewayRefFlag()
+        }
+        if(!PreferenceUtil.getUpdateRestartSystemFlag()){
+            setCCUReadyPropertyByName("CCU_REBOOT", "true")
+            PreferenceUtil.setUpdateRestartSystemFlag()
         }
 
         hayStack.scheduleSync()

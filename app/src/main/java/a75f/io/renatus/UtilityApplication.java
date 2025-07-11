@@ -1,10 +1,13 @@
 package a75f.io.renatus;
 
-import static java.lang.Thread.sleep;
-import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_RESTART;
+import static a75f.io.alerts.model.AlertCauses.CCU_CRASH;
 import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
 import static a75f.io.logic.util.PreferenceUtil.getSyncStartTime;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_MSTP_INITIALIZED;
+import static a75f.io.renatus.util.CCUUiUtil.UpdateAppRestartCause;
+
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.cancelScheduleJobToResubscribeBacnetMstpCOV;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.scheduleJobToResubscribeBacnetMstpCOV;
 
@@ -20,12 +23,9 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.wifi.WifiManager;
-import android.os.Handler;
-import android.os.Looper;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
-import com.google.common.base.Throwables;
 import com.raygun.raygun4android.RaygunClient;
 
 import org.greenrobot.eventbus.EventBus;
@@ -47,10 +47,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -84,9 +81,6 @@ import a75f.io.messaging.service.MessageCleanUpWork;
 import a75f.io.messaging.service.MessageRetryHandlerWork;
 import a75f.io.messaging.service.MessagingAckJob;
 import a75f.io.modbusbox.EquipsManager;
-import a75f.io.renatus.anrwatchdog.ANRError;
-import a75f.io.renatus.anrwatchdog.ANRHandler;
-import a75f.io.renatus.anrwatchdog.ANRWatchDog;
 import a75f.io.renatus.ota.OtaCache;
 import a75f.io.renatus.ota.SeqCache;
 import a75f.io.renatus.registration.UpdateCCUFragment;
@@ -498,6 +492,7 @@ public abstract class UtilityApplication extends Application implements Globals.
 
         String crashMessage = getCrashMessage();
         AlertManager.getInstance().fixPreviousCrashAlert();
+        crashPreference.edit().putString("app_restart_cause",CCU_CRASH).commit();
         AlertManager.getInstance().generateCrashAlert(
                 "CCU CRASH",
                 crashMessage);
@@ -519,6 +514,7 @@ public abstract class UtilityApplication extends Application implements Globals.
                 CCUHsApi.getInstance().writeHisValByQuery("domainName == \"safeModeStatus\"", 1.0);
             }
         } else if (OOMExceptionHandler.isOOMCausedByFragmentation(paramThrowable)) {
+            UpdateAppRestartCause(DEVICE_RESTART);
             RenatusApp.rebootTablet();
         }
     }

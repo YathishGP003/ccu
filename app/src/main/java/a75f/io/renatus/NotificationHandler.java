@@ -1,7 +1,9 @@
 package a75f.io.renatus;
 
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_RESTART;
 import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
 import static a75f.io.messaging.handler.DataSyncHandler.isMessageTimeExpired;
+import static a75f.io.renatus.util.CCUUiUtil.UpdateAppRestartCause;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -160,6 +162,7 @@ public class NotificationHandler {
                 if (diffInMinutes >= ccuNetworkWatchdogTimeoutTunerValue) {
                     prefs.setString(INTERNET_DISCONNECTED_TIMESTAMP, "");
                     CcuLog.i("NotificationHandler", "Device Restarted");
+                    UpdateAppRestartCause(DEVICE_RESTART);
                     RenatusApp.rebootTablet();
                 }
             } else {

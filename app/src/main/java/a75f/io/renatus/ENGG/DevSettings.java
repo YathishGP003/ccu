@@ -1,6 +1,7 @@
 package a75f.io.renatus.ENGG;
 
-import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
+import static a75f.io.alerts.model.AlertCauses.CCU_RESTART;
+import static a75f.io.renatus.util.CCUUiUtil.UpdateAppRestartCause;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -32,7 +33,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
-
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HRef;
@@ -59,8 +59,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Site;
 import a75f.io.device.mesh.LSerial;
-import a75f.io.domain.logic.TunerEquipBuilder;
 import a75f.io.domain.api.Domain;
+import a75f.io.domain.logic.TunerEquipBuilder;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -958,6 +958,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         PackageManager packageManager = context.getPackageManager();
         Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
         ComponentName componentName = intent.getComponent();
+        UpdateAppRestartCause(CCU_RESTART);
         Intent mainIntent = Intent.makeRestartActivityTask(componentName);
         context.startActivity(mainIntent);
         Runtime.getRuntime().exit(0);

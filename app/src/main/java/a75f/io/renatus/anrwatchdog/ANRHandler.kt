@@ -1,10 +1,12 @@
 package a75f.io.renatus.anrwatchdog
 
+import a75f.io.alerts.model.AlertCauses.Companion.CCU_ANR
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.renatus.RenatusApp
 import a75f.io.renatus.UtilityApplication
+import a75f.io.renatus.util.CCUUiUtil.UpdateAppRestartCause
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
@@ -45,6 +47,7 @@ object ANRHandler {
                         error.printStackTrace()
                         dumpANRTraces(UtilityApplication.context, error)
                         CcuLog.e(TAG, "ANR Triggered, Restarting App")
+                        UpdateAppRestartCause(CCU_ANR)
                         RenatusApp.restartApp()
                     }
                 } catch (e: InterruptedException) {

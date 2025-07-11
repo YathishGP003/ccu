@@ -133,6 +133,7 @@ public class PreferenceUtil {
     private static final String UPDATE_MYSTAT_GATEWAY_REF_FLAG = "updateMystatGatewayRefFlag";
     private static final String IS_REBOOT_REQUIRED_AFTER_REPLACE = "isRebootRequiredAfterReplace";
     private static final String MIGRATE_MODULATING_PROFILE_NORMALIZATION = "migrateModulatingProfileNormalization";
+    private static final String MIGRATION_SYSTEM_FLAG_CCU_REBOOT = "migrationSystemFlagCcuReboot";
 
     public static void setContext(Context c) {
         context= c;
@@ -1029,6 +1030,13 @@ public class PreferenceUtil {
 
     public static void setUpdateMystatGatewayRefFlag() {
         setBooleanPreference(UPDATE_MYSTAT_GATEWAY_REF_FLAG, true);
+    }
+    public static boolean getUpdateRestartSystemFlag() {
+        return getBooleanPreference(MIGRATION_SYSTEM_FLAG_CCU_REBOOT);
+    }
+
+    public static void setUpdateRestartSystemFlag() {
+        setBooleanPreference(MIGRATION_SYSTEM_FLAG_CCU_REBOOT, true);
     }
 
     public static boolean getUpdateEnumValuesForTerminalProfile() {

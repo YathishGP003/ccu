@@ -1,8 +1,12 @@
 package a75f.io.logic.jobs;
 
+import static a75f.io.alerts.AlertsConstantsKt.CCU_RESTART;
+
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import a75f.io.alerts.AlertManager;
+import a75f.io.alerts.model.AlertCauses;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.sync.PointWriteCache;
 import a75f.io.api.haystack.sync.PointWriteHandler;
@@ -42,7 +46,15 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     public void doJob() {
         CcuLog.d(L.TAG_CCU_JOB,"BuildingProcessJob -> ");
         watchdogMonitor = false;
-    
+        try {
+            if (CCUHsApi.getInstance().getAppAliveMinutes() == 0) {
+                AlertManager.getInstance().fixActiveAlertDef(CCU_RESTART);
+                AlertManager.getInstance().generateAlert(CCU_RESTART,
+                        AlertCauses.Companion.getCauses(Globals.getInstance().getApplicationContext().getSharedPreferences("crash_preference", 0)));
+            }
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU_JOB, "Error while generating CCU RESTART ALERT", e);
+        }
         CCUHsApi.getInstance().incrementAppAliveCount();
         CcuLog.d(L.TAG_CCU_JOB,"AppAliveMinutes : "+CCUHsApi.getInstance().getAppAliveMinutes());
         if (CCUHsApi.getInstance().getAppAliveMinutes() % 15 == 0) {

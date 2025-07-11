@@ -1,5 +1,8 @@
 package a75f.io.renatus.ENGG;
 
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_RESTART;
+import static a75f.io.renatus.util.CCUUiUtil.UpdateAppRestartCause;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -10,7 +13,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -19,7 +21,6 @@ import androidx.fragment.app.Fragment;
 import java.util.Arrays;
 import java.util.List;
 
-import a75f.io.device.mesh.RootCommandExecuter;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.renatus.R;
@@ -123,7 +124,7 @@ public class NetworkConfigFragment extends Fragment {
                                 .putString("broadcastAddress", "")
                                 .putString("dnsAddress", "")
                                 .apply();
-
+                        UpdateAppRestartCause(DEVICE_RESTART);
                         RenatusApp.rebootTablet();
                      })
                     .setNegativeButton(android.R.string.no, null)

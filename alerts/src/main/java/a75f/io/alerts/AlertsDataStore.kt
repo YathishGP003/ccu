@@ -8,8 +8,6 @@ import a75f.io.logger.CcuLog
 import android.content.Context
 import io.objectbox.kotlin.inValues
 import org.apache.commons.lang3.StringUtils
-import java.lang.Exception
-import kotlin.collections.ArrayList
 
 private const val PREFS_ALERT_DEFS = "ccu_alerts"
 private const val PREFS_ALERTS_PREDEFINED = "predef_alerts"
@@ -269,6 +267,14 @@ class AlertsDataStore @JvmOverloads constructor(
       alertQuery.equal(Alert_.isFixed, false)
          .equal(Alert_.mTitle, DEVICE_REBOOT)
          .equal(Alert_.equipId, deviceRef)
+         .orderDesc(Alert_.startTime)
+      return alertQuery.build().find()
+   }
+
+   fun getAlertByAlertDefId(alertDefId: String): List<Alert> {
+      val alertQuery = alertBox.query()
+      alertQuery.equal(Alert_.isFixed, false)
+         .equal(Alert_.mTitle,alertDefId )
          .orderDesc(Alert_.startTime)
       return alertQuery.build().find()
    }

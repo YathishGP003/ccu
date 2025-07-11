@@ -1,5 +1,8 @@
 package a75f.io.renatus;
 
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_RESTART;
+import static a75f.io.renatus.util.CCUUiUtil.UpdateAppRestartCause;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -25,6 +28,7 @@ public class RebootHandlerService extends BroadcastReceiver {
             PreferenceUtil.setIsCcuRebootStarted(true);
             RebootDataCache rebootDataCache = new RebootDataCache();
             rebootDataCache.storeRebootTimestamp(true);
+            UpdateAppRestartCause(DEVICE_RESTART);
             RenatusApp.rebootTablet();
         }
     }

@@ -174,6 +174,7 @@ class AlertsRepository(
    fun getActiveAlertsByRef(deviceRef: String): List<Alert> = dataStore.getActiveAlertsByRef(deviceRef)
 
    fun getDeviceRebootActiveAlert(deviceRef: String) = dataStore.getDeviceRebootActiveAlert(deviceRef)
+   fun getActiveAlert(alertDef: String) = dataStore.getAlertByAlertDefId(alertDef)
 
    /**
     * @return Looks like this returns all alerts with severity not equal to an INTERNAL status

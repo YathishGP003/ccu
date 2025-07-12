@@ -261,12 +261,21 @@ class HpuConfiguration(
         return HsHpuRelayMapping.values()[highestSelected]
     }
 
-    fun getHighestFanStageCount() = getHighestFanStage().ordinal - 4
+    override fun getHighestFanStageCount(): Int {
+        return try {
+            getHighestFanStage().ordinal - 4
+        } catch (e: ArrayIndexOutOfBoundsException) {
+            0
+        }
+    }
 
-    fun highestCompressorStages() = getHighestCompressorStage().ordinal + 1
-
-
-
+    fun getHighestCompressorStages(): Int {
+        return try {
+            getHighestCompressorStage().ordinal + 1
+        } catch (e: ArrayIndexOutOfBoundsException) {
+            0
+        }
+    }
 }
 
 data class HpuMinMaxConfig(

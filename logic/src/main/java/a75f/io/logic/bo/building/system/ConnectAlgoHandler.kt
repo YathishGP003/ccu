@@ -24,8 +24,6 @@ fun getAnalogAssociation(enabledControls: MutableSet<AdvancedAhuAnalogOutAssocia
                 AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_COOLING -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.LOAD_COOLING)
                 AdvancedAhuAnalogOutAssociationTypeConnect.CO2_DAMPER -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.CO2_DAMPER)
                 AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.COMPOSITE_SIGNAL)
-                /*AdvancedAhuAnalogOutAssociationTypeConnect.OAO_DAMPER -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.OAO_DAMPER)
-                AdvancedAhuAnalogOutAssociationTypeConnect.RETURN_DAMPER -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.RETURN_DAMPER)*/
                 AdvancedAhuAnalogOutAssociationTypeConnect.COMPRESSOR_SPEED -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.COMPRESSOR_SPEED)
 
                 else -> { } // Do nothing

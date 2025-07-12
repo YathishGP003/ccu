@@ -280,7 +280,7 @@ class Pipe2Configuration(
     }
 
 
-    fun getHighestFanStageCount(): Int {
+    override fun getHighestFanStageCount(): Int {
         if (getHighestFanSelected() == null) return 0
         return getHighestFanSelected()!!.ordinal + 1
     }

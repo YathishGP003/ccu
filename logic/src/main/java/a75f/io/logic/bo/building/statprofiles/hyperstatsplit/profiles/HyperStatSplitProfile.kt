@@ -3,7 +3,9 @@ package a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZoneProfile
@@ -14,6 +16,7 @@ import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.statprofiles.statcontrollers.SplitControllerFactory
 import a75f.io.logic.bo.building.statprofiles.util.BasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.util.StagesCounts
 import a75f.io.logic.bo.building.statprofiles.util.StatLoopController
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
 import a75f.io.logic.controlcomponents.util.ControllerNames
@@ -26,6 +29,10 @@ import a75f.io.logic.util.uiutils.updateUserIntentPoints
  */
 
 abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short) : ZoneProfile() {
+
+    var stageCounts = StagesCounts()
+    val derivedFanLoopOutput = CalibratedPoint(DomainName.fanLoopOutput, equipRef, 0.0)
+    var zoneOccupancyState = CalibratedPoint("zoneOccupancyState", equipRef, 0.0)
 
     var hssEquip : HyperStatSplitEquip = HyperStatSplitEquip(equipRef)
     val loopController = StatLoopController()
@@ -92,7 +99,7 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short) :
                 outsideAirLoopOutput, outsideAirFinalLoopOutput
             ).forEach { resetPoint(it) }
         }
-        hssEquip.derivedFanLoopOutput.data = 0.0
+        derivedFanLoopOutput.data = 0.0
     }
 
     fun handleChangeOfDirection(userIntents: UserIntents, factory: SplitControllerFactory) {
@@ -123,7 +130,7 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short) :
             ControllerNames.FAN_SPEED_CONTROLLER,
             ControllerNames.COMPRESSOR_RELAY_CONTROLLER,
         ).forEach {
-            val controller = factory.getController(it, hssEquip)
+            val controller = factory.getController(it)
             controller?.resetController()
         }
 

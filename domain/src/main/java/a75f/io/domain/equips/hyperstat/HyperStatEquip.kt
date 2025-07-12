@@ -164,10 +164,4 @@ open class HyperStatEquip(equipRef : String) : DomainEquip(equipRef) {
 
     val relayStages = HashMap<String, Int>()
     val analogOutStages = HashMap<String, Int>()
-
-    val derivedFanLoopOutput = CalibratedPoint(DomainName.fanLoopOutput ,equipRef,0.0)
-    var zoneOccupancyState = CalibratedPoint(DomainName.zoneOccupancy, equipRef, 0.0)
-    var stageUpTimer = CalibratedPoint(DomainName.hyperstatStageUpTimerCounter, equipRef, 0.0)
-    var stageDownTimer = CalibratedPoint(DomainName.hyperstatStageDownTimerCounter, equipRef, 0.0)
-
 }

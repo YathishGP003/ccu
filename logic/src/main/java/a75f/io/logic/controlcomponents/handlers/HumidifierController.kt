@@ -9,7 +9,7 @@ import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.util.isOccupiedDcvHumidityControl
 
 class HumidifierController(
-    private val humidityPoint: Point, val targetMinHumidity: Point, hysteresis: Point, private val logTag: String, val occupancy : CalibratedPoint
+    private val humidityPoint: Point, val targetMinHumidity: Point, private val hysteresis: Point, private val logTag: String, val occupancy : CalibratedPoint
 ) : Controller {
     private val controller = GenericBooleanControllerImpl()
 
@@ -25,7 +25,7 @@ class HumidifierController(
 
     override fun runController(): Boolean {
         CcuLog.d(logTag, "Running HumidifierController" +
-                " ${humidityPoint.readHisVal()} , targetMinHumidity ${targetMinHumidity.readPriorityVal()} Status = ${controller.getActiveControl()}" +
+                " ${humidityPoint.readHisVal()} , hysteresis: ${hysteresis.readPriorityVal()} targetMinHumidity ${targetMinHumidity.readPriorityVal()} Status = ${controller.getActiveControl()}" +
                 " Occupancy = ${occupancy.readHisVal()}")
 
         return controller.getActiveControl()

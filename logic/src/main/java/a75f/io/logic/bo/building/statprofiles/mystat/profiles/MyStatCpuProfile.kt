@@ -88,14 +88,14 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
         val fanModeSaved = FanModeCacheStorage.getMyStatFanModeCache().getFanModeFromCache(equip.equipRef)
         val basicSettings = fetchMyStatBasicSettings(equip)
         val config = getMyStatConfiguration(equip.equipRef) as MyStatCpuConfiguration
-        val controllerFactory = MyStatControlFactory(equip)
+        val controllerFactory = MyStatControlFactory(equip, controllers, stageCounts, derivedFanLoopOutput, zoneOccupancyState)
 
         curState = ZoneState.DEADBAND
         logicalPointsList = getMyStatLogicalPointList(equip, config)
 
         if (equipOccupancyHandler != null) {
             occupancyStatus = equipOccupancyHandler.currentOccupiedMode
-            equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+            zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
         }
 
         logIt("Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
@@ -518,7 +518,7 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
         config: MyStatCpuConfiguration, basicSettings: MyStatBasicSettings,
         equip: MyStatCpuEquip, controllerFactory: MyStatControlFactory
     ) {
-        controllerFactory.addControllers(config)
+        controllerFactory.addCpuControllers(config)
         runControllers(equip, basicSettings, config)
     }
 
@@ -528,16 +528,14 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
         config: MyStatCpuConfiguration
     ) {
 
-        equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
-        equip.stageDownTimer.data = equip.mystatStageUpTimerCounter.readPriorityVal()
-        equip.stageUpTimer.data = equip.mystatStageUpTimerCounter.readPriorityVal()
-        equip.derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
+        zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+        derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
         // This is for title 24 compliance
         if (fanLoopCounter > 0) {
-            equip.derivedFanLoopOutput.data = previousFanLoopVal.toDouble()
+            derivedFanLoopOutput.data = previousFanLoopVal.toDouble()
         }
 
-        equip.controllers.forEach { (controllerName, value) ->
+        controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             val result = controller.runController()
             updateRelayStatus(controllerName, result, equip, basicSettings, config)
@@ -552,22 +550,14 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
         config: MyStatCpuConfiguration
     ) {
 
-        fun updateRelayStage(stageName: String, isActive: Boolean, point: Point) {
-            if (point.pointExists()) {
-                val status = if (isActive) 1.0 else 0.0
-                if (isActive) {
-                    equip.relayStages[stageName] = status.toInt()
-                } else {
-                    equip.relayStages.remove(stageName)
-                }
-                point.writeHisVal(status)
-            }
-        }
-
         fun updateStatus(point: Point, result: Any, status: String? = null) {
-            point.writeHisVal(if (result as Boolean) 1.0 else 0.0)
-            if (status != null && result) {
-                equip.relayStages[status] = 1
+            if (point.pointExists()) {
+                point.writeHisVal(if (result as Boolean) 1.0 else 0.0)
+                if (status != null && result) {
+                    equip.relayStages[status] = 1
+                } else {
+                    equip.relayStages.remove(status)
+                }
             } else {
                 equip.relayStages.remove(status)
             }
@@ -583,16 +573,18 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
                         if (canWeDoCooling(basicSettings.conditioningMode)) it.second else false
                     )
                     when (stage) {
-                        0 -> updateRelayStage(
-                            Stage.COOLING_1.displayName,
+                        0 -> updateStatus(
+                            equip.coolingStage1,
                             isActive,
-                            equip.coolingStage1
+                            Stage.COOLING_1.displayName,
                         )
 
-                        1 -> updateRelayStage(
-                            Stage.COOLING_2.displayName,
+                        1 -> updateStatus(
+                            equip.coolingStage2,
                             isActive,
-                            equip.coolingStage2
+                            Stage.COOLING_2.displayName,
+
+
                         )
                     }
                 }
@@ -606,16 +598,16 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
                         if (canWeDoHeating(basicSettings.conditioningMode)) it.second else false
                     )
                     when (stage) {
-                        0 -> updateRelayStage(
-                            Stage.HEATING_1.displayName,
+                        0 -> updateStatus(
+                            equip.heatingStage1,
                             isActive,
-                            equip.heatingStage1
+                            Stage.HEATING_1.displayName
                         )
 
-                        1 -> updateRelayStage(
-                            Stage.HEATING_2.displayName,
+                        1 -> updateStatus(
+                            equip.heatingStage2,
                             isActive,
-                            equip.heatingStage2
+                            Stage.HEATING_2.displayName
                         )
                     }
                 }
@@ -653,16 +645,16 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
                 fanStages.forEach {
                     val (stage, isActive) = Pair(it.first, it.second)
                     when (stage) {
-                        0 -> updateRelayStage(
-                            Stage.FAN_1.displayName,
+                        0 -> updateStatus(
+                            equip.fanLowSpeed,
                             isStageActive(stage, isActive, lowestStageFanLow),
-                            equip.fanLowSpeed
+                            Stage.FAN_1.displayName,
                         )
 
-                        1 -> updateRelayStage(
-                            Stage.FAN_2.displayName,
+                        1 -> updateStatus(
+                            equip.fanHighSpeed,
                             isStageActive(stage, isActive, lowestStageFanHigh),
-                            equip.fanHighSpeed
+                            Stage.FAN_2.displayName
                         )
                     }
                 }
@@ -683,12 +675,8 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
             }
             ControllerNames.OCCUPIED_ENABLED -> updateStatus(equip.occupiedEnable, result)
             ControllerNames.HUMIDIFIER_CONTROLLER -> updateStatus(equip.humidifierEnable, result)
-            ControllerNames.DEHUMIDIFIER_CONTROLLER -> updateStatus(
-                equip.dehumidifierEnable,
-                result
-            )
-
-            ControllerNames.DAMPER_RELAY_CONTROLLER -> updateStatus(equip.dcvDamper, result)
+            ControllerNames.DEHUMIDIFIER_CONTROLLER -> updateStatus(equip.dehumidifierEnable, result)
+            ControllerNames.DAMPER_RELAY_CONTROLLER -> updateStatus(equip.dcvDamper, result, StatusMsgKeys.DCV_DAMPER.name)
             else -> {
                 logIt("Unknown controller: $controllerName")
             }

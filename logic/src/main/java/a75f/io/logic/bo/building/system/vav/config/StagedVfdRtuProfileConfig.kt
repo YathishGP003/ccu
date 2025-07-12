@@ -68,8 +68,6 @@ open class StagedVfdRtuProfileConfig(modelDef : SeventyFiveFProfileDirective)
         thermistor2InAssociation = getDefaultAssociationConfig(DomainName.thermistor2InputAssociation, model)
         analogIn1Association = getDefaultAssociationConfig(DomainName.analog1InputAssociation, model)
         analogIn2Association = getDefaultAssociationConfig(DomainName.analog2InputAssociation, model)
-
-        CcuLog.i("manju", "getDefaultValConfig(DomainName.analog2Economizer, model) ${getDefaultValConfig(DomainName.analog2Economizer, model).currentVal}")
         analogOut2Economizer = getDefaultValConfig(DomainName.analog2Economizer, model)
         analogOut2Recirculate = getDefaultValConfig(DomainName.analog2Recirculate, model)
         analogOut2CoolStage1 = getDefaultValConfig(DomainName.analog2CoolStage1, model)

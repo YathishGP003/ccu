@@ -4,8 +4,9 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
 import a75f.io.domain.HyperStatSplitEquip
-import a75f.io.domain.api.Domain
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.util.CalibratedPoint
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
@@ -75,7 +76,6 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
     private var outsideAirFinalLoopOutput = 0
     // Flags for keeping tab of occupancy during linear fan operation(Only to be used in doAnalogFanActionCpu())
 
-
     private var economizingAvailable = false
     private var dcvAvailable = false
     private var matThrottle = false
@@ -85,8 +85,11 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
     private var prePurgeEnabled = false
     private var prePurgeOpeningValue = 0.0
 
-    private var controllerFactory = SplitControllerFactory(hssEquip)
-
+    private val isEconAvailable: CalibratedPoint = CalibratedPoint("economizingAvailable", "", 0.0)
+    private var controllerFactory = SplitControllerFactory(
+        hssEquip, controllers, stageCounts,
+        isEconAvailable, derivedFanLoopOutput, zoneOccupancyState
+    )
     override fun updateZonePoints() {
         if (Globals.getInstance().isTestMode) {
             logIt("Test mode is on: $nodeAddress")
@@ -169,11 +172,10 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
 
         if (equipOccupancyHandler != null) {
             occupancyStatus = equipOccupancyHandler.currentOccupiedMode
-            hssEquip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+            zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
         }
 
         updateTitle24LoopCounter(hyperStatSplitTuners, basicSettings)
-        logIt("present hssEquip : $hssEquip domain equip ${Domain.equips[equipRef]} ${hssEquip.zoneOccupancyState.data}")
 
         if (basicSettings.fanMode != StandaloneFanStage.OFF) {
             runRelayOperations(config, basicSettings)
@@ -499,7 +501,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
             L.TAG_CCU_HSSPLIT_CPUECON,
             "zoneSensorCO2: $zoneSensorCO2, zoneCO2Threshold: $zoneCO2Threshold, co2DamperOpeningRate: $co2DamperOpeningRate"
         )
-        if (isOccupiedDcvHumidityControl(hssEquip.zoneOccupancyState)) {
+        if (isOccupiedDcvHumidityControl(zoneOccupancyState)) {
             if (zoneSensorCO2 > zoneCO2Threshold) {
                 dcvAvailable = true
                 dcvLoopOutput = max(
@@ -727,7 +729,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
             L.TAG_CCU_HSSPLIT_CPUECON,
             "zoneSensorCO2: $zoneSensorCO2, zoneCO2Threshold: $zoneCO2Threshold, co2DamperOpeningRate: $co2DamperOpeningRate"
         )
-        if (isOccupiedDcvHumidityControl(hssEquip.zoneOccupancyState)) {
+        if (isOccupiedDcvHumidityControl(zoneOccupancyState)) {
             if (zoneSensorCO2 > zoneCO2Threshold) {
                 dcvAvailable = true
                 dcvLoopOutput = max(
@@ -1210,47 +1212,31 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         if (controllerFactory.equip != hssEquip) {
             controllerFactory.equip = hssEquip
         }
-        hssEquip.stageDownTimer.data = hssEquip.hyperstatStageUpTimerCounter.readPriorityVal()
-        hssEquip.stageUpTimer.data = hssEquip.hyperstatStageUpTimerCounter.readPriorityVal()
 
         if (coolingLoopOutput > 0) {
-            hssEquip.isEconAvailable.data = if (economizingAvailable) 1.0 else 0.0
+            isEconAvailable.data = if (economizingAvailable) 1.0 else 0.0
         } else {
-            hssEquip.isEconAvailable.data = 0.0
-        }
-
-        if (config.isCoolingStagesAvailable()) {
-            hssEquip.highestCoolingStages.data = config.getHighestCoolingStageCount().toDouble()
-        } else {
-            hssEquip.highestCoolingStages.data = 0.0
-        }
-
-        if (config.isCompressorStagesAvailable()) {
-            hssEquip.highestCompressorStages.data =
-                config.getHighestCompressorStageCount().toDouble()
-        } else {
-            hssEquip.highestCompressorStages.data = 0.0
+            isEconAvailable.data = 0.0
         }
 
         /**
          * This is where we run the controllers for the equipment. they need dynamic loop points values
          * when constraint executes they will calculate the value based on the current loop points
          */
-        hssEquip.derivedFanLoopOutput.data = hssEquip.fanLoopOutput.readHisVal()
+        derivedFanLoopOutput.data = hssEquip.fanLoopOutput.readHisVal()
 
         // This is for title 24 compliance
         if (fanLoopCounter > 0) {
-            hssEquip.derivedFanLoopOutput.data = previousFanLoopVal.toDouble()
+            derivedFanLoopOutput.data = previousFanLoopVal.toDouble()
         }
+        logIt("derivedFanLoopOutput $derivedFanLoopOutput")
         controllerFactory.addControllers(config, ::isPrePurgeActive)
-        logIt(" isEconAvailable: ${hssEquip.isEconAvailable.data} " +
-                "zoneOccupancyState : ${hssEquip.zoneOccupancyState.data}" +
-                " highestCoolingStages : ${hssEquip.highestCoolingStages.data}" +
-                " highestCompressorStages : ${hssEquip.highestCompressorStages.data} ")
+        logIt(" isEconAvailable: ${isEconAvailable.data} " +
+                "zoneOccupancyState : ${zoneOccupancyState.data}")
     }
 
     private fun runControllers(equip: HyperStatSplitEquip, basicSettings: BasicSettings, config: HyperStatSplitCpuConfiguration) {
-        equip.controllers.forEach { (controllerName, value) ->
+        controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             val result = controller.runController()
             updateRelayStatus(controllerName, result, equip, basicSettings, config)
@@ -1267,7 +1253,6 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         val analogOuts = config.getAnalogOutsConfigurationMapping()
         analogOuts.forEach { (enabled, association, port) ->
             if (enabled) {
-
                 if (hssEquip.isCondensateTripped()) {
                     resetAnalogOutLogicalPoints()
                     return
@@ -1375,23 +1360,16 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         basicSettings: BasicSettings, config: HyperStatSplitCpuConfiguration
     ) {
 
-        fun updateRelayStage(stageName: String, isActive: Boolean, point: Point) {
-
-            if (point.pointExists()) {
-                val status = if (isActive) 1.0 else 0.0
-                if (isActive) {
-                    equip.relayStages[stageName] = status.toInt()
-                } else {
-                    equip.relayStages.remove(stageName)
-                }
-                point.writeHisVal(status)
-            }
-        }
-
         fun updateStatus(point: Point, result: Any, status: String? = null) {
-            point.writeHisVal(if (result as Boolean) 1.0 else 0.0)
-            if (status != null && result) {
-                equip.relayStages[status] = 1
+            if (point.pointExists()) {
+                point.writeHisVal(if (result as Boolean) 1.0 else 0.0)
+                if (status != null && result) {
+                    equip.relayStages[status] = 1
+                } else {
+                    equip.relayStages.remove(status)
+                }
+            } else {
+                equip.relayStages.remove(status)
             }
         }
 
@@ -1405,9 +1383,9 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
                     )
                     if (isActive) curState = ZoneState.COOLING
                     when (stage) {
-                        0 -> updateRelayStage(Stage.COOLING_1.displayName, isActive, equip.coolingStage1)
-                        1 -> updateRelayStage(Stage.COOLING_2.displayName, isActive, equip.coolingStage2)
-                        2 -> updateRelayStage(Stage.COOLING_3.displayName, isActive, equip.coolingStage3)
+                        0 -> updateStatus(equip.coolingStage1, isActive, Stage.COOLING_1.displayName)
+                        1 -> updateStatus(equip.coolingStage2, isActive, Stage.COOLING_2.displayName)
+                        2 -> updateStatus(equip.coolingStage3, isActive, Stage.COOLING_3.displayName)
                     }
                 }
             }
@@ -1421,9 +1399,9 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
                     )
                     if (isActive) curState = ZoneState.HEATING
                     when (stage) {
-                        0 -> updateRelayStage(Stage.HEATING_1.displayName, isActive, equip.heatingStage1)
-                        1 -> updateRelayStage(Stage.HEATING_2.displayName, isActive, equip.heatingStage2)
-                        2 -> updateRelayStage(Stage.HEATING_3.displayName, isActive, equip.heatingStage3)
+                        0 -> updateStatus(equip.heatingStage1, isActive, Stage.HEATING_1.displayName)
+                        1 -> updateStatus(equip.heatingStage2, isActive, Stage.HEATING_2.displayName)
+                        2 -> updateStatus(equip.heatingStage3, isActive, Stage.HEATING_3.displayName)
                     }
                 }
             }
@@ -1458,9 +1436,9 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
                 fanStages.forEach {
                     val (stage, isActive) = Pair(it.first, it.second)
                     when (stage) {
-                        0 -> updateRelayStage(Stage.FAN_1.displayName, isStageActive(stage, isActive, lowestStageFanLow), equip.fanLowSpeed)
-                        1 -> updateRelayStage(Stage.FAN_2.displayName, isStageActive(stage, isActive, lowestStageFanMedium), equip.fanMediumSpeed)
-                        2 -> updateRelayStage(Stage.FAN_3.displayName, isStageActive(stage, isActive, lowestStageFanHigh), equip.fanHighSpeed)
+                        0 -> updateStatus(equip.fanLowSpeed, isStageActive(stage, isActive, lowestStageFanLow), Stage.FAN_1.displayName)
+                        1 -> updateStatus(equip.fanMediumSpeed, isStageActive(stage, isActive, lowestStageFanMedium), Stage.FAN_2.displayName)
+                        2 -> updateStatus(equip.fanHighSpeed, isStageActive(stage, isActive, lowestStageFanHigh), Stage.FAN_3.displayName)
                     }
                 }
             }
@@ -1473,9 +1451,9 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
                         if (basicSettings.conditioningMode != StandaloneConditioningMode.OFF ) it.second else false
                     )
                     when (stage) {
-                        0 -> updateRelayStage(if (coolingLoopOutput > 0 ) Stage.COOLING_1.displayName else Stage.HEATING_1.displayName, isActive, equip.compressorStage1)
-                        1 -> updateRelayStage(if (coolingLoopOutput > 0 ) Stage.COOLING_2.displayName else Stage.HEATING_2.displayName, isActive, equip.compressorStage2)
-                        2 -> updateRelayStage(if (coolingLoopOutput > 0 ) Stage.COOLING_3.displayName else Stage.HEATING_3.displayName, isActive, equip.compressorStage3)
+                        0 -> updateStatus(equip.compressorStage1, isActive, if (state == ZoneState.COOLING) Stage.COOLING_1.displayName else if (state == ZoneState.HEATING) Stage.HEATING_1.displayName else "")
+                        1 -> updateStatus(equip.compressorStage2, isActive, if (state == ZoneState.COOLING) Stage.COOLING_2.displayName else if (state == ZoneState.HEATING) Stage.HEATING_2.displayName else "")
+                        2 -> updateStatus(equip.compressorStage3, isActive, if (state == ZoneState.COOLING) Stage.COOLING_3.displayName else if (state == ZoneState.HEATING) Stage.HEATING_3.displayName else "")
                     }
                 }
             }
@@ -1491,14 +1469,14 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
                 if (!currentStatus && isFanLoopCounterEnabled  ) {
                     currentStatus = true
                 }
-                updateStatus(equip.fanEnable, currentStatus)
+                updateStatus(equip.fanEnable, currentStatus, StatusMsgKeys.FAN_ENABLED.name)
             }
             ControllerNames.OCCUPIED_ENABLED -> updateStatus(equip.occupiedEnable,result)
             ControllerNames.HUMIDIFIER_CONTROLLER -> updateStatus(equip.humidifierEnable,result)
             ControllerNames.DEHUMIDIFIER_CONTROLLER -> updateStatus(equip.dehumidifierEnable,result)
             ControllerNames.EXHAUST_FAN_STAGE1_CONTROLLER -> updateStatus(equip.exhaustFanStage1,result)
             ControllerNames.EXHAUST_FAN_STAGE2_CONTROLLER -> updateStatus(equip.exhaustFanStage2,result)
-            ControllerNames.DAMPER_RELAY_CONTROLLER -> updateStatus(equip.dcvDamper,result)
+            ControllerNames.DAMPER_RELAY_CONTROLLER -> updateStatus(equip.dcvDamper,result, StatusMsgKeys.DCV_DAMPER.name)
             ControllerNames.AUX_HEATING_STAGE1 -> {
                 var status = result as Boolean
                 if (basicSettings.conditioningMode != StandaloneConditioningMode.AUTO
@@ -1539,7 +1517,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
     private fun resetEquip() {
         hssEquip.relayStages.clear()
         hssEquip.analogOutStages.clear()
-        hssEquip.derivedFanLoopOutput.data = 0.0
+        derivedFanLoopOutput.data = 0.0
     }
 
     private fun logResults(config: HyperStatSplitCpuConfiguration) {

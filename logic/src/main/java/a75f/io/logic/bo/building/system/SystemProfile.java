@@ -84,12 +84,9 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
  */
 public abstract class SystemProfile
 {
-
+    public HashMap<String,Object> controllers = new HashMap<>();
     public Schedule schedule = new Schedule();
-
     public TRSystem trSystem;
-
-
     private String equipRef = null;
     private String siteRef;
     private String equipDis;
@@ -1126,7 +1123,7 @@ public abstract class SystemProfile
         );
 
         for (String controllerType : controllerTypes) {
-            StageControlHandler controller = factory.getController(controllerType, systemEquip);
+            StageControlHandler controller = factory.getController(controllerType);
             if (controller != null) {
                 controller.resetController();
             }

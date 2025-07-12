@@ -5,7 +5,6 @@ import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.DomainEquip
-import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logger.CcuLog
 
 /**
@@ -143,9 +142,4 @@ open class MyStatEquip(equipRef: String) : DomainEquip(equipRef) {
 
     val relayStages = HashMap<String, Int>()
     val analogOutStages = HashMap<String, Int>()
-
-    val derivedFanLoopOutput = CalibratedPoint(DomainName.fanLoopOutput ,equipRef,0.0)
-    var zoneOccupancyState = CalibratedPoint(DomainName.zoneOccupancy, equipRef, 0.0)
-    var stageUpTimer = CalibratedPoint(DomainName.mystatStageUpTimerCounter, equipRef, 0.0)
-    var stageDownTimer = CalibratedPoint(DomainName.mystatStageDownTimerCounter, equipRef, 0.0)
 }

@@ -1,25 +1,13 @@
 package a75f.io.logic.bo.building.system.vav;
 
-import static a75f.io.logic.bo.building.hvac.Stage.COMPRESSOR_1;
-import static a75f.io.logic.bo.building.hvac.Stage.COMPRESSOR_2;
-import static a75f.io.logic.bo.building.hvac.Stage.COMPRESSOR_3;
-import static a75f.io.logic.bo.building.hvac.Stage.COMPRESSOR_4;
-import static a75f.io.logic.bo.building.hvac.Stage.COMPRESSOR_5;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
-import static a75f.io.logic.bo.building.hvac.Stage.COOLING_3;
-import static a75f.io.logic.bo.building.hvac.Stage.COOLING_4;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_5;
 import static a75f.io.logic.bo.building.hvac.Stage.DEHUMIDIFIER;
 import static a75f.io.logic.bo.building.hvac.Stage.FAN_1;
 import static a75f.io.logic.bo.building.hvac.Stage.FAN_2;
-import static a75f.io.logic.bo.building.hvac.Stage.FAN_3;
-import static a75f.io.logic.bo.building.hvac.Stage.FAN_4;
-import static a75f.io.logic.bo.building.hvac.Stage.FAN_5;
 import static a75f.io.logic.bo.building.hvac.Stage.HEATING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.HEATING_2;
-import static a75f.io.logic.bo.building.hvac.Stage.HEATING_3;
-import static a75f.io.logic.bo.building.hvac.Stage.HEATING_4;
 import static a75f.io.logic.bo.building.hvac.Stage.HEATING_5;
 import static a75f.io.logic.bo.building.hvac.Stage.HUMIDIFIER;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
@@ -27,9 +15,6 @@ import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForVav;
-import static a75f.io.logic.controlcomponents.util.ControllerNames.COOLING_STAGE_CONTROLLER;
-import static a75f.io.logic.controlcomponents.util.ControllerNames.FAN_SPEED_CONTROLLER;
-import static a75f.io.logic.controlcomponents.util.ControllerNames.HEATING_STAGE_CONTROLLER;
 
 import android.content.Intent;
 
@@ -50,6 +35,7 @@ import a75f.io.domain.api.Domain;
 import a75f.io.domain.equips.ConditioningStages;
 import a75f.io.domain.equips.VavStagedSystemEquip;
 import a75f.io.domain.equips.VavStagedVfdSystemEquip;
+import a75f.io.domain.util.CalibratedPoint;
 import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
@@ -80,6 +66,12 @@ public class VavStagedRtu extends VavSystemProfile {
     public int coolingStages = 0;
     public int fanStages = 0;
     public int compressorStages = 0;
+
+    public CalibratedPoint coolingStagesCount = new CalibratedPoint("coolingStages" ,"", 0.0);
+    public CalibratedPoint heatingStagesCount = new CalibratedPoint("heatingStages" ,"", 0.0);
+    public CalibratedPoint fanStagesCount = new CalibratedPoint("fanStages" ,"", 0.0);
+    public CalibratedPoint compressorStagesCount = new CalibratedPoint("compressorStages" ,"", 0.0);
+
 
     public int stageUpTimerCounter = 0;
     public int stageDownTimerCounter = 0;
@@ -123,7 +115,7 @@ public class VavStagedRtu extends VavSystemProfile {
         return ((VavTRSystem)trSystem).getCurrentSp();
     }
 
-    SystemControllerFactory factory = new SystemControllerFactory();
+    SystemControllerFactory factory = new SystemControllerFactory(controllers);
     SystemStageHandler systemStatusHandler;
 
     @Override
@@ -185,72 +177,92 @@ public class VavStagedRtu extends VavSystemProfile {
     }
 
     public void addControllers() {
-        factory.addCoolingControllers(systemEquip,
+
+        coolingStagesCount.setData(coolingStages);
+        heatingStagesCount.setData(heatingStages);
+        fanStagesCount.setData(fanStages);
+        compressorStagesCount.setData(compressorStages);
+
+        factory.addCoolingControllers(
                 systemEquip.getCoolingLoopOutput(),
-                systemEquip.getVavRelayDeactivationHysteresis(),
+                systemEquip.getRelayActivationHysteresis(),
                 systemEquip.getVavStageUpTimerCounter(),
                 systemEquip.getVavStageDownTimerCounter(),
                 systemEquip.getEconomizationAvailable(),
-                coolingStages);
+                coolingStagesCount
+        );
 
-        factory.addHeatingControllers(systemEquip,
+        factory.addHeatingControllers(
                 systemEquip.getHeatingLoopOutput(),
-                systemEquip.getVavRelayDeactivationHysteresis(),
+                systemEquip.getRelayActivationHysteresis(),
                 systemEquip.getVavStageUpTimerCounter(),
                 systemEquip.getVavStageDownTimerCounter(),
-                heatingStages);
+                heatingStagesCount
+        );
 
-        factory.addFanControllers(systemEquip,
+        factory.addFanControllers(
                 systemEquip.getFanLoopOutput(),
-                systemEquip.getVavRelayDeactivationHysteresis(),
+                systemEquip.getRelayActivationHysteresis(),
                 systemEquip.getVavStageUpTimerCounter(),
                 systemEquip.getVavStageDownTimerCounter(),
-                fanStages);
+                fanStagesCount
+        );
 
-        factory.addCompressorControllers(systemEquip,
+        factory.addCompressorControllers(
                 systemEquip.getCompressorLoopOutput(),
                 systemEquip.getRelayActivationHysteresis(),
                 systemEquip.getVavStageUpTimerCounter(),
                 systemEquip.getVavStageDownTimerCounter(),
                 systemEquip.getEconomizationAvailable(),
-                compressorStages
+                compressorStagesCount
         );
 
-        factory.addHumidifierController(systemEquip,
+        factory.addHumidifierController(
                 systemEquip.getAverageHumidity(),
                 systemEquip.getSystemtargetMinInsideHumidity(),
-                systemEquip.getRelayActivationHysteresis(),
-                systemEquip.getCurrentOccupancy()
+                systemEquip.getVavHumidityHysteresis(),
+                systemEquip.getCurrentOccupancy(),
+                systemEquip.getConditioningStages().getHumidifierEnable().pointExists()
         );
 
-        factory.addDeHumidifierController(systemEquip,
+        factory.addDeHumidifierController(
                 systemEquip.getAverageHumidity(),
                 systemEquip.getSystemtargetMaxInsideHumidity(),
-                systemEquip.getRelayActivationHysteresis(),
-                systemEquip.getCurrentOccupancy()
+                systemEquip.getVavHumidityHysteresis(),
+                systemEquip.getCurrentOccupancy(),
+                systemEquip.getConditioningStages().getDehumidifierEnable().pointExists()
         );
 
-        factory.addChangeCoolingChangeOverRelay(systemEquip, systemEquip.getCoolingLoopOutput());
-        factory.addChangeHeatingChangeOverRelay(systemEquip, systemEquip.getHeatingLoopOutput());
-        factory.addOccupiedEnabledController(systemEquip, systemEquip.getCurrentOccupancy());
+        factory.addChangeCoolingChangeOverRelay(
+                systemEquip.getCoolingLoopOutput(),
+                systemEquip.getConditioningStages().getChangeOverCooling().pointExists()
+        );
+
+        factory.addChangeHeatingChangeOverRelay(
+                systemEquip.getHeatingLoopOutput(),
+                systemEquip.getConditioningStages().getChangeOverHeating().pointExists()
+        );
+
+        factory.addOccupiedEnabledController(systemEquip.getCurrentOccupancy(),
+                systemEquip.getConditioningStages().getOccupiedEnabled().pointExists());
         factory.addFanEnableController(
-                systemEquip, systemEquip.getFanLoopOutput(), systemEquip.getCurrentOccupancy()
+                systemEquip.getFanLoopOutput(), systemEquip.getCurrentOccupancy(),
+                systemEquip.getConditioningStages().getFanEnable().pointExists()
         );
         factory.addDcvDamperController(
-                systemEquip,
                 systemEquip.getDcvLoopOutput(),
-                systemEquip.getRelayActivationHysteresis(),
-                systemEquip.getCurrentOccupancy()
+                systemEquip.getVavRelayDeactivationHysteresis(),
+                systemEquip.getCurrentOccupancy(),
+                systemEquip.getConditioningStages().getDcvDamper().pointExists()
         );
-
 
     }
 
     protected synchronized void updateSystemPoints() {
-
+        systemEquip = (VavStagedSystemEquip) Domain.systemEquip;
+        systemStatusHandler = new SystemStageHandler(systemEquip.getConditioningStages());
         updateStagesSelected();
         addControllers();
-
         updateOutsideWeatherParams();
         updateMechanicalConditioning(CCUHsApi.getInstance());
 
@@ -413,7 +425,7 @@ public class VavStagedRtu extends VavSystemProfile {
                                    " systemHeatingLoopOp "+ systemHeatingLoopOp+" " + "systemFanLoopOp "+systemFanLoopOp);
 
         updatePrerequisite();
-        systemStatusHandler.runControllersAndUpdateStatus(systemEquip, (int) systemEquip.getConditioningMode().readPriorityVal());
+        systemStatusHandler.runControllersAndUpdateStatus(controllers, (int) systemEquip.getConditioningMode().readPriorityVal());
         updateRelays();
     
         CcuLog.d(L.TAG_CCU_SYSTEM, "stageUpTimerCounter "+stageUpTimerCounter+
@@ -614,7 +626,7 @@ public class VavStagedRtu extends VavSystemProfile {
         CcuLog.i(L.TAG_CCU_SYSTEM, "updateStagesSelected Cooling stages: "+coolingStages+" Heating stages: "+heatingStages+" Fan stages: "+fanStages+
                 " Compressor stages: "+compressorStages);
     }
-    
+
     public boolean isStageEnabled(Stage s) {
         AtomicBoolean enabled = new AtomicBoolean(false);
         getRelayAssiciationMap().forEach( (relay, association) -> {
@@ -624,15 +636,7 @@ public class VavStagedRtu extends VavSystemProfile {
         });
         return enabled.get();
     }
-    
-    private boolean isStageMapped(Stage stage) {
-        for (int relayCount = 1; relayCount <= 7; relayCount++) {
-            if (stage.ordinal() == getConfigAssociation("relay" + relayCount)) {
-                return true;
-            }
-        }
-        return false;
-    }
+
     public double getStageStatus(Stage stage) {
         return getDomainPointForStage(stage).readHisVal();
     }

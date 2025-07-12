@@ -46,6 +46,8 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.equips.ConditioningStages;
 import a75f.io.domain.equips.DabStagedSystemEquip;
+import a75f.io.domain.equips.DabStagedVfdSystemEquip;
+import a75f.io.domain.util.CalibratedPoint;
 import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
@@ -73,7 +75,12 @@ public class DabStagedRtu extends DabSystemProfile
     public int coolingStages = 0;
     public int fanStages = 0;
     public int compressorStages = 0;
-    
+
+    public CalibratedPoint coolingStagesCount = new CalibratedPoint("coolingStages" ,"", 0.0);
+    public CalibratedPoint heatingStagesCount = new CalibratedPoint("heatingStages" ,"", 0.0);
+    public CalibratedPoint fanStagesCount = new CalibratedPoint("fanStages" ,"", 0.0);
+    public CalibratedPoint compressorStagesCount = new CalibratedPoint("compressorStages" ,"", 0.0);
+
     private int stageUpTimerCounter = 0;
     private int stageDownTimerCounter = 0;
     private boolean changeOverStageDownTimerOverrideActive = false;
@@ -106,10 +113,12 @@ public class DabStagedRtu extends DabSystemProfile
         systemStatusHandler = new SystemStageHandler(systemEquip.getConditioningStages());
     }
 
-    SystemControllerFactory factory = new SystemControllerFactory();
+    SystemControllerFactory factory = new SystemControllerFactory(controllers);
 
 
     protected synchronized void updateSystemPoints() {
+        systemEquip = (DabStagedVfdSystemEquip) Domain.systemEquip;
+        systemStatusHandler = new SystemStageHandler(systemEquip.getConditioningStages());
         updateOutsideWeatherParams();
         updateMechanicalConditioning(CCUHsApi.getInstance());
 
@@ -202,7 +211,7 @@ public class DabStagedRtu extends DabSystemProfile
 
 
         updatePrerequisite();
-        systemStatusHandler.runControllersAndUpdateStatus(systemEquip, (int) systemEquip.getConditioningMode().readPriorityVal());
+        systemStatusHandler.runControllersAndUpdateStatus(controllers, (int) systemEquip.getConditioningMode().readPriorityVal());
         updateRelays();
         CcuLog.d(L.TAG_CCU_SYSTEM, "stageUpTimerCounter "+stageUpTimerCounter+
                                    " stageDownTimerCounter "+ stageDownTimerCounter+" " +
@@ -408,65 +417,83 @@ public class DabStagedRtu extends DabSystemProfile
     }
 
     public void addControllers() {
-        factory.addCoolingControllers(systemEquip,
+
+        coolingStagesCount.setData(coolingStages);
+        heatingStagesCount.setData(heatingStages);
+        fanStagesCount.setData(fanStages);
+        compressorStagesCount.setData(compressorStages);
+
+        factory.addCoolingControllers(
                 systemEquip.getCoolingLoopOutput(),
                 systemEquip.getRelayActivationHysteresis(),
                 systemEquip.getDabStageUpTimerCounter(),
                 systemEquip.getDabStageDownTimerCounter(),
                 systemEquip.getEconomizationAvailable(),
-                coolingStages
+                coolingStagesCount
         );
 
-        factory.addHeatingControllers(systemEquip,
+        factory.addHeatingControllers(
                 systemEquip.getHeatingLoopOutput(),
                 systemEquip.getRelayActivationHysteresis(),
                 systemEquip.getDabStageUpTimerCounter(),
                 systemEquip.getDabStageDownTimerCounter(),
-                heatingStages
+                heatingStagesCount
         );
 
-        factory.addFanControllers(systemEquip,
+        factory.addFanControllers(
                 systemEquip.getFanLoopOutput(),
                 systemEquip.getRelayActivationHysteresis(),
                 systemEquip.getDabStageUpTimerCounter(),
                 systemEquip.getDabStageDownTimerCounter(),
-                fanStages
+                fanStagesCount
         );
 
-        factory.addCompressorControllers(systemEquip,
+        factory.addCompressorControllers(
                 systemEquip.getCompressorLoopOutput(),
                 systemEquip.getRelayActivationHysteresis(),
                 systemEquip.getDabStageUpTimerCounter(),
                 systemEquip.getDabStageDownTimerCounter(),
                 systemEquip.getEconomizationAvailable(),
-                compressorStages
+                compressorStagesCount
         );
 
-        factory.addHumidifierController(systemEquip,
+        factory.addHumidifierController(
                 systemEquip.getAverageHumidity(),
                 systemEquip.getSystemtargetMinInsideHumidity(),
-                systemEquip.getRelayActivationHysteresis(),
-                systemEquip.getCurrentOccupancy()
+                systemEquip.getDabRelayDeactivationHysteresis(),
+                systemEquip.getCurrentOccupancy(),
+                systemEquip.getConditioningStages().getHumidifierEnable().pointExists()
         );
 
-        factory.addDeHumidifierController(systemEquip,
+        factory.addDeHumidifierController(
                 systemEquip.getAverageHumidity(),
                 systemEquip.getSystemtargetMaxInsideHumidity(),
-                systemEquip.getRelayActivationHysteresis(),
-                systemEquip.getCurrentOccupancy()
+                systemEquip.getDabRelayDeactivationHysteresis(),
+                systemEquip.getCurrentOccupancy(),
+                systemEquip.getConditioningStages().getDehumidifierEnable().pointExists()
         );
 
-        factory.addChangeCoolingChangeOverRelay(systemEquip, systemEquip.getCoolingLoopOutput());
-        factory.addChangeHeatingChangeOverRelay(systemEquip, systemEquip.getHeatingLoopOutput());
-        factory.addOccupiedEnabledController(systemEquip, systemEquip.getCurrentOccupancy());
+        factory.addChangeCoolingChangeOverRelay(
+                systemEquip.getCoolingLoopOutput(),
+                systemEquip.getConditioningStages().getChangeOverCooling().pointExists()
+        );
+
+        factory.addChangeHeatingChangeOverRelay(
+                systemEquip.getHeatingLoopOutput(),
+                systemEquip.getConditioningStages().getChangeOverHeating().pointExists()
+        );
+
+        factory.addOccupiedEnabledController(systemEquip.getCurrentOccupancy(),
+                systemEquip.getConditioningStages().getOccupiedEnabled().pointExists());
         factory.addFanEnableController(
-                systemEquip, systemEquip.getFanLoopOutput(), systemEquip.getCurrentOccupancy()
+                systemEquip.getFanLoopOutput(), systemEquip.getCurrentOccupancy(),
+                systemEquip.getConditioningStages().getFanEnable().pointExists()
         );
         factory.addDcvDamperController(
-                systemEquip,
                 systemEquip.getDcvLoopOutput(),
-                systemEquip.getRelayActivationHysteresis(),
-                systemEquip.getCurrentOccupancy()
+                systemEquip.getDabRelayDeactivationHysteresis(),
+                systemEquip.getCurrentOccupancy(),
+                systemEquip.getConditioningStages().getDcvDamper().pointExists()
         );
 
     }

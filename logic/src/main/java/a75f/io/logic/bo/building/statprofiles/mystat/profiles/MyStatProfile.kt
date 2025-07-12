@@ -1,7 +1,9 @@
 package a75f.io.logic.bo.building.statprofiles.mystat.profiles
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.mystat.MyStatEquip
+import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZoneProfile
@@ -13,11 +15,11 @@ import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.statcontrollers.MyStatControlFactory
-import a75f.io.logic.bo.building.statprofiles.statcontrollers.SplitControllerFactory
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.MyStatBasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
 import a75f.io.logic.bo.building.statprofiles.util.MyStatTuners
+import a75f.io.logic.bo.building.statprofiles.util.StagesCounts
 import a75f.io.logic.bo.building.statprofiles.util.StatLoopController
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
 import a75f.io.logic.bo.building.statprofiles.util.updateLogicalPoint
@@ -41,9 +43,13 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
     open var occupancyStatus: Occupancy = Occupancy.NONE
     private val haystack = CCUHsApi.getInstance()
 
+    var stageCounts = StagesCounts()
+
     var occupancyBeforeDoorWindow = Occupancy.NONE
     var doorWindowSensorOpenStatus = false
     var runFanLowDuringDoorWindow = false
+    val derivedFanLoopOutput = CalibratedPoint(DomainName.fanLoopOutput ,"",0.0)
+    var zoneOccupancyState = CalibratedPoint(DomainName.zoneOccupancy, "", 0.0)
 
     var coolingLoopOutput = 0
     var heatingLoopOutput = 0
@@ -124,7 +130,7 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
             ControllerNames.FAN_SPEED_CONTROLLER,
             ControllerNames.COMPRESSOR_RELAY_CONTROLLER,
         ).forEach {
-            val controller = factory.getController(it, myStatEquip)
+            val controller = factory.getController(it, this)
             controller?.resetController()
         }
 
@@ -250,10 +256,10 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
         logIt(
             "doAnalogDCVAction: co2Value : $co2Value zoneCO2Threshold: $cO2Threshold zoneCO2DamperOpeningRate $damperOpeningRate"
         )
-        if (isDcvEligibleToOn(co2Value, cO2Threshold, isDoorOpen, equip.zoneOccupancyState)) {
+        if (isDcvEligibleToOn(co2Value, cO2Threshold, isDoorOpen, zoneOccupancyState)) {
             updateLogicalPoint(logicalPointsList[port]!!, dcvLoopOutput.toDouble())
             analogOutStages[StatusMsgKeys.DCV_DAMPER.name] = dcvLoopOutput
-        } else if (isDcvEligibleToOn(co2Value, cO2Threshold, isDoorOpen, equip.zoneOccupancyState).not()) {
+        } else if (isDcvEligibleToOn(co2Value, cO2Threshold, isDoorOpen, zoneOccupancyState).not()) {
             updateLogicalPoint(logicalPointsList[port]!!, 0.0)
         }
     }

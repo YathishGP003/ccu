@@ -60,7 +60,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
 
     private int lastSystemSATRequests = 0;
 
-    private final SystemControllerFactory factory = new SystemControllerFactory();
+    private final SystemControllerFactory factory = new SystemControllerFactory(controllers);
     private SystemStageHandler systemStatusHandler;
 
     public VavFullyModulatingRtu() {
@@ -172,7 +172,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
                                    +" systemCo2LoopOp "+systemCo2LoopOp);
 
         updatePrerequisite();
-        systemStatusHandler.runControllersAndUpdateStatus(systemEquip, (int) systemEquip.getConditioningMode().readPriorityVal());
+        systemStatusHandler.runControllersAndUpdateStatus(controllers, (int) systemEquip.getConditioningMode().readPriorityVal());
         updateRelays();
 
         setSystemPoint("operating and mode", VavSystemController.getInstance().systemState.ordinal());
@@ -558,31 +558,43 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
     }
 
     public void addControllers() {
-        factory.addHumidifierController(systemEquip,
+        factory.addHumidifierController(
                 systemEquip.getAverageHumidity(),
                 systemEquip.getSystemtargetMinInsideHumidity(),
-                systemEquip.getVavRelayDeactivationHysteresis(),
-                systemEquip.getCurrentOccupancy()
+                systemEquip.getVavHumidityHysteresis(),
+                systemEquip.getCurrentOccupancy(),
+                systemEquip.getConditioningStages().getDehumidifierEnable().pointExists()
         );
 
-        factory.addDeHumidifierController(systemEquip,
+        factory.addDeHumidifierController(
                 systemEquip.getAverageHumidity(),
                 systemEquip.getSystemtargetMaxInsideHumidity(),
-                systemEquip.getVavRelayDeactivationHysteresis(),
-                systemEquip.getCurrentOccupancy()
+                systemEquip.getVavHumidityHysteresis(),
+                systemEquip.getCurrentOccupancy(),
+                systemEquip.getConditioningStages().getHumidifierEnable().pointExists()
         );
 
-        factory.addChangeCoolingChangeOverRelay(systemEquip, systemEquip.getCoolingLoopOutput());
-        factory.addChangeHeatingChangeOverRelay(systemEquip, systemEquip.getHeatingLoopOutput());
-        factory.addOccupiedEnabledController(systemEquip, systemEquip.getCurrentOccupancy());
+        factory.addChangeCoolingChangeOverRelay(
+                systemEquip.getCoolingLoopOutput(),
+                systemEquip.getConditioningStages().getChangeOverCooling().pointExists()
+        );
+
+        factory.addChangeHeatingChangeOverRelay(
+                systemEquip.getHeatingLoopOutput(),
+                systemEquip.getConditioningStages().getChangeOverHeating().pointExists()
+        );
+
+        factory.addOccupiedEnabledController(systemEquip.getCurrentOccupancy(),
+                systemEquip.getConditioningStages().getOccupiedEnabled().pointExists());
         factory.addFanEnableController(
-                systemEquip, systemEquip.getFanLoopOutput(), systemEquip.getCurrentOccupancy()
+                systemEquip.getFanLoopOutput(), systemEquip.getCurrentOccupancy(),
+                systemEquip.getConditioningStages().getFanEnable().pointExists()
         );
         factory.addDcvDamperController(
-                systemEquip,
                 systemEquip.getDcvLoopOutput(),
                 systemEquip.getVavRelayDeactivationHysteresis(),
-                systemEquip.getCurrentOccupancy()
+                systemEquip.getCurrentOccupancy(),
+                systemEquip.getConditioningStages().getDcvDamper().pointExists()
         );
     }
 

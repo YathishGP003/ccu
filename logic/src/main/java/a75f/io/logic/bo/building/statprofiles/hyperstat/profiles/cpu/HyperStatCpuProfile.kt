@@ -64,7 +64,6 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
     private var previousFanStageStatus: StandaloneFanStage = StandaloneFanStage.OFF
     private val cpuDeviceMap: MutableMap<Int, CpuV2Equip> = mutableMapOf()
 
-
     override fun getProfileType() = ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT
 
     override fun updateZonePoints() {
@@ -310,16 +309,15 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
         val fanModeSaved = FanModeCacheStorage.getHyperStatFanModeCache().getFanModeFromCache(equip.equipRef)
         val basicSettings = fetchBasicSettings(equip)
         val config = getHsConfiguration(equip.equipRef)
-        val controllerFactory = HyperStatControlFactory(equip)
+        val controllerFactory = HyperStatControlFactory(equip, controllers, stageCounts, derivedFanLoopOutput, zoneOccupancyState)
 
         logicalPointsList = getHSLogicalPointList(equip, config!!)
         curState = ZoneState.DEADBAND
 
         if (equipOccupancyHandler != null) {
             occupancyStatus = equipOccupancyHandler.currentOccupiedMode
-            equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+            zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
         }
-
 
         logIt( "Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
         val updatedFanMode = fallBackFanMode(equip, equip.equipRef, fanModeSaved, basicSettings)
@@ -456,7 +454,7 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
         config: CpuConfiguration, basicSettings: BasicSettings, equip: CpuV2Equip,
         controllerFactory: HyperStatControlFactory
     ) {
-        controllerFactory.addControllers(config)
+        controllerFactory.addHsCpuControllers(config)
         runControllers(equip, basicSettings, config)
     }
 
@@ -465,14 +463,13 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
         basicSettings: BasicSettings,
         config: CpuConfiguration
     ) {
-        equip.derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
-        equip.stageDownTimer.data = equip.hyperstatStageUpTimerCounter.readPriorityVal()
-        equip.stageUpTimer.data = equip.hyperstatStageUpTimerCounter.readPriorityVal()
+        derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
         // This is for title 24 compliance
         if (fanLoopCounter > 0) {
-            equip.derivedFanLoopOutput.data = previousFanLoopVal.toDouble()
+            derivedFanLoopOutput.data = previousFanLoopVal.toDouble()
         }
-        equip.controllers.forEach { (controllerName, value) ->
+
+        controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             val result = controller.runController()
             updateRelayStatus(controllerName, result, equip, basicSettings, config)
@@ -664,22 +661,14 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
         config: CpuConfiguration
     ) {
 
-        fun updateRelayStage(stageName: String, isActive: Boolean, point: Point) {
-            if (point.pointExists()) {
-                val status = if (isActive) 1.0 else 0.0
-                if (isActive) {
-                    equip.relayStages[stageName] = status.toInt()
-                } else {
-                    equip.relayStages.remove(stageName)
-                }
-                point.writeHisVal(status)
-            }
-        }
-
         fun updateStatus(point: Point, result: Any, status: String? = null) {
-            point.writeHisVal(if (result as Boolean) 1.0 else 0.0)
-            if (status != null && result) {
-                equip.relayStages[status] = 1
+            if (point.pointExists()) {
+                point.writeHisVal(if (result as Boolean) 1.0 else 0.0)
+                if (status != null && result) {
+                    equip.relayStages[status] = 1
+                } else {
+                    equip.relayStages.remove(status)
+                }
             } else {
                 equip.relayStages.remove(status)
             }
@@ -696,9 +685,9 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
                         if (canWeDoCooling(basicSettings.conditioningMode)) it.second else false
                     )
                     when (stage) {
-                        0 -> updateRelayStage(Stage.COOLING_1.displayName, isActive, equip.coolingStage1)
-                        1 -> updateRelayStage(Stage.COOLING_2.displayName, isActive, equip.coolingStage2)
-                        2 -> updateRelayStage(Stage.COOLING_3.displayName, isActive, equip.coolingStage3)
+                        0 -> updateStatus(equip.coolingStage1, isActive, Stage.COOLING_1.displayName)
+                        1 -> updateStatus(equip.coolingStage2, isActive, Stage.COOLING_2.displayName)
+                        2 -> updateStatus(equip.coolingStage3, isActive, Stage.COOLING_3.displayName)
                     }
                 }
             }
@@ -711,9 +700,9 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
                         if (canWeDoHeating(basicSettings.conditioningMode)) it.second else false
                     )
                     when (stage) {
-                        0 -> updateRelayStage(Stage.HEATING_1.displayName, isActive, equip.heatingStage1)
-                        1 -> updateRelayStage(Stage.HEATING_2.displayName, isActive, equip.heatingStage2)
-                        2 -> updateRelayStage(Stage.HEATING_3.displayName, isActive, equip.heatingStage3)
+                        0 -> updateStatus(equip.heatingStage1, isActive, Stage.HEATING_1.displayName)
+                        1 -> updateStatus(equip.heatingStage2, isActive, Stage.HEATING_2.displayName)
+                        2 -> updateStatus(equip.heatingStage3, isActive, Stage.HEATING_3.displayName)
                     }
                 }
             }
@@ -751,9 +740,9 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
                 fanStages.forEach {
                     val (stage, isActive) = Pair(it.first, it.second)
                     when (stage) {
-                        0 -> updateRelayStage(Stage.FAN_1.displayName, isStageActive(stage, isActive, lowestStageFanLow), equip.fanLowSpeed)
-                        1 -> updateRelayStage(Stage.FAN_2.displayName, isStageActive(stage, isActive, lowestStageFanMedium), equip.fanMediumSpeed)
-                        2 -> updateRelayStage(Stage.FAN_3.displayName, isStageActive(stage, isActive, lowestStageFanHigh), equip.fanHighSpeed)
+                        0 -> updateStatus(equip.fanLowSpeed, isStageActive(stage, isActive, lowestStageFanLow), Stage.FAN_1.displayName )
+                        1 -> updateStatus(equip.fanMediumSpeed, isStageActive(stage, isActive, lowestStageFanMedium), Stage.FAN_2.displayName )
+                        2 -> updateStatus(equip.fanHighSpeed, isStageActive(stage, isActive, lowestStageFanHigh), Stage.FAN_3.displayName )
                     }
                 }
             }
@@ -774,7 +763,7 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
             ControllerNames.OCCUPIED_ENABLED -> updateStatus(equip.occupiedEnable, result)
             ControllerNames.HUMIDIFIER_CONTROLLER -> updateStatus(equip.humidifierEnable, result)
             ControllerNames.DEHUMIDIFIER_CONTROLLER -> updateStatus(equip.dehumidifierEnable, result)
-            ControllerNames.DAMPER_RELAY_CONTROLLER -> updateStatus(equip.dcvDamper, result)
+            ControllerNames.DAMPER_RELAY_CONTROLLER -> updateStatus(equip.dcvDamper, result, StatusMsgKeys.DCV_DAMPER.name)
             else -> {
                 logIt( "Unknown controller: $controllerName")
             }

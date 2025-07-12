@@ -3,7 +3,6 @@ package a75f.io.logic.bo.building.system
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.ConditioningStages
-import a75f.io.domain.equips.DomainEquip
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.util.ControllerNames
 
@@ -13,8 +12,8 @@ import a75f.io.logic.controlcomponents.util.ControllerNames
 
 class SystemStageHandler(private val conditioningStages: ConditioningStages) {
 
-    fun runControllersAndUpdateStatus(equip: DomainEquip, conditioningMode : Int) {
-        equip.controllers.forEach { (controllerName, value) ->
+    fun runControllersAndUpdateStatus(controllers: HashMap<String,Any>, conditioningMode : Int) {
+        controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             if (conditioningMode == SystemMode.OFF.ordinal) {
                 controller.resetController()

@@ -2,7 +2,6 @@ package a75f.io.logic.bo.building.system.dab;
 
 import static a75f.io.logic.tuners.TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 

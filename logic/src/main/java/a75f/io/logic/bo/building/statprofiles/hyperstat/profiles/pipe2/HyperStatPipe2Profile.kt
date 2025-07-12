@@ -115,7 +115,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
         val averageDesiredTemp = getAverageTemp(userIntents)
         val fanModeSaved = FanModeCacheStorage.getHyperStatFanModeCache().getFanModeFromCache(equip.equipRef)
         val basicSettings = fetchBasicSettings(equip)
-        val controllerFactory = HyperStatControlFactory(equip)
+        val controllerFactory = HyperStatControlFactory(equip, controllers, stageCounts, derivedFanLoopOutput, zoneOccupancyState)
 
         logicalPointsList = getHSLogicalPointList(equip, config!!)
         relayLogicalPoints = getHSRelayOutputPoints(equip)
@@ -127,7 +127,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
 
         if (equipOccupancyHandler != null) {
             occupancyStatus = equipOccupancyHandler.currentOccupiedMode
-            equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+            zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
         }
 
         logIt("Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
@@ -688,17 +688,15 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
         config: Pipe2Configuration, basicSettings: BasicSettings,
         equip: Pipe2V2Equip, userIntents: UserIntents, controllerFactory: HyperStatControlFactory
     ) {
-        controllerFactory.addControllers(config)
+        controllerFactory.addPipe2Controllers(config)
         equip.waterValveLoop.data = waterValveLoop(userIntents).toDouble()
         runControllers(equip, basicSettings, config)
     }
 
     private fun runControllers(equip: Pipe2V2Equip, basicSettings: BasicSettings, config: Pipe2Configuration) {
-        equip.derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
-        equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
-        equip.stageDownTimer.data = equip.hyperstatStageUpTimerCounter.readPriorityVal()
-        equip.stageUpTimer.data = equip.hyperstatStageUpTimerCounter.readPriorityVal()
-        equip.controllers.forEach { (controllerName, value) ->
+        derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
+        zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+        controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             val result = controller.runController()
             updateRelayStatus(controllerName, result, equip, basicSettings, config)
@@ -710,22 +708,14 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
         config: Pipe2Configuration
     ) {
 
-        fun updateRelayStage(stageName: String, isActive: Boolean, point: Point) {
-            if (point.pointExists()) {
-                val status = if (isActive) 1.0 else 0.0
-                if (isActive) {
-                    equip.relayStages[stageName] = status.toInt()
-                } else {
-                    equip.relayStages.remove(stageName)
-                }
-                point.writeHisVal(status)
-            }
-        }
-
         fun updateStatus(point: Point, result: Any, status: String? = null) {
-            point.writeHisVal(if (result as Boolean) 1.0 else 0.0)
-            if (status != null && result) {
-                equip.relayStages[status] = 1
+            if (point.pointExists()) {
+                point.writeHisVal(if (result as Boolean) 1.0 else 0.0)
+                if (status != null && result) {
+                    equip.relayStages[status] = 1
+                } else {
+                    equip.relayStages.remove(status)
+                }
             } else {
                 equip.relayStages.remove(status)
             }
@@ -735,11 +725,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
 
             ControllerNames.WATER_VALVE_CONTROLLER -> {
                 if (equip.waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
-                    updateRelayStage(
-                        StatusMsgKeys.WATER_VALVE.name,
-                        result as Boolean,
-                        equip.waterValve
-                    )
+                    updateStatus(equip.waterValve, result as Boolean, StatusMsgKeys.WATER_VALVE.name)
                 }
             }
 
@@ -780,17 +766,17 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
 
                 if (equip.fanHighSpeed.pointExists() && highExist != null) {
                     isHighActive = isStageActive(highExist.first, highExist.second, lowestStageFanHigh)
-                    updateRelayStage(Stage.FAN_3.displayName, isHighActive, equip.fanHighSpeed)
+                    updateStatus(equip.fanHighSpeed, isHighActive, Stage.FAN_3.displayName)
                 }
 
                 if (equip.fanMediumSpeed.pointExists() && mediumExist != null) {
                     isMediumActive = if (isHighActive && isConfigPresent(HsPipe2RelayMapping.FAN_HIGH_SPEED)) false else isStageActive(mediumExist.first, mediumExist.second, lowestStageFanMedium)
-                    updateRelayStage(Stage.FAN_2.displayName, isMediumActive, equip.fanMediumSpeed)
+                    updateStatus(equip.fanMediumSpeed, isMediumActive, Stage.FAN_2.displayName)
                 }
 
                 if (equip.fanLowSpeed.pointExists() && lowExist != null) {
                     val isLowActive = if ((isHighActive && isConfigPresent(HsPipe2RelayMapping.FAN_HIGH_SPEED)) || (isConfigPresent(HsPipe2RelayMapping.FAN_MEDIUM_SPEED) && isMediumActive)) false else isStageActive(lowExist.first, lowExist.second, lowestStageFanLow)
-                    updateRelayStage(Stage.FAN_1.displayName, isLowActive, equip.fanLowSpeed)
+                    updateStatus(equip.fanLowSpeed, isLowActive, Stage.FAN_1.displayName)
                 }
             }
 
@@ -816,7 +802,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
             ControllerNames.OCCUPIED_ENABLED -> updateStatus(equip.occupiedEnable, result)
             ControllerNames.HUMIDIFIER_CONTROLLER -> updateStatus(equip.humidifierEnable, result)
             ControllerNames.DEHUMIDIFIER_CONTROLLER -> updateStatus(equip.dehumidifierEnable, result)
-            ControllerNames.DAMPER_RELAY_CONTROLLER -> updateStatus(equip.dcvDamper, result)
+            ControllerNames.DAMPER_RELAY_CONTROLLER -> updateStatus(equip.dcvDamper, result, StatusMsgKeys.DCV_DAMPER.name)
 
             else -> {
                 logIt("Unknown controller: $controllerName")

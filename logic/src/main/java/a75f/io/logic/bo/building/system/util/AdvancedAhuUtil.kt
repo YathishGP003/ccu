@@ -6,6 +6,7 @@ import a75f.io.domain.equips.AdvancedHybridSystemEquip
 import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
+import a75f.io.domain.util.CalibratedPoint
 import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.ModelLoader.getDabAdvancedAhuCmModelV2
 import a75f.io.domain.util.ModelLoader.getDabAdvancedAhuConnectModelV2
@@ -101,22 +102,22 @@ data class UserIntentConfig(
 )
 
 data class StagesCounts(
-    var loadCoolingStages: Int = 0,
-    var loadHeatingStages: Int = 0,
-    var loadFanStages: Int = 0,
-    var satCoolingStages: Int = 0,
-    var satHeatingStages: Int = 0,
-    var pressureFanStages: Int = 0,
-    var compressorStages: Int = 0
+    var loadCoolingStages: CalibratedPoint = CalibratedPoint("loadCoolingStages", "", 0.0),
+    var loadHeatingStages: CalibratedPoint = CalibratedPoint("loadHeatingStages", "", 0.0),
+    var loadFanStages: CalibratedPoint = CalibratedPoint("loadFanStages", "", 0.0),
+    var compressorStages: CalibratedPoint = CalibratedPoint("compressorStages", "", 0.0),
+    var satCoolingStages: CalibratedPoint = CalibratedPoint("satCoolingStages", "", 0.0),
+    var satHeatingStages: CalibratedPoint = CalibratedPoint("satHeatingStages", "", 0.0),
+    var pressureFanStages: CalibratedPoint = CalibratedPoint("pressureFanStages", "", 0.0),
 ) {
     fun resetCounts() {
-        loadCoolingStages = 0
-        loadHeatingStages = 0
-        loadFanStages = 0
-        satCoolingStages = 0
-        satHeatingStages = 0
-        pressureFanStages = 0
-        compressorStages = 0
+        loadCoolingStages.data = 0.0
+        loadHeatingStages.data = 0.0
+        loadFanStages.data = 0.0
+        satCoolingStages.data = 0.0
+        satHeatingStages.data = 0.0
+        pressureFanStages.data = 0.0
+        compressorStages.data = 0.0
     }
 }
 
@@ -131,9 +132,6 @@ fun readEntity(domainName: String): HashMap<Any, Any> {
 
 fun getConnectDevice(): HashMap<Any, Any> {
     return readEntity(ModelNames.connectModuleDevice)
-}
-fun getAllConnectDevice(): ArrayList<HashMap<Any, Any>> {
-    return CCUHsApi.getInstance().readAllEntities("domainName == \"" + ModelNames.connectModuleDevice + "\"")
 }
 
 fun getDis(name: String): String = "${CCUHsApi.getInstance().siteName}-$name"

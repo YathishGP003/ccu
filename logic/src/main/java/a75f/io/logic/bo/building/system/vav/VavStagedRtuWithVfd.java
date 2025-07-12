@@ -28,7 +28,6 @@ import a75f.io.logic.bo.building.hvac.Stage;
 public class VavStagedRtuWithVfd extends VavStagedRtu
 {
     private static final int ANALOG_SCALE = 10;
-    private static final int MAX_RELAY_COUNT = 8;
 
     //VavStagedVfdSystemEquip systemEquip;
     @Override
@@ -64,8 +63,8 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
     
     public synchronized void updateSystemPoints() {
         super.updateSystemPoints();
+        systemEquip = ((VavStagedVfdSystemEquip) Domain.systemEquip);
         VavStagedVfdSystemEquip vfdSystemEquip = (VavStagedVfdSystemEquip) systemEquip;
-
         if (vfdSystemEquip.getAnalog2OutputEnable().readDefaultVal() > 0) {
             handleAnalogOutControl(vfdSystemEquip);
         } else {
@@ -192,6 +191,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         } else {
             signal = ANALOG_SCALE * min; // Use minimum value when not occupied
         }
+
         vfdSystemEquip.getDamperModulation().writePointValue(signal);
         signal = vfdSystemEquip.getDamperModulation().readHisVal();
         Domain.cmBoardDevice.getAnalog2Out().writePointValue(signal);

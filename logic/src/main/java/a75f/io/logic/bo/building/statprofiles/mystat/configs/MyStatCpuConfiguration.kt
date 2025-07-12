@@ -252,11 +252,23 @@ class MyStatCpuConfiguration(nodeAddress: Int, nodeType: String, priority: Int, 
         return MyStatCpuRelayMapping.values()[highestSelected]
     }
 
-    fun getHighestCoolingStageCount() = getHighestCoolingStage().ordinal + 1
+    fun getHighestCoolingStageCount(): Int {
+        return try {
+            getHighestCoolingStage().ordinal + 1
+        } catch (e: ArrayIndexOutOfBoundsException) {
+            0
+        }
+    }
 
-    fun getHighestHeatingStageCount() = getHighestHeatingStage().ordinal - 1
+    fun getHighestHeatingStageCount(): Int {
+        return try {
+            getHighestHeatingStage().ordinal - 1
+        } catch (e: ArrayIndexOutOfBoundsException) {
+            0
+        }
+    }
 
-    fun getHighestFanStageCount(): Int {
+    override fun getHighestFanStageCount(): Int {
         val found = getHighestStage(
             MyStatCpuRelayMapping.FAN_LOW_SPEED.ordinal,
             MyStatCpuRelayMapping.FAN_HIGH_SPEED.ordinal

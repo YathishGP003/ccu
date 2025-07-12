@@ -1,7 +1,6 @@
 package a75f.io.logic.controlcomponents.controls
 
 import a75f.io.domain.api.Point
-import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logic.controlcomponents.handlers.AuxHeatingController
 import a75f.io.logic.controlcomponents.handlers.DcvDamperController
@@ -22,10 +21,9 @@ import a75f.io.logic.controlcomponents.util.logIt
 
 open class ControllerFactory {
 
-    
     fun addStageController(
         controllerName: String,
-        equip: DomainEquip,
+        controllers: HashMap<String, Any>,
         loopOutput: Point,
         totalStages: CalibratedPoint,
         activationHysteresis: Point,
@@ -36,7 +34,7 @@ open class ControllerFactory {
         economizingAvailable: CalibratedPoint = CalibratedPoint("economizingAvailable", "", 0.0),
         logTag: String
     ): StageControlHandler {
-        if (!equip.controllers.containsKey(controllerName)) {
+        if (!controllers.containsKey(controllerName)) {
             val stageController = StageControlHandler(
                 controllerName = controllerName,
                 loopOutput = loopOutput,
@@ -47,22 +45,22 @@ open class ControllerFactory {
                 economizingAvailable = economizingAvailable,
                 logTag = logTag
             )
-            equip.controllers[controllerName] = stageController
+            controllers[controllerName] = stageController
             addConstraintsIfExist(stageController, onConstrains, offConstrains)
             logIt(logTag, "Controller added with name: $controllerName")
         }
-        return equip.controllers[controllerName] as StageControlHandler
+        return controllers[controllerName] as StageControlHandler
     }
 
     fun addFanEnableController(
-        equip: DomainEquip,
+        controllers: HashMap<String, Any>,
         fanLoopOutput: Point,
         occupancy: CalibratedPoint,
         onConstrains: List<Constraint> = emptyList(),
         offConstrains: List<Constraint> = emptyList(),
         logTag: String
     ): FanEnableController {
-        if (!equip.controllers.containsKey(ControllerNames.FAN_ENABLED)) {
+        if (!controllers.containsKey(ControllerNames.FAN_ENABLED)) {
             val controller = FanEnableController(
                 fanLoopPoint = fanLoopOutput, occupancy = occupancy, logTag = logTag
             )
@@ -76,20 +74,20 @@ open class ControllerFactory {
                     controller.addOffConstraint(constraint)
                 }
             }
-            equip.controllers[ControllerNames.FAN_ENABLED] = controller
+            controllers[ControllerNames.FAN_ENABLED] = controller
         }
-        return equip.controllers[ControllerNames.FAN_ENABLED] as FanEnableController
+        return controllers[ControllerNames.FAN_ENABLED] as FanEnableController
     }
 
 
     fun addOccupiedEnableController(
-        equip: DomainEquip,
+        controllers: HashMap<String, Any>,
         occupancy: CalibratedPoint,
         onConstrains: List<Constraint> = emptyList(),
         offConstrains: List<Constraint> = emptyList(),
         logTag: String
     ): OccupiedEnabledController {
-        if (!equip.controllers.containsKey(ControllerNames.OCCUPIED_ENABLED)) {
+        if (!controllers.containsKey(ControllerNames.OCCUPIED_ENABLED)) {
             val controller = OccupiedEnabledController(occupancy = occupancy, logTag)
             if (onConstrains.isNotEmpty()) {
                 onConstrains.forEach { constraint ->
@@ -101,15 +99,15 @@ open class ControllerFactory {
                     controller.addOffConstraint(constraint)
                 }
             }
-            equip.controllers[ControllerNames.OCCUPIED_ENABLED] = controller
+            controllers[ControllerNames.OCCUPIED_ENABLED] = controller
             logIt(logTag, "Controller added with name: OccupiedEnabledController")
         }
-        return equip.controllers[ControllerNames.OCCUPIED_ENABLED] as OccupiedEnabledController
+        return controllers[ControllerNames.OCCUPIED_ENABLED] as OccupiedEnabledController
     }
 
 
     fun addHumidifierController(
-        equip: DomainEquip,
+        controllers: HashMap<String, Any>,
         zoneHumidity: Point,
         targetHumidifier: Point,
         activationHysteresis: Point,
@@ -118,7 +116,7 @@ open class ControllerFactory {
         occupancy: CalibratedPoint,
         logTag: String
     ): HumidifierController {
-        if (!equip.controllers.containsKey(ControllerNames.HUMIDIFIER_CONTROLLER)) {
+        if (!controllers.containsKey(ControllerNames.HUMIDIFIER_CONTROLLER)) {
             val controller =
                 HumidifierController(zoneHumidity, targetHumidifier, activationHysteresis, logTag, occupancy = occupancy)
             if (onConstrains.isNotEmpty()) {
@@ -131,14 +129,14 @@ open class ControllerFactory {
                     controller.addOffConstraint(constraint)
                 }
             }
-            equip.controllers[ControllerNames.HUMIDIFIER_CONTROLLER] = controller
+            controllers[ControllerNames.HUMIDIFIER_CONTROLLER] = controller
             logIt(logTag, "Controller added with name: HumidifierController")
         }
-        return equip.controllers[ControllerNames.HUMIDIFIER_CONTROLLER] as HumidifierController
+        return controllers[ControllerNames.HUMIDIFIER_CONTROLLER] as HumidifierController
     }
 
     fun addDeHumidifierController(
-        equip: DomainEquip,
+        controllers: HashMap<String, Any>,
         zoneHumidity: Point,
         targetDehumidifier: Point,
         activationHysteresis: Point,
@@ -147,7 +145,7 @@ open class ControllerFactory {
         occupancy: CalibratedPoint,
         logTag: String
     ): DehumidifierController {
-        if (!equip.controllers.containsKey(ControllerNames.DEHUMIDIFIER_CONTROLLER)) {
+        if (!controllers.containsKey(ControllerNames.DEHUMIDIFIER_CONTROLLER)) {
             val controller = DehumidifierController(
                 zoneHumidity,
                 targetDehumidifier,
@@ -165,15 +163,15 @@ open class ControllerFactory {
                     controller.addOffConstraint(constraint)
                 }
             }
-            equip.controllers[ControllerNames.DEHUMIDIFIER_CONTROLLER] = controller
+            controllers[ControllerNames.DEHUMIDIFIER_CONTROLLER] = controller
             logIt(logTag, "Controller added with name: DeHumidifierController")
         }
-        return equip.controllers[ControllerNames.DEHUMIDIFIER_CONTROLLER] as DehumidifierController
+        return controllers[ControllerNames.DEHUMIDIFIER_CONTROLLER] as DehumidifierController
     }
 
 
     fun addDcvDamperController(
-        equip: DomainEquip,
+        controllers: HashMap<String, Any>,
         dcvLoopOutput: Point,
         actionHysteresis: Point,
         currentOccupancy: CalibratedPoint,
@@ -181,7 +179,7 @@ open class ControllerFactory {
         offConstrains: List<Constraint> = emptyList(),
         logTag: String
     ): DcvDamperController {
-        if (!equip.controllers.containsKey(ControllerNames.DAMPER_RELAY_CONTROLLER)) {
+        if (!controllers.containsKey(ControllerNames.DAMPER_RELAY_CONTROLLER)) {
             val controller =
                 DcvDamperController(dcvLoopOutput, actionHysteresis, currentOccupancy, logTag)
             if (onConstrains.isNotEmpty()) {
@@ -194,20 +192,20 @@ open class ControllerFactory {
                     controller.addOffConstraint(constraint)
                 }
             }
-            equip.controllers[ControllerNames.DAMPER_RELAY_CONTROLLER] = controller
+            controllers[ControllerNames.DAMPER_RELAY_CONTROLLER] = controller
             logIt(logTag, "Controller added with name: DcvDamperController")
         }
-        return equip.controllers[ControllerNames.DAMPER_RELAY_CONTROLLER] as DcvDamperController
+        return controllers[ControllerNames.DAMPER_RELAY_CONTROLLER] as DcvDamperController
     }
 
     fun addChangeOverCoolingController(
-        equip: DomainEquip,
+        controllers: HashMap<String, Any>,
         coolingLoopOutput: Point,
         onConstrains: List<Constraint> = emptyList(),
         offConstrains: List<Constraint> = emptyList(),
         logTag: String
     ): EnableController {
-        if (!equip.controllers.containsKey(ControllerNames.CHANGE_OVER_O_COOLING)) {
+        if (!controllers.containsKey(ControllerNames.CHANGE_OVER_O_COOLING)) {
             val controller = EnableController(
                 ControllerNames.CHANGE_OVER_O_COOLING, coolingLoopOutput, logTag
             )
@@ -221,21 +219,21 @@ open class ControllerFactory {
                     controller.addOffConstraint(constraint)
                 }
             }
-            equip.controllers[ControllerNames.CHANGE_OVER_O_COOLING] = controller
+            controllers[ControllerNames.CHANGE_OVER_O_COOLING] = controller
             logIt(logTag, "Controller added with name: ChangeOverCoolingController")
         }
-        return equip.controllers[ControllerNames.CHANGE_OVER_O_COOLING] as EnableController
+        return controllers[ControllerNames.CHANGE_OVER_O_COOLING] as EnableController
 
     }
 
     fun addChangeOverHeatingController(
-        equip: DomainEquip,
+        controllers: HashMap<String, Any>,
         heatingLoopOutput: Point,
         onConstrains: List<Constraint> = emptyList(),
         offConstrains: List<Constraint> = emptyList(),
         logTag: String
     ): EnableController {
-        if (!equip.controllers.containsKey(ControllerNames.CHANGE_OVER_B_HEATING)) {
+        if (!controllers.containsKey(ControllerNames.CHANGE_OVER_B_HEATING)) {
             val controller = EnableController(
                 ControllerNames.CHANGE_OVER_B_HEATING, heatingLoopOutput, logTag
             )
@@ -249,15 +247,15 @@ open class ControllerFactory {
                     controller.addOffConstraint(constraint)
                 }
             }
-            equip.controllers[ControllerNames.CHANGE_OVER_B_HEATING] = controller
+            controllers[ControllerNames.CHANGE_OVER_B_HEATING] = controller
             logIt(logTag, "Controller added with name: ChangeOverHeatingController")
         }
-        return equip.controllers[ControllerNames.CHANGE_OVER_B_HEATING] as EnableController
+        return controllers[ControllerNames.CHANGE_OVER_B_HEATING] as EnableController
     }
 
 
     fun addAuxHeatingStage1Controller(
-        equip: DomainEquip,
+        controllers: HashMap<String, Any>,
         currentTemp: Point,
         desiredTempHeating: Point,
         auxHeating1Activate: Point,
@@ -265,7 +263,7 @@ open class ControllerFactory {
         offConstrains: List<Constraint> = emptyList(),
         logTag: String
     ): AuxHeatingController {
-        if (!equip.controllers.containsKey(ControllerNames.AUX_HEATING_STAGE1)) {
+        if (!controllers.containsKey(ControllerNames.AUX_HEATING_STAGE1)) {
 
             val controller = AuxHeatingController(
                 ControllerNames.AUX_HEATING_STAGE1,
@@ -284,14 +282,14 @@ open class ControllerFactory {
                     controller.addOffConstraint(constraint)
                 }
             }
-            equip.controllers[ControllerNames.AUX_HEATING_STAGE1] = controller
+            controllers[ControllerNames.AUX_HEATING_STAGE1] = controller
             logIt(logTag, "Controller added with name: AuxHeatingStage1Controller")
         }
-        return equip.controllers[ControllerNames.AUX_HEATING_STAGE1] as AuxHeatingController
+        return controllers[ControllerNames.AUX_HEATING_STAGE1] as AuxHeatingController
     }
 
     fun addAuxHeatingStage2Controller(
-        equip: DomainEquip,
+        controllers: HashMap<String, Any>,
         currentTemp: Point,
         desiredTempHeating: Point,
         auxHeating2Activate: Point,
@@ -299,7 +297,7 @@ open class ControllerFactory {
         offConstrains: List<Constraint> = emptyList(),
         logTag: String
     ): AuxHeatingController {
-        if (!equip.controllers.containsKey(ControllerNames.AUX_HEATING_STAGE2)) {
+        if (!controllers.containsKey(ControllerNames.AUX_HEATING_STAGE2)) {
             val controller = AuxHeatingController(
                 ControllerNames.AUX_HEATING_STAGE2,
                 currentTemp,
@@ -317,50 +315,50 @@ open class ControllerFactory {
                     controller.addOffConstraint(constraint)
                 }
             }
-            equip.controllers[ControllerNames.AUX_HEATING_STAGE2] = controller
+            controllers[ControllerNames.AUX_HEATING_STAGE2] = controller
             logIt(logTag, "Controller added with name: AuxHeatingStage2Controller")
         }
-        return equip.controllers[ControllerNames.AUX_HEATING_STAGE2] as AuxHeatingController
+        return controllers[ControllerNames.AUX_HEATING_STAGE2] as AuxHeatingController
     }
 
     fun addWaterValveController(
-        equip: DomainEquip,
+        controllers: HashMap<String, Any>,
         waterValveLoop: CalibratedPoint,
         actionHysteresis: Point,
         logTag: String
     ): WaterValveController {
-        if (!equip.controllers.containsKey(ControllerNames.WATER_VALVE_CONTROLLER)) {
+        if (!controllers.containsKey(ControllerNames.WATER_VALVE_CONTROLLER)) {
             val controller = WaterValveController(
                 ControllerNames.WATER_VALVE_CONTROLLER,
                 waterValveLoop,
                 actionHysteresis,
                 logTag
             )
-            equip.controllers[ControllerNames.WATER_VALVE_CONTROLLER] = controller
+            controllers[ControllerNames.WATER_VALVE_CONTROLLER] = controller
             logIt(logTag, "Controller added with name: WaterValveController")
         }
-        return equip.controllers[ControllerNames.WATER_VALVE_CONTROLLER] as WaterValveController
+        return controllers[ControllerNames.WATER_VALVE_CONTROLLER] as WaterValveController
     }
 
     fun addFanRunCommandController(
-        equip: DomainEquip,
+        controllers: HashMap<String, Any>,
         systemCo2Loop: Point,
         occupancy: CalibratedPoint,
         onConstrains: Map<Int, Constraint> = emptyMap(),
         offConstrains: Map<Int, Constraint> = emptyMap(),
         logTag: String
     ): FanRunCommandController {
-        if (!equip.controllers.containsKey(ControllerNames.FAN_RUN_COMMAND_CONTROLLER)) {
+        if (!controllers.containsKey(ControllerNames.FAN_RUN_COMMAND_CONTROLLER)) {
             val controller = FanRunCommandController(
                 isSystemOccupied = occupancy,
                 systemCo2Loop = systemCo2Loop,
                 logTag = logTag
             )
             addConstraintsIfExist(controller, onConstrains, offConstrains)
-            equip.controllers[ControllerNames.FAN_RUN_COMMAND_CONTROLLER] = controller
+            controllers[ControllerNames.FAN_RUN_COMMAND_CONTROLLER] = controller
             logIt(logTag, "Controller added with name: FanRunCommandController")
         }
-        return equip.controllers[ControllerNames.FAN_RUN_COMMAND_CONTROLLER] as FanRunCommandController
+        return controllers[ControllerNames.FAN_RUN_COMMAND_CONTROLLER] as FanRunCommandController
     }
 
 

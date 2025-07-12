@@ -164,7 +164,7 @@ class MyStatPipe2Configuration(nodeAddress: Int, nodeType: String, priority: Int
         return MyStatPipe2RelayMapping.values()[lowestSelected]
     }
 
-    fun getHighestFanStageCount(): Int {
+    override fun getHighestFanStageCount(): Int {
         val highestSelected = getHighestStage(
             MyStatPipe2RelayMapping.FAN_LOW_SPEED.ordinal,
             MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal

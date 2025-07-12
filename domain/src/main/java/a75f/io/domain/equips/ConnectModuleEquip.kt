@@ -2,6 +2,7 @@ package a75f.io.domain.equips
 
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.util.CalibratedPoint
 
 class ConnectModuleEquip (equipRef : String) : DomainEquip(equipRef) {
 
@@ -340,5 +341,4 @@ class ConnectModuleEquip (equipRef : String) : DomainEquip(equipRef) {
     val systemPostPurgeFanSpeedTuner = Point(DomainName.systemPostPurgeFanSpeedTuner, equipRef)
     val oaoDamper = Point(DomainName.oaoDamper,equipRef)
     val compressorLoopOutput = Point(DomainName.compressorLoopOutput, equipRef)
-
 }

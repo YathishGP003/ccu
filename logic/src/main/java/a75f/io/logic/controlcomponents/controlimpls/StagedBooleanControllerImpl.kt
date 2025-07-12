@@ -5,6 +5,7 @@ import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logic.controlcomponents.controls.Constraint
 import a75f.io.logic.controlcomponents.controls.StagedBooleanController
 import a75f.io.logic.controlcomponents.util.logIt
+import android.util.Log
 
 class StagedBooleanControllerImpl(
     private val totalStages: CalibratedPoint,
@@ -12,21 +13,40 @@ class StagedBooleanControllerImpl(
     private val stageDownTimer: Point,
     val logTag: String
 ) : StagedBooleanController {
-
     val onConstraints = mutableMapOf<Int, List<Constraint>>()
     val offConstraints = mutableMapOf<Int, List<Constraint>>()
-    private val currentStages = mutableMapOf<Int, Boolean>().apply {
-        repeat(totalStages.data.toInt()) { this[it] = false }
-    }
 
+    val currentStages = mutableMapOf<Int, Boolean>()
     private var upTimer = 0
     private var downTimer = 0
 
-    override fun getActiveControls(): List<Pair<Int, Boolean>> {
+    private fun updateCurrentStages(newTotalStages: Int) {
 
+        if (currentStages.size == newTotalStages) {
+            return // No change needed
+        }
+
+        val existingKeys = currentStages.keys
+
+        // Add new keys with default value `false`, keep existing values untouched
+        for (i in 0 until newTotalStages) {
+            if (i !in existingKeys) {
+                currentStages[i] = false
+            }
+        }
+
+        // Remove keys that are now out of range
+        val keysToRemove = existingKeys.filter { it >= newTotalStages }
+        for (key in keysToRemove) {
+            currentStages.remove(key)
+        }
+    }
+
+    override fun getActiveControls(): List<Pair<Int, Boolean>> {
+        updateCurrentStages(totalStages.data.toInt())
         if (upTimer > 0) upTimer--
         if (downTimer > 0) downTimer--
-        logIt(logTag, "Tuners : stageUpTimer ${stageUpTimer.readPriorityVal()} stageDownTimer ${stageDownTimer.readPriorityVal()} Started Timers => up: $upTimer, down: $downTimer")
+        logIt(logTag, "total ${totalStages.data}: Tuners : stageUpTimer ${stageUpTimer.readPriorityVal()} stageDownTimer ${stageDownTimer.readPriorityVal()} | Started Timers => up: $upTimer, down: $downTimer")
         val newState = mutableMapOf<Int, Boolean>()
 
         logIt(logTag, "-------- On constrains ----------------------")
@@ -78,8 +98,13 @@ class StagedBooleanControllerImpl(
         downTimer = stageDownTimer.readPriorityVal().toInt() + 1
     }
 
-    private fun isStageUpTimerActive() = upTimer > 0
-    private fun isStageDownTimerActive() = downTimer > 0
+    private fun isStageUpTimerActive(): Boolean {
+        return (stageUpTimer.readPriorityVal() > 0 && upTimer > 0)
+    }
+
+    private fun isStageDownTimerActive(): Boolean {
+        return (stageDownTimer.readPriorityVal() > 0 && downTimer > 0)
+    }
 
     override fun setOnConstraints(constraints: List<Constraint>) {
         TODO("Not required because it has multiple stages")

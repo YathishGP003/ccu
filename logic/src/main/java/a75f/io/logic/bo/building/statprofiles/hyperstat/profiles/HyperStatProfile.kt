@@ -1,8 +1,10 @@
 package a75f.io.logic.bo.building.statprofiles.hyperstat.profiles
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.hyperstat.HpuV2Equip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
+import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.ZoneProfile
 import a75f.io.logic.bo.building.ZoneState
@@ -17,6 +19,7 @@ import a75f.io.logic.bo.building.statprofiles.statcontrollers.HyperStatControlFa
 import a75f.io.logic.bo.building.statprofiles.util.BasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.HyperStatProfileTuners
+import a75f.io.logic.bo.building.statprofiles.util.StagesCounts
 import a75f.io.logic.bo.building.statprofiles.util.StatLoopController
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
 import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
@@ -36,13 +39,14 @@ import a75f.io.logic.util.uiutils.updateUserIntentPoints
 
 abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
 
+
     private val haystack = CCUHsApi.getInstance()
     var coolingLoopOutput = 0
     var heatingLoopOutput = 0
     var fanLoopOutput = 0
     var dcvLoopOutput = 0
     var compressorLoopOutput = 0
-
+    var stageCounts = StagesCounts()
     // These are require parameter for CPU profile
     var defaultFanLoopOutput = 0.0
     var previousFanLoopVal = 0
@@ -53,6 +57,8 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
     var previousOccupancyStatus: Occupancy = Occupancy.NONE
     var occupancyBeforeDoorWindow: Occupancy = Occupancy.NONE
     var curState = ZoneState.DEADBAND
+    val derivedFanLoopOutput = CalibratedPoint(DomainName.fanLoopOutput ,"",0.0)
+    var zoneOccupancyState = CalibratedPoint(DomainName.zoneOccupancy, "", 0.0)
 
     var logicalPointsList = HashMap<Port, String>()
     var occupancyStatus: Occupancy = Occupancy.NONE
@@ -131,7 +137,7 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
             ControllerNames.FAN_SPEED_CONTROLLER,
             ControllerNames.COMPRESSOR_RELAY_CONTROLLER,
         ).forEach {
-            val controller = factory.getController(it, statEquip)
+            val controller = factory.getController(it, this)
             controller?.resetController()
         }
 
@@ -208,10 +214,10 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
         logIt(
             "doAnalogDCVAction: co2Value : $co2Value zoneCO2Threshold: $zoneCO2Threshold zoneCO2DamperOpeningRate $zoneCO2DamperOpeningRate"
         )
-        if (isDcvEligibleToOn(co2Value, zoneCO2Threshold, isDoorOpen, equip.zoneOccupancyState)) {
+        if (isDcvEligibleToOn(co2Value, zoneCO2Threshold, isDoorOpen, zoneOccupancyState)) {
             updateLogicalPoint(logicalPointsList[port]!!, dcvLoopOutput.toDouble())
             analogOutStages[StatusMsgKeys.DCV_DAMPER.name] = dcvLoopOutput
-        } else if (isDcvEligibleToOn(co2Value, zoneCO2Threshold, isDoorOpen, equip.zoneOccupancyState).not()) {
+        } else if (isDcvEligibleToOn(co2Value, zoneCO2Threshold, isDoorOpen, zoneOccupancyState).not()) {
             updateLogicalPoint(logicalPointsList[port]!!, 0.0)
         }
     }

@@ -344,6 +344,8 @@ abstract class HyperStatConfiguration(
 
     abstract fun getAnalogMap(): Map<String, Pair<Boolean, String>>
 
+    abstract fun getHighestFanStageCount(): Int
+
     fun setPortConfiguration(nodeAddress: Int, relays: Map<String, Boolean>, analogOuts: Map<String, Pair<Boolean, String>>) {
 
         val hayStack = CCUHsApi.getInstance()

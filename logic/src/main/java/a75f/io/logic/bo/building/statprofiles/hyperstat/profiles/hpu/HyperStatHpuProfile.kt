@@ -102,14 +102,14 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
         val averageDesiredTemp = getAverageTemp(userIntents)
         val fanModeSaved = FanModeCacheStorage.getHyperStatFanModeCache().getFanModeFromCache(equip.equipRef)
         val basicSettings = fetchBasicSettings(equip)
-        val controllerFactory = HyperStatControlFactory(equip)
+        val controllerFactory = HyperStatControlFactory(equip, controllers, stageCounts, derivedFanLoopOutput, zoneOccupancyState)
 
         logicalPointsList = getHSLogicalPointList(equip, config!!)
         curState = ZoneState.DEADBAND
 
         if (equipOccupancyHandler != null) {
             occupancyStatus = equipOccupancyHandler.currentOccupiedMode
-            equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+            zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
         }
 
         logIt("Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
@@ -498,15 +498,13 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
         config: HpuConfiguration, basicSettings: BasicSettings, equip: HpuV2Equip,
         controllerFactory: HyperStatControlFactory
     ) {
-        controllerFactory.addControllers(config)
+        controllerFactory.addHpuControllers(config)
         runControllers(equip, basicSettings, config)
     }
 
     private fun runControllers(equip: HpuV2Equip, basicSettings: BasicSettings, config: HpuConfiguration) {
-        equip.derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
-        equip.stageDownTimer.data = equip.hyperstatStageUpTimerCounter.readPriorityVal()
-        equip.stageUpTimer.data = equip.hyperstatStageUpTimerCounter.readPriorityVal()
-        equip.controllers.forEach { (controllerName, value) ->
+        derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
+        controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             val result = controller.runController()
             updateRelayStatus(controllerName, result, equip, basicSettings, config)
@@ -518,22 +516,14 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
         config: HpuConfiguration
     ) {
 
-        fun updateRelayStage(stageName: String, isActive: Boolean, point: Point) {
-            if (point.pointExists()) {
-                val status = if (isActive) 1.0 else 0.0
-                if (isActive) {
-                    equip.relayStages[stageName] = status.toInt()
-                } else {
-                    equip.relayStages.remove(stageName)
-                }
-                point.writeHisVal(status)
-            }
-        }
-
         fun updateStatus(point: Point, result: Any, status: String? = null) {
-            point.writeHisVal(if (result as Boolean) 1.0 else 0.0)
-            if (status != null && result) {
-                equip.relayStages[status] = 1
+            if (point.pointExists()) {
+                point.writeHisVal(if (result as Boolean) 1.0 else 0.0)
+                if (status != null && result) {
+                    equip.relayStages[status] = 1
+                } else {
+                    equip.relayStages.remove(status)
+                }
             } else {
                 equip.relayStages.remove(status)
             }
@@ -548,22 +538,19 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
                         if (basicSettings.conditioningMode != StandaloneConditioningMode.OFF) it.second else false
                     )
                     when (stage) {
-                        0 -> updateRelayStage(
-                            if (coolingLoopOutput > 0) Stage.COOLING_1.displayName else Stage.HEATING_1.displayName,
-                            isActive,
-                            equip.compressorStage1
+                        0 -> updateStatus(
+                            equip.compressorStage1, isActive,
+                            if (state == ZoneState.COOLING) Stage.COOLING_1.displayName else if (state == ZoneState.HEATING) Stage.HEATING_1.displayName else "",
                         )
 
-                        1 -> updateRelayStage(
-                            if (coolingLoopOutput > 0) Stage.COOLING_2.displayName else Stage.HEATING_2.displayName,
-                            isActive,
-                            equip.compressorStage2
+                        1 -> updateStatus(
+                            equip.compressorStage2, isActive,
+                            if (state == ZoneState.COOLING) Stage.COOLING_2.displayName else if (state == ZoneState.HEATING) Stage.HEATING_2.displayName else "",
                         )
 
-                        2 -> updateRelayStage(
-                            if (coolingLoopOutput > 0) Stage.COOLING_3.displayName else Stage.HEATING_3.displayName,
-                            isActive,
-                            equip.compressorStage3
+                        2 -> updateStatus(
+                            equip.compressorStage3, isActive,
+                            if (state == ZoneState.COOLING) Stage.COOLING_3.displayName else if (state == ZoneState.HEATING) Stage.HEATING_3.displayName else "",
                         )
                     }
                 }
@@ -598,38 +585,36 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
                 fanStages.forEach {
                     val (stage, isActive) = Pair(it.first, it.second)
                     when (stage) {
-                        0 -> updateRelayStage(
-                            Stage.FAN_1.displayName,
+                        0 -> updateStatus(
+                            equip.fanLowSpeed,
                             isStageActive(stage, isActive, lowestStageFanLow),
-                            equip.fanLowSpeed
+                            Stage.FAN_1.displayName
                         )
 
-                        1 -> updateRelayStage(
-                            Stage.FAN_2.displayName,
+                        1 -> updateStatus(
+                            equip.fanMediumSpeed,
                             isStageActive(stage, isActive, lowestStageFanMedium),
-                            equip.fanMediumSpeed
+                            Stage.FAN_2.displayName
                         )
 
-                        2 -> updateRelayStage(
-                            Stage.FAN_3.displayName,
+                        2 -> updateStatus(
+                            equip.fanHighSpeed,
                             isStageActive(stage, isActive, lowestStageFanHigh),
-                            equip.fanHighSpeed
+                            Stage.FAN_3.displayName
                         )
                     }
                 }
             }
 
-            ControllerNames.FAN_ENABLED -> updateStatus(
-                equip.fanEnable, result, StatusMsgKeys.FAN_ENABLED.name
-            )
-
+            ControllerNames.FAN_ENABLED -> updateStatus(equip.fanEnable, result, StatusMsgKeys.FAN_ENABLED.name)
             ControllerNames.OCCUPIED_ENABLED -> updateStatus(equip.occupiedEnable, result)
             ControllerNames.HUMIDIFIER_CONTROLLER -> updateStatus(equip.humidifierEnable, result)
             ControllerNames.DEHUMIDIFIER_CONTROLLER -> updateStatus(equip.dehumidifierEnable, result)
-            ControllerNames.DAMPER_RELAY_CONTROLLER -> updateStatus(equip.dcvDamper, result)
+            ControllerNames.DAMPER_RELAY_CONTROLLER -> updateStatus(equip.dcvDamper, result, StatusMsgKeys.DCV_DAMPER.name)
             ControllerNames.AUX_HEATING_STAGE1 -> {
                 var status = result as Boolean
-                if (basicSettings.conditioningMode != StandaloneConditioningMode.AUTO && basicSettings.conditioningMode != StandaloneConditioningMode.HEAT_ONLY) {
+                if (basicSettings.conditioningMode != StandaloneConditioningMode.AUTO
+                    && basicSettings.conditioningMode != StandaloneConditioningMode.HEAT_ONLY) {
                     status = false
                 }
                 updateStatus(equip.auxHeatingStage1, status, StatusMsgKeys.AUX_HEATING_STAGE1.name)
@@ -637,7 +622,8 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
 
             ControllerNames.AUX_HEATING_STAGE2 -> {
                 var status = result as Boolean
-                if (basicSettings.conditioningMode != StandaloneConditioningMode.AUTO && basicSettings.conditioningMode != StandaloneConditioningMode.HEAT_ONLY) {
+                if (basicSettings.conditioningMode != StandaloneConditioningMode.AUTO
+                    && basicSettings.conditioningMode != StandaloneConditioningMode.HEAT_ONLY) {
                     status = false
                 }
                 updateStatus(equip.auxHeatingStage2, status, StatusMsgKeys.AUX_HEATING_STAGE2.name)

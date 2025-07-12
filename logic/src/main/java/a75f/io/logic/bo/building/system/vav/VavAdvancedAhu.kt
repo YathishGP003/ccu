@@ -107,7 +107,9 @@ open class VavAdvancedAhu : VavSystemProfile() {
     val cmRelayStatus = BitSet()
     val analogStatus = arrayOf(0.0, 0.0, 0.0, 0.0, 0.0)
 
-    var factory: SystemControllerFactory = SystemControllerFactory()
+    private var connectControllers: HashMap<String, Any> = HashMap()
+    var factory: SystemControllerFactory = SystemControllerFactory(controllers)
+    private var connectfactory: SystemControllerFactory = SystemControllerFactory(connectControllers)
 
     private fun initTRSystem() {
         trSystem = VavTRSystem()
@@ -138,12 +140,9 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable) 1.0 else 0.0
         }
         systemEquip.economizationAvailable.data = economization
-        if (systemStatusHandler == null) {
-            systemStatusHandler = SystemStageHandler(systemEquip.cmEquip.conditioningStages)
-        }
-        if (connectStatusHandler == null) {
-            connectStatusHandler = SystemStageHandler(systemEquip.connectEquip1.conditioningStages)
-        }
+        systemStatusHandler = SystemStageHandler(systemEquip.cmEquip.conditioningStages)
+        connectStatusHandler = SystemStageHandler(systemEquip.connectEquip1.conditioningStages)
+
     }
 
     fun getAnalogControlsEnabled(): Set<AdvancedAhuAnalogOutAssociationType> = analogControlsEnabled
@@ -181,7 +180,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
 
     override fun isCoolingAvailable(): Boolean {
-        return ahuStagesCounts.compressorStages > 0 || connect1StagesCounts.compressorStages > 0
+        return ahuStagesCounts.compressorStages.data > 0 || connect1StagesCounts.compressorStages.data > 0
                 || coolingStages > 0 || coolingStagesConnect > 0
                 || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_COOLING)
                 || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_COOLING)
@@ -190,7 +189,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
 
     override fun isHeatingAvailable(): Boolean {
-        return ahuStagesCounts.compressorStages > 0 || connect1StagesCounts.compressorStages > 0
+        return ahuStagesCounts.compressorStages.data > 0 || connect1StagesCounts.compressorStages.data > 0
                 || heatingStages > 0 || coolingStagesConnect > 0
                 || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_HEATING)
                 || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_HEATING)
@@ -259,8 +258,8 @@ open class VavAdvancedAhu : VavSystemProfile() {
         updateOutsideWeatherParams()
         updateMechanicalConditioning(CCUHsApi.getInstance())
         updateDerivedSensorPoints()
-        addAhuControllers(factory)
-        addConnectControllers(factory)
+        addAhuControllers()
+        addConnectControllers()
         if (currentConditioning == SystemController.State.OFF) {
             currentConditioning = systemController.getSystemState()
             tempChangeDirectiveIsActive = false
@@ -806,7 +805,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 " Cooling stages connect : $coolingStagesConnect")
         CcuLog.d(L.TAG_CCU_SYSTEM, "Stages Counts: $ahuStagesCounts \n Connect1 Stages Counts: $connect1StagesCounts")
     }
-
     private fun updateStagesForRelayMapping(relayMapping: Map<Point, Point>) {
         relayMapping.forEach { (relay: Point, association: Point) ->
             if (relay.readDefaultVal() > 0) {
@@ -845,46 +843,46 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
     private fun updateStageCounts(associationIndex: Int, counts: StagesCounts, isConnectEquip: Boolean) {
         if (coolIndexRange.contains(associationIndex) ) {
-            if(associationIndex + 1 >= counts.loadCoolingStages || counts.loadCoolingStages == 0) {
-                counts.loadCoolingStages = associationIndex + 1
+            if(associationIndex + 1 >= counts.loadCoolingStages.data.toInt() || counts.loadCoolingStages.data.toInt() == 0) {
+                counts.loadCoolingStages.data = (associationIndex + 1).toDouble()
             }
         }
         if (heatIndexRange.contains(associationIndex)) {
-            if (associationIndex - 4 >= counts.loadHeatingStages || counts.loadHeatingStages == 0) {
-                counts.loadHeatingStages = associationIndex - 4
+            if (associationIndex - 4 >= counts.loadHeatingStages.data.toInt() || counts.loadHeatingStages.data.toInt() == 0) {
+                counts.loadHeatingStages.data = (associationIndex - 4).toDouble()
             }
         }
         if (fanIndexRange.contains(associationIndex)) {
-            if (associationIndex - 9 >= counts.loadFanStages || counts.loadFanStages == 0) {
-                counts.loadFanStages = associationIndex - 9
+            if (associationIndex - 9 >= counts.loadFanStages.data.toInt() || counts.loadFanStages.data.toInt() == 0) {
+                counts.loadFanStages.data = (associationIndex - 9).toDouble()
             }
         }
         if (!isConnectEquip) {
             if (satCoolIndexRange.contains(associationIndex)) {
-                if (associationIndex - 16 >= counts.satCoolingStages || counts.satCoolingStages == 0) {
-                    counts.satCoolingStages = associationIndex - 16
+                if (associationIndex - 16 >= counts.satCoolingStages.data.toInt() || counts.satCoolingStages.data.toInt() == 0) {
+                    counts.satCoolingStages.data = (associationIndex - 16).toDouble()
                 }
             }
             if (satHeatIndexRange.contains(associationIndex)) {
-                if (associationIndex - 21 >= counts.satHeatingStages || counts.satHeatingStages == 0) {
-                    counts.satHeatingStages = associationIndex - 21
+                if (associationIndex - 21 >= counts.satHeatingStages.data.toInt() || counts.satHeatingStages.data.toInt() == 0) {
+                    counts.satHeatingStages.data = (associationIndex - 21).toDouble()
                 }
             }
             if (pressureFanIndexRange.contains(associationIndex)) {
-                if (associationIndex - 26 >= counts.loadFanStages || counts.loadFanStages == 0) {
-                    counts.pressureFanStages = associationIndex - 26
+                if (associationIndex - 26 >= counts.loadFanStages.data.toInt() || counts.loadFanStages.data.toInt() == 0) {
+                    counts.pressureFanStages.data = (associationIndex - 26).toDouble()
                 }
             }
         }
 
         if (isConnectEquip && (22..26).contains(associationIndex)) {
-            if (associationIndex - 21 >= counts.compressorStages || counts.compressorStages == 0) {
-                counts.compressorStages = associationIndex - 21
+            if (associationIndex - 21 >= counts.compressorStages.data.toInt() || counts.compressorStages.data.toInt() == 0) {
+                counts.compressorStages.data = (associationIndex - 21).toDouble()
             }
         }
         else if (compressorRange.contains(associationIndex)) {
-            if (associationIndex - 34 >= counts.compressorStages || counts.compressorStages == 0) {
-                counts.compressorStages = associationIndex - 34
+            if (associationIndex - 34 >= counts.compressorStages.data.toInt() || counts.compressorStages.data.toInt() == 0) {
+                counts.compressorStages.data = (associationIndex - 34).toDouble()
             }
         }
 
@@ -918,13 +916,13 @@ open class VavAdvancedAhu : VavSystemProfile() {
         CcuLog.d(L.TAG_CCU_SYSTEM, "CM  status")
 
         updatePrerequisite()
-        systemStatusHandler.runControllersAndUpdateStatus(systemEquip, systemEquip.conditioningMode.readPriorityVal().toInt())
+        systemStatusHandler.runControllersAndUpdateStatus(controllers, systemEquip.conditioningMode.readPriorityVal().toInt())
         updateLogicalToPhysical(false)
         updateAnalogOutputPorts(getCMAnalogAssociationMap(systemEquip.cmEquip), getAnalogOutLogicalPhysicalMap(), false)
 
         CcuLog.d(L.TAG_CCU_SYSTEM, "Connect module status")
         if (!systemEquip.connectEquip1.equipRef.contentEquals("null")) {
-            connectStatusHandler.runControllersAndUpdateStatus(systemEquip.connectEquip1, systemEquip.conditioningMode.readPriorityVal().toInt())
+            connectStatusHandler.runControllersAndUpdateStatus(connectControllers, systemEquip.conditioningMode.readPriorityVal().toInt())
             updateLogicalToPhysical(true)
             updateAnalogOutputPorts(
                 getConnectAnalogAssociationMap(systemEquip.connectEquip1),
@@ -1195,10 +1193,10 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 systemEquip.connectEquip1.conditioningStages.loadFanStage1.readHisVal() > 0
     }
 
-    private fun addAhuControllers(factory: SystemControllerFactory) {
+
+    private fun addAhuControllers() {
 
         factory.addLoadCoolingControllers(
-            systemEquip,
             systemEquip.cmEquip.coolingLoopOutput,
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
@@ -1208,7 +1206,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
         )
 
         factory.addLoadHeatingControllers(
-            systemEquip,
             systemEquip.cmEquip.heatingLoopOutput,
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
@@ -1217,7 +1214,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
         )
 
         factory.addLoadFanControllers(
-            systemEquip,
             systemEquip.cmEquip.fanLoopOutput,
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
@@ -1226,7 +1222,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
         )
 
         factory.addSatCoolingControllers(
-            systemEquip,
             systemEquip.cmEquip.satCoolingLoopOutput,
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
@@ -1236,7 +1231,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
         )
 
         factory.addSatHeatingControllers(
-            systemEquip,
             systemEquip.heatingLoopOutput,
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
@@ -1245,62 +1239,53 @@ open class VavAdvancedAhu : VavSystemProfile() {
         )
 
         factory.addPressureFanControllers(
-            systemEquip,
             systemEquip.fanLoopOutput,
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
             systemEquip.vavStageDownTimerCounter,
             ahuStagesCounts.pressureFanStages
         )
+        factory.addHumidifierController(
+            systemEquip.averageHumidity,
+            systemEquip.systemtargetMinInsideHumidity,
+            systemEquip.vavHumidityHysteresis,
+            systemEquip.currentOccupancy,
+            systemEquip.cmEquip.conditioningStages.humidifierEnable.pointExists()
+        )
 
-        if (systemEquip.cmEquip.conditioningStages.humidifierEnable.pointExists()) {
-            factory.addHumidifierController(
-                systemEquip,
-                systemEquip.averageHumidity,
-                systemEquip.systemtargetMinInsideHumidity,
-                systemEquip.relayActivationHysteresis,
-                systemEquip.currentOccupancy
-            )
-        }
-        if (systemEquip.cmEquip.conditioningStages.dehumidifierEnable.pointExists()) {
-            factory.addDeHumidifierController(
-                systemEquip,
-                systemEquip.averageHumidity,
-                systemEquip.systemtargetMaxInsideHumidity,
-                systemEquip.relayActivationHysteresis,
-                systemEquip.currentOccupancy
-            )
-        }
+        factory.addDeHumidifierController(
+            systemEquip.averageHumidity,
+            systemEquip.systemtargetMaxInsideHumidity,
+            systemEquip.vavHumidityHysteresis,
+            systemEquip.currentOccupancy,
+            systemEquip.cmEquip.conditioningStages.dehumidifierEnable.pointExists()
+        )
 
-        if (systemEquip.cmEquip.conditioningStages.occupiedEnabled.pointExists()) {
-            factory.addOccupiedEnabledController(systemEquip, systemEquip.currentOccupancy)
-        }
+        factory.addOccupiedEnabledController(
+            systemEquip.currentOccupancy,
+            systemEquip.cmEquip.conditioningStages.occupiedEnabled.pointExists()
+        )
 
-        if (systemEquip.cmEquip.conditioningStages.fanEnable.pointExists()) {
-            factory.addFanEnableController(
-                systemEquip,
-                systemEquip.fanLoopOutput,
-                systemEquip.currentOccupancy
-            )
-        }
-        if (systemEquip.cmEquip.conditioningStages.ahuFreshAirFanRunCommand.pointExists()) {
-            factory.addFanRunCommandController(
-                systemEquip,
-                systemEquip.co2LoopOutput,
-                systemEquip.currentOccupancy
-            )
-        }
-        if (systemEquip.cmEquip.conditioningStages.dcvDamper.pointExists()) {
-            factory.addDcvDamperController(
-                systemEquip,
-                systemEquip.dcvLoopOutput,
-                systemEquip.relayActivationHysteresis,
-                systemEquip.currentOccupancy
-            )
-        }
+        factory.addFanEnableController(
+            systemEquip.fanLoopOutput,
+            systemEquip.currentOccupancy,
+            systemEquip.cmEquip.conditioningStages.fanEnable.pointExists()
+        )
+
+        factory.addFanRunCommandController(
+            systemEquip.co2LoopOutput,
+            systemEquip.currentOccupancy,
+            systemEquip.cmEquip.conditioningStages.ahuFreshAirFanRunCommand.pointExists()
+        )
+
+        factory.addDcvDamperController(
+            systemEquip.dcvLoopOutput,
+            systemEquip.relayActivationHysteresis,
+            systemEquip.currentOccupancy,
+            systemEquip.cmEquip.conditioningStages.dcvDamper.pointExists()
+        )
 
         factory.addCompressorControllers(
-            systemEquip,
             systemEquip.compressorLoopOutput,
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
@@ -1308,18 +1293,23 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.economizationAvailable,
             ahuStagesCounts.compressorStages
         )
-        if (systemEquip.cmEquip.conditioningStages.changeOverCooling.pointExists()) {
-            factory.addChangeCoolingChangeOverRelay(systemEquip, systemEquip.coolingLoopOutput)
-        }
-        if (systemEquip.cmEquip.conditioningStages.changeOverHeating.pointExists()) {
-            factory.addChangeHeatingChangeOverRelay(systemEquip, systemEquip.heatingLoopOutput)
-        }
+
+        factory.addChangeCoolingChangeOverRelay(
+            systemEquip.coolingLoopOutput,
+            systemEquip.cmEquip.conditioningStages.changeOverCooling.pointExists()
+        )
+
+        factory.addChangeHeatingChangeOverRelay(
+            systemEquip.heatingLoopOutput,
+            systemEquip.cmEquip.conditioningStages.changeOverHeating.pointExists()
+        )
 
     }
 
-    private fun addConnectControllers(factory: SystemControllerFactory) {
-        factory.addLoadCoolingControllers(
-            systemEquip.connectEquip1,
+    private fun addConnectControllers() {
+
+
+        connectfactory.addLoadCoolingControllers(
             systemEquip.connectEquip1.coolingLoopOutput,
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
@@ -1328,8 +1318,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             connect1StagesCounts.loadCoolingStages
         )
 
-        factory.addLoadHeatingControllers(
-            systemEquip.connectEquip1,
+        connectfactory.addLoadHeatingControllers(
             systemEquip.connectEquip1.heatingLoopOutput,
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
@@ -1337,8 +1326,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             connect1StagesCounts.loadHeatingStages
         )
 
-        factory.addLoadFanControllers(
-            systemEquip.connectEquip1,
+        connectfactory.addLoadFanControllers(
             systemEquip.connectEquip1.fanLoopOutput,
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
@@ -1346,63 +1334,53 @@ open class VavAdvancedAhu : VavSystemProfile() {
             connect1StagesCounts.loadFanStages
         )
 
-        if (systemEquip.connectEquip1.conditioningStages.humidifierEnable.pointExists()) {
-            factory.addHumidifierController(
-                systemEquip.connectEquip1,
-                systemEquip.averageHumidity,
-                systemEquip.systemtargetMinInsideHumidity,
-                systemEquip.relayActivationHysteresis,
-                systemEquip.currentOccupancy
-            )
-        }
-        if (systemEquip.connectEquip1.conditioningStages.dehumidifierEnable.pointExists()) {
-            factory.addDeHumidifierController(
-                systemEquip.connectEquip1,
-                systemEquip.averageHumidity,
-                systemEquip.systemtargetMaxInsideHumidity,
-                systemEquip.relayActivationHysteresis,
-                systemEquip.currentOccupancy
-            )
-        }
-        if (systemEquip.connectEquip1.conditioningStages.occupiedEnabled.pointExists()) {
-            factory.addOccupiedEnabledController(
-                systemEquip.connectEquip1,
-                systemEquip.currentOccupancy
-            )
-        }
-        if (systemEquip.connectEquip1.conditioningStages.fanEnable.pointExists()) {
-            factory.addFanEnableController(
-                systemEquip.connectEquip1,
-                systemEquip.connectEquip1.fanLoopOutput,
-                systemEquip.currentOccupancy
-            )
-        }
-        if (systemEquip.connectEquip1.conditioningStages.ahuFreshAirFanRunCommand.pointExists()) {
-            factory.addFanRunCommandController(
-                systemEquip.connectEquip1,
-                systemEquip.connectEquip1.co2LoopOutput,
-                systemEquip.currentOccupancy
-            )
-        }
-        if (systemEquip.connectEquip1.conditioningStages.exhaustFanStage1.pointExists()) {
-            factory.addExhaustFanStage1Controller(
-                systemEquip.connectEquip1,
-                systemEquip.connectEquip1.outsideAirFinalLoopOutput,
-                systemEquip.connectEquip1.exhaustFanStage1,
-                systemEquip.connectEquip1.exhaustFanHysteresis
-            )
-        }
-        if (systemEquip.connectEquip1.conditioningStages.exhaustFanStage2.pointExists()) {
-            factory.addExhaustFanStage2Controller(
-                systemEquip.connectEquip1,
-                systemEquip.connectEquip1.outsideAirFinalLoopOutput,
-                systemEquip.connectEquip1.exhaustFanStage2,
-                systemEquip.connectEquip1.exhaustFanHysteresis
-            )
-        }
+        connectfactory.addHumidifierController(
+            systemEquip.averageHumidity,
+            systemEquip.systemtargetMinInsideHumidity,
+            systemEquip.vavHumidityHysteresis,
+            systemEquip.currentOccupancy,
+            systemEquip.connectEquip1.conditioningStages.humidifierEnable.pointExists()
+        )
+        connectfactory.addDeHumidifierController(
+            systemEquip.averageHumidity,
+            systemEquip.systemtargetMaxInsideHumidity,
+            systemEquip.vavHumidityHysteresis,
+            systemEquip.currentOccupancy,
+            systemEquip.connectEquip1.conditioningStages.dehumidifierEnable.pointExists()
+        )
 
-        factory.addCompressorControllers(
-            systemEquip.connectEquip1,
+        connectfactory.addOccupiedEnabledController(
+            systemEquip.currentOccupancy,
+            systemEquip.connectEquip1.conditioningStages.occupiedEnabled.pointExists()
+        )
+
+        connectfactory.addFanEnableController(
+            systemEquip.connectEquip1.fanLoopOutput,
+            systemEquip.currentOccupancy,
+            systemEquip.connectEquip1.conditioningStages.fanEnable.pointExists()
+        )
+
+        connectfactory.addFanRunCommandController(
+            systemEquip.connectEquip1.co2LoopOutput,
+            systemEquip.currentOccupancy,
+            systemEquip.connectEquip1.conditioningStages.ahuFreshAirFanRunCommand.pointExists()
+        )
+
+        connectfactory.addExhaustFanStage1Controller(
+            systemEquip.connectEquip1.outsideAirFinalLoopOutput,
+            systemEquip.connectEquip1.exhaustFanStage1,
+            systemEquip.connectEquip1.exhaustFanHysteresis,
+            systemEquip.connectEquip1.conditioningStages.exhaustFanStage1.pointExists()
+        )
+
+        connectfactory.addExhaustFanStage2Controller(
+            systemEquip.connectEquip1.outsideAirFinalLoopOutput,
+            systemEquip.connectEquip1.exhaustFanStage2,
+            systemEquip.connectEquip1.exhaustFanHysteresis,
+            systemEquip.connectEquip1.conditioningStages.exhaustFanStage2.pointExists()
+        )
+
+        connectfactory.addCompressorControllers(
             systemEquip.connectEquip1.compressorLoopOutput,
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
@@ -1410,17 +1388,17 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.economizationAvailable,
             connect1StagesCounts.compressorStages
         )
-        if (systemEquip.connectEquip1.conditioningStages.changeOverCooling.pointExists()) {
-            factory.addChangeCoolingChangeOverRelay(
-                systemEquip.connectEquip1,
-                systemEquip.connectEquip1.coolingLoopOutput
-            )
-        }
-        if (systemEquip.connectEquip1.conditioningStages.changeOverHeating.pointExists()) {
-            factory.addChangeHeatingChangeOverRelay(
-                systemEquip.connectEquip1,
-                systemEquip.connectEquip1.heatingLoopOutput
-            )
-        }
+
+        connectfactory.addChangeCoolingChangeOverRelay(
+            systemEquip.connectEquip1.coolingLoopOutput,
+            systemEquip.connectEquip1.conditioningStages.changeOverCooling.pointExists()
+        )
+
+        connectfactory.addChangeHeatingChangeOverRelay(
+            systemEquip.connectEquip1.heatingLoopOutput,
+            systemEquip.connectEquip1.conditioningStages.changeOverHeating.pointExists()
+        )
+
     }
+
 }

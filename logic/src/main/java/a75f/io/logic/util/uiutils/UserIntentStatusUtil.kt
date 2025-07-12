@@ -72,7 +72,6 @@ fun getAnalogStatus(analogOutStages: HashMap<String, Int>): String? {
     if (analogOutStages.containsKey(StatusMsgKeys.COOLING.name)) analogs.add("Cooling Analog ON")
     if (analogOutStages.containsKey(StatusMsgKeys.HEATING.name)) analogs.add("Heating Analog ON")
     if (analogOutStages.containsKey(StatusMsgKeys.FAN_SPEED.name)) analogs.add("Fan Analog ON")
-    if (analogOutStages.containsKey(StatusMsgKeys.DCV_DAMPER.name)) analogs.add("DCV ON")
     return analogs.joinToString(" | ").takeIf { it.isNotEmpty() }
 }
 
@@ -86,7 +85,7 @@ fun getStatusMsg(
     temperatureState: ZoneTempState,
     epidemicState: EpidemicState = EpidemicState.OFF
 ): String {
-    val statusParts = mutableListOf<String>()
+    val statusParts = linkedSetOf<String>()
 
     val tempPrefix = when (temperatureState) {
         ZoneTempState.RF_DEAD -> "RF Signal dead"
@@ -127,6 +126,10 @@ fun getStatusMsg(
         statusParts.add("Fan ON")
     }
     getAnalogStatus(analogOutStages)?.let { statusParts.add(it) }
+
+    if (portStages.containsKey(StatusMsgKeys.DCV_DAMPER.name) || analogOutStages.containsKey(StatusMsgKeys.DCV_DAMPER.name)) {
+        statusParts.add("DCV ON")
+    }
 
     var status = statusParts.joinToString(", ")
     if (status.isEmpty()) status = "OFF"

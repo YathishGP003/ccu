@@ -9,7 +9,7 @@ import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.util.isOccupiedDcvHumidityControl
 
 class DehumidifierController (
-    private val humidityPoint: Point, val targetMaxHumidity: Point, hysteresis: Point, private val logTag: String, val occupancy : CalibratedPoint
+    private val humidityPoint: Point, private val targetMaxHumidity: Point, private  val hysteresis: Point, private val logTag: String, val occupancy : CalibratedPoint
 ) : Controller {
     private val controller = GenericBooleanControllerImpl()
 
@@ -25,7 +25,7 @@ class DehumidifierController (
 
     override fun runController(): Boolean {
         CcuLog.d(logTag, "Running DeHumidifierController" +
-                " ${humidityPoint.readHisVal()} , targetMinHumidity ${targetMaxHumidity.readPriorityVal()} Status = ${controller.getActiveControl()}" +
+                " ${humidityPoint.readHisVal()} , hysteresis: ${hysteresis.readPriorityVal()} targetMaxHumidity ${targetMaxHumidity.readPriorityVal()} Status = ${controller.getActiveControl()}" +
                 " Occupancy = ${occupancy.readHisVal()}")
 
         return controller.getActiveControl()

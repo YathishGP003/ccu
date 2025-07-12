@@ -2,6 +2,7 @@ package a75f.io.domain.equips
 
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.util.CalibratedPoint
 
 /**
  * Could be a subclass of VavStagedEquip. But the cooling/heating stages are defined as load-based and
@@ -20,5 +21,4 @@ class VavAdvancedHybridSystemEquip (equipRef : String, connectEquipRef : String)
     val vavDuctStaticPressureProportionalRange = Point(DomainName.vavDuctStaticPressureProportionalRange, equipRef)
     val vavDuctStaticPressureIntegralTime = Point(DomainName.vavDuctStaticPressureIntegralTime, equipRef)
     val vavDuctStaticIntegralKFactor = Point(DomainName.vavDuctStaticPressureIntegralKFactor, equipRef)
-
 }

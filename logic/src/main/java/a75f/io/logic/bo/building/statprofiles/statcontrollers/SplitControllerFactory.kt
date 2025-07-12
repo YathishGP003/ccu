@@ -1,11 +1,10 @@
 package a75f.io.logic.bo.building.statprofiles.statcontrollers
 
 import a75f.io.domain.HyperStatSplitEquip
-import a75f.io.domain.equips.DomainEquip
-import a75f.io.logger.CcuLog
+import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.StagesCounts
 import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isUserIntentFanMode
@@ -18,310 +17,346 @@ import a75f.io.logic.controlcomponents.util.ControllerNames
 /**
  * Created by Manjunath K on 09-05-2025.
  */
-class SplitControllerFactory(var equip: HyperStatSplitEquip) {
+class SplitControllerFactory(
+    var equip: HyperStatSplitEquip,
+    var controllers: HashMap<String, Any>, var counts: StagesCounts,
+    private var isEconAvailable: CalibratedPoint,
+    var derivedFanLoopOutput: CalibratedPoint,
+    var zoneOccupancyState: CalibratedPoint,
+) {
     private val controlFactory = ControllerFactory()
 
-    fun addControllers(config: HyperStatSplitCpuConfiguration, isPrePurgeActive: () -> Boolean) {
-        val mappings = config.getRelayConfigurationMapping()
-        mappings.forEach { (enabled, association, _) ->
-            if (!enabled) return@forEach
-
-            when (CpuRelayType.values()[association]) {
-                CpuRelayType.COOLING_STAGE1, CpuRelayType.COOLING_STAGE2, CpuRelayType.COOLING_STAGE3 -> addCoolingController(
-                    config
-                )
-
-                CpuRelayType.HEATING_STAGE1, CpuRelayType.HEATING_STAGE2, CpuRelayType.HEATING_STAGE3 -> addHeatingController(
-                    config
-                )
-
-                CpuRelayType.FAN_LOW_SPEED, CpuRelayType.FAN_MEDIUM_SPEED, CpuRelayType.FAN_HIGH_SPEED -> addFanSpeedController(
-                    config,
-                    isPrePurgeActive
-                )
-
-                CpuRelayType.COMPRESSOR_STAGE1, CpuRelayType.COMPRESSOR_STAGE2, CpuRelayType.COMPRESSOR_STAGE3 -> addCompressorController(
-                    config
-                )
-
-                CpuRelayType.FAN_ENABLED -> addFanEnabledController()
-                CpuRelayType.OCCUPIED_ENABLED -> addOccupiedEnableController()
-                CpuRelayType.HUMIDIFIER -> addHumidifierController()
-                CpuRelayType.DEHUMIDIFIER -> addDehumidifierController()
-                CpuRelayType.EX_FAN_STAGE1 -> addExhaustFanStage1Controller()
-                CpuRelayType.EX_FAN_STAGE2 -> addExhaustFanStage2Controller()
-                CpuRelayType.DCV_DAMPER -> addDcvDamperController()
-                CpuRelayType.CHANGE_OVER_O_COOLING -> addChangeOverCoolingController()
-                CpuRelayType.CHANGE_OVER_B_HEATING -> addChangeOverHeatingController()
-                CpuRelayType.AUX_HEATING_STAGE1 -> addAuxHeatingStage1Controller()
-                CpuRelayType.AUX_HEATING_STAGE2 -> addAuxHeatingStage2Controller()
-                CpuRelayType.EXTERNALLY_MAPPED -> {}
-            }
-        }
-
-        equip.controllers.keys.forEach {
-            CcuLog.d(
-                L.TAG_CCU_HSSPLIT_CPUECON, "available Controller $it: ${equip.controllers[it]}"
-            )
-        }
+    fun addControllers(
+        config: HyperStatSplitCpuConfiguration,
+        isPrePurgeActive: () -> Boolean) {
+        addCoolingController(config)
+        addHeatingController(config)
+        addFanSpeedController(config, isPrePurgeActive)
+        addCompressorController(config)
+        addFanEnabledController()
+        addOccupiedEnableController()
+        addHumidifierController()
+        addDehumidifierController()
+        addExhaustFanStage1Controller()
+        addExhaustFanStage2Controller()
+        addDcvDamperController()
+        addChangeOverCoolingController()
+        addChangeOverHeatingController()
+        addAuxHeatingStage1Controller()
+        addAuxHeatingStage2Controller()
     }
 
     private fun addHeatingController(config: HyperStatSplitCpuConfiguration) {
-        val totalStages = config.getHighestHeatingStageCount()
-        if (totalStages == 0) return
+        counts.heatingStages.data = config.getHighestHeatingStageCount().toDouble()
+        if (counts.heatingStages.data > 0) {
+            val totalStages = counts.heatingStages.data.toInt()
+            val additionalOffConstraints = mutableMapOf<Int, Constraint>()
+            if (totalStages >= 1) {
+                additionalOffConstraints[0] = Constraint { equip.isCondensateTripped() }
+            }
+            if (totalStages >= 2) {
+                additionalOffConstraints[1] = Constraint { equip.isCondensateTripped() }
+            }
+            if (totalStages >= 3) {
+                additionalOffConstraints[2] = Constraint { equip.isCondensateTripped() }
+            }
 
-        val additionalOffConstraints = mutableMapOf<Int, Constraint>()
-        if (totalStages >= 1) {
-            additionalOffConstraints[0] = Constraint { equip.isCondensateTripped() }
+            controlFactory.addStageController(
+                ControllerNames.HEATING_STAGE_CONTROLLER,
+                controllers,
+                loopOutput = equip.heatingLoopOutput,
+                activationHysteresis = equip.standaloneRelayActivationHysteresis,
+                totalStages = counts.heatingStages,
+                offConstrains = additionalOffConstraints,
+                logTag = L.TAG_CCU_HSSPLIT_CPUECON
+            )
+        } else {
+            removeController(ControllerNames.HEATING_STAGE_CONTROLLER)
         }
-        if (totalStages >= 2) {
-            additionalOffConstraints[1] = Constraint { equip.isCondensateTripped() }
-        }
-        if (totalStages >= 3) {
-            additionalOffConstraints[2] = Constraint { equip.isCondensateTripped() }
-        }
-
-        controlFactory.addStageController(
-            ControllerNames.HEATING_STAGE_CONTROLLER,
-            equip = equip,
-            loopOutput = equip.heatingLoopOutput,
-            activationHysteresis = equip.standaloneRelayActivationHysteresis,
-            totalStages = equip.getInCalibratedPointPoint(totalStages),
-            offConstrains = additionalOffConstraints,
-            logTag = L.TAG_CCU_HSSPLIT_CPUECON
-        )
     }
 
     private fun addCoolingController(config: HyperStatSplitCpuConfiguration) {
-        val totalStages = config.getHighestCoolingStageCount()
-        if (totalStages == 0) return
+        counts.coolingStages.data = config.getHighestCoolingStageCount().toDouble()
+        if (counts.coolingStages.data > 0) {
+            val totalStages = counts.coolingStages.data.toInt()
+            val additionalOffConstraints = mutableMapOf<Int, Constraint>()
+            if (totalStages >= 1) {
+                additionalOffConstraints[0] = Constraint { equip.isCondensateTripped() }
+            }
+            if (totalStages >= 2) {
+                additionalOffConstraints[1] = Constraint { equip.isCondensateTripped() }
+            }
+            if (totalStages >= 3) {
+                additionalOffConstraints[2] = Constraint { equip.isCondensateTripped() }
+            }
 
-        val additionalOffConstraints = mutableMapOf<Int, Constraint>()
-        if (totalStages >= 1) {
-            additionalOffConstraints[0] = Constraint { equip.isCondensateTripped() }
+            controlFactory.addStageController(
+                ControllerNames.COOLING_STAGE_CONTROLLER,
+                controllers,
+                loopOutput = equip.coolingLoopOutput,
+                activationHysteresis = equip.standaloneRelayActivationHysteresis,
+                totalStages = counts.coolingStages,
+                offConstrains = additionalOffConstraints,
+                economizingAvailable = isEconAvailable,
+                stageDownTimer = equip.hyperstatStageDownTimerCounter,
+                stageUpTimer = equip.hyperstatStageUpTimerCounter,
+                logTag = L.TAG_CCU_HSSPLIT_CPUECON
+            )
+        } else {
+            removeController(ControllerNames.COOLING_STAGE_CONTROLLER)
         }
-        if (totalStages >= 2) {
-            additionalOffConstraints[1] = Constraint { equip.isCondensateTripped() }
-        }
-        if (totalStages >= 3) {
-            additionalOffConstraints[2] = Constraint { equip.isCondensateTripped() }
-        }
-
-        controlFactory.addStageController(
-            ControllerNames.COOLING_STAGE_CONTROLLER,
-            equip = equip,
-            loopOutput = equip.coolingLoopOutput,
-            activationHysteresis = equip.standaloneRelayActivationHysteresis,
-            totalStages = equip.highestCoolingStages,
-            offConstrains = additionalOffConstraints,
-            economizingAvailable = equip.isEconAvailable,
-            stageDownTimer = equip.stageDownTimer,
-            stageUpTimer = equip.stageUpTimer,
-            logTag = L.TAG_CCU_HSSPLIT_CPUECON
-        )
     }
 
     private fun addFanSpeedController(
         config: HyperStatSplitCpuConfiguration, isPrePurgeActive: () -> Boolean
     ) {
-        val totalStages = config.getHighestFanStageCount()
-        if (totalStages == 0) return
+        counts.fanStages.data = config.getHighestFanStageCount().toDouble()
+        if (counts.fanStages.data > 0) {
+            val totalStages = counts.fanStages.data
+            val additionalOffConstraints = mutableMapOf<Int, Constraint>()
+            val additionalOnConstraints = mutableMapOf<Int, Constraint>()
 
-        val additionalOffConstraints = mutableMapOf<Int, Constraint>()
-        val additionalOnConstraints = mutableMapOf<Int, Constraint>()
-
-        if (totalStages >= 1) {
-            additionalOnConstraints[0] =
-                Constraint { isUserIntentFanMode(equip.fanOpMode) || isPrePurgeActive() }
-            additionalOffConstraints[0] =
-                Constraint { equip.isCondensateTripped() || !isUserIntentFanMode(equip.fanOpMode) }
-        }
-        if (totalStages >= 2) {
-            additionalOnConstraints[1] = Constraint {
-                isMediumUserIntentFanMode(equip.fanOpMode) || isHighUserIntentFanMode(equip.fanOpMode) || isPrePurgeActive()
+            if (totalStages >= 1) {
+                additionalOnConstraints[0] =
+                    Constraint { isUserIntentFanMode(equip.fanOpMode) || isPrePurgeActive() }
+                additionalOffConstraints[0] =
+                    Constraint { equip.isCondensateTripped() || !isUserIntentFanMode(equip.fanOpMode) }
             }
-            additionalOffConstraints[1] = Constraint {
-                equip.isCondensateTripped() || (!isMediumUserIntentFanMode(equip.fanOpMode) && !isHighUserIntentFanMode(
-                    equip.fanOpMode
-                ))
+            if (totalStages >= 2) {
+                additionalOnConstraints[1] = Constraint {
+                    isMediumUserIntentFanMode(equip.fanOpMode) || isHighUserIntentFanMode(equip.fanOpMode) || isPrePurgeActive()
+                }
+                additionalOffConstraints[1] = Constraint {
+                    equip.isCondensateTripped() || (!isMediumUserIntentFanMode(equip.fanOpMode) && !isHighUserIntentFanMode(
+                        equip.fanOpMode
+                    ))
+                }
             }
-        }
-        if (totalStages >= 3) {
-            additionalOnConstraints[2] =
-                Constraint { isHighUserIntentFanMode(equip.fanOpMode) || isPrePurgeActive() }
-            additionalOffConstraints[2] =
-                Constraint { equip.isCondensateTripped() || !isHighUserIntentFanMode(equip.fanOpMode) }
-        }
+            if (totalStages >= 3) {
+                additionalOnConstraints[2] =
+                    Constraint { isHighUserIntentFanMode(equip.fanOpMode) || isPrePurgeActive() }
+                additionalOffConstraints[2] =
+                    Constraint { equip.isCondensateTripped() || !isHighUserIntentFanMode(equip.fanOpMode) }
+            }
 
-        controlFactory.addStageController(
-            ControllerNames.FAN_SPEED_CONTROLLER,
-            equip = equip,
-            loopOutput = equip.derivedFanLoopOutput,
-            activationHysteresis = equip.standaloneRelayActivationHysteresis,
-            totalStages = equip.getInCalibratedPointPoint(totalStages),
-            onConstrains = additionalOnConstraints,
-            offConstrains = additionalOffConstraints,
-            stageDownTimer = equip.stageDownTimer,
-            stageUpTimer = equip.stageUpTimer,
-            logTag = L.TAG_CCU_HSSPLIT_CPUECON
-        )
+            controlFactory.addStageController(
+                ControllerNames.FAN_SPEED_CONTROLLER,
+                controllers,
+                loopOutput = derivedFanLoopOutput,
+                activationHysteresis = equip.standaloneRelayActivationHysteresis,
+                totalStages = counts.fanStages,
+                onConstrains = additionalOnConstraints,
+                offConstrains = additionalOffConstraints,
+                stageDownTimer = equip.hyperstatStageDownTimerCounter,
+                stageUpTimer = equip.hyperstatStageUpTimerCounter,
+                logTag = L.TAG_CCU_HSSPLIT_CPUECON
+            )
+        } else {
+            removeController(ControllerNames.FAN_SPEED_CONTROLLER)
+        }
     }
 
     private fun addCompressorController(config: HyperStatSplitCpuConfiguration) {
-        val totalStages = config.getHighestCompressorStageCount()
-        if (totalStages == 0) return
+        counts.compressorStages.data = config.getHighestCompressorStageCount().toDouble()
+        val totalStages = counts.compressorStages.data
+        if (totalStages > 0) {
 
-        val additionalOffConstraints = mutableMapOf<Int, Constraint>()
-        if (totalStages >= 1) {
-            additionalOffConstraints[0] = Constraint { equip.isCondensateTripped() }
+            val additionalOffConstraints = mutableMapOf<Int, Constraint>()
+            if (totalStages >= 1) {
+                additionalOffConstraints[0] = Constraint { equip.isCondensateTripped() }
+            }
+            if (totalStages >= 2) {
+                additionalOffConstraints[1] = Constraint { equip.isCondensateTripped() }
+            }
+            if (totalStages >= 3) {
+                additionalOffConstraints[2] = Constraint { equip.isCondensateTripped() }
+            }
+            controlFactory.addStageController(
+                ControllerNames.COMPRESSOR_RELAY_CONTROLLER,
+                controllers,
+                loopOutput = equip.compressorLoopOutput,
+                activationHysteresis = equip.standaloneRelayActivationHysteresis,
+                totalStages = counts.compressorStages,
+                offConstrains = additionalOffConstraints,
+                economizingAvailable = isEconAvailable,
+                stageDownTimer = equip.hyperstatStageDownTimerCounter,
+                stageUpTimer = equip.hyperstatStageUpTimerCounter,
+                logTag = L.TAG_CCU_HSSPLIT_CPUECON
+            )
+        } else {
+            removeController(ControllerNames.COMPRESSOR_RELAY_CONTROLLER)
         }
-        if (totalStages >= 2) {
-            additionalOffConstraints[1] = Constraint { equip.isCondensateTripped() }
-        }
-        if (totalStages >= 3) {
-            additionalOffConstraints[2] = Constraint { equip.isCondensateTripped() }
-        }
-
-        if (equip.highestCompressorStages.data <= 0) {
-            equip.highestCompressorStages.data = totalStages.toDouble()
-        }
-
-        controlFactory.addStageController(
-            ControllerNames.COMPRESSOR_RELAY_CONTROLLER,
-            equip = equip,
-            loopOutput = equip.compressorLoopOutput,
-            activationHysteresis = equip.standaloneRelayActivationHysteresis,
-            totalStages = equip.highestCompressorStages,
-            offConstrains = additionalOffConstraints,
-            economizingAvailable = equip.isEconAvailable,
-            stageDownTimer = equip.stageDownTimer,
-            stageUpTimer = equip.stageUpTimer,
-            logTag = L.TAG_CCU_HSSPLIT_CPUECON
-        )
     }
 
     private fun addFanEnabledController() {
-        controlFactory.addFanEnableController(
-            equip = equip,
-            fanLoopOutput = equip.fanLoopOutput,
-            occupancy = equip.zoneOccupancyState,
-            offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
-            logTag = L.TAG_CCU_HSSPLIT_CPUECON
-        )
-
+        if (equip.fanEnable.pointExists()) {
+            controlFactory.addFanEnableController(
+                controllers,
+                fanLoopOutput = equip.fanLoopOutput,
+                occupancy = zoneOccupancyState,
+                offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
+                logTag = L.TAG_CCU_HSSPLIT_CPUECON
+            )
+        } else {
+            removeController(ControllerNames.FAN_ENABLED)
+        }
     }
 
     private fun addOccupiedEnableController() {
-        controlFactory.addOccupiedEnableController(
-            equip, equip.zoneOccupancyState, logTag = L.TAG_CCU_HSSPLIT_CPUECON
-        )
+        if (equip.occupiedEnable.pointExists()) {
+            controlFactory.addOccupiedEnableController(
+                controllers, zoneOccupancyState, logTag = L.TAG_CCU_HSSPLIT_CPUECON
+            )
+        } else {
+            removeController(ControllerNames.OCCUPIED_ENABLED)
+        }
     }
 
     private fun addHumidifierController() {
-        controlFactory.addHumidifierController(
-            equip = equip,
-            zoneHumidity = equip.zoneHumidity,
-            targetHumidifier = equip.targetHumidifier,
-            activationHysteresis = equip.standaloneRelayActivationHysteresis,
-            occupancy = equip.zoneOccupancyState,
-            offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
-            logTag = L.TAG_CCU_HSSPLIT_CPUECON
-        )
+        if (equip.humidifierEnable.pointExists()) {
+            controlFactory.addHumidifierController(
+                controllers,
+                zoneHumidity = equip.zoneHumidity,
+                targetHumidifier = equip.targetHumidifier,
+                activationHysteresis = equip.standaloneHumidityHysteresis,
+                occupancy = zoneOccupancyState,
+                offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
+                logTag = L.TAG_CCU_HSSPLIT_CPUECON
+            )
+        } else {
+            removeController(ControllerNames.HUMIDIFIER_CONTROLLER)
+        }
     }
 
     private fun addDehumidifierController() {
-        controlFactory.addDeHumidifierController(
-            equip = equip,
-            zoneHumidity = equip.zoneHumidity,
-            targetDehumidifier = equip.targetDehumidifier,
-            activationHysteresis = equip.standaloneRelayActivationHysteresis,
-            offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
-            occupancy = equip.zoneOccupancyState,
-            logTag = L.TAG_CCU_HSSPLIT_CPUECON
-        )
+        if (equip.dehumidifierEnable.pointExists()) {
+            controlFactory.addDeHumidifierController(
+                controllers,
+                zoneHumidity = equip.zoneHumidity,
+                targetDehumidifier = equip.targetDehumidifier,
+                activationHysteresis = equip.standaloneHumidityHysteresis,
+                offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
+                occupancy = zoneOccupancyState,
+                logTag = L.TAG_CCU_HSSPLIT_CPUECON
+            )
+        } else {
+            removeController(ControllerNames.DEHUMIDIFIER_CONTROLLER)
+        }
     }
 
     private fun addExhaustFanStage1Controller() {
-        if (equip.controllers.containsKey(ControllerNames.EXHAUST_FAN_STAGE1_CONTROLLER)) return
+        if (equip.exhaustFanStage1.pointExists()) {
+            if (controllers.containsKey(ControllerNames.EXHAUST_FAN_STAGE1_CONTROLLER)) return
 
-        val controller = ExhaustFanController(
-            equip.outsideAirFinalLoopOutput,
-            equip.exhaustFanStage1Threshold,
-            equip.exhaustFanHysteresis,
-            logTag = L.TAG_CCU_HSSPLIT_CPUECON
-        )
-        controller.addOffConstraint(Constraint { equip.isCondensateTripped() })
-        equip.controllers[ControllerNames.EXHAUST_FAN_STAGE1_CONTROLLER] = controller
+            val controller = ExhaustFanController(
+                equip.outsideAirFinalLoopOutput,
+                equip.exhaustFanStage1Threshold,
+                equip.exhaustFanHysteresis,
+                logTag = L.TAG_CCU_HSSPLIT_CPUECON
+            )
+            controller.addOffConstraint(Constraint { equip.isCondensateTripped() })
+            controllers[ControllerNames.EXHAUST_FAN_STAGE1_CONTROLLER] = controller
+        } else {
+            removeController(ControllerNames.EXHAUST_FAN_STAGE1_CONTROLLER)
+        }
     }
 
     private fun addExhaustFanStage2Controller() {
-        if (equip.controllers.containsKey(ControllerNames.EXHAUST_FAN_STAGE2_CONTROLLER)) return
+        if (equip.exhaustFanStage2.pointExists()) {
+            if (controllers.containsKey(ControllerNames.EXHAUST_FAN_STAGE2_CONTROLLER)) return
 
-        val controller = ExhaustFanController(
-            equip.outsideAirFinalLoopOutput,
-            equip.exhaustFanStage2Threshold,
-            equip.exhaustFanHysteresis,
-            logTag = L.TAG_CCU_HSSPLIT_CPUECON
-        )
-        controller.addOffConstraint(Constraint { equip.isCondensateTripped() })
-        equip.controllers[ControllerNames.EXHAUST_FAN_STAGE2_CONTROLLER] = controller
+            val controller = ExhaustFanController(
+                equip.outsideAirFinalLoopOutput,
+                equip.exhaustFanStage2Threshold,
+                equip.exhaustFanHysteresis,
+                logTag = L.TAG_CCU_HSSPLIT_CPUECON
+            )
+            controller.addOffConstraint(Constraint { equip.isCondensateTripped() })
+            controllers[ControllerNames.EXHAUST_FAN_STAGE2_CONTROLLER] = controller
+        } else {
+            removeController(ControllerNames.EXHAUST_FAN_STAGE2_CONTROLLER)
+        }
     }
 
     private fun addDcvDamperController() {
-        controlFactory.addDcvDamperController(
-            equip = equip,
-            dcvLoopOutput = equip.dcvLoopOutput,
-            actionHysteresis = equip.standaloneRelayActivationHysteresis,
-            currentOccupancy = equip.zoneOccupancyState,
-            offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
-            logTag = L.TAG_CCU_HSSPLIT_CPUECON
-        )
+        if (equip.dcvDamper.pointExists()) {
+            controlFactory.addDcvDamperController(
+                controllers,
+                dcvLoopOutput = equip.dcvLoopOutput,
+                actionHysteresis = equip.standaloneRelayActivationHysteresis,
+                currentOccupancy = zoneOccupancyState,
+                offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
+                logTag = L.TAG_CCU_HSSPLIT_CPUECON
+            )
+        } else {
+            removeController(ControllerNames.DAMPER_RELAY_CONTROLLER)
+        }
     }
 
     private fun addChangeOverCoolingController() {
-        controlFactory.addChangeOverCoolingController(
-            equip = equip,
-            coolingLoopOutput = equip.coolingLoopOutput,
-            offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
-            logTag = L.TAG_CCU_HSSPLIT_CPUECON
-        )
+        if (equip.changeOverCooling.pointExists()) {
+            controlFactory.addChangeOverCoolingController(
+                controllers,
+                coolingLoopOutput = equip.coolingLoopOutput,
+                offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
+                logTag = L.TAG_CCU_HSSPLIT_CPUECON
+            )
+        } else {
+            removeController(ControllerNames.CHANGE_OVER_O_COOLING)
+        }
     }
 
     private fun addChangeOverHeatingController() {
-        controlFactory.addChangeOverHeatingController(
-            equip = equip,
-            heatingLoopOutput = equip.heatingLoopOutput,
-            offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
-            logTag = L.TAG_CCU_HSSPLIT_CPUECON
-        )
+        if (equip.changeOverHeating.pointExists()) {
+            controlFactory.addChangeOverHeatingController(
+                controllers,
+                heatingLoopOutput = equip.heatingLoopOutput,
+                offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
+                logTag = L.TAG_CCU_HSSPLIT_CPUECON
+            )
+        } else {
+            removeController(ControllerNames.CHANGE_OVER_B_HEATING)
+        }
     }
 
     private fun addAuxHeatingStage1Controller() {
-        controlFactory.addAuxHeatingStage1Controller(
-            equip = equip,
-            currentTemp = equip.currentTemp,
-            desiredTempHeating = equip.desiredTempHeating,
-            auxHeating1Activate = equip.auxHeating1Activate,
-            offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
-            logTag = L.TAG_CCU_HSSPLIT_CPUECON
-        )
+        if (equip.auxHeatingStage1.pointExists()) {
+            controlFactory.addAuxHeatingStage1Controller(
+                controllers,
+                currentTemp = equip.currentTemp,
+                desiredTempHeating = equip.desiredTempHeating,
+                auxHeating1Activate = equip.auxHeating1Activate,
+                offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
+                logTag = L.TAG_CCU_HSSPLIT_CPUECON
+            )
+        } else {
+            removeController(ControllerNames.AUX_HEATING_STAGE1)
+        }
     }
 
     private fun addAuxHeatingStage2Controller() {
-        controlFactory.addAuxHeatingStage2Controller(
-            equip = equip,
-            currentTemp = equip.currentTemp,
-            desiredTempHeating = equip.desiredTempHeating,
-            auxHeating2Activate = equip.auxHeating2Activate,
-            offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
-            logTag = L.TAG_CCU_HSSPLIT_CPUECON
-        )
+        if (equip.auxHeatingStage2.pointExists()) {
+            controlFactory.addAuxHeatingStage2Controller(
+                controllers,
+                currentTemp = equip.currentTemp,
+                desiredTempHeating = equip.desiredTempHeating,
+                auxHeating2Activate = equip.auxHeating2Activate,
+                offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
+                logTag = L.TAG_CCU_HSSPLIT_CPUECON
+            )
+        } else {
+            removeController(ControllerNames.AUX_HEATING_STAGE2)
+        }
     }
 
-    fun getController(controllerName: String, equip: DomainEquip): StageControlHandler? {
-        return if (equip.controllers.containsKey(controllerName)) equip.controllers[controllerName] as StageControlHandler
+    fun getController(controllerName: String): StageControlHandler? {
+        return if (controllers.containsKey(controllerName)) controllers[controllerName] as StageControlHandler
         else {
             return null
         }
+    }
+
+    private fun removeController(controllerName: String) {
+        if (controllers.containsKey(controllerName)) controllers.remove(controllerName)
     }
 }

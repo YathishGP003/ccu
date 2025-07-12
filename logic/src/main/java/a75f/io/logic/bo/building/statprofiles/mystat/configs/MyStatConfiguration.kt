@@ -230,10 +230,11 @@ abstract class MyStatConfiguration(
         }
     }
 
-
     abstract fun getRelayMap(): Map<String, Boolean>
 
     abstract fun getAnalogMap(): Map<String, Pair<Boolean, String>>
+
+    abstract fun getHighestFanStageCount(): Int
 
     fun isAnyRelayEnabledAssociated(relays: List<Pair<Boolean, Int>> = emptyList(), association: Int): Boolean {
         fun isMapped(list: List<Pair<Boolean, Int>>) = list.any { it.first && it.second == association }

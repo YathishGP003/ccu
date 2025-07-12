@@ -54,6 +54,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
 
     public synchronized void updateSystemPoints() {
         super.updateSystemPoints();
+        systemEquip = (DabStagedVfdSystemEquip) Domain.systemEquip;
         DabStagedVfdSystemEquip vfdSystemEquip = (DabStagedVfdSystemEquip) systemEquip;
         if (vfdSystemEquip.getAnalog2OutputEnable().readDefaultVal() > 0) {
             handleAnalogOutControl(vfdSystemEquip);

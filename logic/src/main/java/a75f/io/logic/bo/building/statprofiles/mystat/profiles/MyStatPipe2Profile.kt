@@ -109,7 +109,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         val averageDesiredTemp = getAverageTemp(userIntents)
         val fanModeSaved = FanModeCacheStorage.getMyStatFanModeCache().getFanModeFromCache(equip.equipRef)
         val basicSettings = fetchMyStatBasicSettings(equip)
-        val controllerFactory = MyStatControlFactory(equip)
+        val controllerFactory = MyStatControlFactory(equip, controllers, stageCounts, derivedFanLoopOutput, zoneOccupancyState)
 
         logicalPointsList = getMyStatLogicalPointList(equip, config!!)
         relayLogicalPoints = getMyStatRelayOutputPoints(equip)
@@ -121,7 +121,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
 
         if (equipOccupancyHandler != null) {
             occupancyStatus = equipOccupancyHandler.currentOccupiedMode
-            equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
+            zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
         }
 
         logIt( "Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
@@ -245,7 +245,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         equip: MyStatPipe2Equip, userIntents: UserIntents,
         controllerFactory: MyStatControlFactory
     ) {
-        controllerFactory.addControllers(config)
+        controllerFactory.addPipe2Controllers(config)
         runControllers(equip, basicSettings, config, userIntents)
     }
 
@@ -254,12 +254,9 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         config: MyStatPipe2Configuration, userIntents: UserIntents
     ) {
         equip.waterValveLoop.data = waterValveLoop(userIntents).toDouble()
-        equip.derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
-        equip.zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
-        equip.stageDownTimer.data = equip.mystatStageUpTimerCounter.readPriorityVal()
-        equip.stageUpTimer.data = equip.mystatStageUpTimerCounter.readPriorityVal()
+        zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
 
-        equip.controllers.forEach { (controllerName, value) ->
+        controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             val result = controller.runController()
             updateRelayStatus(controllerName, result, equip, basicSettings, config)
@@ -270,22 +267,14 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         basicSettings: MyStatBasicSettings, config: MyStatPipe2Configuration
     ) {
 
-        fun updateRelayStage(stageName: String, isActive: Boolean, point: Point) {
-            if (point.pointExists()) {
-                val status = if (isActive) 1.0 else 0.0
-                if (isActive) {
-                    equip.relayStages[stageName] = status.toInt()
-                } else {
-                    equip.relayStages.remove(stageName)
-                }
-                point.writeHisVal(status)
-            }
-        }
-
         fun updateStatus(point: Point, result: Any, status: String? = null) {
-            point.writeHisVal(if (result as Boolean) 1.0 else 0.0)
-            if (status != null && result) {
-                equip.relayStages[status] = 1
+            if (point.pointExists()) {
+                point.writeHisVal(if (result as Boolean) 1.0 else 0.0)
+                if (status != null && result) {
+                    equip.relayStages[status] = 1
+                } else {
+                    equip.relayStages.remove(status)
+                }
             } else {
                 equip.relayStages.remove(status)
             }
@@ -295,10 +284,10 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
 
             ControllerNames.WATER_VALVE_CONTROLLER -> {
                 if (equip.waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
-                    updateRelayStage(
-                        StatusMsgKeys.WATER_VALVE.name,
+                    updateStatus(
+                        equip.waterValve,
                         result as Boolean,
-                        equip.waterValve
+                        StatusMsgKeys.WATER_VALVE.name
                     )
                 }
             }
@@ -340,12 +329,12 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
 
                 if (isHighExist && highExist != null) {
                     isHighActive = isStageActive(highExist.first, highExist.second, lowestStageFanHigh)
-                    updateRelayStage(Stage.FAN_2.displayName, isHighActive, equip.fanHighSpeed)
+                    updateStatus(equip.fanHighSpeed, isHighActive, Stage.FAN_2.displayName)
                 }
 
                 if (equip.fanLowSpeed.pointExists() && lowExist != null) {
                     val isLowActive = if (isHighExist && isHighActive) false else isStageActive(lowExist.first, lowExist.second, lowestStageFanLow)
-                    updateRelayStage(Stage.FAN_1.displayName, isLowActive, equip.fanLowSpeed)
+                    updateStatus(equip.fanLowSpeed, isLowActive, Stage.FAN_1.displayName)
                 }
             }
             ControllerNames.AUX_HEATING_STAGE1 -> {
@@ -360,7 +349,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
             ControllerNames.OCCUPIED_ENABLED -> updateStatus(equip.occupiedEnable, result)
             ControllerNames.HUMIDIFIER_CONTROLLER -> updateStatus(equip.humidifierEnable, result)
             ControllerNames.DEHUMIDIFIER_CONTROLLER -> updateStatus(equip.dehumidifierEnable, result)
-            ControllerNames.DAMPER_RELAY_CONTROLLER -> updateStatus(equip.dcvDamper, result)
+            ControllerNames.DAMPER_RELAY_CONTROLLER -> updateStatus(equip.dcvDamper, result, StatusMsgKeys.DCV_DAMPER.name)
             else -> {
                 logIt("Unknown controller: $controllerName")
             }

@@ -370,11 +370,29 @@ class CpuConfiguration(
         return HsCpuRelayMapping.values()[highestSelected]
     }
 
-    fun getHighestCoolingStageCount() = getHighestCoolingStage().ordinal + 1
+    fun getHighestCoolingStageCount(): Int {
+        return try {
+            getHighestCoolingStage().ordinal + 1
+        } catch (e: ArrayIndexOutOfBoundsException) {
+            0
+        }
+    }
 
-    fun getHighestHeatingStageCount() = getHighestHeatingStage().ordinal - 2
+    fun getHighestHeatingStageCount(): Int {
+        return try {
+            getHighestHeatingStage().ordinal - 2
+        } catch (e: ArrayIndexOutOfBoundsException) {
+            0
+        }
+    }
 
-    fun getHighestFanStageCount() = getHighestFanSelected().ordinal - 5 // Assuming fan stage 1,2,3
+    override fun getHighestFanStageCount(): Int {
+        return try {
+            getHighestFanSelected().ordinal - 5 // Assuming fan stage 1,2,3
+        } catch (e: ArrayIndexOutOfBoundsException) {
+            0
+        }
+    }
 
 }
 

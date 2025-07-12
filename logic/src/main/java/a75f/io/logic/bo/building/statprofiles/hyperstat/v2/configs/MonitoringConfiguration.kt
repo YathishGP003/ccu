@@ -52,6 +52,9 @@ class MonitoringConfiguration(
 
     override fun getAnalogMap(): Map<String, Pair<Boolean, String>> = mutableMapOf()
 
+    override fun getHighestFanStageCount() = 0
+
+
     override fun getDependencies(): List<ValueConfig> {
         return mutableListOf()
     }

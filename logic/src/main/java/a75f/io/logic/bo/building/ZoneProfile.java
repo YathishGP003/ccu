@@ -6,6 +6,7 @@ import static a75f.io.logic.controlcomponents.util.ControllerNames.FAN_SPEED_CON
 import static a75f.io.logic.controlcomponents.util.ControllerNames.HEATING_STAGE_CONTROLLER;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -27,11 +28,12 @@ import a75f.io.logic.tuners.TunerUtil;
 
 public abstract class ZoneProfile
 {
+
     public static final String TAG = ZoneProfile.class.getSimpleName();
     protected HashMap<Short, BaseProfileConfiguration> mProfileConfiguration = new HashMap<>();
     protected UUID uuid = UUID.randomUUID();
     public ZoneState    state    = COOLING;
-    
+    public HashMap<String,Object> controllers = new HashMap<>();
     private EquipOccupancyHandler equipOccupancyHandler = null;
     private EquipScheduleHandler equipScheduleHandler = null;
     public String RFDead = "RF Signal Dead";

@@ -2,6 +2,7 @@ package a75f.io.domain.equips
 
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.util.CalibratedPoint
 
 /**
  * Created by Manjunath K on 19-05-2024.
@@ -351,5 +352,4 @@ open class AdvancedHybridSystemEquip(equipRef: String) : SystemEquip (equipRef) 
     val pressureBasedFanControlFeedback = Point(DomainName.pressureBasedFanControlFeedback, equipRef)
     val satBasedCoolingControlFeedback = Point(DomainName.satBasedCoolingControlFeedback, equipRef)
     val satBasedHeatingControlFeedback = Point(DomainName.satBasedHeatingControlFeedback, equipRef)
-
 }

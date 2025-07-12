@@ -80,7 +80,19 @@ class StageControlHandler(
 
     override fun runController(): List<Pair<Int, Boolean>> {
         logIt(logTag, "Running Control $controllerName")
+        updateConstrainsIfRequired()
         return controller.getActiveControls()
+    }
+
+    private fun updateConstrainsIfRequired() {
+        if (controller.currentStages.keys.size != totalStages.data.toInt()) {
+            for (i in 0 until totalStages.data.toInt()) {
+                if (!controller.currentStages.containsKey(i)) {
+                    controller.setOnConstraint(i, listOf(Constraint { stageOn(i) }))
+                    controller.setOffConstraint(i, listOf(Constraint { stageOff(i) }))
+                }
+            }
+        }
     }
 
     fun addOnConstraint(stage: Int, constraint: Constraint) {

@@ -60,10 +60,14 @@ class HyperStatSplitUserIntentHandler {
                                 || basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY)) {
                         status += "Free Cooling ON"
                         if (dcvLoopOutput > outsideDamperMinOpen) {
-                            status += ", DCV ON"
+                            if (!status.contains("DCV ON")) {
+                                status += ", DCV ON"
+                            }
                         }
                     } else if (dcvLoopOutput > outsideDamperMinOpen) {
+                        if (!status.contains("DCV ON")) {
                         status += "DCV ON"
+                            }
                     }
                 }
             }

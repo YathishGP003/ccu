@@ -27,7 +27,7 @@ import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.updateLoopOutputs
 import a75f.io.logic.controlcomponents.util.ControllerNames
-import a75f.io.logic.controlcomponents.util.isOccupiedDcvHumidityControl
+import a75f.io.logic.controlcomponents.util.isSoftOccupied
 import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler
 import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler.Companion.hyperStatStatus
 import a75f.io.logic.util.uiutils.updateUserIntentPoints
@@ -231,7 +231,7 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
         isDoorOpen: Boolean,
         zoneOccupancy: a75f.io.domain.api.Point
     ): Boolean {
-        return (co2Value > 0 && co2Value > zoneCO2Threshold && dcvLoopOutput > 0 && !isDoorOpen && isOccupiedDcvHumidityControl(
+        return (co2Value > 0 && co2Value > zoneCO2Threshold && dcvLoopOutput > 0 && !isDoorOpen && isSoftOccupied(
             zoneOccupancy
         ))
     }
@@ -278,14 +278,12 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
         equip: HyperStatEquip, equipRef: String, fanModeSaved: Int, basicSettings: BasicSettings
     ): StandaloneFanStage {
 
-        logIt("FanModeSaved in Shared Preference $fanModeSaved")
         val currentOccupancy = equip.occupancyMode.readHisVal().toInt()
+        logIt("FanModeSaved in Shared Preference $fanModeSaved : current occupancy $currentOccupancy")
+
 
         // If occupancy is unoccupied and the fan mode is current occupied then remove the fan mode from cache
-        if ((occupancyStatus == Occupancy.UNOCCUPIED || occupancyStatus == Occupancy.DEMAND_RESPONSE_UNOCCUPIED) && isFanModeCurrentOccupied(
-                fanModeSaved
-            )
-        ) {
+        if ((occupancyStatus == Occupancy.UNOCCUPIED || occupancyStatus == Occupancy.DEMAND_RESPONSE_UNOCCUPIED) && isFanModeCurrentOccupied(fanModeSaved)) {
             FanModeCacheStorage.getHyperStatFanModeCache().removeFanModeFromCache(equipRef)
         }
 
@@ -293,7 +291,7 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
             "Fall back fan mode " + basicSettings.fanMode + " conditioning mode " + basicSettings.conditioningMode
                     + "\nFan Details :$occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved"
         )
-        if (isEligibleToAuto(basicSettings, currentOccupancy)) {
+        if (isEligibleToAuto(basicSettings, equip)) {
             logIt("Resetting the Fan status back to  AUTO: ")
             updateUserIntentPoints(
                 equipRef = equipRef,
@@ -304,13 +302,7 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
             return StandaloneFanStage.AUTO
         }
 
-        if ((occupancyStatus == Occupancy.OCCUPIED
-                    || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED
-                    || occupancyStatus == Occupancy.FORCEDOCCUPIED
-                    || Occupancy.values()[currentOccupancy] == Occupancy.PRECONDITIONING
-                    || occupancyStatus == Occupancy.DEMAND_RESPONSE_OCCUPIED)
-            && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0
-        ) {
+        if (isSoftOccupied(equip.occupancyMode) && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
             logIt("Resetting the Fan status back to ${StandaloneFanStage.values()[fanModeSaved]}")
             updateUserIntentPoints(
                 equipRef = equipRef,
@@ -330,12 +322,8 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
                 || basicSettings == StandaloneFanStage.HIGH_CUR_OCC)
     }
 
-    private fun isEligibleToAuto(basicSettings: BasicSettings, currentOperatingMode: Int): Boolean {
-        return (occupancyStatus != Occupancy.OCCUPIED
-                && occupancyStatus != Occupancy.AUTOFORCEOCCUPIED
-                && occupancyStatus != Occupancy.FORCEDOCCUPIED
-                && occupancyStatus != Occupancy.DEMAND_RESPONSE_OCCUPIED
-                && Occupancy.values()[currentOperatingMode] != Occupancy.PRECONDITIONING
+    private fun isEligibleToAuto(basicSettings: BasicSettings, equip: HyperStatEquip): Boolean {
+        return (!isSoftOccupied(equip.occupancyMode)
                 && basicSettings.fanMode != StandaloneFanStage.OFF
                 && basicSettings.fanMode != StandaloneFanStage.AUTO
                 && basicSettings.fanMode != StandaloneFanStage.LOW_ALL_TIME

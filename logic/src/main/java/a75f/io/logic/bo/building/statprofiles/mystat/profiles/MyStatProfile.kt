@@ -24,7 +24,7 @@ import a75f.io.logic.bo.building.statprofiles.util.StatLoopController
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
 import a75f.io.logic.bo.building.statprofiles.util.updateLogicalPoint
 import a75f.io.logic.controlcomponents.util.ControllerNames
-import a75f.io.logic.controlcomponents.util.isOccupiedDcvHumidityControl
+import a75f.io.logic.controlcomponents.util.isSoftOccupied
 import a75f.io.logic.util.uiutils.MyStatUserIntentHandler
 import a75f.io.logic.util.uiutils.MyStatUserIntentHandler.Companion.myStatStatus
 import a75f.io.logic.util.uiutils.updateUserIntentPoints
@@ -270,7 +270,7 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
         isDoorOpen: Boolean,
         zoneOccupancy: a75f.io.domain.api.Point
     ): Boolean {
-        return (co2Value > 0 && co2Value > zoneCO2Threshold && dcvLoopOutput > 0 && !isDoorOpen && isOccupiedDcvHumidityControl(
+        return (co2Value > 0 && co2Value > zoneCO2Threshold && dcvLoopOutput > 0 && !isDoorOpen && isSoftOccupied(
             zoneOccupancy
         ))
     }
@@ -314,7 +314,7 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
 
         logIt("Fall back fan mode " + basicSettings.fanMode + " conditioning mode " + basicSettings.conditioningMode
                 +"\n Fan Details :$occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved")
-        if (isEligibleToAuto(basicSettings, currentOccupancy)) {
+        if (isEligibleToAuto(basicSettings, equip)) {
             logIt("Resetting the Fan status back to  AUTO: ")
             updateUserIntentPoints(
                 equipRef = equipRef,
@@ -325,13 +325,7 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
             return MyStatFanStages.AUTO
         }
 
-        if ((occupancyStatus == Occupancy.OCCUPIED
-                    || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED
-                    || occupancyStatus == Occupancy.FORCEDOCCUPIED
-                    || Occupancy.values()[currentOccupancy] == Occupancy.PRECONDITIONING
-                    || occupancyStatus == Occupancy.DEMAND_RESPONSE_OCCUPIED)
-            && basicSettings.fanMode == MyStatFanStages.AUTO && fanModeSaved != 0
-        ) {
+        if (isSoftOccupied(equip.occupancyMode) && basicSettings.fanMode == MyStatFanStages.AUTO && fanModeSaved != 0) {
             logIt("Resetting the Fan status back to ${MyStatFanStages.values()[fanModeSaved]}")
             updateUserIntentPoints(
                 equipRef = equipRef,
@@ -351,13 +345,9 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
 
     private fun isEligibleToAuto(
         basicSettings: MyStatBasicSettings,
-        currentOperatingMode: Int
+        equip: MyStatEquip
     ): Boolean {
-        return (occupancyStatus != Occupancy.OCCUPIED
-                && occupancyStatus != Occupancy.AUTOFORCEOCCUPIED
-                && occupancyStatus != Occupancy.FORCEDOCCUPIED
-                && occupancyStatus != Occupancy.DEMAND_RESPONSE_OCCUPIED
-                && Occupancy.values()[currentOperatingMode] != Occupancy.PRECONDITIONING
+        return (!isSoftOccupied(equip.occupancyMode) // should not be occupied
                 && basicSettings.fanMode != MyStatFanStages.OFF
                 && basicSettings.fanMode != MyStatFanStages.AUTO
                 && basicSettings.fanMode != MyStatFanStages.LOW_ALL_TIME

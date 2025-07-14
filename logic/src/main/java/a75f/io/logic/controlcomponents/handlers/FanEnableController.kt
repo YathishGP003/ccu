@@ -6,7 +6,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.controlcomponents.controlimpls.GenericBooleanControllerImpl
 import a75f.io.logic.controlcomponents.controls.Constraint
 import a75f.io.logic.controlcomponents.controls.Controller
-import a75f.io.logic.controlcomponents.util.isOccupiedDcvHumidityControl
+import a75f.io.logic.controlcomponents.util.isSoftOccupied
 
 
 class FanEnableController(val fanLoopPoint: Point, val occupancy: CalibratedPoint, private val logTag: String) : Controller {
@@ -15,9 +15,9 @@ class FanEnableController(val fanLoopPoint: Point, val occupancy: CalibratedPoin
     init {
         controller.setOnConstraints(
             listOf(Constraint { fanLoopPoint.readHisVal() > 0 },
-                Constraint { isOccupiedDcvHumidityControl(occupancy) })
+                Constraint { isSoftOccupied(occupancy) })
         )
-        controller.setOffConstraints(listOf(Constraint { (fanLoopPoint.readHisVal() == 0.0 && isOccupiedDcvHumidityControl(occupancy).not()) }))
+        controller.setOffConstraints(listOf(Constraint { (fanLoopPoint.readHisVal() == 0.0 && isSoftOccupied(occupancy).not()) }))
     }
 
     override fun runController(): Boolean {

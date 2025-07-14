@@ -6,7 +6,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.controlcomponents.controlimpls.GenericBooleanControllerImpl
 import a75f.io.logic.controlcomponents.controls.Constraint
 import a75f.io.logic.controlcomponents.controls.Controller
-import a75f.io.logic.controlcomponents.util.isOccupiedDcvHumidityControl
+import a75f.io.logic.controlcomponents.util.isSoftOccupied
 
 /**
  * Created by Manjunath K on 05-05-2025.
@@ -22,17 +22,17 @@ class DcvDamperController(
 
     init {
         controller.setOnConstraints(listOf(Constraint {
-            dcvLoopOutput.readHisVal() > hysteresis.readPriorityVal() && isOccupiedDcvHumidityControl(currentOccupancy)
+            dcvLoopOutput.readHisVal() > hysteresis.readPriorityVal() && isSoftOccupied(currentOccupancy)
         }))
         controller.setOffConstraints(listOf(Constraint {
-            (dcvLoopOutput.readHisVal() == 0.0 || isOccupiedDcvHumidityControl(currentOccupancy).not())
+            (dcvLoopOutput.readHisVal() == 0.0 || isSoftOccupied(currentOccupancy).not())
         }))
     }
 
     override fun runController(): Boolean {
         val status = controller.getActiveControl()
         CcuLog.d(logTag, "Running DcvDamperController dcvLoopOutput" +
-                " ${dcvLoopOutput.readHisVal()} currentOccupancy ${currentOccupancy.readHisVal()} Eligible to ON = ${isOccupiedDcvHumidityControl(currentOccupancy)} ")
+                " ${dcvLoopOutput.readHisVal()} currentOccupancy ${currentOccupancy.readHisVal()} Eligible to ON = ${isSoftOccupied(currentOccupancy)} ")
         return status
     }
 

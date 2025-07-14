@@ -4,7 +4,6 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
 import a75f.io.domain.HyperStatSplitEquip
-import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.util.CalibratedPoint
 import a75f.io.domain.util.ModelLoader
@@ -44,7 +43,7 @@ import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.handlers.doAnalogOperation
 import a75f.io.logic.controlcomponents.util.ControllerNames
-import a75f.io.logic.controlcomponents.util.isOccupiedDcvHumidityControl
+import a75f.io.logic.controlcomponents.util.isSoftOccupied
 import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler
 import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler.Companion.hyperStatSplitStatus
@@ -501,7 +500,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
             L.TAG_CCU_HSSPLIT_CPUECON,
             "zoneSensorCO2: $zoneSensorCO2, zoneCO2Threshold: $zoneCO2Threshold, co2DamperOpeningRate: $co2DamperOpeningRate"
         )
-        if (isOccupiedDcvHumidityControl(zoneOccupancyState)) {
+        if (isSoftOccupied(zoneOccupancyState)) {
             if (zoneSensorCO2 > zoneCO2Threshold) {
                 dcvAvailable = true
                 dcvLoopOutput = max(
@@ -729,7 +728,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
             L.TAG_CCU_HSSPLIT_CPUECON,
             "zoneSensorCO2: $zoneSensorCO2, zoneCO2Threshold: $zoneCO2Threshold, co2DamperOpeningRate: $co2DamperOpeningRate"
         )
-        if (isOccupiedDcvHumidityControl(zoneOccupancyState)) {
+        if (isSoftOccupied(zoneOccupancyState)) {
             if (zoneSensorCO2 > zoneCO2Threshold) {
                 dcvAvailable = true
                 dcvLoopOutput = max(

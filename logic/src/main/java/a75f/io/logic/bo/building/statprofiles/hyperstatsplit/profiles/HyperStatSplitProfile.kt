@@ -20,6 +20,7 @@ import a75f.io.logic.bo.building.statprofiles.util.StagesCounts
 import a75f.io.logic.bo.building.statprofiles.util.StatLoopController
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
 import a75f.io.logic.controlcomponents.util.ControllerNames
+import a75f.io.logic.controlcomponents.util.isSoftOccupied
 import a75f.io.logic.util.uiutils.updateUserIntentPoints
 
 
@@ -158,7 +159,7 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short) :
         }
         logIt("Fall back fan mode " + basicSettings.fanMode + " conditioning mode " + basicSettings.conditioningMode)
         logIt("Fan Details :$occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved")
-        if (isEligibleToAuto(basicSettings,currentOperatingMode)) {
+        if (isEligibleToAuto(basicSettings, equip)) {
             logIt("Resetting the Fan status back to  AUTO: ")
             updateUserIntentPoints(
                 equipRef = equip.equipRef,
@@ -193,12 +194,8 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short) :
         return (basicSettings == StandaloneFanStage.LOW_CUR_OCC || basicSettings == StandaloneFanStage.MEDIUM_CUR_OCC || basicSettings == StandaloneFanStage.HIGH_CUR_OCC)
     }
 
-    private fun isEligibleToAuto(basicSettings: BasicSettings, currentOperatingMode: Int ): Boolean{
-        return (occupancyStatus != Occupancy.OCCUPIED
-            && occupancyStatus != Occupancy.AUTOFORCEOCCUPIED
-            && occupancyStatus != Occupancy.FORCEDOCCUPIED
-            && occupancyStatus != Occupancy.DEMAND_RESPONSE_OCCUPIED
-            && Occupancy.values()[currentOperatingMode] != Occupancy.PRECONDITIONING
+    private fun isEligibleToAuto(basicSettings: BasicSettings, equip: HyperStatSplitEquip): Boolean{
+        return (!isSoftOccupied(equip.occupancyMode) // should not be occupied
             && basicSettings.fanMode != StandaloneFanStage.OFF
             && basicSettings.fanMode != StandaloneFanStage.AUTO
             && basicSettings.fanMode != StandaloneFanStage.LOW_ALL_TIME

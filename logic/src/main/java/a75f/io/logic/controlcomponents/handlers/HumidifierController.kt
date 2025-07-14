@@ -6,7 +6,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.controlcomponents.controlimpls.GenericBooleanControllerImpl
 import a75f.io.logic.controlcomponents.controls.Constraint
 import a75f.io.logic.controlcomponents.controls.Controller
-import a75f.io.logic.controlcomponents.util.isOccupiedDcvHumidityControl
+import a75f.io.logic.controlcomponents.util.isSoftOccupied
 
 class HumidifierController(
     private val humidityPoint: Point, val targetMinHumidity: Point, private val hysteresis: Point, private val logTag: String, val occupancy : CalibratedPoint
@@ -15,11 +15,11 @@ class HumidifierController(
 
     init {
         controller.setOnConstraints(listOf(Constraint {
-            humidityPoint.readHisVal() > 0 && humidityPoint.readHisVal() < targetMinHumidity.readPriorityVal() && isOccupiedDcvHumidityControl(occupancy)
+            humidityPoint.readHisVal() > 0 && humidityPoint.readHisVal() < targetMinHumidity.readPriorityVal() && isSoftOccupied(occupancy)
         }))
         controller.setOffConstraints(listOf(Constraint {
             humidityPoint.readHisVal() > 0 && humidityPoint.readHisVal() > (targetMinHumidity.readPriorityVal() + hysteresis.readPriorityVal())
-                    || isOccupiedDcvHumidityControl(occupancy).not()
+                    || isSoftOccupied(occupancy).not()
         }))
     }
 

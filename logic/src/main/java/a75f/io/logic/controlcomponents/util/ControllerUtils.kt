@@ -42,21 +42,12 @@ class ControllerNames {
     }
 }
 
-fun isOccupiedDcvHumidityControl(occupancyPoint : Point) : Boolean {
+fun isSoftOccupied(occupancyPoint : Point) : Boolean {
     val occupancyValue = Occupancy.values()[occupancyPoint.readHisVal().toInt()]
     return occupancyValue == Occupancy.OCCUPIED ||
             occupancyValue == Occupancy.AUTOAWAY ||
             occupancyValue == Occupancy.KEYCARD_AUTOAWAY ||
             occupancyValue == Occupancy.DEMAND_RESPONSE_OCCUPIED
-}
-
-fun isOccupiedConditioning(occupancyPoint : Point) : Boolean {
-    val occupancyValue = Occupancy.values()[occupancyPoint.readHisVal().toInt()]
-    return occupancyValue == Occupancy.OCCUPIED ||
-            occupancyValue == Occupancy.AUTOAWAY ||
-            occupancyValue == Occupancy.KEYCARD_AUTOAWAY ||
-            occupancyValue == Occupancy.DEMAND_RESPONSE_OCCUPIED ||
-            occupancyValue == Occupancy.PRECONDITIONING
 }
 
 fun isSystemOccupied(occupancyPoint: Point): Boolean {

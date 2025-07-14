@@ -377,6 +377,7 @@ fun updateSensorValue(
 
 
 fun sendAcknowledge(address: Int) {
+
     CcuLog.i(L.TAG_CCU_DEVICE, "Sending Acknowledgement")
     if (!LSerial.getInstance().isConnected) {
         CcuLog.d(L.TAG_CCU_DEVICE, "Device not connected !!")

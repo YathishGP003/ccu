@@ -88,6 +88,7 @@ import android.preference.PreferenceManager
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -1104,7 +1105,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                 point
             }
         }
-        bacnetModel.value.points = updatedPoints.toMutableList()
+        bacnetModel.value.points = updatedPoints.toMutableStateList()
         CcuLog.d(TAG, "Updated point is $pointId and property is ${bacnetProperty.value.id} value is $i")
     }
 
@@ -1616,6 +1617,17 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         bacnetModel.value = BacnetModel()
         isConnectedDevicesSearchFinished.value = false
         connectedDevices.value =emptyList<BacnetDevice>()
+        destinationIp.value  = ""
+        deviceId.value  = ""
+        destinationPort.value  = ""
+        destinationMacAddress.value  = ""
+        dnet.value = ""
+        bacnetPropertiesFetched.value = false
+    }
+
+    fun resetBacnetView(){
+        bacnetModel.value.version.value = ""
+        bacnetModel.value.points.clear()
         destinationIp.value  = ""
         deviceId.value  = ""
         destinationPort.value  = ""

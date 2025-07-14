@@ -66,6 +66,8 @@ import a75f.io.logic.util.bacnet.BacnetConfigConstants.DESTINATION_PORT
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.DEVICE_ID
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.DEVICE_NETWORK
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.MAC_ADDRESS
+import a75f.io.logic.util.bacnet.BacnetTypeMapper
+import a75f.io.util.getConfig
 import android.content.Intent
 import android.preference.PreferenceManager
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -74,7 +76,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.util.Objects
 import kotlin.math.roundToInt
-import a75f.io.util.*
 
 /**
  * Created by Manjunath K on 27-10-2023.
@@ -331,6 +332,19 @@ fun mapBacnetPoint(
     val defaultPriority = point["defaultWriteLevel"].toString()
     //val isSystemPoint = point["system"]
     //var objectId = 0
+    var valueFromPercentage = 0.0
+    if(query == DAMPER_CMD){
+        try {
+            CcuLog.d(TAG_BACNET, "--this is DAMPER_CMD--maxval ->${point["maxVal"].toString()}--min--${point["maxVal"].toString()}")
+            val maxVal = point["maxVal"].toString().toDouble()
+            val minVal = point["minVal"].toString().toDouble()
+            valueFromPercentage = mapToSetPoint(minVal, maxVal, value)
+        }catch (e : Exception){
+            CcuLog.d(TAG_BACNET, "--logical error due to wrong or no maxval--")
+            e.printStackTrace()
+        }
+        CcuLog.d(TAG_BACNET, "--valueFromPercentage--${valueFromPercentage}")
+    }
     CcuLog.d(TAG_BACNET, "--checking bool--")
 
 
@@ -338,21 +352,31 @@ fun mapBacnetPoint(
 
     if (point.isNotEmpty()) {
         CcuLog.i(TAG_BACNET, " point found $query-----#going to update local point and remote point--value--$value")
-        if(BacNetConstants.ObjectType.OBJECT_MULTI_STATE_VALUE.key == getObjectType(objectType)){
-            val wholeNumber = value.toInt()
-            //val bacnetWholeNumber = wholeNumber
-            updatePointValueChanges(pointId, haystack, setPointsList, wholeNumber.toDouble())
-            doMakeRequest(getConfig(bacnetConfig), bacnetObjectId, wholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
-        }else if(BacNetConstants.ObjectType.OBJECT_BINARY_VALUE.key == getObjectType(objectType)){
-            val wholeNumber = value.toInt()
-            //  val bacnetWholeNumber = wholeNumber - 1
-            updatePointValueChanges(pointId, haystack, setPointsList, wholeNumber.toDouble())
-            doMakeRequest(getConfig(bacnetConfig), bacnetObjectId, wholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
-        }else{
-            updatePointValueChanges(pointId, haystack, setPointsList, value)
-            doMakeRequest(getConfig(bacnetConfig), bacnetObjectId, value.toString(),getObjectType(objectType), defaultPriority, pointId)
-        }
 
+        val bacnetType =
+            point["bacnetType"].toString()?.let { BacnetTypeMapper.getObjectType(it) }
+        val objectTypeWithSuffix = "OBJECT_$bacnetType"
+
+        if (BacNetConstants.ObjectType.OBJECT_MULTI_STATE_VALUE.key == objectTypeWithSuffix
+            || BacNetConstants.ObjectType.OBJECT_MULTI_STATE_OUTPUT.key == objectTypeWithSuffix
+            || BacNetConstants.ObjectType.OBJECT_MULTI_STATE_INPUT.key == objectTypeWithSuffix
+            || BacNetConstants.ObjectType.OBJECT_BINARY_VALUE.key == objectTypeWithSuffix
+            || BacNetConstants.ObjectType.OBJECT_BINARY_OUTPUT.key == objectTypeWithSuffix
+            || BacNetConstants.ObjectType.OBJECT_BINARY_INPUT.key == objectTypeWithSuffix
+        ) {
+            val wholeNumber = value.toInt()
+            updatePointValueChanges(pointId, haystack, setPointsList, wholeNumber.toDouble())
+            doMakeRequest(getConfig(bacnetConfig), bacnetObjectId, wholeNumber.toString(),objectTypeWithSuffix, defaultPriority, pointId)
+        }else{
+            if(query == DAMPER_CMD){
+                updatePointValueChanges(pointId, haystack, setPointsList, valueFromPercentage)
+                doMakeRequest(getConfig(bacnetConfig), bacnetObjectId, valueFromPercentage.toString(),objectTypeWithSuffix, defaultPriority, pointId)
+            }else{
+                updatePointValueChanges(pointId, haystack, setPointsList, value)
+                doMakeRequest(getConfig(bacnetConfig), bacnetObjectId, value.toString(),objectTypeWithSuffix, defaultPriority, pointId)
+            }
+
+        }
     } else {
         CcuLog.i(L.TAG_CCU_MODBUS, " point not found $query")
     }

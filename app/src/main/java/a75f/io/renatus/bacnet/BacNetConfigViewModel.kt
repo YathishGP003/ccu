@@ -70,6 +70,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -1042,7 +1043,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                 point
             }
         }
-        bacnetModel.value.points = updatedPoints.toMutableList()
+        bacnetModel.value.points = updatedPoints.toMutableStateList()
         CcuLog.d(TAG, "Updated point is $pointId and property is ${bacnetProperty.value.id} value is $i")
     }
     fun applyCopiedConfiguration() {

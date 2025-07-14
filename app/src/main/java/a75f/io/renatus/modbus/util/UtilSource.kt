@@ -23,7 +23,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.core.content.ContextCompat
 import com.google.gson.Gson
 import java.util.Objects
@@ -92,8 +94,8 @@ fun getParametersList(equipment: EquipmentDevice): List<Parameter> {
     }
     return isAllSelected
 }
- fun getBacnetPoints(points: List<BacnetPoint>, isPaired : Boolean = true): MutableList<BacnetPointState> {
-    val parameterList = mutableListOf<BacnetPointState>()
+ fun getBacnetPoints(points: List<BacnetPoint>, isPaired : Boolean = true): SnapshotStateList<BacnetPointState> {
+    val parameterList = mutableStateListOf<BacnetPointState>()
     if (Objects.nonNull(points)) {
         for (bacnetPoint in points) {
             if(!isPaired) {

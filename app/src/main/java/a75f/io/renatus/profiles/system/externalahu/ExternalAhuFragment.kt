@@ -614,6 +614,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                         viewModel.configTypeRadioOption.value = ExternalAhuViewModel.ConfigType.MODBUS
                                         setStateChanged()
                                         resetModelName()
+                                        viewModel.resetBacnetView()
                                     }
                                 }
                             }
@@ -634,7 +635,9 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                         }
                     }
                     item {
-                        BacnetButtons()
+                        if (viewModel.configTypeRadioOption.value == ExternalAhuViewModel.ConfigType.BACNET) {
+                            BacnetButtons()
+                        }
                     }
                     item {
                         SaveConfig()
@@ -830,7 +833,9 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             if(!viewModel.bacnetModel.value.isDevicePaired){
                 if(viewModel.deviceId.value.isNotEmpty()
                     && viewModel.destinationIp.value.isNotEmpty()
-                    && viewModel.destinationPort.value.isNotEmpty()) {
+                    && viewModel.destinationPort.value.isNotEmpty()
+                    && viewModel.bacnetModel.value.points.isNotEmpty()
+                    ) {
                     isEnabledFetch = true
                 }
             }
@@ -1541,81 +1546,6 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
         ParametersListView(data = viewModel.equipModel, indexForSelectAllRelay = -1)
         SubEquipments(viewModel.equipModel)
         setStateChanged()
-    }
-
-    @Composable
-    fun ParametersListViewBacnet(data: MutableState<BacnetModel>) {
-        if (data.value.points.isNotEmpty()) {
-            var index = 0
-            while (index < data.value.points.size) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 30.dp)
-                        .wrapContentHeight()
-                ) {
-                    for (rowIndex in 0 until 1) {
-                        if (index < data.value.points.size) {
-                            var item = data.value.points[index]
-                            if(!item.equipTagNames.contains("heartbeat")){
-                                Row {
-                                    Box(modifier = Modifier
-                                        .weight(3f)
-                                        .padding(top = 10.dp, bottom = 10.dp)) {
-                                        Row {
-                                            val images = listOf(
-                                                R.drawable.ic_arrow_down,
-                                                R.drawable.ic_arrow_right
-                                            )
-                                            var clickedImageIndex by remember { mutableStateOf(0) }
-                                            ImageViewComposable(images, "") {
-                                                clickedImageIndex =
-                                                    (clickedImageIndex + 1) % images.size
-                                                item.displayInEditor.value = !item.displayInEditor.value
-                                            }
-                                            Box(modifier = Modifier.width(20.dp)) { }
-                                            if (item.disName.isNotEmpty()) {
-                                                HeaderTextViewMultiLine(item.disName)
-                                            } else {
-                                                HeaderTextViewMultiLine(item.name)
-                                            }
-
-                                        }
-                                    }
-
-                                    Box(modifier =
-                                    Modifier.weight(3f).padding(top = 10.dp, bottom = 10.dp)
-                                    ) {
-                                        ToggleButton(item.displayInUi.value) {
-                                            // need to fix below 2 lines
-                                            item.displayInUi.value = it
-                                            viewModel.updateSelectAll(it, item)
-                                            setStateChanged()
-                                        }
-                                    }
-                                    val pointDisplayValue: String = if(item.defaultValue == "null" || item.defaultValue == null)
-                                        "-" else{
-                                        "${item.defaultValue} ${item.defaultUnit}"
-                                    }
-
-                                    Box(modifier =
-                                    Modifier.weight(1f).padding(top = 10.dp, bottom = 10.dp), contentAlignment = Alignment.Center
-                                    ) { LabelTextView(pointDisplayValue, fontSize = 22) }
-                                }
-
-                                if (item.displayInEditor.value) {
-                                    populateProperties(item)
-                                }
-
-                                Divider(color = Color.Gray, modifier = Modifier.padding(0.dp, 5.dp, 0.dp, 5.dp))
-                            }
-                            index++
-                        }
-                    }
-
-                }
-            }
-        }
     }
 
     @Composable

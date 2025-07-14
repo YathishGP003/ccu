@@ -361,9 +361,6 @@ class CustomScheduleManager {
         val eventScheduleId = eventSchedule.id.toString()
         val pointDis = point.get(Tags.DIS).toString().split("-")
 
-        var isWriteToDeviceReq: Boolean
-        val priorityVal = haystack.readPointPriorityVal(pointId)
-
 
         // if point has eventDefinitions
         if (point.has("eventDefinitions")) {

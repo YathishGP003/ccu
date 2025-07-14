@@ -27,11 +27,6 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/qa/'
       ArtifactName: qaApk
-  - task: WhiteSource@21
-    inputs:
-      cwd: '$(System.DefaultWorkingDirectory)'
-      projectName: 'ccu'
-      scanReportTimeout: '5'
 
 - job: Job_2
   displayName: Build APK Stagig

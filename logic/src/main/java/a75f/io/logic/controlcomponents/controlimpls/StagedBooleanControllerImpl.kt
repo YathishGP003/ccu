@@ -53,7 +53,7 @@ class StagedBooleanControllerImpl(
         onConstraints.toSortedMap().forEach { (stage, constraints) ->
             val shouldTurnOn = constraints.any { it() }
             if (stageUpTimer.readPriorityVal() > 0) {
-                if (shouldTurnOn && !isStageUpTimerActive() && !currentStages.getOrDefault(stage, false)) {
+                if (shouldTurnOn && !isStageUpTimerActive() && !isStageDownTimerActive() && !currentStages.getOrDefault(stage, false)) {
                     activateStageUpTimer()
                     currentStages[stage] = true
                 }
@@ -75,7 +75,9 @@ class StagedBooleanControllerImpl(
                     if (stage != 0 && currentStages.getOrDefault(stage - 1, false) && !isStageUpTimerActive()) {
                         activateStageDownTimer()
                     }
-                    currentStages[stage] = false
+                    if (!isStageUpTimerActive()) {
+                        currentStages[stage] = false
+                    }
                 }
             } else {
                 if (shouldTurnOff && currentStages.getOrDefault(stage, false)) {

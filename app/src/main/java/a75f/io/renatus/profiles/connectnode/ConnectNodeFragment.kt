@@ -1,6 +1,7 @@
 package a75f.io.renatus.profiles.connectnode
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.NodeType
@@ -123,6 +124,8 @@ class ConnectNodeFragment : BaseDialogFragment(), OnPairingCompleteListener {
                         viewModel.saveConfiguration()
                         arguments?.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
                             ?.let { showSuccessToast("Connect Node", it.toInt(), requireContext()) }
+                        // Send seed message when connect module is added
+                        LSerial.getInstance().setResetSeedMessage(true)
                         // Initialize background services after saving configuration
                         context?.let { BackgroundServiceInitiator.initializeServices(it.applicationContext) }
                     },

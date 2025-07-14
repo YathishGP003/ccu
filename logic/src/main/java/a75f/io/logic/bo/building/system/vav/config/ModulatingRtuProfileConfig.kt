@@ -560,6 +560,12 @@ open class ModulatingRtuProfileConfig(open val model: SeventyFiveFProfileDirecti
         return (relay3OutputEnable.enabled && relay3Association.associationVal == mapping) ||
                 (relay7OutputEnable.enabled && relay7Association.associationVal == mapping)
     }
+    fun isAnyAnalogMapped(mapping: Int) : Boolean{
+        return (analog1OutputEnable.enabled && analog1OutputAssociation.associationVal == mapping) ||
+                (analog2OutputEnable.enabled && analog2OutputAssociation.associationVal == mapping) ||
+                (analog3OutputEnable.enabled && analog3OutputAssociation.associationVal == mapping) ||
+                (analog4OutputEnable.enabled && analog4OutputAssociation.associationVal == mapping)
+    }
 
     fun isAnyAnalogMappedToCompressor() : Boolean {
         return (analog1OutputEnable.enabled && analog1OutputAssociation.associationVal

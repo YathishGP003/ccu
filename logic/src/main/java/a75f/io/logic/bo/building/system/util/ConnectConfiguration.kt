@@ -658,6 +658,9 @@ class ConnectConfiguration(open val model: SeventyFiveFProfileDirective, nodeAdd
                 " address1Enabled=${address1Enabled.enabled}," + "\naddress2Enabled=${address2Enabled.enabled}, " +
                 "address3Enabled=${address3Enabled.enabled}," + " pressureEnabled: $sensorBus0PressureEnabled" +
                 "\nuniversal1InEnabled=${universal1InEnabled.enabled}," + " universal2InEnabled=${universal2InEnabled.enabled}, " +
+                "\nuniversal3InEnabled=${universal3InEnabled.enabled}, " + "universal4InEnabled=${universal4InEnabled.enabled}," +
+                "\nuniversal5InEnabled=${universal5InEnabled.enabled}, " + "universal6InEnabled=${universal6InEnabled.enabled}," +
+                "\nuniversal7InEnabled=${universal7InEnabled.enabled}, " + "universal8InEnabled=${universal8InEnabled.enabled}," +
                 "\nuniversal1InAssociation=${universal1InAssociation.associationVal}, " + "universal2InAssociation=${universal2InAssociation.associationVal}," +
                 "\nuniversal3InAssociation=${universal3InAssociation.associationVal}, " + "universal4InAssociation=${universal4InAssociation.associationVal}," +
                 "\nuniversal5InAssociation=${universal5InAssociation.associationVal}, " + "universal6InAssociation=${universal6InAssociation.associationVal}," +

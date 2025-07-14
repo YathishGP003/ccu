@@ -15,9 +15,7 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.equips.TIEquip
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
-import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationTypeConnect
 import a75f.io.logic.bo.building.system.AdvancedAhuRelayAssociationType
 import a75f.io.logic.bo.building.system.UniversalInputAssociationType
 import a75f.io.logic.bo.building.system.connectRelayAssociationToDomainName
@@ -93,10 +91,10 @@ private fun isAnyUniversalMapped(config:ConnectConfiguration , mappedTo: Univers
 }
 private fun isAnySensorBusMappedTempSensor(config:ConnectConfiguration, mappedTo: TemperatureSensorBusMapping): Boolean {
     return listOf(
-        config.address0Enabled to config.address1SensorAssociation,
+        config.address0Enabled to config.address0SensorAssociation,
         config.address1Enabled to config.address1SensorAssociation,
-        config.address2Enabled to config.address1SensorAssociation,
-        config.address3Enabled to config.address1SensorAssociation
+        config.address2Enabled to config.address2SensorAssociation,
+        config.address3Enabled to config.address3SensorAssociation
     ).any { (enabled, association) -> isSensorBusMappedConnectModule(enabled,association, mappedTo) }
 }
 
@@ -609,7 +607,6 @@ fun isValidateConfiguration(
         }
         //MAT, SAT AND OAT MAPPING VALIDATION
         if (analogOutMappedToOaoDamper && ((!(isAnyUniversalMapped(config.connectConfiguration,UniversalInputAssociationType.MIXED_AIR_TEMPERATURE) || isAnySensorBusMappedTempSensor(config.connectConfiguration,TemperatureSensorBusMapping.mixedAirTemperature))) ||
-            (!(isSupplyAirTemperatureMappedInSensorBusOrUniversal(config).first || isSupplyAirTemperatureMappedInSensorBusOrUniversal(config).second)) ||
             (!isAnyUniversalMapped(config.connectConfiguration,UniversalInputAssociationType.OUTSIDE_TEMPERATURE)))
         ) {
             return Pair(false, Html.fromHtml(MAT_OAT_SAT_NOT_MAPPED, Html.FROM_HTML_MODE_LEGACY))

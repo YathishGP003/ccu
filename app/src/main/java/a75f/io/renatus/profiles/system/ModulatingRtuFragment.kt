@@ -6,12 +6,9 @@ import a75f.io.renatus.composables.AddInputWidget
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.MinMaxConfiguration
 import a75f.io.renatus.composables.SystemAnalogOutMappingDropDown
-import a75f.io.renatus.composables.SystemAnalogOutMappingView
-import a75f.io.renatus.composables.SystemAnalogOutMappingViewButtonComposable
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
-import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -275,7 +272,7 @@ open class ModulatingRtuFragment : Fragment() {
                 heightValue = 100,
                 onSelected = onMappingChanged,
                 defaultSelection = mappingSelection,
-                isEnabled = viewModel.viewState.value.isRelay7OutputEnabled
+                isEnabled = relayState
             )
 
             var buttonState by remember { mutableStateOf(buttonState) }
@@ -406,8 +403,8 @@ open class ModulatingRtuFragment : Fragment() {
         }
         when (viewModel.viewState.value.analog1OutputAssociation) {
             0 -> {
-                MinMaxConfiguration("Analog-out1 at Min \nFan Speed",
-                    "Analog-out1 at Max \nFan Speed",
+                MinMaxConfiguration("Analog-Out1 at Min \nFan Speed",
+                    "Analog-Out1 at Max \nFan Speed",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog1OutMinMaxConfig.fanSignalConfig.min.toString(),
@@ -424,8 +421,8 @@ open class ModulatingRtuFragment : Fragment() {
                     })
             }
             1 -> {
-                MinMaxConfiguration("Analog-out1 at Min \nCompressor Speed",
-                    "Analog-out1 at Max \nCompressor Speed",
+                MinMaxConfiguration("Analog-Out1 at Min \nCompressor Speed",
+                    "Analog-Out1 at Max \nCompressor Speed",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog1OutMinMaxConfig.compressorSpeedConfig.min.toString(),
@@ -442,8 +439,8 @@ open class ModulatingRtuFragment : Fragment() {
                     })
             }
             2 -> {
-                MinMaxConfiguration("Analog-out1 at Min \nOutside Air Damper",
-                    "Analog-out1 at Max \nOutside Air Damper",
+                MinMaxConfiguration("Analog-Out1 at Min \nOutside Air Damper",
+                    "Analog-Out1 at Max \nOutside Air Damper",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog1OutMinMaxConfig.outsideAirDamperConfig.min.toString(),
@@ -460,8 +457,8 @@ open class ModulatingRtuFragment : Fragment() {
                     })
             }
             3 -> {
-                MinMaxConfiguration("Analog-out1 at Min \nCooling Signal",
-                    "Analog-out1 at Max \nCooling Signal",
+                MinMaxConfiguration("Analog-Out1 at Min \nCooling Signal",
+                    "Analog-Out1 at Max \nCooling Signal",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog1OutMinMaxConfig.coolingSignalConfig.min.toString(),
@@ -478,8 +475,8 @@ open class ModulatingRtuFragment : Fragment() {
                     })
             }
             4 -> {
-                MinMaxConfiguration("Analog-out1 at Min \nHeating Signal",
-                    "Analog-out1 at Max \nHeating Signal",
+                MinMaxConfiguration("Analog-Out1 at Min \nHeating Signal",
+                    "Analog-Out1 at Max \nHeating Signal",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog1OutMinMaxConfig.heatingSignalConfig.min.toString(),
@@ -505,8 +502,8 @@ open class ModulatingRtuFragment : Fragment() {
         }
         when (viewModel.viewState.value.analog2OutputAssociation) {
             0 -> {
-                MinMaxConfiguration("Analog-out2 at Min \nFan Speed",
-                    "Analog-out2 at Max \nFan Speed",
+                MinMaxConfiguration("Analog-Out2 at Min \nFan Speed",
+                    "Analog-Out2 at Max \nFan Speed",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog2OutMinMaxConfig.fanSignalConfig.min.toString(),
@@ -523,8 +520,8 @@ open class ModulatingRtuFragment : Fragment() {
                     })
             }
             1 -> {
-                MinMaxConfiguration("Analog-out2 at Min \nCompressor Speed",
-                    "Analog-out2 at Max \nCompressor Speed",
+                MinMaxConfiguration("Analog-Out2 at Min \nCompressor Speed",
+                    "Analog-Out2 at Max \nCompressor Speed",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog2OutMinMaxConfig.compressorSpeedConfig.min.toString(),
@@ -541,8 +538,8 @@ open class ModulatingRtuFragment : Fragment() {
                     })
             }
             2 -> {
-                MinMaxConfiguration("Analog-out2 at Min \nOutside Air Damper",
-                    "Analog-out2 at Max \nOutside Air Damper",
+                MinMaxConfiguration("Analog-Out2 at Min \nOutside Air Damper",
+                    "Analog-Out2 at Max \nOutside Air Damper",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog2OutMinMaxConfig.outsideAirDamperConfig.min.toString(),
@@ -559,8 +556,8 @@ open class ModulatingRtuFragment : Fragment() {
                     })
             }
             3 -> {
-                MinMaxConfiguration("Analog-out2 at Min \nCooling Signal",
-                    "Analog-out2 at Max \nCooling Signal",
+                MinMaxConfiguration("Analog-Out2 at Min \nCooling Signal",
+                    "Analog-Out2 at Max \nCooling Signal",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog2OutMinMaxConfig.coolingSignalConfig.min.toString(),
@@ -577,8 +574,8 @@ open class ModulatingRtuFragment : Fragment() {
                     })
             }
             4 -> {
-                MinMaxConfiguration("Analog-out2 at Min \nHeating Signal",
-                    "Analog-out2 at Max \nHeating Signal",
+                MinMaxConfiguration("Analog-Out2 at Min \nHeating Signal",
+                    "Analog-Out2 at Max \nHeating Signal",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog2OutMinMaxConfig.heatingSignalConfig.min.toString(),
@@ -604,8 +601,8 @@ open class ModulatingRtuFragment : Fragment() {
         }
         when (viewModel.viewState.value.analog3OutputAssociation) {
             0 -> {
-                MinMaxConfiguration("Analog-out3 at Min \nFan Speed",
-                    "Analog-out3 at Max \nFan Speed",
+                MinMaxConfiguration("Analog-Out3 at Min \nFan Speed",
+                    "Analog-Out3 at Max \nFan Speed",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog3OutMinMaxConfig.fanSignalConfig.min.toString(),
@@ -622,8 +619,8 @@ open class ModulatingRtuFragment : Fragment() {
                     })
             }
             1 -> {
-                MinMaxConfiguration("Analog-out3 at Min \nCompressor Speed",
-                    "Analog-out3 at Max \nCompressor Speed",
+                MinMaxConfiguration("Analog-Out3 at Min \nCompressor Speed",
+                    "Analog-Out3 at Max \nCompressor Speed",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog3OutMinMaxConfig.compressorSpeedConfig.min.toString(),
@@ -641,7 +638,7 @@ open class ModulatingRtuFragment : Fragment() {
             }
             2 -> {
                 MinMaxConfiguration("Analog-out3 at Min \nOutside Air Damper",
-                    "Analog-out3 at Max \nOutside Air Damper",
+                    "Analog-Out3 at Max \nOutside Air Damper",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog3OutMinMaxConfig.outsideAirDamperConfig.min.toString(),
@@ -658,8 +655,8 @@ open class ModulatingRtuFragment : Fragment() {
                     })
             }
             3 -> {
-                MinMaxConfiguration("Analog-out3 at Min \nCooling Signal",
-                    "Analog-out3 at Max \nCooling Signal",
+                MinMaxConfiguration("Analog-Out3 at Min \nCooling Signal",
+                    "Analog-Out3 at Max \nCooling Signal",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog3OutMinMaxConfig.coolingSignalConfig.min.toString(),
@@ -676,8 +673,8 @@ open class ModulatingRtuFragment : Fragment() {
                     })
             }
             4 -> {
-                MinMaxConfiguration("Analog-out3 at Min \nHeating Signal",
-                    "Analog-out3 at Max \nHeating Signal",
+                MinMaxConfiguration("Analog-Out3 at Min \nHeating Signal",
+                    "Analog-Out3 at Max \nHeating Signal",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog3OutMinMaxConfig.heatingSignalConfig.min.toString(),
@@ -703,8 +700,8 @@ open class ModulatingRtuFragment : Fragment() {
         }
         when (viewModel.viewState.value.analog4OutputAssociation) {
             0 -> {
-                MinMaxConfiguration("Analog-out4 at Min \nFan Speed",
-                    "Analog-out4 at Max \nFan Speed",
+                MinMaxConfiguration("Analog-Out4 at Min \nFan Speed",
+                    "Analog-Out4 at Max \nFan Speed",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog4OutMinMaxConfig.fanSignalConfig.min.toString(),
@@ -722,8 +719,8 @@ open class ModulatingRtuFragment : Fragment() {
             }
 
             1 -> {
-                MinMaxConfiguration("Analog-out4 at Min \nCompressor Speed",
-                    "Analog-out4 at Max \nCompressor Speed",
+                MinMaxConfiguration("Analog-Out4 at Min \nCompressor Speed",
+                    "Analog-Out4 at Max \nCompressor Speed",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog4OutMinMaxConfig.compressorSpeedConfig.min.toString(),
@@ -741,8 +738,8 @@ open class ModulatingRtuFragment : Fragment() {
             }
 
             2 -> {
-                MinMaxConfiguration("Analog-out4 at Min \nOutside Air Damper",
-                    "Analog-out4 at Max \nOutside Air Damper",
+                MinMaxConfiguration("Analog-Out4 at Min \nOutside Air Damper",
+                    "Analog-Out4 at Max \nOutside Air Damper",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog4OutMinMaxConfig.outsideAirDamperConfig.min.toString(),
@@ -760,8 +757,8 @@ open class ModulatingRtuFragment : Fragment() {
             }
 
             3 -> {
-                MinMaxConfiguration("Analog-out4 at Min \nCooling Signal",
-                    "Analog-out4 at Max \nCooling Signal",
+                MinMaxConfiguration("Analog-Out4 at Min \nCooling Signal",
+                    "Analog-Out4 at Max \nCooling Signal",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog4OutMinMaxConfig.coolingSignalConfig.min.toString(),
@@ -779,8 +776,8 @@ open class ModulatingRtuFragment : Fragment() {
             }
 
             4 -> {
-                MinMaxConfiguration("Analog-out4 at Min \nHeating Signal",
-                    "Analog-out4 at Max \nHeating Signal",
+                MinMaxConfiguration("Analog-Out4 at Min \nHeating Signal",
+                    "Analog-Out4 at Max \nHeating Signal",
                     viewModel.minMaxVoltage,
                     "V",
                     minDefault = viewModel.viewState.value.analog4OutMinMaxConfig.heatingSignalConfig.min.toString(),

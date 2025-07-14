@@ -16,14 +16,15 @@ import a75f.io.domain.util.allSystemProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.hvac.ModulatingProfileAnalogMapping
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
 import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.haystack.device.ControlMote
+import a75f.io.logic.util.modifyConditioningMode
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
 import a75f.io.renatus.util.SystemProfileUtil
 import a75f.io.renatus.util.TestSignalManager
-import a75f.io.logic.util.modifyConditioningMode
 import android.app.Activity
 import android.content.Context
 import androidx.compose.runtime.MutableState
@@ -145,10 +146,12 @@ open class ModulatingRtuViewModel : ViewModel() {
 
     fun updateSystemMode() {
         val systemProfile = L.ccu().systemProfile
+        val (coolingAvailable, heatingAvailable) = checkCoolingAndHeatingAvailable()
+        CcuLog.i(L.TAG_CCU_DOMAIN, " Modulating profile   [ Cooling Available: $coolingAvailable, Heating Available: $heatingAvailable ]")
         val possibleConditioningMode = when {
-            systemProfile.isCoolingAvailable && systemProfile.isHeatingAvailable -> PossibleConditioningMode.BOTH
-            systemProfile.isCoolingAvailable && !systemProfile.isHeatingAvailable -> PossibleConditioningMode.COOLONLY
-            !systemProfile.isCoolingAvailable && systemProfile.isHeatingAvailable -> PossibleConditioningMode.HEATONLY
+            coolingAvailable && heatingAvailable -> PossibleConditioningMode.BOTH
+            coolingAvailable && !heatingAvailable -> PossibleConditioningMode.COOLONLY
+            !coolingAvailable && heatingAvailable -> PossibleConditioningMode.HEATONLY
             else -> PossibleConditioningMode.OFF
         }
         val conditioningMode = Point(DomainName.conditioningMode, Domain.systemEquip.equipRef)
@@ -212,4 +215,13 @@ open class ModulatingRtuViewModel : ViewModel() {
         }
         CcuLog.i(L.TAG_CCU_DOMAIN, "Time taken to delete entities: $deleteTime")
     }
+
+    private fun checkCoolingAndHeatingAvailable(): Pair<Boolean, Boolean> = with(profileConfiguration) {
+        if (isAnyAnalogMappedToCompressor()) {
+            Pair(true, true)
+        } else {
+            Pair(isAnyAnalogMapped(ModulatingProfileAnalogMapping.Cooling.ordinal), isAnyAnalogMapped(ModulatingProfileAnalogMapping.Heating.ordinal))
+        }
+    }
+
 }

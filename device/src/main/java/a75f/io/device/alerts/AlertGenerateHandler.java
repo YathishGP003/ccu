@@ -12,7 +12,10 @@ import static a75f.io.alerts.AlertsConstantsKt.FIRMWARE_OTA_UPDATE_ENDED;
 import static a75f.io.alerts.AlertsConstantsKt.FIRMWARE_OTA_UPDATE_STARTED;
 import static a75f.io.alerts.AlertsConstantsKt.FSV_REBOOT;
 
+import java.util.HashMap;
+
 import a75f.io.alerts.AlertManager;
+import a75f.io.api.haystack.CCUHsApi;
 
 /**
  * Created by mahesh on 26-11-2019.
@@ -52,21 +55,29 @@ public class AlertGenerateHandler {
         switch (cmd) {
             case DEVICE_REBOOT:
                 alertManager.fixActiveDeviceRebootAlert(deviceRef);
-                alertManager.generateAlert(DEVICE_REBOOT, msg, deviceRef);
+                alertManager.generateAlert(DEVICE_REBOOT, msg, getEquipRef(deviceRef));
                 break;
             case DEVICE_DEAD:
-                alertManager.generateAlert(DEVICE_DEAD, msg, deviceRef);
+                alertManager.generateAlert(DEVICE_DEAD, msg, getEquipRef(deviceRef));
                 break;
             case DEVICE_LOW_SIGNAL:
-                alertManager.generateAlert(DEVICE_LOW_SIGNAL, msg, deviceRef);
+                alertManager.generateAlert(DEVICE_LOW_SIGNAL, msg, getEquipRef(deviceRef));
                 break;
             case FIRMWARE_OTA_UPDATE_STARTED:
-                alertManager.generateAlert(FIRMWARE_OTA_UPDATE_STARTED, msg, deviceRef);
+                alertManager.generateAlert(FIRMWARE_OTA_UPDATE_STARTED, msg, getEquipRef(deviceRef));
                 break;
             case FIRMWARE_OTA_UPDATE_ENDED:
-                alertManager.generateAlert(FIRMWARE_OTA_UPDATE_ENDED, msg, deviceRef);
+                alertManager.generateAlert(FIRMWARE_OTA_UPDATE_ENDED, msg, getEquipRef(deviceRef));
                 break;
         }
+    }
+
+    private static String getEquipRef(String deviceRef) {
+        HashMap<Object, Object> device = CCUHsApi.getInstance().readMapById(deviceRef);
+        if (device == null) {
+            return deviceRef;
+        }
+        return device.get("equipRef").toString();
     }
 
 }

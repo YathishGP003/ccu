@@ -881,7 +881,7 @@ fun sendWriteRequestToBacnetEquip(
     }
     var defaultPriority = pointMap["defaultWriteLevel"].toString()
     if (isPointFollowingScheduleOrEvent(pointId)) {
-        defaultPriority = "" + HayStackConstants.FORCE_OVERRIDE_LEVEL
+        defaultPriority = level
     }
     var bacnetObjectId = pointMap[Tags.BACNET_OBJECT_ID]?.toString()?.toDouble()?.toInt()
     val group = pointMap[Tags.GROUP]?.toString()?.toIntOrNull()

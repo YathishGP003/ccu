@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -138,6 +139,7 @@ public class ModbusPulse {
             return;
         }
         HashMap logPoint = hayStack.read("point and id==" + phyPoint.get("pointRef"));
+//        double priorityVal = hayStack.readPointPriorityVal(logPoint.get("id").toString());
         CcuLog.d(L.TAG_CCU_MODBUS,"Response data : "+Arrays.toString(response.getMessageData()));
         double formattedVal = 0;
         switch (UsbModbusUtils.validateFunctionCode(registerType)){
@@ -149,7 +151,9 @@ public class ModbusPulse {
                 hayStack.writeHisValById(logPoint.get("id").toString(),formattedVal);
                 hayStack.writeHisValById(phyPoint.get("id").toString(), formattedVal);
                 
-                if (logPoint.containsKey("writable")) {
+                if (logPoint.containsKey("writable") &&
+                        !(logPoint.containsKey(Tags.SCHEDULABLE)
+                        && (logPoint.containsKey(Tags.SCHEDULE_REF) || logPoint.containsKey(Tags.EVENT_REF)))) {
                     hayStack.writePoint(logPoint.get("id").toString(), formattedVal);
                 }
                 //startIndex +=2;
@@ -168,6 +172,16 @@ public class ModbusPulse {
                                         " Val "+formattedVal);
 
         LModbus.getModbusCommLock().unlock();
+//        if ((priorityVal != formattedVal) && logPoint.containsKey("writable") && (logPoint.containsKey(Tags.SCHEDULABLE)
+//                        && (logPoint.containsKey(Tags.SCHEDULE_REF) || logPoint.containsKey(Tags.EVENT_REF)))) {
+//            CcuLog.d(L.TAG_CCU_MODBUS, "Received Modbus value is different from Haystack priority value. " +
+//                    "Haystack priority value: " + priorityVal + ", Modbus value: " + formattedVal + ", hence sending the priority data to the device.");
+//            if(readRegister.parameterDefinitionType.equals("float")) {
+//                LModbus.writeRegister(Integer.parseInt(logPoint.get("group").toString()), readRegister, (float) priorityVal);
+//            }  else {
+//                LModbus.writeRegister(Integer.parseInt(logPoint.get("group").toString()), readRegister, (int) priorityVal);
+//            }
+//        }
     }
     
     public static double getRegisterValFromResponse(Register register, RtuMessageResponse response) {

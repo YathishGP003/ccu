@@ -74,6 +74,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.util.Objects
 import kotlin.math.roundToInt
+import a75f.io.util.*
 
 /**
  * Created by Manjunath K on 27-10-2023.
@@ -341,15 +342,15 @@ fun mapBacnetPoint(
             val wholeNumber = value.toInt()
             //val bacnetWholeNumber = wholeNumber
             updatePointValueChanges(pointId, haystack, setPointsList, wholeNumber.toDouble())
-            doMakeRequest(BacnetServicesUtils().getConfig(bacnetConfig), bacnetObjectId, wholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
+            doMakeRequest(getConfig(bacnetConfig), bacnetObjectId, wholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
         }else if(BacNetConstants.ObjectType.OBJECT_BINARY_VALUE.key == getObjectType(objectType)){
             val wholeNumber = value.toInt()
             //  val bacnetWholeNumber = wholeNumber - 1
             updatePointValueChanges(pointId, haystack, setPointsList, wholeNumber.toDouble())
-            doMakeRequest(BacnetServicesUtils().getConfig(bacnetConfig), bacnetObjectId, wholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
+            doMakeRequest(getConfig(bacnetConfig), bacnetObjectId, wholeNumber.toString(),getObjectType(objectType), defaultPriority, pointId)
         }else{
             updatePointValueChanges(pointId, haystack, setPointsList, value)
-            doMakeRequest(BacnetServicesUtils().getConfig(bacnetConfig), bacnetObjectId, value.toString(),getObjectType(objectType), defaultPriority, pointId)
+            doMakeRequest(getConfig(bacnetConfig), bacnetObjectId, value.toString(),getObjectType(objectType), defaultPriority, pointId)
         }
 
     } else {

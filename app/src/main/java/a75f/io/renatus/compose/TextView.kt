@@ -293,7 +293,7 @@ fun LabelTextViewForTable(text: String, modifier: Modifier, fontSize: Int = 20, 
             textAlign = textAlign,
         ),
         maxLines = 1,
-        text = text
+        text = text,
     )
 }
 
@@ -486,19 +486,30 @@ fun SubTitle(text: String,modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun SubTitleNoPadding(text: String, modifier: Modifier = Modifier, fontSize: Float = 20.0f, fontWeight: FontWeight = FontWeight.Bold) {
+fun SubTitleNoPadding(
+    text: String,
+    modifier: Modifier = Modifier,
+    fontSize: Float = 20.0f,
+    fontWeight: FontWeight = FontWeight.Bold,
+    color : Color = greyColor,
+    textAlignment: TextAlign = TextAlign.Center,
+    textOverflow: TextOverflow = TextOverflow.Clip,
+    maxLines: Int = Int.MAX_VALUE
+) {
 
     Text(
         modifier = modifier
             .wrapContentHeight(),
         style = TextStyle(
-            textAlign = TextAlign.Center,
+            textAlign = textAlignment,
             fontWeight = fontWeight,
             fontFamily = myFontFamily,
             fontSize =  fontSize.sp,
-            color = greyColor
+            color = color,
         ),
-        text = text
+        text = text,
+        overflow = textOverflow,
+        maxLines = maxLines
     )
 }
 
@@ -548,8 +559,8 @@ fun SaveTextViewNewExtraBold(onClick: () -> Unit) {
         Image( painter = painterResource(id = R.drawable.font_awesome_close),
                 contentDescription = "Custom Icon",
                 modifier = Modifier
-                        .size(24.dp)
-                        .padding(top = 0.dp),
+                    .size(24.dp)
+                    .padding(top = 0.dp),
                 colorFilter = ColorFilter.tint(primaryColor))
     }
 }
@@ -571,7 +582,9 @@ fun TextViewWithClick(text: MutableState<String>, onClick: () -> Unit, enableCli
             onValueChange = { text.value = it },
             enabled = false,
             readOnly = !enableClick,
-            modifier = modifier.fillMaxHeight().width(300.dp),
+            modifier = modifier
+                .fillMaxHeight()
+                .width(300.dp),
             maxLines = 1,
             textStyle = TextStyle(
                 fontFamily = myFontFamily,
@@ -601,7 +614,10 @@ fun TextViewWithClick(text: MutableState<String>, onClick: () -> Unit, enableCli
             },
         )
         Divider(
-            Modifier.width(280.dp).padding(top = 0.dp, start = 13.dp).offset(x = 5.dp, y = (-10).dp))
+            Modifier
+                .width(280.dp)
+                .padding(top = 0.dp, start = 13.dp)
+                .offset(x = 5.dp, y = (-10).dp))
     }
 }
 

@@ -1,6 +1,7 @@
 package a75f.io.renatus.modbus;
 
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
+import static a75f.io.logic.bo.util.CustomScheduleUtilKt.isPointFollowingScheduleOrEvent;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -19,9 +20,13 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.tooltip.Tooltip;
+
+import org.projecthaystack.HDict;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,6 +49,7 @@ import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.renatus.views.userintent.UserIntentDialog;
 import a75f.io.util.ExecutorTask;
 
 public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRecyclerModbusParamAdapter.ViewHolder> implements ModbusDataInterface {
@@ -108,7 +114,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                         Paint paint = new Paint();
                         String unit = null;
                         List<Command> commands = new ArrayList<>();
-                        Point p = readPoint(modbusParam.get(position));
+                        final Point p = readPoint(modbusParam.get(position));
                         int minSpinnerLength = 0;
                         if (modbusParam.get(position).getCommands() != null && modbusParam.get(position).getCommands().size() > 0) {
                             HashMap<String, List<Command>> userIntentsMap = getUserIntentsCommandMap(modbusParam.get(position));
@@ -150,8 +156,18 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                         //added the touch listener , while setting the spinner value to avoid  writing value to device
                         viewHolder.spValue.setOnTouchListener((v, event) -> {
                             if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_UP) {
-                                v.performClick();
-                                userAction = true;
+                                if(p != null && isPointFollowingScheduleOrEvent(p.getId())) {
+                                    FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
+                                    if (!UserIntentDialog.Companion.isDialogAlreadyVisible()) {
+                                        UserIntentDialog userIntentDialog = new UserIntentDialog(p.getId(), v);
+                                        userIntentDialog.show(fragmentManager, "UserIntentDialog");
+                                    }
+                                    userAction = true;
+                                    return true;
+                                } else {
+                                    v.performClick();
+                                    userAction = true;
+                                }
                             }
                             return false;
                         });
@@ -356,33 +372,33 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         //every logical tag combination is not unique.
 
         if (isConnectNodeView) {
-            HashMap logicalPoint = CCUHsApi.getInstance().readEntity("point " +
+            HDict logicalPoint = CCUHsApi.getInstance().readHDict("point " +
                     " and registerType == \""+configParams.getRegisterType()+"\""+
                     " and registerAddress == \""+configParams.getRegisterAddress()+ "\""+
                     " and equipRef == \"" + equipRef + "\"");
 
-            if (logicalPoint.isEmpty()) {
+            if (logicalPoint == null || logicalPoint.isEmpty()) {
                 return null;
             }
-            return new Point.Builder().setHashMap(logicalPoint).build();
+            return new Point.Builder().setHDict(logicalPoint).build();
         }
-        HashMap phyPoint = CCUHsApi.getInstance().read("point and physical " +
+        HDict phyPoint = CCUHsApi.getInstance().readHDict("point and physical " +
                                          " and registerType == \""+configParams.getRegisterType()+"\""+
                                          " and registerAddress == \""+configParams.getRegisterAddress()+ "\""+
                                          " and parameterId == \""+configParams.getParameterId()+ "\""+
                                          " and deviceRef == \"" + deviceRef + "\"");
     
-        if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
+        if (phyPoint.get("pointRef", false) == null || phyPoint.get("pointRef").toString().equals("")) {
             CcuLog.d(L.TAG_CCU_MODBUS, "Physical point does not exist for register "
                                     + configParams.getRegisterAddress() + " and device " + deviceRef);
             return null;
         }
-        HashMap logPoint = CCUHsApi.getInstance().read("point and id == " + phyPoint.get("pointRef"));
+        HDict logPoint = CCUHsApi.getInstance().readHDict("point and id == " + phyPoint.get("pointRef"));
         
-        if (logPoint.isEmpty()) {
+        if (logPoint == null || logPoint.isEmpty()) {
             return null;
         }
-        return new Point.Builder().setHashMap(logPoint).build();
+        return new Point.Builder().setHDict(logPoint).build();
     }
 
     public double readVal(String id) {
@@ -408,15 +424,19 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
 
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(point.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
-        CCUHsApi.getInstance().writePoint(point.getId(), Double.valueOf(value));
-        if (point.getMarkers().contains("his")) {
-            CCUHsApi.getInstance().writeHisValById(point.getId(), Double.valueOf(value));
+        if(!isPointFollowingScheduleOrEvent(point.getId())) {
+            CCUHsApi.getInstance().writePoint(point.getId(), Double.valueOf(value));
+            if (point.getMarkers().contains("his")) {
+                CCUHsApi.getInstance().writeHisValById(point.getId(), Double.valueOf(value));
+            }
         }
+        double highestPriorityValue = CCUHsApi.getInstance().readPointPriorityVal(point.getId());
         List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
 
         if (isConnectNodeView) {
             ConnectModbusSerialComm.writeToConnectNode(Integer.parseInt(point.getGroup()),
-                    Integer.parseInt(parameter.getRegisterNumber()), Double.parseDouble(value));
+                    Integer.parseInt(parameter.getRegisterNumber()), highestPriorityValue);
+            return;
         }
         if (equip.getEquipRef() != null) {
             EquipmentDevice parentEquip = buildModbusModelByEquipRef(equip.getEquipRef());
@@ -433,9 +453,9 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                         if (pam.getName().equals(parameter.getName())) {
                             // if it connect node view, then write only in int
                             if(register.parameterDefinitionType!=null && register.parameterDefinitionType.equals("float")) {
-                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (float) Double.parseDouble(value));
+                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (float) highestPriorityValue);
                             } else {
-                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) Double.parseDouble(value));
+                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) highestPriorityValue);
                             }
                             break;
                         }

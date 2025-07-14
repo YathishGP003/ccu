@@ -246,7 +246,7 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                 }
                 item {
                     ButtonListRow(
-                        mapOf(
+                        textActionPairMap= mapOf(
                             CANCEL to Pair(true) { closeAllBaseDialogFragments() },
                             SAVE to Pair(true) {
                                 viewModel.updateData()
@@ -1050,7 +1050,7 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                 onDismiss = { showToast = false }
             )
         }
-        ButtonListRow(buttonInfoMap)
+        ButtonListRow(textActionPairMap = buttonInfoMap)
     }
 
     private fun isFetchReady() : Boolean {

@@ -2,6 +2,7 @@ package a75f.io.logic.util.bacnet
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HSUtil
+import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.Tags.BACNET_DEVICE_JOB
 import a75f.io.domain.api.Domain
@@ -25,7 +26,7 @@ import a75f.io.logic.bo.building.system.client.MultiReadResponse
 import a75f.io.logic.bo.building.system.client.RemotePointUpdateInterface
 import a75f.io.logic.bo.building.system.client.ServiceManager
 import a75f.io.logic.bo.building.system.doMakeRequest
-import a75f.io.logic.bo.building.system.getObjectType
+import a75f.io.logic.bo.util.isPointFollowingScheduleOrEvent
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.APDU_SEGMENT_TIMEOUT
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.APDU_TIMEOUT
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.APPLICATION_SOFTWARE_VERSION
@@ -75,6 +76,7 @@ import a75f.io.logic.util.bacnet.BacnetConfigConstants.VENDOR_NAME
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.VENDOR_NAME_VALUE
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.VIRTUAL_NETWORK_NUMBER
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.ZONE_TO_VIRTUAL_DEVICE_MAPPING
+import a75f.io.util.getConfig
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -856,7 +858,7 @@ fun sendWriteRequestToMstpEquip(id : String, level: String, value: String, isMst
             }
 
         bacnetService.sendWriteRequest(
-            bacnetService.generateWriteObject(bacnetService.getConfig(bacnetConfig), bacnetId, value,
+            bacnetService.generateWriteObject(getConfig(bacnetConfig), bacnetId, value,
             "OBJECT_$objectType", level, true),
             serverIpAddress, remotePointUpdateInterface, value, pointId, isMstpEquip)
     }
@@ -877,7 +879,10 @@ fun sendWriteRequestToBacnetEquip(
         CcuLog.e(L.TAG_CCU_BACNET, "Point with id $id not found")
         return
     }
-    val defaultPriority = pointMap["defaultWriteLevel"].toString()
+    var defaultPriority = pointMap["defaultWriteLevel"].toString()
+    if (isPointFollowingScheduleOrEvent(pointId)) {
+        defaultPriority = "" + HayStackConstants.FORCE_OVERRIDE_LEVEL
+    }
     var bacnetObjectId = pointMap[Tags.BACNET_OBJECT_ID]?.toString()?.toDouble()?.toInt()
     val group = pointMap[Tags.GROUP]?.toString()?.toIntOrNull()
     val objectType =

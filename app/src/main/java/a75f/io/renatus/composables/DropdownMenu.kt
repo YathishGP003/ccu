@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,12 +49,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.ExperimentalTextApi
 
 @Composable
 fun DropDownWithLabel(
@@ -138,6 +143,103 @@ fun DropDownWithLabel(
                           )
                        }
                     }
+                LaunchedEffect(expanded) {
+                    lazyListState.scrollToItem(selectedIndex)
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalTextApi::class)
+@Composable
+fun DropDownWithoutLabel(
+    list: List<String>, maxLengthString: String, maxContainerWidth: Dp,
+    onSelected: (Int) -> Unit, defaultSelection: Int = 0,
+    isEnabled : Boolean = true, disabledIndices: List<Int> = emptyList()){
+
+    Row {
+        var expanded by remember { mutableStateOf(false) }
+        var selectedIndex by remember { mutableIntStateOf(defaultSelection) }
+        val lazyListState = rememberLazyListState()
+        val noOfItemsDisplayInDropDown = 8  // This is the number of items to be displayed in the dropdown layout
+        val dropDownHeight = 435 // This is the default height of the dropdown for 8 items
+
+        val density = LocalDensity.current
+        val textMeasurer = rememberTextMeasurer()
+
+        val measuredTextWidthDp = remember(maxLengthString) {
+            with(density) {
+                val result = textMeasurer.measure(
+                    text = AnnotatedString(maxLengthString),
+                    style = TextStyle(fontSize = 22.sp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                result.size.width.toDp()
+            }
+        }
+
+        val maxAvailableWidth = maxContainerWidth - 30.dp
+        val textWidth = (measuredTextWidthDp + 20.dp).coerceAtMost(maxAvailableWidth)
+
+        Box(modifier = Modifier.wrapContentWidth()
+            .wrapContentSize(Alignment.TopStart)) {
+            Column() {
+                Row {
+                    Text(
+                        list[selectedIndex],
+                        modifier = Modifier.width((textWidth)).height(35.dp)
+                            .clickable(onClick = { if(isEnabled) expanded = true }, enabled = isEnabled),
+                        fontSize = 22.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Image(
+                        painter = painterResource(id = R.drawable.angle_down_solid),
+                        contentDescription = "Custom Icon",
+                        modifier = Modifier
+                            .size(30.dp)
+                            .padding(PaddingValues(top = 8.dp))
+                            .clickable(onClick = { if (isEnabled) expanded = true}),
+                        colorFilter = ColorFilter.tint(if(isEnabled) primaryColor
+                        else greyDropDownColor)
+                    )
+                }
+                Divider(color = greyDropDownUnderlineColor, modifier = Modifier.width(textWidth + 30.dp))
+            }
+
+            var customHeight = getDropdownCustomHeight(list, noOfItemsDisplayInDropDown, dropDownHeight)
+            Spacer(modifier = Modifier.height(5.dp))
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier
+                    .width(measuredTextWidthDp + 50.dp)
+                    .height((customHeight).dp)
+                    .background(Color.White)
+                    .border(0.5.dp, Color.LightGray)
+                    .shadow(1.dp, shape = RoundedCornerShape(2.dp))
+                    .simpleVerticalScrollbar(lazyListState)
+
+            ) {
+                LazyColumn(state = lazyListState,
+                    modifier = Modifier
+                        .width(measuredTextWidthDp + 50.dp)
+                        .height((customHeight).dp)) {
+
+                    itemsIndexed(list) { index, s ->
+                        DropdownMenuItem(onClick = {
+                            selectedIndex = index
+                            expanded = false
+                            onSelected(selectedIndex) }, text = { Text(text = s, style = TextStyle(fontSize = 20.sp)) },
+                            modifier = Modifier.background(if (index == selectedIndex) secondaryColor else Color.White),
+                            contentPadding = PaddingValues(10.dp),
+                            enabled = !disabledIndices.contains(index)
+                        )
+                    }
+                }
                 LaunchedEffect(expanded) {
                     lazyListState.scrollToItem(selectedIndex)
                 }

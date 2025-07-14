@@ -1,9 +1,12 @@
 package a75f.io.renatus.bacnet;
 
+import static a75f.io.api.haystack.HayStackConstants.FORCE_OVERRIDE_LEVEL;
 import static a75f.io.logic.bo.building.bacnet.BacnetEquip.TAG_BACNET;
 
+import static a75f.io.logic.bo.util.CustomScheduleUtilKt.isPointFollowingScheduleOrEvent;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.isValidMstpMacAddress;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
@@ -19,6 +22,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.tooltip.Tooltip;
@@ -26,6 +31,7 @@ import com.tooltip.Tooltip;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.projecthaystack.HDict;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +41,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.bacnet.parser.BacnetZoneViewItem;
 import a75f.io.logic.bo.building.system.BacnetServicesUtils;
@@ -52,6 +59,7 @@ import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants;
 import a75f.io.renatus.R;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.renatus.views.userintent.UserIntentDialog;
 
 public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRecyclerBacnetParamAdapter.ViewHolder> implements ModbusDataInterface {
 
@@ -98,6 +106,7 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
         return new ViewHolder(view);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int viewPosition) {
         int position = viewHolder.getAdapterPosition();
@@ -112,13 +121,15 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
         CcuLog.d(TAG,"onBindViewHolder -->"+title);
         viewHolder.tvParamLabel.setText(title);
 
+        HDict pointMap = CCUHsApi.getInstance().readHDictById(bacnetZoneViewItem.getBacnetObj().getId());
+        final Point p = new Point.Builder().setHDict(pointMap).build();
         if(bacnetZoneViewItem.isWritable()) {
             viewHolder.spValue.setVisibility(View.VISIBLE);
             viewHolder.tvParamValue.setVisibility(View.GONE);
             List<String> spinnerValues = getSpinnerValues(bacnetZoneViewItem.getSpinnerValues());
             viewHolder.spValue.setAdapter(getAdapterValue((ArrayList) spinnerValues));
 
-            String enumValues = (String) CCUHsApi.getInstance().readMapById(bacnetZoneViewItem.getBacnetObj().getId()).get("enum");
+            String enumValues = p.getEnums();
             int itemIndex = 0;
             if(enumValues != null){
                 CcuLog.d(TAG,"onBindViewHolder bacnetZoneViewItem writable point enum-->"+bacnetZoneViewItem.getBacnetObj().getId()+"--"+enumValues);
@@ -150,6 +161,15 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
 
         AtomicBoolean isUserInteraction = new AtomicBoolean(false);
         viewHolder.spValue.setOnTouchListener((v, event) -> {
+            if(isPointFollowingScheduleOrEvent(p.getId())) {
+                FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
+                if (!UserIntentDialog.Companion.isDialogAlreadyVisible()) {
+                    UserIntentDialog userIntentDialog = new UserIntentDialog(p.getId(), v);
+                    userIntentDialog.show(fragmentManager, "UserIntentDialog");
+                }
+                isUserInteraction.set(true);
+                return true;
+            }
             isUserInteraction.set(true);
             return false;
         });
@@ -202,22 +222,29 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
             String value = keyValue[1];
             configMap.put(key, value);
         }
-
-        int objectId = (int) Double.parseDouble(CCUHsApi.getInstance().readMapById(bacnetZoneViewItem.getBacnetObj().getId()).get(Tags.BACNET_OBJECT_ID).toString());
-        //int objectId = bacnetZoneViewItem.getBacnetObj().getBacnetObjectId();
-        CcuLog.d(TAG_BACNET, "--####this is a system point, objectId--"+objectId);
+        /*if(configMap.get(DESTINATION_IP) == null || configMap.get(DESTINATION_PORT) == null || configMap.get(DEVICE_ID) == null || configMap.get(MAC_ADDRESS) == null){
+            CcuLog.e(TAG, "writeValue: Invalid config map");
+            Toast.makeText(context, "Invalid configuration please check ip, port, deviceId and mac address", Toast.LENGTH_SHORT).show();
+            return;
+        }*/
+        String pointId = bacnetZoneViewItem.getBacnetObj().getId();
+        String level = bacnetZoneViewItem.getBacnetObj().getDefaultWriteLevel();
+        if(isPointFollowingScheduleOrEvent(pointId)) {
+            level = "" + FORCE_OVERRIDE_LEVEL;
+        }
+        int objectId = (int) Double.parseDouble(CCUHsApi.getInstance().readMapById(pointId).get(Tags.BACNET_OBJECT_ID).toString());
         String objectType = bacnetZoneViewItem.getObjectType();
         boolean isMstpEquip = isValidMstpMacAddress(Objects.requireNonNull(configMap.getOrDefault(MAC_ADDRESS, "")));
         BacnetServicesUtils bacnetServicesUtils = new BacnetServicesUtils();
         if(bacnetZoneViewItem.getBacnetObj().isSystem()){
             CcuLog.d(TAG_BACNET, "--this is a system point, objectId--"+objectId);
             bacnetServicesUtils.sendWriteRequest(generateWriteObject(configMap, objectId, selectedValue,
-                            bacnetZoneViewItem.getObjectType(), bacnetZoneViewItem.getBacnetObj().getDefaultWriteLevel(), isMstpEquip),
+                            bacnetZoneViewItem.getObjectType(), level, isMstpEquip),
                     serverIpAddress, remotePointUpdateInterface, selectedValue, bacnetZoneViewItem.getBacnetObj().getId(), isMstpEquip);
         }else{
-            CcuLog.d(TAG_BACNET, "--this is a normal bacnet client point");
+            CcuLog.d(TAG_BACNET, "--this is a normal bacnet client point with level: " + level);
             bacnetServicesUtils.sendWriteRequest(generateWriteObject(configMap, objectId, selectedValue,
-                            bacnetZoneViewItem.getObjectType(), bacnetZoneViewItem.getBacnetObj().getDefaultWriteLevel(), isMstpEquip),
+                            bacnetZoneViewItem.getObjectType(), level, isMstpEquip),
                     serverIpAddress, remotePointUpdateInterface, selectedValue, bacnetZoneViewItem.getBacnetObj().getId(), isMstpEquip);
         }
 

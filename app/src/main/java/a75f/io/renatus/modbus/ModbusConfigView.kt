@@ -347,7 +347,7 @@ class ModbusConfigView : BaseDialogFragment() {
 
                         // Displaying the Save and Cancel buttons
                         ButtonListRow(
-                            mapOf(
+                            textActionPairMap = mapOf(
                                 CANCEL to Pair(true) { closeAllBaseDialogFragments() },
                                 SAVE to Pair(true) { viewModel.saveConfiguration() },
                             )

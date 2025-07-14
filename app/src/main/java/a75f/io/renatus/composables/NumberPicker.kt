@@ -2,18 +2,23 @@ package a75f.io.renatus.composables
 
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.compose.LabelTextView
+import a75f.io.renatus.compose.LabelTextViewForTable
 import a75f.io.renatus.compose.StyledTextView
-import a75f.io.renatus.compose.SubTitle
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
@@ -37,8 +42,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -243,3 +251,133 @@ private fun Modifier.fadingEdge(brush: Brush) = this
 
 @Composable
 private fun pixelsToDp(pixels: Int) = with(LocalDensity.current) { pixels.toDp() }
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun TimeFieldPicker (
+    header: String,
+    modifier: Modifier,
+    items: List<String>,
+    startIndex: Int = 0,
+    visibleItemsCount: Int = 3,
+    state: PickerState = rememberPickerState(),
+    textModifier: Modifier = Modifier,
+    textStyle: TextStyle = LocalTextStyle.current,
+    dividerColor: Color = primaryColor,
+    onChanged: (String) -> Unit = {},
+) {
+    val visibleItemsMiddle = visibleItemsCount / 2
+    val listScrollCount = Integer.MAX_VALUE
+    val listScrollMiddle = listScrollCount / 2
+    val listStartIndex = listScrollMiddle - listScrollMiddle % items.size - visibleItemsMiddle + startIndex
+
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = listStartIndex)
+    val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
+
+    val itemHeightPixels = remember { mutableStateOf(0) }
+    val itemHeightDp = pixelsToDp(itemHeightPixels.value)
+
+    val fadingEdgeGradient = remember {
+        Brush.verticalGradient(
+            0f to Color.Transparent,
+            0.5f to Color.Black,
+            1f to Color.Transparent
+        )
+    }
+
+    fun getItem(index: Int) = items[index % items.size]
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .map { index -> getItem(index + visibleItemsMiddle) }
+            .distinctUntilChanged()
+            .collect { item ->
+                state.selectedItem = item
+                onChanged(item)
+            }
+    }
+
+    Column(modifier = modifier) {
+        LabelTextViewForTable(
+            text = header,
+            modifier = textModifier,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Box {
+            LazyColumn(
+                state = listState,
+                flingBehavior = flingBehavior,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .height(itemHeightDp * visibleItemsCount)
+                    .fadingEdge(fadingEdgeGradient)
+            ) {
+                items(listScrollCount) { index ->
+                    Text(
+                        text = getItem(index),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = textStyle,
+                        modifier = Modifier
+                            .onSizeChanged { size -> itemHeightPixels.value = size.height }
+                            .then(textModifier),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+
+            Divider(
+                color = dividerColor,
+                modifier = Modifier.offset(y = itemHeightDp * visibleItemsMiddle).width(80.dp).align(Alignment.TopCenter)
+
+            )
+
+            Divider(
+                color = dividerColor,
+                modifier = Modifier.offset(y = itemHeightDp * (visibleItemsMiddle + 1)).width(80.dp).align(Alignment.TopCenter)
+            )
+        }
+    }
+}
+
+@Composable
+fun DurationPicker(
+    onHHTimeFieldChange: (String) -> Unit = {},
+    onMMTimeFieldChange: (String) -> Unit = {},
+) {
+    val hhValuesPickerState = rememberPickerState()
+    val mmValuesPickerState = rememberPickerState()
+    Row{
+        Column{
+            TimeFieldPicker(
+                header = "HH",
+                state = hhValuesPickerState,
+                items = (0..168).toList().map(Int::toString),
+                startIndex = 0,
+                visibleItemsCount = 3,
+                modifier = Modifier.wrapContentSize(),
+                textModifier = Modifier.padding(8.dp).width(80.dp),
+                textStyle = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold),
+                onChanged = onHHTimeFieldChange
+            )
+        }
+        Spacer(modifier = Modifier.padding(horizontal = 24.dp))
+        Column {
+            TimeFieldPicker(
+                header = "MM",
+                state = mmValuesPickerState,
+                items = (0..59).toList().map(Int::toString),
+                startIndex = 0,
+                visibleItemsCount = 3,
+                modifier = Modifier.wrapContentSize(),
+                textModifier = Modifier.padding(8.dp).width(80.dp),
+                textStyle = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold),
+                onChanged = onMMTimeFieldChange
+            )
+        }
+    }
+}

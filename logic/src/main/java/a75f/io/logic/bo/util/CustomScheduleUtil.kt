@@ -3,8 +3,11 @@ package a75f.io.logic.bo.util
 import PointDefinition
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.DAYS
+import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.MockTime
+import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.util.TimeUtil
+import a75f.io.api.haystack.util.hayStack
 import a75f.io.logic.bo.building.pointscheduling.model.Day
 import android.graphics.Typeface
 import android.text.Spannable
@@ -14,6 +17,7 @@ import io.seventyfivef.ph.core.Tags
 import org.joda.time.DateTime
 import org.joda.time.Interval
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 const val SCHEDULE_STATUS = "scheduleStatus"
@@ -88,7 +92,7 @@ fun getValueByEnum(enumVal: Double, enumString: String?, unit: String?) : String
             }
         }
     } ?: run {
-        valueString = "$enumVal ${ unit ?: "" }"
+        valueString = "$enumVal${ unit ?: "" }"
     }
     return valueString
 }
@@ -178,4 +182,37 @@ private fun getScheduledIntervals(daysSorted: MutableList<Day>): MutableList<Int
 fun formatTimeValue(value: String?): String {
     val number = value?.toDoubleOrNull()
     return number?.toInt()?.toString()?.padStart(2, '0') ?: "00"
+}
+
+fun isPointFollowingScheduleOrEvent(pointId: String): Boolean {
+    val point = CCUHsApi.getInstance().readMapById(pointId)
+    return point.isNotEmpty() && (point.containsKey("scheduleRef") || point.containsKey("eventRef"))
+}
+
+fun fetchForceOverrideLevelValueAndEndTimeIfAvailable(pointId: String, enumString: String?, unit: String?): Triple<String, String, Double> {
+    var valueString: String = ""
+    var endTimeString: String = ""
+    var highestPriorityValue: Double = 0.0
+
+    var highestLevelValFound = false
+    var forceOverrideLevelFound = false
+    for ((index, hashMap) in hayStack.readPoint(pointId)?.withIndex() ?: emptyList()) {
+        hashMap["val"]?.let { valObject ->
+            if (!highestLevelValFound) {
+                highestPriorityValue = valObject.toString().toDouble()
+                highestLevelValFound = true
+            }
+            if (index == HayStackConstants.FORCE_OVERRIDE_LEVEL - 1) {
+                forceOverrideLevelFound = true
+                valueString = getValueByEnum(valObject.toString().toDouble(), enumString, unit)
+                val date = Date(hashMap["duration"].toString().toLong())
+                val sdf = SimpleDateFormat("MMMM dd, yyyy 'at' HH:mm", Locale.ENGLISH)
+                endTimeString = sdf.format(date)
+            }
+        }
+        if (highestLevelValFound && forceOverrideLevelFound) {
+            break
+        }
+    }
+    return Triple(valueString, endTimeString, highestPriorityValue)
 }

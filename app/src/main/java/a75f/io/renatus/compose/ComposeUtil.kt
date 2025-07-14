@@ -562,11 +562,12 @@ fun annotatedStringBySpannableString(text: String, delimiter: String): Annotated
 }
 
 @Composable
-fun ButtonListRow(textActionPairMap: Map<String, Pair<Boolean, () -> Unit>>) {
+fun ButtonListRow(
+    modifier: Modifier = Modifier.fillMaxWidth().padding(end = 20.dp, bottom = 40.dp, top = 40.dp),
+    textActionPairMap: Map<String, Pair<Boolean, () -> Unit>>
+) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(end = 20.dp, bottom = 40.dp, top = 40.dp),
+        modifier = modifier,
         horizontalArrangement = Arrangement.End
     ) {
         textActionPairMap.entries.forEachIndexed { index, entry ->

@@ -99,7 +99,7 @@ public class UpdatePointHandler implements MessageHandler
             BacnetRequestProcessor.sendCallBackMstpWriteRequest(localPoint.getId(), String.valueOf(pointLevel), value);
         }
 
-        if (localPoint.getMarkers().contains("external")) {
+        if (localPoint.getMarkers().contains("external") || localPoint.getMarkers().contains("bacnetCur")) {
             String value = msgObject.get(WRITABLE_ARRAY_VAL).getAsString();
             if (value.isEmpty()) {
                 value = String.valueOf(hayStack.readPointPriorityVal(localPoint.getId()));

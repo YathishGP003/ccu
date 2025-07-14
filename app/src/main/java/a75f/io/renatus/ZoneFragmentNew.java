@@ -8,6 +8,7 @@ import static a75f.io.api.haystack.Tags.MODBUS;
 import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
 import static a75f.io.logic.bo.building.definitions.ProfileType.CONNECTNODE;
 import static a75f.io.logic.bo.util.CCUUtils.getTruncatedString;
+import static a75f.io.logic.bo.util.CustomScheduleUtilKt.isPointFollowingScheduleOrEvent;
 import static a75f.io.logic.util.bacnet.BacnetModelBuilderKt.buildBacnetModel;
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModel;
 import static a75f.io.logic.L.TAG_CCU_INIT;
@@ -183,7 +184,9 @@ import a75f.io.renatus.util.TextListAdapter;
 import a75f.io.renatus.views.AlertDialogAdapter;
 import a75f.io.renatus.views.AlertDialogData;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.renatus.views.userintent.UserIntentViewModel;
 import a75f.io.restserver.server.HttpServer;
+import a75f.io.util.EntityKVStringParserUtilKt;
 import a75f.io.util.ExecutorTask;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
@@ -2754,9 +2757,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         getActivity().runOnUiThread(() -> {
             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
         });
-
-        CCUHsApi.getInstance().writeDefaultValById(id, Double.parseDouble(value));
-        CCUHsApi.getInstance().writeHisValById(id, Double.parseDouble(value));
+        if(!isPointFollowingScheduleOrEvent(id)) {
+            CCUHsApi.getInstance().writeDefaultValById(id, Double.parseDouble(value));
+            CCUHsApi.getInstance().writeHisValById(id, Double.parseDouble(value));
+        }
     };
 
     private List<BacnetZoneViewItem> fetchZoneDataForBacnet(List<BacnetPoint> bacnetPoints, String bacnetConfig){
@@ -5100,9 +5104,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             case "BACNET":
                 Equip nonTempEquip = (Equip) profileParam;
-                BacnetServicesUtils serviceUtils = new BacnetServicesUtils();
-
-                Map<String, String> bacnetConfig = serviceUtils.getConfig(
+                Map<String, String> bacnetConfig = EntityKVStringParserUtilKt.getConfig(
                         nonTempEquip.getTags().getOrDefault(
                                 "bacnetConfig",
                                 HStr.make("")).toString()

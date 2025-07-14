@@ -97,7 +97,7 @@ public class CCUUtils
             }
 
             HashMap<Object, Object> heartBeatPoint =
-                    hayStack.readEntity("point and (heartbeat or heartBeat) and equipRef == \"" + equip.get("id") + "\"");
+                    hayStack.readEntity("point and bacnetDeviceId and (heartbeat or heartBeat) and equipRef == \"" + equip.get("id") + "\"");
             if (!heartBeatPoint.isEmpty()) {
                 HisItem heartBeatHisItem = hayStack.curRead(heartBeatPoint.get("id").toString());
                 return (heartBeatHisItem == null) ? null : heartBeatHisItem.getDate();

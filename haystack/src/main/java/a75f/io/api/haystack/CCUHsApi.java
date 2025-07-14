@@ -2702,8 +2702,20 @@ public class CCUHsApi
                 RawPoint updatedPoint = new RawPoint.Builder().setHashMap(point).setTz(newTz).build();
                 updatePoint(updatedPoint, updatedPoint.getId());
             } else {
-                Point updatedPoint = new Point.Builder().setHashMap(point).setTz(newTz).build();
-                updatePoint(updatedPoint, updatedPoint.getId());
+                if (point.containsKey("schedule")
+                        && point.containsKey("point")) {
+                    HDict recurringScheduleDict = CCUHsApi.getInstance().readHDictById(point.get("id").toString());
+                    CcuLog.d(TAG_CCU_HS, "updateTimeZone: Recurring Schedule Dict: " + recurringScheduleDict);
+                    CCUHsApi.getInstance().updateRecurringSchedule(point.get("id").toString(), recurringScheduleDict);
+                } else if (point.containsKey("event")
+                        && point.containsKey("point")) {
+                    HDict eventDict = CCUHsApi.getInstance().readHDictById(point.get("id").toString());
+                    CcuLog.d(TAG_CCU_HS, "updateTimeZone: Event Dict: " + eventDict);
+                    CCUHsApi.getInstance().updateEventSchedule(point.get("id").toString(), eventDict);
+                } else {
+                    Point updatedPoint = new Point.Builder().setHashMap(point).setTz(newTz).build();
+                    updatePoint(updatedPoint, updatedPoint.getId());
+                }
             }
 
         }

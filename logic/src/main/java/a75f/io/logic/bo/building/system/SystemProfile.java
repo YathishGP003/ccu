@@ -46,7 +46,6 @@ import a75f.io.domain.api.PhysicalPoint;
 import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.domain.devices.CCUDevice;
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip;
-import a75f.io.domain.equips.DomainEquip;
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip;
 import a75f.io.domain.equips.ConnectModuleEquip;
 import a75f.io.domain.logic.CCUBaseConfigurationBuilder;
@@ -1108,7 +1107,7 @@ public abstract class SystemProfile
         DCV_MODULATION
     }
 
-    public void resetControllers(SystemControllerFactory factory, DomainEquip systemEquip) {
+    public void resetControllers(SystemControllerFactory factory) {
         List<String> controllerTypes = Arrays.asList(
                 // Add controller here if any new stage controller is added
                 COOLING_STAGE_CONTROLLER,

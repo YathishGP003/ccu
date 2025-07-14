@@ -279,7 +279,7 @@ public class VavStagedRtu extends VavSystemProfile {
         }
 
         if (changeOverStageDownTimerOverrideActive) {
-            resetControllers(factory, systemEquip);
+            resetControllers(factory);
         }
         if (isSingleZoneTIMode(CCUHsApi.getInstance())) {
             systemCoolingLoopOp = VavSystemController.getInstance().getCoolingSignal();
@@ -389,7 +389,8 @@ public class VavStagedRtu extends VavSystemProfile {
                 systemFanLoopOp = 0;
             }
             
-        } else if (VavSystemController.getInstance().getSystemState() == HEATING) {
+        } else if (VavSystemController.getInstance().getSystemState() == HEATING
+                && (systemMode == SystemMode.HEATONLY || systemMode == SystemMode.AUTO)) {
             systemFanLoopOp = (int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier);
         } else {
             systemFanLoopOp = 0;

@@ -276,7 +276,7 @@ class DabAdvancedAhu : DabSystemProfile() {
         }
 
         if (tempChangeDirectiveIsActive) {
-            resetControllers(factory, systemEquip)
+            resetControllers(factory)
         }
         currentConditioning = systemController.getSystemState()
 
@@ -524,9 +524,9 @@ class DabAdvancedAhu : DabSystemProfile() {
                 }
                 if(((L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable) ||
                         ahuSettings.isEconomizationAvailable) &&
-                    (satCoolingPILoopLocal > 0 && satCoolingPILoopLocal < economizingToMainCoolingLoopMap)) {
-                    CcuLog.d(L.TAG_CCU_SYSTEM, "Econ ON overridden at satCoolingPILoop: $satCoolingPILoopLocal with max value: coolingSatSp: $satSpMax")
-                    systemEquip.cmEquip.airTempCoolingSp.writeHisVal(satSpMax)
+                    (systemCoolingLoopOp > 0 && systemCoolingLoopOp < economizingToMainCoolingLoopMap)) {
+                    CcuLog.d(L.TAG_CCU_SYSTEM, "Econ ON overridden at systemCoolingLoopOp: $systemCoolingLoopOp with max value: coolingSatSp: $satSpMax")
+                    systemEquip.cmEquip.airTempCoolingSp.writeHisVal(satSpMax + 2)
                 }
                 satCoolingPILoopLocal
         } else {

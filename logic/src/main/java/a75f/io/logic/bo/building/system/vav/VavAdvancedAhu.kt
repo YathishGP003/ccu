@@ -271,7 +271,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         }
 
         if (tempChangeDirectiveIsActive) {
-            resetControllers(factory, systemEquip)
+            resetControllers(factory)
         }
         currentConditioning = systemController.getSystemState()
         getConditioningLoops()
@@ -500,7 +500,8 @@ open class VavAdvancedAhu : VavSystemProfile() {
             val spSpMin = systemEquip.staticPressureSPMin.readPriorityVal()
             CcuLog.d(L.TAG_CCU_SYSTEM, "spSpMax :$spSpMax spSpMin: $spSpMin SP: $staticPressure")
             ((staticPressure - spSpMin) * 100 / (spSpMax - spSpMin)).toInt().toDouble()
-        } else if (VavSystemController.getInstance().getSystemState() == SystemController.State.HEATING) {
+        } else if (VavSystemController.getInstance().getSystemState() == SystemController.State.HEATING
+            && (conditioningMode == SystemMode.HEATONLY || conditioningMode == SystemMode.AUTO)) {
             (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier).toInt()
                 .toDouble()
         } else {
@@ -549,9 +550,9 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 }
                 if(((L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable) ||
                         ahuSettings.isEconomizationAvailable)
-                    && satCoolingPILoopLocal > 0 && satCoolingPILoopLocal < economizingToMainCoolingLoopMap) {
-                    CcuLog.d(L.TAG_CCU_SYSTEM, "Econ ON overridden at satCoolingPILoop: $satCoolingPILoopLocal with max value: coolingSatSp: $satSpMax")
-                    systemEquip.cmEquip.airTempCoolingSp.writeHisVal(satSpMax)
+                    && systemCoolingLoopOp > 0 && systemCoolingLoopOp < economizingToMainCoolingLoopMap) {
+                    CcuLog.d(L.TAG_CCU_SYSTEM, "Econ ON overridden at systemCoolingLoopOp: $systemCoolingLoopOp with max value: coolingSatSp: $satSpMax")
+                    systemEquip.cmEquip.airTempCoolingSp.writeHisVal(satSpMax + 2)
                 }
                 satCoolingPILoopLocal
             /*} else {
@@ -581,11 +582,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
             CcuLog.d(L.TAG_CCU_SYSTEM, "satSpMax :$satSpMax satSpMin: $satSpMin " +
                     "satSensorVal $satControlPoint heatingSatSp: $heatingSatSp")
             satHeatingPILoop.getLoopOutput(heatingSatSp, satControlPoint)
-            /*if (systemHeatingLoopOp > 0) {
-                satHeatingPILoop.getLoopOutput(heatingSatSp, satControlPoint)
-            } else {
-                0.0
-            }*/
         } else {
             CcuLog.d(L.TAG_CCU_SYSTEM, "airTempHeatingSp : ${systemEquip.cmEquip.systemHeatingSatMin.readDefaultVal()}")
             systemEquip.cmEquip.airTempHeatingSp.writeHisVal(systemEquip.cmEquip.systemHeatingSatMin.readDefaultVal())

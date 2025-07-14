@@ -135,6 +135,7 @@ public class PreferenceUtil {
     private static final String MIGRATE_MODULATING_PROFILE_NORMALIZATION = "migrateModulatingProfileNormalization";
     private static final String MIGRATE_STAGE1_DAB_REHEAT_MAPPING = "migrateStage1ReheatMapping";
     private static final String MIGRATION_SYSTEM_FLAG_CCU_REBOOT = "migrationSystemFlagCcuReboot";
+    private static final String MIGRATION_BACNET_EQUIP = "migrationBacnetEquip2";
 
     public static void setContext(Context c) {
         context= c;
@@ -1059,5 +1060,12 @@ public class PreferenceUtil {
     }
     public static void setMigrateStage1DabReheatMapping() {
         setBooleanPreference(MIGRATE_STAGE1_DAB_REHEAT_MAPPING, true);
+    }
+
+    public static boolean getBacnetEquipGatewayUpdation() {
+        return getBooleanPreference(MIGRATION_BACNET_EQUIP);
+    }
+    public static void setBacnetEquipGatewayUpdation() {
+        setBooleanPreference(MIGRATION_BACNET_EQUIP, true);
     }
 }

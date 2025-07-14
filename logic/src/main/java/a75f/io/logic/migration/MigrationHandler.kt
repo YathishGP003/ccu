@@ -514,6 +514,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             setCCUReadyPropertyByName("CCU_REBOOT", "true")
             PreferenceUtil.setUpdateRestartSystemFlag()
         }
+        if(!PreferenceUtil.getBacnetEquipGatewayUpdation()){
+            updateBacNetEquipGatewayRef()
+            PreferenceUtil.setBacnetEquipGatewayUpdation()
+        }
+
 
         hayStack.scheduleSync()
     }
@@ -4241,5 +4246,47 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Analog Points for System Profile: $analogPoints")
 
         return analogPoints
+    }
+
+    private fun updateBacNetEquipGatewayRef() {
+        val systemEquip = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
+        hayStack.readAllHDictByQuery(CommonQueries.BACNET_EQUIP_ZONE).forEach {
+            if (it["gatewayRef", false] != null && !it["gatewayRef", false].toString()
+                    .equals(systemEquip["id"].toString(), true)
+            ) {
+                val equip = Equip.Builder().setHDict(it)
+                    .setGatewayRef(systemEquip["id"].toString()).build()
+                hayStack.updateEquip(equip, it["id"].toString())
+                CcuLog.d(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "Updated bacNet Equip: ${it["id"]} with GatewayRef: ${systemEquip["id"]}"
+                )
+            } else {
+                CcuLog.d(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "Equip: ${it["id"]} already has correct GatewayRef: ${systemEquip["id"]}"
+                )
+            }
+        }
+
+        hayStack.readAllHDictByQuery("equip and (domainName==\"${DomainName.smartnodeSSE}\" or domainName==\"${DomainName.helionodeSSE}\")").forEach {
+            // For SSE Equip, we need to ensure that the gatewayRef is set to the systemEquip id
+            if (it["gatewayRef", false] != null && !it["gatewayRef", false].toString()
+                    .equals(systemEquip["id"].toString(), true)
+            ) {
+                val equip = Equip.Builder().setHDict(it)
+                    .setGatewayRef(systemEquip["id"].toString()).build()
+                hayStack.updateEquip(equip, it["id"].toString())
+                CcuLog.d(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "Updated SSE Equip: ${it["id"]} with GatewayRef: ${systemEquip["id"]}"
+                )
+            } else {
+                CcuLog.d(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "Equip: ${it["id"]} already has correct GatewayRef: ${systemEquip["id"]}"
+                )
+            }
+        }
     }
 }

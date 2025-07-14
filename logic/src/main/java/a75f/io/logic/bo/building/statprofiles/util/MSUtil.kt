@@ -412,7 +412,7 @@ fun logMsResults(config: MyStatConfiguration, tag: String, logicalPointsList: Ha
             }
         }
     }
-
+    if(!config.analogOut1Enabled.enabled) return
     val analogOutValue = haystack.readHisValById(logicalPointsList[Port.ANALOG_OUT_ONE]!!)
 
     val mapping = when (config) {

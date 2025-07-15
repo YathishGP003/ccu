@@ -1812,6 +1812,7 @@
     <string name="offline_description">Not connected to Cloud</string>
     <string name="system_profile">System Profile</string>
     <string name="taost_for_fallback">The zone schedule of the zone is deleted and is therefore following default named schedule, which is not editable. Please restart the CCU app to reinstate the zone schedule</string>
+    <string name="settings_saved_successfully">Settings saved successfully!</string>
 
     <string-array name="log_level">
         <item>verbose</item>

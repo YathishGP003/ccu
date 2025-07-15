@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
@@ -193,6 +194,7 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
                 } else {
                     writeValue(bacnetZoneViewItem, selectedValue.second.toString());
                 }
+                Toast.makeText(context, R.string.settings_saved_successfully, Toast.LENGTH_LONG).show();
                 CcuLog.d(TAG, "onItemSelected: " + selectedValue.first + " " + bacnetZoneViewItem.getBacnetConfig());
                 isUserInteraction.set(false);
             }

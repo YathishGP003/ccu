@@ -17,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
@@ -184,6 +185,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                             writePoint(p, adapterView.getItemAtPosition(pos).toString(), modbusParam.get(position), isConnectNodeView);
                                         }
                                     });
+                                    Toast.makeText(context, R.string.settings_saved_successfully, Toast.LENGTH_LONG).show();
                                 }
                             }
 

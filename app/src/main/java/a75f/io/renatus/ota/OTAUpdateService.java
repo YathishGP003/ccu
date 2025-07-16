@@ -626,16 +626,8 @@ public class OTAUpdateService extends IntentService {
             if ((msg.smartNodeDeviceType.get() == FirmwareDeviceType_t.FIRMWARE_DEVICE_CONTROL_MOTE ||
                     (msg.smartNodeAddress.get() == mCurrentLwMeshAddress)) && mUpdateInProgress) {
                 sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT));
-
-                short versionMajor = msg.smartNodeMajorFirmwareVersion.get();
-                short versionMinor = msg.smartNodeMinorFirmwareVersion.get();
-                String ccuName = Domain.ccuDevice.getCcuDisName();
-                AlertGenerateHandler.handleDeviceMessage(FIRMWARE_OTA_UPDATE_ENDED, "Firmware OTA update for" + " " + ccuName + " " +
-                        "ended for " + mFirmwareDeviceType.getUpdateFileName() + " " + mCurrentLwMeshAddress + " " + "with version" + " " + versionMajor +
-                        // changed Smart node to Smart Device as it is indicating the general name (US:9387)
-                        "." + versionMinor, getDeviceId(String.valueOf(mFirmwareDeviceType), mCurrentLwMeshAddress));
-                CcuLog.d(TAG, mUpdateWaitingToComplete + " - " + versionMajor + " - " + versionMinor);
-                // Check if the reboot message is after sequence update
+                // Check if the reboot message is after sequence update. This is to ensure that we dont check for any equip ref since this device dont have the equip ref.
+                // We will be returning here for success and failure of sequence update.
                 if ((msg.nodeStatus.get() & 0x07) == SEQ_TYPE) {
                     // Extract bits 3-7 (last 5 bits) using bitmask 0xF8 (11111000 in binary)
                     int last5Bits = msg.nodeStatus.get() & NODE_STATUS_FW_OTA_VALUE_MASK;  // Mask keeps only bits 3-7
@@ -648,6 +640,16 @@ public class OTAUpdateService extends IntentService {
                     }
                     return;
                 }
+
+                short versionMajor = msg.smartNodeMajorFirmwareVersion.get();
+                short versionMinor = msg.smartNodeMinorFirmwareVersion.get();
+                String ccuName = Domain.ccuDevice.getCcuDisName();
+                AlertGenerateHandler.handleDeviceMessage(FIRMWARE_OTA_UPDATE_ENDED, "Firmware OTA update for" + " " + ccuName + " " +
+                        "ended for " + mFirmwareDeviceType.getUpdateFileName() + " " + mCurrentLwMeshAddress + " " + "with version" + " " + versionMajor +
+                        // changed Smart node to Smart Device as it is indicating the general name (US:9387)
+                        "." + versionMinor, getDeviceId(String.valueOf(mFirmwareDeviceType), mCurrentLwMeshAddress));
+                CcuLog.d(TAG, mUpdateWaitingToComplete + " - " + versionMajor + " - " + versionMinor);
+
                 if (mUpdateWaitingToComplete && versionMatches(versionMajor, versionMinor)) {
                     CcuLog.d(TAG, "[UPDATE] [SUCCESSFUL]"
                             + " [Node Address:" + mCurrentLwMeshAddress + "]"   // updated to Node address from SN as

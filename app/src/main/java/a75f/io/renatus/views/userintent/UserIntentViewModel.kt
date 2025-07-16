@@ -85,9 +85,6 @@ class UserIntentViewModel(application: Application): AndroidViewModel(applicatio
         if (hhDurationVal.intValue == 0 && mmDurationVal.intValue == 0) {
             CcuLog.d("CCU_USER_INTENT", "UserIntentViewModel.validateDuration() - Duration is zero, setting isDurationValid to false")
             isDurationValid.value = false
-        } else if (hhDurationVal.intValue > 168 || (hhDurationVal.intValue == 168 && mmDurationVal.intValue > 0)) {
-            CcuLog.d("CCU_USER_INTENT", "UserIntentViewModel.validateDuration() - Duration exceeds 7 days, setting isDurationValid to false")
-            isDurationValid.value = false
         } else {
             CcuLog.d("CCU_USER_INTENT", "UserIntentViewModel.validateDuration() - Duration is valid, setting isDurationValid to true")
             isDurationValid.value = true

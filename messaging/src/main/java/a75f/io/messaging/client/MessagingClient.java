@@ -165,7 +165,7 @@ public class MessagingClient implements BearerTokenManager.OnBearerTokenRefreshL
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(0, TimeUnit.SECONDS)
                 .build();
-        OkSse okSse = new OkSse(client);
+        okSse = new OkSse(client);
         sse = okSse.newServerSentEvent(request, new MessagingListener(siteId, ccuId, messagingUrl));
         sse.setTimeout(1, TimeUnit.MINUTES);
     }

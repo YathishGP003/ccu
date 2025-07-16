@@ -186,7 +186,8 @@ fun formatTimeValue(value: String?): String {
 
 fun isPointFollowingScheduleOrEvent(pointId: String): Boolean {
     val point = CCUHsApi.getInstance().readMapById(pointId)
-    return point.isNotEmpty() && (point.containsKey("scheduleRef") || point.containsKey("eventRef"))
+    return point.isNotEmpty() && point.containsKey(Tags.SCHEDULABLE)
+            && (point.containsKey("scheduleRef") || point.containsKey("eventRef"))
 }
 
 fun fetchForceOverrideLevelValueAndEndTimeIfAvailable(pointId: String, enumString: String?, unit: String?): Triple<String, String, Double> {

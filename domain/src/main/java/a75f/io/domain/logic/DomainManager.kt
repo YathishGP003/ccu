@@ -113,7 +113,8 @@ object DomainManager {
                 CcuLog.i(Domain.LOG_TAG, "Build domain $it")
 
                 when{
-                    it["domainName"]?.toString().equals("smartnodeActiveChilledBeam", true) -> {
+                    it["domainName"]?.toString().equals("smartnodeActiveChilledBeam", true)
+                            || it["domainName"]?.toString().equals("helionodeActiveChilledBeam", true)-> {
                         Domain.equips[it["id"].toString()] = VavAcbEquip(it["id"].toString())
                     }
                     it.contains("vav") -> {
@@ -278,7 +279,8 @@ object DomainManager {
     }
     fun updateDomainEquip(equip: a75f.io.api.haystack.Equip) {
         when {
-            equip.domainName.contains("smartnodeActiveChilledBeam") ->  {
+            equip.domainName.contains("smartnodeActiveChilledBeam")
+                    || equip.domainName.contains("helionodeActiveChilledBeam")->  {
                 Domain.equips[equip.id] = VavAcbEquip(equip.id)
             }
             equip.markers.contains("vav") -> Domain.equips[equip.id] = VavEquip(equip.id)

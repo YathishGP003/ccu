@@ -66,7 +66,7 @@ public class VavAcbProfile extends VavProfile
         vavEquip = (VavEquip) Domain.getEquip(equipRef);
         if (vavEquip == null) {
             CcuLog.e(L.TAG_CCU_ZONE, "No domain equip found for equipRef: " + equipRef);
-            vavEquip = new VavEquip(equipRef);
+            vavEquip = new VavAcbEquip(equipRef);
         }
 
         if(mInterface != null) {

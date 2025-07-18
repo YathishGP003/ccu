@@ -172,7 +172,11 @@ public abstract class VavProfile extends ZoneProfile {
                 vavUnit = new VavAcbUnit();
         }
         if (profileType == ProfileType.VAV_ACB) {
-            vavEquip = new VavAcbEquip(Domain.getEquip(equipRef).getId());
+            vavEquip = (VavAcbEquip) Domain.getEquip(equipRef);
+            if (vavEquip == null) {
+                CcuLog.e(L.TAG_CCU_ZONE, "No domain equip found during init for equipRef: " + equipRef);
+                vavEquip = new VavAcbEquip(equipRef);
+            }
         } else {
             vavEquip = (VavEquip) Domain.getEquip(equipRef);
             if (vavEquip == null) {

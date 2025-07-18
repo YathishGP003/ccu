@@ -426,7 +426,9 @@ public class VavStagedRtu extends VavSystemProfile {
                                    " systemHeatingLoopOp "+ systemHeatingLoopOp+" " + "systemFanLoopOp "+systemFanLoopOp);
 
         updatePrerequisite();
-        systemStatusHandler.runControllersAndUpdateStatus(controllers, (int) systemEquip.getConditioningMode().readPriorityVal());
+        systemStatusHandler.runControllersAndUpdateStatus(controllers,
+                (int) systemEquip.getConditioningMode().readPriorityVal(),
+                systemEquip.getConditioningStages());
         updateRelays();
     
         CcuLog.d(L.TAG_CCU_SYSTEM, "stageUpTimerCounter "+stageUpTimerCounter+

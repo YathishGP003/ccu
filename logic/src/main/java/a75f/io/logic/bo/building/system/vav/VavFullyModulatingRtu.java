@@ -172,7 +172,9 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
                                    +" systemCo2LoopOp "+systemCo2LoopOp);
 
         updatePrerequisite();
-        systemStatusHandler.runControllersAndUpdateStatus(controllers, (int) systemEquip.getConditioningMode().readPriorityVal());
+        systemStatusHandler.runControllersAndUpdateStatus(controllers,
+                (int) systemEquip.getConditioningMode().readPriorityVal(),
+                systemEquip.getConditioningStages());
         updateRelays();
 
         setSystemPoint("operating and mode", VavSystemController.getInstance().systemState.ordinal());
@@ -563,7 +565,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
                 systemEquip.getSystemtargetMinInsideHumidity(),
                 systemEquip.getVavHumidityHysteresis(),
                 systemEquip.getCurrentOccupancy(),
-                systemEquip.getConditioningStages().getDehumidifierEnable().pointExists()
+                systemEquip.getConditioningStages().getHumidifierEnable().pointExists()
         );
 
         factory.addDeHumidifierController(
@@ -571,7 +573,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
                 systemEquip.getSystemtargetMaxInsideHumidity(),
                 systemEquip.getVavHumidityHysteresis(),
                 systemEquip.getCurrentOccupancy(),
-                systemEquip.getConditioningStages().getHumidifierEnable().pointExists()
+                systemEquip.getConditioningStages().getDehumidifierEnable().pointExists()
         );
 
         factory.addChangeCoolingChangeOverRelay(

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.Ccu;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.PhysicalPoint;
 import a75f.io.domain.api.Point;
@@ -28,6 +29,7 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemControllerFactory;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemStageHandler;
+import a75f.io.logic.bo.building.system.vav.config.DabModulatingRtuProfileConfig;
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuAnalogOutMinMaxConfig;
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -101,6 +103,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
     private synchronized void updateSystemPoints() {
 
         systemEquip = (DabModulatingRtuSystemEquip) Domain.systemEquip;
+        CcuLog.d("CCU_TEST_EQUIP", "DabFullyModulatingRtu updateSystemPoints systemEquip: "+systemEquip
+                +" ConditioningStages "+systemEquip.getConditioningStages()
+        );
         addControllers();
         updateOutsideWeatherParams();
         updateMechanicalConditioning(CCUHsApi.getInstance());
@@ -125,7 +130,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
         updateSystemCo2LoopOp();
 
         SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getVavModulatingRtuModelDef();
-        ModulatingRtuProfileConfig config = new ModulatingRtuProfileConfig(model).getActiveConfiguration();
+        ModulatingRtuProfileConfig config = new DabModulatingRtuProfileConfig(model).getActiveConfiguration();
+
+        CcuLog.d(L.TAG_CCU_SYSTEM, config.toString());
 
         Domain.cmBoardDevice.getAnalog1Out().writePointValue(getAnalog1Output(config));
         Domain.cmBoardDevice.getAnalog2Out().writePointValue(getAnalog2Output(config));
@@ -137,7 +144,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
                 +" systemCo2LoopOp "+systemCo2LoopOp+" systemDCWBValveLoopOutput "+systemDCWBValveLoopOutput);
 
         updatePrerequisite();
-        systemStatusHandler.runControllersAndUpdateStatus(controllers, (int) systemEquip.getConditioningMode().readPriorityVal());
+        systemStatusHandler.runControllersAndUpdateStatus(controllers,
+                (int) systemEquip.getConditioningMode().readPriorityVal(),
+                systemEquip.getConditioningStages());
         updateRelays();
 
 
@@ -480,7 +489,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
                 systemEquip.getSystemtargetMinInsideHumidity(),
                 systemEquip.getDabHumidityHysteresis(),
                 systemEquip.getCurrentOccupancy(),
-                systemEquip.getConditioningStages().getDehumidifierEnable().pointExists()
+                systemEquip.getConditioningStages().getHumidifierEnable().pointExists()
         );
 
         factory.addDeHumidifierController(
@@ -488,7 +497,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
                 systemEquip.getSystemtargetMaxInsideHumidity(),
                 systemEquip.getDabHumidityHysteresis(),
                 systemEquip.getCurrentOccupancy(),
-                systemEquip.getConditioningStages().getHumidifierEnable().pointExists()
+                systemEquip.getConditioningStages().getDehumidifierEnable().pointExists()
         );
 
         factory.addChangeCoolingChangeOverRelay(

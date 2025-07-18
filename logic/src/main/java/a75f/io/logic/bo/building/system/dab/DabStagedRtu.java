@@ -199,7 +199,9 @@ public class DabStagedRtu extends DabSystemProfile
 
 
         updatePrerequisite();
-        systemStatusHandler.runControllersAndUpdateStatus(controllers, (int) systemEquip.getConditioningMode().readPriorityVal());
+        systemStatusHandler.runControllersAndUpdateStatus(controllers,
+                (int) systemEquip.getConditioningMode().readPriorityVal(),
+                systemEquip.getConditioningStages());
         updateRelays();
         CcuLog.d(L.TAG_CCU_SYSTEM, "stageUpTimerCounter "+stageUpTimerCounter+
                                    " stageDownTimerCounter "+ stageDownTimerCounter+" " +

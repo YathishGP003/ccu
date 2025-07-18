@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.system
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.ConditioningStages
+import a75f.io.logger.CcuLog
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.util.ControllerNames
 
@@ -10,9 +11,10 @@ import a75f.io.logic.controlcomponents.util.ControllerNames
  * Created by Manjunath K on 12-05-2025.
  */
 
-class SystemStageHandler(private val conditioningStages: ConditioningStages) {
+class SystemStageHandler(private var conditioningStages: ConditioningStages) {
 
-    fun runControllersAndUpdateStatus(controllers: HashMap<String,Any>, conditioningMode : Int) {
+    fun runControllersAndUpdateStatus(controllers: HashMap<String,Any>, conditioningMode : Int, conditioningStages: ConditioningStages) {
+        this.conditioningStages = conditioningStages
         controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             if (conditioningMode == SystemMode.OFF.ordinal) {

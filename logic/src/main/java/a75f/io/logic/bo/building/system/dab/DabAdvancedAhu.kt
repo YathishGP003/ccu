@@ -880,13 +880,17 @@ class DabAdvancedAhu : DabSystemProfile() {
     private fun updateOutputPorts() {
         CcuLog.d(L.TAG_CCU_SYSTEM, "CM  status")
         updatePrerequisite()
-        systemStatusHandler.runControllersAndUpdateStatus(controllers, systemEquip.conditioningMode.readPriorityVal().toInt())
+        systemStatusHandler.runControllersAndUpdateStatus(controllers,
+            systemEquip.conditioningMode.readPriorityVal().toInt(),
+            systemEquip.cmEquip.conditioningStages)
         updateLogicalToPhysical(false)
         updateAnalogOutputPorts(getCMAnalogAssociationMap(systemEquip.cmEquip), getAnalogOutLogicalPhysicalMap(), false)
 
         CcuLog.d(L.TAG_CCU_SYSTEM, "Connect module status")
         if (!systemEquip.connectEquip1.equipRef.contentEquals("null")) {
-            connectStatusHandler.runControllersAndUpdateStatus(connectControllers, systemEquip.conditioningMode.readPriorityVal().toInt())
+            connectStatusHandler.runControllersAndUpdateStatus(connectControllers,
+                systemEquip.conditioningMode.readPriorityVal().toInt(),
+                systemEquip.connectEquip1.conditioningStages)
             updateLogicalToPhysical(true)
             updateAnalogOutputPorts(getConnectAnalogAssociationMap(systemEquip.connectEquip1), getConnectAnalogOutLogicalPhysicalMap(
                     systemEquip.connectEquip1,

@@ -29,7 +29,6 @@ import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import android.os.Build
-import android.util.Log
 import com.google.gson.Gson
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -152,7 +151,7 @@ class BundleInstallManager: BundleInstallListener {
             val bundleInstallState = getBundleInstallState()
             if (bundleInstallState != null) {
                 // Update the CCU OTA status
-                Log.d(TAG, "completeBundleInstallIfNecessary: Writing bundle ota point")
+                CcuLog.d(TAG, "completeBundleInstallIfNecessary: Writing bundle ota point")
                 updateBundleOtaStatus(BundleOtaStatus.OTA_UPDATE_SUCCEEDED)
                 updateBundleVersion(bundleInstallState.bundleName)
                 try {
@@ -179,19 +178,10 @@ class BundleInstallManager: BundleInstallListener {
                         // Reset our bundle state so that we can't get into a loop
                         clearBundleInstallState()
 
-                        // Clean up deleted files
-                        /*for (fileName in bundleInstallState.downloadedFiles) {
-                            val file = File(RenatusApp.getAppContext().getExternalFilesDir(null), fileName)
-                            if (file.exists()) {
-                                Log.d(TAG, "completeBundleInstallIfNecessary: Deleting ${file.absolutePath}")
-                                file.delete()
-                            }
-                        }*/
-
                         // Finally, reboot if the bundle requires it (Home app was installed)
                         if (bundleInstallState.rebootRequired) {
                             // Reboot the tablet
-                            Log.d(TAG, "completeBundleInstallIfNecessary: Restarting tablet")
+                            CcuLog.d(TAG, "completeBundleInstallIfNecessary: Restarting tablet")
                             UpdateAppRestartCause(BUNDLE_UPDATE_DEVICE_REBOOT)
                             RenatusApp.rebootTablet()
                         }
@@ -237,7 +227,7 @@ class BundleInstallManager: BundleInstallListener {
     override fun onBundleInstallMessage(installState: BundleInstallState,
                                         percentComplete: Int,
                                         message: String) {
-        Log.d(TAG, "BundleInstallMessage: State: $installState, Percent complete: $percentComplete, Message: \"$message\"")
+        CcuLog.d(TAG, "BundleInstallMessage: State: $installState, Percent complete: $percentComplete, Message: \"$message\"")
     }
 
     /***
@@ -261,10 +251,10 @@ class BundleInstallManager: BundleInstallListener {
             }
 
             val version = APKVersion.extractVersion(pi.versionName)
-            Log.d(TAG, "getPackageVersion: $packageName versionName ${pi.versionName} resolved to $version")
+            CcuLog.d(TAG, "getPackageVersion: $packageName versionName ${pi.versionName} resolved to $version")
             return APKVersion(version)
         } catch (e: Exception) {
-            Log.e(TAG, "Error getting package version for $packageName: ${e.message}")
+            CcuLog.e(TAG, "Error getting package version for $packageName: ${e.message}")
             return null
         }
     }
@@ -408,9 +398,9 @@ class BundleInstallManager: BundleInstallListener {
             upgradeMessages.add(homeUpgradeInfo)
         }
 
-        Log.i(TAG, "evaluateUpgradeBundle($caller): Bundle '${upgradeBundle.bundle.bundleName}' upgrade evaluation complete: okayToUpgrade: ${upgradeBundle.upgradeOkay}")
-        upgradeBundle.errorMessages.forEach { Log.i(TAG, "      - Error: $it") }
-        upgradeMessages.forEach { Log.i(TAG, "      - $it") }
+        CcuLog.i(TAG, "evaluateUpgradeBundle($caller): Bundle '${upgradeBundle.bundle.bundleName}' upgrade evaluation complete: okayToUpgrade: ${upgradeBundle.upgradeOkay}")
+        upgradeBundle.errorMessages.forEach { CcuLog.i(TAG, "      - Error: $it") }
+        upgradeMessages.forEach { CcuLog.i(TAG, "      - $it") }
 
         return upgradeBundle
     }
@@ -440,7 +430,7 @@ class BundleInstallManager: BundleInstallListener {
 
             return evaluateUpgradeBundle(recommendedBundleDTO, "id: $bundleId")
         } catch (e: Exception) {
-            Log.e(TAG, "Error retrieving upgrade bundle by id: ${e.message}")
+            CcuLog.e(TAG, "Error retrieving upgrade bundle by id: ${e.message}")
             return null
         }
     }
@@ -462,7 +452,7 @@ class BundleInstallManager: BundleInstallListener {
 
             return evaluateUpgradeBundle(recommendedBundleDTO, "name: $bundleName", isReplace = isReplace)
         } catch (e: Exception) {
-            Log.e(TAG, "Error retrieving upgrade bundle by name: ${e.message}")
+            CcuLog.e(TAG, "Error retrieving upgrade bundle by name: ${e.message}")
             throw e
         }
     }
@@ -491,7 +481,7 @@ class BundleInstallManager: BundleInstallListener {
 
             return evaluateUpgradeBundle(recommendedBundleDTO, "recommended", isFreshCCU = isFreshCCU)
         } catch (e: Exception) {
-            Log.e(TAG, "Error retrieving recommended upgrade bundle: ${e.message}")
+            CcuLog.e(TAG, "Error retrieving recommended upgrade bundle: ${e.message}")
             return null
         }
     }
@@ -549,16 +539,16 @@ class BundleInstallManager: BundleInstallListener {
      */
     @Synchronized
     private fun downloadFile(appName: String, appNbr: Int, totalApps: Int, apkFile: String) {
-        Log.i(TAG, "downloadFile: Checking for $apkFile")
+        CcuLog.i(TAG, "downloadFile: Checking for $apkFile")
         val file = File(RenatusApp.getAppContext().getExternalFilesDir(null), apkFile)
         if (file.exists()) {
-            Log.i(TAG, "downloadFile: ${file.absolutePath} already exists, skipping download")
+            CcuLog.i(TAG, "downloadFile: ${file.absolutePath} already exists, skipping download")
             return
         }
 
         // Request file download
         val url = DOWNLOAD_BASE_URL + apkFile
-        Log.d(TAG, "downloadFile: Downloading $url")
+        CcuLog.d(TAG, "downloadFile: Downloading $url")
 
         val manager =
             RenatusApp.getAppContext().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
@@ -571,7 +561,7 @@ class BundleInstallManager: BundleInstallListener {
         request.setDestinationInExternalFilesDir(RenatusApp.getAppContext(), null, apkFile)
 
         val downloadId = manager.enqueue(request)
-        Log.d(TAG, "downloadFile: ...download id $downloadId, watching for completion")
+        CcuLog.d(TAG, "downloadFile: ...download id $downloadId, watching for completion")
 
         // Watch for download completion or failure
         var finishDownload = false
@@ -579,11 +569,11 @@ class BundleInstallManager: BundleInstallListener {
         while (!finishDownload) {
             // Handle any cancellation requests
             if (cancelPending) {
-                Log.d(TAG, "downloadFile: Cancel $appName download in progress")
+                CcuLog.d(TAG, "downloadFile: Cancel $appName download in progress")
                 try {
                     manager.remove(downloadId)
                 } catch (e: Exception) {
-                    Log.e(TAG, "downloadFile: Error cancelling download $downloadId: ${e.message}")
+                    CcuLog.e(TAG, "downloadFile: Error cancelling download $downloadId: ${e.message}")
                 }
                 return
             }
@@ -694,7 +684,7 @@ class BundleInstallManager: BundleInstallListener {
         // Download artifacts
         upgradeBundle.componentsToUpgrade.forEachIndexed { index, component ->
             if (cancelPending) {
-                Log.d(TAG, "downloadArtifacts: Cancel pending, stopping download")
+                CcuLog.d(TAG, "downloadArtifacts: Cancel pending, stopping download")
                 return
             }
             try {
@@ -731,7 +721,7 @@ class BundleInstallManager: BundleInstallListener {
                 }
 
                 val msg = "Error downloading ${component.target} apk"
-                Log.e(TAG, "downloadArtifacts: $msg, ${e.message}")
+                CcuLog.e(TAG, "downloadArtifacts: $msg, ${e.message}")
                 sendBundleInstallMessage(state, 0, msg)
                 throw DownloadFailedException(msg)
             }
@@ -746,7 +736,7 @@ class BundleInstallManager: BundleInstallListener {
         upgradeBundle.componentsToUpgrade.forEach { component ->
             val file = File(RenatusApp.getAppContext().getExternalFilesDir(null), component.fileName)
             if (file.exists()) {
-                Log.d(TAG, "deleteArtifacts: Deleting ${file.absolutePath}")
+                CcuLog.d(TAG, "deleteArtifacts: Deleting ${file.absolutePath}")
                 file.delete()
             }
         }
@@ -845,7 +835,7 @@ class BundleInstallManager: BundleInstallListener {
 
         // Install BAC App
         if (appsToInstall.contains(BAC)) {
-            Log.d(TAG, "*********************** Installing BAC App ***********************")
+            CcuLog.d(TAG, "*********************** Installing BAC App ***********************")
             updateBundleOtaStatus(BundleOtaStatus.OTA_BAC_APP_INSTALLING)
             sendBundleInstallMessage(BundleInstallState.INSTALLING, computeTaskPercent(appNbr, totalApps), formatInstallingMessage(appNbr, totalApps, "BAC"))
 
@@ -864,7 +854,7 @@ class BundleInstallManager: BundleInstallListener {
 
         // Install Remote App
         if (appsToInstall.contains(REMOTE)) {
-            Log.d(TAG, "*********************** Installing REMOTE App ***********************")
+            CcuLog.d(TAG, "*********************** Installing REMOTE App ***********************")
             updateBundleOtaStatus(BundleOtaStatus.OTA_REMOTE_APP_INSTALLING)
 
             sendBundleInstallMessage(BundleInstallState.INSTALLING, computeTaskPercent(appNbr, totalApps), formatInstallingMessage(appNbr, totalApps, "REMOTE"))
@@ -884,7 +874,7 @@ class BundleInstallManager: BundleInstallListener {
 
         // Install Home App - if we install the home app, set a flag for reboot
         if (appsToInstall.contains(HOME)) {
-            Log.d(TAG, "*********************** Installing HOME App ***********************")
+            CcuLog.d(TAG, "*********************** Installing HOME App ***********************")
             updateBundleOtaStatus(BundleOtaStatus.OTA_HOME_APP_INSTALLING)
             sendBundleInstallMessage(BundleInstallState.INSTALLING, computeTaskPercent(appNbr, totalApps), formatInstallingMessage(appNbr, totalApps, "HOME"))
 
@@ -904,7 +894,7 @@ class BundleInstallManager: BundleInstallListener {
 
         // Install CCU App
         if (appsToInstall.contains("CCU")) {
-            Log.d(TAG, "*********************** Installing CCU App ***********************")
+            CcuLog.d(TAG, "*********************** Installing CCU App ***********************")
             updateBundleOtaStatus(BundleOtaStatus.OTA_CCU_APP_INSTALLING)
             sendBundleInstallMessage(BundleInstallState.INSTALLING, computeTaskPercent(appNbr, totalApps), formatInstallingMessage(appNbr, totalApps, "CCU"))
             try {
@@ -939,17 +929,17 @@ class BundleInstallManager: BundleInstallListener {
      * @param bundleId - The bundleId to upgrade to
      */
     fun processOTARemoteCommand(bundleId: String) {
-        Log.d(TAG, "processOTARemoteCommand: Received OTA bundle command for bundleId $bundleId")
+        CcuLog.d(TAG, "processOTARemoteCommand: Received OTA bundle command for bundleId $bundleId")
         try {
             val bundle = getUpgradeBundleById(bundleId)
             if (bundle == null || !bundle.upgradeOkay) {
-                Log.d(TAG, "processOTARemoteCommand: Bundle $bundleId not applied")
+                CcuLog.d(TAG, "processOTARemoteCommand: Bundle $bundleId not applied")
                 return
             }
 
             initiateBundleUpgrade(bundle, this)
         } catch (e: Exception) {
-            Log.e(TAG, "processOTARemoteCommand: Error processing OTA bundle command: ${e.message}")
+            CcuLog.e(TAG, "processOTARemoteCommand: Error processing OTA bundle command: ${e.message}")
         }
     }
 
@@ -963,7 +953,7 @@ class BundleInstallManager: BundleInstallListener {
      *     @return - Error message if the upgrade failed, null if successful
      */
     fun initiateBundleUpgrade(upgradeBundle: UpgradeBundle, listener: BundleInstallListener?=null): String? {
-        Log.d(TAG, "initiateBundleUpgrade: $upgradeBundle")
+        CcuLog.d(TAG, "initiateBundleUpgrade: $upgradeBundle")
         cancelPending = false
         try {
             if (!installSemaphore.tryAcquire()) {
@@ -987,7 +977,7 @@ class BundleInstallManager: BundleInstallListener {
             }
 
             val appsToInstall = upgradeBundle.componentsToUpgrade.map { it.target }
-            Log.i( TAG, "initiateBundleUpgrade: The following components will be upgraded: $appsToInstall")
+            CcuLog.i( TAG, "initiateBundleUpgrade: The following components will be upgraded: $appsToInstall")
 
             // Establish reboot/restart requirements
             val restartTablet =
@@ -1012,7 +1002,7 @@ class BundleInstallManager: BundleInstallListener {
                     installArtifacts(upgradeBundle)
                 } catch (e: Exception) {
                     state = BundleInstallState.FAILED
-                    Log.e(TAG, "Error installing artifacts: ${e.message}")
+                    CcuLog.e(TAG, "Error installing artifacts: ${e.message}")
                     val msg = "$REMOTE App installation failed"
                     sendBundleInstallMessage(state, 0, msg)
                     return msg
@@ -1023,7 +1013,7 @@ class BundleInstallManager: BundleInstallListener {
             try {
                 deleteArtifacts(upgradeBundle)
             } catch (e: Exception) {
-                Log.d(TAG, "Error deleting artifacts: ${e.message}, not failing the upgrade")
+                CcuLog.d(TAG, "Error deleting artifacts: ${e.message}, not failing the upgrade")
             }
 
             // If the user canceled the installation, return
@@ -1035,30 +1025,36 @@ class BundleInstallManager: BundleInstallListener {
             }
 
             updateBundleOtaStatus(BundleOtaStatus.OTA_UPDATE_SUCCEEDED)
-            updateBundleVersion(upgradeBundle.bundle.bundleName)
+
+            // If the bundle contains a CCU app, only then update the bundle version
+            if (upgradeBundle.componentsToUpgrade.any { it.fileName.contains("CCU") }) {
+                updateBundleVersion(upgradeBundle.bundle.bundleName)
+            } else {
+                CcuLog.d(TAG, "initiateBundleUpgrade: No CCU app in bundle, skipping bundle version update")
+            }
 
             state = BundleInstallState.COMPLETED
             sendBundleInstallMessage(state, 100, "Bundle installation complete")
 
             // Everything has completed successfully, deal with any restart/reboot requirements
             if (restartTablet) {
-                Log.d(TAG, "initiateBundleUpgrade: Restarting tablet")
+                CcuLog.d(TAG, "initiateBundleUpgrade: Restarting tablet")
                 UpdateAppRestartCause(BUNDLE_UPDATE_DEVICE_REBOOT)
                 RenatusApp.rebootTablet()
             } else if (restartCCU) {
-                Log.d(TAG, "initiateBundleUpgrade: Restarting CCU")
+                CcuLog.d(TAG, "initiateBundleUpgrade: Restarting CCU")
                 UpdateAppRestartCause(CCU_UPDATE)
                 RenatusApp.restartApp()
             }
 
         } catch(e: Exception) {
             val msg = "Exception: ${e.message}"
-            Log.e(TAG, "initiateBundleUpgrade: $msg")
+            CcuLog.e(TAG, "initiateBundleUpgrade: $msg")
             state = BundleInstallState.FAILED
             sendBundleInstallMessage(state, 0, msg)
             return msg
         } finally {
-            Log.d(TAG, "initiateBundleUpgrade: Removing listeners and freeing semaphore")
+            CcuLog.d(TAG, "initiateBundleUpgrade: Removing listeners and freeing semaphore")
             installSemaphore.release()
         }
         return null

@@ -221,22 +221,25 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
 
         HashMap site = CCUHsApi.getInstance().read("site");
 
-        PackageManager pm = getActivity().getPackageManager();
-        PackageInfo pi;
-        try {
-            String softwareVersion;
-            String bundleVersion = Domain.diagEquip.getBundleVersion().readDefaultStrVal();
-            if (bundleVersion != "") {
-                softwareVersion = bundleVersion;
-            } else {
+
+        String softwareVersion = "";
+        String bundleVersion = Domain.diagEquip.getBundleVersion().readDefaultStrVal();
+
+        if (!bundleVersion.isEmpty()) {
+            softwareVersion = bundleVersion;
+        } else {
+            PackageManager pm = Globals.getInstance().getApplicationContext().getPackageManager();
+            PackageInfo pi;
+            try {
                 pi = pm.getPackageInfo("a75f.io.renatus", 0);
-                softwareVersion = pi.versionName.toString().replace("RENATUS_CCU", "CCU");
+                softwareVersion =  pi.versionName.substring(pi.versionName.lastIndexOf('_')+1);
+            } catch (PackageManager.NameNotFoundException e) {
+                CcuLog.e(L.TAG_CCU_UI, "Error getting package info for renatus", e);
+                e.printStackTrace();
             }
-            tvCcuVersion.setText(softwareVersion);
-        } catch (PackageManager.NameNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
+
+        tvCcuVersion.setText(softwareVersion);
 
         String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
         tvSiteId.setText(siteUID == null? site.get("id").toString() :siteUID);

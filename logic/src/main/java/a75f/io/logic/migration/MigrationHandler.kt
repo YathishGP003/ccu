@@ -241,7 +241,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if (hayStack.readEntity(Tags.SITE).isNotEmpty()) {
             // After DM integration skipping migration for DR mode
 //            migrationForDRMode()
-            migrateEquipStatusEnums()
+            if (!PreferenceUtil.getEquipScheduleStatusMigrationStatus()) {
+                migrateEquipStatusEnums()
+                PreferenceUtil.setEquipScheduleStatusMigrationStatus()
+            }
             if(!PreferenceUtil.getSingleDualMigrationStatus()) {
                 migrationToHandleInfluenceOfUserIntentOnSentPoints()
                 PreferenceUtil.setSingleDualMigrationStatus()
@@ -1034,7 +1037,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun migrateEquipStatusEnums() {
         val equipStatusPointList = hayStack.readAllEntities("status and not ota and not message" +
-                " and zone and his and enum and not modbus")
+                " and zone and his and enum and not modbus and not connectModule")
         equipStatusPointList.forEach{equipStatusMap ->
             val equipStatusPoint = Point.Builder().setHashMap(equipStatusMap).build()
             if (!equipStatusPoint.enums.toString().contains("rfdead")) {

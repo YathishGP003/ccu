@@ -115,7 +115,7 @@ public class PreferenceUtil {
     private static final String FLOOR_REF_UPDATE_STATUS = "floorRefUpdateStatus";
     private static final String MODBUS_KVTAGS_DATA_TYPE_UPDATED = "modbusKVTagsDataTypeUpdated";
     private static final String  UPDATE_ENUM_VALUES_FOR_TERMINAL_SYSTEM_PROFILE = "updatingEnumValuesForTerminalSystemProfile";
-    private static final String CLEAR_UNSYNCED_LIST = "clearUnSyncedList";
+    private static final String CLEAR_UNSYNCED_LIST = "clearUnSyncedLists";
 
 
     public static final String SELECTED_PROFILE_WITH_AHU = "selectedProfileWithAhu";

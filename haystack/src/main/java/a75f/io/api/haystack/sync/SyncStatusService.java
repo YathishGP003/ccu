@@ -159,7 +159,13 @@ public class SyncStatusService {
     public void clearSyncStatus() {
         CcuLog.i(HayStackConstants.LOG_TAG,"clearSyncStatus");
         if (unsyncedIdList.size() > 100) {
-            preferences.edit().remove(PREFS_ID_LIST_UNSYNCED).apply();
+            CcuLog.i(HayStackConstants.LOG_TAG,"More than 100 unsynced entities, clearing all unsynced data");
+            if(preferences.edit().remove(PREFS_ID_LIST_UNSYNCED).commit()) {
+                CcuLog.i(HayStackConstants.LOG_TAG," successfully Cleared unsynced data");
+            } else {
+                CcuLog.e(HayStackConstants.LOG_TAG,"Failed to clear unsynced data");
+            }
+            unsyncedIdList = new ArrayList<>();
         } else {
             unsyncedIdList.clear();
         }

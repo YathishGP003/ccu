@@ -120,12 +120,6 @@ public class HClient extends HProj
 // State
 //////////////////////////////////////////////////////////////////////////
 
-  private final HashMap watches = new HashMap();
-
-  /* contains point id and point data*/
-  private final HashMap sharedEntities = new HashMap();
-  private final HashMap sharedPointArrays = new HashMap();
-
   /** Base URI for connection such as "http://host/api/demo/".
       This string always ends with slash. */
   public String uri;
@@ -275,7 +269,7 @@ public class HClient extends HProj
    */
   public HWatch[] watches()
   {
-    return (HWatch[])watches.values().toArray(new HWatch[watches.size()]);
+    return (HWatch[])CCUHsApi.getInstance().watches.values().toArray(new HWatch[CCUHsApi.getInstance().watches.size()]);
   }
 
   /**
@@ -285,7 +279,7 @@ public class HClient extends HProj
    */
   public HWatch watch(String id, boolean checked)
   {
-    HWatch w = (HWatch)watches.get(id);
+    HWatch w = (HWatch)CCUHsApi.getInstance().watches.get(id);
     if (w != null) return w;
     if (checked) throw new UnknownWatchException(id);
     return null;
@@ -316,7 +310,7 @@ public class HClient extends HProj
     }
 
     w.lease = w.desiredLease;
-    watches.put(w.id, w);
+    CCUHsApi.getInstance().watches.put(w.id, w);
 
     List<HRef> newIds = Arrays.asList(ids);
     w.subscribedIds.addAll(Arrays.asList(ids));
@@ -332,8 +326,8 @@ public class HClient extends HProj
     while (it.hasNext()) {
       HRow r = (HRow) it.next();
       HVal rowId = r.get("id");
-      sharedEntities.put(rowId, r);
-      sharedPointArrays.put(rowId, getValue(rowId.toString()));
+      CCUHsApi.getInstance().sharedEntities.put(rowId, r);
+      CCUHsApi.getInstance().sharedPointArrays.put(rowId, getValue(rowId.toString()));
 
       //sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointArr(rowId.toString()));
     }
@@ -348,12 +342,12 @@ public class HClient extends HProj
     if (w.closed) throw new IllegalStateException("watch is closed");
     CcuLog.i("CCU_HS","--watchUnsub---"+Arrays.toString(ids));
     for (int i = 0; i < ids.length; ++i) {
-      sharedEntities.remove(ids[i]);
-      sharedPointArrays.remove(ids[i]);
+      CCUHsApi.getInstance().sharedEntities.remove(ids[i]);
+      CCUHsApi.getInstance().sharedPointArrays.remove(ids[i]);
       w.subscribedIds.remove(ids[i]);
     }
     //w.subscribedIds.clear();
-    CcuLog.i("CCU_HS","--unsub--sharedEntities-"+sharedEntities.size() + "-sharedPointArrays-" + sharedPointArrays.size() + "-subscribedIds-" + w.subscribedIds.size());
+    CcuLog.i("CCU_HS","--unsub--sharedEntities-"+CCUHsApi.getInstance().sharedEntities.size() + "-sharedPointArrays-" + CCUHsApi.getInstance().sharedPointArrays.size() + "-subscribedIds-" + w.subscribedIds.size());
   }
 
   HGrid watchPoll(HClientWatch w, boolean refresh)
@@ -395,13 +389,13 @@ public class HClient extends HProj
         HRow r = (HRow) it.next();
         HVal lastModifiedDateTime = r.get(lastModifiedDateTimeStr);
         HVal rowId = r.get(idStr);
-        HRow previousRow = (HRow) sharedEntities.get(rowId);
+        HRow previousRow = (HRow) CCUHsApi.getInstance().sharedEntities.get(rowId);
         HVal previousLastModifiedDateTime = previousRow.get(lastModifiedDateTimeStr);
 
         if(previousLastModifiedDateTime != null && lastModifiedDateTime != null){
           if (!previousLastModifiedDateTime.equals(lastModifiedDateTime)) {
             pIds.add(getDictFromHRow(r));
-            sharedPointArrays.put(rowId, getValue(rowId.toString()));
+            CCUHsApi.getInstance().sharedPointArrays.put(rowId, getValue(rowId.toString()));
           }else{
             checkItemsWithInPointArray(pIds, idStr, r, rowId);
           }
@@ -429,11 +423,11 @@ public class HClient extends HProj
         }
       }
     }
-    Double sharedHighPriorityVal = (Double) sharedPointArrays.get(r.get(idStr));
+    Double sharedHighPriorityVal = (Double) CCUHsApi.getInstance().sharedPointArrays.get(r.get(idStr));
    CcuLog.d("CCU_HS", "-currentHighPriorityVal-" + currentHighPriorityVal + "-sharedHighPriorityVal-" + sharedHighPriorityVal);
     if (Double.compare(currentHighPriorityVal, sharedHighPriorityVal) != 0) {
       pIds.add(getDictFromHRow(r));
-      sharedPointArrays.put(rowId, currentHighPriorityVal);
+      CCUHsApi.getInstance().sharedPointArrays.put(rowId, currentHighPriorityVal);
     } else {
      CcuLog.d("CCU_HS", "no change in data");
     }
@@ -495,12 +489,12 @@ public class HClient extends HProj
       Iterator it = w.subscribedIds.iterator();
       while (it.hasNext()) {
         HRef r = (HRef) it.next();
-        sharedEntities.remove(r.val);
-        sharedPointArrays.remove(r.val);
+        CCUHsApi.getInstance().sharedEntities.remove(r.val);
+        CCUHsApi.getInstance().sharedPointArrays.remove(r.val);
       }
       //watchesWithIds.remove(w.id);
       w.subscribedIds.clear();
-      watches.remove(w.id);
+      CCUHsApi.getInstance().watches.remove(w.id);
 
     }
 
@@ -524,14 +518,14 @@ public class HClient extends HProj
    * @param id
    */
   public void clearPointFromWatch(HRef id) {
-    for (Object entry : watches.entrySet()) {
+    for (Object entry : CCUHsApi.getInstance().watches.entrySet()) {
       Map.Entry<String,Object> obj = (Map.Entry<String, Object>) entry;
       HClientWatch watch = (HClientWatch) obj.getValue();
       Iterator<HRef> it = watch.subscribedIds.iterator();
       while (it.hasNext()) {
         HRef r = (HRef) it.next();
         if(r.equals(id)){
-          sharedEntities.remove(r.val);
+          CCUHsApi.getInstance().sharedEntities.remove(r.val);
           it.remove();
           break;
         }

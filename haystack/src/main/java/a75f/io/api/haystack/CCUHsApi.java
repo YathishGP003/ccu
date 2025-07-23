@@ -133,6 +133,13 @@ public class CCUHsApi
 
     private static double mCurrentTemperature =-1;
     private static double mCurrentHumidity =-1;
+
+    public final HashMap watches = new HashMap();
+
+    /* contains point id and point data*/
+    public final HashMap sharedEntities = new HashMap();
+    public final HashMap sharedPointArrays = new HashMap();
+
     private final List<OnCcuRegistrationCompletedListener> onCcuRegistrationCompletedListeners = new ArrayList<>();
     private final List<EntityDeletedListener> entityDeletedListeners = new ArrayList<>();
     public static CCUHsApi getInstance() {

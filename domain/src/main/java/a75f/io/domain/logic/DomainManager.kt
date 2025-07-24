@@ -220,7 +220,9 @@ object DomainManager {
                     }
                 }
             } else  {
-                CcuLog.e(Domain.LOG_TAG, "Unknown system (${systemEquip["profile"]}) equip does not contains domainName ")
+                Domain.systemEquip = DefaultSystemEquip(systemEquip["id"].toString())
+                CcuLog.e(Domain.LOG_TAG, "Unknown system (${systemEquip["profile"]})" +
+                        " equip does not contains domainName so falling back to default system")
             }
         } else {
             CcuLog.e(Domain.LOG_TAG, "No system equip found")

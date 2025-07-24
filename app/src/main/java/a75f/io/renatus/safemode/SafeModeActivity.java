@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat;
 import com.google.gson.JsonObject;
 
 import a75f.io.alerts.AlertManager;
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -70,7 +71,11 @@ public class SafeModeActivity extends AppCompatActivity implements SafeModeInter
 
     public void exitSafeMode(){
         CcuLog.d(L.TAG_CCU_SAFE_MODE, "exitSafeMode Complete");
-        Domain.diagEquip.getSafeModeStatus().writeHisVal(0.0);
+        if (Domain.diagEquip != null) {
+            Domain.diagEquip.getSafeModeStatus().writeHisVal(0.0);
+        } else {
+            CCUHsApi.getInstance().writeHisValByQuery("domainName == \"safeModeStatus\"", 0.0);
+        }
         SharedPreferences crashPreference = this.getSharedPreferences("crash_preference", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = crashPreference.edit();
         editor.clear();

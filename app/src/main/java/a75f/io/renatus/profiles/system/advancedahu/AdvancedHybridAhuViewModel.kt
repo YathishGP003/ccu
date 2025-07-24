@@ -406,6 +406,13 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
          )
 
          if (profileConfiguration.connectConfiguration.connectEnabled) {
+             // there was a problem, in older build, we dint add restriction for changing node-address,
+             // if connect  module is paired, sometimes CN may have 1098 nodeaddress and other edge devices may have other addresband,
+             // work around will be just deleting and repairing CN, while repairing make sure we have proper node address.
+             if (profileConfiguration.connectConfiguration.nodeAddress != L.ccu().addressBand + 98) {
+                 profileConfiguration.connectConfiguration.nodeAddress = L.ccu().addressBand + 98
+                 CcuLog.i(Domain.LOG_TAG, "CORRECTED NODE ADDRESS")
+             }
              if (existingConnectEquip.isNotEmpty()) {
                  connectEquipBuilder.updateEquipAndPoints(
                          configuration = profileConfiguration.connectConfiguration,

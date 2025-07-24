@@ -169,7 +169,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 }
                 Spacer(Modifier.weight(1f))
                 Box(modifier = Modifier.padding(end = 30.dp)) {
-                    StyledTextView("Address: " + viewModel.viewState.value.connectAddress.toString(), fontSize = 20)
+                    StyledTextView("Address: " + (L.ccu().addressBand + 98), fontSize = 20)
                 }
             }
         }

@@ -954,10 +954,8 @@ public class RestoreCCUHsApi {
         if (site != null && site.getOrganization() != null) {
             String org = site.getOrganization();
             HDict scheduleDicts = new HDictBuilder().add("filter",
-                    "point and (schedule or event) organization == \""+org+"\" and " +
-                            "(not siteRef or siteRef == \"" + site.getId().replace("@","") + "\")").toDict();
-            CcuLog.d(TAG, "scheduleDicts: query----"+ ("point and (schedule or event) organization == \""+org+"\" and " +
-                            "(not siteRef or siteRef == \"" + site.getId().replace("@","") + "\")"));
+                    "organization == \""+org+"\" and (schedule or event) and point").toDict();
+            CcuLog.d(TAG, "scheduleDicts: query---->"+ ("organization == \""+org+"\" and (schedule or event) and point"));
             HGrid scheduleGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(scheduleDicts),
                     retryCountCallback);
 

@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.system
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.DefaultSystemEquip
 import a75f.io.domain.logic.DeviceBuilder
@@ -8,6 +9,7 @@ import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.DomainManager.addSystemDomainEquip
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
+import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.ModelLoader.getCMDeviceModel
 import a75f.io.domain.util.ModelLoader.getDefaultSystemProfileModel
 import a75f.io.logger.CcuLog
@@ -141,11 +143,15 @@ class DefaultSystem : SystemProfile() {
     }
 
     override fun deleteSystemEquip() {
-        val equip =
-            CCUHsApi.getInstance().readEntity("system and equip and not modbus and not connectModule")
-        if (equip["profile"] == DomainName.defaultSystemEquip) {
-            CCUHsApi.getInstance().deleteEntityTree(equip["id"].toString())
+        val listOfEquips = CCUHsApi.getInstance().readAllEntities(CommonQueries.SYSTEM_PROFILE)
+        for(equip in listOfEquips){
+            if (ProfileType.getProfileTypeForName(equip["profile"]?.toString()).name.contentEquals(ProfileType.SYSTEM_DEFAULT.name)) {
+                CcuLog.d(Tags.ADD_REMOVE_PROFILE, "DefaultSystem removing profile with it -->${equip[Tags.ID].toString()}")
+                CCUHsApi.getInstance().deleteEntityTree(equip[Tags.ID].toString())
+            }
         }
+
+
         deleteOAODamperEquip()
         deleteBypassDamperEquip()
         removeSystemEquipModbus()

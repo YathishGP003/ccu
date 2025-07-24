@@ -12,6 +12,7 @@ import android.widget.Button;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
@@ -30,7 +31,7 @@ public class DefaultSystemProfile extends Fragment
         return new DefaultSystemProfile();
     }
 
-    DefaultSystem systemProfile = null;
+    SystemProfile systemProfile = null;
     Prefs prefs;
     @BindView(R.id.buttonNext)
     Button mNext;
@@ -52,6 +53,7 @@ public class DefaultSystemProfile extends Fragment
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
             ButterKnife.bind(this, view);
             prefs = new Prefs(getContext().getApplicationContext());
+            systemProfile = L.ccu().systemProfile;
             if (L.ccu().systemProfile instanceof DefaultSystem) {
             } else {
                 ExecutorTask.executeAsync(

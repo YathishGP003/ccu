@@ -47,7 +47,9 @@ fun isSoftOccupied(occupancyPoint : Point) : Boolean {
     return occupancyValue == Occupancy.OCCUPIED ||
             occupancyValue == Occupancy.AUTOAWAY ||
             occupancyValue == Occupancy.KEYCARD_AUTOAWAY ||
-            occupancyValue == Occupancy.DEMAND_RESPONSE_OCCUPIED
+            occupancyValue == Occupancy.DEMAND_RESPONSE_OCCUPIED||
+            occupancyValue == Occupancy.FORCEDOCCUPIED ||
+            occupancyValue == Occupancy.AUTOFORCEOCCUPIED
 }
 
 fun isSystemOccupied(occupancyPoint: Point): Boolean {

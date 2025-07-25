@@ -8,6 +8,7 @@ import a75f.io.device.cm.PressureSensorBusMapping
 import a75f.io.device.cm.TemperatureSensorBusMapping
 import a75f.io.device.cm.getUniversalInputSensorMapping
 import a75f.io.device.cm.isNotAdvanceAhuProfile
+import a75f.io.device.mesh.Pulse
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.equips.ConnectModuleEquip
@@ -18,12 +19,18 @@ import a75f.io.logic.bo.building.system.util.getConnectEquip
 import com.x75f.modbus4j.serial.rtu.RtuMessageResponse
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.Calendar
 import kotlin.math.roundToInt
 
 
 const val MODBUS_DATA_OFFSET = 3
 const val CN_MODBUS_DATA_OFFSET = 3
 fun handleModbusResponse(slaveId : Int, response : RtuMessageResponse, ops: ConnectModbusOps) {
+    // if slave id is 01, address will be 1001, so just put nodeAddress to mDeviceUpdate variable,
+    // it will take care of alerts
+
+    Pulse.mDeviceUpdate[(slaveId + L.ccu().addressBand).toShort()] = Calendar.getInstance().timeInMillis
+
     when (ops) {
         ConnectModbusOps.READ_SENSOR_BUS_VALUES -> {
             CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "READ_SENSOR_BUS_VALUES response received $response")

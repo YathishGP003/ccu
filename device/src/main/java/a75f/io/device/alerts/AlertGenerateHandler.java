@@ -16,6 +16,7 @@ import java.util.HashMap;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
 
 /**
  * Created by mahesh on 26-11-2019.
@@ -77,7 +78,11 @@ public class AlertGenerateHandler {
         if (device == null) {
             return deviceRef;
         }
-        return device.get("equipRef").toString();
+        if (device.containsKey(Tags.CONNECTMODULE) && device.containsKey("lowCode")) {
+            return deviceRef;
+        }
+        // for devices like CN, PCN, we dont have equipRef in device
+        return device.get("equipRef") != null ? device.get("equipRef").toString() : "";
     }
 
 }

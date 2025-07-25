@@ -45,8 +45,10 @@ import a75f.io.logic.controlcomponents.handlers.doAnalogOperation
 import a75f.io.logic.controlcomponents.util.ControllerNames
 import a75f.io.logic.controlcomponents.util.isSoftOccupied
 import a75f.io.logic.util.PreferenceUtil
+import a75f.io.logic.util.isOfflineMode
 import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler
 import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler.Companion.hyperStatSplitStatus
+import android.content.Context
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlin.math.max
 import kotlin.math.min
@@ -351,19 +353,24 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         } else {
             compressorLoopOutput = 0
         }
-        evaluateOAOLoop(basicSettings, isCondensateTripped, effectiveOutsideDamperMinOpen, config)
+        evaluateOAOLoop(basicSettings, isCondensateTripped, effectiveOutsideDamperMinOpen, config, equipRef)
     }
 
     private fun evaluateOAOLoop(
         basicSettings: BasicSettings,
         isCondensateTripped: Boolean,
         effectiveOutsideDamperMinOpen: Int,
-        config: HyperStatSplitCpuConfiguration
+        config: HyperStatSplitCpuConfiguration,
+        equipRef: String
     ) {
 
         // If there's not an OAO damper mapped,
         if (!HyperStatSplitAssociationUtil.isAnyAnalogAssociatedToOAO(domainProfileConfiguration)) {
-
+            val sharedPreferences = Globals.getInstance().applicationContext.getSharedPreferences(
+                "ccu_devsetting",
+                Context.MODE_PRIVATE
+            )
+            val isTestModeEnabled = Globals.getInstance().isWeatherTest
             economizingAvailable = false
             economizingLoopOutput = 0
             dcvAvailable = false
@@ -373,11 +380,24 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
             matThrottle = false
             outsideAirFinalLoopOutput = 0
 
+            var externalTemp = 0.0
+            var externalHumidity = 0.0
             // Even if there's not an OAO damper, still calculate enthalpy for portal widgets
-            val externalTemp = CCUHsApi.getInstance()
-                .readHisValByQuery("system and outside and temp and not lockout")
-            val externalHumidity =
-                CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity")
+            if(isTestModeEnabled) {
+                externalTemp = sharedPreferences.getInt("outside_temp", 0).toDouble()
+                externalHumidity = sharedPreferences.getInt("outside_humidity", 0).toDouble()
+
+            }else if(isOfflineMode()) {
+                externalTemp = CCUHsApi.getInstance()
+                    .readHisValByQuery("domainName == \"outsideTemperature\" and equipRef == \"$equipRef\"")
+                externalHumidity = CCUHsApi.getInstance()
+                    .readHisValByQuery("domainName == \"outsideHumidity\" and equipRef == \"$equipRef\"")
+            } else {
+                externalTemp = CCUHsApi.getInstance()
+                    .readHisValByQuery("system and outside and temp and not lockout")
+                externalHumidity = CCUHsApi.getInstance()
+                    .readHisValByQuery("system and outside and humidity")
+            }
 
             val indoorTemp = hssEquip.currentTemp.readHisVal()
             val indoorHumidity = hssEquip.zoneHumidity.readHisVal()
@@ -397,7 +417,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
             val matTemp = hssEquip.mixedAirTemperature.readHisVal()
 
             handleSmartPrePurgeControl()
-            doEconomizing(config)
+            doEconomizing(config, equipRef)
             doDcv(effectiveOutsideDamperMinOpen)
 
             outsideAirLoopOutput = if (epidemicState == EpidemicState.PREPURGE) {
@@ -516,12 +536,31 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
 
     }
 
-    private fun doEconomizing(config: HyperStatSplitCpuConfiguration) {
+    private fun doEconomizing(config: HyperStatSplitCpuConfiguration, equipRef: String) {
 
-        val externalTemp =
-            CCUHsApi.getInstance().readHisValByQuery("system and outside and temp and not lockout")
-        val externalHumidity =
-            CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity")
+        val sharedPreferences = Globals.getInstance().applicationContext.getSharedPreferences(
+            "ccu_devsetting",
+            Context.MODE_PRIVATE
+        )
+        val isTestModeEnabled = Globals.getInstance().isWeatherTest
+
+        var externalTemp = 0.0
+        var externalHumidity = 0.0
+
+        if(isTestModeEnabled) {
+            externalTemp = sharedPreferences.getInt("outside_temp", 0).toDouble()
+            externalHumidity = sharedPreferences.getInt("outside_humidity", 0).toDouble()
+        } else if(isOfflineMode()) {
+            externalTemp = CCUHsApi.getInstance()
+                .readHisValByQuery("domainName == \"outsideTemperature\" and equipRef == \"$equipRef\"")
+            externalHumidity = CCUHsApi.getInstance()
+                .readHisValByQuery("domainName == \"outsideHumidity\" and equipRef == \"$equipRef\"")
+        } else {
+            externalTemp = CCUHsApi.getInstance()
+                .readHisValByQuery("system and outside and temp and not lockout")
+            externalHumidity = CCUHsApi.getInstance()
+                .readHisValByQuery("system and outside and humidity")
+        }
 
         // Check for economizer enable
         if (canDoEconomizing(externalTemp, externalHumidity)) {

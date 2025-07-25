@@ -10,6 +10,7 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.AdvancedHybridSystemEquip
 import a75f.io.logger.CcuLog
+import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
 import a75f.io.logic.bo.building.system.AdvancedAhuRelayMappings
@@ -97,7 +98,7 @@ private fun updateCurrentTemp(roomTemperature: Double, equip: AdvancedHybridSyst
 private fun updateHumidity(humidity: Double, equip: AdvancedHybridSystemEquip) {
     if (equip.outsideHumidity.pointExists()) {
         CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Humidity $humidity")
-        equip.outsideHumidity.writeHisVal(humidity)
+        equip.cmHumidity.writeHisVal(humidity)
     } else {
         CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : outsideHumidity point not found")
     }

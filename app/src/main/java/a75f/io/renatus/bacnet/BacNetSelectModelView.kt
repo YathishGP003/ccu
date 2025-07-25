@@ -4,7 +4,6 @@ import a75f.io.api.haystack.bacnet.parser.BacnetSelectedValue
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.util.bacnet.BacnetConfigConstants
-import a75f.io.logic.util.bacnet.isValidMstpMacAddress
 import a75f.io.logic.util.bacnet.validateInputdata
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
@@ -459,7 +458,10 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
         val expanded = remember { mutableStateOf(false) }
         val onConfigDropdownClickEvent =
             if(isEditable) {
-                { expanded.value = true }
+                {
+                    expanded.value = true
+                    viewModel.clearConfigFieldData()
+                }
             } else { {} }
 
             ExternalConfigDropdownSelector(

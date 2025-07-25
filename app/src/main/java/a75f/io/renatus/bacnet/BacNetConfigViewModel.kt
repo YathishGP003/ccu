@@ -1109,5 +1109,6 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         dnet.value = ""
         destinationIp.value = ""
         destinationMacAddress.value = ""
+        connectedDevices = mutableStateOf(emptyList())
     }
 }

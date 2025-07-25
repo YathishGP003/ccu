@@ -32,6 +32,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.ConditioningStages;
 import a75f.io.domain.equips.VavStagedSystemEquip;
 import a75f.io.domain.equips.VavStagedVfdSystemEquip;
@@ -221,7 +222,7 @@ public class VavStagedRtu extends VavSystemProfile {
                 systemEquip.getAverageHumidity(),
                 systemEquip.getSystemtargetMinInsideHumidity(),
                 systemEquip.getVavHumidityHysteresis(),
-                systemEquip.getCurrentOccupancy(),
+                currentOccupancy,
                 systemEquip.getConditioningStages().getHumidifierEnable().pointExists()
         );
 
@@ -229,7 +230,7 @@ public class VavStagedRtu extends VavSystemProfile {
                 systemEquip.getAverageHumidity(),
                 systemEquip.getSystemtargetMaxInsideHumidity(),
                 systemEquip.getVavHumidityHysteresis(),
-                systemEquip.getCurrentOccupancy(),
+                currentOccupancy,
                 systemEquip.getConditioningStages().getDehumidifierEnable().pointExists()
         );
 
@@ -243,16 +244,16 @@ public class VavStagedRtu extends VavSystemProfile {
                 systemEquip.getConditioningStages().getChangeOverHeating().pointExists()
         );
 
-        factory.addOccupiedEnabledController(systemEquip.getCurrentOccupancy(),
+        factory.addOccupiedEnabledController(currentOccupancy,
                 systemEquip.getConditioningStages().getOccupiedEnabled().pointExists());
         factory.addFanEnableController(
-                systemEquip.getFanLoopOutput(), systemEquip.getCurrentOccupancy(),
+                systemEquip.getFanLoopOutput(), currentOccupancy,
                 systemEquip.getConditioningStages().getFanEnable().pointExists()
         );
         factory.addDcvDamperController(
                 systemEquip.getDcvLoopOutput(),
                 systemEquip.getVavRelayDeactivationHysteresis(),
-                systemEquip.getCurrentOccupancy(),
+                currentOccupancy,
                 systemEquip.getConditioningStages().getDcvDamper().pointExists()
         );
 
@@ -260,6 +261,9 @@ public class VavStagedRtu extends VavSystemProfile {
 
     protected synchronized void updateSystemPoints() {
         systemEquip = (VavStagedSystemEquip) Domain.systemEquip;
+        if (currentOccupancy == null) {
+            currentOccupancy = new CalibratedPoint(DomainName.occupancyMode, systemEquip.getEquipRef(), 0.0);
+        }
         systemStatusHandler = new SystemStageHandler(systemEquip.getConditioningStages());
         updateStagesSelected();
         addControllers();
@@ -451,7 +455,7 @@ public class VavStagedRtu extends VavSystemProfile {
     }
 
     private void updatePrerequisite() {
-        systemEquip.getCurrentOccupancy().setData(ScheduleManager.getInstance().getSystemOccupancy().ordinal());
+        currentOccupancy.setData(ScheduleManager.getInstance().getSystemOccupancy().ordinal());
         double economization = 0.0;
         if (systemCoolingLoopOp > 0) {
             economization = L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable() ? 1.0 : 0.0;

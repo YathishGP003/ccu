@@ -12,6 +12,7 @@ import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.api.Point
 import a75f.io.domain.api.readPoint
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
+import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
@@ -132,7 +133,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
 
     private fun updatePrerequisite() {
-        systemEquip.currentOccupancy.data =
+        currentOccupancy.data =
             ScheduleManager.getInstance().systemOccupancy.ordinal.toDouble()
         var economization = 0.0
         if (systemCoolingLoopOp > 0) {
@@ -248,6 +249,9 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
     fun updateSystemPoints() {
         systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
+        if (currentOccupancy == null) {
+            currentOccupancy = CalibratedPoint(DomainName.occupancyMode, systemEquip.equipRef, 0.0)
+        }
         advancedAhuImpl = AdvancedAhuAlgoHandler(systemEquip)
         advAhuEconImpl = AdvAhuEconAlgoHandler(systemEquip.connectEquip1)
         conditioningMode = SystemMode.values()[systemEquip.conditioningMode.readPriorityVal().toInt()]
@@ -1249,7 +1253,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.averageHumidity,
             systemEquip.systemtargetMinInsideHumidity,
             systemEquip.vavHumidityHysteresis,
-            systemEquip.currentOccupancy,
+            currentOccupancy,
             systemEquip.cmEquip.conditioningStages.humidifierEnable.pointExists()
         )
 
@@ -1257,31 +1261,31 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.averageHumidity,
             systemEquip.systemtargetMaxInsideHumidity,
             systemEquip.vavHumidityHysteresis,
-            systemEquip.currentOccupancy,
+            currentOccupancy,
             systemEquip.cmEquip.conditioningStages.dehumidifierEnable.pointExists()
         )
 
         factory.addOccupiedEnabledController(
-            systemEquip.currentOccupancy,
+            currentOccupancy,
             systemEquip.cmEquip.conditioningStages.occupiedEnabled.pointExists()
         )
 
         factory.addFanEnableController(
             systemEquip.fanLoopOutput,
-            systemEquip.currentOccupancy,
+            currentOccupancy,
             systemEquip.cmEquip.conditioningStages.fanEnable.pointExists()
         )
 
         factory.addFanRunCommandController(
             systemEquip.co2LoopOutput,
-            systemEquip.currentOccupancy,
+            currentOccupancy,
             systemEquip.cmEquip.conditioningStages.ahuFreshAirFanRunCommand.pointExists()
         )
 
         factory.addDcvDamperController(
             systemEquip.dcvLoopOutput,
             systemEquip.relayActivationHysteresis,
-            systemEquip.currentOccupancy,
+            currentOccupancy,
             systemEquip.cmEquip.conditioningStages.dcvDamper.pointExists()
         )
 
@@ -1338,31 +1342,31 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.averageHumidity,
             systemEquip.systemtargetMinInsideHumidity,
             systemEquip.vavHumidityHysteresis,
-            systemEquip.currentOccupancy,
+            currentOccupancy,
             systemEquip.connectEquip1.conditioningStages.humidifierEnable.pointExists()
         )
         connectfactory.addDeHumidifierController(
             systemEquip.averageHumidity,
             systemEquip.systemtargetMaxInsideHumidity,
             systemEquip.vavHumidityHysteresis,
-            systemEquip.currentOccupancy,
+            currentOccupancy,
             systemEquip.connectEquip1.conditioningStages.dehumidifierEnable.pointExists()
         )
 
         connectfactory.addOccupiedEnabledController(
-            systemEquip.currentOccupancy,
+            currentOccupancy,
             systemEquip.connectEquip1.conditioningStages.occupiedEnabled.pointExists()
         )
 
         connectfactory.addFanEnableController(
             systemEquip.connectEquip1.fanLoopOutput,
-            systemEquip.currentOccupancy,
+            currentOccupancy,
             systemEquip.connectEquip1.conditioningStages.fanEnable.pointExists()
         )
 
         connectfactory.addFanRunCommandController(
             systemEquip.connectEquip1.co2LoopOutput,
-            systemEquip.currentOccupancy,
+            currentOccupancy,
             systemEquip.connectEquip1.conditioningStages.ahuFreshAirFanRunCommand.pointExists()
         )
 

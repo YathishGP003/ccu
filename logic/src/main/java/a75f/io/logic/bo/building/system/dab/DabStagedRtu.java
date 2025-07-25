@@ -32,6 +32,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.ConditioningStages;
 import a75f.io.domain.equips.DabStagedSystemEquip;
 import a75f.io.domain.equips.DabStagedVfdSystemEquip;
@@ -106,6 +107,9 @@ public class DabStagedRtu extends DabSystemProfile
 
     protected synchronized void updateSystemPoints() {
         systemEquip = (DabStagedVfdSystemEquip) Domain.systemEquip;
+        if (currentOccupancy == null) {
+            currentOccupancy = new CalibratedPoint(DomainName.occupancyMode, systemEquip.getEquipRef(), 0.0);
+        }
         systemStatusHandler = new SystemStageHandler(systemEquip.getConditioningStages());
         updateOutsideWeatherParams();
         updateMechanicalConditioning(CCUHsApi.getInstance());
@@ -227,7 +231,7 @@ public class DabStagedRtu extends DabSystemProfile
     }
 
     private void updatePrerequisite() {
-        systemEquip.getCurrentOccupancy().setData(ScheduleManager.getInstance().getSystemOccupancy().ordinal());
+        currentOccupancy.setData(ScheduleManager.getInstance().getSystemOccupancy().ordinal());
         double economization = 0.0;
         if (systemCoolingLoopOp > 0) {
             economization = L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable() ? 1.0 : 0.0;
@@ -451,7 +455,7 @@ public class DabStagedRtu extends DabSystemProfile
                 systemEquip.getAverageHumidity(),
                 systemEquip.getSystemtargetMinInsideHumidity(),
                 systemEquip.getDabRelayDeactivationHysteresis(),
-                systemEquip.getCurrentOccupancy(),
+                currentOccupancy,
                 systemEquip.getConditioningStages().getHumidifierEnable().pointExists()
         );
 
@@ -459,7 +463,7 @@ public class DabStagedRtu extends DabSystemProfile
                 systemEquip.getAverageHumidity(),
                 systemEquip.getSystemtargetMaxInsideHumidity(),
                 systemEquip.getDabRelayDeactivationHysteresis(),
-                systemEquip.getCurrentOccupancy(),
+                currentOccupancy,
                 systemEquip.getConditioningStages().getDehumidifierEnable().pointExists()
         );
 
@@ -473,16 +477,16 @@ public class DabStagedRtu extends DabSystemProfile
                 systemEquip.getConditioningStages().getChangeOverHeating().pointExists()
         );
 
-        factory.addOccupiedEnabledController(systemEquip.getCurrentOccupancy(),
+        factory.addOccupiedEnabledController(currentOccupancy,
                 systemEquip.getConditioningStages().getOccupiedEnabled().pointExists());
         factory.addFanEnableController(
-                systemEquip.getFanLoopOutput(), systemEquip.getCurrentOccupancy(),
+                systemEquip.getFanLoopOutput(), currentOccupancy,
                 systemEquip.getConditioningStages().getFanEnable().pointExists()
         );
         factory.addDcvDamperController(
                 systemEquip.getDcvLoopOutput(),
                 systemEquip.getDabRelayDeactivationHysteresis(),
-                systemEquip.getCurrentOccupancy(),
+                currentOccupancy,
                 systemEquip.getConditioningStages().getDcvDamper().pointExists()
         );
 

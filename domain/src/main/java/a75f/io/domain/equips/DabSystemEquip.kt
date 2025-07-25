@@ -74,6 +74,5 @@ open class DabSystemEquip(equipRef: String) : SystemEquip(equipRef) {
 
     // others
     val systemPurgeVavMinFanLoopOutput = Point(DomainName.systemPurgeVavMinFanLoopOutput , equipRef)
-    val currentOccupancy = CalibratedPoint(DomainName.occupancyMode , equipRef, 0.0)
 
 }

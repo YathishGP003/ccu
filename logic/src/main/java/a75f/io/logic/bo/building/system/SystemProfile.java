@@ -51,6 +51,7 @@ import a75f.io.domain.equips.ConnectModuleEquip;
 import a75f.io.domain.logic.CCUBaseConfigurationBuilder;
 import a75f.io.domain.logic.CCUDeviceBuilder;
 import a75f.io.domain.logic.DiagEquipConfigurationBuilder;
+import a75f.io.domain.util.CalibratedPoint;
 import a75f.io.domain.util.CommonQueries;
 import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
@@ -182,7 +183,7 @@ public abstract class SystemProfile
     public double getCo2LoopOp() {
         return systemCo2LoopOp;
     }
-
+    protected CalibratedPoint currentOccupancy = null;
     public double getCmd(String tags) {
         return CCUHsApi.getInstance().readHisValByQuery(tags+" and cmd and equipRef == \""+getSystemEquipRef()+"\"");
     }

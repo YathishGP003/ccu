@@ -52,7 +52,6 @@ import org.projecthaystack.server.HStdOps;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -63,7 +62,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.exception.NullHGridException;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
@@ -3009,8 +3007,8 @@ public class CCUHsApi
 
     }
 
-    public ArrayList<HashMap<Object, Object>> readAllSchedulable(){
-        return CCUHsApi.getInstance().readAllEntities("schedulable");
+    public ArrayList<HashMap<Object, Object>> readAllNativeSchedulable(){
+        return CCUHsApi.getInstance().readAllEntities("schedulable and not (modbus or bacnetDeviceId or (connectModule and zone))");
     }
 
     public boolean importPointArrays(List<HDict> hDicts) {
@@ -3054,6 +3052,7 @@ public class CCUHsApi
                             String who = dataElement.getStr("who");
                             String level = dataElement.get("level").toString();
                             HVal val = dataElement.get("val");
+                            HNum dur = HNum.make(dataElement.getDouble("dur") - System.currentTimeMillis());
                             Object lastModifiedTimeTag = dataElement.get("lastModifiedDateTime", false);
 
                             HDictBuilder pid = new HDictBuilder().add("id", HRef.copy(id))
@@ -3074,7 +3073,7 @@ public class CCUHsApi
                                 //save points on tagsDb
                                 tagsDb.onPointWrite(rec, Integer.parseInt(level),
                                         kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) :
-                                                val, who, HNum.make(0), rec, lastModifiedDateTime);
+                                                val, who, dur, rec, lastModifiedDateTime);
 
                                 //save his data to local cache
                                 tagsDb.saveHisItems(hsClient.readById(HRef.copy(id)),

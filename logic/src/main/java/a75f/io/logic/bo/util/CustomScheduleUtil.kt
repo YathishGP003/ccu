@@ -206,7 +206,7 @@ fun fetchForceOverrideLevelValueAndEndTimeIfAvailable(pointId: String, enumStrin
             if (index == HayStackConstants.FORCE_OVERRIDE_LEVEL - 1) {
                 forceOverrideLevelFound = true
                 valueString = getValueByEnum(valObject.toString().toDouble(), enumString, unit)
-                val date = Date(hashMap["duration"].toString().toLong())
+                val date = Date(hashMap["duration"].toString().toDouble().toLong())
                 val sdf = SimpleDateFormat("MMMM dd, yyyy 'at' HH:mm", Locale.ENGLISH)
                 endTimeString = sdf.format(date)
             }

@@ -511,7 +511,7 @@ public class MasterControlUtil {
     }
 
     public static boolean isMigrated(){
-        ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllSchedulable();
+        ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllNativeSchedulable();
         return ((isSchedulableAvailable != null && SchedulableMigrationKt.validateMigration()));
     }
 

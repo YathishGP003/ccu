@@ -2,12 +2,10 @@ package a75f.io.api.haystack.util
 
 import a75f.io.api.haystack.*
 import a75f.io.logger.CcuLog
-import android.util.Log
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.apache.commons.lang3.StringUtils
 import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
 import org.projecthaystack.HRef
@@ -154,7 +152,7 @@ fun setZoneEnabled() {
 
 fun doPointWriteForSchedulable(){
    CcuLog.i("CCU_SCHEDULABLE", "PointWrite Schedulable")
-    val schedulabaledata: ArrayList<HashMap<Any, Any>> = hayStack.readAllSchedulable()
+    val schedulabaledata: ArrayList<HashMap<Any, Any>> = hayStack.readAllNativeSchedulable()
     val hDicts = java.util.ArrayList<HDict>()
     for (m in schedulabaledata) {
         val pid = HDictBuilder().add("id", HRef.copy(m["id"].toString())).toDict()

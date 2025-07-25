@@ -359,7 +359,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
         double coolingDeadband = 2.0;
         boolean occupied = false;
         if(occuStatus != null){
-            ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllSchedulable();
+            ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllNativeSchedulable();
             HashMap<Object,Object> cDBMap = CCUHsApi.getInstance().readEntity("zone and cooling and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
             if (!isSchedulableAvailable.isEmpty() && !cDBMap.isEmpty()) {
                 coolingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
@@ -508,7 +508,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
         double heatingDeadband = 2.0;
         boolean occupied = false;
         if(occuStatus != null){
-            ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllSchedulable();
+            ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllNativeSchedulable();
             HashMap<Object,Object> hDBMap = CCUHsApi.getInstance().readEntity("zone and heating and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
             if (!isSchedulableAvailable.isEmpty() && !hDBMap.isEmpty()) {
                 heatingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \"" + equip.getRoomRef() + "\"");

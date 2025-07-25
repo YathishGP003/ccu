@@ -537,8 +537,8 @@ public class RestoreCCUHsApi {
                         String who = dataElement.getStr("who");
                         String level = dataElement.get("level").toString();
                         HVal val = dataElement.get("val");
+                        HNum dur = HNum.make(dataElement.getDouble("dur") - System.currentTimeMillis());
                         Object lastModifiedTimeTag = dataElement.get("lastModifiedDateTime", false);
-
                         HDictBuilder pid = new HDictBuilder().add("id", HRef.copy(id))
                                 .add("level", Integer.parseInt(level))
                                 .add("who", who)
@@ -561,7 +561,7 @@ public class RestoreCCUHsApi {
                         }
                         //save points on tagsDb
                         tagsDb.onPointWrite(rec, Integer.parseInt(level), kind.equals(Kind.STRING.getValue()) ?
-                                HStr.make(val.toString()) : val, who, HNum.make(0), rec, lastModifiedDateTime);
+                                HStr.make(val.toString()) : val, who, dur, rec, lastModifiedDateTime);
                     }
                 }
             }

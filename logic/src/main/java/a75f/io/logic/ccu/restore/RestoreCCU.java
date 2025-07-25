@@ -410,7 +410,7 @@ public class RestoreCCU {
                     replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.COMPLETED.toString());
                     equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
                     return;
-                } else if(equipRow.has(Tags.CONNECTMODULE)) {
+                } else if(equipRow.has(Tags.CONNECTMODULE) && equipRow.has(Tags.ZONE)) {
                     CcuLog.i(TAG, "Connect Node device already downloaded for : " + equipRow.get(Tags.DIS).toString());
                     replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.COMPLETED.toString());
                     equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());

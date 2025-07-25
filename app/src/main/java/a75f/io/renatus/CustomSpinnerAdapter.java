@@ -33,7 +33,7 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
 
     @Override
     public boolean isEnabled(int position) {
-        if(position == 2 && values.get(position).contains("No Named Schedule available"))
+        if(position == 2 && values.get(position).contains("No Shared Schedule available"))
             return false;
 
         return position !=1 ;// As this option is a title for NamedSchedule
@@ -104,7 +104,7 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
                 textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
             }
 
-            if(position == 2 && values.get(position).contains("No Named Schedule available")){
+            if(position == 2 && values.get(position).contains("No Shared Schedule available")){
                 textView.setEnabled(false);
             }
             return row;

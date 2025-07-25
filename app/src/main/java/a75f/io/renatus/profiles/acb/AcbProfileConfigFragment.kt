@@ -243,7 +243,7 @@ class AcbProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         Row {
                             HeaderTextView(text = "Thermistor-1", padding = 0)
                             Spacer(modifier = Modifier.width(160.dp))
-                            LabelTextView(text = "Discharge Airflow Temperature")
+                            LabelTextView(text = "Discharge Airflow")
                         }
                         Spacer(modifier = Modifier.width(56.dp))
                         Row {

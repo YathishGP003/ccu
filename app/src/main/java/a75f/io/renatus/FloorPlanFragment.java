@@ -963,7 +963,7 @@ public class FloorPlanFragment extends Fragment {
                 if(defaultNamedSchedule.isEmpty()){
                     hsZone.setScheduleRef(zoneSchedule);
                     Toast.makeText(getActivity().getApplicationContext(),
-                                "Zone following zone-schedule as default named schedule is not available", Toast.LENGTH_SHORT).show();
+                                "Zone following zone-schedule as default shared schedule is not available", Toast.LENGTH_SHORT).show();
                 }else {
                     hsZone.setScheduleRef(defaultNamedSchedule.get("id").toString());
                 }

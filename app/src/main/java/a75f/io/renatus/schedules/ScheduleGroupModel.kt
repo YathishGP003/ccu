@@ -726,7 +726,7 @@ class ScheduleGroupModel (application: Application) : AndroidViewModel(applicati
 
     fun getAlertTitle(): String {
         return when {
-            mSchedule.isNamedSchedule -> "Named Schedule is outside Building Occupancy"
+            mSchedule.isNamedSchedule -> "Shared Schedule is outside Building Occupancy"
             else -> "Zone Schedule is outside Building Occupancy"
         }
     }

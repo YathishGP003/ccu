@@ -266,7 +266,7 @@ public class NamedSchedule extends DialogFragment {
                 String roomRef = getArguments().getString(PARAM_ROOM_REF);
                 ArrayList<Interval> zoneIntervals = namedSchedule.getScheduledIntervals();
                 if(zoneIntervals.isEmpty()){
-                    warningMessage = new StringBuilder("Selected named schedule has no occupied blocks, please define occupied slots in the named schedule to apply");
+                    warningMessage = new StringBuilder("Selected shared schedule has no occupied blocks, please define occupied slots in the shared schedule to apply");
                     showWarningMessage(warningMessage);
                     return false;
                 }
@@ -331,7 +331,7 @@ public class NamedSchedule extends DialogFragment {
                 double deadbandNamedSched = namedSchedDay.getCoolingVal() - namedSchedDay.getHeatingVal();
                 deadbandNamedSched = fahrenheitToCelsiusRelative(deadbandNamedSched);
                 if (deadbandNamedSched < coolingDeadband + heatingDeadband) {
-                    warningMessage.append(getText(R.string.deadband_warning)).append("\n\t").append("Deadband in Named schedule - ").append(fahrenheitToCelsiusRelative(deadbandNamedSched)).append("°C").append("\n\t").append("Deadband for zone: CoolingDeadband - ").append(coolingDeadband).append("°C").append("\n\t\t").append("HeatingDeadband - ").append(heatingDeadband).append("°C").append("\n\n");
+                    warningMessage.append(getText(R.string.deadband_warning)).append("\n\t").append("Deadband in Shared schedule - ").append(fahrenheitToCelsiusRelative(deadbandNamedSched)).append("°C").append("\n\t").append("Deadband for zone: CoolingDeadband - ").append(coolingDeadband).append("°C").append("\n\t\t").append("HeatingDeadband - ").append(heatingDeadband).append("°C").append("\n\n");
                     return false;
                 }
             }
@@ -339,7 +339,7 @@ public class NamedSchedule extends DialogFragment {
             for (Schedule.Days namedSchedDay : namedSchedule.getDays()) {
                 double deadbandNamedSched = namedSchedDay.getCoolingVal() - namedSchedDay.getHeatingVal();
                 if (deadbandNamedSched < coolingDeadband + heatingDeadband) {
-                    warningMessage.append(getText(R.string.deadband_warning)).append("\n\t").append("Deadband in Named schedule - ").append(deadbandNamedSched).append("°F").append("\n\t").append("Deadband for zone: CoolingDeadband - ").append(coolingDeadband).append("°F").append("\n\t\t").append("HeatingDeadband - ").append(heatingDeadband).append("°F").append("\n\n");
+                    warningMessage.append(getText(R.string.deadband_warning)).append("\n\t").append("Deadband in Shared schedule - ").append(deadbandNamedSched).append("°F").append("\n\t").append("Deadband for zone: CoolingDeadband - ").append(coolingDeadband).append("°F").append("\n\t\t").append("HeatingDeadband - ").append(heatingDeadband).append("°F").append("\n\n");
                     return false;
                 }
             }
@@ -391,9 +391,9 @@ public class NamedSchedule extends DialogFragment {
 
     private void invalidDesiredTempError(StringBuilder warningMessage, StringBuilder desiredTempWarning) {
         if (isCelsiusTunerAvailableStatus()) {
-            warningMessage.append(getText(R.string.desiredTemp_warning)).append("\n\t").append("Named schedule desired temperature : \n\t\t").append(desiredTempWarning);
+            warningMessage.append(getText(R.string.desiredTemp_warning)).append("\n\t").append("Shared schedule desired temperature : \n\t\t").append(desiredTempWarning);
         } else {
-            warningMessage.append(getText(R.string.desiredTemp_warning)).append("\n\t").append("Named schedule desired temperature : \n\t\t").append(desiredTempWarning);
+            warningMessage.append(getText(R.string.desiredTemp_warning)).append("\n\t").append("Shared schedule desired temperature : \n\t\t").append(desiredTempWarning);
         }
     }
 
@@ -471,9 +471,9 @@ public class NamedSchedule extends DialogFragment {
 
     private void invalidUserLimitError(StringBuilder warningMessage, StringBuilder userLimitWarning) {
         if (isCelsiusTunerAvailableStatus()) {
-            warningMessage.append(getText(R.string.limits_warning)).append("\n\t").append("Named schedule limits : \n\t\t").append(userLimitWarning).append("Building limits :").append((fahrenheitToCelsius(BuildingTunerCache.getInstance().getBuildingLimitMin()))).append("°C").append("~").append(fahrenheitToCelsius(BuildingTunerCache.getInstance().getBuildingLimitMax())).append("°C").append("\n\n");
+            warningMessage.append(getText(R.string.limits_warning)).append("\n\t").append("Shared schedule limits : \n\t\t").append(userLimitWarning).append("Building limits :").append((fahrenheitToCelsius(BuildingTunerCache.getInstance().getBuildingLimitMin()))).append("°C").append("~").append(fahrenheitToCelsius(BuildingTunerCache.getInstance().getBuildingLimitMax())).append("°C").append("\n\n");
         } else {
-            warningMessage.append(getText(R.string.limits_warning)).append("\n\t").append("Named schedule limits : \n\t\t").append(userLimitWarning).append("Building limits : ").append(BuildingTunerCache.getInstance().getBuildingLimitMin()).append("°F").append("~").append(BuildingTunerCache.getInstance().getBuildingLimitMax()).append("°F").append("\n\n");
+            warningMessage.append(getText(R.string.limits_warning)).append("\n\t").append("Shared schedule limits : \n\t\t").append(userLimitWarning).append("Building limits : ").append(BuildingTunerCache.getInstance().getBuildingLimitMin()).append("°F").append("~").append(BuildingTunerCache.getInstance().getBuildingLimitMax()).append("°F").append("\n\n");
         }
     }
 
@@ -505,7 +505,7 @@ public class NamedSchedule extends DialogFragment {
     }
 
     private void invalidDeadBandError(StringBuilder warningMessage, StringBuilder deadBandWarning) {
-        warningMessage.append("Named schedule limits and deadbands are viloating on below zones: \n\t\t")
+        warningMessage.append("Shared schedule limits and deadbands are viloating on below zones: \n\t\t")
                 .append(deadBandWarning).append("\n\t\tThe difference in limit maximum and minimum to be more or than or equal to the deadband and "
                         + "\n\t\tHeating Limit Max + deadband (heating + cooling) should be less than or equal to Cooling Limit Max"
                         + "\n\t\tCooling Limit min - deadband (heating + cooling) should be greater than or equal to Heating Limit Min ")

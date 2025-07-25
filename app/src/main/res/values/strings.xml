@@ -406,7 +406,7 @@
     <string-array name="schedule">
         <item>  Building Schedule</item>
         <item>  Zone Schedule</item>
-        <!--<item>  Named Schedule</item>-->
+        <!--<item>  Shared Schedule</item>-->
     </string-array>
 
     <string-array name="fan_off_auto">
@@ -512,12 +512,12 @@
     <string-array name="schedulePORT">
         <item>   LCM Zone Schedule</item>
         <item>   Circuit Schedule</item>
-        <item>   Named Schedule</item>
+        <item>   Shared Schedule</item>
     </string-array>
 
     <string-array name="scheduleLCM">
         <item>   LCM Zone Schedule</item>
-        <item>   Named Schedule</item>
+        <item>   Shared Schedule</item>
     </string-array>
 
     <string-array name="reheat_port">
@@ -1106,7 +1106,7 @@
     <string name="dab_dual_duct_label_thermistor1">Thermistor-1</string>
     <string name="dab_dual_duct_label_thermistor2">Thermistor-2</string>
 
-    <string name="dab_dual_duct_label_thermistor1_val">Discharge Airflow Temperature</string>
+    <string name="dab_dual_duct_label_thermistor1_val">Discharge Airflow Temp</string>
 
     <string name="dab_dual_duct_label_ao1_min_damp_heat_pos">Analog-Out1 at Min\n Damper Heating Pos</string>
     <string name="dab_dual_duct_label_ao1_max_damp_heat_pos">Analog-Out1 at Max\n Damper Heating Pos</string>
@@ -1130,7 +1130,7 @@
     </string-array>
 
     <string-array name="dab_dual_duct_thermistor1_options">
-        <item>  Discharge Airflow Temperature </item>
+        <item>  Discharge Airflow Temp</item>
     </string-array>
 
     <string-array name="dab_dual_duct_thermistor2_options">
@@ -1142,8 +1142,8 @@
     <string name="vav_label_thermistor1">Thermistor-1</string>
     <string name="vav_label_thermistor2">Thermistor-2</string>
 
-    <string name="vav_label_thermistor1_val">Discharge Airflow Temperature</string>
-    <string name="vav_label_thermistor2_val">Entering Airflow Temperature</string>
+    <string name="vav_label_thermistor1_val">Discharge Airflow</string>
+    <string name="vav_label_thermistor2_val">Supply Airflow</string>
 
     <string name="vav_label_relay1">Relay 1</string>
     <string name="vav_label_relay2">Relay 2</string>
@@ -1173,7 +1173,7 @@
     <string name="txt_equipment_status">Equipment Status:</string>
     <string name="txt_equipment_status_CN1">CN 1 Status:</string>
     <string name="txt_schedule">Schedule:</string>
-    <string name="txt_intrinsic_schedule">Intrinsic Schedule</string>
+    <string name="txt_intrinsic_schedule"> Effective Schedule</string>
     <string name="txt_building_occupancy">Building Occupancy</string>
     <string name="txt_economy">ECONOMY</string>
     <string name="txt_comfort">COMFORT</string>
@@ -1589,7 +1589,7 @@
     <string name="demand_response_active">Demand Response Active</string>
     <string name="temperature_mode_description">Temperature Mode</string>
 
-    <!-- Named Schedule-->
+    <!-- Shared Schedule-->
     <string name="monday">MONDAY</string>
     <string name="tuesday">TUESDAY</string>
     <string name="wednesday">WEDNESDAY</string>
@@ -1599,15 +1599,15 @@
     <string name="sunday">SUNDAY</string>
     <string name="preview">Preview  </string>
     <string name="warning_ns">WARNING</string>
-    <string name="warning_msg">Named Schedule is outside building occupancy.This Named Schedule is outside by</string>
+    <string name="warning_msg">Shared Schedule is outside building occupancy.This Shared Schedule is outside by</string>
     <string name="validation_title">Schedule Validation</string>
     <string name="validation_msg">Validation in progress.Please wait…</string>
-    <string name="validation_toast">Validating Named Schedule in Progress…Please wait</string>
-    <string name="success_alert">Named Schedule set successfully</string>
-    <string name="pls_goback">Please go back to the NamedSchedule to edit OR Apply any other NamedSchedule</string>
-    <string name="deadband_warning">Deadbands of the NamedSchedule is outsite the deadband of the zone</string>
-    <string name="desiredTemp_warning">Desired temperatures of this NamedSchedule is outside the desired temperature limits of the building</string>
-    <string name="limits_warning">UserLimits of this NamedSchedule is outside the limits of the building</string>
+    <string name="validation_toast">Validating Shared Schedule in Progress…Please wait</string>
+    <string name="success_alert">Shared Schedule set successfully</string>
+    <string name="pls_goback">Please go back to the SharedSchedule to edit OR Apply any other SharedSchedule</string>
+    <string name="deadband_warning">Deadbands of the SharedSchedule is outsite the deadband of the zone</string>
+    <string name="desiredTemp_warning">Desired temperatures of this SharedSchedule is outside the desired temperature limits of the building</string>
+    <string name="limits_warning">UserLimits of this SharedSchedule is outside the limits of the building</string>
 
     <!-- Thermistor for TI Profile -->
     <string name="mainsensor">Main Temperature/Humidity Sensor</string>
@@ -1811,7 +1811,7 @@
 
     <string name="offline_description">Not connected to Cloud</string>
     <string name="system_profile">System Profile</string>
-    <string name="taost_for_fallback">The zone schedule of the zone is deleted and is therefore following default named schedule, which is not editable. Please restart the CCU app to reinstate the zone schedule</string>
+    <string name="taost_for_fallback">The zone schedule of the zone is deleted and is therefore following default shared schedule, which is not editable. Please restart the CCU app to reinstate the zone schedule</string>
     <string name="settings_saved_successfully">Settings saved successfully!</string>
 
     <string-array name="log_level">

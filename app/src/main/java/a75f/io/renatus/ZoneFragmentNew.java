@@ -1364,7 +1364,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 if (isExpanded) {
                     ArrayList<String> scheduleArray = new ArrayList<>();
                     scheduleArray.add("Zone Schedule");
-                    scheduleArray.add("Named Schedule");
+                    scheduleArray.add("Shared Schedule");
                     boolean isSelectedScheduleAvailable = true;
 
                     ArrayList<Boolean> hasImage = new ArrayList<>();
@@ -1389,7 +1389,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             }
                         }
                     }else{
-                        scheduleArray.add("No Named Schedule available");
+                        scheduleArray.add("No Shared Schedule available");
                         hasImage.add(false);
                         scheduleImageButton.setVisibility(View.GONE);
                         namedScheduleView.setVisibility(View.GONE);
@@ -1816,7 +1816,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         ArrayList<String> scheduleArray = new ArrayList<>();
 //        scheduleArray.add("Building Schedule");
         scheduleArray.add("Zone Schedule");
-        scheduleArray.add("Named Schedule");
+        scheduleArray.add("Shared Schedule");
 
         ArrayList<Boolean> hasImage = new ArrayList<>();
         hasImage.add(false);
@@ -1839,7 +1839,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 }
             }
         }else{
-            scheduleArray.add("No Named Schedule available");
+            scheduleArray.add("No Shared Schedule available");
             hasImage.add(false);
             scheduleImageButton.setVisibility(View.GONE);
             namedScheduleView.setVisibility(View.GONE);
@@ -2885,13 +2885,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewValue1.setText(vavPoints.get("Damper").toString());
         textViewLabel2.setText(isACB ? "CHW Valve : " : "Reheat Coil : ");
         textViewValue2.setText(vavPoints.get("Reheat Coil").toString());
-        textViewLabel3.setText("Discharge Airflow Temperature: ");
+        textViewLabel3.setText("Discharge Airflow: ");
         if( isCelsiusTunerAvailableStatus()) {
             textViewValue3.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
         }
-        textViewLabel4.setText("Entering Airflow Temperature: ");
+        textViewLabel4.setText("Supply Airflow: ");
         if( isCelsiusTunerAvailableStatus()) {
             textViewValue4.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Entering Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
@@ -2965,7 +2965,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewTitle.setText(ssePoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(ssePoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
-        textViewLabel1.setText("Discharge Airflow Temperature : ");
+        textViewLabel1.setText("Discharge Airflow : ");
         if( isCelsiusTunerAvailableStatus()) {
             textViewValue1.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(ssePoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
@@ -3036,7 +3036,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewStatus.setText(dabPoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Damper : ");
-        textViewLabel2.setText("Discharge Airflow Temperature : ");
+        textViewLabel2.setText("Discharge Airflow : ");
         textViewValue1.setText(dabPoints.get("Damper").toString());
         if( isCelsiusTunerAvailableStatus()) {
             textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dabPoints.get("Supply Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
@@ -3124,7 +3124,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
         }
 
-        textViewLabel2.setText("Discharge Airflow Temperature : ");
+        textViewLabel2.setText("Discharge Airflow : ");
         try {
             if (isCelsiusTunerAvailableStatus()) {
                 textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dualDuctPoints.get("DischargeAirflow").toString().replaceAll("[^0-9\\.]", "")))) + " \u00B0C");

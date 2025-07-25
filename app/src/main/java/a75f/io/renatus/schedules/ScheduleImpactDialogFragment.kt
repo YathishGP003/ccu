@@ -218,8 +218,8 @@ private fun ActionButtons(isNamedScheduledZoneExists: Boolean, mOnScheduleUpdate
 
 private fun getHeaderText(isNamedScheduledZoneExists: Boolean, isZoneScheduledZoneExists: Boolean): String {
     return when {
-        isNamedScheduledZoneExists && isZoneScheduledZoneExists -> "Named & Zone Schedule is outside Building Occupancy"
-        isNamedScheduledZoneExists -> "Named Schedule is outside Building Occupancy"
+        isNamedScheduledZoneExists && isZoneScheduledZoneExists -> "Shared & Zone Schedule is outside Building Occupancy"
+        isNamedScheduledZoneExists -> "Shared Schedule is outside Building Occupancy"
         else -> "Zone Schedule is outside Building Occupancy"
     }
 }
@@ -257,7 +257,7 @@ private fun prepareTableContent(scheduleImpacts: List<ScheduleImpact>): Map<Poss
             PossibleScheduleImpactTable.EVERYDAY -> "Zone schedule"
 
             else -> {
-                "Named schedule"
+                "Shared schedule"
             }
         }
 

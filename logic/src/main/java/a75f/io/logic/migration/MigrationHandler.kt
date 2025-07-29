@@ -2129,57 +2129,68 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     fun updateBacnetProperties(hayStack: CCUHsApi) {
         // migration for system equip and points
         CcuLog.d(TAG_CCU_MIGRATION_UTIL,"updateBacnetProperties method started!!!")
-        val hsSystemEquip = hayStack.readEntity("equip and system and not modbus and domainName")
-        val site = hayStack.site
+        val hsSystemEquips = hayStack.readAllEntities("equip and system and not modbus and domainName")
         val profileEquipBuilder = ProfileEquipBuilder(hayStack)
+        val site = hayStack.site
 
-        if (hsSystemEquip.isNotEmpty() && site != null) {
-            val systemModel = ModelCache.getModelById(hsSystemEquip["sourceModel"].toString())
-            val profileType = hsSystemEquip["profile"].toString()
-            val profileConfig = DefaultProfileConfiguration(
-                hsSystemEquip["group"].toString().toInt(),
-                "",
-                0,
-                hsSystemEquip["roomRef"].toString(),
-                hsSystemEquip["floorRef"].toString(),
-                profileType
-            )
-            val equipDis = hsSystemEquip["dis"].toString()
-            val systemEquip = profileEquipBuilder.buildEquip(
-                EquipBuilderConfig(
-                    systemModel,
-                    profileConfig,
-                    site.id,
-                    hayStack.timeZone,
-                    equipDis
+        hsSystemEquips.forEach { hsSystemEquip ->
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL,"Processing Bacnet id migration for  : ${hsSystemEquip["dis"]}")
+            if (hsSystemEquip.isNotEmpty() && site != null) {
+                val systemModel = ModelCache.getModelById(hsSystemEquip["sourceModel"].toString())
+                val profileType = hsSystemEquip["profile"].toString()
+                val profileConfig = DefaultProfileConfiguration(
+                    hsSystemEquip["group"].toString().toInt(),
+                    "",
+                    0,
+                    hsSystemEquip["roomRef"].toString(),
+                    hsSystemEquip["floorRef"].toString(),
+                    profileType
                 )
-            )
-            hayStack.updateEquip(systemEquip, hsSystemEquip["id"].toString())
-
-            val bacnetPoints = hayStack.readAllEntities(
-                "point and domainName and bacnetId and equipRef == \"${hsSystemEquip["id"]}\""
-            )
-            bacnetPoints.forEach { point ->
-                CcuLog.d(
-                    L.TAG_CCU_DOMAIN,
-                    "Updating bacnetId for the system point(${point["dis"]})."
-                )
-                systemModel.points.find { it.domainName == point["domainName"].toString() }?.let { pointDef ->
-                    profileEquipBuilder.updatePoint(
-                        PointBuilderConfig(
-                            pointDef,
-                            profileConfig,
-                            hsSystemEquip["id"].toString(),
-                            site.id,
-                            site.tz,
-                            equipDis
-                        ), point
+                val equipDis = hsSystemEquip["dis"].toString()
+                val systemEquip = profileEquipBuilder.buildEquip(
+                    EquipBuilderConfig(
+                        systemModel,
+                        profileConfig,
+                        site.id,
+                        hayStack.timeZone,
+                        equipDis
                     )
-
+                )
+                hsSystemEquip["ahuRef"]?.let {
+                    CcuLog.d(
+                        TAG_CCU_MIGRATION_UTIL,
+                        "Updating ahuRef for system equip: ${hsSystemEquip["dis"]}"
+                    )
+                    systemEquip.ahuRef = it.toString()
                 }
+                hayStack.updateEquip(systemEquip, hsSystemEquip["id"].toString())
+
+                val bacnetPoints = hayStack.readAllEntities(
+                    "point and domainName and bacnetId and equipRef == \"${hsSystemEquip["id"]}\""
+                )
+                bacnetPoints.forEach { point ->
+                    CcuLog.d(
+                        L.TAG_CCU_DOMAIN,
+                        "Updating bacnetId for the system point(${point["dis"]})."
+                    )
+                    systemModel.points.find { it.domainName == point["domainName"].toString() }
+                        ?.let { pointDef ->
+                            profileEquipBuilder.updatePoint(
+                                PointBuilderConfig(
+                                    pointDef,
+                                    profileConfig,
+                                    hsSystemEquip["id"].toString(),
+                                    site.id,
+                                    site.tz,
+                                    equipDis
+                                ), point
+                            )
+
+                        }
+                }
+            } else {
+                CcuLog.i(Domain.LOG_TAG, "system profile is not migrated - $hsSystemEquip")
             }
-        } else {
-            CcuLog.i(Domain.LOG_TAG, "system profile is not migrated - $hsSystemEquip")
         }
 
         // migration for terminal equip and points
@@ -2218,7 +2229,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
         }
     }
-
     private fun updateMinCfmPointMaxVal(minMaxCfmDomainNames: Pair<String, String>) {
         CcuLog.d(TAG_CCU_MIGRATION_UTIL,"executing updateMinCfmPointMaxVal")
         hayStack.readAllEntities(" point and zone and config and domainName == \"${minMaxCfmDomainNames.first}\" ").forEach { minCfmMap ->

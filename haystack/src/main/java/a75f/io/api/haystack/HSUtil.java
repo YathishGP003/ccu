@@ -804,7 +804,7 @@ public class HSUtil {
         boolean isBacnetIDUsed = true;
         try {
             HashMap currentRoom = CCUHsApi.getInstance().read("equip and group==\""+group+"\"");
-            if (currentRoom != null && !currentRoom.isEmpty() && currentRoom.containsKey(BACNET_ID) && (Integer.parseInt(currentRoom.get(BACNET_ID).toString())) != 0) {
+            if (currentRoom != null && !currentRoom.isEmpty() && currentRoom.containsKey(BACNET_ID) && (Double.parseDouble(currentRoom.get(BACNET_ID).toString())) != 0) {
                 if (currentRoom.containsKey(MODBUS)) { // Execute only if SubEquip slave Id is same as parent
                     ArrayList<HashMap<Object,Object>> modbusEquip = CCUHsApi.getInstance().readAllEntities("equip and group==\""+group+"\"");
                     CcuLog.d(Tags.BACNET, "Already have bacnetID for Modbus Equip. Updating Bacnet Id for Modbus subequip");

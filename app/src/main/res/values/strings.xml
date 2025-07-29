@@ -1106,7 +1106,7 @@
     <string name="dab_dual_duct_label_thermistor1">Thermistor-1</string>
     <string name="dab_dual_duct_label_thermistor2">Thermistor-2</string>
 
-    <string name="dab_dual_duct_label_thermistor1_val">Discharge Airflow Temp</string>
+    <string name="dab_dual_duct_label_thermistor1_val">Discharge Airflow Temperature</string>
 
     <string name="dab_dual_duct_label_ao1_min_damp_heat_pos">Analog-Out1 at Min\n Damper Heating Pos</string>
     <string name="dab_dual_duct_label_ao1_max_damp_heat_pos">Analog-Out1 at Max\n Damper Heating Pos</string>
@@ -1130,7 +1130,7 @@
     </string-array>
 
     <string-array name="dab_dual_duct_thermistor1_options">
-        <item>  Discharge Airflow Temp</item>
+        <item>  Discharge Airflow Temperature</item>
     </string-array>
 
     <string-array name="dab_dual_duct_thermistor2_options">
@@ -1142,8 +1142,8 @@
     <string name="vav_label_thermistor1">Thermistor-1</string>
     <string name="vav_label_thermistor2">Thermistor-2</string>
 
-    <string name="vav_label_thermistor1_val">Discharge Airflow</string>
-    <string name="vav_label_thermistor2_val">Supply Airflow</string>
+    <string name="vav_label_thermistor1_val">Discharge Airflow Temperature</string>
+    <string name="vav_label_thermistor2_val">Entering Airflow Temperature</string>
 
     <string name="vav_label_relay1">Relay 1</string>
     <string name="vav_label_relay2">Relay 2</string>

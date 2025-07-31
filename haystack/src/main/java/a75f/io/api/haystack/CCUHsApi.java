@@ -3007,8 +3007,8 @@ public class CCUHsApi
 
     }
 
-    public ArrayList<HashMap<Object, Object>> readAllNativeSchedulable(){
-        return CCUHsApi.getInstance().readAllEntities("schedulable and not (modbus or bacnetDeviceId or (connectModule and zone))");
+   public ArrayList<HashMap<Object, Object>> readAllNativeSchedulable(){
+        return CCUHsApi.getInstance().readAllEntities("schedulable and ((not modbus) and (not bacnetDeviceId) and (not connectModule or (not zone)))");
     }
 
     public boolean importPointArrays(List<HDict> hDicts) {
@@ -3052,7 +3052,9 @@ public class CCUHsApi
                             String who = dataElement.getStr("who");
                             String level = dataElement.get("level").toString();
                             HVal val = dataElement.get("val");
-                            HNum dur = HNum.make(dataElement.getDouble("dur") - System.currentTimeMillis());
+                            long currentTime = System.currentTimeMillis();
+                            HNum dur = dataElement.getDouble("dur") > currentTime ?
+                                    HNum.make(dataElement.getDouble("dur") - System.currentTimeMillis()) : HNum.make(0);
                             Object lastModifiedTimeTag = dataElement.get("lastModifiedDateTime", false);
 
                             HDictBuilder pid = new HDictBuilder().add("id", HRef.copy(id))

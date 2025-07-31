@@ -537,7 +537,9 @@ public class RestoreCCUHsApi {
                         String who = dataElement.getStr("who");
                         String level = dataElement.get("level").toString();
                         HVal val = dataElement.get("val");
-                        HNum dur = HNum.make(dataElement.getDouble("dur") - System.currentTimeMillis());
+                        long currentTime = System.currentTimeMillis();
+                        HNum dur = dataElement.getDouble("dur") > currentTime ?
+                                HNum.make(dataElement.getDouble("dur") - System.currentTimeMillis()) : HNum.make(0);
                         Object lastModifiedTimeTag = dataElement.get("lastModifiedDateTime", false);
                         HDictBuilder pid = new HDictBuilder().add("id", HRef.copy(id))
                                 .add("level", Integer.parseInt(level))

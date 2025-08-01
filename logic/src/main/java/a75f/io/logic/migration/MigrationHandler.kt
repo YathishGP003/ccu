@@ -4282,17 +4282,19 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
         }
 
-        hayStack.readAllHDictByQuery("equip and (domainName==\"${DomainName.smartnodeSSE}\" or domainName==\"${DomainName.helionodeSSE}\")").forEach {
-            // For SSE Equip, we need to ensure that the gatewayRef is set to the systemEquip id
-            if (it["gatewayRef", false] != null && !it["gatewayRef", false].toString()
-                    .equals(systemEquip["id"].toString(), true)
-            ) {
+        hayStack.readAllHDictByQuery("equip and (domainName==\"${DomainName.smartnodeSSE}\" or domainName==\"${DomainName.helionodeSSE}\" or " +
+                "domainName==\"${DomainName.smartnodePID}\" or domainName==\"${DomainName.helionodePID}\")").forEach {
+
+            // For SSE and PID Equip, we need to ensure that the gatewayRef is set to the systemEquip id and needs to remove ahuRef if available.
+            if (( it["gatewayRef", false] != null && !it["gatewayRef", false].toString()
+                    .equals(systemEquip["id"].toString(), true)) || it["ahuRef", false] != null ) {
                 val equip = Equip.Builder().setHDict(it)
+                    .setAhuRef(null) // Remove ahuRef marker if exists, PID and SSE profile is an standalone
                     .setGatewayRef(systemEquip["id"].toString()).build()
                 hayStack.updateEquip(equip, it["id"].toString())
                 CcuLog.d(
                     TAG_CCU_MIGRATION_UTIL,
-                    "Updated SSE Equip: ${it["id"]} with GatewayRef: ${systemEquip["id"]}"
+                    "Updated Equip: ${it["id"]} with GatewayRef: ${systemEquip["id"]}"
                 )
             } else {
                 CcuLog.d(

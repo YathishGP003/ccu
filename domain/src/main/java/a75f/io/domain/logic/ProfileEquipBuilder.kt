@@ -583,7 +583,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
     }
 
     private fun isStandAloneEquip(equip : Equip) : Boolean {
-        return equip.markers.contains(Tags.STANDALONE)
+        return equip.markers.contains(Tags.STANDALONE) || equip.markers.contains(Tags.PID) || equip.markers.contains(Tags.SSE)
     }
 
     private fun isDiagEquip(equip : Equip) : Boolean {

@@ -233,7 +233,7 @@ public abstract class SystemProfile
             Equip q = new Equip.Builder().setHDict(m).build();
             //All the zone equips served by AHU/RTU will have an ahuRef.
             if (q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct") || q.getMarkers().contains("vav")
-                || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")
+                || q.getMarkers().contains("ti") || q.getMarkers().contains("oao")
                 || q.getMarkers().contains("vrv") || q.getMarkers().contains("otn") || q.getMarkers().contains("bypassDamper")) {
                 q.setAhuRef(systemEquipId);
             } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") ||

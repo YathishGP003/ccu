@@ -135,7 +135,7 @@ public class PreferenceUtil {
     private static final String MIGRATE_MODULATING_PROFILE_NORMALIZATION = "migrateModulatingProfileNormalization";
     private static final String MIGRATE_STAGE1_DAB_REHEAT_MAPPING = "migrateStage1ReheatMapping";
     private static final String MIGRATION_SYSTEM_FLAG_CCU_REBOOT = "migrationSystemFlagCcuReboot";
-    private static final String MIGRATION_BACNET_EQUIP = "migrationBacnetEquip2";
+    private static final String MIGRATION_BACNET_EQUIP = "migrationBacnetEquips";
     private static final String MIGRATION_ZONE_STATUS = "migrationZoneStatus";
 
     public static void setContext(Context c) {

@@ -404,3 +404,10 @@ private fun isCompressorActive(systemStages: ConditioningStages): Boolean {
             systemStages.compressorStage5.readHisVal() > 0
 }
 
+ fun getAdvAhuConnectModule(
+    nodeAddress: String,
+    hayStack: CCUHsApi = CCUHsApi.getInstance()): HashMap<Any, Any> {
+    val connectModuleEquip = hayStack.readEntity("domainName == \"${ModelNames.dabAdvancedHybridAhuV2_connectModule}\" or domainName == \"${ModelNames.vavAdvancedHybridAhuV2_connectModule}\" " +
+            "and addr == \"$nodeAddress\"")
+    return connectModuleEquip
+ }

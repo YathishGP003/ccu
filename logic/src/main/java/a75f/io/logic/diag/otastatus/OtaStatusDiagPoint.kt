@@ -12,6 +12,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil.Companion.connectNodeEquip
+import a75f.io.logic.bo.building.system.util.getAdvAhuConnectModule
 
 /**
  * Created by Manjunath K on 28-02-2023.
@@ -172,8 +173,12 @@ class OtaStatusDiagPoint {
             if (isCMDevice(node)) {
                 Domain.diagEquip.otaStatusCM.writeHisVal(status.ordinal.toDouble())
             } else if (ConnectNodeUtil.getConnectNodeByNodeAddress(node.toString(), hsApi).size > 0) {
+                val deviceRef = ConnectNodeUtil.getConnectNodeByNodeAddress(node.toString(), hsApi).get("id").toString()
+                hsApi.writeHisValByQuery("ota and status and domainName ==\"otaStatus\" and deviceRef ==\"$deviceRef\"",status.ordinal.toDouble())
+            } else if (getAdvAhuConnectModule(node.toString(), hsApi).size > 0) {
+                // This is a connect module for advanced hybrid AHU
                 hsApi.writeHisValByQuery("ota and status and domainName ==\"otaStatus\" and group ==\"$node\"",status.ordinal.toDouble())
-            }else {
+            } else {
                 //hyperstatsplit we have two OTA point -->  connect module and Hyperstatsplit
                 if(connectmoduleUpdateLevel) {
                     hsApi.writeHisValByQuery(" ota and status and domainName ==\"otaStatusConnectModule\" and  group ==\"$node\"",status.ordinal.toDouble())

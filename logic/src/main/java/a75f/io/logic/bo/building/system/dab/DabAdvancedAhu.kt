@@ -208,9 +208,31 @@ class DabAdvancedAhu : DabSystemProfile() {
                 || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.COMPRESSOR_SPEED)
     }
 
-    override fun isCoolingActive(): Boolean = (systemCoolingLoopOp > 0 || systemSatCoolingLoopOp > 0)
+    override fun isCoolingActive(): Boolean {
+        return systemEquip.cmEquip.conditioningStages.loadCoolingStage1.readHisVal() > 0 ||
+                systemEquip.cmEquip.conditioningStages.loadCoolingStage2.readHisVal() > 0 ||
+                systemEquip.cmEquip.conditioningStages.loadCoolingStage3.readHisVal() > 0 ||
+                systemEquip.cmEquip.conditioningStages.loadCoolingStage4.readHisVal() > 0 ||
+                systemEquip.cmEquip.conditioningStages.loadCoolingStage5.readHisVal() > 0 ||
+                systemEquip.cmEquip.satCoolingStage1Feedback.readHisVal() > 0 ||
+                systemEquip.cmEquip.satCoolingStage2Feedback.readHisVal() > 0 ||
+                systemEquip.cmEquip.satCoolingStage3Feedback.readHisVal() > 0 ||
+                systemEquip.cmEquip.satCoolingStage4Feedback.readHisVal() > 0 ||
+                systemEquip.cmEquip.satCoolingStage5Feedback.readHisVal() > 0
+    }
 
-    override fun isHeatingActive(): Boolean = (systemHeatingLoopOp > 0 || systemSatHeatingLoopOp > 0)
+    override fun isHeatingActive(): Boolean {
+        return systemEquip.cmEquip.conditioningStages.loadHeatingStage1.readHisVal() > 0 ||
+                systemEquip.cmEquip.conditioningStages.loadHeatingStage2.readHisVal() > 0 ||
+                systemEquip.cmEquip.conditioningStages.loadHeatingStage3.readHisVal() > 0 ||
+                systemEquip.cmEquip.conditioningStages.loadHeatingStage4.readHisVal() > 0 ||
+                systemEquip.cmEquip.conditioningStages.loadHeatingStage5.readHisVal() > 0 ||
+                systemEquip.cmEquip.satHeatingStage1Feedback.readHisVal() > 0 ||
+                systemEquip.cmEquip.satHeatingStage2Feedback.readHisVal() > 0 ||
+                systemEquip.cmEquip.satHeatingStage3Feedback.readHisVal() > 0 ||
+                systemEquip.cmEquip.satHeatingStage4Feedback.readHisVal() > 0 ||
+                systemEquip.cmEquip.satHeatingStage5Feedback.readHisVal() > 0
+    }
 
     private fun isCompressorActive(): Boolean {
         return systemEquip.cmEquip.conditioningStages.compressorStage1.readHisVal() > 0 ||
@@ -655,7 +677,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemStatus.append(" ON ")
         }
         val coolingStatus = StringBuilder().apply {
-            if (isCoolingActive || systemCoolingLoopOp > 0 && isCompressorActive()) {
+            if (isCoolingActive || DabSystemController.getInstance().systemState == SystemController.State.COOLING && isCompressorActive()) {
                 append(if (systemStages.loadCoolingStage1.readHisVal() > 0 || systemStages.compressorStage1.readHisVal() > 0  || systemEquip.cmEquip.satCoolingStage1Feedback.readHisVal() > 0) "1" else "")
                 append(if (systemStages.loadCoolingStage2.readHisVal() > 0 || systemStages.compressorStage2.readHisVal() > 0  || systemEquip.cmEquip.satCoolingStage2Feedback.readHisVal() > 0) ",2" else "")
                 append(if (systemStages.loadCoolingStage3.readHisVal() > 0 || systemStages.compressorStage3.readHisVal() > 0  || systemEquip.cmEquip.satCoolingStage3Feedback.readHisVal() > 0) ",3" else "")
@@ -672,12 +694,12 @@ class DabAdvancedAhu : DabSystemProfile() {
         }
 
         val heatingStatus = StringBuilder().apply {
-            if (isHeatingActive || systemHeatingLoopOp > 0 && isCompressorActive()) {
+            if (isHeatingActive || DabSystemController.getInstance().systemState == SystemController.State.HEATING && isCompressorActive()) {
                 append(if (systemStages.loadHeatingStage1.readHisVal() > 0 || systemStages.compressorStage1.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage1Feedback.readHisVal() > 0) "1" else "")
-                append(if (systemStages.loadHeatingStage2.readHisVal() > 0 || systemStages.compressorStage1.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage2Feedback.readHisVal() > 0) ",2" else "")
-                append(if (systemStages.loadHeatingStage3.readHisVal() > 0 || systemStages.compressorStage1.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage3Feedback.readHisVal() > 0) ",3" else "")
-                append(if (systemStages.loadHeatingStage4.readHisVal() > 0 || systemStages.compressorStage1.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage4Feedback.readHisVal() > 0) ",4" else "")
-                append(if (systemStages.loadHeatingStage5.readHisVal() > 0 || systemStages.compressorStage1.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage5Feedback.readHisVal() > 0) ",5" else "")
+                append(if (systemStages.loadHeatingStage2.readHisVal() > 0 || systemStages.compressorStage2.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage2Feedback.readHisVal() > 0) ",2" else "")
+                append(if (systemStages.loadHeatingStage3.readHisVal() > 0 || systemStages.compressorStage3.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage3Feedback.readHisVal() > 0) ",3" else "")
+                append(if (systemStages.loadHeatingStage4.readHisVal() > 0 || systemStages.compressorStage4.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage4Feedback.readHisVal() > 0) ",4" else "")
+                append(if (systemStages.loadHeatingStage5.readHisVal() > 0 || systemStages.compressorStage5.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage5Feedback.readHisVal() > 0) ",5" else "")
             }
         }
         if (heatingStatus.isNotEmpty()) {

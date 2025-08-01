@@ -373,7 +373,7 @@ public class DabStagedRtu extends DabSystemProfile
             status.append(" ON ");
         }
 
-        if (isCoolingActive() || (systemCoolingLoopOp > 0 && isCompressorActive())) {
+        if (isCoolingActive() || (DabSystemController.getInstance().systemState == SystemController.State.COOLING && isCompressorActive())) {
             status.append("| Cooling Stage " + ((systemStages.getCoolingStage1().readHisVal() > 0) || (systemStages.getCompressorStage1().readHisVal() > 0) ? "1" : ""));
             status.append((systemStages.getCoolingStage2().readHisVal() > 0 || systemStages.getCompressorStage2().readHisVal() > 0) ? ",2" : "");
             status.append((systemStages.getCoolingStage3().readHisVal() > 0 || systemStages.getCompressorStage3().readHisVal() > 0) ? ",3" : "");
@@ -382,7 +382,7 @@ public class DabStagedRtu extends DabSystemProfile
 
         }
 
-        if (isHeatingActive() || (systemHeatingLoopOp > 0 && isCompressorActive())) {
+        if (isHeatingActive() || (DabSystemController.getInstance().systemState == SystemController.State.HEATING && isCompressorActive())) {
             status.append("| Heating Stage " + (((systemStages.getHeatingStage1().readHisVal() > 0) ||
                     systemStages.getCompressorStage1().readHisVal() > 0) ? "1" : ""));
             status.append((systemStages.getHeatingStage2().readHisVal() > 0 || systemStages.getCompressorStage2().readHisVal() > 0) ? ",2" : "");

@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.system.util
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.equips.AdvancedHybridSystemEquip
+import a75f.io.domain.equips.ConditioningStages
 import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
@@ -21,7 +22,9 @@ import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
 import a75f.io.logic.bo.building.system.SystemController
 import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
+import a75f.io.logic.bo.building.system.dab.DabSystemController
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
+import a75f.io.logic.bo.building.system.vav.VavSystemController
 import android.annotation.SuppressLint
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
@@ -263,12 +266,20 @@ fun isConnectModuleExist(): Boolean {
         connectModuleSystemStatus.insert(0, "Fan Stage ")
         connectModuleSystemStatus.append(" ON ")
     }
+     val systemState = if(getSystemDomain() == ModelNames.dabAdvancedHybridAhuV2) {
+         DabSystemController.getInstance().systemState
+     } else {
+         VavSystemController.getInstance().systemState
+     }
+
      val coolingStatus = StringBuilder().apply {
-         append(if (systemStages.loadCoolingStage1.readHisVal() > 0 || (coolingLoopOutput > 0 && systemStages.compressorStage1.readHisVal() > 0)) "1" else "")
-         append(if (systemStages.loadCoolingStage2.readHisVal() > 0 || (coolingLoopOutput > 0 && systemStages.compressorStage2.readHisVal() > 0)) ",2" else "")
-         append(if (systemStages.loadCoolingStage3.readHisVal() > 0 || (coolingLoopOutput > 0 && systemStages.compressorStage3.readHisVal() > 0)) ",3" else "")
-         append(if (systemStages.loadCoolingStage4.readHisVal() > 0 || (coolingLoopOutput > 0 && systemStages.compressorStage4.readHisVal() > 0)) ",4" else "")
-         append(if (systemStages.loadCoolingStage5.readHisVal() > 0 || (coolingLoopOutput > 0 && systemStages.compressorStage5.readHisVal() > 0)) ",5" else "")
+         if (isCoolingActive(systemStages) || systemState == SystemController.State.COOLING && isCompressorActive(systemStages)) {
+             append(if (systemStages.loadCoolingStage1.readHisVal() > 0 || systemStages.compressorStage1.readHisVal() > 0) "1" else "")
+             append(if (systemStages.loadCoolingStage2.readHisVal() > 0 || systemStages.compressorStage2.readHisVal() > 0) ",2" else "")
+             append(if (systemStages.loadCoolingStage3.readHisVal() > 0 || systemStages.compressorStage3.readHisVal() > 0) ",3" else "")
+             append(if (systemStages.loadCoolingStage4.readHisVal() > 0 || systemStages.compressorStage4.readHisVal() > 0) ",4" else "")
+             append(if (systemStages.loadCoolingStage5.readHisVal() > 0 || systemStages.compressorStage5.readHisVal() > 0) ",5" else "")
+         }
      }
      if (coolingStatus.isNotEmpty()) {
          if (coolingStatus[0] == ',') {
@@ -279,12 +290,14 @@ fun isConnectModuleExist(): Boolean {
      }
 
      val heatingStatus = StringBuilder().apply {
-         append(if (systemStages.loadHeatingStage1.readHisVal() > 0 || (heatingLoopOutput > 0 && systemStages.compressorStage1.readHisVal() > 0)) "1" else "")
-         append(if (systemStages.loadHeatingStage2.readHisVal() > 0 || (heatingLoopOutput > 0 && systemStages.compressorStage2.readHisVal() > 0)) ",2" else "")
-         append(if (systemStages.loadHeatingStage3.readHisVal() > 0 || (heatingLoopOutput > 0 && systemStages.compressorStage3.readHisVal() > 0)) ",3" else "")
-         append(if (systemStages.loadHeatingStage4.readHisVal() > 0 || (heatingLoopOutput > 0 && systemStages.compressorStage4.readHisVal() > 0)) ",4" else "")
-         append(if (systemStages.loadHeatingStage5.readHisVal() > 0 || (heatingLoopOutput > 0 && systemStages.compressorStage5.readHisVal() > 0)) ",5" else "")
-    }
+         if (isHeatingActive(systemStages) || systemState == SystemController.State.HEATING && isCompressorActive(systemStages)) {
+             append(if (systemStages.loadHeatingStage1.readHisVal() > 0 || systemStages.compressorStage1.readHisVal() > 0) "1" else "")
+             append(if (systemStages.loadHeatingStage2.readHisVal() > 0 || systemStages.compressorStage2.readHisVal() > 0) ",2" else "")
+             append(if (systemStages.loadHeatingStage3.readHisVal() > 0 || systemStages.compressorStage3.readHisVal() > 0) ",3" else "")
+             append(if (systemStages.loadHeatingStage4.readHisVal() > 0 || systemStages.compressorStage4.readHisVal() > 0) ",4" else "")
+             append(if (systemStages.loadHeatingStage5.readHisVal() > 0 || systemStages.compressorStage5.readHisVal() > 0) ",5" else "")
+         }
+     }
     if (heatingStatus.isNotEmpty()) {
         if (heatingStatus[0] == ',') {
             heatingStatus.deleteCharAt(0)
@@ -366,5 +379,28 @@ fun isConnectModuleExist(): Boolean {
     }
     // just for the case when humidifierEnable point is not available
     return ""
+}
+
+private fun isCoolingActive(systemStages: ConditioningStages): Boolean {
+    return systemStages.loadCoolingStage1.readHisVal() > 0 ||
+            systemStages.loadCoolingStage2.readHisVal() > 0 ||
+            systemStages.loadCoolingStage3.readHisVal() > 0 ||
+            systemStages.loadCoolingStage4.readHisVal() > 0 ||
+            systemStages.loadCoolingStage5.readHisVal() > 0
+}
+private fun isHeatingActive(systemStages: ConditioningStages): Boolean {
+    return systemStages.loadHeatingStage1.readHisVal() > 0 ||
+            systemStages.loadHeatingStage2.readHisVal() > 0 ||
+            systemStages.loadHeatingStage3.readHisVal() > 0 ||
+            systemStages.loadHeatingStage4.readHisVal() > 0 ||
+            systemStages.loadHeatingStage5.readHisVal() > 0
+}
+
+private fun isCompressorActive(systemStages: ConditioningStages): Boolean {
+    return systemStages.compressorStage1.readHisVal() > 0 ||
+            systemStages.compressorStage2.readHisVal() > 0 ||
+            systemStages.compressorStage3.readHisVal() > 0 ||
+            systemStages.compressorStage4.readHisVal() > 0 ||
+            systemStages.compressorStage5.readHisVal() > 0
 }
 

@@ -118,6 +118,7 @@ class DabAdvancedAhu : DabSystemProfile() {
     val cmRelayStatus = BitSet()
     val analogStatus = arrayOf(0.0, 0.0, 0.0, 0.0, 0.0)
     var factory: SystemControllerFactory = SystemControllerFactory(controllers)
+    private lateinit var economizationAvailable: CalibratedPoint
 
     override fun getProfileName(): String {
         return if (BuildConfig.BUILD_TYPE.equals(DabProfile.CARRIER_PROD, ignoreCase = true)) {
@@ -138,7 +139,7 @@ class DabAdvancedAhu : DabSystemProfile() {
         updateStagesSelected()
         systemStatusHandler = SystemStageHandler(systemEquip.cmEquip.conditioningStages)
         connectStatusHandler = SystemStageHandler(systemEquip.connectEquip1.conditioningStages)
-
+        economizationAvailable = CalibratedPoint(DomainName.economizingAvailable , systemEquip.equipRef, 0.0)
     }
 
     private fun updatePrerequisite() {
@@ -147,9 +148,9 @@ class DabAdvancedAhu : DabSystemProfile() {
         var economization = 0.0
         if (systemCoolingLoopOp > 0) {
             economization =
-                if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable) 1.0 else 0.0
+                if ((L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable) || AdvAhuEconAlgoHandler.isFreeCoolingOn()) 1.0 else 0.0
         }
-        systemEquip.economizationAvailable.data = economization
+        economizationAvailable.data = economization
         systemStatusHandler = SystemStageHandler(systemEquip.cmEquip.conditioningStages)
         connectStatusHandler = SystemStageHandler(systemEquip.connectEquip1.conditioningStages)
     }
@@ -1160,7 +1161,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.dabStageUpTimerCounter,
             systemEquip.dabStageDownTimerCounter,
-            systemEquip.economizationAvailable,
+            economizationAvailable,
             ahuStagesCounts.loadCoolingStages
         )
 
@@ -1185,7 +1186,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.dabStageUpTimerCounter,
             systemEquip.dabStageDownTimerCounter,
-            systemEquip.economizationAvailable,
+            economizationAvailable,
             ahuStagesCounts.satCoolingStages
         )
 
@@ -1249,7 +1250,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.dabStageUpTimerCounter,
             systemEquip.dabStageDownTimerCounter,
-            systemEquip.economizationAvailable,
+            economizationAvailable,
             ahuStagesCounts.compressorStages
         )
 
@@ -1271,7 +1272,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.dabStageUpTimerCounter,
             systemEquip.dabStageDownTimerCounter,
-            systemEquip.economizationAvailable,
+            economizationAvailable,
             connect1StagesCounts.loadCoolingStages
         )
 
@@ -1342,7 +1343,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.dabStageUpTimerCounter,
             systemEquip.dabStageDownTimerCounter,
-            systemEquip.economizationAvailable,
+            economizationAvailable,
             connect1StagesCounts.compressorStages
         )
 

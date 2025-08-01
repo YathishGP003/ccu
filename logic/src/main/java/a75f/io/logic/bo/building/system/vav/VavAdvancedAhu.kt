@@ -111,6 +111,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
     private var connectControllers: HashMap<String, Any> = HashMap()
     var factory: SystemControllerFactory = SystemControllerFactory(controllers)
     private var connectfactory: SystemControllerFactory = SystemControllerFactory(connectControllers)
+    private lateinit var economizationAvailable: CalibratedPoint
 
     private fun initTRSystem() {
         trSystem = VavTRSystem()
@@ -130,6 +131,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         updateStagesSelected()
         systemStatusHandler = SystemStageHandler(systemEquip.cmEquip.conditioningStages)
         connectStatusHandler = SystemStageHandler(systemEquip.connectEquip1.conditioningStages)
+        economizationAvailable = CalibratedPoint(DomainName.economizingAvailable , systemEquip.equipRef, 0.0)
     }
 
     private fun updatePrerequisite() {
@@ -138,9 +140,9 @@ open class VavAdvancedAhu : VavSystemProfile() {
         var economization = 0.0
         if (systemCoolingLoopOp > 0) {
             economization =
-                if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable) 1.0 else 0.0
+                if ((L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable) || AdvAhuEconAlgoHandler.isFreeCoolingOn()) 1.0 else 0.0
         }
-        systemEquip.economizationAvailable.data = economization
+        economizationAvailable.data = economization
         systemStatusHandler = SystemStageHandler(systemEquip.cmEquip.conditioningStages)
         connectStatusHandler = SystemStageHandler(systemEquip.connectEquip1.conditioningStages)
 
@@ -1205,7 +1207,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
             systemEquip.vavStageDownTimerCounter,
-            systemEquip.economizationAvailable,
+            economizationAvailable,
             ahuStagesCounts.loadCoolingStages
         )
 
@@ -1230,7 +1232,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
             systemEquip.vavStageDownTimerCounter,
-            systemEquip.economizationAvailable,
+            economizationAvailable,
             ahuStagesCounts.satCoolingStages
         )
 
@@ -1294,7 +1296,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
             systemEquip.vavStageDownTimerCounter,
-            systemEquip.economizationAvailable,
+            economizationAvailable,
             ahuStagesCounts.compressorStages
         )
 
@@ -1318,7 +1320,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
             systemEquip.vavStageDownTimerCounter,
-            systemEquip.economizationAvailable,
+            economizationAvailable,
             connect1StagesCounts.loadCoolingStages
         )
 
@@ -1389,7 +1391,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
             systemEquip.vavStageDownTimerCounter,
-            systemEquip.economizationAvailable,
+            economizationAvailable,
             connect1StagesCounts.compressorStages
         )
 

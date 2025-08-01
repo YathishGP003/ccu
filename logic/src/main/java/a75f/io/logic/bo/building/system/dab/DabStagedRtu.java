@@ -76,6 +76,7 @@ public class DabStagedRtu extends DabSystemProfile
     SystemController.State currentConditioning = OFF;
     public DabStagedSystemEquip systemEquip;
     SystemStageHandler systemStatusHandler;
+    private CalibratedPoint economizationAvailable = null;
 
     public String getProfileName() {
         if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
@@ -100,6 +101,7 @@ public class DabStagedRtu extends DabSystemProfile
         systemEquip = (DabStagedSystemEquip) Domain.systemEquip;
         updateStagesSelected();
         systemStatusHandler = new SystemStageHandler(systemEquip.getConditioningStages());
+        economizationAvailable = new CalibratedPoint(DomainName.economizingAvailable , systemEquip.getEquipRef(), 0.0);
     }
 
     SystemControllerFactory factory = new SystemControllerFactory(controllers);
@@ -236,7 +238,7 @@ public class DabStagedRtu extends DabSystemProfile
         if (systemCoolingLoopOp > 0) {
             economization = L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable() ? 1.0 : 0.0;
         }
-        systemEquip.getEconomizationAvailable().setData(economization);
+        economizationAvailable.setData(economization);
         if (systemStatusHandler == null) {
             systemStatusHandler = new SystemStageHandler(systemEquip.getConditioningStages());
         }
@@ -422,7 +424,7 @@ public class DabStagedRtu extends DabSystemProfile
                 systemEquip.getRelayActivationHysteresis(),
                 systemEquip.getDabStageUpTimerCounter(),
                 systemEquip.getDabStageDownTimerCounter(),
-                systemEquip.getEconomizationAvailable(),
+                economizationAvailable,
                 coolingStagesCount
         );
 
@@ -447,7 +449,7 @@ public class DabStagedRtu extends DabSystemProfile
                 systemEquip.getRelayActivationHysteresis(),
                 systemEquip.getDabStageUpTimerCounter(),
                 systemEquip.getDabStageDownTimerCounter(),
-                systemEquip.getEconomizationAvailable(),
+                economizationAvailable,
                 compressorStagesCount
         );
 

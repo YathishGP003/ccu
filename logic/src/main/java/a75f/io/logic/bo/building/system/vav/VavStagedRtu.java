@@ -82,6 +82,7 @@ public class VavStagedRtu extends VavSystemProfile {
     public VavStagedSystemEquip systemEquip;
 
     private int lastSystemSATRequests = 0;
+    private CalibratedPoint economizationAvailable = null;
 
     public void initTRSystem() {
         trSystem =  new VavTRSystem();
@@ -138,6 +139,7 @@ public class VavStagedRtu extends VavSystemProfile {
         initTRSystem();
         updateStagesSelected();
         systemStatusHandler = new SystemStageHandler(systemEquip.getConditioningStages());
+        economizationAvailable = new CalibratedPoint(DomainName.economizingAvailable , systemEquip.getEquipRef(), 0.0);
     }
     
     @Override
@@ -189,7 +191,7 @@ public class VavStagedRtu extends VavSystemProfile {
                 systemEquip.getRelayActivationHysteresis(),
                 systemEquip.getVavStageUpTimerCounter(),
                 systemEquip.getVavStageDownTimerCounter(),
-                systemEquip.getEconomizationAvailable(),
+                economizationAvailable,
                 coolingStagesCount
         );
 
@@ -214,7 +216,7 @@ public class VavStagedRtu extends VavSystemProfile {
                 systemEquip.getRelayActivationHysteresis(),
                 systemEquip.getVavStageUpTimerCounter(),
                 systemEquip.getVavStageDownTimerCounter(),
-                systemEquip.getEconomizationAvailable(),
+                economizationAvailable,
                 compressorStagesCount
         );
 
@@ -460,7 +462,7 @@ public class VavStagedRtu extends VavSystemProfile {
         if (systemCoolingLoopOp > 0) {
             economization = L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable() ? 1.0 : 0.0;
         }
-        systemEquip.getEconomizationAvailable().setData(economization);
+        economizationAvailable.setData(economization);
         if (systemStatusHandler == null) {
             systemStatusHandler = new SystemStageHandler(systemEquip.getConditioningStages());
         }

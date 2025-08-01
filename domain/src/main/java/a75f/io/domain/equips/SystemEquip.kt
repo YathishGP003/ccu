@@ -83,6 +83,5 @@ open class SystemEquip (equipRef : String) : DomainEquip(equipRef) {
     val fanLoopOutput = Point(DomainName.fanLoopOutput, equipRef)
     val co2LoopOutput = Point(DomainName.co2LoopOutput, equipRef)
     val compressorLoopOutput = Point(DomainName.compressorLoopOutput, equipRef)
-    val economizationAvailable = CalibratedPoint(DomainName.economizingAvailable , equipRef, 0.0)
     val dcvLoopOutput = Point(DomainName.dcvLoopOutput, equipRef)
 }

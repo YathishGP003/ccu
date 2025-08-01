@@ -64,6 +64,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
 
     private final SystemControllerFactory factory = new SystemControllerFactory(controllers);
     private SystemStageHandler systemStatusHandler;
+    private CalibratedPoint economizationAvailable = null;
 
     public VavFullyModulatingRtu() {
     }
@@ -493,6 +494,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
         systemEquip = (VavModulatingRtuSystemEquip) Domain.systemEquip;
         initTRSystem();
         systemStatusHandler = new SystemStageHandler(systemEquip.getConditioningStages());
+        economizationAvailable = new CalibratedPoint(DomainName.economizingAvailable , systemEquip.getEquipRef(), 0.0);
         //updateSystemPoints();
     }
     
@@ -611,7 +613,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
         if (systemCoolingLoopOp > 0) {
             economization = L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable() ? 1.0 : 0.0;
         }
-        systemEquip.getEconomizationAvailable().setData(economization);
+        economizationAvailable.setData(economization);
         if (systemStatusHandler == null) {
             systemStatusHandler = new SystemStageHandler(systemEquip.getConditioningStages());
         }

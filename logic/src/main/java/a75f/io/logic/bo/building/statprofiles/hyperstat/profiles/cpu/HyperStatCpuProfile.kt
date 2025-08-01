@@ -549,11 +549,11 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
 
         fun isAnalogHasDoorWindowMapping(): Boolean {
             return (config.isEnabledAndAssociated(
-                config.analogOut1Enabled,
+                config.analogIn1Enabled,
                 config.analogIn1Association,
                 AnalogInputAssociation.DOOR_WINDOW_SENSOR_TITLE_24.ordinal
             ) || config.isEnabledAndAssociated(
-                config.analogOut2Enabled,
+                config.analogIn1Enabled,
                 config.analogIn2Association,
                 AnalogInputAssociation.DOOR_WINDOW_SENSOR_TITLE_24.ordinal
             ))

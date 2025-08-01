@@ -698,8 +698,8 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
     private fun isDoorOpenState(config: HyperStatConfiguration, equip: HyperStatEquip): Boolean {
 
         fun isAnalogHasDoorWindowMapping(): Boolean {
-            return (config.isEnabledAndAssociated(config.analogOut1Enabled, config.analogIn1Association, AnalogInputAssociation.DOOR_WINDOW_SENSOR_TITLE_24.ordinal)
-                    || config.isEnabledAndAssociated(config.analogOut2Enabled, config.analogIn2Association, AnalogInputAssociation.DOOR_WINDOW_SENSOR_TITLE_24.ordinal))
+            return (config.isEnabledAndAssociated(config.analogIn1Enabled, config.analogIn1Association, AnalogInputAssociation.DOOR_WINDOW_SENSOR_TITLE_24.ordinal)
+                    || config.isEnabledAndAssociated(config.analogIn2Enabled, config.analogIn2Association, AnalogInputAssociation.DOOR_WINDOW_SENSOR_TITLE_24.ordinal))
         }
 
         // If thermistor value less than 10000 ohms door is closed (0) else door is open (1)

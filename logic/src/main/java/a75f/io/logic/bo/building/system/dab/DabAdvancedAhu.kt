@@ -1184,6 +1184,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.dabStageUpTimerCounter,
             systemEquip.dabStageDownTimerCounter,
             economizationAvailable,
+            mechanicalCoolingActive,
             ahuStagesCounts.loadCoolingStages
         )
 
@@ -1192,6 +1193,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.dabStageUpTimerCounter,
             systemEquip.dabStageDownTimerCounter,
+            mechanicalHeatingActive,
             ahuStagesCounts.loadHeatingStages
         )
 
@@ -1209,6 +1211,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.dabStageUpTimerCounter,
             systemEquip.dabStageDownTimerCounter,
             economizationAvailable,
+            mechanicalHeatingActive,
             ahuStagesCounts.satCoolingStages
         )
 
@@ -1217,6 +1220,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.dabStageUpTimerCounter,
             systemEquip.dabStageDownTimerCounter,
+            mechanicalHeatingActive,
             ahuStagesCounts.satHeatingStages
         )
 
@@ -1273,7 +1277,8 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.dabStageUpTimerCounter,
             systemEquip.dabStageDownTimerCounter,
             economizationAvailable,
-            ahuStagesCounts.compressorStages
+            ahuStagesCounts.compressorStages,
+            lockoutCompressorActive
         )
 
         factory.addChangeCoolingChangeOverRelay(
@@ -1295,6 +1300,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.dabStageUpTimerCounter,
             systemEquip.dabStageDownTimerCounter,
             economizationAvailable,
+            mechanicalCoolingActive,
             connect1StagesCounts.loadCoolingStages
         )
 
@@ -1303,6 +1309,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.dabStageUpTimerCounter,
             systemEquip.dabStageDownTimerCounter,
+            mechanicalHeatingActive,
             connect1StagesCounts.loadHeatingStages
         )
 
@@ -1366,7 +1373,8 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.dabStageUpTimerCounter,
             systemEquip.dabStageDownTimerCounter,
             economizationAvailable,
-            connect1StagesCounts.compressorStages
+            connect1StagesCounts.compressorStages,
+            lockoutCompressorActive
         )
 
         connectfactory.addChangeCoolingChangeOverRelay(

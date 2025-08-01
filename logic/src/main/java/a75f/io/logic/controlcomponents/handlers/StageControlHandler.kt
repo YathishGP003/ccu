@@ -15,6 +15,7 @@ class StageControlHandler(
     stageUpTimer: Point = Point("StageUpTimer", ""),
     stageDownTimer: Point = Point("StageDownTimer", ""),
     private val economizingAvailable: CalibratedPoint = CalibratedPoint("economizingAvailable", "", 0.0),
+    private val lockOutActive: CalibratedPoint = CalibratedPoint("economizingAvailable", "", 0.0),
     private val logTag: String
 ) : Controller {
     val controller = StagedBooleanControllerImpl(totalStages, stageUpTimer, stageDownTimer, logTag)
@@ -24,6 +25,10 @@ class StageControlHandler(
     }
 
     private fun stageOn(stageNumber: Int): Boolean {
+        if (lockOutActive.readHisVal() > 0) {
+            logIt(logTag, "Lockout is active, Stage$stageNumber is OFF")
+            return false
+        }
         logIt(
             logTag, "Stage ON $stageNumber On , economizingAvailable: ${economizingAvailable.readHisVal()} " +
                     "loopOutput: ${loopOutput.readHisVal()} , Threshold : ${getThreshold()},  hysteresis: ${hysteresis.readPriorityVal()}"
@@ -44,6 +49,9 @@ class StageControlHandler(
     }
 
     private fun stageOff(stageNumber: Int): Boolean {
+        if (lockOutActive.readHisVal() > 0) {
+            return true
+        }
         logIt(
             logTag,
             "Stage OFF $stageNumber , economizingAvailable: ${economizingAvailable.readHisVal()} " +

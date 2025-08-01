@@ -425,6 +425,7 @@ public class DabStagedRtu extends DabSystemProfile
                 systemEquip.getDabStageUpTimerCounter(),
                 systemEquip.getDabStageDownTimerCounter(),
                 economizationAvailable,
+                mechanicalCoolingActive,
                 coolingStagesCount
         );
 
@@ -433,6 +434,7 @@ public class DabStagedRtu extends DabSystemProfile
                 systemEquip.getRelayActivationHysteresis(),
                 systemEquip.getDabStageUpTimerCounter(),
                 systemEquip.getDabStageDownTimerCounter(),
+                mechanicalHeatingActive,
                 heatingStagesCount
         );
 
@@ -450,7 +452,8 @@ public class DabStagedRtu extends DabSystemProfile
                 systemEquip.getDabStageUpTimerCounter(),
                 systemEquip.getDabStageDownTimerCounter(),
                 economizationAvailable,
-                compressorStagesCount
+                compressorStagesCount,
+                lockoutCompressorActive
         );
 
         factory.addHumidifierController(

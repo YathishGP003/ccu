@@ -105,6 +105,9 @@ public abstract class SystemProfile
     private boolean mechanicalCoolingAvailable;
     private boolean mechanicalHeatingAvailable;
 
+    public CalibratedPoint mechanicalCoolingActive = new CalibratedPoint("coolingLockOut","cooling", 0.0);
+    public CalibratedPoint mechanicalHeatingActive = new CalibratedPoint("heatingLockOut","heating", 0.0);
+    public CalibratedPoint lockoutCompressorActive = new CalibratedPoint("compressor","heating", 0.0);
 
     private Timer bypassHeatingLockoutTimer;
     private Timer bypassCoolingLockoutTimer;
@@ -962,17 +965,17 @@ public abstract class SystemProfile
         CcuLog.i(L.TAG_CCU_SYSTEM,
                  "outsideAirTemp "+outsideAirTemp+ " mechanicalCoolingAvailable "+mechanicalCoolingAvailable+
                                   " mechanicalHeatingAvailable "+mechanicalHeatingAvailable+" coolingLockoutActive ");
+        mechanicalCoolingActive.setData(isCoolingLockoutActive() ? 1.0 : 0.0);
+        mechanicalHeatingActive.setData(isHeatingLockoutActive() ? 1.0 : 0.0);
+        lockoutCompressorActive.setData(isCoolingLockoutActive() && systemCoolingLoopOp > 0 ? 1.0 : 0.0);
+        lockoutCompressorActive.setData(isHeatingLockoutActive() && systemHeatingLoopOp > 0 ? 1.0 : 0.0);
     }
-    
-    public boolean isCoolingLockoutActive() {
-        return !mechanicalCoolingAvailable;
-    }
-    
+
+    public boolean isCoolingLockoutActive() { return !mechanicalCoolingAvailable; }
+
     public boolean isHeatingLockoutActive() {
         return !mechanicalHeatingAvailable;
     }
-
-
 
     public double getSystemLoopOutputValue(String state){
          double systemLoopOPValue = CCUHsApi.getInstance().readPointPriorityValByQuery(state+" and system and loop and output and point");

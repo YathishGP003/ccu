@@ -59,9 +59,8 @@ fun getAnalogOutValueForLoopType(
 }
 
 fun getLogicalOutput(
-        controlType: AdvancedAhuAnalogOutAssociationType,
-        source: Point,
-        ahuSettings: AhuSettings
+        controlType: AdvancedAhuAnalogOutAssociationType, source: Point,
+        ahuSettings: AhuSettings, lockoutActiveDuringUnOccupied: Boolean
 ) : Double {
     val loopOutput = getCmLoopOutput(ahuSettings.systemEquip, controlType, source)
     val minMax = getMinMax(source, controlType, ahuSettings.systemEquip)
@@ -92,6 +91,14 @@ fun getLogicalOutput(
                 loopOutput
             }
         }
+        AdvancedAhuAnalogOutAssociationType.PRESSURE_FAN, AdvancedAhuAnalogOutAssociationType.LOAD_FAN -> {
+            if (lockoutActiveDuringUnOccupied) {
+                0.0
+            } else {
+                loopOutput
+            }
+        }
+
         else -> {
             loopOutput
         }

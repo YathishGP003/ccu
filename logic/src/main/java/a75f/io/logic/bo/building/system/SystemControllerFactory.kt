@@ -21,6 +21,7 @@ class SystemControllerFactory(var controllers: HashMap<String, Any>) {
         stageUpTimerCounter: Point,
         stageDownTimerCounter: Point,
         economizationAvailable: CalibratedPoint,
+        coolingLockOutActive: CalibratedPoint,
         coolingStages: CalibratedPoint
     ) {
         if (coolingStages.data > 0) {
@@ -33,6 +34,7 @@ class SystemControllerFactory(var controllers: HashMap<String, Any>) {
                 stageUpTimer = stageUpTimerCounter,
                 stageDownTimer = stageDownTimerCounter,
                 economizingAvailable = economizationAvailable,
+                lockOutActive = coolingLockOutActive,
                 logTag = L.TAG_CCU_SYSTEM
             )
         } else {
@@ -45,6 +47,7 @@ class SystemControllerFactory(var controllers: HashMap<String, Any>) {
         activationHysteresis: Point,
         stageUpTimerCounter: Point,
         stageDownTimerCounter: Point,
+        heatingLockOutActive: CalibratedPoint,
         heatingStages: CalibratedPoint
     ) {
         if (heatingStages.data > 0) {
@@ -56,6 +59,7 @@ class SystemControllerFactory(var controllers: HashMap<String, Any>) {
                 activationHysteresis = activationHysteresis,
                 stageUpTimer = stageUpTimerCounter,
                 stageDownTimer = stageDownTimerCounter,
+                lockOutActive = heatingLockOutActive,
                 logTag = L.TAG_CCU_SYSTEM
             )
         } else {
@@ -92,7 +96,8 @@ class SystemControllerFactory(var controllers: HashMap<String, Any>) {
         stageUpTimerCounter: Point,
         stageDownTimerCounter: Point,
         economizationAvailable: CalibratedPoint,
-        compressorStages: CalibratedPoint
+        compressorStages: CalibratedPoint,
+        compressorLockout: CalibratedPoint
     ) {
         if (compressorStages.data > 0) {
             factory.addStageController(
@@ -104,6 +109,7 @@ class SystemControllerFactory(var controllers: HashMap<String, Any>) {
                 stageUpTimer = stageUpTimerCounter,
                 stageDownTimer = stageDownTimerCounter,
                 economizingAvailable = economizationAvailable,
+                lockOutActive = compressorLockout,
                 logTag = L.TAG_CCU_SYSTEM
             )
         } else {
@@ -280,6 +286,7 @@ class SystemControllerFactory(var controllers: HashMap<String, Any>) {
         stageUpTimerCounter: Point,
         stageDownTimerCounter: Point,
         economizationAvailable: CalibratedPoint,
+        coolingLockOutActive: CalibratedPoint,
         coolingStages: CalibratedPoint
     ) {
         if (coolingStages.data > 0) {
@@ -292,6 +299,7 @@ class SystemControllerFactory(var controllers: HashMap<String, Any>) {
                 stageUpTimer = stageUpTimerCounter,
                 stageDownTimer = stageDownTimerCounter,
                 economizingAvailable = economizationAvailable,
+                lockOutActive = coolingLockOutActive,
                 logTag = L.TAG_CCU_SYSTEM
             )
         } else {
@@ -304,6 +312,7 @@ class SystemControllerFactory(var controllers: HashMap<String, Any>) {
         activationHysteresis: Point,
         stageUpTimerCounter: Point,
         stageDownTimerCounter: Point,
+        heatingLockOutActive: CalibratedPoint,
         heatingStages: CalibratedPoint
     ) {
         if (heatingStages.data > 0) {
@@ -315,6 +324,7 @@ class SystemControllerFactory(var controllers: HashMap<String, Any>) {
                 activationHysteresis = activationHysteresis,
                 stageUpTimer = stageUpTimerCounter,
                 stageDownTimer = stageDownTimerCounter,
+                lockOutActive = heatingLockOutActive,
                 logTag = L.TAG_CCU_SYSTEM
             )
         } else {
@@ -351,6 +361,7 @@ class SystemControllerFactory(var controllers: HashMap<String, Any>) {
         stageUpTimerCounter: Point,
         stageDownTimerCounter: Point,
         economizationAvailable: CalibratedPoint,
+        coolingLockoutActive: CalibratedPoint,
         coolingStages: CalibratedPoint
     ) {
         if (coolingStages.data > 0) {
@@ -363,6 +374,7 @@ class SystemControllerFactory(var controllers: HashMap<String, Any>) {
                 stageUpTimer = stageUpTimerCounter,
                 stageDownTimer = stageDownTimerCounter,
                 economizingAvailable = economizationAvailable,
+                lockOutActive = coolingLockoutActive,
                 logTag = L.TAG_CCU_SYSTEM
             )
         } else {
@@ -375,6 +387,7 @@ class SystemControllerFactory(var controllers: HashMap<String, Any>) {
         activationHysteresis: Point,
         stageUpTimerCounter: Point,
         stageDownTimerCounter: Point,
+        heatingLockOutActive: CalibratedPoint,
         heatingStages: CalibratedPoint
     ) {
         if (heatingStages.data > 0) {
@@ -386,6 +399,7 @@ class SystemControllerFactory(var controllers: HashMap<String, Any>) {
                 activationHysteresis = activationHysteresis,
                 stageUpTimer = stageUpTimerCounter,
                 stageDownTimer = stageDownTimerCounter,
+                lockOutActive = heatingLockOutActive,
                 logTag = L.TAG_CCU_SYSTEM
             )
         } else {

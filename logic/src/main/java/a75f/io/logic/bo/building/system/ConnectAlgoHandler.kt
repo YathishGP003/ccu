@@ -85,9 +85,8 @@ fun isConnectLowFanStageEnabled(connectEquip: ConnectModuleEquip) : Boolean{
 
 
 fun getConnectLogicalOutput(
-        controlType: AdvancedAhuAnalogOutAssociationTypeConnect,
-        source: Point,
-        ahuSettings: AhuSettings
+        controlType: AdvancedAhuAnalogOutAssociationTypeConnect, source: Point,
+        ahuSettings: AhuSettings, lockoutActiveDuringUnOccupied: Boolean
 ) : Double {
     val loopOutput = getConnectLoopOutput(ahuSettings.connectEquip1, controlType, source, ahuSettings)
     val minMax = getMinMax(source, controlType, ahuSettings.connectEquip1, ahuSettings)
@@ -123,6 +122,14 @@ fun getConnectLogicalOutput(
         AdvancedAhuAnalogOutAssociationTypeConnect.RETURN_DAMPER -> {
             getModulatedOutput(loopOutput, minMax.first, minMax.second) * 10
         }
+        AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_FAN -> {
+            if (lockoutActiveDuringUnOccupied) {
+                0.0
+            } else {
+                loopOutput
+            }
+        }
+
         else -> {
             loopOutput
         }

@@ -32,6 +32,7 @@ open class ControllerFactory {
         stageUpTimer: Point = Point("stageUpTimer", ""),
         stageDownTimer: Point = Point("stageUpTimer", ""),
         economizingAvailable: CalibratedPoint = CalibratedPoint("economizingAvailable", "", 0.0),
+        lockOutActive: CalibratedPoint = CalibratedPoint("lockOutActive", "", 0.0),
         logTag: String
     ): StageControlHandler {
         if (!controllers.containsKey(controllerName)) {
@@ -43,6 +44,7 @@ open class ControllerFactory {
                 stageUpTimer = stageUpTimer,
                 stageDownTimer = stageDownTimer,
                 economizingAvailable = economizingAvailable,
+                lockOutActive = lockOutActive,
                 logTag = logTag
             )
             controllers[controllerName] = stageController

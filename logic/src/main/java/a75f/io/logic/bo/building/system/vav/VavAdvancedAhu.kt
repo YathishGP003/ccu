@@ -1234,6 +1234,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.vavStageUpTimerCounter,
             systemEquip.vavStageDownTimerCounter,
             economizationAvailable,
+            mechanicalCoolingActive,
             ahuStagesCounts.loadCoolingStages
         )
 
@@ -1242,7 +1243,8 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
             systemEquip.vavStageDownTimerCounter,
-            ahuStagesCounts.loadHeatingStages
+            ahuStagesCounts.loadHeatingStages,
+            mechanicalHeatingActive
         )
 
         factory.addLoadFanControllers(
@@ -1259,6 +1261,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.vavStageUpTimerCounter,
             systemEquip.vavStageDownTimerCounter,
             economizationAvailable,
+            mechanicalCoolingActive,
             ahuStagesCounts.satCoolingStages
         )
 
@@ -1267,6 +1270,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
             systemEquip.vavStageDownTimerCounter,
+            mechanicalHeatingActive,
             ahuStagesCounts.satHeatingStages
         )
 
@@ -1323,7 +1327,8 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.vavStageUpTimerCounter,
             systemEquip.vavStageDownTimerCounter,
             economizationAvailable,
-            ahuStagesCounts.compressorStages
+            ahuStagesCounts.compressorStages,
+            lockoutCompressorActive
         )
 
         factory.addChangeCoolingChangeOverRelay(
@@ -1347,6 +1352,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.vavStageUpTimerCounter,
             systemEquip.vavStageDownTimerCounter,
             economizationAvailable,
+            mechanicalCoolingActive,
             connect1StagesCounts.loadCoolingStages
         )
 
@@ -1355,6 +1361,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
             systemEquip.vavStageDownTimerCounter,
+            mechanicalHeatingActive,
             connect1StagesCounts.loadHeatingStages
         )
 
@@ -1418,7 +1425,8 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.vavStageUpTimerCounter,
             systemEquip.vavStageDownTimerCounter,
             economizationAvailable,
-            connect1StagesCounts.compressorStages
+            connect1StagesCounts.compressorStages,
+            lockoutCompressorActive
         )
 
         connectfactory.addChangeCoolingChangeOverRelay(

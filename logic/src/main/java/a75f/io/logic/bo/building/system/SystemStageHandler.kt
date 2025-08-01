@@ -3,7 +3,7 @@ package a75f.io.logic.bo.building.system
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.ConditioningStages
-import a75f.io.logger.CcuLog
+import a75f.io.logic.L
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.util.ControllerNames
 
@@ -194,12 +194,13 @@ class SystemStageHandler(private var conditioningStages: ConditioningStages) {
                 val fanStages = result as List<Pair<Int, Boolean>>
                 fanStages.forEach {
                     val (stage, isActive) = Pair(it.first, it.second)
+
                     when (stage) {
-                        0 -> updateRelayStatus(DomainName.fanStage1, isActive)
-                        1 -> updateRelayStatus(DomainName.fanStage2, isActive)
-                        2 -> updateRelayStatus(DomainName.fanStage3, isActive)
-                        3 -> updateRelayStatus(DomainName.fanStage4, isActive)
-                        4 -> updateRelayStatus(DomainName.fanStage5, isActive)
+                        0 -> updateRelayStatus(DomainName.fanStage1, if (fanOffWhenLockoutActiveDuringUnOccupied()) false else isActive)
+                        1 -> updateRelayStatus(DomainName.fanStage2, if (fanOffWhenLockoutActiveDuringUnOccupied()) false else isActive)
+                        2 -> updateRelayStatus(DomainName.fanStage3, if (fanOffWhenLockoutActiveDuringUnOccupied()) false else isActive)
+                        3 -> updateRelayStatus(DomainName.fanStage4, if (fanOffWhenLockoutActiveDuringUnOccupied()) false else isActive)
+                        4 -> updateRelayStatus(DomainName.fanStage5, if (fanOffWhenLockoutActiveDuringUnOccupied()) false else isActive)
                     }
                 }
             }
@@ -208,11 +209,11 @@ class SystemStageHandler(private var conditioningStages: ConditioningStages) {
                 fanStages.forEach {
                     val (stage, isActive) = Pair(it.first, it.second)
                     when (stage) {
-                        0 -> updateRelayStatus(DomainName.loadFanStage1, isActive)
-                        1 -> updateRelayStatus(DomainName.loadFanStage2, isActive)
-                        2 -> updateRelayStatus(DomainName.loadFanStage3, isActive)
-                        3 -> updateRelayStatus(DomainName.loadFanStage4, isActive)
-                        4 -> updateRelayStatus(DomainName.loadFanStage5, isActive)
+                        0 -> updateRelayStatus(DomainName.loadFanStage1, if (fanOffWhenLockoutActiveDuringUnOccupied()) false else isActive)
+                        1 -> updateRelayStatus(DomainName.loadFanStage2, if (fanOffWhenLockoutActiveDuringUnOccupied()) false else isActive)
+                        2 -> updateRelayStatus(DomainName.loadFanStage3, if (fanOffWhenLockoutActiveDuringUnOccupied()) false else isActive)
+                        3 -> updateRelayStatus(DomainName.loadFanStage4, if (fanOffWhenLockoutActiveDuringUnOccupied()) false else isActive)
+                        4 -> updateRelayStatus(DomainName.loadFanStage5, if (fanOffWhenLockoutActiveDuringUnOccupied()) false else isActive)
                     }
                 }
             }
@@ -222,11 +223,11 @@ class SystemStageHandler(private var conditioningStages: ConditioningStages) {
                 fanStages.forEach {
                     val (stage, isActive) = Pair(it.first, it.second)
                     when (stage) {
-                        0 -> updateRelayStatus(DomainName.fanPressureStage1, isActive)
-                        1 -> updateRelayStatus(DomainName.fanPressureStage2, isActive)
-                        2 -> updateRelayStatus(DomainName.fanPressureStage3, isActive)
-                        3 -> updateRelayStatus(DomainName.fanPressureStage4, isActive)
-                        4 -> updateRelayStatus(DomainName.fanPressureStage5, isActive)
+                        0 -> updateRelayStatus(DomainName.fanPressureStage1, if (fanOffWhenLockoutActiveDuringUnOccupied()) false else isActive)
+                        1 -> updateRelayStatus(DomainName.fanPressureStage2, if (fanOffWhenLockoutActiveDuringUnOccupied()) false else isActive)
+                        2 -> updateRelayStatus(DomainName.fanPressureStage3, if (fanOffWhenLockoutActiveDuringUnOccupied()) false else isActive)
+                        3 -> updateRelayStatus(DomainName.fanPressureStage4, if (fanOffWhenLockoutActiveDuringUnOccupied()) false else isActive)
+                        4 -> updateRelayStatus(DomainName.fanPressureStage5, if (fanOffWhenLockoutActiveDuringUnOccupied()) false else isActive)
                     }
                 }
             }
@@ -285,6 +286,9 @@ class SystemStageHandler(private var conditioningStages: ConditioningStages) {
             }
 
         }
+    }
 
+    private fun fanOffWhenLockoutActiveDuringUnOccupied(): Boolean {
+        return (!L.ccu().systemProfile.isSystemOccupied && L.ccu().systemProfile.isLockoutActiveDuringUnoccupied)
     }
 }

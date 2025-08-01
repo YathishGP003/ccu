@@ -192,6 +192,7 @@ public class VavStagedRtu extends VavSystemProfile {
                 systemEquip.getVavStageUpTimerCounter(),
                 systemEquip.getVavStageDownTimerCounter(),
                 economizationAvailable,
+                mechanicalCoolingActive,
                 coolingStagesCount
         );
 
@@ -200,6 +201,7 @@ public class VavStagedRtu extends VavSystemProfile {
                 systemEquip.getRelayActivationHysteresis(),
                 systemEquip.getVavStageUpTimerCounter(),
                 systemEquip.getVavStageDownTimerCounter(),
+                mechanicalHeatingActive,
                 heatingStagesCount
         );
 
@@ -217,7 +219,8 @@ public class VavStagedRtu extends VavSystemProfile {
                 systemEquip.getVavStageUpTimerCounter(),
                 systemEquip.getVavStageDownTimerCounter(),
                 economizationAvailable,
-                compressorStagesCount
+                compressorStagesCount,
+                lockoutCompressorActive
         );
 
         factory.addHumidifierController(

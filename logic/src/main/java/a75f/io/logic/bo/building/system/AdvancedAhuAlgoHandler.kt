@@ -21,13 +21,14 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
             ahuSettings: AhuSettings,
             systemEquip: DomainEquip
     ) : Pair<Double,Double> {
-        return when (systemEquip) {
+        val lockoutActiveDuringUnOccupied = isLockoutActiveDuringUnoccupied(ahuSettings)
+         return when (systemEquip) {
             is AdvancedHybridSystemEquip -> {
                 val analogOutAssociationType = AdvancedAhuAnalogOutAssociationType.values()[association.readDefaultVal().toInt()]
                     CcuLog.i(L.TAG_CCU_SYSTEM, "getAnalogOutValue- association: ${association.domainName}, analogOutAssociationType: $analogOutAssociationType")
                 Pair (
-                        getAnalogOutValueForLoopType(enable, analogOutAssociationType, ahuSettings, isLockoutActiveDuringUnoccupied(ahuSettings)),
-                        getLogicalOutput(analogOutAssociationType, enable, ahuSettings)
+                    getAnalogOutValueForLoopType(enable, analogOutAssociationType, ahuSettings,lockoutActiveDuringUnOccupied),
+                    getLogicalOutput(analogOutAssociationType, enable, ahuSettings, lockoutActiveDuringUnOccupied)
                 )
 
             }
@@ -35,8 +36,8 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
                 val analogOutAssociationType = AdvancedAhuAnalogOutAssociationTypeConnect.values()[association.readDefaultVal().toInt()]
                 CcuLog.i(L.TAG_CCU_SYSTEM, "getAnalogOutValue- association: ${association.domainName}, analogOutAssociationType: $analogOutAssociationType")
                 Pair (
-                        getConnectAnalogOutValueForLoopType(enable, analogOutAssociationType, ahuSettings, isLockoutActiveDuringUnoccupied(ahuSettings)),
-                        getConnectLogicalOutput(analogOutAssociationType, enable, ahuSettings)
+                    getConnectAnalogOutValueForLoopType(enable, analogOutAssociationType, ahuSettings, lockoutActiveDuringUnOccupied),
+                    getConnectLogicalOutput(analogOutAssociationType, enable, ahuSettings, lockoutActiveDuringUnOccupied)
                 )
             }
             else -> {

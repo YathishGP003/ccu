@@ -138,7 +138,6 @@ import a75f.io.logic.bo.building.otn.OTNUtil;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
-import a75f.io.logic.bo.building.system.BacnetServicesUtils;
 import a75f.io.logic.bo.building.system.client.RemotePointUpdateInterface;
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
@@ -184,7 +183,6 @@ import a75f.io.renatus.util.TextListAdapter;
 import a75f.io.renatus.views.AlertDialogAdapter;
 import a75f.io.renatus.views.AlertDialogData;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
-import a75f.io.renatus.views.userintent.UserIntentViewModel;
 import a75f.io.restserver.server.HttpServer;
 import a75f.io.util.EntityKVStringParserUtilKt;
 import a75f.io.util.ExecutorTask;
@@ -2727,6 +2725,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             HashMap<Object, Object> parentBacnetEquip = CCUHsApi.getInstance().readEntity("equip " +  // parent modbbus equip
                                     "and not equipRef and roomRef  == " + "\""+nonTempEquip.getRoomRef()+"\"");
                             HashMap<Object,Object> bacnetDevice = CCUHsApi.getInstance().readEntity("device and equipRef == \"" + nonTempEquip.getId() + "\"");
+                            visibleEquip = nonTempEquip;
                             loadExternalEquipUi(
                                     "BACNET",
                                     nonTempEquip.getId(),
@@ -2737,7 +2736,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                     linearLayoutZonePoints,
                                     null
                             );
-                            visibleEquip = nonTempEquip;
                         }
                     } else {
                         //Non paired devices
@@ -4998,6 +4996,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             case "BACNET":
                 HashMap<Object,Object> bacnetDevice = (HashMap<Object,Object>) equipPointDetails;
                 setEquipmentDeviceName(zoneDetailsView, equipmentDeviceName);
+                setBacnetEquipmentDeviceType(zoneDetailsView, bacnetDevice);
                 controlLastUpdatedVisibilityForModbusEquips(zoneDetailsView, Integer.parseInt(bacnetDevice.get("addr").toString()), showLastUpdatedTime);
                 setPointScheduleStatusForExternalEquip(zoneDetailsView, equipId);
                 setupExternalEquipParamRecyclerView(zoneDetailsView, BACNET, bacNetPointsList, null);
@@ -5145,6 +5144,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
     private void setEquipmentDeviceName(View zoneDetailsView, String equipmentDeviceName) {
         ((TextView) zoneDetailsView.findViewById(R.id.tvEquipmentType)).setText(equipmentDeviceName);
+    }
+
+    private void setBacnetEquipmentDeviceType(View zoneDetailsView, HashMap<Object, Object> bacnetDevice) {
+        boolean isIpEquip = false;
+        if (visibleEquip != null) {
+            isIpEquip = visibleEquip.getMarkers().contains("bacnetCur");
+        }
+        zoneDetailsView.findViewById(R.id.tvEquipmentTypeDesc).setVisibility(View.VISIBLE);
+        if (isIpEquip) {
+            ((TextView) zoneDetailsView.findViewById(R.id.tvEquipmentTypeDesc)).setText("BACnet-IP Device");
+        } else {
+            ((TextView) zoneDetailsView.findViewById(R.id.tvEquipmentTypeDesc)).setText("BACnet-MSTP Device");
+        }
+
     }
 
     private void controlLastUpdatedVisibilityForModbusEquips(

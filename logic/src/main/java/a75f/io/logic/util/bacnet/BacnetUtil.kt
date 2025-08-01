@@ -654,7 +654,7 @@ fun updateHeartBeatPoint(id: String, isEquipId: Boolean = false) {
         val equipId = if (!isEquipId) point["equipRef"] //if given id is point id then get equipRef from point
                       else id    //if given id is equip id then use it directly
         CcuLog.i(TAG_CCU_BACNET, "updateHeartBeatPoint for equip: $equipId  isIp -> $isBacnetClientPoint isMstp-> $isBacnetMstpPoint" )
-        val heartBeatPointId = CCUHsApi.getInstance().readEntity("point and heartbeat and bacnetDeviceId and equipRef==\"$equipId\"")["id"]
+        val heartBeatPointId = CCUHsApi.getInstance().readEntity("point and heartbeat and (bacnetCur or bacnetMstp) and equipRef==\"$equipId\"")["id"]
         if(heartBeatPointId != null && heartBeatPointId.toString().isNotEmpty()){
             CcuLog.i(TAG_CCU_BACNET, "updateHeartBeatPoint for equip: $equipId with heartBeatPointId: $heartBeatPointId")
             CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(heartBeatPointId.toString(), 1.0)

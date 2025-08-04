@@ -7,8 +7,10 @@ import static a75f.io.logic.migration.firmware.FirmwareVersionPointMigration.ini
 import static a75f.io.logic.migration.firmware.FirmwareVersionPointMigration.initRemoteFirmwareVersionPointMigration;
 import static a75f.io.logic.util.PreferenceUtil.FIRMWARE_VERSION_POINT_MIGRATION;
 
+import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
+import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.io.HZincReader;
 
@@ -214,6 +216,13 @@ public class MigrationUtil {
             migrateStage1DabReheatMapping(ccuHsApi);
             PreferenceUtil.setMigrateStage1DabReheatMapping();
             CcuLog.d(TAG, "migrateStage1DabReheatMapping ended");
+        }
+
+        if (!PreferenceUtil.getMigrateSystemTunerSync()) {
+            CcuLog.d(TAG, "migrateMissingSystemTunerValues");
+            ExecutorTask.executeBackground(() -> {
+                migrateMissingSystemTunerValues(ccuHsApi);
+            });
         }
         ccuHsApi.scheduleSync();
     }
@@ -1278,5 +1287,23 @@ public class MigrationUtil {
 
         }
         CcuLog.d(TAG_CCU_MIGRATION_UTIL, "migrateStage1DabReheatMapping completed");
+    }
+
+    private static void migrateMissingSystemTunerValues(CCUHsApi ccuHsApi) {
+        HashMap<Object, Object> systemEquip = ccuHsApi.readEntity("system and equip " +
+                "and not modbus and not connectModule and not bacnet and domainName");
+        if (systemEquip.get("domainName").toString().contains("AdvancedHybridAhuV2")) {
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "syncMissingSystemTunerValues started for "+systemEquip);
+            ArrayList<HashMap<Object, Object>> writablePoints = CCUHsApi.getInstance()
+                    .readAllEntities("point and system and tuner");
+            List<HDict> systemTunerDicts = new ArrayList<>();
+            for (HashMap<Object, Object> m : writablePoints) {
+                HDict pid = new HDictBuilder().add("id", HRef.copy(m.get("id").toString())).toDict();
+                systemTunerDicts.add(pid);
+            }
+            ccuHsApi.importPointArrays(systemTunerDicts);
+            PreferenceUtil.setMigrateSystemTunerSync();
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "syncMissingSystemTunerValues completed");
+        }
     }
 }

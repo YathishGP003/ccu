@@ -139,6 +139,7 @@ public class PreferenceUtil {
     private static final String MIGRATION_ZONE_STATUS = "migrationZoneStatus";
     private static final String MIGRATION_CLEAR_INVALID_HIS_DATA = "migrationClearInvalidHisData";
 
+    private static final String MIGRATE_SYSTEM_TUNER_SYNC = "migrateMissingSystemTunerValues";
     public static void setContext(Context c) {
         context= c;
     }
@@ -1077,6 +1078,13 @@ public class PreferenceUtil {
 
     public static void setEquipScheduleStatusMigrationStatus() {
         setBooleanPreference(MIGRATION_ZONE_STATUS, true);
+    }
+
+    public static boolean getMigrateSystemTunerSync() {
+        return getBooleanPreference(MIGRATE_SYSTEM_TUNER_SYNC);
+    }
+    public static void setMigrateSystemTunerSync() {
+        setBooleanPreference(MIGRATE_SYSTEM_TUNER_SYNC, true);
     }
 
     public static boolean getMigrationClearInvalidHisData() {

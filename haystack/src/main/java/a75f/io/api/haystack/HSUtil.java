@@ -340,8 +340,8 @@ public class HSUtil {
         return false;
     }
 
-    public static boolean skipUserIntentForV2(Point localPoint) {
-        return !(localPoint.getMarkers().contains("userIntent"));
+    public static boolean skipUserIntentOrTunerForV2(Point localPoint) {
+        return !(localPoint.getMarkers().contains("userIntent")) && !(localPoint.getMarkers().contains("tuner"));
     }
 
     public static boolean isSSEConfig(String id, CCUHsApi hayStack) {

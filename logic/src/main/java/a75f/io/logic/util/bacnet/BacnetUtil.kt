@@ -13,6 +13,7 @@ import a75f.io.logic.L.TAG_CCU_BACNET
 import a75f.io.logic.L.TAG_CCU_BACNET_MSTP
 import a75f.io.logic.bo.building.system.BacNetConstants
 import a75f.io.logic.bo.building.system.BacnetMstpSubscribeCov
+import a75f.io.logic.bo.building.system.BacnetMstpSubscribeCovForAllDevices
 import a75f.io.logic.bo.building.system.BacnetMstpSubscribeCovRequest
 import a75f.io.logic.bo.building.system.BacnetReadRequestMultiple
 import a75f.io.logic.bo.building.system.BacnetServicesUtils
@@ -502,18 +503,19 @@ fun updateBacnetMstpLinearAndCovSubscription( isInitProcessRequired: Boolean = t
 
         val serviceUtils = BacnetServicesUtils()
         val serverIpAddress = serviceUtils.getServerIpAddress()
-        CcuLog.d(TAG_CCU_BACNET_MSTP, "BACnet MSTP COV Subscription Server IP Address: $serverIpAddress")
+        CcuLog.d(TAG_CCU_BACNET_MSTP, "BACnet MSTP Subscription Server IP Address: $serverIpAddress")
         val bacnetMstpEquip = CCUHsApi.getInstance().readAllHDictByQuery("equip and bacnetMstp")
-        CcuLog.d(TAG_CCU_BACNET_MSTP, "BACnet MSTP COV Subscription for ${bacnetMstpEquip.size} devices")
+        CcuLog.d(TAG_CCU_BACNET_MSTP, "BACnet MSTP Subscription for ${bacnetMstpEquip.size} devices")
+        var subscribeCovForAllDevices = mutableListOf<BacnetMstpSubscribeCov>()
         bacnetMstpEquip.forEach { t1 ->
 
             val deviceId = t1["bacnetDeviceId"]?.toString() ?: ""
             val deviceMacAddress = t1["bacnetDeviceMacAddr"]?.toString() ?: "0"
             val destination = DestinationMultiRead("", "0", deviceId ,"", deviceMacAddress)
 
-            CcuLog.d(TAG_CCU_BACNET_MSTP,"Destination for COV Subscription: $destination")
+            CcuLog.d(TAG_CCU_BACNET_MSTP,"Destination for Subscription: $destination")
            val points = CCUHsApi.getInstance().readAllHDictByQuery("point and bacnetId and equipRef==\"${t1.id()}\"")
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "BACnet MSTP COV Subscription for device: $deviceId with mac address: $deviceMacAddress and points: ${points.size}")
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "BACnet MSTP Subscription for device: $deviceId with mac address: $deviceMacAddress and points: ${points.size}")
             val objectIdentifierListForCov = mutableListOf<ObjectIdentifierBacNet>()
             val readAccessSpecification = mutableListOf<ReadRequestMultiple>()
 
@@ -587,31 +589,31 @@ fun updateBacnetMstpLinearAndCovSubscription( isInitProcessRequired: Boolean = t
 
             if (objectIdentifierListForCov.isNotEmpty()) {
                 CcuLog.d(TAG_CCU_BACNET_MSTP, "BACnet MSTP COV Subscription for device: $deviceId with mac address: $deviceMacAddress and object identifiers: $objectIdentifierListForCov")
-                val unSubscribeCovRequest = BacnetMstpSubscribeCov(
-                    destination,
-                    BacnetMstpSubscribeCovRequest(0,objectIdentifierListForCov)
-                )
-                val subscribeCovRequest = BacnetMstpSubscribeCov(
+                subscribeCovForAllDevices.add(BacnetMstpSubscribeCov(
                     destination,
                     BacnetMstpSubscribeCovRequest(1,objectIdentifierListForCov)
-                )
+                ))
 
-                if (serverIpAddress != null) {
-                    CcuLog.d(TAG_CCU_BACNET_MSTP, "Sending COV Unsubscribe Request for device: $deviceId")
-                    serviceUtils.sendCovSubscription(unSubscribeCovRequest, serverIpAddress)
-                    CcuLog.d(TAG_CCU_BACNET_MSTP, "ReSending COV Subscribe Request for device: $deviceId")
-                    serviceUtils.sendCovSubscription(subscribeCovRequest, serverIpAddress)
-                }
             } else {
                 CcuLog.d(TAG_CCU_BACNET_MSTP, "No COV enabled points found for device: $deviceId")
             }
 
             if (serverIpAddress != null && readAccessSpecification.isNotEmpty()) {
+                CcuLog.d(TAG_CCU_BACNET_MSTP, "Sending RPM for device: $deviceId with mac address: $deviceMacAddress and read access specification: $readAccessSpecification")
                 val rpmRequest = RpmRequest(readAccessSpecification)
                 sendRequestMultipleRead(BacnetReadRequestMultiple(destination, rpmRequest), serverIpAddress , deviceId, t1.id().toString())
             }
 
         }
+    if (serverIpAddress != null ) {
+        if (subscribeCovForAllDevices.isEmpty()) {
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "No COV subscription found for any device")
+        } else {
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "Sending COV subscription for all devices: $subscribeCovForAllDevices")
+            serviceUtils.sendCovSubscription(BacnetMstpSubscribeCovForAllDevices(subscribeCovForAllDevices), serverIpAddress)
+        }
+    }
+
 }
 
 private fun sendRequestMultipleRead(rpmRequest: BacnetReadRequestMultiple, deviceIp: String, deviceId: String, equipId: String) {

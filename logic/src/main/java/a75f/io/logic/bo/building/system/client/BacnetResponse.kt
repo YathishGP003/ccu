@@ -19,7 +19,7 @@ data class ReadResponse(
 )
 
 data class MultiReadResponse(
-    val source: String,//Source,
+    val source: Source?,//Source,
     @SerializedName("rpm_response")
     val rpResponse: RpResponseMultiRead,
     val error: BacnetError?,
@@ -36,8 +36,10 @@ data class MultiReadResponse(
 
 data class Source(
     @SerializedName("ip_address")
-    private val ipAddress: String,
-    private val port: Int
+     val ipAddress: String,
+     val port: Int,
+    @SerializedName("mac_address")
+     val macAddress: String? = null,
 )
 
 data class RpResponse(

@@ -1993,15 +1993,8 @@ public class Communication extends Fragment implements MstpDataInterface {
             sharedPreferences.edit().putString(BACNET_MSTP_CONFIGURATION, jsonString).apply();
             sharedPreferences.edit().putBoolean(IS_BACNET_MSTP_INITIALIZED, true).apply();
 
+            BacnetUtilKt.launchBacApp(context, BROADCAST_BACNET_APP_START, "Start BACnet App", ipDeviceInstanceNumber.getText().toString(),true);
 
-            if (BacnetUtilKt.isAppRunning(BAC_APP_PACKAGE_NAME)) {
-                Intent intentBacApp = new Intent("MSTP_CONFIGURATION");
-                intentBacApp.putExtra("message", "MSTP");
-                intentBacApp.putExtra("data", jsonString);
-                context.sendBroadcast(intentBacApp);
-            } else {
-                BacnetUtilKt.launchBacApp(context, BROADCAST_BACNET_APP_START, "Start BACnet App", ipDeviceInstanceNumber.getText().toString(),true);
-            }
             requireActivity().runOnUiThread(() -> {
                 hideMstpConfigView();
             });

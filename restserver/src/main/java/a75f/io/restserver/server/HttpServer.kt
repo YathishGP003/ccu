@@ -249,7 +249,6 @@ class HttpServer {
                             CcuLog.i(HTTP_SERVER, "Bacnet stack: MSTP stackInitStatus: $stackStatus")
                             if (stackStatus.toBoolean()) {
                                 CcuLog.d(L.TAG_CCU_BACNET_MSTP, "BACnet MSTP Stack initialized successfully!!!. Sending COV Subscription....")
-                                updateBacnetMstpLinearAndCovSubscription(isInitProcessRequired = true)
                                 scheduleJobToResubscribeBacnetMstpCOV()
                             }  else {
                                 CcuLog.d(L.TAG_CCU_BACNET_MSTP, "BACnet MSTP Stack initialization failed. Not sending COV Subscription")
@@ -401,7 +400,7 @@ class HttpServer {
 
                 //example call = http://127.0.0.1:5001/pointWrite/mstp?deviceId=1199&level=0&val=75.0&who=bacnet&duration=0&objectId=1&objectType=2
                 get("/pointWrite/mstp") {
-                    val deviceId = call.parameters["deviceId"]
+                    val deviceId:String? = call.parameters["deviceId"]
                     val macAddr = call.parameters["macAddress"]
                     var level = call.parameters["level"]
                     var value = call.parameters["val"]

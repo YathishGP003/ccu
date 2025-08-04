@@ -10,6 +10,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.bacnet.BacnetProfile
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.system.BacnetMstpSubscribeCov
+import a75f.io.logic.bo.building.system.BacnetMstpSubscribeCovForAllDevices
 import a75f.io.logic.bo.building.system.BacnetMstpSubscribeCovRequest
 import a75f.io.logic.bo.building.system.BacnetReadRequestMultiple
 import a75f.io.logic.bo.building.system.BacnetWhoIsRequest
@@ -433,14 +434,14 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         }
 
 
-        val subscribeCovRequest = BacnetMstpSubscribeCov(
+        val subscribeCovRequest = mutableListOf( BacnetMstpSubscribeCov(
             destination,
             BacnetMstpSubscribeCovRequest(1,objectIdentifierList)
-        )
+        ))
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = service.subscribeCov(subscribeCovRequest)
+                val response = service.subscribeCov(BacnetMstpSubscribeCovForAllDevices( subscribeCovRequest ))
                 val resp = BaseResponse(response)
                 ProgressDialogUtils.hideProgressDialog()
                 if (response.isSuccessful) {

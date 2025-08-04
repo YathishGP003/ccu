@@ -10,12 +10,22 @@ data class BacnetReadRequest(
     private val readRequest: ReadRequest
 )
 
+data class BacnetReadRequestMultipleForAllDevices(
+    @SerializedName("list_of_devices")
+    private val rpmRequestForAllDevices : MutableList<BacnetReadRequestMultiple>,
+)
+
 data class BacnetReadRequestMultiple(
     @SerializedName("destination")
     private val destination: DestinationMultiRead,
 
     @SerializedName("rpm_request")
     private val rpmRequest: RpmRequest
+)
+
+data class BacnetMstpSubscribeCovForAllDevices(
+    @SerializedName("list_of_devices")
+    private val subscribeCovForAllDevices: MutableList<BacnetMstpSubscribeCov>
 )
 
 data class BacnetMstpSubscribeCov(

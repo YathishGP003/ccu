@@ -88,7 +88,7 @@ class BacnetServicesUtils: BacnetRequestUtil {
         }
     }
 
-    fun sendCovSubscription( subscribeCovRequest: BacnetMstpSubscribeCov , ipAddress: String) {
+    fun sendCovSubscription( subscribeCovRequest: BacnetMstpSubscribeCovForAllDevices , ipAddress: String) {
 
         val service = ServiceManager.makeCcuServiceForMSTP(ipAddress)
       CcuLog.d(TAG, "sendCovSubscription called with request: $subscribeCovRequest")

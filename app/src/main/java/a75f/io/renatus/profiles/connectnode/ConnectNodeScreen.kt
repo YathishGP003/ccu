@@ -193,7 +193,7 @@ object ConnectNodeScreen {
                             val rowDataList = mutableListOf<Pair<String, Any>>()
 
                             // Parameter Name Column
-                            rowDataList.add("text" to (param.name + " ["+register.registerNumber +"]" to Alignment.CenterStart))
+                            rowDataList.add("text" to (param.name to Alignment.CenterStart))
 
                             // Display in UI Column
                             rowDataList.add("toggle" to (param.isDisplayInUI to { state: Boolean ->

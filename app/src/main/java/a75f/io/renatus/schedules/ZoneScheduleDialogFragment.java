@@ -578,9 +578,9 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 if (isCelsiusTunerAvailableStatus()) {
-                    rangeSeekBarView.setHeatingLimitMin(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingUserLimitMin.getSelectedItem().toString(), "\u00B0C"))));
+                    rangeSeekBarView.setHeatingLimitMinForced(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingUserLimitMin.getSelectedItem().toString(), "\u00B0C"))));
                 } else {
-                    rangeSeekBarView.setHeatingLimitMin(MasterControlUtil.getAdapterFarhenheitVal(heatingUserLimitMin.getSelectedItem().toString()));
+                    rangeSeekBarView.setHeatingLimitMinForced(MasterControlUtil.getAdapterFarhenheitVal(heatingUserLimitMin.getSelectedItem().toString()));
                 }
             }
 
@@ -594,9 +594,9 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
 
                 if (isCelsiusTunerAvailableStatus()) {
-                    rangeSeekBarView.setCoolingLimitMax(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingUserLimitMax.getSelectedItem().toString(), "\u00B0C"))));
+                    rangeSeekBarView.setCoolingLimitMaxForced(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingUserLimitMax.getSelectedItem().toString(), "\u00B0C"))));
                 } else {
-                    rangeSeekBarView.setCoolingLimitMax(MasterControlUtil.getAdapterFarhenheitVal(coolingUserLimitMax.getSelectedItem().toString()));
+                    rangeSeekBarView.setCoolingLimitMaxForced(MasterControlUtil.getAdapterFarhenheitVal(coolingUserLimitMax.getSelectedItem().toString()));
                 }
             }
             @Override
@@ -608,9 +608,9 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 if (isCelsiusTunerAvailableStatus()) {
-                    rangeSeekBarView.setHeatingLimitMax(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingUserLimitMax.getSelectedItem().toString(), "\u00B0C"))));
+                    rangeSeekBarView.setHeatingLimitMaxForced(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingUserLimitMax.getSelectedItem().toString(), "\u00B0C"))));
                 } else {
-                    rangeSeekBarView.setHeatingLimitMax(MasterControlUtil.getAdapterFarhenheitVal(heatingUserLimitMax.getSelectedItem().toString()));
+                    rangeSeekBarView.setHeatingLimitMaxForced(MasterControlUtil.getAdapterFarhenheitVal(heatingUserLimitMax.getSelectedItem().toString()));
                 }
             }
 
@@ -624,9 +624,9 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
 
                 if (isCelsiusTunerAvailableStatus()) {
-                    rangeSeekBarView.setCoolingLimitMin(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingUserLimitMin.getSelectedItem().toString(), "\u00B0C"))));
+                    rangeSeekBarView.setCoolingLimitMinForced(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingUserLimitMin.getSelectedItem().toString(), "\u00B0C"))));
                 } else {
-                    rangeSeekBarView.setCoolingLimitMin(MasterControlUtil.getAdapterFarhenheitVal(coolingUserLimitMin.getSelectedItem().toString()));
+                    rangeSeekBarView.setCoolingLimitMinForced(MasterControlUtil.getAdapterFarhenheitVal(coolingUserLimitMin.getSelectedItem().toString()));
                 }
             }
             @Override

@@ -137,6 +137,7 @@ public class PreferenceUtil {
     private static final String MIGRATION_SYSTEM_FLAG_CCU_REBOOT = "migrationSystemFlagCcuReboot";
     private static final String MIGRATION_BACNET_EQUIP = "migrationBacnetEquips";
     private static final String MIGRATION_ZONE_STATUS = "migrationZoneStatus";
+    private static final String MIGRATION_CLEAR_INVALID_HIS_DATA = "migrationClearInvalidHisData";
 
     public static void setContext(Context c) {
         context= c;
@@ -1076,5 +1077,13 @@ public class PreferenceUtil {
 
     public static void setEquipScheduleStatusMigrationStatus() {
         setBooleanPreference(MIGRATION_ZONE_STATUS, true);
+    }
+
+    public static boolean getMigrationClearInvalidHisData() {
+        return getBooleanPreference(MIGRATION_CLEAR_INVALID_HIS_DATA);
+    }
+
+    public static void setMigrationClearInvalidHisData() {
+        setBooleanPreference(MIGRATION_CLEAR_INVALID_HIS_DATA, true);
     }
 }

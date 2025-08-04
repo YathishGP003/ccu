@@ -2055,4 +2055,19 @@ public class CCUTagsDb extends HServer {
         updateEntity(hDict,localId);
 
     }
+
+    // This is an overridden to clear out his data for a specific id without
+    // checking if the entity exists.
+    public void clearHistory(String id) {
+        try {
+            CcuLog.d(TAG_CCU_HS, "CCUTagsDb.clearHistory by id as rec.");
+            QueryBuilder<HisItem> hisQuery = hisBox.query();
+            hisQuery.equal(HisItem_.rec, id).order(HisItem_.date);
+            List<HisItem> hisItems = hisQuery.build().find();
+            CcuLog.d(TAG_CCU_HS, "CCUTagsDb.clearHistory hisItems size: "+hisItems.size());
+            hisBox.remove(hisItems);
+        } catch (UnknownRecException e) {
+            CcuLog.i(TAG_CCU_HS, " nknownRecException "+id+ " Not found");
+        }
+    }
 }

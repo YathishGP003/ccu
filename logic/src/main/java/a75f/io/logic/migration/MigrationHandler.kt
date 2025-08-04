@@ -4,6 +4,8 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HayStackConstants
+import a75f.io.api.haystack.HisItem
+import a75f.io.api.haystack.HisItemCache
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
 import a75f.io.api.haystack.Site
@@ -521,7 +523,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             updateBacNetEquipGatewayRef()
             PreferenceUtil.setBacnetEquipGatewayUpdation()
         }
-
+        if(!PreferenceUtil.getMigrationClearInvalidHisData()) {
+            removeNullableHistorizedData()
+            PreferenceUtil.setMigrationClearInvalidHisData()
+        }
 
         hayStack.scheduleSync()
     }
@@ -4303,5 +4308,18 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 )
             }
         }
+    }
+
+    private fun removeNullableHistorizedData() {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Removing nullable historized data")
+        hayStack.tagsDb.clearHistory("null")
+        hayStack.tagsDb.clearHistory("@null")
+        HisItemCache.getInstance().delete("null")
+        HisItemCache.getInstance().delete("Null")
+        HisItemCache.getInstance().delete("NULL")
+        HisItemCache.getInstance().delete("@null")
+        HisItemCache.getInstance().delete("@Null")
+        HisItemCache.getInstance().delete("@NULL")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Nullable historized data removed")
     }
 }

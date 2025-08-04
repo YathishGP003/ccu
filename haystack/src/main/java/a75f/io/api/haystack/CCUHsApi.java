@@ -1280,7 +1280,7 @@ public class CCUHsApi
         return id.toString();
     }
 
-    public void hisWrite(HisItem item)
+    private void hisWrite(HisItem item)
     {
         hsClient.hisWrite(HRef.copy(item.getRec()), new HHisItem[]{HHisItem.make(HDateTime.make(item.date), HNum.make(item.val))});
     }
@@ -1314,6 +1314,10 @@ public class CCUHsApi
 
     public Double readHisValById(String id)
     {
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS,"readHisValById id is null or invalid : "+id);
+            return 0.0;
+        }
         HisItem item = curRead(id);
         return item == null ? 0 : item.getVal();
     }
@@ -1354,6 +1358,10 @@ public class CCUHsApi
      */
     public void writeHisValById(String id, Double val)
     {
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS,"writeHisValById id is null or invalid : "+id);
+            return;
+        }
         long time = System.currentTimeMillis();
         HisItem item = curRead(id);
         Double prevVal = item == null ? 0 : item.getVal();
@@ -1377,6 +1385,10 @@ public class CCUHsApi
      */
     public void writeHisValueByIdWithoutCOV(String id, Double val)
     {
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS,"writeHisValueByIdWithoutCOV id is null or invalid : "+id);
+            return;
+        }
         tagsDb.putHisItem(id, val);
     }
 
@@ -1405,10 +1417,12 @@ public class CCUHsApi
                 HisItem previtem = curRead(cachedId);
                 Double prevVal = previtem == null ? 0 : previtem.getVal();
                 if((previtem == null) || (!previtem.initialized)|| !prevVal.equals(val) || query.contains("and diag")) {
-                    cachedId = p.get("id").toString();
-                    QueryCache.getInstance().add(query, cachedId);
-                    HisItem item = new HisItem(cachedId, new Date(), val);
-                    hisWrite(item);
+                    if(isIdValid(p.get("id"))) {
+                        cachedId = p.get("id").toString();
+                        QueryCache.getInstance().add(query, cachedId);
+                        HisItem item = new HisItem(cachedId, new Date(), val);
+                        hisWrite(item);
+                    }
                 }
             }
         } else {
@@ -1417,12 +1431,14 @@ public class CCUHsApi
                 CcuLog.d(TAG_CCU_HS,"write point id is null : "+query);
                 return;
             }
-            String    id     = point.get("id").toString();
-            HisItem previtem = curRead(id);
-            Double prevVal = previtem == null ? 0 : previtem.getVal();
-            if((previtem == null) || (!previtem.initialized) || !prevVal.equals(val) || point.containsKey("diag")) {
-                HisItem item = new HisItem(id, new Date(), val);
-                hisWrite(item);
+            if(isIdValid(point.get("id"))) {
+                String    id     = point.get("id").toString();
+                HisItem previtem = curRead(id);
+                Double prevVal = previtem == null ? 0 : previtem.getVal();
+                if((previtem == null) || (!previtem.initialized) || !prevVal.equals(val) || point.containsKey("diag")) {
+                    HisItem item = new HisItem(id, new Date(), val);
+                    hisWrite(item);
+                }
             }
         }
     }
@@ -2391,7 +2407,7 @@ public class CCUHsApi
      * @return
      */
     public List<HisItem> getHisItems(String id, int offset, int limit) {
-        return tagsDb.getHisItems(HRef.copy(id), offset, limit);
+        return isIdValid(id)? tagsDb.getHisItems(HRef.copy(id), offset, limit) : new ArrayList<>();
     }
 
     public void deletePointArray(String id) {
@@ -3522,4 +3538,7 @@ public class CCUHsApi
         return CCUHsApi.getInstance().readAllHDictByQuery(query);
     }
 
+    private boolean isIdValid(Object id) {
+       return id != null && !id.toString().toLowerCase().contains("null");
+    }
 }

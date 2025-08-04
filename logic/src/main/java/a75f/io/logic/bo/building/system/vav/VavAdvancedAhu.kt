@@ -55,8 +55,10 @@ import a75f.io.logic.bo.building.system.util.getConnectModuleSystemStatus
 import a75f.io.logic.bo.building.system.util.getDehumidifierStatus
 import a75f.io.logic.bo.building.system.util.getHumidifierStatus
 import a75f.io.logic.bo.building.system.util.getModulatedOutput
+import a75f.io.logic.bo.building.system.util.isConnectEconActive
 import a75f.io.logic.bo.building.system.util.isConnectModuleAvailable
 import a75f.io.logic.bo.building.system.util.isConnectModuleExist
+import a75f.io.logic.bo.building.system.util.isOaEconActive
 import a75f.io.logic.bo.building.system.util.needToUpdateConditioningMode
 import a75f.io.logic.bo.building.system.util.roundOff
 import a75f.io.logic.tuners.TunerUtil
@@ -558,8 +560,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         }
         val satControlPoint = getSatControlPoint()
         return if (VavSystemController.getInstance().getSystemState() == SystemController.State.COOLING
-                && (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO)
-                && (systemEquip.mechanicalCoolingAvailable.readHisVal() > 0)) {
+                && (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO)) {
             val satSpMax = systemEquip.cmEquip.systemCoolingSatMax.readDefaultVal()
             val satSpMin = systemEquip.cmEquip.systemCoolingSatMin.readDefaultVal()
             val coolingSatSp = roundOff(satSpMax - systemCoolingLoopOp * (satSpMax - satSpMin) / 100)
@@ -600,8 +601,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         }
         val satControlPoint = getSatControlPoint()
         return if (VavSystemController.getInstance().getSystemState() == SystemController.State.HEATING
-                && (conditioningMode == SystemMode.HEATONLY || conditioningMode == SystemMode.AUTO)
-                && (systemEquip.mechanicalHeatingAvailable.readHisVal() > 0)) {
+                && (conditioningMode == SystemMode.HEATONLY || conditioningMode == SystemMode.AUTO)) {
             val satSpMax = systemEquip.cmEquip.systemHeatingSatMax.readDefaultVal()
             val satSpMin = systemEquip.cmEquip.systemHeatingSatMin.readDefaultVal()
             val heatingSatSp = roundOff(getModulatedOutput(systemHeatingLoopOp, satSpMin, satSpMax))
@@ -671,7 +671,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.connectEquip1,
             advancedAhuImpl,
             systemCoolingLoopOp,
-            systemHeatingLoopOp,
             cnAnalogControlsEnabled,
             ahuSettings
         )
@@ -695,7 +694,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
     override fun getStatusMessage(): String {
         cmAnalogControlsEnabled = advancedAhuImpl.getEnabledAnalogControls(systemEquip.cmEquip)
-        val economizerActive = L.ccu().oaoProfile != null && L.ccu().oaoProfile.economizingLoopOutput > 0 && L.ccu().oaoProfile.isEconomizingAvailable
+        val economizerActive = isOaEconActive() || isConnectEconActive()
         if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(systemEquip = systemEquip.cmEquip))
             return "Emergency Shut Off mode is active"
         val systemStatus = StringBuilder().apply {
@@ -762,8 +761,17 @@ open class VavAdvancedAhu : VavSystemProfile() {
             analogStatus.append("| Fan ON ")
         }
         if(economizerActive) {
+            var economizingToMainCoolingLoopMap = 30.0
+
             // Only if te systemCoolingLoopOp greater than economizingToMainCoolingLoopMap, update the analog cooling status
-            val economizingToMainCoolingLoopMap = L.ccu().oaoProfile.oaoEquip.economizingToMainCoolingLoopMap.readPriorityVal()
+            if (isOaEconActive()) {
+                economizingToMainCoolingLoopMap =
+                    L.ccu().oaoProfile.oaoEquip.economizingToMainCoolingLoopMap.readPriorityVal()
+            }
+            if (isConnectEconActive()) {
+                economizingToMainCoolingLoopMap =
+                    ahuSettings.connectEquip1.economizingToMainCoolingLoopMap.readPriorityVal()
+            }
 
             if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((cmAnalogControlsEnabled.contains(
                     AdvancedAhuAnalogOutAssociationType.LOAD_COOLING
@@ -786,7 +794,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             }
         }
 
-        if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((cmAnalogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_HEATING) && systemHeatingLoopOp > 0)
+        if ((systemEquip.mechanicalHeatingAvailable.readHisVal() > 0) && ((cmAnalogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_HEATING) && systemHeatingLoopOp > 0)
                         || ((cmAnalogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_HEATING)  && systemHeatingLoopOp > 0)
                         && (cmAnalogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_HEATING)
                     || systemEquip.cmEquip.heatingLoopOutputFeedback.readHisVal() > 0)))) {
@@ -1243,8 +1251,8 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.relayActivationHysteresis,
             systemEquip.vavStageUpTimerCounter,
             systemEquip.vavStageDownTimerCounter,
+            mechanicalHeatingActive,
             ahuStagesCounts.loadHeatingStages,
-            mechanicalHeatingActive
         )
 
         factory.addLoadFanControllers(

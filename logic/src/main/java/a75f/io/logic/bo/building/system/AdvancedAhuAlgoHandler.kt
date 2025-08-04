@@ -9,6 +9,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.SystemController.State
 import a75f.io.logic.bo.building.system.util.AhuSettings
+import a75f.io.logic.controlcomponents.util.isSystemOccupied
 
 /**
  * Common implementation of utility methods for VAV and DAB advanced AHUs
@@ -98,8 +99,9 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
     }
 
     fun isLockoutActiveDuringUnoccupied(ahuSettings: AhuSettings): Boolean {
-        return ((ahuSettings.isMechanicalCoolingAvailable && ahuSettings.systemState == State.COOLING) ||
-                (ahuSettings.isMechanicalHeatingAvailable && ahuSettings.systemState == State.HEATING))
+        return (!L.ccu().systemProfile.isSystemOccupied
+                && ((ahuSettings.isMechanicalCoolingAvailable && ahuSettings.systemState == State.COOLING) ||
+                (ahuSettings.isMechanicalHeatingAvailable && ahuSettings.systemState == State.HEATING)))
     }
 
 }

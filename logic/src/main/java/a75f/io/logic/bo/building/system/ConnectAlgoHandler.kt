@@ -7,8 +7,12 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.util.AhuSettings
 import a75f.io.logic.bo.building.system.util.getComposeMidPoint
+import a75f.io.logic.bo.building.system.util.getConnectEconToMainCoolingLoop
 import a75f.io.logic.bo.building.system.util.getModulatedOutput
 import a75f.io.logic.bo.building.system.util.getModulatedOutputDuringEcon
+import a75f.io.logic.bo.building.system.util.getOaoEconToMainCoolingLoop
+import a75f.io.logic.bo.building.system.util.isConnectEconActive
+import a75f.io.logic.bo.building.system.util.isOaEconActive
 
 
 fun getAnalogAssociation(enabledControls: MutableSet<AdvancedAhuAnalogOutAssociationType>, connectEquip1: ConnectModuleEquip) {
@@ -25,6 +29,7 @@ fun getAnalogAssociation(enabledControls: MutableSet<AdvancedAhuAnalogOutAssocia
                 AdvancedAhuAnalogOutAssociationTypeConnect.CO2_DAMPER -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.CO2_DAMPER)
                 AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.COMPOSITE_SIGNAL)
                 AdvancedAhuAnalogOutAssociationTypeConnect.COMPRESSOR_SPEED -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.COMPRESSOR_SPEED)
+                AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_FAN -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.LOAD_FAN)
 
                 else -> { } // Do nothing
             }
@@ -90,7 +95,7 @@ fun getConnectLogicalOutput(
 ) : Double {
     val loopOutput = getConnectLoopOutput(ahuSettings.connectEquip1, controlType, source, ahuSettings)
     val minMax = getMinMax(source, controlType, ahuSettings.connectEquip1, ahuSettings)
-    return when (controlType) {
+    val logicalValue =  when (controlType) {
         AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> {
             if (ahuSettings.isMechanicalCoolingAvailable || ahuSettings.isMechanicalHeatingAvailable
                     || ahuSettings.isEmergencyShutoffActive) {
@@ -133,6 +138,26 @@ fun getConnectLogicalOutput(
         else -> {
             loopOutput
         }
+    }
+    return if ((controlType == AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_COOLING
+                || controlType == AdvancedAhuAnalogOutAssociationTypeConnect.COMPRESSOR_SPEED)
+        && ((isOaEconActive() || isConnectEconActive()))
+    ) {
+
+        // When econ is on we need to send get different modulated output for analog outs
+        var econToMainCoolingLoopMap = 30.0
+        if (isOaEconActive()) {
+            econToMainCoolingLoopMap = getOaoEconToMainCoolingLoop()
+        } else if (isConnectEconActive()) {
+            econToMainCoolingLoopMap = getConnectEconToMainCoolingLoop(ahuSettings.connectEquip1)
+        }
+        if (logicalValue < econToMainCoolingLoopMap) {
+            0.0
+        } else {
+            logicalValue
+        }
+    } else {
+        logicalValue
     }
 }
 
@@ -442,7 +467,6 @@ fun getConnectAnalogModulation(
         ahuSettings: AhuSettings,
         isLockoutActiveDuringUnoccupied: Boolean
 ) : Double {
-    var econFlag = false
     val finalLoop = when (controlType) {
         AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> {
             if (ahuSettings.isMechanicalCoolingAvailable || ahuSettings.isMechanicalHeatingAvailable
@@ -468,9 +492,6 @@ fun getConnectAnalogModulation(
             if (ahuSettings.isMechanicalCoolingAvailable) {
                 0.0
             } else {
-                if(ahuSettings.isEconomizationAvailable) {
-                    econFlag = true
-                }
                 ahuSettings.systemEquip.coolingLoopOutput.readHisVal()
             }
         }
@@ -499,10 +520,17 @@ fun getConnectAnalogModulation(
         }
     }
     CcuLog.i(L.TAG_CCU_SYSTEM, "modulateAnalogOut: loopOutput $finalLoop analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
-    return if (econFlag) {
+    return if ((controlType == AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_COOLING
+                || controlType == AdvancedAhuAnalogOutAssociationTypeConnect.COMPRESSOR_SPEED)
+        && (isOaEconActive() || isConnectEconActive())) {
         // When econ is on we need to send get different modulated output for analog outs
-        val economizingToMainCoolingLoopMap = ahuSettings.connectEquip1.economizingToMainCoolingLoopMap.readPriorityVal()
-        getModulatedOutputDuringEcon(finalLoop, minMax.first, minMax.second, economizingToMainCoolingLoopMap).coerceIn(0.0, 10.0) * 10
+        var econToMainCoolingLoopMap = 30.0
+        if (isOaEconActive()) {
+            econToMainCoolingLoopMap = getOaoEconToMainCoolingLoop()
+        } else if (isConnectEconActive()) {
+            econToMainCoolingLoopMap = getConnectEconToMainCoolingLoop(ahuSettings.connectEquip1)
+        }
+        getModulatedOutputDuringEcon(finalLoop, minMax.first, minMax.second, econToMainCoolingLoopMap).coerceIn(0.0, 10.0) * 10
     } else {
         getModulatedOutput(finalLoop, minMax.first, minMax.second).coerceIn(0.0, 10.0) * 10
     }

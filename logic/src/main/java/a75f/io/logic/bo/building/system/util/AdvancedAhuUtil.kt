@@ -233,6 +233,10 @@ fun getAdvanceAhuModels():  Pair<SeventyFiveFProfileDirective, SeventyFiveFProfi
     }
 }
 
+private fun needToShowFreeCooling(): Boolean {
+    return (!L.ccu().systemProfile.isSystemOccupied && L.ccu().systemProfile.isLockoutActiveDuringUnoccupied)
+}
+
 fun isConnectModuleExist(): Boolean {
     if(L.ccu().systemProfile is VavAdvancedAhu)
         return getVavConnectEquip().isNotEmpty()
@@ -243,8 +247,8 @@ fun isConnectModuleExist(): Boolean {
 
  fun getConnectModuleSystemStatus(
      connectEquip: ConnectModuleEquip, advancedAhuImpl: AdvancedAhuAlgoHandler,
-     coolingLoopOutput :Double, heatingLoopOutput: Double,
-     analogControlsEnabled : Set<AdvancedAhuAnalogOutAssociationType>, ahuSettings: AhuSettings
+     coolingLoopOutput: Double, analogControlsEnabled: Set<AdvancedAhuAnalogOutAssociationType>,
+     ahuSettings: AhuSettings
  ): String {
     val systemEquip = getAdvancedAhuSystemEquip()
     if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(connectEquip1 = connectEquip)) {
@@ -305,8 +309,8 @@ fun isConnectModuleExist(): Boolean {
         heatingStatus.insert(0, "Heating Stage ")
         heatingStatus.append(" ON ")
     }
-
-    if (AdvAhuEconAlgoHandler.isFreeCoolingOn()) {
+    val isEconActive = AdvAhuEconAlgoHandler.isFreeCoolingOn() || (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable)
+    if (isEconActive && !needToShowFreeCooling()) {
         connectModuleSystemStatus.insert(0, "Free Cooling Used | ")
     }
 
@@ -314,20 +318,37 @@ fun isConnectModuleExist(): Boolean {
     val dehumidifierStatus = getDehumidifierStatus(connectEquip1 = connectEquip)
 
     val analogStatus = StringBuilder()
-    if ((analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_FAN)) && connectEquip.fanLoopOutput.readHisVal() > 0) {
+    if ((analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_FAN))
+        && connectEquip.fanLoopOutput.readHisVal() > 0 && !(!L.ccu().systemProfile.isSystemOccupied && L.ccu().systemProfile.isLockoutActiveDuringUnoccupied)) {
         analogStatus.append("| Fan ON ")
     }
 
-    var economizingToMainCoolingLoopMap = 0.0
-     economizingToMainCoolingLoopMap = ahuSettings.connectEquip1.economizingToMainCoolingLoopMap.readPriorityVal()
-    if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((analogControlsEnabled.contains(
-            AdvancedAhuAnalogOutAssociationType.LOAD_COOLING
-        ))) && connectEquip.coolingLoopOutput.readHisVal() > 0 && coolingLoopOutput >= economizingToMainCoolingLoopMap
-    ) {
-        analogStatus.append("| Cooling ON ")
-    }
+     if (isOaEconActive() || isConnectEconActive()) {
+         // Only if te systemCoolingLoopOp greater than economizingToMainCoolingLoopMap, update the analog cooling status
+         var economizingToMainCoolingLoopMap = 30.0
+         if (isOaEconActive()) {
+             economizingToMainCoolingLoopMap = L.ccu().oaoProfile.oaoEquip.economizingToMainCoolingLoopMap.readPriorityVal()
+         }
+         if (isConnectEconActive()) {
+             economizingToMainCoolingLoopMap = connectEquip.economizingToMainCoolingLoopMap.readPriorityVal()
+         }
 
-    if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((analogControlsEnabled.contains(
+         if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((analogControlsEnabled.contains(
+                 AdvancedAhuAnalogOutAssociationType.LOAD_COOLING
+             ))) && connectEquip.coolingLoopOutput.readHisVal() > 0 && coolingLoopOutput >= economizingToMainCoolingLoopMap
+         ) {
+             analogStatus.append("| Cooling ON ")
+         }
+     } else {
+         if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((analogControlsEnabled.contains(
+                 AdvancedAhuAnalogOutAssociationType.LOAD_COOLING
+             ))) && connectEquip.coolingLoopOutput.readHisVal() > 0
+         ) {
+             analogStatus.append("| Cooling ON ")
+         }
+     }
+
+    if ((systemEquip.mechanicalHeatingAvailable.readHisVal() > 0) && ((analogControlsEnabled.contains(
             AdvancedAhuAnalogOutAssociationType.LOAD_HEATING
         )) && connectEquip.heatingLoopOutput.readHisVal() > 0)
     ) {
@@ -411,3 +432,17 @@ private fun isCompressorActive(systemStages: ConditioningStages): Boolean {
             "and addr == \"$nodeAddress\"")
     return connectModuleEquip
  }
+
+fun isOaEconActive(): Boolean {
+    return (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable)
+}
+
+fun isConnectEconActive() = AdvAhuEconAlgoHandler.isFreeCoolingOn()
+
+fun getOaoEconToMainCoolingLoop(): Double {
+    return L.ccu().oaoProfile.oaoEquip.economizingToMainCoolingLoopMap.readPriorityVal()
+}
+
+fun getConnectEconToMainCoolingLoop(connectEquip: ConnectModuleEquip): Double {
+    return connectEquip.economizingToMainCoolingLoopMap.readPriorityVal()
+}

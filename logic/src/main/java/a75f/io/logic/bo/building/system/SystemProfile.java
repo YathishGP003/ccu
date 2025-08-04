@@ -967,8 +967,10 @@ public abstract class SystemProfile
                                   " mechanicalHeatingAvailable "+mechanicalHeatingAvailable+" coolingLockoutActive ");
         mechanicalCoolingActive.setData(isCoolingLockoutActive() ? 1.0 : 0.0);
         mechanicalHeatingActive.setData(isHeatingLockoutActive() ? 1.0 : 0.0);
-        lockoutCompressorActive.setData(isCoolingLockoutActive() && systemCoolingLoopOp > 0 ? 1.0 : 0.0);
-        lockoutCompressorActive.setData(isHeatingLockoutActive() && systemHeatingLoopOp > 0 ? 1.0 : 0.0);
+        lockoutCompressorActive.setData(isCoolingLockoutActive() && getSystemController().getSystemState() == COOLING ? 1.0 : 0.0);
+        if (lockoutCompressorActive.getData() == 0.0) {
+            lockoutCompressorActive.setData(isHeatingLockoutActive() && getSystemController().getSystemState() == HEATING ? 1.0 : 0.0);
+        }
     }
 
     public boolean isCoolingLockoutActive() { return !mechanicalCoolingAvailable; }

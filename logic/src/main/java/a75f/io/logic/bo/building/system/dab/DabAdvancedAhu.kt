@@ -56,8 +56,10 @@ import a75f.io.logic.bo.building.system.util.getConnectModuleSystemStatus
 import a75f.io.logic.bo.building.system.util.getDehumidifierStatus
 import a75f.io.logic.bo.building.system.util.getHumidifierStatus
 import a75f.io.logic.bo.building.system.util.getModulatedOutput
+import a75f.io.logic.bo.building.system.util.isConnectEconActive
 import a75f.io.logic.bo.building.system.util.isConnectModuleAvailable
 import a75f.io.logic.bo.building.system.util.isConnectModuleExist
+import a75f.io.logic.bo.building.system.util.isOaEconActive
 import a75f.io.logic.bo.building.system.util.needToUpdateConditioningMode
 import a75f.io.logic.bo.building.system.util.roundOff
 import a75f.io.logic.tuners.TunerUtil
@@ -534,7 +536,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             return 0.0
         }
         val satControlPoint = getSatControlPoint()
-        return if (DabSystemController.getInstance().getSystemState() == SystemController.State.COOLING && (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO) && (systemEquip.mechanicalCoolingAvailable.readHisVal() > 0)) {
+        return if (DabSystemController.getInstance().getSystemState() == SystemController.State.COOLING && (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO)) {
             val satSpMax = systemEquip.cmEquip.systemCoolingSatMax.readDefaultVal()
             val satSpMin = systemEquip.cmEquip.systemCoolingSatMin.readDefaultVal()
             val coolingSatSp = roundOff(satSpMax - systemCoolingLoopOp * (satSpMax - satSpMin) / 100)
@@ -570,7 +572,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             return 0.0
         }
         val satControlPoint = getSatControlPoint()
-        return if (DabSystemController.getInstance().getSystemState() == SystemController.State.HEATING && (conditioningMode == SystemMode.HEATONLY || conditioningMode == SystemMode.AUTO) && (systemEquip.mechanicalHeatingAvailable.readHisVal() > 0)) {
+        return if (DabSystemController.getInstance().getSystemState() == SystemController.State.HEATING && (conditioningMode == SystemMode.HEATONLY || conditioningMode == SystemMode.AUTO)) {
             val satSpMax = systemEquip.cmEquip.systemHeatingSatMax.readDefaultVal()
             val satSpMin = systemEquip.cmEquip.systemHeatingSatMin.readDefaultVal()
             val heatingSatSp = roundOff(getModulatedOutput(systemHeatingLoopOp, satSpMin, satSpMax))
@@ -635,7 +637,6 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.connectEquip1,
             advancedAhuImpl,
             systemCoolingLoopOp,
-            systemHeatingLoopOp,
             cnAnalogControlsEnabled,
             ahuSettings
         )
@@ -660,7 +661,7 @@ class DabAdvancedAhu : DabSystemProfile() {
     override fun getStatusMessage(): String {
         cmAnalogControlsEnabled = advancedAhuImpl.getEnabledAnalogControls(systemEquip.cmEquip)
         val systemStages = systemEquip.cmEquip.conditioningStages
-        val economizerActive = L.ccu().oaoProfile != null && L.ccu().oaoProfile.economizingLoopOutput > 0 && L.ccu().oaoProfile.isEconomizingAvailable
+        val economizerActive = isOaEconActive() || isConnectEconActive()
         if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(systemEquip.cmEquip, systemEquip.connectEquip1)) return "Emergency Shut Off mode is active"
         val systemStatus = StringBuilder().apply {
             append(if (systemStages.loadFanStage1.readHisVal() > 0 ||systemEquip.cmEquip.fanPressureStage1Feedback.readHisVal() > 0) "1" else "")
@@ -727,10 +728,17 @@ class DabAdvancedAhu : DabSystemProfile() {
         }
         // 1. When the economizer from OAO system profile is active, then cooling status is on only if the cooling loop output is greater than economizingToMainCoolingLoopMap
         // 2. When the economizer from OAO system profile is not active, then cooling status is on only if the cooling loop output is greater than 0
-        if(economizerActive) {
+        if (economizerActive) {
             // Only if te systemCoolingLoopOp greater than economizingToMainCoolingLoopMap, update the analog cooling status
-            val economizingToMainCoolingLoopMap = L.ccu().oaoProfile.oaoEquip.economizingToMainCoolingLoopMap.readPriorityVal()
-
+            var economizingToMainCoolingLoopMap = 30.0
+            if (isOaEconActive()) {
+                economizingToMainCoolingLoopMap =
+                    L.ccu().oaoProfile.oaoEquip.economizingToMainCoolingLoopMap.readPriorityVal()
+            }
+            if (isConnectEconActive()) {
+                economizingToMainCoolingLoopMap =
+                    ahuSettings.connectEquip1.economizingToMainCoolingLoopMap.readPriorityVal()
+            }
             if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((cmAnalogControlsEnabled.contains(
                     AdvancedAhuAnalogOutAssociationType.LOAD_COOLING
                 ) && systemCoolingLoopOp >= economizingToMainCoolingLoopMap) ||
@@ -752,7 +760,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             }
         }
 
-        if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((cmAnalogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_HEATING) && systemHeatingLoopOp > 0)
+        if ((systemEquip.mechanicalHeatingAvailable.readHisVal() > 0) && ((cmAnalogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_HEATING) && systemHeatingLoopOp > 0)
                         || (cmAnalogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_HEATING)
                         && systemEquip.cmEquip.heatingLoopOutputFeedback.readHisVal() > 0))) {
             analogStatus.append("| Heating ON ")
@@ -1211,7 +1219,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.dabStageUpTimerCounter,
             systemEquip.dabStageDownTimerCounter,
             economizationAvailable,
-            mechanicalHeatingActive,
+            mechanicalCoolingActive,
             ahuStagesCounts.satCoolingStages
         )
 

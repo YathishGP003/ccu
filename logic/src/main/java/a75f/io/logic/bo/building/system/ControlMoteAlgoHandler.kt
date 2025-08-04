@@ -9,8 +9,12 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.util.AhuSettings
 import a75f.io.logic.bo.building.system.util.getComposeMidPoint
+import a75f.io.logic.bo.building.system.util.getConnectEconToMainCoolingLoop
 import a75f.io.logic.bo.building.system.util.getModulatedOutput
 import a75f.io.logic.bo.building.system.util.getModulatedOutputDuringEcon
+import a75f.io.logic.bo.building.system.util.getOaoEconToMainCoolingLoop
+import a75f.io.logic.bo.building.system.util.isConnectEconActive
+import a75f.io.logic.bo.building.system.util.isOaEconActive
 
 fun getCMRelayLogicalPhysicalMap(systemEquip: AdvancedHybridSystemEquip): Map<Point, PhysicalPoint> {
     val map: MutableMap<Point, PhysicalPoint> = java.util.HashMap()
@@ -64,7 +68,7 @@ fun getLogicalOutput(
 ) : Double {
     val loopOutput = getCmLoopOutput(ahuSettings.systemEquip, controlType, source)
     val minMax = getMinMax(source, controlType, ahuSettings.systemEquip)
-    return when (controlType) {
+    val logicalValue = when (controlType) {
         AdvancedAhuAnalogOutAssociationType.COMPOSITE_SIGNAL -> {
             if (ahuSettings.isMechanicalCoolingAvailable
                     || ahuSettings.isMechanicalHeatingAvailable
@@ -98,10 +102,29 @@ fun getLogicalOutput(
                 loopOutput
             }
         }
-
         else -> {
             loopOutput
         }
+    }
+
+    return if ((controlType == AdvancedAhuAnalogOutAssociationType.LOAD_COOLING
+                || controlType == AdvancedAhuAnalogOutAssociationType.COMPRESSOR_SPEED)
+        && isOaEconActive() || isConnectEconActive()
+    ) {
+        // When econ is on we need to send get different modulated output for analog outs
+        var econToMainCoolingLoopMap = 30.0
+        if (isOaEconActive()) {
+            econToMainCoolingLoopMap = getOaoEconToMainCoolingLoop()
+        } else if (isConnectEconActive()) {
+            econToMainCoolingLoopMap = getConnectEconToMainCoolingLoop(ahuSettings.connectEquip1)
+        }
+        if (logicalValue < econToMainCoolingLoopMap) {
+            0.0
+        } else {
+            logicalValue
+        }
+    } else {
+        logicalValue
     }
 }
 
@@ -400,7 +423,6 @@ fun getAnalogModulation(
         ahuSettings: AhuSettings,
         isLockoutActiveDuringUnoccupied: Boolean
 ) : Double {
-    var econFlag = false
     val finalLoop = when (controlType) {
         AdvancedAhuAnalogOutAssociationType.COMPOSITE_SIGNAL -> {
             if (ahuSettings.isMechanicalCoolingAvailable || ahuSettings.isMechanicalHeatingAvailable
@@ -426,9 +448,6 @@ fun getAnalogModulation(
             if (ahuSettings.isMechanicalCoolingAvailable) {
                 0.0
             } else {
-                if(L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable) {
-                    econFlag = true
-                }
                 loopOutput
             }
         }
@@ -452,10 +471,20 @@ fun getAnalogModulation(
         }
     }
     CcuLog.i(L.TAG_CCU_SYSTEM, "modulateAnalogOut: loopOutput $finalLoop analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
-    return if (econFlag) {
+
+    return if ((controlType == AdvancedAhuAnalogOutAssociationType.LOAD_COOLING
+                || controlType == AdvancedAhuAnalogOutAssociationType.SAT_COOLING
+                || controlType == AdvancedAhuAnalogOutAssociationType.COMPRESSOR_SPEED)
+        && (isOaEconActive() || isConnectEconActive())
+    ) {
         // When econ is on we need to send get different modulated output for analog outs
-        val economizingToMainCoolingLoopMap = L.ccu().oaoProfile.oaoEquip.economizingToMainCoolingLoopMap.readPriorityVal()
-        getModulatedOutputDuringEcon(finalLoop, minMax.first, minMax.second, economizingToMainCoolingLoopMap).coerceIn(0.0, 10.0) * 10
+        var econToMainCoolingLoopMap = 30.0
+        if (isOaEconActive()) {
+            econToMainCoolingLoopMap = getOaoEconToMainCoolingLoop()
+        } else if (isConnectEconActive()) {
+            econToMainCoolingLoopMap = getConnectEconToMainCoolingLoop(ahuSettings.connectEquip1)
+        }
+        getModulatedOutputDuringEcon(finalLoop, minMax.first, minMax.second, econToMainCoolingLoopMap).coerceIn(0.0, 10.0) * 10
     } else {
         getModulatedOutput(finalLoop, minMax.first, minMax.second).coerceIn(0.0, 10.0) * 10
     }

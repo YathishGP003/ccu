@@ -148,8 +148,11 @@ public class ModbusPulse {
             case UsbModbusUtils.READ_DISCRETE_INPUTS:
             case UsbModbusUtils.READ_COILS:
                 formattedVal = getRegisterValFromResponse(readRegister, response);
-                
-                if (logPoint.containsKey("writable") &&
+
+                if(!logPoint.containsKey("writable")) {
+                    hayStack.writeHisValById(logPoint.get("id").toString(),formattedVal);
+                    hayStack.writeHisValById(phyPoint.get("id").toString(), formattedVal);
+                } else if (logPoint.containsKey("writable") &&
                         !(logPoint.containsKey(Tags.SCHEDULABLE)
                         && (logPoint.containsKey(Tags.SCHEDULE_REF) || logPoint.containsKey(Tags.EVENT_REF)))) {
                     hayStack.writeHisValById(logPoint.get("id").toString(),formattedVal);

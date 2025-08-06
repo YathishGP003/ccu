@@ -96,6 +96,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     var deviceList = mutableStateOf(emptyList<String>())
     var connectedDevices = mutableStateOf(emptyList<BacnetDevice>())
     val isConnectedDevicesSearchFinished = mutableStateOf(false)
+    val isAutoFetchSelected = mutableStateOf(false)
     var bacnetModel = mutableStateOf(BacnetModel())
     var isErrorMsg = mutableStateOf(false)
     var errorMsg = ""
@@ -840,6 +841,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                 CcuLog.d(TAG, "--connection time out--${e.message}")
             }
             isConnectedDevicesSearchFinished.value = true
+            isAutoFetchSelected.value = false
         }
     }
 

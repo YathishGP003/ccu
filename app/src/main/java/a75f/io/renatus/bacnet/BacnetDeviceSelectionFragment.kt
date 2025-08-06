@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -151,14 +152,16 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
                     .padding(top = 20.dp)
             ) {
 
-                LazyColumn {
+                LazyColumn (
+                    contentPadding = PaddingValues(bottom = 40.dp)
+                ) {
                     if (isMstpView) {
                         item {
                             MstpDeviceListItemHeader()
                         }
-                        items(itemsList.value.size) { index ->
+                        items(filteredItems.size) { index ->
                             MstpDeviceListItem(
-                                device = itemsList.value[index],
+                                device = filteredItems[index],
                                 isEven = index % 2 == 0, index
                             )
                         }
@@ -166,9 +169,9 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
                         item {
                             DeviceListItemHeader()
                         }
-                        items(itemsList.value.size) { index ->
+                        items(filteredItems.size) { index ->
                             DeviceListItem(
-                                device = itemsList.value[index],
+                                device = filteredItems[index],
                                 isEven = index % 2 == 0, index
                             )
                         }

@@ -897,17 +897,20 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                 }
 
                 "Auto" -> {
-                    viewModel.deviceSelectionMode.value = 1
-                    viewModel.searchDevices()
+                    if (!viewModel.isAutoFetchSelected.value) {
+                        viewModel.isAutoFetchSelected.value = true
+                        viewModel.deviceSelectionMode.value = 1
+                        viewModel.searchDevices()
 
-                    ProgressDialogUtils.showProgressDialog(
-                        context,
-                        CONST_AUTO_DISCOVERY
-                    )
-                    CcuLog.d(
-                        TAG,
-                        "searching devices ${viewModel.isConnectedDevicesSearchFinished.value}"
-                    )
+                        ProgressDialogUtils.showProgressDialog(
+                            context,
+                            CONST_AUTO_DISCOVERY
+                        )
+                        CcuLog.d(
+                            TAG,
+                            "searching devices ${viewModel.isConnectedDevicesSearchFinished.value}"
+                        )
+                    }
                 }
             }
         }
@@ -923,15 +926,22 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                 }
 
                 "Master" -> {
-                    viewModel.deviceSelectionMode.value = 1
-                    if (!isBacnetMstpInitialized) {
-                        viewModel.showToast.value = true
-                    } else {
-                        viewModel.showToast.value = false
-                        viewModel.searchDevices()
+                    if (!viewModel.isAutoFetchSelected.value) {
+                        viewModel.isAutoFetchSelected.value = true
 
-                        ProgressDialogUtils.showProgressDialog(context, CONST_AUTO_DISCOVERY)
-                        CcuLog.d(TAG, "searching devices ${viewModel.isConnectedDevicesSearchFinished.value}")
+                        viewModel.deviceSelectionMode.value = 1
+                        if (!isBacnetMstpInitialized) {
+                            viewModel.showToast.value = true
+                        } else {
+                            viewModel.showToast.value = false
+                            viewModel.searchDevices()
+
+                            ProgressDialogUtils.showProgressDialog(context, CONST_AUTO_DISCOVERY)
+                            CcuLog.d(
+                                TAG,
+                                "searching devices ${viewModel.isConnectedDevicesSearchFinished.value}"
+                            )
+                        }
                     }
                 }
             }

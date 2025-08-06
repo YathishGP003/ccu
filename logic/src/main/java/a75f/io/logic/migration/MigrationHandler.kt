@@ -13,7 +13,6 @@ import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.Zone
 import a75f.io.api.haystack.sync.HttpUtil
 import a75f.io.api.haystack.util.BackfillUtil
-import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.OAOEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.createDomainDevicePoint
@@ -43,6 +42,7 @@ import a75f.io.domain.cutover.VavStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
 import a75f.io.domain.cutover.getDomainNameForMonitoringProfile
 import a75f.io.domain.equips.DabEquip
+import a75f.io.domain.equips.HyperStatSplitEquip
 import a75f.io.domain.equips.OtnEquip
 import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.TIEquip
@@ -54,6 +54,7 @@ import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
+import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
 import a75f.io.domain.logic.CCUBaseConfigurationBuilder
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager.addCmBoardDevice
@@ -101,7 +102,7 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfigurat
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.MonitoringConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuUniInType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.UniversalInputs
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
@@ -539,7 +540,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             val equipIdStr = equip["id"]?.toString() ?: return@forEach
             if (equip["domainName"].toString().equals(DomainName.hyperstatSplitCpu, ignoreCase = true)) {
                 // For HyperStat Split CPU, we need to handle it separately
-                val equipId = HyperStatSplitEquip(equip["id"].toString())
+                val equipId = HsSplitCpuEquip(equip["id"].toString())
                 val possibleConditioningMode =
                     HSSplitHaystackUtil.getPossibleConditioningModeSettings(equipId)
                 val possibleFanMode = HSSplitHaystackUtil.getSplitPossibleFanModeSettings(
@@ -1660,26 +1661,26 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun migrateUniversalInValue(value: Int): Double {
         return when (value) {
-            0 -> CpuUniInType.CURRENT_TX_10.ordinal.toDouble()
-            1 -> CpuUniInType.CURRENT_TX_20.ordinal.toDouble()
-            2 -> CpuUniInType.CURRENT_TX_50.ordinal.toDouble()
-            3 -> CpuUniInType.CURRENT_TX_100.ordinal.toDouble()
-            4 -> CpuUniInType.CURRENT_TX_150.ordinal.toDouble()
-            5 -> CpuUniInType.SUPPLY_AIR_TEMPERATURE.ordinal.toDouble()
-            6 -> CpuUniInType.MIXED_AIR_TEMPERATURE.ordinal.toDouble()
-            7 -> CpuUniInType.OUTSIDE_AIR_TEMPERATURE.ordinal.toDouble()
-            8 -> CpuUniInType.FILTER_STATUS_NC.ordinal.toDouble()
-            9 -> CpuUniInType.FILTER_STATUS_NO.ordinal.toDouble()
-            10 -> CpuUniInType.CONDENSATE_STATUS_NC.ordinal.toDouble()
-            11 -> CpuUniInType.CONDENSATE_STATUS_NO.ordinal.toDouble()
-            12 -> CpuUniInType.DUCT_STATIC_PRESSURE1_1.ordinal.toDouble()
-            13 -> CpuUniInType.DUCT_STATIC_PRESSURE1_2.ordinal.toDouble()
-            14 -> CpuUniInType.VOLTAGE_INPUT.ordinal.toDouble()
-            15 -> CpuUniInType.THERMISTOR_INPUT.ordinal.toDouble()
-            16 -> CpuUniInType.DUCT_STATIC_PRESSURE1_10.ordinal.toDouble()
-            17 -> CpuUniInType.GENERIC_ALARM_NC.ordinal.toDouble()
-            18 -> CpuUniInType.GENERIC_ALARM_NO.ordinal.toDouble()
-            else -> CpuUniInType.NONE.ordinal.toDouble()
+            0 -> UniversalInputs.CURRENT_TX_10.ordinal.toDouble()
+            1 -> UniversalInputs.CURRENT_TX_20.ordinal.toDouble()
+            2 -> UniversalInputs.CURRENT_TX_50.ordinal.toDouble()
+            3 -> UniversalInputs.CURRENT_TX_100.ordinal.toDouble()
+            4 -> UniversalInputs.CURRENT_TX_150.ordinal.toDouble()
+            5 -> UniversalInputs.SUPPLY_AIR_TEMPERATURE.ordinal.toDouble()
+            6 -> UniversalInputs.MIXED_AIR_TEMPERATURE.ordinal.toDouble()
+            7 -> UniversalInputs.OUTSIDE_AIR_TEMPERATURE.ordinal.toDouble()
+            8 -> UniversalInputs.FILTER_STATUS_NC.ordinal.toDouble()
+            9 -> UniversalInputs.FILTER_STATUS_NO.ordinal.toDouble()
+            10 -> UniversalInputs.CONDENSATE_STATUS_NC.ordinal.toDouble()
+            11 -> UniversalInputs.CONDENSATE_STATUS_NO.ordinal.toDouble()
+            12 -> UniversalInputs.DUCT_STATIC_PRESSURE1_1.ordinal.toDouble()
+            13 -> UniversalInputs.DUCT_STATIC_PRESSURE1_2.ordinal.toDouble()
+            14 -> UniversalInputs.VOLTAGE_INPUT.ordinal.toDouble()
+            15 -> UniversalInputs.THERMISTOR_INPUT.ordinal.toDouble()
+            16 -> UniversalInputs.DUCT_STATIC_PRESSURE1_10.ordinal.toDouble()
+            17 -> UniversalInputs.GENERIC_ALARM_NC.ordinal.toDouble()
+            18 -> UniversalInputs.GENERIC_ALARM_NO.ordinal.toDouble()
+            else -> UniversalInputs.NONE.ordinal.toDouble()
         }
     }
 

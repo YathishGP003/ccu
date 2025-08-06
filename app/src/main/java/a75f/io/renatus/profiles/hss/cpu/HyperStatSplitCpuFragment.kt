@@ -5,6 +5,7 @@ import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuAnalogControlType
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.composables.CancelDialog
 import a75f.io.renatus.composables.DuplicatePointDialog
@@ -143,24 +144,25 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
                         )
                     }
                 }
-                item { Title(viewModel,Modifier.padding(50.dp,25.dp)) }
-                item { TempOffset(viewModel,Modifier.padding(50.dp,0.dp)) }
-                item { AutoAwayConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
-
-                item { TitleLabel(Modifier.padding(50.dp,0.dp)) }
-                item { SensorConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
-                item { RelayConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
-                item { AnalogOutConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
-                item { UniversalInConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
-
-                item { AnalogOutDynamicConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
-
-                item { ZoneOAOConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
-                item { DividerRow() }
-                item { DisplayInDeviceConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
-                item { DividerRow() }
-                item { MiscSettingConfig(viewModel) }
-                item { SaveConfig(viewModel,Modifier.padding(50.dp,25.dp)) }
+                item {
+                    Column(modifier = Modifier.padding(50.dp,25.dp)) {
+                        Title(viewModel)
+                        TempOffset(viewModel)
+                        AutoAwayConfig(viewModel)
+                        TitleLabel()
+                        SensorConfig(viewModel)
+                        RelayConfig(viewModel)
+                        AnalogOutConfig(viewModel)
+                        UniversalInConfig(viewModel)
+                        AnalogOutDynamicConfig(viewModel)
+                        ZoneOAOConfig(viewModel)
+                        DividerRow()
+                        DisplayInDeviceConfig(viewModel)
+                        PinPasswordView(viewModel)
+                        MiscSettingConfig(viewModel)
+                        SaveConfig(viewModel)
+                    }
+                }
             }
         }
     }
@@ -188,6 +190,286 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
         StagedFanControl(viewModel,modifier)
         OAODamperControl(viewModel,modifier)
         ReturnDamperControl(viewModel,modifier)
+    }
+
+    @Composable
+    fun LinearFanControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+        Column(modifier =  modifier) {
+            if (viewModel.isLinearFanAOEnabled(CpuAnalogControlType.LINEAR_FAN.ordinal)) {
+                EnableLinearFanVoltage(viewModel, CpuAnalogControlType.LINEAR_FAN)
+            }
+        }
+    }
+
+    @Composable
+    fun EnableLinearFanVoltage(viewModel: HyperStatSplitCpuViewModel, type: CpuAnalogControlType) {
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut1Enabled,
+                viewModel.viewState.value.analogOut1Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out1 at Min \nLinear Fan",
+                "Analog-out1 at Max \nLinear Fan",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value  as HyperStatSplitCpuState).analogOut1MinMax.linearFanMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut2Enabled,
+                viewModel.viewState.value.analogOut2Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out2 at Min \nLinear Fan",
+                "Analog-out2 at Max \nLinear Fan",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut3Enabled,
+                viewModel.viewState.value.analogOut3Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out3 at Min \nLinear Fan",
+                "Analog-out3 at Max \nLinear Fan",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut4Enabled,
+                viewModel.viewState.value.analogOut4Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out4 at Min \nLinear Fan",
+                "Analog-out4 at Max \nLinear Fan",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+    }
+
+    @Composable
+    fun CoolingControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+        Column(modifier = modifier) {
+            if (viewModel.isCoolingAOEnabled(CpuAnalogControlType.COOLING.ordinal)) {
+                EnableCoolingVoltage(viewModel, CpuAnalogControlType.COOLING)
+            }
+        }
+    }
+
+
+
+    @Composable
+    fun EnableCoolingVoltage(viewModel: HyperStatSplitCpuViewModel, type: CpuAnalogControlType) {
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut1Enabled,
+                viewModel.viewState.value.analogOut1Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out1 at Min \nCooling",
+                "Analog-out1 at Max \nCooling",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.coolingMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.coolingMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.coolingMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.coolingMaxVoltage = it.value.toInt()
+                })
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut2Enabled,
+                viewModel.viewState.value.analogOut2Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out2 at Min \nCooling",
+                "Analog-out2 at Max \nCooling",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState ).analogOut2MinMax.coolingMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.coolingMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.coolingMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.coolingMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut3Enabled,
+                viewModel.viewState.value.analogOut3Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out3 at Min \nCooling",
+                "Analog-out3 at Max \nCooling",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.coolingMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.coolingMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.coolingMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.coolingMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut4Enabled,
+                viewModel.viewState.value.analogOut4Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out4 at Min \nCooling",
+                "Analog-out4 at Max \nCooling",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.coolingMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.coolingMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.coolingMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.coolingMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+    }
+
+    @Composable
+    fun HeatingControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+        Column(modifier = modifier) {
+            if (viewModel.isHeatingAOEnabled(CpuAnalogControlType.HEATING.ordinal)) {
+                EnableHeatingVoltage(viewModel, CpuAnalogControlType.HEATING)
+            }
+        }
+    }
+
+    @Composable
+    fun EnableHeatingVoltage(viewModel: HyperStatSplitCpuViewModel, type: CpuAnalogControlType) {
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut1Enabled,
+                viewModel.viewState.value.analogOut1Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out1 at Min \nHeating",
+                "Analog-out1 at Max \nHeating",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value  as HyperStatSplitCpuState ).analogOut1MinMax.heatingMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState ).analogOut1MinMax.heatingMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.heatingMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.heatingMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut2Enabled,
+                viewModel.viewState.value.analogOut2Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out2 at Min \nHeating",
+                "Analog-out2 at Max \nHeating",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.heatingMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.heatingMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.heatingMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.heatingMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut3Enabled,
+                viewModel.viewState.value.analogOut3Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out3 at Min \nHeating",
+                "Analog-out3 at Max \nHeating",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.heatingMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.heatingMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.heatingMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.heatingMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                type,
+                viewModel.viewState.value.analogOut4Enabled,
+                viewModel.viewState.value.analogOut4Association
+            )
+        ) {
+            MinMaxConfiguration("Analog-out4 at Min \nHeating",
+                "Analog-out4 at Max \nHeating",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.heatingMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.heatingMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.heatingMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.heatingMaxVoltage = it.value.toInt()
+                }
+            )
+        }
     }
 
     override fun onPairingComplete() {

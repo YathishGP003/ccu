@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.util;
 
+import static a75f.io.logic.bo.building.definitions.ProfileType.HYPERSTATSPLIT_2PIPE_UV;
+import static a75f.io.logic.bo.building.definitions.ProfileType.HYPERSTATSPLIT_4PIPE_UV;
 import static a75f.io.logic.bo.building.definitions.ProfileType.SMARTSTAT_FOUR_PIPE_FCU;
 import static a75f.io.logic.bo.building.definitions.ProfileType.SSE;
 import static a75f.io.logic.bo.building.hvac.StandaloneConditioningMode.AUTO;
@@ -8,6 +10,8 @@ import static a75f.io.logic.bo.building.hvac.StandaloneConditioningMode.HEAT_ONL
 import static a75f.io.logic.bo.building.hvac.StandaloneConditioningMode.OFF;
 import static a75f.io.logic.bo.building.statprofiles.util.HSUtilKt.getHsConfiguration;
 import static a75f.io.logic.bo.building.statprofiles.util.MSUtilKt.getMyStatConfiguration;
+import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getSplitConfiguration;
+import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getUvPossibleConditioningMode;
 import static a75f.io.logic.bo.util.TemperatureMode.COOLING;
 import static a75f.io.logic.bo.util.TemperatureMode.DUAL;
 import static a75f.io.logic.bo.util.TemperatureMode.HEATING;
@@ -17,26 +21,29 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
-import a75f.io.domain.HyperStatSplitEquip;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip;
 import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
-import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfiguration;
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HyperStatSplitAssociationUtil;
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration;
 import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitConfigurationUtil;
 import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitEquip;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitLogicalMap;
 import a75f.io.logic.bo.building.sscpu.SmartStatAssociationUtil;
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfiguration;
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HyperStatSplitAssociationUtil;
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration;
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorConfiguration;
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration;
+import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode;
 import a75f.io.logic.bo.building.system.dab.DABSystemProfileRelayAssociationUtil;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfileRelayAssociationUtil;
 
@@ -49,25 +56,26 @@ public class DesiredTempDisplayMode {
         if (modeType.equals(DUAL)) {
             TemperatureMode modeToset = modeType;
             //Check if any systemProfile is present in the zone
-            if(!hasSystemEquip(zoneEquips)){
+            if (!hasSystemEquip(zoneEquips)) {
                 modeToset = getConditioningModeForZone(roomRef, ccuHsApi);
             }
-            CcuLog.d(L.TAG_CCU,"Temperature modeType : "+modeToset+" equip : "+ roomRef);
+            CcuLog.d(L.TAG_CCU, "Temperature modeType : " + modeToset + " equip : " + roomRef);
             ccuHsApi.writeHisValByQuery("hvacMode and roomRef == \""
                     + roomRef + "\"", (double) modeToset.ordinal());
         } else {
-            CcuLog.d(L.TAG_CCU,"Temperature modeType : "+modeType+" equip : "+ roomRef);
+            CcuLog.d(L.TAG_CCU, "Temperature modeType : " + modeType + " equip : " + roomRef);
             ccuHsApi.writeHisValByQuery("hvacMode and roomRef == \""
                     + roomRef + "\"", (double) modeType.ordinal());
         }
     }
+
     public static void setModeTypeOnUserIntentChange(String roomRef, CCUHsApi ccuHsApi) {
         ArrayList<Equip> zoneEquips = HSUtil.getEquips(roomRef);
         TemperatureMode modeType = getDesiredTempDisplayMode(zoneEquips, ccuHsApi);
         if (modeType.equals(DUAL)) {
             TemperatureMode modeToset = modeType;
             //Check if any systemProfile is present in the zone
-            if(!hasSystemEquip(zoneEquips)){
+            if (!hasSystemEquip(zoneEquips)) {
                 modeToset = getConditioningModeForZone(roomRef, ccuHsApi);
             }
             ccuHsApi.writeHisValByQuery("hvacMode and roomRef == \""
@@ -90,8 +98,8 @@ public class DesiredTempDisplayMode {
 
     private static TemperatureMode getConditioningModeForZone(String roomRef, CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> conditioningMode = ccuHsApi.readAllEntities(
-                "conditioning and mode and roomRef == \""+roomRef +"\"");
-        List<StandaloneConditioningMode> standaloneConditioningModes = new ArrayList<>() ;
+                "conditioning and mode and not access and roomRef == \"" + roomRef + "\"");
+        List<StandaloneConditioningMode> standaloneConditioningModes = new ArrayList<>();
         conditioningMode.forEach(conditioningModeMap ->
                 standaloneConditioningModes.add(StandaloneConditioningMode.values()[(int)
                         (ccuHsApi.readPointPriorityVal(conditioningModeMap.get("id").toString()))]));
@@ -127,50 +135,56 @@ public class DesiredTempDisplayMode {
 
 
     public static TemperatureMode getDesiredTempDisplayMode(ArrayList<Equip> zoneEquips, CCUHsApi ccuHsApi) {
-        List< TemperatureMode > temperatureModes = new ArrayList<>() ;
+        List<TemperatureMode> temperatureModes = new ArrayList<>();
         for (Equip mEquip : zoneEquips) {
             //  As per spec for below profiles need to show both heating and cooling desired temperature
             if (mEquip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name()) ||
                     mEquip.getProfile().equalsIgnoreCase(ProfileType.SMARTSTAT_TWO_PIPE_FCU.name()) ||
                     mEquip.getProfile().equalsIgnoreCase(ProfileType.SMARTSTAT_HEAT_PUMP_UNIT.name()) ||
-                    mEquip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())||
+                    mEquip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name()) ||
                     mEquip.getProfile().equalsIgnoreCase(ProfileType.MYSTAT_PIPE2.name()) ||
-                    mEquip.getProfile().equalsIgnoreCase(ProfileType.MYSTAT_HPU.name())) {
+                    mEquip.getProfile().equalsIgnoreCase(ProfileType.MYSTAT_HPU.name()) ||
+                    mEquip.getProfile().equalsIgnoreCase(HYPERSTATSPLIT_2PIPE_UV.name())) {
                 return DUAL;
-            }
-            else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
+            } else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
                 TemperatureMode temperatureMode = getTemperatureModeForHSCPU(mEquip);
                 temperatureModes.add(temperatureMode);
             } else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_CPU.name())) {
                 TemperatureMode temperatureMode = getTemperatureModeForHSSplitCPUEcon(mEquip);
                 temperatureModes.add(temperatureMode);
-            } else if(mEquip.getProfile().equalsIgnoreCase(ProfileType.MYSTAT_CPU.name())) {
+            } else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.MYSTAT_CPU.name())) {
                 TemperatureMode temperatureMode = getTemperatureModeForMSCPU(mEquip);
                 temperatureModes.add(temperatureMode);
             } else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT.name())) {
                 TemperatureMode temperatureMode = getTemperatureModeForSSCPU(mEquip);
                 temperatureModes.add(temperatureMode);
-            }else if (mEquip.getProfile().equalsIgnoreCase(SMARTSTAT_FOUR_PIPE_FCU.name())) {
+            } else if (mEquip.getProfile().equalsIgnoreCase(SMARTSTAT_FOUR_PIPE_FCU.name())) {
                 TemperatureMode temperatureMode = getTemperatureModeForSSFCU(mEquip);
                 temperatureModes.add(temperatureMode);
-            }else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.VAV_ACB.name())) {
+            } else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.VAV_ACB.name())) {
                 TemperatureMode temperatureMode = getTemperatureModeForAcbProfile();
                 temperatureModes.add(temperatureMode);
-            }else if (mEquip.getMarkers().contains(Tags.VAV)) {
+            } else if (mEquip.getMarkers().contains(Tags.VAV)) {
                 TemperatureMode temperatureMode = getTemperatureModeForVavProfile(mEquip, ccuHsApi);
                 temperatureModes.add(temperatureMode);
-            }else if (mEquip.getMarkers().contains(Tags.TI) || mEquip.getMarkers().contains(Tags.OTN)) {
+            } else if (mEquip.getMarkers().contains(Tags.TI) || mEquip.getMarkers().contains(Tags.OTN)) {
                 TemperatureMode temperatureMode = getTemperatureModeForTiOrOtnProfile(ccuHsApi);
                 temperatureModes.add(temperatureMode);
-            }else if (mEquip.getMarkers().contains(Tags.DAB)) {
+            } else if (mEquip.getMarkers().contains(Tags.DAB)) {
                 TemperatureMode temperatureMode = getTemperatureModeForDabProfile(mEquip, ccuHsApi);
                 temperatureModes.add(temperatureMode);
-            }else if (mEquip.getMarkers().contains(Tags.DUALDUCT)) {
+            } else if (mEquip.getMarkers().contains(Tags.DUALDUCT)) {
                 TemperatureMode temperatureMode = getTemperatureModeForDualDuctProfile();
                 temperatureModes.add(temperatureMode);
-            }else if (mEquip.getProfile().equalsIgnoreCase(SSE.name())) {
+            } else if (mEquip.getProfile().equalsIgnoreCase(SSE.name())) {
                 TemperatureMode temperatureMode = getTemperatureModeForSSEProfile(mEquip, ccuHsApi);
                 temperatureModes.add(temperatureMode);
+            } else if (mEquip.getProfile().equalsIgnoreCase(HYPERSTATSPLIT_4PIPE_UV.name())) {
+                TemperatureMode temperatureMode = getTempModeForUnitVentilatorProfile(mEquip);
+                temperatureModes.add(temperatureMode);
+            }
+            else {
+                CcuLog.w(L.TAG_CCU, "Unknown profile for equip: " + mEquip.getId() + ", profile: " + mEquip.getProfile());
             }
         }
         return getZoneTemperatureMode(temperatureModes);
@@ -179,17 +193,17 @@ public class DesiredTempDisplayMode {
     private static TemperatureMode getTemperatureModeForSSEProfile(Equip mEquip, CCUHsApi ccuHsApi) {
         boolean heating = false;
         boolean cooling = false;
-        int relay1OutputAssociationState = ccuHsApi.readDefaultVal("point and domainName == \""+ DomainName.relay1OutputAssociation +"\"" +
+        int relay1OutputAssociationState = ccuHsApi.readDefaultVal("point and domainName == \"" + DomainName.relay1OutputAssociation + "\"" +
                 " and equipRef == \"" + mEquip.getId() + "\"").intValue();
-        int isRelay1Enabled = ccuHsApi.readDefaultVal("point and domainName == \""+ DomainName.relay1OutputEnable +"\"" +
+        int isRelay1Enabled = ccuHsApi.readDefaultVal("point and domainName == \"" + DomainName.relay1OutputEnable + "\"" +
                 " and equipRef == \"" + mEquip.getId() + "\"").intValue();
-        if(isRelay1Enabled == 1){
+        if (isRelay1Enabled == 1) {
             if (relay1OutputAssociationState == 0) {
                 heating = true;
             } else if (relay1OutputAssociationState == 1) {
                 cooling = true;
             }
-        }else{
+        } else {
             return DUAL;
         }
         return getTemperatureMode(heating, cooling);
@@ -225,16 +239,16 @@ public class DesiredTempDisplayMode {
             }
             return getTemperatureMode(heating, cooling);
         } else if (systemEquip.getMarkers().contains(Tags.VAV)) {
-            if(VavSystemProfileRelayAssociationUtil.getDesiredTempDisplayMode(
-                    TemperatureMode.COOLING)){
+            if (VavSystemProfileRelayAssociationUtil.getDesiredTempDisplayMode(
+                    TemperatureMode.COOLING)) {
                 cooling = true;
             }
-            if(VavSystemProfileRelayAssociationUtil.getDesiredTempDisplayMode(
-                    TemperatureMode.HEATING)){
+            if (VavSystemProfileRelayAssociationUtil.getDesiredTempDisplayMode(
+                    TemperatureMode.HEATING)) {
                 heating = true;
             }
             return getTemperatureMode(heating, cooling);
-        }else {
+        } else {
             // For Default system profile we show both heating and cooling
             return DUAL;
         }
@@ -262,21 +276,21 @@ public class DesiredTempDisplayMode {
                                                                       boolean isReheatEnabled) {
         boolean heating = false;
         boolean cooling = false;
-        if(!isCooling && !isHeating){
+        if (!isCooling && !isHeating) {
             heating = true;
             cooling = true;
         }
-        if(isHeating && !isCooling){
+        if (isHeating && !isCooling) {
             heating = true;
         }
-        if(isCooling && !isReheatEnabled){
+        if (isCooling && !isReheatEnabled) {
             cooling = true;
         }
-        if(isCooling && isReheatEnabled){
+        if (isCooling && isReheatEnabled) {
             heating = true;
             cooling = true;
         }
-        if(isCooling && isHeating ){
+        if (isCooling && isHeating) {
             heating = true;
             cooling = true;
         }
@@ -318,22 +332,22 @@ public class DesiredTempDisplayMode {
     }
 
     private static TemperatureMode getTemperatureModeForHSCPU(Equip mEquip) {
-        CpuConfiguration cpuConfiguration = (CpuConfiguration)getHsConfiguration(mEquip.getId());
-       return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(cpuConfiguration.isHeatingAvailable(),cpuConfiguration.isCoolingAvailable()), mEquip);
+        CpuConfiguration cpuConfiguration = (CpuConfiguration) getHsConfiguration(mEquip.getId());
+        return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(cpuConfiguration.isHeatingAvailable(), cpuConfiguration.isCoolingAvailable()), mEquip);
     }
 
     private static TemperatureMode getTemperatureModeForMSCPU(Equip mEquip) {
-        MyStatCpuConfiguration cpuConfiguration = (MyStatCpuConfiguration)getMyStatConfiguration(mEquip.getId());
-        return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(cpuConfiguration.isHeatingAvailable(),cpuConfiguration.isCoolingAvailable()), mEquip);
+        MyStatCpuConfiguration cpuConfiguration = (MyStatCpuConfiguration) getMyStatConfiguration(mEquip.getId());
+        return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(cpuConfiguration.isHeatingAvailable(), cpuConfiguration.isCoolingAvailable()), mEquip);
     }
 
-    private static TemperatureMode getTemperatureForStandaloneBasedOnConditioningMode(TemperatureMode temperatureMode,Equip equip) {
+    private static TemperatureMode getTemperatureForStandaloneBasedOnConditioningMode(TemperatureMode temperatureMode, Equip equip) {
 
         HashMap<Object, Object> conditioningModeEntity = CCUHsApi.getInstance().readEntity(
-                "conditioning and mode and equipRef == \""+equip.getId() +"\"");
+                "conditioning and mode and not access and equipRef == \"" + equip.getId() + "\"");
         StandaloneConditioningMode conditioningMode = StandaloneConditioningMode.values()[(int)
                 (CCUHsApi.getInstance().readPointPriorityVal(conditioningModeEntity.get("id").toString()))];
-        if ((conditioningMode == AUTO || (conditioningMode == OFF && temperatureMode == DUAL))){
+        if ((conditioningMode == AUTO || (conditioningMode == OFF && temperatureMode == DUAL))) {
             return DUAL;
         } else if (temperatureMode == HEATING && (conditioningMode == HEAT_ONLY || conditioningMode == OFF)) {
             return HEATING;
@@ -351,7 +365,7 @@ public class DesiredTempDisplayMode {
 
         if (profile == null) {
             // This is a fallback for when this method is called before profiles are loaded
-            HyperStatSplitEquip hssEquip = new HyperStatSplitEquip(mEquip.getId());
+            HsSplitCpuEquip hssEquip = new HsSplitCpuEquip(mEquip.getId());
             if (hssEquip.getCoolingSignal().pointExists() || hssEquip.getCoolingStage1().pointExists() ||
                     hssEquip.getCoolingStage2().pointExists() || hssEquip.getCoolingStage3().pointExists()) {
                 cooling = true;
@@ -361,7 +375,7 @@ public class DesiredTempDisplayMode {
                 heating = true;
             }
         } else {
-            HyperStatSplitCpuConfiguration config = profile.getDomainProfileConfiguration();
+            HyperStatSplitCpuConfiguration config = (HyperStatSplitCpuConfiguration) getSplitConfiguration(mEquip.getId());
             if (HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling(config) ||
                     HyperStatSplitAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToCooling(config)) {
                 cooling = true;
@@ -378,7 +392,7 @@ public class DesiredTempDisplayMode {
     public static void setSystemModeForVav(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> vavEquips = ccuHsApi.readAllEntities(
                 "equip and vav and not system");
-        if(!vavEquips.isEmpty()) {
+        if (!vavEquips.isEmpty()) {
             vavEquips.forEach(equip -> {
                 Equip actualEquip = new Equip.Builder().setHashMap(equip).build();
                 setModeType(actualEquip.getRoomRef(), ccuHsApi);
@@ -390,7 +404,7 @@ public class DesiredTempDisplayMode {
     public static void setSystemModeForDab(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> dabEquips = ccuHsApi.readAllEntities(
                 "equip and dab and not system");
-        if(!dabEquips.isEmpty()) {
+        if (!dabEquips.isEmpty()) {
             dabEquips.forEach(equip -> {
                 Equip actualEquip = new Equip.Builder().setHashMap(equip).build();
                 setModeType(actualEquip.getRoomRef(), ccuHsApi);
@@ -405,7 +419,7 @@ public class DesiredTempDisplayMode {
         setDualDuctMode(ccuHsApi);
     }
 
-    private static void setTiAndOtnMode(CCUHsApi ccuHsApi){
+    private static void setTiAndOtnMode(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> tiProfile = ccuHsApi.readAllEntities(
                 "equip and ti");
         tiProfile.forEach(equip -> {
@@ -421,7 +435,7 @@ public class DesiredTempDisplayMode {
         });
     }
 
-    private static void setDualDuctMode(CCUHsApi ccuHsApi){
+    private static void setDualDuctMode(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> dualDuctProfile = CCUHsApi.getInstance().readAllEntities(
                 "equip and dualDuct");
         dualDuctProfile.forEach(equip -> {
@@ -431,25 +445,27 @@ public class DesiredTempDisplayMode {
     }
 
     public static void setSystemModeForStandaloneProfile(CCUHsApi ccuHsApi) {
-        ArrayList<HashMap<Object,Object>> standaloneEquips = ccuHsApi.readAllEntities("equip and (hyperstat or smartstat or hyperstatsplit) and roomRef");
+        ArrayList<HashMap<Object, Object>> standaloneEquips = ccuHsApi.readAllEntities("equip and (hyperstat or smartstat or hyperstatsplit) and roomRef");
         List<String> roomRefs = getRoomRefsForAllStandaloneProfiles(standaloneEquips);
         for (String roomRef : roomRefs) {
             setModeTypeOnUserIntentChange(roomRef, ccuHsApi);
         }
     }
+
     private static List<String> getRoomRefsForAllStandaloneProfiles(ArrayList<HashMap<Object, Object>> standaloneEquips) {
         Set<String> roomRefs = new HashSet<>(); // Using set to avoid duplicate
         standaloneEquips.forEach(standaloneEquip -> roomRefs.add(standaloneEquip.get("roomRef").toString()));
         return new ArrayList<>(roomRefs);
     }
+
     public static String setPointStatusMessage(String status, TemperatureMode modeType) {
         boolean statusContainsChar;
-        if(modeType == DUAL){
+        if (modeType == DUAL) {
             return status;
         }
         // below code checks whether string has "-" to divide Two units
         statusContainsChar = status.contains("F");
-        if(!statusContainsChar){
+        if (!statusContainsChar) {
             return status;
         }
         String[] statusString = status.split(" ");
@@ -457,15 +473,15 @@ public class DesiredTempDisplayMode {
         for (int i = 0; i < statusString.length; i++) {
             if (statusString[i].contains("°")) {
                 String[] arrOfStr = statusString[i].split("-");
-                if(modeType == TemperatureMode.HEATING){
-                    statusString[i]= arrOfStr[0]+"°F";
-                }else {
+                if (modeType == TemperatureMode.HEATING) {
+                    statusString[i] = arrOfStr[0] + "°F";
+                } else {
                     /*This is safe condition when status message contains single Temperature
                     This happens when status message fetched from haystack that CCU sets based on single Temp mode.
                     ex: ,changes to 70F at 8:00*/
-                    if(arrOfStr.length < 2){
-                        statusString[i]= arrOfStr[0];
-                    }else {
+                    if (arrOfStr.length < 2) {
+                        statusString[i] = arrOfStr[0];
+                    } else {
                         statusString[i] = arrOfStr[1];
                     }
                 }
@@ -478,37 +494,55 @@ public class DesiredTempDisplayMode {
         return sb.toString();
     }
 
-    private static TemperatureMode getTemperatureMode(boolean heating, boolean cooling){
-        if(heating && cooling){
+    private static TemperatureMode getTemperatureMode(boolean heating, boolean cooling) {
+        if (heating && cooling) {
             return DUAL;
-        }
-        else if(cooling){
+        } else if (cooling) {
             return TemperatureMode.COOLING;
-        }
-        else if(heating){
+        } else if (heating) {
             return TemperatureMode.HEATING;
         }
         return DUAL;
     }
 
     private static TemperatureMode getZoneTemperatureMode(List<TemperatureMode> temperatureModes) {
-          boolean heating = false;
-          boolean cooling = false;
-        for (TemperatureMode temperatureMode : temperatureModes){
-            if(temperatureMode == DUAL){
+        boolean heating = false;
+        boolean cooling = false;
+        for (TemperatureMode temperatureMode : temperatureModes) {
+            if (temperatureMode == DUAL) {
                 return DUAL;
-            }else if(temperatureMode == TemperatureMode.HEATING){
+            } else if (temperatureMode == TemperatureMode.HEATING) {
                 heating = true;
-            }else {
+            } else {
                 cooling = true;
             }
         }
 
-        if(heating && cooling){
+        if (heating && cooling) {
             return DUAL;
-        }else if(heating){
+        } else if (heating) {
             return TemperatureMode.HEATING;
         }
         return TemperatureMode.COOLING;
+    }
+
+    public static TemperatureMode getTempModeForUnitVentilatorProfile(Equip equip) {
+
+        UnitVentilatorConfiguration pipeUVConfiguration = (UnitVentilatorConfiguration) getSplitConfiguration(equip.getId());
+        assert pipeUVConfiguration != null;
+        Boolean coolingAvailable = false;
+        Boolean heatingAvailable = false;
+        PossibleConditioningMode possibleConditioningMode = getUvPossibleConditioningMode(pipeUVConfiguration);
+        if (PossibleConditioningMode.BOTH == possibleConditioningMode) {
+            coolingAvailable = true;
+            heatingAvailable = true;
+
+        } else if (possibleConditioningMode == PossibleConditioningMode.HEATONLY) {
+           heatingAvailable = true;
+        } else if (possibleConditioningMode == PossibleConditioningMode.COOLONLY) {
+            coolingAvailable = true;
+        }
+        return getTemperatureForStandaloneBasedOnConditioningMode(
+                getTemperatureMode(heatingAvailable, coolingAvailable), equip);
     }
 }

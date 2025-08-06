@@ -46,6 +46,7 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.pipe2.HyperStat
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
 import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.getCpuFanLevel
@@ -193,6 +194,7 @@ private fun updateFanMode(
     if (fanMode != -1) {
         updateUserIntentPoints(equip.equipRef, equip.fanOpMode, fanMode.toDouble(), WhoFiledConstants.HYPERSTAT_WHO)
         CcuLog.d(L.TAG_CCU_DEVICE, "${equip.equipRef} fan mode updated to $selectedMode")
+        FanModeCacheStorage.getHyperStatFanModeCache().saveFanModeInCache(equip.equipRef, fanMode)
     } else {
         CcuLog.e(L.TAG_CCU_DEVICE, "Invalid fan mode possibleFanMode $possibleMode selectedMode $selectedMode")
     }

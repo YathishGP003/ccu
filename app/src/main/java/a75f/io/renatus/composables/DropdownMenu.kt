@@ -14,6 +14,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -67,7 +68,7 @@ fun DropDownWithLabel(
     , isHeader : Boolean = true, isEnabled : Boolean = true, disabledIndices: List<Int> = emptyList(),labelWidth :Int = 216){
 
     //var modifiedList = ComposeUtil.getModifiedList(list)
-    Row {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
         Box(modifier = Modifier.wrapContentWidth(), contentAlignment = Alignment.Center) {
             if (isHeader) {
                 HeaderTextView(text = label, padding = paddingLimit)

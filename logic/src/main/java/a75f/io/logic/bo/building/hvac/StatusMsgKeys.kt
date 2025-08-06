@@ -16,4 +16,6 @@ enum class StatusMsgKeys {
     FAN_ENABLED,
     AUX_HEATING_STAGE1,
     AUX_HEATING_STAGE2,
+    COOLING_VALVE,
+    HEATING_VALVE,
 }

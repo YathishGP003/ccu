@@ -1,16 +1,21 @@
 package a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common
 
-import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
+import a75f.io.domain.equips.HyperStatSplitEquip
+import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
+import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.CpuSensorBusType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.SensorTempHumidityAssociationConfig
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuControlType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuAnalogControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuSensorBusType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getUvPossibleFanMode
 
 /**
  * Created for HyperStat Split by Nick P on 07-24-2023.
@@ -19,29 +24,6 @@ import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.Hy
 class HyperStatSplitAssociationUtil {
     companion object {
 
-        //Function which checks the Relay is Associated  to Fan or Not
-        fun isRelayAssociatedToFan(relayConfig: AssociationConfig): Boolean {
-            return (relayConfig.associationVal == CpuRelayType.FAN_LOW_SPEED.ordinal
-                    || relayConfig.associationVal == CpuRelayType.FAN_MEDIUM_SPEED.ordinal
-                    || relayConfig.associationVal == CpuRelayType.FAN_HIGH_SPEED.ordinal)
-        }
-
-
-        //Function which checks the Relay is Associated  to Cooling Stage
-        fun isRelayAssociatedToCoolingStage(relayConfig: AssociationConfig): Boolean {
-            return (relayConfig.associationVal == CpuRelayType.COOLING_STAGE1.ordinal
-                    || relayConfig.associationVal == CpuRelayType.COOLING_STAGE2.ordinal
-                    || relayConfig.associationVal == CpuRelayType.COOLING_STAGE3.ordinal)
-        }
-
-
-        //Function which checks the Relay is Associated  to Heating Stage
-        fun isRelayAssociatedToHeatingStage(relayConfig: AssociationConfig): Boolean {
-            return (relayConfig.associationVal == CpuRelayType.HEATING_STAGE1.ordinal
-                    || relayConfig.associationVal == CpuRelayType.HEATING_STAGE2.ordinal
-                    || relayConfig.associationVal == CpuRelayType.HEATING_STAGE3.ordinal)
-
-        }
 
         //Function which checks the Sensor bus address is Associated  to OUTSIDE_AIR_TEMPERATURE_HUMIDITY
         private fun isSensorBusAddressAssociatedToOutsideAir(association: SensorTempHumidityAssociationConfig): Boolean {
@@ -50,17 +32,17 @@ class HyperStatSplitAssociationUtil {
 
         //Function which checks the Analog out is Associated  to FAN_SPEED
         fun isAnalogOutAssociatedToFanSpeed(analogOut: AssociationConfig): Boolean {
-            return (analogOut.associationVal == CpuControlType.LINEAR_FAN.ordinal)
+            return (analogOut.associationVal == CpuAnalogControlType.LINEAR_FAN.ordinal)
         }
 
         //Function which checks the Analog out is Associated  to OAO_DAMPER
         fun isAnalogOutAssociatedToOaoDamper(analogOut: AssociationConfig): Boolean {
-            return (analogOut.associationVal == CpuControlType.OAO_DAMPER.ordinal)
+            return (analogOut.associationVal == CpuAnalogControlType.OAO_DAMPER.ordinal)
         }
 
         //Function which checks the Analog out is Associated  to STAGED_FAN_SPEED
         fun isAnalogOutAssociatedToStagedFanSpeed(analogOut: AssociationConfig): Boolean {
-            return (analogOut.associationVal == CpuControlType.STAGED_FAN.ordinal)
+            return (analogOut.associationVal == CpuAnalogControlType.STAGED_FAN.ordinal)
         }
 
         fun isAnyRelayAssociatedToFanEnabled(config: HyperStatSplitCpuConfiguration): Boolean {
@@ -98,7 +80,7 @@ class HyperStatSplitAssociationUtil {
 
 
         fun isAnySensorBusAddressMappedToOutsideAir(
-            config: HyperStatSplitCpuConfiguration
+            config: HyperStatSplitConfiguration
         ): Boolean {
             return config.address0Enabled.enabled && isSensorBusAddressAssociatedToOutsideAir(config.address0SensorAssociation)
                     || config.address1Enabled.enabled && isSensorBusAddressAssociatedToOutsideAir(config.address1SensorAssociation)
@@ -117,28 +99,28 @@ class HyperStatSplitAssociationUtil {
             if(isAnyAnalogOutEnabledAssociatedToFanSpeed(config) || isAnyAnalogOutMappedToStagedFan(config)) return 21 // All options are enabled due to
             // analog fan speed
 
-            if (config.relay1Enabled.enabled && isRelayAssociatedToFan(config.relay1Association))
+            if (config.relay1Enabled.enabled && config.isRelayAssociatedToFan(config.relay1Association))
                 fanEnabledStages = updateSelectedFanLevel(config.relay1Association, fanEnabledStages)
 
-            if (config.relay2Enabled.enabled && isRelayAssociatedToFan(config.relay2Association))
+            if (config.relay2Enabled.enabled && config.isRelayAssociatedToFan(config.relay2Association))
                 fanEnabledStages = updateSelectedFanLevel(config.relay2Association, fanEnabledStages)
 
-            if (config.relay3Enabled.enabled && isRelayAssociatedToFan(config.relay3Association))
+            if (config.relay3Enabled.enabled && config.isRelayAssociatedToFan(config.relay3Association))
                 fanEnabledStages = updateSelectedFanLevel(config.relay3Association, fanEnabledStages)
 
-            if (config.relay4Enabled.enabled && isRelayAssociatedToFan(config.relay4Association))
+            if (config.relay4Enabled.enabled && config.isRelayAssociatedToFan(config.relay4Association))
                 fanEnabledStages = updateSelectedFanLevel(config.relay4Association, fanEnabledStages)
 
-            if (config.relay5Enabled.enabled && isRelayAssociatedToFan(config.relay5Association))
+            if (config.relay5Enabled.enabled && config.isRelayAssociatedToFan(config.relay5Association))
                 fanEnabledStages = updateSelectedFanLevel(config.relay5Association, fanEnabledStages)
 
-            if (config.relay6Enabled.enabled && isRelayAssociatedToFan(config.relay6Association))
+            if (config.relay6Enabled.enabled && config.isRelayAssociatedToFan(config.relay6Association))
                 fanEnabledStages = updateSelectedFanLevel(config.relay6Association, fanEnabledStages)
 
-            if (config.relay7Enabled.enabled && isRelayAssociatedToFan(config.relay7Association))
+            if (config.relay7Enabled.enabled && config.isRelayAssociatedToFan(config.relay7Association))
                 fanEnabledStages = updateSelectedFanLevel(config.relay7Association, fanEnabledStages)
 
-            if (config.relay8Enabled.enabled && isRelayAssociatedToFan(config.relay8Association))
+            if (config.relay8Enabled.enabled && config.isRelayAssociatedToFan(config.relay8Association))
                 fanEnabledStages = updateSelectedFanLevel(config.relay8Association, fanEnabledStages)
 
             if (fanEnabledStages.first) fanLevel += 6
@@ -152,7 +134,19 @@ class HyperStatSplitAssociationUtil {
             return fanLevel
         }
 
-        fun getSelectedFanLevel(hssEquip: HyperStatSplitEquip): Int {
+
+        fun getHssProfileFanLevel(
+            equip: HyperStatSplitEquip,
+            config: HyperStatSplitConfiguration?
+        ): Int {
+            return when (equip) {
+                is HsSplitCpuEquip -> getEconSelectedFanLevel(equip)
+                is Pipe4UVEquip -> getUvPossibleFanMode(config as UnitVentilatorConfiguration)
+                else -> 0
+            }
+        }
+
+        fun getEconSelectedFanLevel(hssEquip: HsSplitCpuEquip): Int {
 
             var fanLevel = 0
 
@@ -193,58 +187,58 @@ class HyperStatSplitAssociationUtil {
         }
 
         // Function which checks that any of the relay Enabled and is associated to cooling
-        fun isAnyRelayEnabledAssociatedToHeating(configuration: HyperStatSplitCpuConfiguration): Boolean {
+        fun isAnyRelayEnabledAssociatedToHeating(config: HyperStatSplitCpuConfiguration): Boolean {
             return when {
-                (configuration.relay1Enabled.enabled &&
-                        isRelayAssociatedToHeatingStage(configuration.relay1Association)) -> true
-                (configuration.relay2Enabled.enabled &&
-                        isRelayAssociatedToHeatingStage(configuration.relay2Association)) -> true
-                (configuration.relay3Enabled.enabled &&
-                        isRelayAssociatedToHeatingStage(configuration.relay3Association)) -> true
-                (configuration.relay4Enabled.enabled &&
-                        isRelayAssociatedToHeatingStage(configuration.relay4Association)) -> true
-                (configuration.relay5Enabled.enabled &&
-                        isRelayAssociatedToHeatingStage(configuration.relay5Association)) -> true
-                (configuration.relay6Enabled.enabled &&
-                        isRelayAssociatedToHeatingStage(configuration.relay6Association)) -> true
-                (configuration.relay7Enabled.enabled &&
-                        isRelayAssociatedToHeatingStage(configuration.relay7Association)) -> true
-                (configuration.relay8Enabled.enabled &&
-                        isRelayAssociatedToHeatingStage(configuration.relay8Association)) -> true
+                (config.relay1Enabled.enabled &&
+                        config.isRelayAssociatedToHeatingStage(config.relay1Association)) -> true
+                (config.relay2Enabled.enabled &&
+                        config.isRelayAssociatedToHeatingStage(config.relay2Association)) -> true
+                (config.relay3Enabled.enabled &&
+                        config.isRelayAssociatedToHeatingStage(config.relay3Association)) -> true
+                (config.relay4Enabled.enabled &&
+                        config.isRelayAssociatedToHeatingStage(config.relay4Association)) -> true
+                (config.relay5Enabled.enabled &&
+                        config.isRelayAssociatedToHeatingStage(config.relay5Association)) -> true
+                (config.relay6Enabled.enabled &&
+                        config.isRelayAssociatedToHeatingStage(config.relay6Association)) -> true
+                (config.relay7Enabled.enabled &&
+                        config.isRelayAssociatedToHeatingStage(config.relay7Association)) -> true
+                (config.relay8Enabled.enabled &&
+                        config.isRelayAssociatedToHeatingStage(config.relay8Association)) -> true
                 else -> false
             }
         }
 
         // Function which checks that any of the relay Enabled and is associated to cooling
-        fun isAnyRelayEnabledAssociatedToHeating(hssEquip: HyperStatSplitEquip): Boolean {
+        fun isAnyRelayEnabledAssociatedToHeating(hssEquip: HsSplitCpuEquip): Boolean {
             return hssEquip.heatingStage1.pointExists() || hssEquip.heatingStage2.pointExists() || hssEquip.heatingStage3.pointExists()
         }
 
         // Function which checks that any of the relay Enabled and is associated to cooling
-        fun isAnyRelayEnabledAssociatedToCooling(configuration: HyperStatSplitCpuConfiguration): Boolean {
+        fun isAnyRelayEnabledAssociatedToCooling(config: HyperStatSplitCpuConfiguration): Boolean {
             return when {
-                (configuration.relay1Enabled.enabled &&
-                        isRelayAssociatedToCoolingStage(configuration.relay1Association)) -> true
-                (configuration.relay2Enabled.enabled &&
-                        isRelayAssociatedToCoolingStage(configuration.relay2Association)) -> true
-                (configuration.relay3Enabled.enabled &&
-                        isRelayAssociatedToCoolingStage(configuration.relay3Association)) -> true
-                (configuration.relay4Enabled.enabled &&
-                        isRelayAssociatedToCoolingStage(configuration.relay4Association)) -> true
-                (configuration.relay5Enabled.enabled &&
-                        isRelayAssociatedToCoolingStage(configuration.relay5Association)) -> true
-                (configuration.relay6Enabled.enabled &&
-                        isRelayAssociatedToCoolingStage(configuration.relay6Association)) -> true
-                (configuration.relay7Enabled.enabled &&
-                        isRelayAssociatedToCoolingStage(configuration.relay7Association)) -> true
-                (configuration.relay8Enabled.enabled &&
-                        isRelayAssociatedToCoolingStage(configuration.relay8Association)) -> true
+                (config.relay1Enabled.enabled &&
+                        config.isRelayAssociatedToCoolingStage(config.relay1Association)) -> true
+                (config.relay2Enabled.enabled &&
+                        config.isRelayAssociatedToCoolingStage(config.relay2Association)) -> true
+                (config.relay3Enabled.enabled &&
+                        config.isRelayAssociatedToCoolingStage(config.relay3Association)) -> true
+                (config.relay4Enabled.enabled &&
+                        config.isRelayAssociatedToCoolingStage(config.relay4Association)) -> true
+                (config.relay5Enabled.enabled &&
+                        config.isRelayAssociatedToCoolingStage(config.relay5Association)) -> true
+                (config.relay6Enabled.enabled &&
+                        config.isRelayAssociatedToCoolingStage(config.relay6Association)) -> true
+                (config.relay7Enabled.enabled &&
+                        config.isRelayAssociatedToCoolingStage(config.relay7Association)) -> true
+                (config.relay8Enabled.enabled &&
+                        config.isRelayAssociatedToCoolingStage(config.relay8Association)) -> true
                 else -> false
             }
         }
 
         // Function which checks that any of the relay Enabled and is associated to cooling
-        fun isAnyRelayEnabledAssociatedToCooling(hssEquip: HyperStatSplitEquip): Boolean {
+        fun isAnyRelayEnabledAssociatedToCooling(hssEquip: HsSplitCpuEquip): Boolean {
             return hssEquip.coolingStage1.pointExists() || hssEquip.coolingStage2.pointExists() || hssEquip.coolingStage3.pointExists()
         }
 
@@ -252,19 +246,19 @@ class HyperStatSplitAssociationUtil {
         fun isAnyAnalogOutEnabledAssociatedToCooling(configuration: HyperStatSplitCpuConfiguration): Boolean {
             return when {
                 (configuration.analogOut1Enabled.enabled &&
-                        configuration.analogOut1Association.associationVal == CpuControlType.COOLING.ordinal) -> true
+                        configuration.analogOut1Association.associationVal == CpuAnalogControlType.COOLING.ordinal) -> true
                 (configuration.analogOut2Enabled.enabled &&
-                        configuration.analogOut2Association.associationVal == CpuControlType.COOLING.ordinal) -> true
+                        configuration.analogOut2Association.associationVal == CpuAnalogControlType.COOLING.ordinal) -> true
                 (configuration.analogOut3Enabled.enabled &&
-                        configuration.analogOut3Association.associationVal == CpuControlType.COOLING.ordinal) -> true
+                        configuration.analogOut3Association.associationVal == CpuAnalogControlType.COOLING.ordinal) -> true
                 (configuration.analogOut4Enabled.enabled &&
-                        configuration.analogOut4Association.associationVal == CpuControlType.COOLING.ordinal) -> true
+                        configuration.analogOut4Association.associationVal == CpuAnalogControlType.COOLING.ordinal) -> true
                 else -> false
             }
         }
 
         // Function which checks that any of the relay Enabled and is associated to cooling
-        fun isAnyAnalogOutEnabledAssociatedToCooling(hssEquip: HyperStatSplitEquip): Boolean {
+        fun isAnyAnalogOutEnabledAssociatedToCooling(hssEquip: HsSplitCpuEquip): Boolean {
             return hssEquip.coolingSignal.pointExists()
         }
 
@@ -272,13 +266,13 @@ class HyperStatSplitAssociationUtil {
         fun isAnyAnalogOutEnabledAssociatedToHeating(configuration: HyperStatSplitCpuConfiguration): Boolean {
             return when {
                 (configuration.analogOut1Enabled.enabled &&
-                        configuration.analogOut1Association.associationVal == CpuControlType.HEATING.ordinal) -> true
+                        configuration.analogOut1Association.associationVal == CpuAnalogControlType.HEATING.ordinal) -> true
                 (configuration.analogOut2Enabled.enabled &&
-                        configuration.analogOut2Association.associationVal == CpuControlType.HEATING.ordinal) -> true
+                        configuration.analogOut2Association.associationVal == CpuAnalogControlType.HEATING.ordinal) -> true
                 (configuration.analogOut3Enabled.enabled &&
-                        configuration.analogOut3Association.associationVal == CpuControlType.HEATING.ordinal) -> true
+                        configuration.analogOut3Association.associationVal == CpuAnalogControlType.HEATING.ordinal) -> true
                 (configuration.analogOut4Enabled.enabled &&
-                        configuration.analogOut4Association.associationVal == CpuControlType.HEATING.ordinal) -> true
+                        configuration.analogOut4Association.associationVal == CpuAnalogControlType.HEATING.ordinal) -> true
                 else -> false
             }
         }
@@ -299,26 +293,26 @@ class HyperStatSplitAssociationUtil {
         }
 
         // Function which checks that any of the relay Enabled and is associated to heating
-        fun isAnyAnalogOutEnabledAssociatedToHeating(hssEquip: HyperStatSplitEquip): Boolean {
+        fun isAnyAnalogOutEnabledAssociatedToHeating(hssEquip: HsSplitCpuEquip): Boolean {
             return hssEquip.heatingSignal.pointExists()
         }
 
         /**
          * Determines the lowest fan stage based on the relay states in the given CPU configuration.
          *
-         * @param configuration the CPU configuration to analyze.
+         * @param config the CPU configuration to analyze.
          * @return the lowest fan stage, represented as a [CpuRelayType] value.
          */
-        fun getLowestFanStage(configuration: HyperStatSplitCpuConfiguration): CpuRelayType {
+        fun getLowestFanStage(config: HyperStatSplitCpuConfiguration): CpuRelayType {
             var lowestValue = 0xFF
-            lowestValue = verifyFanStateLowValue(configuration.relay1Enabled, configuration.relay1Association, lowestValue)
-            lowestValue = verifyFanStateLowValue(configuration.relay2Enabled, configuration.relay2Association, lowestValue)
-            lowestValue = verifyFanStateLowValue(configuration.relay3Enabled, configuration.relay3Association, lowestValue)
-            lowestValue = verifyFanStateLowValue(configuration.relay4Enabled, configuration.relay4Association, lowestValue)
-            lowestValue = verifyFanStateLowValue(configuration.relay5Enabled, configuration.relay5Association, lowestValue)
-            lowestValue = verifyFanStateLowValue(configuration.relay6Enabled, configuration.relay6Association, lowestValue)
-            lowestValue = verifyFanStateLowValue(configuration.relay7Enabled, configuration.relay7Association, lowestValue)
-            lowestValue = verifyFanStateLowValue(configuration.relay8Enabled, configuration.relay8Association, lowestValue)
+            lowestValue = verifyFanStateLowValue(config.relay1Enabled, config.relay1Association, lowestValue,config)
+            lowestValue = verifyFanStateLowValue(config.relay2Enabled, config.relay2Association, lowestValue,config)
+            lowestValue = verifyFanStateLowValue(config.relay3Enabled, config.relay3Association, lowestValue,config)
+            lowestValue = verifyFanStateLowValue(config.relay4Enabled, config.relay4Association, lowestValue,config)
+            lowestValue = verifyFanStateLowValue(config.relay5Enabled, config.relay5Association, lowestValue,config)
+            lowestValue = verifyFanStateLowValue(config.relay6Enabled, config.relay6Association, lowestValue,config)
+            lowestValue = verifyFanStateLowValue(config.relay7Enabled, config.relay7Association, lowestValue,config)
+            lowestValue = verifyFanStateLowValue(config.relay8Enabled, config.relay8Association, lowestValue,config)
 
             return CpuRelayType.values().getOrNull(lowestValue) ?: CpuRelayType.DEHUMIDIFIER
         }
@@ -329,8 +323,8 @@ class HyperStatSplitAssociationUtil {
          * @param lowestValue the current lowest value.
          * @return the updated lowest value, considering the relay state.
          */
-        private fun verifyFanStateLowValue(enabled: EnableConfig, association: AssociationConfig, lowestValue: Int): Int {
-            if (enabled.enabled && isRelayAssociatedToFan(association)
+        private fun verifyFanStateLowValue(enabled: EnableConfig, association: AssociationConfig, lowestValue: Int, config: HyperStatSplitCpuConfiguration): Int {
+            if (enabled.enabled && config.isRelayAssociatedToFan(association)
                 && association.associationVal < lowestValue
             )
                 return association.associationVal

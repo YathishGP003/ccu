@@ -1,8 +1,8 @@
 package a75f.io.logic.bo.building.statprofiles.util
 
-import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.DomainEquip
+import a75f.io.domain.equips.HyperStatSplitEquip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.util.CalibratedPoint
@@ -11,7 +11,6 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.util.CCUUtils
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -65,9 +64,11 @@ fun canWeDoHeating(conditioningMode: StandaloneConditioningMode): Boolean {
     return (conditioningMode == StandaloneConditioningMode.HEAT_ONLY || conditioningMode == StandaloneConditioningMode.AUTO)
 }
 
-fun canWeRunFan(basicSettings: BasicSettings): Boolean {
-    return (basicSettings.fanMode != StandaloneFanStage.OFF && basicSettings.conditioningMode != StandaloneConditioningMode.OFF)
+fun canWeDoConditioning(basicSettings: BasicSettings): Boolean {
+    return (basicSettings.conditioningMode != StandaloneConditioningMode.OFF)
 }
+
+fun canWeOperate(basicSettings: BasicSettings) = canWeDoConditioning(basicSettings)
 
 fun isUserIntentFanMode(fanOpMode: Point): Boolean {
     val fanMode = fanOpMode.readPriorityVal().toInt()

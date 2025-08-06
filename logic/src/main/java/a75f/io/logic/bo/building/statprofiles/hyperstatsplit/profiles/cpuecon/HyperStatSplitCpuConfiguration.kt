@@ -1,10 +1,11 @@
 package a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon
 
-import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
-import a75f.io.domain.api.Point
+import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.ValueConfig
+import a75f.io.domain.devices.HyperStatDevice
+import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
@@ -26,171 +27,18 @@ class HyperStatSplitCpuConfiguration (nodeAddress: Int, nodeType: String, priori
         if (equip.isEmpty()) {
             return this
         }
-        val hssEquip = HyperStatSplitEquip(equip[Tags.ID].toString())
-
+        val hssEquip = HsSplitCpuEquip(equip[Tags.ID].toString())
         getDefaultConfiguration()
         getActiveEnableConfigs(hssEquip)
         getActiveAssociationConfigs(hssEquip)
         getGenericZoneConfigs(hssEquip)
         getActiveDynamicConfigs(hssEquip)
-
+        equipId = hssEquip.equipRef
         isDefault = false
         return this
     }
 
-    private fun getActiveEnableConfigs(hssEquip : HyperStatSplitEquip) {
-        apply {
-            address0Enabled.enabled = hssEquip.sensorBusAddress0Enable.readDefaultVal() > 0
-            sensorBusPressureEnable.enabled = hssEquip.sensorBusPressureEnable.readDefaultVal() > 0
-            address1Enabled.enabled = hssEquip.sensorBusAddress1Enable.readDefaultVal() > 0
-            address2Enabled.enabled = hssEquip.sensorBusAddress2Enable.readDefaultVal() > 0
-
-            relay1Enabled.enabled = hssEquip.relay1OutputEnable.readDefaultVal() > 0.0
-            relay2Enabled.enabled = hssEquip.relay2OutputEnable.readDefaultVal() > 0.0
-            relay3Enabled.enabled = hssEquip.relay3OutputEnable.readDefaultVal() > 0.0
-            relay4Enabled.enabled = hssEquip.relay4OutputEnable.readDefaultVal() > 0.0
-            relay5Enabled.enabled = hssEquip.relay5OutputEnable.readDefaultVal() > 0.0
-            relay6Enabled.enabled = hssEquip.relay6OutputEnable.readDefaultVal() > 0.0
-            relay7Enabled.enabled = hssEquip.relay7OutputEnable.readDefaultVal() > 0.0
-            relay8Enabled.enabled = hssEquip.relay8OutputEnable.readDefaultVal() > 0.0
-
-            analogOut1Enabled.enabled = hssEquip.analog1OutputEnable.readDefaultVal() > 0.0
-            analogOut2Enabled.enabled = hssEquip.analog2OutputEnable.readDefaultVal() > 0.0
-            analogOut3Enabled.enabled = hssEquip.analog3OutputEnable.readDefaultVal() > 0.0
-            analogOut4Enabled.enabled = hssEquip.analog4OutputEnable.readDefaultVal() > 0.0
-
-            universal1InEnabled.enabled = hssEquip.universalIn1Enable.readDefaultVal() > 0.0
-            universal2InEnabled.enabled = hssEquip.universalIn2Enable.readDefaultVal() > 0.0
-            universal3InEnabled.enabled = hssEquip.universalIn3Enable.readDefaultVal() > 0.0
-            universal4InEnabled.enabled = hssEquip.universalIn4Enable.readDefaultVal() > 0.0
-            universal5InEnabled.enabled = hssEquip.universalIn5Enable.readDefaultVal() > 0.0
-            universal6InEnabled.enabled = hssEquip.universalIn6Enable.readDefaultVal() > 0.0
-            universal7InEnabled.enabled = hssEquip.universalIn7Enable.readDefaultVal() > 0.0
-            universal8InEnabled.enabled = hssEquip.universalIn8Enable.readDefaultVal() > 0.0
-        }
-    }
-
-    private fun getActiveAssociationConfigs(hssEquip: HyperStatSplitEquip) {
-        getSensorAssociationConfigs(hssEquip)
-
-        apply {
-            if (relay1Enabled.enabled) {
-                relay1Association.associationVal = hssEquip.relay1OutputAssociation.readDefaultVal().toInt()
-            }
-            if (relay2Enabled.enabled) {
-                relay2Association.associationVal = hssEquip.relay2OutputAssociation.readDefaultVal().toInt()
-            }
-            if (relay3Enabled.enabled) {
-                relay3Association.associationVal = hssEquip.relay3OutputAssociation.readDefaultVal().toInt()
-            }
-            if (relay4Enabled.enabled) {
-                relay4Association.associationVal = hssEquip.relay4OutputAssociation.readDefaultVal().toInt()
-            }
-            if (relay5Enabled.enabled) {
-                relay5Association.associationVal = hssEquip.relay5OutputAssociation.readDefaultVal().toInt()
-            }
-            if (relay6Enabled.enabled) {
-                relay6Association.associationVal = hssEquip.relay6OutputAssociation.readDefaultVal().toInt()
-            }
-            if (relay7Enabled.enabled) {
-                relay7Association.associationVal = hssEquip.relay7OutputAssociation.readDefaultVal().toInt()
-            }
-            if (relay8Enabled.enabled) {
-                relay8Association.associationVal = hssEquip.relay8OutputAssociation.readDefaultVal().toInt()
-            }
-
-            if (analogOut1Enabled.enabled) {
-                analogOut1Association.associationVal = hssEquip.analog1OutputAssociation.readDefaultVal().toInt()
-            }
-            if (analogOut2Enabled.enabled) {
-                analogOut2Association.associationVal = hssEquip.analog2OutputAssociation.readDefaultVal().toInt()
-            }
-            if (analogOut3Enabled.enabled) {
-                analogOut3Association.associationVal = hssEquip.analog3OutputAssociation.readDefaultVal().toInt()
-            }
-            if (analogOut4Enabled.enabled) {
-                analogOut4Association.associationVal = hssEquip.analog4OutputAssociation.readDefaultVal().toInt()
-            }
-
-            if (universal1InEnabled.enabled) {
-                universal1InAssociation.associationVal = hssEquip.universalIn1Association.readDefaultVal().toInt()
-            }
-            if (universal2InEnabled.enabled) {
-                universal2InAssociation.associationVal = hssEquip.universalIn2Association.readDefaultVal().toInt()
-            }
-            if (universal3InEnabled.enabled) {
-                universal3InAssociation.associationVal = hssEquip.universalIn3Association.readDefaultVal().toInt()
-            }
-            if (universal4InEnabled.enabled) {
-                universal4InAssociation.associationVal = hssEquip.universalIn4Association.readDefaultVal().toInt()
-            }
-            if (universal5InEnabled.enabled) {
-                universal5InAssociation.associationVal = hssEquip.universalIn5Association.readDefaultVal().toInt()
-            }
-            if (universal6InEnabled.enabled) {
-                universal6InAssociation.associationVal = hssEquip.universalIn6Association.readDefaultVal().toInt()
-            }
-            if (universal7InEnabled.enabled) {
-                universal7InAssociation.associationVal = hssEquip.universalIn7Association.readDefaultVal().toInt()
-            }
-            if (universal8InEnabled.enabled) {
-                universal8InAssociation.associationVal = hssEquip.universalIn8Association.readDefaultVal().toInt()
-            }
-        }
-    }
-
-    private fun getSensorAssociationConfigs(hssEquip: HyperStatSplitEquip) {
-        apply {
-
-            if (address0Enabled.enabled) {
-                address0SensorAssociation.temperatureAssociation.associationVal = hssEquip.temperatureSensorBusAdd0.readDefaultVal().toInt()
-                address0SensorAssociation.humidityAssociation.associationVal = hssEquip.humiditySensorBusAdd0.readDefaultVal().toInt()
-            }
-
-            if (sensorBusPressureEnable.enabled) {
-                pressureAddress0SensorAssociation.associationVal = hssEquip.pressureSensorBusAdd0.readDefaultVal().toInt()
-            }
-
-            if (address1Enabled.enabled) {
-                address1SensorAssociation.temperatureAssociation.associationVal = hssEquip.temperatureSensorBusAdd1.readDefaultVal().toInt()
-                address1SensorAssociation.humidityAssociation.associationVal = hssEquip.humiditySensorBusAdd1.readDefaultVal().toInt()
-            }
-
-            if (address2Enabled.enabled) {
-                address2SensorAssociation.temperatureAssociation.associationVal = hssEquip.temperatureSensorBusAdd2.readDefaultVal().toInt()
-                address2SensorAssociation.humidityAssociation.associationVal = hssEquip.humiditySensorBusAdd2.readDefaultVal().toInt()
-            }
-
-        }
-    }
-
-    private fun getGenericZoneConfigs(hssEquip: HyperStatSplitEquip) {
-        apply {
-            temperatureOffset.currentVal = hssEquip.temperatureOffset.readDefaultVal()
-
-            autoForceOccupied.enabled = hssEquip.autoForceOccupied.readDefaultVal() > 0.0
-            autoAway.enabled = hssEquip.autoAway.readDefaultVal() > 0.0
-            prePurge.enabled = hssEquip.prePurgeEnable.readDefaultVal() > 0.0
-
-            zoneCO2Threshold.currentVal = hssEquip.co2Threshold.readDefaultVal()
-            zoneCO2Target.currentVal = hssEquip.co2Target.readDefaultVal()
-
-            zonePM2p5Target.currentVal = hssEquip.pm25Target.readDefaultVal()
-
-            if (prePurge.enabled) prePurgeOutsideDamperOpen.currentVal = hssEquip.prePurgeOutsideDamperOpen.readDefaultVal()
-
-            displayHumidity.enabled = hssEquip.enableHumidityDisplay.readDefaultVal() > 0.0
-            displayCO2.enabled = hssEquip.enableCO2Display.readDefaultVal() > 0.0
-            displayPM2p5.enabled = hssEquip.enablePm25Display.readDefaultVal() > 0.0
-
-            disableTouch.enabled = hssEquip.disableTouch.readDefaultVal() > 0.0
-            enableBrightness.enabled = hssEquip.enableBrightness.readDefaultVal() > 0.0
-
-            enableOutsideAirOptimization.enabled = hssEquip.enableOutsideAirOptimization.readDefaultVal() > 0.0
-        }
-    }
-
-    private fun getActiveDynamicConfigs(hssEquip: HyperStatSplitEquip) {
+    private fun getActiveDynamicConfigs(hssEquip: HsSplitCpuEquip) {
         apply {
 
             analogOut1Voltage.coolingMinVoltage.currentVal = getDefault(hssEquip.analog1AtMinCooling, hssEquip, analogOut1Voltage.coolingMinVoltage)
@@ -289,16 +137,6 @@ class HyperStatSplitCpuConfiguration (nodeAddress: Int, nodeType: String, priori
 
             zoneCO2DamperOpeningRate.currentVal = getDefault(hssEquip.co2DamperOpeningRate, hssEquip, zoneCO2DamperOpeningRate)
         }
-    }
-
-    /**
-     * Function to get the point value if config exist else return the current value model default value
-     */
-    private fun getDefault(point: Point, equip: HyperStatSplitEquip, valueConfig: ValueConfig): Double {
-        return if(Domain.readPointForEquip(point.domainName,equip.equipRef).isEmpty())
-            valueConfig.currentVal
-        else
-            point.readDefaultVal()
     }
 
     override fun getValueConfigs(): List<ValueConfig> {
@@ -496,25 +334,25 @@ class HyperStatSplitCpuConfiguration (nodeAddress: Int, nodeType: String, priori
 
     override fun analogOut1TypeToString(): String {
         return when (analogOut1Association.associationVal) {
-            CpuControlType.COOLING.ordinal -> {
+            CpuAnalogControlType.COOLING.ordinal -> {
                 analogOut1Voltage.coolingMinVoltage.currentVal.toInt().toString() + "-" + analogOut1Voltage.coolingMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.HEATING.ordinal -> {
+            CpuAnalogControlType.HEATING.ordinal -> {
                 analogOut1Voltage.heatingMinVoltage.currentVal.toInt().toString() + "-" + analogOut1Voltage.heatingMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.LINEAR_FAN.ordinal -> {
+            CpuAnalogControlType.LINEAR_FAN.ordinal -> {
                 analogOut1Voltage.linearFanMinVoltage.currentVal.toInt().toString() + "-" + analogOut1Voltage.linearFanMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.OAO_DAMPER.ordinal -> {
+            CpuAnalogControlType.OAO_DAMPER.ordinal -> {
                 analogOut1Voltage.oaoDamperMinVoltage.currentVal.toInt().toString() + "-" + analogOut1Voltage.oaoDamperMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.RETURN_DAMPER.ordinal -> {
+            CpuAnalogControlType.RETURN_DAMPER.ordinal -> {
                 analogOut1Voltage.returnDamperMinVoltage.currentVal.toInt().toString() + "-" + analogOut1Voltage.returnDamperMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.COMPRESSOR_SPEED.ordinal -> {
+            CpuAnalogControlType.COMPRESSOR_SPEED.ordinal -> {
                 analogOut1Voltage.compressorMinVoltage.currentVal.toInt().toString() + "-" + analogOut1Voltage.compressorMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.DCV_MODULATING_DAMPER.ordinal -> {
+            CpuAnalogControlType.DCV_MODULATING_DAMPER.ordinal -> {
                 analogOut1Voltage.dcvModulationMinVoltage.currentVal.toInt().toString() + "-" + analogOut1Voltage.dcvModulationMaxVoltage.currentVal.toInt().toString() + "v"
             }
 
@@ -524,25 +362,25 @@ class HyperStatSplitCpuConfiguration (nodeAddress: Int, nodeType: String, priori
 
     override fun analogOut2TypeToString(): String {
         return when (analogOut2Association.associationVal) {
-            CpuControlType.COOLING.ordinal -> {
+            CpuAnalogControlType.COOLING.ordinal -> {
                 analogOut2Voltage.coolingMinVoltage.currentVal.toInt().toString() + "-" + analogOut2Voltage.coolingMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.HEATING.ordinal -> {
+            CpuAnalogControlType.HEATING.ordinal -> {
                 analogOut2Voltage.heatingMinVoltage.currentVal.toInt().toString() + "-" + analogOut2Voltage.heatingMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.LINEAR_FAN.ordinal -> {
+            CpuAnalogControlType.LINEAR_FAN.ordinal -> {
                 analogOut2Voltage.linearFanMinVoltage.currentVal.toInt().toString() + "-" + analogOut2Voltage.linearFanMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.OAO_DAMPER.ordinal -> {
+            CpuAnalogControlType.OAO_DAMPER.ordinal -> {
                 analogOut2Voltage.oaoDamperMinVoltage.currentVal.toInt().toString() + "-" + analogOut2Voltage.oaoDamperMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.RETURN_DAMPER.ordinal -> {
+            CpuAnalogControlType.RETURN_DAMPER.ordinal -> {
                 analogOut2Voltage.returnDamperMinVoltage.currentVal.toInt().toString() + "-" + analogOut2Voltage.returnDamperMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.COMPRESSOR_SPEED.ordinal -> {
+            CpuAnalogControlType.COMPRESSOR_SPEED.ordinal -> {
                 analogOut2Voltage.compressorMinVoltage.currentVal.toInt().toString() + "-" + analogOut2Voltage.compressorMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.DCV_MODULATING_DAMPER.ordinal -> {
+            CpuAnalogControlType.DCV_MODULATING_DAMPER.ordinal -> {
                 analogOut2Voltage.dcvModulationMinVoltage.currentVal.toInt().toString() + "-" + analogOut2Voltage.dcvModulationMaxVoltage.currentVal.toInt().toString() + "v"
             }
             else -> super.analogOut2TypeToString()
@@ -551,25 +389,25 @@ class HyperStatSplitCpuConfiguration (nodeAddress: Int, nodeType: String, priori
 
     override fun analogOut3TypeToString(): String {
         return when (analogOut3Association.associationVal) {
-            CpuControlType.COOLING.ordinal -> {
+            CpuAnalogControlType.COOLING.ordinal -> {
                 analogOut3Voltage.coolingMinVoltage.currentVal.toInt().toString() + "-" + analogOut3Voltage.coolingMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.HEATING.ordinal -> {
+            CpuAnalogControlType.HEATING.ordinal -> {
                 analogOut3Voltage.heatingMinVoltage.currentVal.toInt().toString() + "-" + analogOut3Voltage.heatingMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.LINEAR_FAN.ordinal -> {
+            CpuAnalogControlType.LINEAR_FAN.ordinal -> {
                 analogOut3Voltage.linearFanMinVoltage.currentVal.toInt().toString() + "-" + analogOut3Voltage.linearFanMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.OAO_DAMPER.ordinal -> {
+            CpuAnalogControlType.OAO_DAMPER.ordinal -> {
                 analogOut3Voltage.oaoDamperMinVoltage.currentVal.toInt().toString() + "-" + analogOut3Voltage.oaoDamperMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.RETURN_DAMPER.ordinal -> {
+            CpuAnalogControlType.RETURN_DAMPER.ordinal -> {
                 analogOut3Voltage.returnDamperMinVoltage.currentVal.toInt().toString() + "-" + analogOut3Voltage.returnDamperMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.COMPRESSOR_SPEED.ordinal -> {
+            CpuAnalogControlType.COMPRESSOR_SPEED.ordinal -> {
                 analogOut3Voltage.compressorMinVoltage.currentVal.toInt().toString() + "-" + analogOut3Voltage.compressorMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.DCV_MODULATING_DAMPER.ordinal -> {
+            CpuAnalogControlType.DCV_MODULATING_DAMPER.ordinal -> {
                 analogOut3Voltage.dcvModulationMinVoltage.currentVal.toInt().toString() + "-" + analogOut3Voltage.dcvModulationMaxVoltage.currentVal.toInt().toString() + "v"
             }
             else -> super.analogOut3TypeToString()
@@ -578,25 +416,25 @@ class HyperStatSplitCpuConfiguration (nodeAddress: Int, nodeType: String, priori
 
     override fun analogOut4TypeToString(): String {
         return when (analogOut4Association.associationVal) {
-            CpuControlType.COOLING.ordinal -> {
+            CpuAnalogControlType.COOLING.ordinal -> {
                 analogOut4Voltage.coolingMinVoltage.currentVal.toInt().toString() + "-" + analogOut4Voltage.coolingMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.HEATING.ordinal -> {
+            CpuAnalogControlType.HEATING.ordinal -> {
                 analogOut4Voltage.heatingMinVoltage.currentVal.toInt().toString() + "-" + analogOut4Voltage.heatingMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.LINEAR_FAN.ordinal -> {
+            CpuAnalogControlType.LINEAR_FAN.ordinal -> {
                 analogOut4Voltage.linearFanMinVoltage.currentVal.toInt().toString() + "-" + analogOut4Voltage.linearFanMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.OAO_DAMPER.ordinal -> {
+            CpuAnalogControlType.OAO_DAMPER.ordinal -> {
                 analogOut4Voltage.oaoDamperMinVoltage.currentVal.toInt().toString() + "-" + analogOut4Voltage.oaoDamperMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.RETURN_DAMPER.ordinal -> {
+            CpuAnalogControlType.RETURN_DAMPER.ordinal -> {
                 analogOut4Voltage.returnDamperMinVoltage.currentVal.toInt().toString() + "-" + analogOut4Voltage.returnDamperMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.COMPRESSOR_SPEED.ordinal -> {
+            CpuAnalogControlType.COMPRESSOR_SPEED.ordinal -> {
                 analogOut4Voltage.compressorMinVoltage.currentVal.toInt().toString() + "-" + analogOut4Voltage.compressorMaxVoltage.currentVal.toInt().toString() + "v"
             }
-            CpuControlType.DCV_MODULATING_DAMPER.ordinal -> {
+            CpuAnalogControlType.DCV_MODULATING_DAMPER.ordinal -> {
                 analogOut4Voltage.dcvModulationMinVoltage.currentVal.toInt().toString() + "-" + analogOut4Voltage.dcvModulationMaxVoltage.currentVal.toInt().toString() + "v"
             }
             else -> super.analogOut4TypeToString()
@@ -626,11 +464,34 @@ class HyperStatSplitCpuConfiguration (nodeAddress: Int, nodeType: String, priori
                 this.relay8Enabled.enabled && this.relay8Association.associationVal == mapping.ordinal
     }
 
-    private fun isAnyAnalogEnabledAndMapped(mapping: CpuControlType): Boolean {
+    private fun isAnyAnalogEnabledAndMapped(mapping: CpuAnalogControlType): Boolean {
         return this.analogOut1Enabled.enabled && this.analogOut1Association.associationVal == mapping.ordinal ||
                 this.analogOut2Enabled.enabled && this.analogOut2Association.associationVal == mapping.ordinal ||
                 this.analogOut3Enabled.enabled && this.analogOut3Association.associationVal == mapping.ordinal ||
                 this.analogOut4Enabled.enabled && this.analogOut4Association.associationVal == mapping.ordinal
+    }
+
+    //Function which checks the Relay is Associated  to Fan or Not
+    fun isRelayAssociatedToFan(relayConfig: AssociationConfig): Boolean {
+        return (relayConfig.associationVal == CpuRelayType.FAN_LOW_SPEED.ordinal
+                || relayConfig.associationVal == CpuRelayType.FAN_MEDIUM_SPEED.ordinal
+                || relayConfig.associationVal == CpuRelayType.FAN_HIGH_SPEED.ordinal)
+    }
+
+
+    //Function which checks the Relay is Associated  to Cooling Stage
+    fun isRelayAssociatedToCoolingStage(relayConfig: AssociationConfig): Boolean {
+        return (relayConfig.associationVal == CpuRelayType.COOLING_STAGE1.ordinal
+                || relayConfig.associationVal == CpuRelayType.COOLING_STAGE2.ordinal
+                || relayConfig.associationVal == CpuRelayType.COOLING_STAGE3.ordinal)
+    }
+
+    //Function which checks the Relay is Associated  to Heating Stage
+    fun isRelayAssociatedToHeatingStage(relayConfig: AssociationConfig): Boolean {
+        return (relayConfig.associationVal == CpuRelayType.HEATING_STAGE1.ordinal
+                || relayConfig.associationVal == CpuRelayType.HEATING_STAGE2.ordinal
+                || relayConfig.associationVal == CpuRelayType.HEATING_STAGE3.ordinal)
+
     }
 
     fun isCoolStage1Enabled() = isAnyRelayEnabledAndMapped(CpuRelayType.COOLING_STAGE1)
@@ -650,34 +511,11 @@ class HyperStatSplitCpuConfiguration (nodeAddress: Int, nodeType: String, priori
     fun isFanHighEnabled() = isAnyRelayEnabledAndMapped(CpuRelayType.FAN_HIGH_SPEED)
     fun isFanEnabled() = isAnyRelayEnabledAndMapped(CpuRelayType.FAN_ENABLED)
 
-    fun isAnalogCoolingEnabled() = isAnyAnalogEnabledAndMapped(CpuControlType.COOLING)
-    fun isAnalogCompressorEnabled() = isAnyAnalogEnabledAndMapped(CpuControlType.COMPRESSOR_SPEED)
-    fun isAnalogHeatingEnabled() = isAnyAnalogEnabledAndMapped(CpuControlType.HEATING)
-    fun isLinearFanEnabled() = isAnyAnalogEnabledAndMapped(CpuControlType.LINEAR_FAN)
-    fun isStagedFanEnabled() = isAnyAnalogEnabledAndMapped(CpuControlType.STAGED_FAN)
-
-    private fun availableHighestStages(stage1: Int, stage2: Int, stage3: Int): Triple<Boolean, Boolean, Boolean> {
-        var isStage1Selected = false
-        var isStage2Selected = false
-        var isStage3Selected = false
-
-        getRelayEnabledAssociations().forEach { (enabled, associated) ->
-            if (enabled) {
-                if (associated == stage1) isStage1Selected = true
-                if (associated == stage2) isStage2Selected = true
-                if (associated == stage3) isStage3Selected = true
-            }
-        }
-        return Triple(isStage1Selected, isStage2Selected, isStage3Selected)
-    }
-
-    fun getHighestStage(stage1: Int, stage2: Int, stage3: Int): Int {
-        val availableStages = availableHighestStages(stage1, stage2, stage3)
-        return if (availableStages.third) stage3
-        else if (availableStages.second) stage2
-        else if (availableStages.first) stage1
-        else -1
-    }
+    fun isAnalogCoolingEnabled() = isAnyAnalogEnabledAndMapped(CpuAnalogControlType.COOLING)
+    fun isAnalogCompressorEnabled() = isAnyAnalogEnabledAndMapped(CpuAnalogControlType.COMPRESSOR_SPEED)
+    fun isAnalogHeatingEnabled() = isAnyAnalogEnabledAndMapped(CpuAnalogControlType.HEATING)
+    fun isLinearFanEnabled() = isAnyAnalogEnabledAndMapped(CpuAnalogControlType.LINEAR_FAN)
+    fun isStagedFanEnabled() = isAnyAnalogEnabledAndMapped(CpuAnalogControlType.STAGED_FAN)
 
     fun getHighestCoolingStageCount(): Int {
         val stage = getHighestStage(
@@ -700,7 +538,7 @@ class HyperStatSplitCpuConfiguration (nodeAddress: Int, nodeType: String, priori
 
     }
 
-    fun getHighestFanStageCount(): Int {
+    override fun getHighestFanStageCount(): Int {
         val stageOrdinal = getHighestStage(
             CpuRelayType.FAN_LOW_SPEED.ordinal,
             CpuRelayType.FAN_MEDIUM_SPEED.ordinal,
@@ -719,29 +557,6 @@ class HyperStatSplitCpuConfiguration (nodeAddress: Int, nodeType: String, priori
         )
         if (stageOrdinal == -1) return 0
         return (stageOrdinal - 16)
-    }
-
-
-    fun getRelayConfigurationMapping(): List<Triple<Boolean, Int, Port>> {
-        return listOf(
-            Triple(relay1Enabled.enabled, relay1Association.associationVal, Port.RELAY_ONE),
-            Triple(relay2Enabled.enabled, relay2Association.associationVal, Port.RELAY_TWO),
-            Triple(relay3Enabled.enabled, relay3Association.associationVal, Port.RELAY_THREE),
-            Triple(relay4Enabled.enabled, relay4Association.associationVal, Port.RELAY_FOUR),
-            Triple(relay5Enabled.enabled, relay5Association.associationVal, Port.RELAY_FIVE),
-            Triple(relay6Enabled.enabled, relay6Association.associationVal, Port.RELAY_SIX),
-            Triple(relay7Enabled.enabled, relay7Association.associationVal, Port.RELAY_SEVEN),
-            Triple(relay8Enabled.enabled, relay8Association.associationVal, Port.RELAY_EIGHT),
-        )
-    }
-
-    fun getAnalogOutsConfigurationMapping(): List<Triple<Boolean, Int, Port>> {
-        return listOf(
-            Triple(analogOut1Enabled.enabled, analogOut1Association.associationVal, Port.ANALOG_OUT_ONE),
-            Triple(analogOut2Enabled.enabled, analogOut2Association.associationVal, Port.ANALOG_OUT_TWO),
-            Triple(analogOut3Enabled.enabled, analogOut3Association.associationVal, Port.ANALOG_OUT_THREE),
-            Triple(analogOut4Enabled.enabled, analogOut4Association.associationVal, Port.ANALOG_OUT_FOUR)
-        )
     }
 
     fun getFanConfiguration(port: Port): AnalogOutVoltage {
@@ -779,7 +594,7 @@ data class StagedFanVoltages(
  * Following enum classes are used to define the input/output types for the HyperStat Split CPU Profile
  * These enum lists are picked from the model & Need to be updated when any changes are made in the model for the enum
  */
-enum class CpuControlType {
+enum class CpuAnalogControlType {
     COOLING, LINEAR_FAN, HEATING, OAO_DAMPER, STAGED_FAN, RETURN_DAMPER, EXTERNALLY_MAPPED, COMPRESSOR_SPEED, DCV_MODULATING_DAMPER,
 }
 
@@ -809,22 +624,4 @@ enum class CpuRelayType {
     AUX_HEATING_STAGE1,
     AUX_HEATING_STAGE2
 }
-
-enum class CpuSensorBusType {
-    SUPPLY_AIR, MIXED_AIR, OUTSIDE_AIR
-}
-
-enum class CpuUniInType {
-    NONE, VOLTAGE_INPUT, THERMISTOR_INPUT, BUILDING_STATIC_PRESSURE1, BUILDING_STATIC_PRESSURE2, BUILDING_STATIC_PRESSURE10, INDEX_6, INDEX_7, INDEX_8, INDEX_9,
-    INDEX_10, INDEX_11, INDEX_12, INDEX_13, SUPPLY_AIR_TEMPERATURE, INDEX_15, DUCT_STATIC_PRESSURE1_1, DUCT_STATIC_PRESSURE1_2, DUCT_STATIC_PRESSURE1_10, INDEX_19, INDEX_20,
-    INDEX_21, INDEX_22, INDEX_23, INDEX_24, INDEX_25, INDEX_26, INDEX_27, MIXED_AIR_TEMPERATURE, OUTSIDE_AIR_DAMPER_FEEDBACK, INDEX_30,
-    INDEX_31, INDEX_32, OUTSIDE_AIR_TEMPERATURE, INDEX_34, INDEX_35, INDEX_36, INDEX_37, INDEX_38, INDEX_39, INDEX_40,
-    CURRENT_TX_10, CURRENT_TX_20, CURRENT_TX_30, CURRENT_TX_50, CURRENT_TX_60, CURRENT_TX_100, CURRENT_TX_120, CURRENT_TX_150, CURRENT_TX_200, INDEX_50,
-    INDEX_51, INDEX_52, DISCHARGE_FAN_AM_STATUS, DISCHARGE_FAN_RUN_STATUS, DISCHARGE_FAN_TRIP_STATUS, INDEX_56, INDEX_57, EXHAUST_FAN_RUN_STATUS, EXHAUST_FAN_TRIP_STATUS, FILTER_STATUS_NO,
-    FILTER_STATUS_NC, INDEX_62, INDEX_63, FIRE_ALARM_STATUS, INDEX_65, INDEX_66, INDEX_67, INDEX_68, INDEX_69, INDEX_70,
-    INDEX_71, INDEX_72, HIGH_DIFFERENTIAL_PRESSURE_SWITCH, LOW_DIFFERENTIAL_PRESSURE_SWITCH, INDEX_75, INDEX_76, INDEX_77, INDEX_78, INDEX_79, INDEX_80,
-    INDEX_81, INDEX_82, CONDENSATE_STATUS_NO, CONDENSATE_STATUS_NC, INDEX_85, INDEX_86, INDEX_87, INDEX_88, INDEX_89, INDEX_90,
-    EMERGENCY_SHUTOFF_NO, EMERGENCY_SHUTOFF_NC, GENERIC_ALARM_NO, GENERIC_ALARM_NC, DOOR_WINDOW_SENSOR_NC, DOOR_WINDOW_SENSOR, DOOR_WINDOW_SENSOR_TITLE24_NC, DOOR_WINDOW_SENSOR_TITLE24, RUN_FAN_STATUS_NO, RUN_FAN_STATUS_NC
-}
-
 

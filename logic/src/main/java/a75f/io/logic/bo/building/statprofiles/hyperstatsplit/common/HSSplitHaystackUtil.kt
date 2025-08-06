@@ -1,7 +1,8 @@
 package a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.domain.HyperStatSplitEquip
+import a75f.io.domain.equips.HyperStatSplitEquip
+import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
@@ -12,9 +13,13 @@ import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HyperStatSpl
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToHeating
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
 import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode
+import a75f.io.logic.bo.building.statprofiles.util.getSplitConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getUvPossibleConditioningMode
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 
 /**
@@ -66,7 +71,7 @@ class HSSplitHaystackUtil(
             return status
         }
 
-        fun getPossibleConditioningModeSettings(hssEquip: HyperStatSplitEquip): PossibleConditioningMode {
+        fun getPossibleConditioningModeSettings(hssEquip: HsSplitCpuEquip): PossibleConditioningMode {
             var status = PossibleConditioningMode.OFF
             try {
 
@@ -116,7 +121,7 @@ class HSSplitHaystackUtil(
         fun getActualConditioningMode(hssEquip: HyperStatSplitEquip, selectedConditioningMode: Int): Int{
             if(selectedConditioningMode == 0)
                 return StandaloneConditioningMode.OFF.ordinal
-            return when(getPossibleConditioningModeSettings(hssEquip)){
+            return when(getHssProfileConditioningMode(getSplitConfiguration(hssEquip.getId()))){
                 PossibleConditioningMode.BOTH -> {
                     StandaloneConditioningMode.values()[selectedConditioningMode].ordinal
                 }
@@ -132,14 +137,21 @@ class HSSplitHaystackUtil(
             }
         }
 
-        fun getSelectedConditioningMode(hssEquip: HyperStatSplitEquip, actualConditioningMode: Int): Int{
+        fun getSelectedConditioningMode(actualConditioningMode: Int,config: HyperStatSplitConfiguration): Int{
             if(actualConditioningMode == 0)
                 return StandaloneConditioningMode.OFF.ordinal
-            return if(getPossibleConditioningModeSettings(hssEquip) == PossibleConditioningMode.BOTH)
+            return if(getHssProfileConditioningMode(config) == PossibleConditioningMode.BOTH)
                 StandaloneConditioningMode.values()[actualConditioningMode].ordinal
             else
                 1 // always it will be 1 because possibility is Off,CoolOnly | Off,Heatonly
 
+        }
+
+        fun getHssProfileConditioningMode(config: HyperStatSplitConfiguration?): PossibleConditioningMode {
+            return when (config) {
+                is HyperStatSplitCpuConfiguration -> getPossibleConditioningModeSettings(config)
+                else -> getUvPossibleConditioningMode(config as UnitVentilatorConfiguration)
+            }
         }
 
         fun getSplitPossibleFanModeSettings(node: Int): PossibleFanMode {
@@ -191,17 +203,17 @@ class HSSplitHaystackUtil(
         }
 
 
-        fun getActualFanMode(hssEquip: HyperStatSplitEquip, position: Int): Int{
+        fun getActualFanMode(equip: HyperStatSplitEquip, position: Int): Int{
             return HyperStatSplitAssociationUtil.getSelectedFanModeByLevel(
-                fanLevel = HyperStatSplitAssociationUtil.getSelectedFanLevel(hssEquip),
+                fanLevel = HyperStatSplitAssociationUtil.getHssProfileFanLevel(equip, getSplitConfiguration(equip.getId())),
                 selectedFan = position
             ).ordinal
 
         }
 
-        fun getFanSelectionMode(hssEquip: HyperStatSplitEquip, position: Int): Int{
+        fun getFanSelectionMode(hssEquip: HyperStatSplitEquip, position: Int,configuration: HyperStatSplitConfiguration): Int{
             return HyperStatSplitAssociationUtil.getSelectedFanMode(
-                fanLevel = HyperStatSplitAssociationUtil.getSelectedFanLevel(hssEquip),
+                fanLevel = HyperStatSplitAssociationUtil.getHssProfileFanLevel(hssEquip,configuration),
                 selectedFan = position
             )
         }

@@ -86,6 +86,7 @@ import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.connectnode.ConnectNodeFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
+import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe4UVFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatCpuFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatHpuFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatPipe2Fragment;
@@ -1243,6 +1244,11 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(MyStatHpuFragment.Companion.newInstance(Short.parseShort(nodeAddress)
                                     , zone.getId(), floor.getId(),NodeType.MYSTAT, profile.getProfileType()),
                             MyStatHpuFragment.Companion.getID());
+                    break;
+                case HYPERSTATSPLIT_4PIPE_UV:
+                    showDialogFragment(Pipe4UVFragment.Companion.newInstance(Short.parseShort(nodeAddress)
+                                    , zone.getId(), floor.getId(),NodeType.HYPERSTATSPLIT, profile.getProfileType()),
+                            Pipe4UVFragment.Companion.getID());
                     break;
 
                 case MODBUS_UPS30:

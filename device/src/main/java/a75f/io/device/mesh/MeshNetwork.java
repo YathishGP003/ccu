@@ -199,7 +199,7 @@ public class MeshNetwork extends DeviceNetwork
                             case HYPER_STAT:
                                 Equip equip = new Equip.Builder()
                                         .setHashMap(CCUHsApi.getInstance()
-                                                .read("equip and group ==\"" + d.getAddr() + "\"")).build();
+                                                .readEntity("equip and group ==\"" + d.getAddr() + "\"")).build();
                                 if (bSeedMessage) {
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
                                             "SEEDS ===================== " + d.getAddr());
@@ -240,10 +240,6 @@ public class MeshNetwork extends DeviceNetwork
                                 break;
 
                             case HYPERSTATSPLIT:
-                                Equip hssEquip = new Equip.Builder()
-                                        .setHashMap(CCUHsApi.getInstance()
-                                                .read("equip and group ==\""+d.getAddr()+ "\"")).build();
-
                                 if (bSeedMessage) {
                                     CcuLog.d(L.TAG_CCU_SERIAL,"=================NOW SENDING HyperSplit SEEDS ===================== "+d.getAddr());
                                     HyperSplitMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
@@ -329,22 +325,22 @@ public class MeshNetwork extends DeviceNetwork
                 {
                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING Bypass Damper SN SEED Message =====================");
                     CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(new Zone.Builder().setDisplayName("BYPASS DAMPER").build(),
-                            (short) ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef(),"bypass");
+                            ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef(),"bypass");
                     sendStructToCM(seedMessage);
                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING Bypass Damper SN Settings2 Message =====================");
                     CcuToCmOverUsbSnSettings2Message_t settings2Message = LSmartNode.getSettings2Message(new Zone.Builder().setDisplayName("BYPASS DAMPER").build(),
-                            (short) ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef(),"bypass");
+                            ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef(),"bypass");
                     sendStructToCM(settings2Message);
                 }
                 else
                 {
                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING Bypass Damper SN Settings=====================");
                     CcuToCmOverUsbSnSettingsMessage_t settingsMessage = LSmartNode.getSettingsMessage(new Zone.Builder().setDisplayName("BYPASS DAMPER").build()
-                            , (short)L.ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef(),"bypass");
+                            , L.ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef(),"bypass");
                     sendStruct((short) settingsMessage.smartNodeAddress.get(), settingsMessage);
                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING Bypass Damper SN CONTROLS=====================");
                     CcuToCmOverUsbSnControlsMessage_t controlsMessage = LSmartNode.getControlMessage(new Zone.Builder().setDisplayName("BYPASS DAMPER").build()
-                            , (short) ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef());
+                            , ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef());
                     //Check duplicated without current time and then append time to control package.
                     if (!checkDuplicateStruct((short) controlsMessage.smartNodeAddress.get(), controlsMessage))
                     {
@@ -353,7 +349,7 @@ public class MeshNetwork extends DeviceNetwork
                     }
                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING Bypass Damper SN SETTINGS2=====================");
                     CcuToCmOverUsbSnSettings2Message_t settings2Message = LSmartNode.getSettings2Message(new Zone.Builder().setDisplayName("BYPASS DAMPER").build()
-                            , (short) ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef(), "bypass");
+                            , ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef(), "bypass");
                     sendStruct((short) settings2Message.smartNodeAddress.get(), settings2Message);
                 }
             }

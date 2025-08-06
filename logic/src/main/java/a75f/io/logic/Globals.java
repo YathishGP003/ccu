@@ -23,7 +23,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.alerts.AlertManager;
-import a75f.io.alerts.AlertProcessJob;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
@@ -53,11 +52,6 @@ import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.erm.EmrProfile;
-import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.cpu.HyperStatCpuProfile;
-import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.hpu.HyperStatHpuProfile;
-import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.monitoring.HyperStatV2MonitoringProfile;
-import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.otn.OTNProfile;
@@ -67,9 +61,15 @@ import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitProfile;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
 import a75f.io.logic.bo.building.sse.SingleStageProfile;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
-import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe2Profile;
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.cpu.HyperStatCpuProfile;
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.hpu.HyperStatHpuProfile;
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.monitoring.HyperStatV2MonitoringProfile;
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UnitVentilatorProfile;
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatCpuProfile;
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatHpuProfile;
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe2Profile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
@@ -105,7 +105,6 @@ import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.util.bacnet.BacnetDeviceJob;
 import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.logic.watchdog.Watchdog;
-import a75f.io.sanity.framework.SanityManager;
 import a75f.io.util.ExecutorTask;
 
 /*
@@ -140,9 +139,6 @@ public class Globals {
     private static Globals globals;
     BuildingProcessJob mProcessJob = new BuildingProcessJob();
     ScheduleProcessJob mScheduleProcessJob = new ScheduleProcessJob();
-
-    AlertProcessJob mAlertProcessJob;
-
     private ScheduledExecutorService taskExecutor;
     private Context mApplicationContext;
     private CCUApplication mCCUApplication;
@@ -620,7 +616,10 @@ public class Globals {
                             mystatHpuProfile.addEquip(eq.getId());
                             L.ccu().zoneProfiles.add(mystatHpuProfile);
                             break;
-
+                        case HYPERSTATSPLIT_4PIPE_UV:
+                            Pipe4UnitVentilatorProfile pipe4UvProfile = new Pipe4UnitVentilatorProfile(eq.getId(), Short.parseShort(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(pipe4UvProfile);
+                            break;
 
                         case MODBUS_PAC:
                         case MODBUS_RRS:

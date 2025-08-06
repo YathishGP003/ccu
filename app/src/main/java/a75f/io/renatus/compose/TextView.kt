@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextPainter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -335,8 +336,9 @@ fun StyledTextView(text: String, fontSize : Int, textAlignment: TextAlign = Text
             fontWeight = FontWeight.Normal,
             fontSize = fontSize.sp,
             color = Color.Black,
-            textAlign = textAlignment
+            textAlign = textAlignment,
         ),
+        overflow = TextOverflow.Ellipsis,
         text = text,
     )
 }

@@ -24,11 +24,12 @@ import a75f.io.domain.util.MODEL_HN_VAV_PARALLEL_FAN
 import a75f.io.domain.util.MODEL_HN_VAV_SERIES_FAN
 import a75f.io.domain.util.MODEL_HYPERSTAT_CPU
 import a75f.io.domain.util.MODEL_HYPERSTAT_DEVICE
-import a75f.io.domain.util.MODEL_HYPERSTAT_MONITORING
 import a75f.io.domain.util.MODEL_HYPERSTAT_HPU
+import a75f.io.domain.util.MODEL_HYPERSTAT_MONITORING
 import a75f.io.domain.util.MODEL_HYPERSTAT_PIPE2
 import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_CPU
 import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_DEVICE
+import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_PIPE4
 import a75f.io.domain.util.MODEL_MYSTAT_CPU
 import a75f.io.domain.util.MODEL_MYSTAT_DEVICE
 import a75f.io.domain.util.MODEL_MYSTAT_HPU
@@ -77,6 +78,7 @@ fun getRequiredModels(): List<String> {
             MODEL_SN_VAV_ACB,
             MODEL_HN_VAV_ACB,
             MODEL_HYPERSTAT_SPLIT_CPU,
+            MODEL_HYPERSTAT_SPLIT_PIPE4,
             MODEL_SN_BYPASS_DAMPER,
             MODEL_SMART_NODE_DEVICE,
             MODEL_HELIO_NODE_DEVICE,

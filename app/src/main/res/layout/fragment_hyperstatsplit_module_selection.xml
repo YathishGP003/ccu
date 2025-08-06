@@ -95,6 +95,52 @@
                     android:layout_alignParentEnd="true"
                     android:background="@color/listview_divider_color" />
             </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/pipe4cell"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/next_arrow_button_enabled"
+                    app:tint="?orange_75f" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginVertical="20dp"
+                    android:layout_marginEnd="114dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end|center_vertical"
+                        android:text="@string/title_hss_pipe4UV"
+                        android:textAppearance="@style/title_bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end|center_vertical"
+                        android:text="@string/desc_hss_pipe4UV"
+                        android:textAppearance="@style/text_label_secondary" />
+
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+                    android:background="@color/listview_divider_color" />
+            </RelativeLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

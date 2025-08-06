@@ -260,6 +260,12 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
         return domainName.readPoint(equipRef)
     }
 
+    // Use the following function only for enabled config points
+    fun isEnabled() : Boolean {
+        requireId()
+        return Domain.hayStack.readDefaultValById(id) > 0
+    }
+
     override fun equals(other: Any?)
             = (other is Point) && this.domainName == other.domainName
     override fun hashCode() = Objects.hash(domainName)

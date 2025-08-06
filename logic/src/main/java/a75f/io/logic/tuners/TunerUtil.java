@@ -1,5 +1,8 @@
 package a75f.io.logic.tuners;
 
+import static a75f.io.api.haystack.HayStackConstants.DEFAULT_INIT_VAL_LEVEL;
+import static a75f.io.domain.api.Domain.buildingEquip;
+
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -9,22 +12,18 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.system.dab.DabSystemProfile;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.building.vav.VavProfile;
-
-import static a75f.io.api.haystack.HayStackConstants.DEFAULT_INIT_VAL_LEVEL;
-import static a75f.io.domain.api.Domain.buildingEquip;
+import a75f.io.logic.util.OfflineModeUtilKt;
 
 /**
  * Created by samjithsadasivan on 1/16/19.
@@ -243,7 +242,7 @@ public class TunerUtil
     
     public static double getProportionalGain(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap pgain = hayStack.read("point and tuner and pgain and not trueCFM and not trueCfm and equipRef == \""+equipRef+"\"");
+        HashMap pgain = hayStack.read("point (not air and inlet) and tuner and pgain and not trueCFM and not trueCfm and equipRef == \""+equipRef+"\"");
         if (!pgain.isEmpty()) {
             ArrayList values = hayStack.readPoint(pgain.get("id").toString());
             if (values != null && values.size() > 0) {
@@ -260,7 +259,7 @@ public class TunerUtil
     
     public static double getIntegralGain(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap integralGain = hayStack.read("point and tuner and igain and not trueCFM and not trueCfm and equipRef == \""+equipRef+"\"");
+        HashMap integralGain = hayStack.read("point (not air and inlet) and tuner and igain and not trueCFM and not trueCfm and equipRef == \""+equipRef+"\"");
         
         if (!integralGain.isEmpty()) {
             ArrayList values = hayStack.readPoint(integralGain.get("id").toString());
@@ -278,7 +277,7 @@ public class TunerUtil
 
     public static double getProportionalSpread(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap proportionalSpread = hayStack.read("point and tuner and pspread and not trueCFM and not trueCfm and equipRef == \""+equipRef+"\"");
+        HashMap proportionalSpread = hayStack.read("point and (not air and inlet) and tuner and pspread and not trueCFM and not trueCfm and equipRef == \""+equipRef+"\"");
         
         if (!proportionalSpread.isEmpty()) {
             ArrayList values = hayStack.readPoint(proportionalSpread.get("id").toString());
@@ -296,7 +295,7 @@ public class TunerUtil
     
     public static double getIntegralTimeout(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap itimeout = hayStack.read("point and tuner and itimeout and not trueCFM and not trueCfm and equipRef == \""+equipRef+"\"");
+        HashMap itimeout = hayStack.read("point and (not air and inlet) tuner and itimeout and not trueCFM and not trueCfm and equipRef == \""+equipRef+"\"");
         
         if (!itimeout.isEmpty()) {
             ArrayList values = hayStack.readPoint(itimeout.get("id").toString());

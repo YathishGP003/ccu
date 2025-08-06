@@ -1,11 +1,11 @@
 package a75f.io.logic.controlcomponents.handlers
 
 import a75f.io.domain.util.CalibratedPoint
-import a75f.io.logger.CcuLog
 import a75f.io.logic.controlcomponents.controlimpls.GenericBooleanControllerImpl
 import a75f.io.logic.controlcomponents.controls.Constraint
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.util.isSoftOccupied
+import a75f.io.logic.controlcomponents.util.logIt
 
 /**
  * Created by Manjunath K on 05-05-2025.
@@ -21,7 +21,7 @@ class OccupiedEnabledController(val occupancy: CalibratedPoint, val logTag: Stri
     }
 
     override fun runController(): Boolean {
-        CcuLog.d(logTag, "Running OccupiedEnabledController" +
+        logIt(logTag, "Running OccupiedEnabledController" +
                 " occupancy ${occupancy.data} Status = ${controller.getActiveControl()}")
         return controller.getActiveControl()
     }

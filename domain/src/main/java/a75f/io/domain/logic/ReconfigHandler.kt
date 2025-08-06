@@ -31,6 +31,9 @@ object ReconfigHandler {
         profileConfig.getAssociationConfigs().forEach {
             CcuLog.i(Domain.LOG_TAG, "Association config ${it.domainName} ${it.associationVal}")
         }
+        profileConfig.getStringConfigs().forEach {
+            CcuLog.i(Domain.LOG_TAG, "String config ${it.domainName} ${it.currentVal}")
+        }
 
         val newEntityConfig = EntityConfiguration()
 
@@ -58,7 +61,7 @@ object ReconfigHandler {
     }
 
     private fun isConfigPoint(domainName: String, profileConfig: ProfileConfiguration): Boolean {
-        return (profileConfig.getEnableConfigs() + profileConfig.getValueConfigs()).find { it.domainName == domainName } != null || (profileConfig.getAssociationConfigs()).find { it.domainName == domainName } != null
+        return (profileConfig.getEnableConfigs() + profileConfig.getValueConfigs() + profileConfig.getStringConfigs()).find { it.domainName == domainName } != null || (profileConfig.getAssociationConfigs()).find { it.domainName == domainName } != null
     }
 
     private fun pointIsDynamicSensor(

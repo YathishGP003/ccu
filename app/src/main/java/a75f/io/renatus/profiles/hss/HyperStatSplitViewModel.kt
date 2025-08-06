@@ -1,24 +1,40 @@
 package a75f.io.renatus.profiles.hss
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.device.HyperSplit
+import a75f.io.device.mesh.hypersplit.HyperSplitMessageGenerator
 import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender
 import a75f.io.device.serial.MessageType
+import a75f.io.domain.api.Domain.getListByDomainName
+import a75f.io.domain.api.DomainName
+import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.CpuEconSensorBusTempAssociation
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration.HyperStatSplitControlType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.UniversalInputs
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuAnalogControlType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVRelayControls
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UvAnalogOutControls
+import a75f.io.logic.bo.building.statprofiles.util.getDomainHyperStatSplitDevice
+import a75f.io.logic.getSchedule
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.formattedToastMessage
+import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.profiles.OnPairingCompleteListener
-import a75f.io.renatus.util.TestSignalManager
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuState
+import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe4UvViewState
 import android.content.Context
 import android.os.Bundle
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -42,25 +58,21 @@ open class HyperStatSplitViewModel : ViewModel() {
     lateinit var floorRef: String
     lateinit var profileType: ProfileType
     lateinit var nodeType: NodeType
-    protected var deviceAddress by Delegates.notNull<Short>()
+     var deviceAddress by Delegates.notNull<Short>()
 
-    protected lateinit var hssProfile: HyperStatSplitProfile
+     lateinit var hssProfile: HyperStatSplitProfile
     lateinit var profileConfiguration: HyperStatSplitConfiguration
 
     lateinit var equipModel : SeventyFiveFProfileDirective
     lateinit var deviceModel : SeventyFiveFDeviceDirective
-    open var viewState = mutableStateOf(HyperStatSplitState())
+    open lateinit var viewState: MutableState<HyperStatSplitState>
 
     lateinit var context: Context
     lateinit var hayStack: CCUHsApi
 
     lateinit var pairingCompleteListener: OnPairingCompleteListener
     protected var saveJob : Job? = null
-    var openDuplicateDialog by mutableStateOf(false)
-    var openMissingDialog by mutableStateOf(false)
     var openCancelDialog by mutableStateOf(false)
-    var noOBRelay by mutableStateOf(false)
-    var noCompressorStages by mutableStateOf(false)
 
     lateinit var temperatureOffsetsList: List<String>
     lateinit var fanLowMedHighSpeedsList: List<String>
@@ -74,6 +86,7 @@ open class HyperStatSplitViewModel : ViewModel() {
     lateinit var zoneVOCThresholdList: List<String>
     lateinit var zoneVOCTargetList: List<String>
     lateinit var zonePM2p5TargetList: List<String>
+    lateinit var fanRecirculateList: List<String>
 
     var minMaxVoltage = List(11) { Option(it, it.toString()) }
     var testVoltage = List(101) { Option(it, it.toString()) }
@@ -81,10 +94,9 @@ open class HyperStatSplitViewModel : ViewModel() {
     val isDisabled: LiveData<Boolean> = _isDisabled
     private val _isReloadRequired = MutableLiveData(false)
     val isReloadRequired: LiveData<Boolean> = _isReloadRequired
+    var equipRef: String? = null
     open fun init(bundle: Bundle, context: Context, hayStack: CCUHsApi) {
-        openDuplicateDialog = false
-        openMissingDialog = false
-        openCancelDialog = false
+        viewState = mutableStateOf(HyperStatSplitState())
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
         zoneRef = bundle.getString(FragmentCommonBundleArgs.ARG_NAME)!!
         floorRef = bundle.getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
@@ -130,83 +142,92 @@ open class HyperStatSplitViewModel : ViewModel() {
         // implemented in subclasses
     }
 
-    open fun handleTestRelayChanged(index: Int, isChecked: Boolean) {
-        when (index) {
-            0 -> viewState.value.testStateRelay1 = isChecked
-            1 -> viewState.value.testStateRelay2 = isChecked
-            2 -> viewState.value.testStateRelay3 = isChecked
-            3 -> viewState.value.testStateRelay4 = isChecked
-            4 -> viewState.value.testStateRelay5 = isChecked
-            5 -> viewState.value.testStateRelay6 = isChecked
-            6 -> viewState.value.testStateRelay7 = isChecked
-            7 -> viewState.value.testStateRelay8 = isChecked
+    fun handleTestRelayChanged(index: Int, isChecked: Boolean) {
+        val state =  if (isChecked) 1.0 else 0.0
+        if(equipRef!=null){
+            val device = getDomainHyperStatSplitDevice(equipRef!!)
+            when (index) {
+                0 -> device.relay1.writePointValue(state)
+                1 -> device.relay2.writePointValue(state)
+                2 -> device.relay3.writePointValue(state)
+                3 -> device.relay4.writePointValue(state)
+                4 -> device.relay5.writePointValue(state)
+                5 -> device.relay6.writePointValue(state)
+                6 -> device.relay7.writePointValue(state)
+                7 -> device.relay8.writePointValue(state)
+            }
+            sendTestSignalControlMessage()
+            CcuLog.d(L.TAG_CCU_HSHST, "R1 ${device.relay1.readPointValue()} R2 ${device.relay2.readPointValue()} R3 ${device.relay3.readPointValue()} R4 ${device.relay4.readPointValue()} A1 ${device.relay5.readPointValue()}, R6 ${device.relay6.readPointValue()} r7 ${device.relay7.readPointValue()} R8 ${device.relay8.readPointValue()} , A1 ${device.analog1Out.readPointValue()} A2 ${device.analog2Out.readPointValue()} A3 ${device.analog3Out.readPointValue()} A4 ${device.analog4Out.readPointValue()}")
+        } else {
+            showToast("Please pair equip to send test command", context)
+            CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "Please pair equip to send test command")
+            return
         }
 
-        sendTestSignalControlMessage()
     }
 
     open fun handleTestAnalogOutChanged(index: Int, value: Double) {
-        when (index) {
-            0 -> viewState.value.testStateAnalogOut1 = value
-            1 -> viewState.value.testStateAnalogOut2 = value
-            2 -> viewState.value.testStateAnalogOut3 = value
-            3 -> viewState.value.testStateAnalogOut4 = value
-        }
 
-        sendTestSignalControlMessage()
+        if(equipRef!=null){
+            val device = getDomainHyperStatSplitDevice(equipRef!!)
+            when (index) {
+                0 -> device.analog1Out.writePointValue(value)
+                1 -> device.analog2Out.writePointValue(value)
+                2 -> device.analog3Out.writePointValue(value)
+                3 -> device.analog4Out.writePointValue(value)
+            }
+            sendTestSignalControlMessage()
+            CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "R1 ${device.relay1.readPointValue()} R2 ${device.relay2.readPointValue()} R3 ${device.relay3.readPointValue()} R4 ${device.relay4.readPointValue()} A1 ${device.relay5.readPointValue()}, R6 ${device.relay6.readPointValue()} r7 ${device.relay7.readPointValue()} R8 ${device.relay8.readPointValue()} , A1 ${device.analog1Out.readPointValue()} A2 ${device.analog2Out.readPointValue()} A3 ${device.analog3Out.readPointValue()} A4 ${device.analog4Out.readPointValue()}")
+        } else {
+            showToast("Please pair equip to send test command", context)
+            CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "Please pair equip to send test command")
+            return
+        }
     }
 
     open fun sendTestSignalControlMessage() {
-        val testMessage = HyperSplit.HyperSplitControlsMessage_t.newBuilder()
-            .setRelay1(viewState.value.testStateRelay1)
-            .setRelay2(viewState.value.testStateRelay2)
-            .setRelay3(viewState.value.testStateRelay3)
-            .setRelay4(viewState.value.testStateRelay4)
-            .setRelay5(viewState.value.testStateRelay5)
-            .setRelay6(viewState.value.testStateRelay6)
-            .setRelay7(viewState.value.testStateRelay7)
-            .setRelay8(viewState.value.testStateRelay8)
-            .setAnalogOut1(
-                HyperSplit.HyperSplitAnalogOutputControl_t
-                    .newBuilder().setPercent(viewState.value.testStateAnalogOut1.toInt()).build()
-            )
-            .setAnalogOut2(
-                HyperSplit.HyperSplitAnalogOutputControl_t
-                    .newBuilder().setPercent(viewState.value.testStateAnalogOut2.toInt()).build()
-            )
-            .setAnalogOut3(
-                HyperSplit.HyperSplitAnalogOutputControl_t
-                    .newBuilder().setPercent(viewState.value.testStateAnalogOut3.toInt()).build()
-            )
-            .setAnalogOut4(
-                HyperSplit.HyperSplitAnalogOutputControl_t
-                    .newBuilder().setPercent(viewState.value.testStateAnalogOut4.toInt()).build()
-            )
-            .setSetTempCooling(148)
-            .setSetTempHeating(140)
-            .setFanSpeed(HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_AUTO)
-            .setConditioningMode(HyperSplit.HyperSplitConditioningMode_e.HYPERSPLIT_CONDITIONING_MODE_AUTO)
-            .build()
-
+        if (!Globals.getInstance().isTestMode) Globals.getInstance().isTestMode = true
         HyperSplitMessageSender.writeControlMessage(
-            testMessage, deviceAddress.toInt(),
+            HyperSplitMessageGenerator.getControlMessage(
+                deviceAddress.toInt(),
+                equipRef
+            ).build(), deviceAddress.toInt(),
             MessageType.HYPERSPLIT_CONTROLS_MESSAGE, false
         )
+    }
 
-        if (viewState.value.testStateRelay1 || viewState.value.testStateRelay2 ||
-            viewState.value.testStateRelay3 || viewState.value.testStateRelay4 ||
-            viewState.value.testStateRelay5 || viewState.value.testStateRelay6 ||
-            viewState.value.testStateRelay7 || viewState.value.testStateRelay8) {
 
-            if (!Globals.getInstance().isTestMode) {
-                Globals.getInstance().isTestMode = true
-            }
-        } else {
-            if (Globals.getInstance().isTestMode) {
-                Globals.getInstance().isTestMode = false
-                TestSignalManager.restoreAllPoints()
+    fun getTestSignalForRelay(index: Int):Boolean{
+
+        if(equipRef!=null){
+            val device = getDomainHyperStatSplitDevice(equipRef!!)
+            return when (index) {
+                0 -> device.relay1.readPointValue() >0
+                1 -> device.relay2.readPointValue() >0
+                2 -> device.relay3.readPointValue() >0
+                3 -> device.relay4.readPointValue() >0
+                4 -> device.relay5.readPointValue() >0
+                5 -> device.relay6.readPointValue() >0
+                6 -> device.relay7.readPointValue() >0
+                7 -> device.relay8.readPointValue() >0
+                else -> false
             }
         }
+        return false
+    }
+
+    fun getTestSignalForAnalogOut(index: Int): Double {
+        if(equipRef!=null){
+            val equip = getDomainHyperStatSplitDevice(equipRef!!)
+            return when (index) {
+                0 -> equip.analog1Out.readPointValue()
+                1 -> equip.analog2Out.readPointValue()
+                2 -> equip.analog3Out.readPointValue()
+                3 -> equip.analog4Out.readPointValue()
+                else -> 0.0
+            }
+        }
+        return 0.0
     }
 
     open fun hasUnsavedChanges() : Boolean { return false }
@@ -217,10 +238,28 @@ open class HyperStatSplitViewModel : ViewModel() {
     }
 
     fun applyCopiedConfiguration() {
-        viewState.value = HyperStatSplitCpuState.fromProfileConfigToState(CopyConfiguration.getCopiedConfiguration() as HyperStatSplitCpuConfiguration)
+        val config = CopyConfiguration.getCopiedConfiguration()
+        val copiedProfileType = CopyConfiguration.getSelectedProfileType()
+        when (copiedProfileType) {
+
+            ProfileType.HYPERSTATSPLIT_4PIPE_UV -> {
+                viewState.value = Pipe4UvViewState.fromProfileConfigToState(config as Pipe4UVConfiguration)
+            }
+
+            ProfileType.HYPERSTATSPLIT_CPU -> {
+                viewState.value = HyperStatSplitCpuState.fromProfileConfigToState(config as HyperStatSplitCpuConfiguration)
+            }
+
+            else -> {
+                CcuLog.i(L.TAG_CCU_COPY_CONFIGURATION, "Unsupported profile type for copy configuration: $profileType")
+            }
+        }
         reloadUiRequired()
         disablePasteConfiguration()
-        formattedToastMessage(context.getString(R.string.Toast_Success_Message_paste_Configuration), context)
+        formattedToastMessage(
+            context.getString(R.string.Toast_Success_Message_paste_Configuration),
+            context
+        )
     }
     private  fun reloadUiRequired(){
         _isReloadRequired.value = !_isReloadRequired.value!!
@@ -236,6 +275,242 @@ open class HyperStatSplitViewModel : ViewModel() {
     fun disablePasteConfiguration() {
         viewModelScope.launch(Dispatchers.Main) {
             _isDisabled.value = !_isDisabled.value!!
+        }
+    }
+
+    // common methods for need for UV viewmodel
+
+
+    fun isPrePurgeEnabled() : Boolean {
+        return this.viewState.value.prePurge
+    }
+
+    fun isOAODamperAOEnabled(enumValue: Int) = isAnyAnalogMappedToControl(enumValue)
+
+    fun initializeLists() {
+        temperatureOffsetsList = getListByDomainName(DomainName.temperatureOffset, equipModel)
+
+        fanLowMedHighSpeedsList = getListByDomainName(DomainName.analog1FanLow, equipModel)
+
+        outsideDamperMinOpenList = getListByDomainName(DomainName.outsideDamperMinOpenDuringRecirculation, equipModel)
+        exhaustFanThresholdList = getListByDomainName(DomainName.exhaustFanStage1Threshold, equipModel)
+        exhaustFanHysteresisList = getListByDomainName(DomainName.exhaustFanHysteresis, equipModel)
+
+        prePurgeOutsideDamperOpenList = getListByDomainName(DomainName.prePurgeOutsideDamperOpen, equipModel)
+        zoneCO2DamperOpeningRateList = getListByDomainName(DomainName.co2DamperOpeningRate, equipModel)
+        zoneCO2ThresholdList = getListByDomainName(DomainName.co2Threshold, equipModel)
+        zoneCO2TargetList = getListByDomainName(DomainName.co2Target, equipModel)
+        zoneVOCThresholdList = getListByDomainName(DomainName.vocThreshold, equipModel)
+        zoneVOCTargetList = getListByDomainName(DomainName.vocTarget, equipModel)
+        zonePM2p5TargetList = getListByDomainName(DomainName.pm25Target, equipModel)
+        fanRecirculateList = getListByDomainName(DomainName.fanOutRecirculate, equipModel)
+    }
+
+
+    fun isCompressorMappedWithAnyRelayForUV(): Boolean {
+        return (isAnyRelayMappedToControl(CpuRelayType.COMPRESSOR_STAGE1)||
+                isAnyRelayMappedToControl(CpuRelayType.COMPRESSOR_STAGE2)||
+                isAnyRelayMappedToControl(CpuRelayType.COMPRESSOR_STAGE3))
+    }
+
+    fun isChangeOverCoolingMappedForUV(ignoreConfig: ConfigState) = isAnyRelayMappedToControl(
+        CpuRelayType.CHANGE_OVER_O_COOLING, ignoreConfig)
+
+    fun isChangeOverHeatingMappedForUV(ignoreConfig: ConfigState) = isAnyRelayMappedToControl(
+        CpuRelayType.CHANGE_OVER_B_HEATING, ignoreConfig)
+
+     fun isAnyRelayMappedToControl(type: CpuRelayType): Boolean {
+
+        fun isEnabledAndMapped(configState: ConfigState): Boolean {
+            return (configState.enabled && configState.association == type.ordinal)
+        }
+        return (isEnabledAndMapped(this.viewState.value.relay1Config) ||
+                isEnabledAndMapped(this.viewState.value.relay2Config) ||
+                isEnabledAndMapped(this.viewState.value.relay3Config) ||
+                isEnabledAndMapped(this.viewState.value.relay4Config) ||
+                isEnabledAndMapped(this.viewState.value.relay5Config) ||
+                isEnabledAndMapped(this.viewState.value.relay6Config) ||
+                isEnabledAndMapped(this.viewState.value.relay7Config) ||
+                isEnabledAndMapped(this.viewState.value.relay8Config))
+    }
+
+    fun isCoolingAOEnabled(enumValue : Int) = isAnyAnalogMappedToControl(enumValue)
+    fun isHeatingAOEnabled(enumValue : Int) = isAnyAnalogMappedToControl(enumValue)
+    fun isLinearFanAOEnabled(enumValue : Int) = isAnyAnalogMappedToControl(enumValue)
+    fun isStagedFanAOEnabled(enumValue : Int) = isAnyAnalogMappedToControl(enumValue)
+    fun isReturnDamperAOEnabled(enumValue : Int) = isAnyAnalogMappedToControl(enumValue)
+    fun isCompressorAOEnabled(enumValue : Int) = isAnyAnalogMappedToControl(enumValue)
+    fun isDamperModulationAOEnabled(enumValue : Int) = isAnyAnalogMappedToControl(enumValue)
+
+    fun isAnyAnalogMappedToControl(enumValue: Int): Boolean {
+        val enumType = when (profileConfiguration) {
+            is HyperStatSplitCpuConfiguration -> CpuAnalogControlType.values()
+            is Pipe4UVConfiguration -> Pipe4UvAnalogOutControls.values()
+            else -> CpuAnalogControlType.values()
+        }
+
+        return (
+                (this.viewState.value.analogOut1Enabled && this.viewState.value.analogOut1Association == enumType[enumValue].ordinal) ||
+                        (this.viewState.value.analogOut2Enabled && this.viewState.value.analogOut2Association == enumType[enumValue].ordinal) ||
+                        (this.viewState.value.analogOut3Enabled && this.viewState.value.analogOut3Association == enumType[enumValue].ordinal) ||
+                        (this.viewState.value.analogOut4Enabled && this.viewState.value.analogOut4Association == enumType[enumValue].ordinal)
+                )
+    }
+
+     fun isAnyUniversalInMapped(type: UniversalInputs): Boolean {
+        return (
+                (this.viewState.value.universalIn1Config.enabled && this.viewState.value.universalIn1Config.association == type.ordinal) ||
+                        (this.viewState.value.universalIn2Config.enabled && this.viewState.value.universalIn2Config.association == type.ordinal) ||
+                        (this.viewState.value.universalIn3Config.enabled && this.viewState.value.universalIn3Config.association == type.ordinal) ||
+                        (this.viewState.value.universalIn4Config.enabled && this.viewState.value.universalIn4Config.association == type.ordinal) ||
+                        (this.viewState.value.universalIn5Config.enabled && this.viewState.value.universalIn5Config.association == type.ordinal) ||
+                        (this.viewState.value.universalIn6Config.enabled && this.viewState.value.universalIn6Config.association == type.ordinal) ||
+                        (this.viewState.value.universalIn7Config.enabled && this.viewState.value.universalIn7Config.association == type.ordinal) ||
+                        (this.viewState.value.universalIn8Config.enabled && this.viewState.value.universalIn8Config.association == type.ordinal)
+                )
+    }
+
+    fun isUniversalInDuplicated(type: UniversalInputs): Boolean {
+        var nInstances = 0
+
+        if (this.viewState.value.universalIn1Config.enabled && this.viewState.value.universalIn1Config.association == type.ordinal) nInstances++
+        if (this.viewState.value.universalIn2Config.enabled && this.viewState.value.universalIn2Config.association == type.ordinal) nInstances++
+        if (this.viewState.value.universalIn3Config.enabled && this.viewState.value.universalIn3Config.association == type.ordinal) nInstances++
+        if (this.viewState.value.universalIn4Config.enabled && this.viewState.value.universalIn4Config.association == type.ordinal) nInstances++
+        if (this.viewState.value.universalIn5Config.enabled && this.viewState.value.universalIn5Config.association == type.ordinal) nInstances++
+        if (this.viewState.value.universalIn6Config.enabled && this.viewState.value.universalIn6Config.association == type.ordinal) nInstances++
+        if (this.viewState.value.universalIn7Config.enabled && this.viewState.value.universalIn7Config.association == type.ordinal) nInstances++
+        if (this.viewState.value.universalIn8Config.enabled && this.viewState.value.universalIn8Config.association == type.ordinal) nInstances++
+
+        return nInstances > 1
+    }
+
+     fun isAnySensorBusMapped(type: CpuEconSensorBusTempAssociation): Boolean {
+        return (
+                (this.viewState.value.sensorAddress0.enabled && this.viewState.value.sensorAddress0.association == type.ordinal) ||
+                        (this.viewState.value.sensorAddress1.enabled && this.viewState.value.sensorAddress1.association == type.ordinal) ||
+                        (this.viewState.value.sensorAddress2.enabled && this.viewState.value.sensorAddress2.association == type.ordinal)
+                )
+    }
+
+     fun isSensorBusDuplicated(type: CpuEconSensorBusTempAssociation): Boolean {
+        var nInstances = 0
+
+        if (this.viewState.value.sensorAddress0.enabled && this.viewState.value.sensorAddress0.association == type.ordinal) nInstances++
+        if (this.viewState.value.sensorAddress1.enabled && this.viewState.value.sensorAddress1.association == type.ordinal) nInstances++
+        if (this.viewState.value.sensorAddress2.enabled && this.viewState.value.sensorAddress2.association == type.ordinal) nInstances++
+
+        return nInstances > 1
+    }
+
+    fun isHeatStage1RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.HEATING_STAGE1)
+    fun isHeatStage2RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.HEATING_STAGE2)
+    fun isHeatStage3RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.HEATING_STAGE3)
+    fun isCoolStage1RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.COOLING_STAGE1)
+    fun isCoolStage2RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.COOLING_STAGE2)
+    fun isCoolStage3RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.COOLING_STAGE3)
+    fun isFanLowRelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.FAN_LOW_SPEED)
+    fun isFanMediumRelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.FAN_MEDIUM_SPEED)
+    fun isFanHighRelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.FAN_HIGH_SPEED)
+    fun isCompressorStage1RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.COMPRESSOR_STAGE1)
+    fun isCompressorStage2RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.COMPRESSOR_STAGE2)
+    fun isCompressorStage3RelayEnabled() = isAnyRelayMappedToControl(CpuRelayType.COMPRESSOR_STAGE3)
+    fun isCompressorMappedWithAnyRelay(): Boolean {
+        return (isAnyRelayMappedToControl(CpuRelayType.COMPRESSOR_STAGE1)||
+                isAnyRelayMappedToControl(CpuRelayType.COMPRESSOR_STAGE2)||
+                isAnyRelayMappedToControl(CpuRelayType.COMPRESSOR_STAGE3))
+    }
+    fun isChangeOverCoolingMapped(ignoreConfig: ConfigState) = isAnyRelayMappedToControl(
+        CpuRelayType.CHANGE_OVER_O_COOLING, ignoreConfig)
+    fun isChangeOverHeatingMapped(ignoreConfig: ConfigState) = isAnyRelayMappedToControl(
+        CpuRelayType.CHANGE_OVER_B_HEATING, ignoreConfig)
+
+    fun isAO1MappedToFan() : Boolean {
+        return this.viewState.value.analogOut1Enabled &&
+                (this.viewState.value.analogOut1Association == CpuAnalogControlType.LINEAR_FAN.ordinal ||
+                        this.viewState.value.analogOut1Association == CpuAnalogControlType.STAGED_FAN.ordinal)
+    }
+    fun isAO2MappedToFan() : Boolean {
+        return this.viewState.value.analogOut2Enabled &&
+                (this.viewState.value.analogOut2Association == CpuAnalogControlType.LINEAR_FAN.ordinal ||
+                        this.viewState.value.analogOut2Association == CpuAnalogControlType.STAGED_FAN.ordinal)
+    }
+    fun isAO3MappedToFan() : Boolean {
+        return this.viewState.value.analogOut3Enabled &&
+                (this.viewState.value.analogOut3Association == CpuAnalogControlType.LINEAR_FAN.ordinal ||
+                        this.viewState.value.analogOut3Association == CpuAnalogControlType.STAGED_FAN.ordinal)
+    }
+    fun isAO4MappedToFan() : Boolean {
+        return this.viewState.value.analogOut4Enabled &&
+                (this.viewState.value.analogOut4Association == CpuAnalogControlType.LINEAR_FAN.ordinal ||
+                        this.viewState.value.analogOut4Association == CpuAnalogControlType.STAGED_FAN.ordinal)
+    }
+
+
+    fun isAnyRelayMappedToControlForUnitVentilator(type: Pipe4UVRelayControls): Boolean {
+
+        fun isEnabledAndMapped(configState: ConfigState): Boolean {
+            return (configState.enabled && configState.association == type.ordinal)
+        }
+        return (isEnabledAndMapped(this.viewState.value.relay1Config) ||
+                isEnabledAndMapped(this.viewState.value.relay2Config) ||
+                isEnabledAndMapped(this.viewState.value.relay3Config) ||
+                isEnabledAndMapped(this.viewState.value.relay4Config) ||
+                isEnabledAndMapped(this.viewState.value.relay5Config) ||
+                isEnabledAndMapped(this.viewState.value.relay6Config) ||
+                isEnabledAndMapped(this.viewState.value.relay7Config) ||
+                isEnabledAndMapped(this.viewState.value.relay8Config))
+    }
+
+    private fun isAnyRelayMappedToControl(
+        type: CpuRelayType,
+        ignoreConfig: ConfigState
+    ): Boolean {
+        fun isEnabledAndMapped(configState: ConfigState): Boolean {
+            return (configState != ignoreConfig && configState.enabled && configState.association == type.ordinal)
+        }
+        return (isEnabledAndMapped(this.viewState.value.relay1Config) ||
+                isEnabledAndMapped(this.viewState.value.relay2Config) ||
+                isEnabledAndMapped(this.viewState.value.relay3Config) ||
+                isEnabledAndMapped(this.viewState.value.relay4Config) ||
+                isEnabledAndMapped(this.viewState.value.relay5Config) ||
+                isEnabledAndMapped(this.viewState.value.relay6Config) ||
+                isEnabledAndMapped(this.viewState.value.relay7Config) ||
+                isEnabledAndMapped(this.viewState.value.relay8Config))
+    }
+
+    fun isAnalogEnabledAndMapped(type: CpuAnalogControlType, enabled: Boolean, association: Int) =
+        (enabled && association == type.ordinal)
+
+
+    // getting the profile based enum value
+    fun getProfileBasedEnumValueAnalog(enumName: String): Int {
+        return when (profileConfiguration) {
+            is HyperStatSplitCpuConfiguration -> CpuAnalogControlType.valueOf(enumName).ordinal
+            is Pipe4UVConfiguration -> Pipe4UvAnalogOutControls.valueOf(enumName).ordinal
+            else -> CpuAnalogControlType.valueOf(enumName).ordinal
+        }
+    }
+
+    // getting the profile based enum value
+    fun getProfileBasedEnumValueRelayType(enumName: String): Int {
+        return when (profileConfiguration) {
+            is HyperStatSplitCpuConfiguration -> CpuRelayType.valueOf(enumName).ordinal
+            is Pipe4UVConfiguration -> Pipe4UVRelayControls.valueOf(enumName).ordinal
+            else -> {
+                HyperStatSplitControlType.valueOf(enumName).ordinal
+            }
+        }
+    }
+
+     fun setScheduleType(config: HyperStatSplitConfiguration) {
+        hayStack.readEntity("point and domainName == \"" + DomainName.scheduleType + "\" and group == \"" + config.nodeAddress + "\"")["id"]?.let { scheduleTypeId ->
+            val roomSchedule = getSchedule(zoneRef, floorRef)
+            if(roomSchedule.isZoneSchedule) {
+                hayStack.writeDefaultValById(scheduleTypeId.toString(), 1.0)
+            } else {
+                hayStack.writeDefaultValById(scheduleTypeId.toString(), 2.0)
+            }
         }
     }
 

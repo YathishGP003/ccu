@@ -2,6 +2,10 @@ package a75f.io.device.mesh.hypersplit;
 
 import static a75f.io.api.haystack.Tags.HYPERSTATSPLIT;
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
+import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getSplitConfiguration;
+import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getUvPossibleConditioningMode;
+import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getUvPossibleFanMode;
+import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getUvPossibleFanModeSettings;
 import static a75f.io.logic.bo.util.CCUUtils.isCurrentTemperatureWithinLimits;
 import static a75f.io.logic.util.uiutils.UserIntentStatusUtilKt.updateUserIntentPoints;
 
@@ -31,8 +35,8 @@ import a75f.io.device.mesh.Pulse;
 import a75f.io.device.mesh.ThermistorUtil;
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.MessageType;
-import a75f.io.domain.HyperStatSplitEquip;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.equips.HyperStatSplitEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -43,6 +47,8 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVConfiguration;
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage;
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode;
 import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode;
 import a75f.io.logic.bo.haystack.device.HyperStatSplitDevice;
@@ -473,17 +479,26 @@ public class HyperSplitMsgReceiver {
         CcuLog.i(L.TAG_CCU_DEVICE, "writeUniversalInVal: "+rawPoint.getDomainName()+" " +rawPoint.getType());
 
         if (rawPoint.getEnabled() && (thermistorPoints.contains(point.getDomainName()))) writeThermistorInVal(rawPoint, point, hayStack, val);
+        if (rawPoint.getEnabled() && (analogDigitalVoltages.contains(point.getDomainName()))) writeVoltageInDigital(rawPoint, point, hayStack, val);
         else if (rawPoint.getEnabled() && (voltagePoints.containsKey(point.getDomainName()))) writeVoltageInVal(rawPoint, point, hayStack, val);
         else if (rawPoint.getEnabled() && (digitalNoPoints.contains(point.getDomainName()))) writeDigitalNOInVal(rawPoint, point, hayStack, val);
         else if (rawPoint.getEnabled() && (digitalNcPoints.contains(point.getDomainName()))) writeDigitalNCInVal(rawPoint, point, hayStack, val);
 
     }
 
+    private static List<String> analogDigitalVoltages = Arrays.asList(
+            DomainName.doorWindowSensorTitle24,
+            DomainName.doorWindowSensor
+    );
+
+
     private static List<String> thermistorPoints = Arrays.asList(
             DomainName.thermistorInput,
             DomainName.dischargeAirTemperature,
             DomainName.mixedAirTemperature,
-            DomainName.outsideTemperature
+            DomainName.outsideTemperature,
+            DomainName.hotWaterLeavingTempSensor,
+            DomainName.chilledWaterLeavingTempSensor
     );
 
     private static Map<String, MinMaxVoltage> voltagePoints;
@@ -505,7 +520,6 @@ public class HyperSplitMsgReceiver {
         pointsMap.put(DomainName.currentTx100, new MinMaxVoltage(0, 10, 0, 100));
         pointsMap.put(DomainName.currentTx120, new MinMaxVoltage(0, 10, 0, 120));
         pointsMap.put(DomainName.currentTx150, new MinMaxVoltage(0, 10, 0, 150));
-        pointsMap.put(DomainName.currentTx200, new MinMaxVoltage(0, 10, 0, 200));
         voltagePoints = Collections.unmodifiableMap(pointsMap);
     }
 
@@ -523,7 +537,11 @@ public class HyperSplitMsgReceiver {
             DomainName.condensateStatusNO,
             DomainName.emergencyShutoffNO,
             DomainName.genericAlarmNO,
-            DomainName.fanRunSensorNO
+            DomainName.fanRunSensorNO,
+            DomainName.keyCardSensorNO,
+            DomainName.doorWindowSensorNO,
+            DomainName.doorWindowSensorNOTitle24
+
     );
 
     private static List<String> digitalNcPoints = Arrays.asList(
@@ -531,7 +549,11 @@ public class HyperSplitMsgReceiver {
             DomainName.condensateStatusNC,
             DomainName.emergencyShutoffNC,
             DomainName.genericAlarmNC,
-            DomainName.fanRunSensorNC
+            DomainName.fanRunSensorNC,
+            DomainName.keyCardSensorNC,
+            DomainName.doorWindowSensorNC,
+            DomainName.doorWindowSensorNCTitle24
+
     );
 
     /*
@@ -621,6 +643,21 @@ public class HyperSplitMsgReceiver {
             hayStack.writeHisValById(rawPoint.getId(), ohmsReading/1000);
             // Write logical point value. For normally closed sensor, 10kOhm or above is "fault" (1), less than 10kOhm is "normal" (0)
             hayStack.writeHisValById(point.getId(), (ohmsReading < 10000)? 0.0 : 1.0);
+        }
+    }
+
+    private static void writeVoltageInDigital(RawPoint rawPoint, Point point, CCUHsApi hayStack, int val) {
+
+        // If 15th bit is "1", then HyperSplit says input is type "thermistor" and not type "voltage". That's a problem.
+        if (getBit(val, 15) == 1) {
+            CcuLog.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as voltage in CCU, but stored as type Thermistor in HyperStat.");
+            return;
+        } else {
+            double mvReading = getBits(val, 0, 14);
+            // Write physical point value in mV
+            hayStack.writeHisValById(rawPoint.getId(), mvReading);
+            // Write logical point value after scaling to engineering units
+            hayStack.writeHisValById(point.getId(), (mvReading / 1000) > 2 ? 1.0 : 0.0); // If voltage is above 2V, then we consider it "on" (1), otherwise "off" (0)
         }
     }
 
@@ -787,6 +824,8 @@ public class HyperSplitMsgReceiver {
         if(fanMode!= -1 && !HyperStatSplitUserIntentHandler.Companion.isFanModeChangeUnnecessary(equipId, fanMode)) {
             HyperStatSplitEquip equip = new HyperStatSplitEquip(equipId);
             updateUserIntentPoints(equipId, equip.getFanOpMode(), fanMode, WhoFiledConstants.HYPERSTAT_SPLIT_WHO);
+            FanModeCacheStorage cacheStorage = FanModeCacheStorage.Companion.getHyperStatSplitFanModeCache();
+            cacheStorage.saveFanModeInCache(equipId, fanMode);
         }
 
     }
@@ -795,9 +834,15 @@ public class HyperSplitMsgReceiver {
         PossibleConditioningMode possibleConditioningMode = PossibleConditioningMode.OFF;
         PossibleFanMode possibleFanMode = PossibleFanMode.OFF;
 
-        if(equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_CPU.name())){
+        if (equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_CPU.name())) {
             possibleConditioningMode = HSSplitHaystackUtil.Companion.getPossibleConditioningModeSettings(nodeAddress);
             possibleFanMode = HSSplitHaystackUtil.Companion.getSplitPossibleFanModeSettings(nodeAddress);
+        }
+        if (equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_4PIPE_UV.name())) {
+            Pipe4UVConfiguration config = (Pipe4UVConfiguration) getSplitConfiguration(equipId);
+            int fanLevel = getUvPossibleFanMode(config);
+            possibleFanMode = getUvPossibleFanModeSettings(fanLevel);
+            possibleConditioningMode = getUvPossibleConditioningMode(config);
         }
         
         updateFanMode(equipId,fanMode,possibleFanMode);

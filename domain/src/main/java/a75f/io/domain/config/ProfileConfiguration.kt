@@ -20,6 +20,13 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
     var isDefault = false
 
     /**
+     * This is the Equip Id of the profile.
+     * It is used to identify the profile in the domain.
+     */
+
+    var equipId :String = ""
+
+    /**
      * Get a list of domainNames of all base-configs
      * This need not have all base points.
      * Only configs which are configured via UI.
@@ -34,6 +41,17 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
      *
      */
     open fun getAssociationConfigs() : List<AssociationConfig> {
+        return emptyList()
+    }
+
+    /**
+     * Get a list of domainNames of all String value configs
+     * This need not have all base points.
+     * Only configs which are configured via UI.
+     *
+     */
+
+    open fun getStringConfigs() : List<StringValueConfig> {
         return emptyList()
     }
 
@@ -68,6 +86,17 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
             config.maxVal = (point.valueConstraint as NumericConstraint).maxValue
         }
         point?.presentationData?.get("tagValueIncrement")?.let { config.incVal = it.toString().toDouble() }
+        return config
+    }
+    /**
+     * Get a default string config for the given domainName.
+     * If the point is not found, it returns an empty string config.
+     */
+
+    fun getDefaultStringConfig(domainName : String, model : SeventyFiveFProfileDirective) : StringValueConfig {
+        val point = model.points.find { it.domainName == domainName }
+        val config = StringValueConfig(domainName, point?.defaultValue?.toString() ?: "")
+        config.disName = point?.name ?:""
         return config
     }
 

@@ -1,35 +1,35 @@
 package a75f.io.logic.controlcomponents.handlers
 
 import a75f.io.domain.api.Point
-import a75f.io.logger.CcuLog
 import a75f.io.logic.controlcomponents.controlimpls.GenericBooleanControllerImpl
 import a75f.io.logic.controlcomponents.controls.Constraint
 import a75f.io.logic.controlcomponents.controls.Controller
+import a75f.io.logic.controlcomponents.util.logIt
 
 /**
- * Created by Manjunath K on 05-05-2025.
+ * Author: Manjunath Kundaragi
+ * Created on: 24-07-2025
  */
-
-open class ThresholdRelayController(
-    val currentPoint: Point, val threshold: Point, val hysteresis: Point, private val logTag: String
+class FanAndByPassControllers(
+    private val coolingLoop: Point,
+    private val heatingLoop: Point,
+    private val hysteresis: Point,
+    private val logTag: String
 ) : Controller {
     private val controller = GenericBooleanControllerImpl()
 
     init {
         controller.setOnConstraints(listOf(Constraint {
-            val currentValue = currentPoint.readHisVal()
-            currentValue > 0 && currentValue > threshold.readPriorityVal()
+            val hysteresisVal = hysteresis.readPriorityVal()
+            (coolingLoop.readHisVal() > hysteresisVal || heatingLoop.readHisVal() > hysteresisVal)
         }))
         controller.setOffConstraints(listOf(Constraint {
-                currentPoint.readHisVal() < (threshold.readPriorityVal() - hysteresis.readPriorityVal())
+            (coolingLoop.readHisVal() == 0.0 && heatingLoop.readHisVal() == 0.0)
         }))
-
     }
 
     override fun runController(): Boolean {
-        CcuLog.d(logTag, "Running ThresholdRelayController " +
-                "${currentPoint.domainName} ${currentPoint.readHisVal()}"
-                + " ${threshold.readPriorityVal()} ${hysteresis.readPriorityVal()} Status = ${controller.getActiveControl()}")
+        logIt(logTag,"Running FanAndByPassControllers hysteresis ${hysteresis.readPriorityVal()}")
         return controller.getActiveControl()
     }
 

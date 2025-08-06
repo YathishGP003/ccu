@@ -3,9 +3,11 @@ package a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.pipe2
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
+import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
@@ -63,6 +65,9 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
     private var supplyWaterTempTh2 = 0.0
     private var heatingThreshold = 85.0
     private var coolingThreshold = 65.0
+    private var lastWaterValveTurnedOnTime: Long = System.currentTimeMillis()
+    private var waterSamplingStartTime: Long = 0
+    private lateinit var waterValveLoop:  CalibratedPoint
 
     private val pipe2DeviceMap: MutableMap<Int, Pipe2V2Equip> = mutableMapOf()
 
@@ -124,7 +129,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
 
         heatingThreshold = hyperStatTuners.heatingThreshold
         coolingThreshold = hyperStatTuners.coolingThreshold
-
+        waterValveLoop = CalibratedPoint(DomainName.waterValve, equip.equipRef,0.0)
         if (equipOccupancyHandler != null) {
             occupancyStatus = equipOccupancyHandler.currentOccupiedMode
             zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
@@ -415,7 +420,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
                     && (getCurrentLogicalPointStatus(analogLogicalPoints[HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal]!!).toInt() != 0)))
         }
 
-        logIt( "waterSamplingStarted Time " + equip.waterSamplingStartTime)
+        logIt("waterSamplingStarted Time $waterSamplingStartTime")
 
         val waitTimeToDoSampling: Int
         val onTimeToDoSampling: Int
@@ -431,29 +436,29 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
         if (waitTimeToDoSampling == 0 || onTimeToDoSampling == 0) {
             //resetting the water valve value value only when the tuner value is zero
             if (resetIsRequired()) {
-                equip.waterSamplingStartTime = 0
-                equip.lastWaterValveTurnedOnTime = System.currentTimeMillis()
+                waterSamplingStartTime = 0
+                lastWaterValveTurnedOnTime = System.currentTimeMillis()
                 resetWaterValve(equip)
             }
             logIt( "No water sampling, because tuner value is zero!")
             return
         }
         logIt("waitTimeToDoSampling:  $waitTimeToDoSampling onTimeToDoSampling: $onTimeToDoSampling")
-        logIt("Current : ${System.currentTimeMillis()}: Last On: ${equip.lastWaterValveTurnedOnTime}")
+        logIt("Current : ${System.currentTimeMillis()}: Last On: $lastWaterValveTurnedOnTime")
 
-        if (equip.waterSamplingStartTime == 0L) {
-            val minutes = milliToMin(System.currentTimeMillis() - equip.lastWaterValveTurnedOnTime)
+        if (waterSamplingStartTime == 0L) {
+            val minutes = milliToMin(System.currentTimeMillis() - lastWaterValveTurnedOnTime)
             logIt("sampling will start in : ${waitTimeToDoSampling - minutes} current : $minutes")
             if (minutes >= waitTimeToDoSampling) {
-                doWaterSampling(equip, relayStages)
+                doWaterSampling(relayStages)
             }
         } else {
             val samplingSinceFrom =
-                milliToMin(System.currentTimeMillis() - equip.waterSamplingStartTime)
+                milliToMin(System.currentTimeMillis() - waterSamplingStartTime)
             logIt("Water sampling is running since from $samplingSinceFrom minutes")
             if (samplingSinceFrom >= onTimeToDoSampling) {
-                equip.waterSamplingStartTime = 0
-                equip.lastWaterValveTurnedOnTime = System.currentTimeMillis()
+                waterSamplingStartTime = 0
+                lastWaterValveTurnedOnTime = System.currentTimeMillis()
                 resetWaterValve(equip)
                 logIt( "Resetting WATER_VALVE to OFF")
             } else {
@@ -463,10 +468,9 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
     }
 
     private fun doWaterSampling(
-        equip: Pipe2V2Equip,
         relayStages: HashMap<String, Int>,
     ) {
-        equip.waterSamplingStartTime = System.currentTimeMillis()
+        waterSamplingStartTime = System.currentTimeMillis()
         updateLogicalPoint(relayLogicalPoints[HsPipe2RelayMapping.WATER_VALVE.ordinal], 1.0)
         updateLogicalPoint(
             analogLogicalPoints[HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal],
@@ -648,7 +652,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
                     val mapping = HsPipe2AnalogOutMapping.values()[analogOutConfig.association]
                     when (mapping) {
                         HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE -> {
-                            if (equip.waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
+                            if (waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
                                 doAnalogWaterValveAction(
                                     port, basicSettings, waterValveLoop(userIntents),
                                     analogOutStages
@@ -688,8 +692,8 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
         config: Pipe2Configuration, basicSettings: BasicSettings,
         equip: Pipe2V2Equip, userIntents: UserIntents, controllerFactory: HyperStatControlFactory
     ) {
-        controllerFactory.addPipe2Controllers(config)
-        equip.waterValveLoop.data = waterValveLoop(userIntents).toDouble()
+        controllerFactory.addPipe2Controllers(config, waterValveLoop)
+        waterValveLoop.data = waterValveLoop(userIntents).toDouble()
         runControllers(equip, basicSettings, config)
     }
 
@@ -724,7 +728,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
         when (controllerName) {
 
             ControllerNames.WATER_VALVE_CONTROLLER -> {
-                if (equip.waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
+                if (waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
                     updateStatus(equip.waterValve, result as Boolean, StatusMsgKeys.WATER_VALVE.name)
                 }
             }
@@ -889,7 +893,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
     }
 
     private fun resetWaterValve(equip: Pipe2V2Equip) {
-        if (equip.waterSamplingStartTime == 0L) {
+        if (waterSamplingStartTime == 0L) {
             if (isConfigPresent(HsPipe2RelayMapping.WATER_VALVE)) {
                 resetLogicalPoint(relayLogicalPoints[HsPipe2RelayMapping.WATER_VALVE.ordinal]!!)
             }

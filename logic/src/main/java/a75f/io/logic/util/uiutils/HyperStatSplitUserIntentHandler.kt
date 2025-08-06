@@ -2,15 +2,13 @@ package a75f.io.logic.util.uiutils
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.DomainName
-import a75f.io.logger.CcuLog
-import a75f.io.logic.L
 import a75f.io.logic.bo.building.EpidemicState
 import a75f.io.logic.bo.building.ZoneTempState
-import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
+import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.statprofiles.util.BasicSettings
-
+import a75f.io.logic.controlcomponents.util.logIt
 import a75f.io.logic.interfaces.ZoneDataInterface
 import kotlin.collections.set
 
@@ -40,7 +38,9 @@ class HyperStatSplitUserIntentHandler {
             condensateOverflow: Double,
             filterDirty: Double,
             basicSettings: BasicSettings,
-            epidemicState: EpidemicState
+            epidemicState: EpidemicState,
+            isEmergencyShutoffActive: Boolean,
+            logTag: String
         ) {
 
             var status = getStatusMsg(portStages, analogOutStages, temperatureState, epidemicState)
@@ -99,23 +99,26 @@ class HyperStatSplitUserIntentHandler {
 
                 status += "Replace Filter"
             }
-            if (status.endsWith(",")) {
-                status = status.dropLast(1)
+            if (status.trim().endsWith(",")) {
+                status = status.trim().dropLast(1)
+            }
+
+            if (isEmergencyShutoffActive) {
+                status = "Emergency Shutoff is Active"
             }
 
             if (!hyperStatSplitStatus.containsKey(equipId)
                 || !getHyperStatSplitStatusString(equipId).contentEquals(status)) {
                 if (hyperStatSplitStatus.containsKey(equipId)) hyperStatSplitStatus.remove(equipId)
                 hyperStatSplitStatus[equipId] = status
-
                 haystack.writeDefaultVal(
                     "point and domainName == \"" + DomainName.equipStatusMessage + "\" and equipRef == \"$equipId\"",
                     status
                 )
                 zoneDataInterface?.refreshScreen("", false)
             }
+            logIt(logTag, "Status : $status")
 
-            CcuLog.i(L.TAG_CCU_ZONE, "HSS equip status $status")
         }
 
         fun isFanModeChangeUnnecessary(equipRef: String, userIntentFanMode: Int): Boolean {

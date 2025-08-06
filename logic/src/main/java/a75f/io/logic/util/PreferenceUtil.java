@@ -7,7 +7,6 @@ import android.preference.PreferenceManager;
 import java.util.Date;
 
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 
 public class PreferenceUtil {
     private static Context context;
@@ -266,32 +265,6 @@ public class PreferenceUtil {
         editor.apply();
     }
 
-    public static StandaloneConditioningMode getLastUserIntentConditioningMode() {
-        switch (getStringPreference(LAST_USERINTENT_CONDITIONING_MODE)) {
-            case "OFF": return StandaloneConditioningMode.OFF;
-            case "HEAT_ONLY": return StandaloneConditioningMode.HEAT_ONLY;
-            case "COOL_ONLY": return StandaloneConditioningMode.COOL_ONLY;
-            default: return StandaloneConditioningMode.AUTO;
-        }
-    }
-    public static void setLastUserIntentConditioningMode(StandaloneConditioningMode mode) {
-        String lastUserIntentConditioningModeValue;
-        if (mode == StandaloneConditioningMode.OFF) {
-            lastUserIntentConditioningModeValue = "OFF";
-        } else if (mode == StandaloneConditioningMode.HEAT_ONLY) {
-            lastUserIntentConditioningModeValue = "HEAT_ONLY";
-        } else if (mode == StandaloneConditioningMode.COOL_ONLY) {
-            lastUserIntentConditioningModeValue = "COOL_ONLY";
-        } else {
-            lastUserIntentConditioningModeValue = "AUTO";
-        }
-
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        editor.putString(LAST_USERINTENT_CONDITIONING_MODE, lastUserIntentConditioningModeValue);
-        editor.apply();
-
-    }
-
     public static boolean isIduPointsMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean("iduMigration",false);
@@ -445,12 +418,6 @@ public class PreferenceUtil {
 
     public static void setCleanUpOtherCcuZoneSchedules() {
         setBooleanPreference(CLEAN_OTHER_CCU_ZONE_SCHEDULES, true);
-    }
-    public static boolean getTemperatureTIPortEnabled() {
-        return getBooleanPreference(ENABLE_TEMPERATURE_TI_PORT);
-    }
-    public static void setTemperatureTIPortEnabled() {
-        setBooleanPreference(ENABLE_TEMPERATURE_TI_PORT, true);
     }
 
     public static boolean isHSSOutsideDamperMinOpenMigrationDone() {

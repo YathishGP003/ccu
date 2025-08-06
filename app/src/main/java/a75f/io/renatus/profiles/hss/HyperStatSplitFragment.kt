@@ -5,15 +5,19 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuControlType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuAnalogControlType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.R
+import a75f.io.renatus.composables.PinPassword
 import a75f.io.renatus.composables.TempOffsetPicker
 import a75f.io.renatus.composables.rememberPickerState
 import a75f.io.renatus.compose.BoldStyledTextView
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.compose.ComposeUtil.Companion.greyDropDownColor
+import a75f.io.renatus.compose.ComposeUtil.Companion.myFontFamily
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
+import a75f.io.renatus.compose.LabelWithToggleButton
 import a75f.io.renatus.compose.SaveTextView
 import a75f.io.renatus.compose.StyledTextView
 import a75f.io.renatus.compose.SubTitle
@@ -27,8 +31,10 @@ import a75f.io.renatus.modbus.util.CANCEL
 import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuState
-import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuViewModel
+import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe4UvViewState
+import a75f.io.renatus.profiles.system.UNIVERSAL_IN3
 import a75f.io.renatus.util.TestSignalManager
+import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -61,11 +67,14 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -81,8 +90,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import org.projecthaystack.util.Base64
 
 open class HyperStatSplitFragment : BaseDialogFragment() {
+    companion object {
+        const val INSTALLER_ACCESS = "Installer Access"
+        const val CONDITIONING_ACCESS = "Conditioning Mode & Fan Access"
+    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -92,11 +108,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         }
     }
 
+
     @Composable
-    fun Title(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+    fun Title(viewModel: HyperStatSplitViewModel,modifier: Modifier = Modifier) {
         Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             when (viewModel.profileType) {
                 ProfileType.HYPERSTATSPLIT_CPU -> TitleTextView("CPU & ECONOMIZER")
+                ProfileType.HYPERSTATSPLIT_4PIPE_UV -> TitleTextView("4 Pipe & Economizer")
                 else -> TitleTextView("CPU & ECONOMIZER")
             }
         }
@@ -105,7 +123,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     override fun getIdString() : String { return "" }
 
     @Composable
-    fun TempOffset(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+    fun TempOffset(viewModel: HyperStatSplitViewModel,modifier: Modifier = Modifier) {
         val valuesPickerState = rememberPickerState()
         Column(modifier = modifier.padding(start = 400.dp, end = 400.dp)) {
             TempOffsetPicker(
@@ -123,7 +141,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun AutoAwayConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+    fun AutoAwayConfig(viewModel: HyperStatSplitViewModel,modifier: Modifier = Modifier) {
         Column(modifier = modifier.padding(start = 25.dp, top = 25.dp, bottom = 25.dp)) {
             Row(modifier = Modifier
                 .fillMaxWidth()
@@ -165,7 +183,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     ToggleButton(
                         defaultSelection = viewModel.viewState.value.enableOutsideAirOptimization,
                         onEnabled = {
-                            if (!it && viewModel.isOAODamperAOEnabled()) {
+                            if (!it && viewModel.isAnyAnalogMappedToControl(viewModel.getProfileBasedEnumValueAnalog(HyperStatSplitConfiguration.HyperStatSplitControlType.OAO_DAMPER.name))) {
                                 showToast("To disable Outside Air Optimization, disable all OAO Damper analog outputs first.", requireContext())
                             } else if (!it && viewModel.isPrePurgeEnabled()) {
                                 showToast("To disable Outside Air Optimization, disable Pre-Purge first.", requireContext())
@@ -193,6 +211,34 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                             }
                         }
                     )
+                }
+            }
+
+            if (viewModel.profileType == ProfileType.HYPERSTATSPLIT_4PIPE_UV || viewModel.profileType == ProfileType.HYPERSTATSPLIT_2PIPE_UV) {
+                Row(
+                    modifier = Modifier
+                        .padding(vertical = 10.dp)
+                        .width(365.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Box(modifier = Modifier
+                        .weight(4f)
+                        .padding(top = 10.dp)) {
+                        StyledTextView(
+                            "Supply Air Tempering",
+                            fontSize = 20,
+                            textAlignment = TextAlign.Start
+                        )
+                    }
+                    Box(modifier = Modifier.weight(1f)) {
+                        ToggleButtonStateful(
+                            defaultSelection = (viewModel.viewState.value as Pipe4UvViewState).saTempering,
+                            onEnabled = {
+                                (viewModel.viewState.value as Pipe4UvViewState).saTempering = it
+                            }
+                        )
+                    }
+
                 }
             }
 
@@ -228,7 +274,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun SensorConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+    fun SensorConfig(viewModel: HyperStatSplitViewModel,modifier: Modifier = Modifier) {
         val temperatureEnums = viewModel.getAllowedValues(DomainName.temperatureSensorBusAdd0, viewModel.equipModel)
         val humidityEnums = viewModel.getAllowedValues(DomainName.humiditySensorBusAdd0, viewModel.equipModel)
         val pressureEnum = viewModel.getAllowedValues(DomainName.pressureSensorBusAdd0, viewModel.equipModel)
@@ -258,7 +304,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     "Humidity",
                     humidityEnums[viewModel.viewState.value.sensorAddress0.association].dis ?: humidityEnums[viewModel.viewState.value.sensorAddress0.association].value
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(17.dp))
                 ConfigCompose(
                     "Pressure",
                     pressureEnum[viewModel.viewState.value.pressureSensorAddress0.association],
@@ -380,7 +426,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     unit = unit,
                     onSelect = { onSelect(it) },
                     width = 375,
-                    expandedWidth = 450,
+                    expandedWidth = 400,
                     isEnabled = isEnabled
                 )
             }
@@ -414,7 +460,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun RelayConfig(viewModel: HyperStatSplitCpuViewModel, modifier: Modifier = Modifier) {
+    fun RelayConfig(viewModel: HyperStatSplitViewModel, modifier: Modifier = Modifier) {
         val relayEnums =
             viewModel.getAllowedValues(DomainName.relay1OutputAssociation, viewModel.equipModel)
 
@@ -495,11 +541,22 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                             relayConfig.association = associationIndex.index
                         },
                         onTestActivated = { isChecked ->
-                            viewModel.handleTestRelayChanged(
-                                index,
-                                isChecked
-                            )
-                        }
+
+                            if (viewModel.equipRef != null) {
+                                viewModel.handleTestRelayChanged(
+                                    index,
+                                    isChecked
+                                )
+                            } else {
+                                showToast(
+                                    "Please pair equip to send test command",
+                                    viewModel.context
+                                )
+
+                            }
+                        },
+
+                        testSignalState = viewModel.getTestSignalForRelay(index)
                     )
                 }
             }
@@ -518,7 +575,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         unit: String,
         isEnabled: Boolean,
         onAssociationChanged: (HyperStatSplitViewModel.Option) -> Unit,
-        onTestActivated: (Boolean) -> Unit
+        onTestActivated: (Boolean) -> Unit,
+        testSignalState :Boolean = false
     ) {
         Row(
             modifier = Modifier
@@ -530,7 +588,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             }
             Box(modifier = Modifier
                 .weight(1.5f)
-                .padding(start = 15.dp, top = 8.dp)) {
+                .padding(start = 15.dp, top = 12.dp)) {
                 StyledTextView(relayName, fontSize = 20)
             }
             Box(modifier = Modifier
@@ -546,52 +604,69 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     isEnabled = isEnabled
                 )
             }
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 5.dp)
-            ) {
-                var buttonState by remember { mutableStateOf(false) }
-                var text by remember { mutableStateOf("OFF") }
-                Button(
-                    onClick = {
-                        buttonState = !buttonState
-                        text = when (buttonState) {
-                            true -> "ON"
-                            false -> "OFF"
-                        }
-                        onTestActivated(buttonState)
-                    },
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        contentColor = when (buttonState) {
-                            true -> primaryColor
-                            false -> Color.Black
-                        }, containerColor = Color.Transparent
-                    ),
-                    border = BorderStroke(1.dp, color = when (buttonState) {
+            var buttonState by remember { mutableStateOf(testSignalState) }
+            var text by remember { mutableStateOf("OFF") }
+            Button(
+                onClick = {
+                    buttonState = !buttonState
+                    text = when (buttonState) {
+                        true -> "ON"
+                        false -> "OFF"
+                    }
+                    onTestActivated(buttonState)
+                },
+                shape = RoundedCornerShape(5.dp),
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = when (buttonState) {
                         true -> primaryColor
                         false -> Color.Black
-                    }),
-                ) {
-                    Text(
-                        text = when (buttonState) {
-                            true -> "ON"
-                            false -> "OFF"
-                        }
-                    )
-                }
+                    }, containerColor = Color.Transparent
+                ),
+                border = BorderStroke(
+                    1.dp, color = when (buttonState) {
+                        true -> primaryColor
+                        false -> Color.Black
+                    }
+                ), modifier = Modifier
+                    .width(72.dp)
+                    .height(44.dp),
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Text(
+                    text = when (buttonState) {
+                        true -> "ON"
+                        false -> "OFF"
+                    },
+                    fontSize = 20.sp,
+                    fontFamily = myFontFamily,
+                    fontWeight = FontWeight.Normal,
+                    textAlign = TextAlign.Left,
+                    modifier = Modifier.wrapContentSize(Alignment.Center)
+
+                )
             }
         }
     }
 
     @Composable
-    fun AnalogOutConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+    fun AnalogOutConfig(viewModel: HyperStatSplitViewModel,modifier: Modifier = Modifier) {
         val analogOutEnums = viewModel.getAllowedValues(DomainName.analog1OutputAssociation, viewModel.equipModel)
-        val enabledEnums = if (viewModel.viewState.value.enableOutsideAirOptimization) {
+
+        var enabledEnums = if (viewModel.viewState.value.enableOutsideAirOptimization) {
             analogOutEnums
         } else {
             analogOutEnums.filter { it.value != DomainName.oaoDamper }
+        }
+        if (viewModel.profileType == ProfileType.HYPERSTATSPLIT_4PIPE_UV || viewModel.profileType.equals(
+                ProfileType.HYPERSTATSPLIT_2PIPE_UV
+        )
+        ) {
+            val controlViaMode = (viewModel.viewState.value as Pipe4UvViewState).controlVia
+            if (controlViaMode == 1) {
+                enabledEnums = enabledEnums.filter { it.value != DomainName.faceBypassDamperModulatingCmd }
+            } else if (controlViaMode == 0) {
+                enabledEnums= enabledEnums.filter { it.value != DomainName.hotWaterModulatingHeatValve && it.value != DomainName.chilledWaterModulatingCoolValve }
+            }
         }
 
         Row(modifier = modifier.fillMaxWidth()) {
@@ -666,7 +741,18 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                                     association.index
                             }
                         },
-                        onTestSignalSelected = { value -> viewModel.handleTestAnalogOutChanged(index, value) })
+                        onTestSignalSelected = { value ->
+                            if (viewModel.equipRef != null) {
+                                viewModel.handleTestAnalogOutChanged(index, value)
+                            }
+                            else {
+                                showToast(
+                                    "Please pair equip to send test command",
+                                    viewModel.context
+                                )
+                            }
+                        },
+                        testSignalValue = viewModel.getTestSignalForAnalogOut(index).toString())
                 }
             }
         }
@@ -674,7 +760,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
 
     @Composable
     fun AnalogOutConfiguration(
-        viewModel: HyperStatSplitCpuViewModel,
+        viewModel: HyperStatSplitViewModel,
         analogOutName: String,
         enabled: Boolean,
         onEnabledChanged: (Boolean) -> Unit = {},
@@ -685,7 +771,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         unit: String = "",
         isEnabled: Boolean,
         onAssociationChanged: (HyperStatSplitViewModel.Option) -> Unit = {},
-        onTestSignalSelected: (Double) -> Unit = {}
+        onTestSignalSelected: (Double) -> Unit = {},
+        testSignalValue :String = "0.0"
     ) {
         Row(
             modifier = Modifier
@@ -698,10 +785,10 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     defaultSelection = enabled,
                 ) {
                     if (!it || viewModel.viewState.value.enableOutsideAirOptimization || !(
-                            (analogOutName.contains("1") && viewModel.viewState.value.analogOut1Association == CpuControlType.OAO_DAMPER.ordinal) ||
-                            (analogOutName.contains("2") && viewModel.viewState.value.analogOut2Association == CpuControlType.OAO_DAMPER.ordinal) ||
-                            (analogOutName.contains("3") && viewModel.viewState.value.analogOut3Association == CpuControlType.OAO_DAMPER.ordinal) ||
-                            (analogOutName.contains("4") && viewModel.viewState.value.analogOut4Association == CpuControlType.OAO_DAMPER.ordinal)
+                            (analogOutName.contains("1") && viewModel.viewState.value.analogOut1Association == viewModel.getProfileBasedEnumValueAnalog(HyperStatSplitConfiguration.HyperStatSplitControlType.OAO_DAMPER.name)) ||
+                            (analogOutName.contains("2") && viewModel.viewState.value.analogOut2Association == viewModel.getProfileBasedEnumValueAnalog(HyperStatSplitConfiguration.HyperStatSplitControlType.OAO_DAMPER.name)) ||
+                            (analogOutName.contains("3") && viewModel.viewState.value.analogOut3Association == viewModel.getProfileBasedEnumValueAnalog(HyperStatSplitConfiguration.HyperStatSplitControlType.OAO_DAMPER.name)) ||
+                            (analogOutName.contains("4") && viewModel.viewState.value.analogOut4Association == viewModel.getProfileBasedEnumValueAnalog(HyperStatSplitConfiguration.HyperStatSplitControlType.OAO_DAMPER.name))
                         )
                     ) {
                         onEnabledChanged(it)
@@ -711,8 +798,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 }
             }
             Box(modifier = Modifier
-                .weight(1.5f)
-                .padding(start = 15.dp, top = 8.dp)) {
+                .weight(1.3f)
+                .padding(top = 13.dp)) {
                 StyledTextView(analogOutName, fontSize = 20)
             }
             Box(modifier = Modifier
@@ -731,13 +818,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(end = 10.dp)
             ) {
                 SpinnerElementOption(
-                    defaultSelection = "0",
+                    defaultSelection = testSignalValue,
                     items = testSingles,
                     unit = unit,
-                    itemSelected = {onTestSignalSelected(it.value.toDouble()) }
+                    itemSelected = {onTestSignalSelected(it.value.toDouble()) },
+                    previewWidth = 70
                 )
             }
         }
@@ -754,7 +841,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         val selectedItem = remember { mutableStateOf(defaultSelection) }
         val expanded = remember { mutableStateOf(false) }
         val lazyListState = rememberLazyListState()
-        var selectedIndex by remember { mutableStateOf(getDefaultSelectionIndex(items, defaultSelection))}
+        var selectedIndex by remember { mutableIntStateOf(getDefaultSelectionIndex(items, defaultSelection)) }
         Box(
             modifier = Modifier
                 .wrapContentSize()
@@ -765,13 +852,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 )
         ) {
             Column(modifier = Modifier
-                .width(160.dp)
+                .width((previewWidth + 30).dp)
                 .clickable(onClick = { expanded.value = true })
             ) {
                 Row {
                     Text(
                         fontSize = 20.sp,
-                        modifier = Modifier.width(110.dp),
+                        modifier = Modifier.width(70.dp),
                         fontWeight = FontWeight.Normal,
                         text = "${selectedItem.value} $unit",
                         overflow = TextOverflow.Ellipsis,
@@ -813,7 +900,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                                 Row {
                                     Text(
                                         fontSize = 20.sp,
-                                        fontFamily = ComposeUtil.myFontFamily,
+                                        fontFamily =myFontFamily,
                                         modifier = Modifier.padding(end = 10.dp),
                                         fontWeight = FontWeight.Normal,
                                         text = item.value
@@ -844,11 +931,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         defaultSelection: String,
         items: List<String>,
         unit: String,
-        itemSelected: (String) -> Unit
+        itemSelected: (String) -> Unit,
+        previewWidth: Int = 160,
+        textWidth : Int = 70
     ) {
         val selectedItem = remember { mutableStateOf(defaultSelection) }
         val lazyListState = rememberLazyListState()
-        var selectedIndex by remember { mutableStateOf(items.indexOf(defaultSelection)) }
+        var selectedIndex by remember { mutableIntStateOf(items.indexOf(defaultSelection)) }
         val expanded = remember { mutableStateOf(false) }
         Box(
             modifier = Modifier
@@ -860,12 +949,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 )
         ) {
             Column(modifier = Modifier
-                .width(160.dp)
+                .width((previewWidth + 40).dp)
                 .clickable(onClick = { expanded.value = true })) {
                 Row {
                     Text(
                         fontSize = 20.sp,
-                        modifier = Modifier.width(110.dp),
+                        modifier = Modifier.width(textWidth.dp),
+
                         fontWeight = FontWeight.Normal,
                         text = "${selectedItem.value} $unit"
                     )
@@ -880,13 +970,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         alignment = Alignment.CenterEnd
                     )
                 }
-                Row { Divider(modifier = Modifier.width(160.dp)) }
+                Row { Divider(modifier = Modifier.width((previewWidth+30).dp)) }
             }
             val customHeight = getDropdownCustomHeight(items, noOfItemsDisplayInDropDown, dropDownHeight)
             DropdownMenu(
                 modifier = Modifier
                     .background(Color.White)
-                    .width(160.dp)
+                    .width((previewWidth + 30).dp)
                     .height(customHeight.dp)
                     .simpleVerticalScrollbar(lazyListState),
                 expanded = expanded.value,
@@ -894,7 +984,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 LazyColumn(state = lazyListState,
                     modifier = Modifier
                         .height((customHeight).dp)
-                        .width(200.dp)) {
+                        .width((previewWidth + 30).dp)) {
                     itemsIndexed(items) {index, item ->
                         DropdownMenuItem(
                             modifier = Modifier.background(if (item == selectedItem.value) ComposeUtil.secondaryColor else Color.White),
@@ -927,6 +1017,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         }
     }
 
+    @SuppressLint("DefaultLocale")
     private fun getDefaultSelectionIndex(items: List<HyperStatSplitViewModel.Option>, defaultSelection: String):Int {
         var selectedIndex = 0
         if (items.isEmpty()) {
@@ -949,8 +1040,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun UniversalInConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
-        val universalEnum = viewModel.getAllowedValues(DomainName.universalIn1Association, viewModel.equipModel)
+    fun UniversalInConfig(viewModel: HyperStatSplitViewModel,modifier: Modifier = Modifier) {
+        val universalEnum = viewModel.getAllowedValues(DomainName.universalIn2Association, viewModel.equipModel)
 
         Row(modifier = modifier.fillMaxWidth()) {
             Image(
@@ -958,7 +1049,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 contentDescription = "Universal Inputs",
                 modifier = Modifier
                     .weight(1.5f)
-                    .padding(top = 25.dp, bottom = 25.dp)
+                    .padding(top = 33.dp, bottom = 25.dp)
                     .height(550.dp)
             )
             Column(
@@ -1034,14 +1125,14 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         }
     }
 
-    val UNIVERSAL_IN1 = "Universal-In 1"
-    val UNIVERSAL_IN2 = "Universal-In 2"
-    val UNIVERSAL_IN3 = "Universal-In 3"
-    val UNIVERSAL_IN4 = "Universal-In 4"
-    val UNIVERSAL_IN5 = "Universal-In 5"
-    val UNIVERSAL_IN6 = "Universal-In 6"
-    val UNIVERSAL_IN7 = "Universal-In 7"
-    val UNIVERSAL_IN8 = "Universal-In 8"
+    private val UNIVERSAL_IN1 = "Universal-In 1"
+    private  val UNIVERSAL_IN2 = "Universal-In 2"
+    private val UNIVERSALIN3 = "Universal-In 3"
+    private val UNIVERSAL_IN4 = "Universal-In 4"
+    private val UNIVERSAL_IN5 = "Universal-In 5"
+    private val UNIVERSAL_IN6 = "Universal-In 6"
+    private val UNIVERSAL_IN7 = "Universal-In 7"
+    private val UNIVERSAL_IN8 = "Universal-In 8"
 
     @Composable
     fun AOTHConfig(
@@ -1064,7 +1155,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             }
             Box(modifier = Modifier
                 .weight(1.5f)
-                .padding(start = 15.dp, top = 8.dp)) {
+                .padding(start = 15.dp, top = 12.dp)) {
                 StyledTextView(name, fontSize = 20)
             }
             Box(modifier = Modifier
@@ -1100,7 +1191,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         val expanded = remember { mutableStateOf(false) }
         var searchedOption by rememberSaveable { mutableStateOf("") }
         val lazyListState = rememberLazyListState()
-        var selectedIndex by remember { mutableStateOf(default.index) }
+        var selectedIndex by remember { mutableIntStateOf(default.index) }
         Box(
             modifier = Modifier
                 .wrapContentSize()
@@ -1116,7 +1207,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Row {
                     Text(
                         fontSize = 20.sp,
-                        fontFamily = ComposeUtil.myFontFamily,
+                        fontFamily = myFontFamily,
                         modifier = Modifier.width((width-50).dp),
                         fontWeight = FontWeight.Normal,
                         text = "${ selectedItem.value.dis?: selectedItem.value.dis } $unit",
@@ -1169,7 +1260,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                                 modifier = Modifier
                                     .padding(10.dp)
                                     .width((expandedWidth).dp),
-                                textStyle = TextStyle(fontSize = 20.sp, fontFamily = ComposeUtil.myFontFamily),
+                                textStyle = TextStyle(fontSize = 20.sp, fontFamily = myFontFamily),
                                 leadingIcon = {
                                     Image(
                                         painter = painterResource(id = R.drawable.ic_search),
@@ -1210,7 +1301,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                                         Text(
                                             fontSize = 20.sp,
                                             color = if (enabledItems.contains(it)) Color.Black else Color.Gray,
-                                            fontFamily = ComposeUtil.myFontFamily,
+                                            fontFamily = myFontFamily,
                                             modifier = Modifier.padding(end = 10.dp, start = 10.dp),
                                             fontWeight = FontWeight.Normal,
                                             text = it.dis ?: it.value
@@ -1218,7 +1309,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                                         Text(
                                             fontSize = 20.sp,
                                             color = if (enabledItems.contains(it)) Color.Black else Color.Gray,
-                                            fontFamily = ComposeUtil.myFontFamily,
+                                            fontFamily = myFontFamily,
                                             fontWeight = FontWeight.Normal,
                                             text = unit
                                         )
@@ -1242,207 +1333,22 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         }
     }
 
-    fun formatText(input: String): String {
+    private fun formatText(input: String): String {
         val regex = "(?<=[a-zA-Z])(?=\\d)|(?<=\\d)(?=[a-zA-Z])|(?<=[a-z\\d])(?=[A-Z])".toRegex()
         return input.split(regex).joinToString(" ").replaceFirstChar { it.uppercase() }
     }
 
     @Composable
-    fun CoolingControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+    fun CompressorControl(viewModel: HyperStatSplitViewModel,modifier: Modifier = Modifier) {
         Column(modifier = modifier) {
-            if (viewModel.isCoolingAOEnabled()) {
-                EnableCoolingVoltage(viewModel, CpuControlType.COOLING)
+            if (viewModel.isCompressorAOEnabled(CpuAnalogControlType.COMPRESSOR_SPEED.ordinal)) {
+                EnableCompressorVoltage(viewModel, CpuAnalogControlType.COMPRESSOR_SPEED)
             }
         }
     }
 
     @Composable
-    fun EnableCoolingVoltage(viewModel: HyperStatSplitCpuViewModel, type: CpuControlType) {
-        if (viewModel.isAnalogEnabledAndMapped(
-                type,
-                viewModel.viewState.value.analogOut1Enabled,
-                viewModel.viewState.value.analogOut1Association
-            )
-        ) {
-            MinMaxConfiguration("Analog-out1 at Min \nCooling",
-                "Analog-out1 at Max \nCooling",
-                viewModel.minMaxVoltage,
-                "V",
-                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.coolingMinVoltage.toString(),
-                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.coolingMaxVoltage.toString(),
-                onMinSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.coolingMinVoltage = it.value.toInt()
-                },
-                onMaxSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.coolingMaxVoltage = it.value.toInt()
-                })
-        }
-        if (viewModel.isAnalogEnabledAndMapped(
-                type,
-                viewModel.viewState.value.analogOut2Enabled,
-                viewModel.viewState.value.analogOut2Association
-            )
-        ) {
-            MinMaxConfiguration("Analog-out2 at Min \nCooling",
-                "Analog-out2 at Max \nCooling",
-                viewModel.minMaxVoltage,
-                "V",
-                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.coolingMinVoltage.toString(),
-                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.coolingMaxVoltage.toString(),
-                onMinSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.coolingMinVoltage = it.value.toInt()
-                },
-                onMaxSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.coolingMaxVoltage = it.value.toInt()
-                }
-            )
-        }
-        if (viewModel.isAnalogEnabledAndMapped(
-                type,
-                viewModel.viewState.value.analogOut3Enabled,
-                viewModel.viewState.value.analogOut3Association
-            )
-        ) {
-            MinMaxConfiguration("Analog-out3 at Min \nCooling",
-                "Analog-out3 at Max \nCooling",
-                viewModel.minMaxVoltage,
-                "V",
-                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.coolingMinVoltage.toString(),
-                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.coolingMaxVoltage.toString(),
-                onMinSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.coolingMinVoltage = it.value.toInt()
-                },
-                onMaxSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.coolingMaxVoltage = it.value.toInt()
-                }
-            )
-        }
-        if (viewModel.isAnalogEnabledAndMapped(
-                type,
-                viewModel.viewState.value.analogOut4Enabled,
-                viewModel.viewState.value.analogOut4Association
-            )
-        ) {
-            MinMaxConfiguration("Analog-out4 at Min \nCooling",
-                "Analog-out4 at Max \nCooling",
-                viewModel.minMaxVoltage,
-                "V",
-                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.coolingMinVoltage.toString(),
-                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.coolingMaxVoltage.toString(),
-                onMinSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.coolingMinVoltage = it.value.toInt()
-                },
-                onMaxSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.coolingMaxVoltage = it.value.toInt()
-                }
-            )
-        }
-    }
-
-    @Composable
-    fun HeatingControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
-        Column(modifier = modifier) {
-            if (viewModel.isHeatingAOEnabled()) {
-                EnableHeatingVoltage(viewModel, CpuControlType.HEATING)
-            }
-        }
-    }
-
-    @Composable
-    fun EnableHeatingVoltage(viewModel: HyperStatSplitCpuViewModel, type: CpuControlType) {
-        if (viewModel.isAnalogEnabledAndMapped(
-                type,
-                viewModel.viewState.value.analogOut1Enabled,
-                viewModel.viewState.value.analogOut1Association
-            )
-        ) {
-            MinMaxConfiguration("Analog-out1 at Min \nHeating",
-                "Analog-out1 at Max \nHeating",
-                viewModel.minMaxVoltage,
-                "V",
-                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.heatingMinVoltage.toString(),
-                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.heatingMaxVoltage.toString(),
-                onMinSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.heatingMinVoltage = it.value.toInt()
-                },
-                onMaxSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.heatingMaxVoltage = it.value.toInt()
-                }
-            )
-        }
-        if (viewModel.isAnalogEnabledAndMapped(
-                type,
-                viewModel.viewState.value.analogOut2Enabled,
-                viewModel.viewState.value.analogOut2Association
-            )
-        ) {
-            MinMaxConfiguration("Analog-out2 at Min \nHeating",
-                "Analog-out2 at Max \nHeating",
-                viewModel.minMaxVoltage,
-                "V",
-                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.heatingMinVoltage.toString(),
-                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.heatingMaxVoltage.toString(),
-                onMinSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.heatingMinVoltage = it.value.toInt()
-                },
-                onMaxSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.heatingMaxVoltage = it.value.toInt()
-                }
-            )
-        }
-        if (viewModel.isAnalogEnabledAndMapped(
-                type,
-                viewModel.viewState.value.analogOut3Enabled,
-                viewModel.viewState.value.analogOut3Association
-            )
-        ) {
-            MinMaxConfiguration("Analog-out3 at Min \nHeating",
-                "Analog-out3 at Max \nHeating",
-                viewModel.minMaxVoltage,
-                "V",
-                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.heatingMinVoltage.toString(),
-                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.heatingMaxVoltage.toString(),
-                onMinSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.heatingMinVoltage = it.value.toInt()
-                },
-                onMaxSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.heatingMaxVoltage = it.value.toInt()
-                }
-            )
-        }
-        if (viewModel.isAnalogEnabledAndMapped(
-                type,
-                viewModel.viewState.value.analogOut4Enabled,
-                viewModel.viewState.value.analogOut4Association
-            )
-        ) {
-            MinMaxConfiguration("Analog-out4 at Min \nHeating",
-                "Analog-out4 at Max \nHeating",
-                viewModel.minMaxVoltage,
-                "V",
-                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.heatingMinVoltage.toString(),
-                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.heatingMaxVoltage.toString(),
-                onMinSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.heatingMinVoltage = it.value.toInt()
-                },
-                onMaxSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.heatingMaxVoltage = it.value.toInt()
-                }
-            )
-        }
-    }
-
-    @Composable
-    fun CompressorControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
-        Column(modifier = modifier) {
-            if (viewModel.isCompressorAOEnabled()) {
-                EnableCompressorVoltage(viewModel, CpuControlType.COMPRESSOR_SPEED)
-            }
-        }
-    }
-
-    @Composable
-    fun EnableCompressorVoltage(viewModel: HyperStatSplitCpuViewModel, type: CpuControlType) {
+    fun EnableCompressorVoltage(viewModel: HyperStatSplitViewModel, type: CpuAnalogControlType) {
         if (viewModel.isAnalogEnabledAndMapped(
                 type,
                 viewModel.viewState.value.analogOut1Enabled,
@@ -1460,7 +1366,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 },
                 onMaxSelected = {
                     (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.compressorMaxVoltage = it.value.toInt()
-                }
+                },
+                modifier = Modifier.padding(10.dp)
             )
         }
         if (viewModel.isAnalogEnabledAndMapped(
@@ -1526,16 +1433,16 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun DcvModulationControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+    fun DcvModulationControl(viewModel: HyperStatSplitViewModel,modifier: Modifier = Modifier) {
         Column(modifier = modifier) {
-            if (viewModel.isDamperModulationAOEnabled()) {
-                EnableDcvModulationVoltage(viewModel, CpuControlType.DCV_MODULATING_DAMPER)
+            if (viewModel.isDamperModulationAOEnabled(CpuAnalogControlType.DCV_MODULATING_DAMPER.ordinal)) {
+                EnableDcvModulationVoltage(viewModel, CpuAnalogControlType.DCV_MODULATING_DAMPER)
             }
         }
     }
 
     @Composable
-    fun EnableDcvModulationVoltage(viewModel: HyperStatSplitCpuViewModel, type: CpuControlType) {
+    fun EnableDcvModulationVoltage(viewModel: HyperStatSplitViewModel, type: CpuAnalogControlType) {
         if (viewModel.isAnalogEnabledAndMapped(
                 type,
                 viewModel.viewState.value.analogOut1Enabled,
@@ -1619,110 +1526,17 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun LinearFanControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
-        Column(modifier =  modifier) {
-            if (viewModel.isLinearFanAOEnabled()) {
-                EnableLinearFanVoltage(viewModel, CpuControlType.LINEAR_FAN)
-            }
-        }
-    }
-
-    @Composable
-    fun EnableLinearFanVoltage(viewModel: HyperStatSplitCpuViewModel, type: CpuControlType) {
-        if (viewModel.isAnalogEnabledAndMapped(
-                type,
-                viewModel.viewState.value.analogOut1Enabled,
-                viewModel.viewState.value.analogOut1Association
-            )
-        ) {
-            MinMaxConfiguration("Analog-out1 at Min \nLinear Fan",
-                "Analog-out1 at Max \nLinear Fan",
-                viewModel.minMaxVoltage,
-                "V",
-                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanMinVoltage.toString(),
-                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanMaxVoltage.toString(),
-                onMinSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanMinVoltage = it.value.toInt()
-                },
-                onMaxSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanMaxVoltage = it.value.toInt()
-                }
-            )
-        }
-        if (viewModel.isAnalogEnabledAndMapped(
-                type,
-                viewModel.viewState.value.analogOut2Enabled,
-                viewModel.viewState.value.analogOut2Association
-            )
-        ) {
-            MinMaxConfiguration("Analog-out2 at Min \nLinear Fan",
-                "Analog-out2 at Max \nLinear Fan",
-                viewModel.minMaxVoltage,
-                "V",
-                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanMinVoltage.toString(),
-                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanMaxVoltage.toString(),
-                onMinSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanMinVoltage = it.value.toInt()
-                },
-                onMaxSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanMaxVoltage = it.value.toInt()
-                }
-            )
-        }
-        if (viewModel.isAnalogEnabledAndMapped(
-                type,
-                viewModel.viewState.value.analogOut3Enabled,
-                viewModel.viewState.value.analogOut3Association
-            )
-        ) {
-            MinMaxConfiguration("Analog-out3 at Min \nLinear Fan",
-                "Analog-out3 at Max \nLinear Fan",
-                viewModel.minMaxVoltage,
-                "V",
-                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanMinVoltage.toString(),
-                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanMaxVoltage.toString(),
-                onMinSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanMinVoltage = it.value.toInt()
-                },
-                onMaxSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanMaxVoltage = it.value.toInt()
-                }
-            )
-        }
-        if (viewModel.isAnalogEnabledAndMapped(
-                type,
-                viewModel.viewState.value.analogOut4Enabled,
-                viewModel.viewState.value.analogOut4Association
-            )
-        ) {
-            MinMaxConfiguration("Analog-out4 at Min \nLinear Fan",
-                "Analog-out4 at Max \nLinear Fan",
-                viewModel.minMaxVoltage,
-                "V",
-                minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanMinVoltage.toString(),
-                maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanMaxVoltage.toString(),
-                onMinSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanMinVoltage = it.value.toInt()
-                },
-                onMaxSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanMaxVoltage = it.value.toInt()
-                }
-            )
-        }
-    }
-
-    @Composable
-    fun StagedFanControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+    fun StagedFanControl(viewModel: HyperStatSplitViewModel,modifier: Modifier = Modifier) {
         Column(modifier = modifier) {
-            if (viewModel.isStagedFanAOEnabled()) {
+            if (viewModel.isStagedFanAOEnabled(CpuAnalogControlType.STAGED_FAN.ordinal)) {
                 EnableStagedFanVoltage(viewModel)
             }
         }
     }
 
     @Composable
-    fun EnableStagedFanVoltage(viewModel: HyperStatSplitCpuViewModel) {
-        if (viewModel.isStagedFanAOEnabled()) {
+    fun EnableStagedFanVoltage(viewModel: HyperStatSplitViewModel) {
+        if (viewModel.isStagedFanAOEnabled(CpuAnalogControlType.STAGED_FAN.ordinal)) {
             CpuStagedFanConfiguration("Fan Out\nduring Recirc",
                 "Fan Out\nduring Economizer",
                 "Fan Out\nduring Heat Stage 1",
@@ -1748,7 +1562,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 compressor2Default = (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.compressorStage2Voltage.toString(),
                 compressor3Default = (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.compressorStage3Voltage.toString(),
                 onRecircSelected = {
-                    (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.recircVoltage = it.value.toInt()
+                    (viewModel.viewState.value as HyperStatSplitCpuState) .stagedFanVoltages.recircVoltage = it.value.toInt()
                 },
                 onEconomizerSelected = {
                     (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.economizerVoltage = it.value.toInt()
@@ -1785,16 +1599,16 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun OAODamperControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+    fun OAODamperControl(viewModel: HyperStatSplitViewModel,modifier: Modifier = Modifier) {
         Column(modifier = modifier) {
-            if (viewModel.isOAODamperAOEnabled()) {
-                EnableOAODamperVoltage(viewModel, CpuControlType.OAO_DAMPER)
+            if (viewModel.isOAODamperAOEnabled(CpuAnalogControlType.OAO_DAMPER.ordinal)) {
+                EnableOAODamperVoltage(viewModel, CpuAnalogControlType.OAO_DAMPER)
             }
         }
     }
 
     @Composable
-    fun EnableOAODamperVoltage(viewModel:HyperStatSplitCpuViewModel, type: CpuControlType) {
+    fun EnableOAODamperVoltage(viewModel:HyperStatSplitViewModel, type: CpuAnalogControlType) {
         if (viewModel.isAnalogEnabledAndMapped(
                 type,
                 viewModel.viewState.value.analogOut1Enabled,
@@ -1886,16 +1700,16 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun ReturnDamperControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+    fun ReturnDamperControl(viewModel: HyperStatSplitViewModel,modifier: Modifier = Modifier) {
         Column(modifier = modifier) {
-            if (viewModel.isReturnDamperAOEnabled()) {
-                EnableReturnDamperVoltage(viewModel, CpuControlType.RETURN_DAMPER)
+            if (viewModel.isReturnDamperAOEnabled(CpuAnalogControlType.RETURN_DAMPER.ordinal)) {
+                EnableReturnDamperVoltage(viewModel, CpuAnalogControlType.RETURN_DAMPER)
             }
         }
     }
 
     @Composable
-    fun EnableReturnDamperVoltage(viewModel: HyperStatSplitCpuViewModel, type: CpuControlType) {
+    fun EnableReturnDamperVoltage(viewModel: HyperStatSplitViewModel, type: CpuAnalogControlType) {
         if (viewModel.isAnalogEnabledAndMapped(
                 type,
                 viewModel.viewState.value.analogOut1Enabled,
@@ -1986,7 +1800,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         minDefault: String,
         maxDefault: String,
         onMinSelected: (HyperStatSplitViewModel.Option) -> Unit = {},
-        onMaxSelected: (HyperStatSplitViewModel.Option) -> Unit = {}
+        onMaxSelected: (HyperStatSplitViewModel.Option) -> Unit = {},
+        modifier: Modifier = Modifier
     ) {
         Row(
             modifier = Modifier
@@ -2004,12 +1819,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 SpinnerElementOption(defaultSelection = minDefault,
                     items = itemList,
                     unit = unit,
-                    itemSelected = { onMinSelected(it) })
+                    itemSelected = { onMinSelected(it) },
+                    previewWidth = 70)
             }
 
-            Box(modifier = Modifier
+            Box(modifier = modifier
                 .weight(2f)
-                .padding(top = 10.dp, bottom = 10.dp)) {
+                .padding(top = 10.dp, bottom = 10.dp, start = 10.dp)) {
                 StyledTextView(
                     maxLabel, fontSize = 20, textAlignment = TextAlign.Left
                 )
@@ -2018,12 +1834,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 SpinnerElementOption(defaultSelection = maxDefault,
                     items = itemList,
                     unit = unit,
-                    itemSelected = { onMaxSelected(it) })
+                    itemSelected = { onMaxSelected(it) },
+                    previewWidth = 70)
             }
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+    @OptIn(ExperimentalLayoutApi::class)
     @Composable
     fun CpuStagedFanConfiguration(
         recircLabel: String,
@@ -2061,7 +1878,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         onCompressor1Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
         onCompressor2Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
         onCompressor3Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
-        viewModel: HyperStatSplitCpuViewModel
+        viewModel: HyperStatSplitViewModel
     ) {
         FlowRow(
             modifier = Modifier
@@ -2081,10 +1898,10 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 SpinnerElementOption(defaultSelection = recircDefault,
                     items = itemList,
                     unit = unit,
-                    itemSelected = { onRecircSelected(it) })
+                    itemSelected = { onRecircSelected(it) }, previewWidth = 70)
             }
 
-            if (viewModel.isOAODamperAOEnabled()) {
+            if (viewModel.isOAODamperAOEnabled(CpuAnalogControlType.OAO_DAMPER.ordinal)) {
                 nEntries++
                 Box(modifier = Modifier
                     .weight(2f)
@@ -2097,7 +1914,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     SpinnerElementOption(defaultSelection = economizerDefault,
                         items = itemList,
                         unit = unit,
-                        itemSelected = { onEconomizerSelected(it) })
+                        itemSelected = { onEconomizerSelected(it) }, previewWidth = 70)
                 }
             }
 
@@ -2114,7 +1931,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     SpinnerElementOption(defaultSelection = heatStage1Default,
                         items = itemList,
                         unit = unit,
-                        itemSelected = { onHeatStage1Selected(it) })
+                        itemSelected = { onHeatStage1Selected(it) }, previewWidth = 70)
                 }
             }
             
@@ -2131,7 +1948,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     SpinnerElementOption(defaultSelection = heatStage2Default,
                         items = itemList,
                         unit = unit,
-                        itemSelected = { onHeatStage2Selected(it) })
+                        itemSelected = { onHeatStage2Selected(it) }, previewWidth = 70)
                 }
             }
             
@@ -2148,7 +1965,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     SpinnerElementOption(defaultSelection = heatStage3Default,
                         items = itemList,
                         unit = unit,
-                        itemSelected = { onHeatStage3Selected(it) })
+                        itemSelected = { onHeatStage3Selected(it) }, previewWidth = 70)
                 }
             }
             
@@ -2165,7 +1982,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     SpinnerElementOption(defaultSelection = coolStage1Default,
                         items = itemList,
                         unit = unit,
-                        itemSelected = { onCoolStage1Selected(it) })
+                        itemSelected = { onCoolStage1Selected(it) }, previewWidth = 70)
                 }
             }
             
@@ -2182,7 +1999,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     SpinnerElementOption(defaultSelection = coolStage2Default,
                         items = itemList,
                         unit = unit,
-                        itemSelected = { onCoolStage2Selected(it) })
+                        itemSelected = { onCoolStage2Selected(it) }, previewWidth = 70)
                 }
             }
             
@@ -2199,7 +2016,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     SpinnerElementOption(defaultSelection = coolStage3Default,
                         items = itemList,
                         unit = unit,
-                        itemSelected = { onCoolStage3Selected(it) })
+                        itemSelected = { onCoolStage3Selected(it) }, previewWidth = 70)
                 }
             }
             if (viewModel.isCompressorStage1RelayEnabled()) {
@@ -2215,7 +2032,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     SpinnerElementOption(defaultSelection = compressor1Default,
                         items = itemList,
                         unit = unit,
-                        itemSelected = { onCompressor1Selected(it) })
+                        itemSelected = { onCompressor1Selected(it) }, previewWidth = 70)
                 }
             }
             if (viewModel.isCompressorStage2RelayEnabled()) {
@@ -2231,7 +2048,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     SpinnerElementOption(defaultSelection = compressor2Default,
                         items = itemList,
                         unit = unit,
-                        itemSelected = { onCompressor2Selected(it) })
+                        itemSelected = { onCompressor2Selected(it) }, previewWidth = 70)
                 }
             }
             if (viewModel.isCompressorStage3RelayEnabled()) {
@@ -2247,7 +2064,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     SpinnerElementOption(defaultSelection = compressor3Default,
                         items = itemList,
                         unit = unit,
-                        itemSelected = { onCompressor3Selected(it) })
+                        itemSelected = { onCompressor3Selected(it) }, previewWidth = 70)
                 }
             }
 
@@ -2259,9 +2076,9 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+    @OptIn(ExperimentalLayoutApi::class)
     @Composable
-    fun ZoneOAOConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+    fun ZoneOAOConfig(viewModel: HyperStatSplitViewModel,modifier: Modifier = Modifier) {
         FlowRow(
             modifier = modifier
                 .fillMaxWidth()
@@ -2272,9 +2089,11 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
 
             if (viewModel.isAO1MappedToFan()) {
                 nEntries += 3
-                Box(modifier = Modifier
-                    .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                Box(
+                    modifier = Modifier
+                        .weight(2f)
+                        .padding(top = 10.dp, bottom = 10.dp)
+                ) {
                     StyledTextView(
                         "Analog-out1 at Fan Low\n", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2284,13 +2103,19 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanAtFanLow.toString(),
                         items = viewModel.testVoltage,
                         unit = "%",
-                        itemSelected = { (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanAtFanLow = it.value.toInt() }
+                        itemSelected = {
+                            (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanAtFanLow =
+                                it.value.toInt()
+                        },
+                        previewWidth = 70
                     )
                 }
 
-                Box(modifier = Modifier
-                    .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                Box(
+                    modifier = Modifier
+                        .weight(2f)
+                        .padding(top = 10.dp, bottom = 10.dp, start = 10.dp)
+                ) {
                     StyledTextView(
                         "Analog-out1 at Fan Medium\n", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2300,13 +2125,19 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanAtFanMedium.toString(),
                         items = viewModel.testVoltage,
                         unit = "%",
-                        itemSelected = { (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanAtFanMedium = it.value.toInt() }
+                        itemSelected = {
+                            (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanAtFanMedium =
+                                it.value.toInt()
+                        },
+                        previewWidth = 70
                     )
                 }
 
-                Box(modifier = Modifier
-                    .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                Box(
+                    modifier = Modifier
+                        .weight(2f)
+                        .padding(top = 10.dp, bottom = 10.dp)
+                ) {
                     StyledTextView(
                         "Analog-out1 at Fan High\n", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2316,16 +2147,26 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanAtFanHigh.toString(),
                         items = viewModel.testVoltage,
                         unit = "%",
-                        itemSelected = { (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanAtFanHigh = it.value.toInt() }
+                        itemSelected = {
+                            (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanAtFanHigh =
+                                it.value.toInt()
+                        },
+                        previewWidth = 70
                     )
                 }
+
+                    Box(modifier = Modifier.weight(2f))
+                    Box(modifier = Modifier.weight(1f))
+
             }
 
             if (viewModel.isAO2MappedToFan()) {
                 nEntries += 3
-                Box(modifier = Modifier
-                    .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                Box(
+                    modifier = Modifier
+                        .weight(2f)
+                        .padding(top = 10.dp, bottom = 10.dp)
+                ) {
                     StyledTextView(
                         "Analog-out2 at Fan Low\n", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2335,13 +2176,19 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanAtFanLow.toString(),
                         items = viewModel.testVoltage,
                         unit = "%",
-                        itemSelected = { (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanAtFanLow = it.value.toInt() }
+                        itemSelected = {
+                            (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanAtFanLow =
+                                it.value.toInt()
+                        },
+                        previewWidth = 70
                     )
                 }
 
-                Box(modifier = Modifier
-                    .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                Box(
+                    modifier = Modifier
+                        .weight(2f)
+                        .padding(top = 10.dp, bottom = 10.dp, start = 10.dp)
+                ) {
                     StyledTextView(
                         "Analog-out2 at Fan Medium\n", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2351,13 +2198,19 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanAtFanMedium.toString(),
                         items = viewModel.testVoltage,
                         unit = "%",
-                        itemSelected = { (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanAtFanMedium = it.value.toInt() }
+                        itemSelected = {
+                            (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanAtFanMedium =
+                                it.value.toInt()
+                        },
+                        previewWidth = 70
                     )
                 }
 
-                Box(modifier = Modifier
-                    .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                Box(
+                    modifier = Modifier
+                        .weight(2f)
+                        .padding(top = 10.dp, bottom = 10.dp)
+                ) {
                     StyledTextView(
                         "Analog-out2 at Fan High\n", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2367,16 +2220,25 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanAtFanHigh.toString(),
                         items = viewModel.testVoltage,
                         unit = "%",
-                        itemSelected = { (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanAtFanHigh = it.value.toInt() }
+                        itemSelected = {
+                            (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanAtFanHigh =
+                                it.value.toInt()
+                        },
+                        previewWidth = 70
                     )
                 }
+                    Box(modifier = Modifier.weight(2f))
+                    Box(modifier = Modifier.weight(1f))
+
             }
 
             if (viewModel.isAO3MappedToFan()) {
                 nEntries += 3
-                Box(modifier = Modifier
-                    .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                Box(
+                    modifier = Modifier
+                        .weight(2f)
+                        .padding(top = 10.dp, bottom = 10.dp)
+                ) {
                     StyledTextView(
                         "Analog-out3 at Fan Low\n", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2386,13 +2248,19 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanAtFanLow.toString(),
                         items = viewModel.testVoltage,
                         unit = "%",
-                        itemSelected = { (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanAtFanLow = it.value.toInt() }
+                        itemSelected = {
+                            (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanAtFanLow =
+                                it.value.toInt()
+                        },
+                        previewWidth = 70
                     )
                 }
 
-                Box(modifier = Modifier
-                    .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                Box(
+                    modifier = Modifier
+                        .weight(2f)
+                        .padding(top = 10.dp, bottom = 10.dp, start = 10.dp)
+                ) {
                     StyledTextView(
                         "Analog-out3 at Fan Medium\n", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2402,13 +2270,19 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanAtFanMedium.toString(),
                         items = viewModel.testVoltage,
                         unit = "%",
-                        itemSelected = { (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanAtFanMedium = it.value.toInt() }
+                        itemSelected = {
+                            (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanAtFanMedium =
+                                it.value.toInt()
+                        },
+                        previewWidth = 70
                     )
                 }
 
-                Box(modifier = Modifier
-                    .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                Box(
+                    modifier = Modifier
+                        .weight(2f)
+                        .padding(top = 10.dp, bottom = 10.dp)
+                ) {
                     StyledTextView(
                         "Analog-out3 at Fan High\n", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2418,16 +2292,26 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanAtFanHigh.toString(),
                         items = viewModel.testVoltage,
                         unit = "%",
-                        itemSelected = { (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanAtFanHigh = it.value.toInt() }
+                        itemSelected = {
+                            (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanAtFanHigh =
+                                it.value.toInt()
+                        },
+                        previewWidth = 70
                     )
                 }
+
+                    Box(modifier = Modifier.weight(2f))
+                    Box(modifier = Modifier.weight(1f))
+
             }
 
             if (viewModel.isAO4MappedToFan()) {
                 nEntries += 3
-                Box(modifier = Modifier
-                    .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                Box(
+                    modifier = Modifier
+                        .weight(2f)
+                        .padding(top = 10.dp, bottom = 10.dp)
+                ) {
                     StyledTextView(
                         "Analog-out4 at Fan Low\n", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2437,13 +2321,19 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanAtFanLow.toString(),
                         items = viewModel.testVoltage,
                         unit = "%",
-                        itemSelected = { (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanAtFanLow = it.value.toInt() }
+                        itemSelected = {
+                            (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanAtFanLow =
+                                it.value.toInt()
+                        },
+                        previewWidth = 70
                     )
                 }
 
-                Box(modifier = Modifier
-                    .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                Box(
+                    modifier = Modifier
+                        .weight(2f)
+                        .padding(top = 10.dp, bottom = 10.dp, start = 10.dp)
+                ) {
                     StyledTextView(
                         "Analog-out4 at Fan Medium\n", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2453,13 +2343,19 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanAtFanMedium.toString(),
                         items = viewModel.testVoltage,
                         unit = "%",
-                        itemSelected = { (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanAtFanMedium = it.value.toInt() }
+                        itemSelected = {
+                            (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanAtFanMedium =
+                                it.value.toInt()
+                        },
+                        previewWidth = 70
                     )
                 }
 
-                Box(modifier = Modifier
-                    .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                Box(
+                    modifier = Modifier
+                        .weight(2f)
+                        .padding(top = 10.dp, bottom = 10.dp)
+                ) {
                     StyledTextView(
                         "Analog-out4 at Fan High\n", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2469,16 +2365,30 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanAtFanHigh.toString(),
                         items = viewModel.testVoltage,
                         unit = "%",
-                        itemSelected = { (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanAtFanHigh = it.value.toInt() }
+                        itemSelected = {
+                            (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanAtFanHigh =
+                                it.value.toInt()
+                        },
+                        previewWidth = 70
                     )
+
                 }
+
+                    Box(modifier = Modifier.weight(2f))
+                    Box(modifier = Modifier.weight(1f))
             }
+        }
+        FlowRow( modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 25.dp, bottom = 10.dp),
+            maxItemsInEachRow = 4) {
+            var nEntries = 0
 
             if (viewModel.viewState.value.enableOutsideAirOptimization) {
-                nEntries += 9
+                nEntries += 6
                 Box(modifier = Modifier
                     .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                    .padding(top = 10.dp, bottom = 20.dp)) {
                     StyledTextView(
                         "Outside Damper Min Open\nDuring Recirc", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2486,12 +2396,14 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementString(defaultSelection = viewModel.viewState.value.outsideDamperMinOpenDuringRecirc.toInt().toString(),
                         items = viewModel.outsideDamperMinOpenList, unit = "%",
-                        itemSelected = { viewModel.viewState.value.outsideDamperMinOpenDuringRecirc = it.toDouble()})
+                        itemSelected = { viewModel.viewState.value.outsideDamperMinOpenDuringRecirc = it.toDouble()},
+                        previewWidth = 70
+                        )
                 }
 
                 Box(modifier = Modifier
                     .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                    .padding(top = 10.dp, bottom = 20.dp, start = 10.dp)) {
                     StyledTextView(
                         "Outside Damper Min Open\nDuring Conditioning", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2499,7 +2411,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementString(defaultSelection = viewModel.viewState.value.outsideDamperMinOpenDuringConditioning.toInt().toString(),
                         items = viewModel.outsideDamperMinOpenList, unit = "%",
-                        itemSelected = { viewModel.viewState.value.outsideDamperMinOpenDuringConditioning = it.toDouble()})
+                        itemSelected = { viewModel.viewState.value.outsideDamperMinOpenDuringConditioning = it.toDouble()}, previewWidth = 70)
                 }
 
                 Box(modifier = Modifier
@@ -2512,12 +2424,12 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementString(defaultSelection = viewModel.viewState.value.outsideDamperMinOpenDuringFanLow.toInt().toString(),
                         items = viewModel.outsideDamperMinOpenList, unit = "%",
-                        itemSelected = { viewModel.viewState.value.outsideDamperMinOpenDuringFanLow = it.toDouble()})
+                        itemSelected = { viewModel.viewState.value.outsideDamperMinOpenDuringFanLow = it.toDouble()}, previewWidth = 70)
                 }
 
                 Box(modifier = Modifier
                     .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                    .padding(top = 10.dp, bottom = 20.dp, start = 10.dp)) {
                     StyledTextView(
                         "Outside Damper Min Open\nDuring Fan Medium", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2525,12 +2437,12 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementString(defaultSelection = viewModel.viewState.value.outsideDamperMinOpenDuringFanMedium.toInt().toString(),
                         items = viewModel.outsideDamperMinOpenList, unit = "%",
-                        itemSelected = { viewModel.viewState.value.outsideDamperMinOpenDuringFanMedium = it.toDouble() })
+                        itemSelected = { viewModel.viewState.value.outsideDamperMinOpenDuringFanMedium = it.toDouble() }, previewWidth = 70)
                 }
 
                 Box(modifier = Modifier
                     .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                    .padding(top = 10.dp, bottom = 20.dp)) {
                     StyledTextView(
                         "Outside Damper Min Open\nDuring Fan High", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2538,12 +2450,12 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementString(defaultSelection = viewModel.viewState.value.outsideDamperMinOpenDuringFanHigh.toInt().toString(),
                         items = viewModel.outsideDamperMinOpenList, unit = "%",
-                        itemSelected = { viewModel.viewState.value.outsideDamperMinOpenDuringFanHigh = it.toDouble()})
+                        itemSelected = { viewModel.viewState.value.outsideDamperMinOpenDuringFanHigh = it.toDouble()}, previewWidth = 70)
                 }
 
                 Box(modifier = Modifier
                     .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                    .padding(top = 10.dp, bottom = 20.dp, start = 10.dp)) {
                     StyledTextView(
                         "Exhaust Fan Stage 1 Threshold\n", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2551,12 +2463,12 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementString(defaultSelection = viewModel.viewState.value.exhaustFanStage1Threshold.toInt().toString(),
                         items = viewModel.exhaustFanThresholdList, unit = "%",
-                        itemSelected = { viewModel.viewState.value.exhaustFanStage1Threshold = it.toDouble()})
+                        itemSelected = { viewModel.viewState.value.exhaustFanStage1Threshold = it.toDouble()}, previewWidth = 70)
                 }
 
                 Box(modifier = Modifier
                     .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                    .padding(top = 10.dp, bottom = 20.dp)) {
                     StyledTextView(
                         "Exhaust Fan Stage 2 Threshold\n", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2564,12 +2476,12 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementString(defaultSelection = viewModel.viewState.value.exhaustFanStage2Threshold.toInt().toString(),
                         items = viewModel.exhaustFanThresholdList, unit = "%",
-                        itemSelected = { viewModel.viewState.value.exhaustFanStage2Threshold = it.toDouble()})
+                        itemSelected = { viewModel.viewState.value.exhaustFanStage2Threshold = it.toDouble()}, previewWidth = 70)
                 }
 
                 Box(modifier = Modifier
                     .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                    .padding(top = 10.dp, bottom = 20.dp, start = 10.dp)) {
                     StyledTextView(
                         "Exhaust Fan Hysteresis\n", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2577,12 +2489,12 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementString(defaultSelection = viewModel.viewState.value.exhaustFanHysteresis.toInt().toString(),
                         items = viewModel.exhaustFanHysteresisList, unit = "%",
-                        itemSelected = { viewModel.viewState.value.exhaustFanHysteresis = it.toDouble()})
+                        itemSelected = { viewModel.viewState.value.exhaustFanHysteresis = it.toDouble()}, previewWidth = 70)
                 }
 
                 Box(modifier = Modifier
                     .weight(2f)
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                    .padding(top = 10.dp, bottom = 20.dp)) {
                     StyledTextView(
                         "CO2 Damper Opening Rate\n", fontSize = 20, textAlignment = TextAlign.Left
                     )
@@ -2590,14 +2502,14 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementString(defaultSelection = viewModel.viewState.value.zoneCO2DamperOpeningRate.toInt().toString(),
                         items = viewModel.zoneCO2DamperOpeningRateList, unit = "%",
-                        itemSelected = { viewModel.viewState.value.zoneCO2DamperOpeningRate = it.toDouble() })
+                        itemSelected = { viewModel.viewState.value.zoneCO2DamperOpeningRate = it.toDouble() }, previewWidth = 70)
                 }
 
                 if (viewModel.isPrePurgeEnabled()) {
                     nEntries += 1
                     Box(modifier = Modifier
                         .weight(2f)
-                        .padding(top = 10.dp, bottom = 10.dp)) {
+                        .padding(top = 10.dp, bottom = 20.dp, start = 10.dp)) {
                         StyledTextView(
                             "Pre Purge Min\nDamper Position", fontSize = 20, textAlignment = TextAlign.Left
                         )
@@ -2605,15 +2517,19 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     Box(modifier = Modifier.weight(1f)) {
                         SpinnerElementString(defaultSelection = viewModel.viewState.value.prePurgeOutsideDamperOpen.toInt().toString(),
                             items = viewModel.prePurgeOutsideDamperOpenList, unit = "%",
-                            itemSelected = { viewModel.viewState.value.prePurgeOutsideDamperOpen = it.toDouble() })
+                            itemSelected = { viewModel.viewState.value.prePurgeOutsideDamperOpen = it.toDouble() }, previewWidth = 70)
                     }
                 }
             }
 
-            nEntries += 5
+            nEntries += 3
             Box(modifier = Modifier
                 .weight(2f)
-                .padding(top = 10.dp, bottom = 10.dp)) {
+                .padding(
+                    top = 10.dp,
+                    bottom = 20.dp,
+                    start = if (nEntries % 2 == 1) 10.dp else 0.dp
+                )) {
                 StyledTextView(
                     "Zone CO2 Threshold\n", fontSize = 20, textAlignment = TextAlign.Left
                 )
@@ -2623,12 +2539,16 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 .padding(end = 25.dp)) {
                 SpinnerElementString(defaultSelection = viewModel.viewState.value.zoneCO2Threshold.toInt().toString(),
                     items = viewModel.zoneCO2ThresholdList, unit = "ppm",
-                    itemSelected = { viewModel.viewState.value.zoneCO2Threshold = it.toDouble() })
+                    itemSelected = { viewModel.viewState.value.zoneCO2Threshold = it.toDouble() }, previewWidth = 125, textWidth = 120)
             }
 
             Box(modifier = Modifier
                 .weight(2f)
-                .padding(top = 10.dp, bottom = 10.dp)) {
+                .padding(
+                    top = 10.dp,
+                    bottom = 20.dp,
+                    start = if (nEntries % 2 == 1) 0.dp else 10.dp
+                )) {
                 StyledTextView(
                     "Zone CO2 Target\n", fontSize = 20, textAlignment = TextAlign.Left
                 )
@@ -2638,12 +2558,16 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 .padding(end = 25.dp)) {
                 SpinnerElementString(defaultSelection = viewModel.viewState.value.zoneCO2Target.toInt().toString(),
                     items = viewModel.zoneCO2TargetList, unit = "ppm",
-                    itemSelected = { viewModel.viewState.value.zoneCO2Target = it.toDouble() })
+                    itemSelected = { viewModel.viewState.value.zoneCO2Target = it.toDouble() },previewWidth = 125, textWidth = 120)
             }
 
             Box(modifier = Modifier
                 .weight(2f)
-                .padding(top = 10.dp, bottom = 10.dp)) {
+                .padding(
+                    top = 10.dp,
+                    bottom = 20.dp,
+                    start = if (nEntries % 2 == 1) 10.dp else 0.dp
+                )) {
                 StyledTextView(
                     "Zone PM2.5 Target\n", fontSize = 20, textAlignment = TextAlign.Left
                 )
@@ -2653,7 +2577,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 .padding(end = 25.dp)) {
                 SpinnerElementString(defaultSelection = viewModel.viewState.value.zonePM2p5Target.toInt().toString(),
                     items = viewModel.zonePM2p5TargetList, unit = "ug/m3",
-                    itemSelected = { viewModel.viewState.value.zonePM2p5Target = it.toDouble() })
+                    itemSelected = { viewModel.viewState.value.zonePM2p5Target = it.toDouble() },previewWidth = 125, textWidth = 120)
             }
 
             if (nEntries % 2 == 1) {
@@ -2664,9 +2588,22 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun DisplayInDeviceConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+    fun DisplayInDeviceConfig(viewModel: HyperStatSplitViewModel,modifier: Modifier = Modifier) {
         Column(modifier = modifier.padding(start = 25.dp, top = 25.dp)) {
             BoldStyledTextView("Display in Device Home Screen", fontSize = 20)
+            Row(horizontalArrangement = Arrangement.Center)
+            {
+                Box(modifier = Modifier.weight(1f)) {
+                    SubTitle("Sensors Value (Select up to 2)")
+
+                }
+                Box(modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 10.dp)) {
+                    SubTitle("Temperature Value (Select only 1)")
+
+                }
+            }
             Spacer(modifier = Modifier.height(10.dp))
 
             Row(modifier = Modifier
@@ -2693,6 +2630,31 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier
                     .weight(4f)
                     .padding(top = 10.dp)) {
+                    StyledTextView(text = viewModel.profileConfiguration.spaceTemp.disName, fontSize = 20)
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    ToggleButton(
+                        defaultSelection = viewModel.viewState.value.spaceTemp,
+                        onEnabled = {
+                            if ( it && viewModel.viewState.value.desiredTemp) {
+                                showToast("Max of 1 temperature can be displayed at once", requireContext())
+                            } else {
+                                viewModel.viewState.value.desiredTemp = true
+                                viewModel.viewState.value.spaceTemp = it
+                                showToast("Min of 1 temperature should be displayed", requireContext())
+                            }
+                        })
+                }
+            }
+
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp)) {
+
+
+                Box(modifier = Modifier
+                    .weight(4f)
+                    .padding(top = 10.dp)) {
                     StyledTextView(text = viewModel.profileConfiguration.displayCO2.disName, fontSize = 20)
                 }
                 Box(modifier = Modifier.weight(1f)) {
@@ -2707,11 +2669,30 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         }
                     )
                 }
+
+                Box(modifier = Modifier
+                    .weight(4f)
+                    .padding(top = 10.dp)) {
+                    StyledTextView(text = viewModel.profileConfiguration.desiredTemp.disName, fontSize = 20)
+                  }
+                Box(modifier = Modifier.weight(1f)){
+                    ToggleButton(defaultSelection = viewModel.viewState.value.desiredTemp, onEnabled = {
+                        if (it && viewModel.viewState.value.spaceTemp) {
+                            showToast("Max of 1 temperature can be displayed at once", requireContext())
+                        } else {
+                            viewModel.viewState.value.spaceTemp = true
+                            viewModel.viewState.value.desiredTemp = it
+                            showToast("Min of 1 temperature should be displayed", requireContext())
+                        }
+                    })
+                }
+
             }
 
             Row(modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp)) {
+                .padding(vertical = 10.dp)){
+
                 Box(modifier = Modifier
                     .weight(4f)
                     .padding(top = 10.dp)) {
@@ -2730,18 +2711,16 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     )
                 }
 
-                Box(modifier = Modifier
-                    .weight(4f)
-                    .padding(top = 10.dp)) {
-                }
-                Box(modifier = Modifier.weight(1f)) {
-                }
+                Box(modifier = Modifier.weight(4f))
+                Box(modifier = Modifier.weight(1f))
             }
         }
+        DividerRow()
+
     }
 
     @Composable
-    fun MiscSettingConfig(viewModel: HyperStatSplitCpuViewModel) {
+    fun MiscSettingConfig(viewModel: HyperStatSplitViewModel) {
         Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {
             BoldStyledTextView("Misc Settings", fontSize = 20)
             Spacer(modifier = Modifier.height(10.dp))
@@ -2789,6 +2768,34 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     )
                 }
             }
+            Row(
+                modifier = Modifier
+                    .width(550.dp)
+                    .padding(vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ){
+                Box(
+                    modifier = Modifier
+                        .weight(4f)
+                        .padding(top = 10.dp)
+                ) {
+                    StyledTextView(
+                        text = "Enable backlight",
+                        fontSize = 20
+                    )
+                }
+
+                Box(modifier = Modifier.weight(1f)) {
+                    ToggleButton(
+                        defaultSelection = viewModel.viewState.value.backLight,
+                        onEnabled = {
+                            viewModel.viewState.value.backLight = it
+                        }
+                    )
+                }
+
+            }
         }
     }
 
@@ -2806,7 +2813,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun SaveConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+    fun SaveConfig(viewModel: HyperStatSplitViewModel,modifier: Modifier = Modifier) {
         Row(
             modifier = modifier
                 .fillMaxWidth()
@@ -2844,6 +2851,304 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             }
         }
     }
+
+    //Pin section
+
+    @SuppressLint("UnrememberedMutableState")
+    @Composable
+    fun PinPasswordView(viewModel: HyperStatSplitViewModel) {
+
+        var isDialogVisible by remember { mutableStateOf(false) }
+        var selectedPinTitle by remember { mutableStateOf("") }
+        val installerPin = remember { mutableStateListOf<Int>() }
+        val conditioningPin = remember { mutableStateListOf<Int>() }
+
+
+        fun decodingPin(pin: String): MutableList<Int> {
+            val decodedBytes = Base64.STANDARD.decode(pin)
+            val decodedString = decodedBytes.toString()
+            return decodedString.map { it.toString().toInt() }.toMutableList()
+        }
+
+        fun resetConditioningPin() {
+            conditioningPin.clear()
+            conditioningPin.addAll(listOf(0, 0, 0, 0))
+            viewModel.viewState.value.conditioningModePassword = "0"
+            CcuLog.d("USER_TEST", "Reset the conditioning pin to 0000")
+        }
+
+        fun resetInstallerPin() {
+            installerPin.clear()
+            installerPin.addAll(listOf(0, 0, 0, 0))
+            viewModel.viewState.value.installerPassword = "0"
+            CcuLog.d("USER_TEST", "Reset the installer pin to 0000")
+        }
+
+        /**
+         * case :1 -> if the pin toggle is enabled for first time/ the pin is disabled and enabled  , by default it will be set to 0000
+         * case :2 -> if the pin is already set, it will be decode and it will update in the list
+         * case :3 -> if the pin toggle is  then if the user click on cancel button, togged will be disabled and the pin will be reset to 0000
+         */
+
+        if (viewModel.viewState.value.installerPassword == "0") {
+            CcuLog.d("USER_TEST", "Installer password is empty, setting default pin to 0000")
+            installerPin.clear()
+            installerPin.addAll(listOf(0, 0, 0, 0))
+        } else {
+            CcuLog.d("USER_TEST", "Installer password is updating")
+            installerPin.clear()
+            CcuLog.d("USER_TEST", "Installer password is: ${viewModel.viewState.value.installerPassword}")
+            // Decode the Base64 encoded password and convert to a list of integers
+            installerPin.addAll(decodingPin(viewModel.viewState.value.installerPassword))
+        }
+
+        if (viewModel.viewState.value.conditioningModePassword == "0") {
+            CcuLog.d("USER_TEST", "conditioningPin password is updating")
+            conditioningPin.clear()
+            conditioningPin.addAll(listOf(0, 0, 0, 0))
+        } else {
+            conditioningPin.clear()
+            CcuLog.d("USER_TEST", "conditioningPin password is: ${viewModel.viewState.value.conditioningModePassword}")
+            conditioningPin.addAll(decodingPin(viewModel.viewState.value.conditioningModePassword))
+        }
+
+        // for toggle change
+
+        val onToggle: (String, Boolean) -> Unit = { pinTitle, isEnabled ->
+
+            CcuLog.d("USER_TEST", "Pin toggle for $pinTitle: $isEnabled")
+            selectedPinTitle = if (isEnabled) pinTitle else ""
+            isDialogVisible = isEnabled
+
+            when (pinTitle) {
+
+                INSTALLER_ACCESS -> {
+                    viewModel.viewState.value.installerPinEnable = isEnabled
+                    if (!isEnabled) resetInstallerPin()
+                }
+
+                CONDITIONING_ACCESS -> {
+                    viewModel.viewState.value.conditioningModePinEnable = isEnabled
+                    if (!isEnabled) resetConditioningPin()
+                }
+
+                else -> CcuLog.i("USER_TEST", "No valid PIN selected")
+            }
+        }
+
+        // for cancel button click
+        val onCancel: (String, Boolean) -> Unit = { pinTitle, enable ->
+
+            CcuLog.d("USER_TEST", "Pin cancel for $pinTitle: $enable")
+            selectedPinTitle = if (enable) pinTitle else ""
+            isDialogVisible = enable
+
+            when (pinTitle) {
+
+                INSTALLER_ACCESS -> {
+                    if (!enable && (viewModel.viewState.value.installerPassword == "0")) {
+                        resetInstallerPin()
+                        viewModel.viewState.value.installerPinEnable = enable
+                    }
+                }
+
+                CONDITIONING_ACCESS -> {
+                    if (!enable && (viewModel.viewState.value.conditioningModePassword == "0")) {
+                        resetConditioningPin()
+                        viewModel.viewState.value.conditioningModePinEnable = enable
+                    }
+                }
+
+                else -> CcuLog.i("USER_TEST", "No valid PIN selected")
+            }
+        }
+
+
+        Column(
+            modifier = Modifier
+                .padding(start = 25.dp, top = 25.dp, bottom = 25.dp)
+        ) {
+            BoldStyledTextView("PIN Lock", fontSize = 20)
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Box(modifier = Modifier.weight(4f)) {
+                    LabelWithToggleButton(
+                        text = INSTALLER_ACCESS,
+                        defaultSelection = viewModel.viewState.value.installerPinEnable,
+                        onEnabled = { enabled ->
+                            onToggle(INSTALLER_ACCESS, enabled)
+                        },
+                        eyeIconEnable = viewModel.viewState.value.installerPinEnable
+                    )
+                    {
+                        isDialogVisible = true
+                        selectedPinTitle = INSTALLER_ACCESS
+                    }
+
+                }
+                Box(modifier = Modifier.weight(4f)) {
+                    LabelWithToggleButton(
+                        text = CONDITIONING_ACCESS,
+                        defaultSelection = viewModel.viewState.value.conditioningModePinEnable,
+                        onEnabled = { enabled ->
+                            onToggle(
+                                CONDITIONING_ACCESS,
+                                enabled
+                            )
+                        },
+                        eyeIconEnable = viewModel.viewState.value.conditioningModePinEnable
+                    ) {
+                        isDialogVisible = true
+                        selectedPinTitle = CONDITIONING_ACCESS
+                    }
+                }
+            }
+// Pin dialog visibility check
+
+            if (isDialogVisible) {
+
+                ShowPinDialog(
+                    onDismiss = {
+                        isDialogVisible = false
+                        onCancel(selectedPinTitle,false)
+                                },
+                    selectedPinTitle = selectedPinTitle,
+                    pinDigits = when(selectedPinTitle)
+                    {
+                        INSTALLER_ACCESS -> installerPin
+                        CONDITIONING_ACCESS -> conditioningPin
+                        else -> mutableStateListOf(0, 0, 0, 0)
+                    }
+                )
+                {
+                    // Save the PIN configuration
+                    when(selectedPinTitle)
+                    {
+                        INSTALLER_ACCESS -> {
+
+                            viewModel.viewState.value.installerPassword = Base64.STANDARD.encode(installerPin.joinToString(separator = "") { it.toString() })
+                            CcuLog.i("USER_TEST", "Installer PIN updated successfully: ${viewModel.viewState.value.installerPassword}")
+                        }
+                        CONDITIONING_ACCESS -> {
+                            viewModel.viewState.value.conditioningModePassword = Base64.STANDARD.encode(conditioningPin.joinToString(separator = "") { it.toString() })
+                            CcuLog.i("USER_TEST", "Installer PIN updated successfully: ${viewModel.viewState.value.conditioningModePassword}")
+                        }
+                        else -> CcuLog.i("USER_TEST", "No valid PIN selected")
+                    }
+                    isDialogVisible = false
+                    CcuLog.i("USER_TEST", "updated successfully ")
+                }
+            }
+        }
+        DividerRow()
+    }
+
+
+    @Composable
+    fun ShowPinDialog(
+        onDismiss: () -> Unit,
+        selectedPinTitle: String,
+        pinDigits: MutableList<Int>,
+        onSave: () -> Unit
+    ) {
+        var saveState by remember { mutableStateOf(false) }
+        CcuLog.i("USER_TEST", "ShowPinDialog called with title: $selectedPinTitle and pinDigits: ${pinDigits.toList()}")
+
+
+        Dialog(
+            onDismissRequest = onDismiss,
+            properties = DialogProperties(dismissOnClickOutside = false, dismissOnBackPress = false)
+        ) {
+            Column(
+                modifier = Modifier
+                    .width(500.dp)
+                    .height(370.dp)
+                    .background(Color.White, RoundedCornerShape(4.dp))
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text("PIN Lock: $selectedPinTitle", fontSize = 23.sp, color = Color.Black, fontWeight = FontWeight.Bold,fontFamily = myFontFamily , modifier = Modifier.padding(start = 10.dp) )
+                Box(modifier = Modifier.padding(start = 20.dp)) {
+                    PinSection(
+                        onSaveState = { saveState = it },
+                        pinDigits = pinDigits
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+
+                    TextButton(onClick = onDismiss,modifier = Modifier.align(alignment = Alignment.CenterVertically)) {
+                        Text("CANCEL", color = primaryColor, fontSize = 22.sp, fontFamily = myFontFamily)
+                    }
+
+                    Divider(
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterVertically)
+                            .height(20.dp)
+                            .width(2.dp),
+                        color = Color.LightGray
+                    )
+
+                    TextButton(onClick = { onSave() }, enabled = saveState, modifier = Modifier.align(alignment = Alignment.CenterVertically))
+                    {
+                        Text(
+                            "SAVE",
+                            color = if (saveState) primaryColor else Color.Gray,
+                            fontSize = 22.sp, fontFamily = myFontFamily
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+
+    @Composable
+    fun PinSection(
+        onSaveState: (Boolean) -> Unit,
+        pinDigits: MutableList<Int>
+    ) {
+        // Store the original pin state for comparison
+        val originalPin = remember { mutableStateListOf(0, 0, 0, 0) }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            repeat(4) { index ->
+                PinPassword(
+                    items = (0..9).map { it.toString() },
+                    modifier = Modifier.weight(1f),
+                    textModifier = Modifier.width(30.dp),
+                    startIndex = pinDigits[index],
+                    onChanged = { selected ->
+                        CcuLog.i("USER_TEST","pinDigit ${pinDigits.toList()}  Original Digit ${originalPin.toList()}  selectedInt ${selected.toInt()}")
+                        val selectedInt = selected.toInt()
+                        // Update the pin digit
+                        pinDigits[index] = selectedInt
+                        // Compare current PIN with original PIN or the pin 0,0,0,0 making save btn to disable state
+                        val isChanged =  (pinDigits.toList()== listOf(0,0,0,0) || pinDigits.toList() != originalPin.toList())
+                        CcuLog.i("USER_TEST","pinDigit ${pinDigits.toList()}  Original Digit ${originalPin.toList()}  selectedInt ${selected.toInt()}  ischanged ${isChanged}")
+                        onSaveState(isChanged)
+                        originalPin[index]= selectedInt
+                        CcuLog.i("USER_TEST","pinDigit ${pinDigits.toList()}  Original Digit ${originalPin.toList()}  selectedInt ${selected.toInt()}")
+                    }
+                )
+            }
+        }
+    }
+
+
 
     private fun getDropdownCustomHeight(list: List<Any>, noOfItemsDisplayInDropDown: Int, heightValue: Int): Int {
         var customHeight = heightValue

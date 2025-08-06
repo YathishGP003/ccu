@@ -12,26 +12,27 @@ import a75f.io.logic.bo.building.bacnet.BacnetProfile
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.monitoring.HyperStatV2MonitoringProfile
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
 import a75f.io.logic.bo.building.modbus.ModbusProfile
 import a75f.io.logic.bo.building.otn.OtnProfileConfiguration
 import a75f.io.logic.bo.building.plc.PlcProfileConfig
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.cpu.HyperStatCpuProfile
 import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.hpu.HyperStatHpuProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.monitoring.HyperStatV2MonitoringProfile
 import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.pipe2.HyperStatPipe2Profile
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.MonitoringConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
-import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe2Profile
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatCpuProfile
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatHpuProfile
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe2Profile
 import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
-
+import a75f.io.logic.bo.building.statprofiles.util.getSplitConfiguration
 import a75f.io.logic.bo.building.vav.AcbProfileConfiguration
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.bo.util.CCUUtils
@@ -44,6 +45,7 @@ import a75f.io.renatus.modbus.util.getNodeType
 import a75f.io.renatus.modbus.util.getParameters
 import a75f.io.renatus.modbus.util.isAllParamsSelected
 import a75f.io.renatus.modbus.util.isAllParamsSelectedBacNet
+import android.annotation.SuppressLint
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -55,6 +57,7 @@ class CopyConfiguration {
     companion object {
         //
         private lateinit var config: ProfileConfiguration
+        @SuppressLint("StaticFieldLeak")
         private val ccuHsApiInstance = CCUHsApi.getInstance()
 
         private var profileType: ProfileType? = null
@@ -150,12 +153,12 @@ class CopyConfiguration {
             if (profileType == null) {
                 CcuLog.e(
                     L.TAG_CCU_COPY_CONFIGURATION,
-                    " Copy Configuration failed : Address $address ,  Profile Type: $profileType ,  Node Type: $nodeType , ModbusModel $modbusModel "
+                    " Copy Configuration failed : Address $address ,  Profile Type: $profileType ! ,  Node Type: $nodeType ! , ModbusModel $modbusModel "
                 )
                 return
             }
             try {
-                processProfileType(address, equip, ccuHsApiInstance)
+                processProfileType(address, equip)
                 CcuLog.i(
                     L.TAG_CCU_COPY_CONFIGURATION,
                     " Copy Configuration completed : Address $address ,  Profile Type: $profileType ,  Node Type: $nodeType , ModbusModel $modbusModel "
@@ -173,8 +176,7 @@ class CopyConfiguration {
 
         private fun processProfileType(
             address: Int,
-            equip: HashMap<Any, Any>,
-            ccuHsApiInstance: CCUHsApi
+            equip: HashMap<Any, Any>
         ) {
             when (profileType) {
                 ProfileType.VAV_PARALLEL_FAN,
@@ -206,13 +208,17 @@ class CopyConfiguration {
                 ProfileType.MYSTAT_CPU,
                 ProfileType.MYSTAT_PIPE2 -> loadActiveMStatProfilesConfiguration(address, equip)
 
-                ProfileType.CONNECTNODE -> loadConnectNodeConfiguration(address, ccuHsApiInstance)
+                ProfileType.CONNECTNODE -> loadConnectNodeConfiguration(address)
+
+                ProfileType.HYPERSTATSPLIT_4PIPE_UV , ProfileType.HYPERSTATSPLIT_2PIPE_UV-> {
+                   loadActiveUnitVentilatorConfiguration(equip)
+                }
 
                 else -> throw IllegalArgumentException("Unsupported Profile Type: $profileType")
             }
         }
 
-        private fun loadConnectNodeConfiguration(address: Int, ccuHsApiInstance: CCUHsApi) {
+        private fun loadConnectNodeConfiguration(address: Int) {
             val roomRef = ccuHsApiInstance.readEntity("device and addr == \"$address\"")[Tags.ROOM_REF].toString()
             equipmentDeviceList = buildModbusModel(roomRef)
                 .let { ConnectNodeUtil.reorderEquipments(it) }
@@ -309,6 +315,10 @@ class CopyConfiguration {
                 ProfileType.HYPERSTATSPLIT_CPU,
                 equipModel
             ).getActiveConfiguration()
+        }
+
+        private fun loadActiveUnitVentilatorConfiguration(equip: HashMap<Any, Any>) {
+            config = getSplitConfiguration(equip["id"].toString()) as UnitVentilatorConfiguration
         }
 
         private fun loadActiveHyperStatProfilesConfiguration(address: Int, equip: HashMap<Any, Any>) {

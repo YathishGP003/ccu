@@ -24,6 +24,8 @@ open class ValueConfig (domainName: String, var currentVal: Double = 0.0) : Base
     var incVal : Double = 0.0
 }
 
+open class StringValueConfig (domainName: String, var currentVal: String = "") : BaseConfig(domainName)
+
 /**
  * A generic port config without anu specific actuator specified.
  */
@@ -56,6 +58,9 @@ fun <T : BaseConfig> List<T>.getConfig(domainName : String) : T? {
     return this.find {it.domainName == domainName}
 }
 fun <T : AssociationConfig> List<T>.getConfig(domainName : String) : T? {
+    return this.find {it.domainName == domainName}
+}
+fun <T : StringValueConfig> List<T>.getConfig(domainName : String) : T? {
     return this.find {it.domainName == domainName}
 }
 

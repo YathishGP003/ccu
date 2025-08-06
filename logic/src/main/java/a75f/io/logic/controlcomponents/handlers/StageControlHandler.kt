@@ -5,6 +5,7 @@ import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logic.controlcomponents.controlimpls.StagedBooleanControllerImpl
 import a75f.io.logic.controlcomponents.controls.Constraint
 import a75f.io.logic.controlcomponents.controls.Controller
+import a75f.io.logic.controlcomponents.util.isSoftOccupied
 import a75f.io.logic.controlcomponents.util.logIt
 
 class StageControlHandler(
@@ -15,7 +16,9 @@ class StageControlHandler(
     stageUpTimer: Point = Point("StageUpTimer", ""),
     stageDownTimer: Point = Point("StageDownTimer", ""),
     private val economizingAvailable: CalibratedPoint = CalibratedPoint("economizingAvailable", "", 0.0),
+    private val fanLowVentilation: CalibratedPoint = CalibratedPoint("fanLowVentilation", "", 0.0),
     private val lockOutActive: CalibratedPoint = CalibratedPoint("economizingAvailable", "", 0.0),
+    private val occupancyMode: CalibratedPoint = CalibratedPoint("economizingAvailable", "", 0.0),
     private val logTag: String
 ) : Controller {
     val controller = StagedBooleanControllerImpl(totalStages, stageUpTimer, stageDownTimer, logTag)
@@ -34,7 +37,10 @@ class StageControlHandler(
                     "loopOutput: ${loopOutput.readHisVal()} , Threshold : ${getThreshold()},  hysteresis: ${hysteresis.readPriorityVal()}"
         )
         return if (stageNumber == 0) {
-            if (economizingAvailable.readHisVal() > 0) {
+            if (fanLowVentilation.readHisVal() > 0 && isSoftOccupied(occupancyMode)) {
+                true
+            }
+            else if (economizingAvailable.readHisVal() > 0) {
                 loopOutput.readHisVal() > getThreshold() + (hysteresis.readPriorityVal() / 2)
             } else {
                 loopOutput.readHisVal() > hysteresis.readPriorityVal()
@@ -61,7 +67,11 @@ class StageControlHandler(
             if (economizingAvailable.readHisVal() > 0) {
                 loopOutput.readHisVal() < getThreshold() - (hysteresis.readPriorityVal() / 2)
             } else {
-                loopOutput.readHisVal() <= 0
+                if (fanLowVentilation.readHisVal() > 0) {
+                    (!isSoftOccupied(occupancyMode) && loopOutput.readHisVal() == 0.0)
+                } else {
+                    loopOutput.readHisVal() <= 0
+                }
             }
         } else {
             if (economizingAvailable.readHisVal() > 0) {

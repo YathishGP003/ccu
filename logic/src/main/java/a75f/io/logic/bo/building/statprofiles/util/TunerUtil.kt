@@ -1,7 +1,7 @@
 package a75f.io.logic.bo.building.statprofiles.util
 
-import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.equips.HyperStatSplitEquip
 import a75f.io.domain.equips.hyperstat.CpuV2Equip
 import a75f.io.domain.equips.hyperstat.HpuV2Equip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
@@ -10,6 +10,7 @@ import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
+import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
 import a75f.io.logic.tuners.TunerUtil
 
 /**
@@ -121,6 +122,20 @@ fun getSplitTuners(equip: HyperStatSplitEquip): BaseStatTuners {
     hsTuners.minFanRuntimePostConditioning =
         getTuner(DomainName.minFanRuntimePostConditioning, equip.equipRef).toInt()
     return hsTuners
+}
+
+fun pipe4UvTuners(equip: Pipe4UVEquip): UvTuners {
+    val tuners = UvTuners()
+    fetchBaseTuners(tuners, equip.equipRef)
+    tuners.minFanRuntimePostConditioning = getTuner(DomainName.minFanRuntimePostConditioning, equip.equipRef).toInt()
+    tuners.saTemperingSetpoint = getTuner(DomainName.saTemperingSetpoint, equip.equipRef)
+    tuners.saTemperingIntegralKFactor = getTuner(DomainName.saTemperingIntegralKFactor, equip.equipRef)
+    tuners.saTemperingTemperatureIntegralTime = getTuner(DomainName.saTemperingTemperatureIntegralTime, equip.equipRef).toInt()
+    tuners.saTemperingProportionalKFactor = getTuner(DomainName.saTemperingProportionalKFactor, equip.equipRef)
+    tuners.saTemperingTemperatureProportionalRange = getTuner(DomainName.saTemperingTemperatureProportionalRange, equip.equipRef)
+    tuners.economizingToMainCoolingLoopMap = getTuner(DomainName.standaloneEconomizingToMainCoolingLoopMap, equip.equipRef)
+    tuners.faceBypassDamperActivationHysteresis = getTuner(DomainName.faceBypassDamperRelayActivationHysteresis, equip.equipRef)
+    return tuners
 }
 
 fun getTuner(domainName: String, equipRef: String): Double {

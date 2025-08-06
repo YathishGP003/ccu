@@ -255,16 +255,43 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                     val existingPoint = hayStack.readEntity("domainName == \""+point.domainName+"\" and equipRef == \""+equipRef+"\"")
                     val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
                     modelPointDef?.run {
+
                         var configVal = getConfigValue(profileConfiguration, modelPointDef , point.domainName)
                         if (configVal == null) {
                             if (modelPointDef.tagNames.contains("writable") && modelPointDef.defaultValue is Number) {
                                 configVal = modelPointDef.defaultValue as Double
                             }
                         }
+
                         configVal?.let {
-                            val currentVal = hayStack.readDefaultValById(existingPoint["id"].toString())
-                            if (configVal != currentVal) {
-                                hayStack.writeDefaultValById(existingPoint["id"].toString(), configVal)
+
+                            when (configVal) {
+
+                                is Double -> {
+                                    val currentVal =
+                                        hayStack.readDefaultValById(existingPoint["id"].toString())
+                                    if (configVal != currentVal) {
+                                        hayStack.writeDefaultValById(
+                                            existingPoint["id"].toString(),
+                                            configVal
+                                        )
+                                    }
+                                }
+
+                                is String -> {
+                                    val currentStringVal =
+                                        hayStack.readDefaultStrVal(existingPoint["id"].toString())
+                                    if (configVal != currentStringVal) {
+                                        CcuLog.i(
+                                            Domain.LOG_TAG,
+                                            "Updating string value for ${point.domainName} to $configVal"
+                                        )
+                                        hayStack.writeDefaultValById(
+                                            existingPoint["id"].toString(),
+                                            configVal
+                                        )
+                                    }
+                                }
                             }
                         }
                         if (existingPoint.contains("his")) {
@@ -292,7 +319,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         }
     }
 
-    private fun getConfigValue(profileConfiguration: ProfileConfiguration, modelPoint : ModelPointDef, domainName : String) : Double? {
+    private fun getConfigValue(profileConfiguration: ProfileConfiguration, modelPoint : ModelPointDef, domainName : String) : Any? {
         return if (profileConfiguration.getEnableConfigs().getConfig(domainName) != null) {
             val enableConfig = profileConfiguration.getEnableConfigs().getConfig(domainName)
             enableConfig?.enabled?.toDouble()
@@ -302,6 +329,9 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         } else if (profileConfiguration.getValueConfigs().getConfig(domainName) != null) {
             val valueConfig = profileConfiguration.getValueConfigs().getConfig(domainName)
             valueConfig?.currentVal
+        } else if (profileConfiguration.getStringConfigs().getConfig(domainName) != null) {
+            val stringConfig = profileConfiguration.getStringConfigs().getConfig(domainName)
+            stringConfig?.currentVal
         } else {
             return null
         }
@@ -367,6 +397,13 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 DomainName.heartBeat)) && pointConfig.modelDef.kind != PointType.STR) {
             // heartBeat is the one point where we don't want to initialize a hisVal to zero (since we want a gray dot on the zone screen, not green)
             hayStack.writeHisValById(pointId, 0.0)
+        } else if (pointConfig.configuration?.getStringConfigs()?.getConfig(pointConfig.modelDef.domainName) != null) {
+            CcuLog.i("Domain.LOG_TAG", "Initializing string config for ${pointConfig.modelDef.domainName}")
+            val stringConfig = pointConfig.configuration.getStringConfigs().getConfig(pointConfig.modelDef.domainName)
+            if (stringConfig != null) {
+                CcuLog.i("Domain.LOG_TAG", "Value string config for ${pointConfig.modelDef.domainName}    :   ${stringConfig.currentVal}")
+                hayStack.writeDefaultValById(pointId, stringConfig.currentVal)
+            }
         }
 
         DomainManager.addPoint(hayStackPoint)

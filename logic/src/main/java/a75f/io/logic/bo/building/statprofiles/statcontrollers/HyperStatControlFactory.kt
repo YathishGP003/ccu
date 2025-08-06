@@ -56,7 +56,7 @@ class HyperStatControlFactory(
         addDcvDamperIfRequired(L.TAG_CCU_HSHPU)
     }
 
-    fun addPipe2Controllers(config: Pipe2Configuration) {
+    fun addPipe2Controllers(config: Pipe2Configuration, waterValveLoop: CalibratedPoint) {
         val pipe2Equip = equip as Pipe2V2Equip
         addFanSpeedControllers(config, L.TAG_CCU_HSPIPE2)
         addAuxStage1Controller(
@@ -65,7 +65,7 @@ class HyperStatControlFactory(
         addAuxStage2Controller(
             L.TAG_CCU_HSPIPE2, pipe2Equip.auxHeatingStage2, pipe2Equip.auxHeating2Activate
         )
-        addWaterValveControllerIfRequired()
+        addWaterValveControllerIfRequired(waterValveLoop)
         addFanEnableIfRequired(L.TAG_CCU_HSPIPE2)
         addOccupiedEnabledIfRequired(L.TAG_CCU_HSPIPE2)
         addHumidifierIfRequired(L.TAG_CCU_HSPIPE2)
@@ -261,11 +261,11 @@ class HyperStatControlFactory(
         }
     }
 
-    private fun addWaterValveControllerIfRequired() {
+    private fun addWaterValveControllerIfRequired(waterValveLoop: CalibratedPoint) {
         if ((equip as Pipe2V2Equip).waterValve.pointExists()) {
             controllerFactory.addWaterValveController(
                 controllers,
-                waterValveLoop = (equip as Pipe2V2Equip).waterValveLoop,
+                waterValveLoop = waterValveLoop,
                 actionHysteresis = equip.standaloneRelayActivationHysteresis,
                 logTag = L.TAG_CCU_HSPIPE2
             )

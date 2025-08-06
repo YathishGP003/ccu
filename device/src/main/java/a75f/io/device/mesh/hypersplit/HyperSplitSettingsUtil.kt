@@ -4,15 +4,22 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
 import a75f.io.device.HyperSplit
+import a75f.io.device.HyperSplit.HyperSplitAnalogOutConfig_t
 import a75f.io.device.HyperSplit.HyperSplitSettingsMessage4_t
-import a75f.io.domain.HyperStatSplitEquip
+import a75f.io.device.mesh.Base64Util
+import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.Point
+import a75f.io.domain.equips.HyperStatSplitEquip
+import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
+import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuControlType
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuEconAnalogOutAssociation
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.CpuSensorBusType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.UniversalInputs
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuAnalogControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuSensorBusType
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuUniInType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVRelayControls
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UvAnalogOutControls
 import a75f.io.logic.tuners.TunerUtil
 
 
@@ -27,35 +34,33 @@ class HyperSplitSettingsUtil {
         /**
          * Function which construct the setting2 message details
          * @param equipRef
-         * @param hsApi
-         * @param nodeAddress
          * return HyperSplitSettingsMessage2_t
          */
-        fun getSetting2Message(nodeAddress: Int, equipRef: String, hsApi: CCUHsApi): HyperSplit.HyperSplitSettingsMessage2_t {
+        fun getSetting2Message(equipRef: String): HyperSplit.HyperSplitSettingsMessage2_t {
             val settings2 = HyperSplit.HyperSplitSettingsMessage2_t.newBuilder()
-            val equip = getEquipDetails(nodeAddress)
-
-            // These all common configuration for all the profiles
-            settings2.enableForceOccupied = isAutoForceEnabled(hsApi, equipRef)
-            settings2.enableAutoAway = isAutoAwayEnabled(hsApi, equipRef)
-            settings2.hyperSplitRelayConfig = getRelayConfigDetails(hsApi, equipRef)
-            settings2.hyperSplitAnalogOutConfig = getAnalogOutConfigDetails(hsApi, equipRef)
-            settings2.hyperSplitUniversalInConfig = getUniversalInConfigDetails(hsApi, equipRef)
-            settings2.hyperSplitSensorBusConfig = getSensorBusConfigDetails(hsApi, equipRef)
-            settings2.zoneCO2Target = readConfig(hsApi, equipRef, "domainName == \"" + DomainName.co2Target + "\"").toInt()
-            settings2.zoneCO2Threshold = readConfig(hsApi, equipRef, "domainName == \"" + DomainName.co2Threshold + "\"").toInt()
-            settings2.zoneCO2DamperOpeningRate = readConfig(hsApi, equipRef, "domainName == \"" + DomainName.co2DamperOpeningRate + "\"").toInt()
+            val splitEquip = Domain.getDomainEquip(equipRef) as HyperStatSplitEquip
+            settings2.enableForceOccupied = splitEquip.autoForceOccupied.isEnabled()
+            settings2.enableAutoAway = splitEquip.autoAway.isEnabled()
+            settings2.hyperSplitRelayConfig = getRelayConfigDetails(splitEquip)
+            settings2.hyperSplitAnalogOutConfig = getAnalogConfigDetails(splitEquip)
+            settings2.hyperSplitUniversalInConfig = getUniversalInConfigDetails(splitEquip)
+            settings2.hyperSplitSensorBusConfig = getSensorBusConfigDetails(splitEquip)
+            settings2.zoneCO2Target = splitEquip.co2Target.readDefaultVal().toInt()
+            settings2.zoneCO2Threshold = splitEquip.co2Threshold.readDefaultVal().toInt()
+            settings2.zoneCO2DamperOpeningRate = splitEquip.co2DamperOpeningRate.readDefaultVal().toInt()
             settings2.proportionalConstant = (TunerUtil.getProportionalGain(equipRef) * 100).toInt()
             settings2.integralConstant = (TunerUtil.getIntegralGain(equipRef) * 100).toInt()
             settings2.proportionalTemperatureRange = (TunerUtil.getProportionalSpread(equipRef) * 10).toInt()
             settings2.integrationTime = TunerUtil.getIntegralTimeout(equipRef).toInt()
-            
-            when (equip.profile) {
-                ProfileType.HYPERSTATSPLIT_CPU.name -> {
+
+            when (splitEquip) {
+                is HsSplitCpuEquip-> {
                     settings2.profile = HyperSplit.HyperSplitProfiles_t.HYPERSPLIT_PROFILE_CONVENTIONAL_PACKAGE_UNIT_ECONOMIZER
                 }
+                is Pipe4UVEquip-> {
+                    settings2.profile = HyperSplit.HyperSplitProfiles_t.HYPERSPLIT_PROFILE_4_PIPE_UNIT_VENTILATOR
+                }
             }
-
             return settings2.build()
         }
 
@@ -66,170 +71,161 @@ class HyperSplitSettingsUtil {
          * return HyperSplitSettingsMessage3_t
          */
         fun getSetting3Message(nodeAddress: Int, equipRef: String, hsApi: CCUHsApi): HyperSplit.HyperSplitSettingsMessage3_t {
+            val hsEquip = Domain.getDomainEquip(equipRef) as HyperStatSplitEquip
             val settings3 = HyperSplit.HyperSplitSettingsMessage3_t.newBuilder()
             val equip = getEquipDetails(nodeAddress)
 
             val ecoTunersBuilder = HyperSplit.HyperSplitTunersEco_t.newBuilder()
-            ecoTunersBuilder.setEconomizingToMainCoolingLoopMap(getEconomizingToMainCoolingLoopMap(hsApi, equipRef))
-            ecoTunersBuilder.setEconomizingMinTemp(getEconomizingMinTemp(hsApi, equipRef))
-            ecoTunersBuilder.setEconomizingMaxTemp(getEconomizingMaxTemp(hsApi, equipRef))
-            ecoTunersBuilder.setEconomizingMinHumidity(getEconomizingMinHumidity(hsApi, equipRef))
-            ecoTunersBuilder.setEconomizingMaxHumidity(getEconomizingMaxHumidity(hsApi, equipRef))
-            ecoTunersBuilder.setEconomizingDryBulbThreshold(getEconomizingDryBulbThreshold(hsApi, equipRef))
-            ecoTunersBuilder.setEnthalpyDuctCompensationOffset(getEnthalpyDuctCompensationOffset(hsApi, equipRef))
-            ecoTunersBuilder.setDuctCompensationOffset(getDuctTemperatureOffset(hsApi, equipRef))
-            ecoTunersBuilder.setExhaustFanStage1Threshold(getExhaustFanStage1Threshold(hsApi, equipRef))
-            ecoTunersBuilder.setExhaustFanStage2Threshold(getExhaustFanStage2Threshold(hsApi, equipRef))
-            ecoTunersBuilder.setExhaustFanHysteresis(getExhaustFanHysteresis(hsApi, equipRef))
-            ecoTunersBuilder.setOaoDamperMatTarget(getOaoDamperMatTarget(hsApi, equipRef))
-            ecoTunersBuilder.setOaoDamperMatMin(getOaoDamperMatMin(hsApi, equipRef))
+            ecoTunersBuilder.setEconomizingToMainCoolingLoopMap(getEconomizingToMainCoolingLoopMap(equipRef))
+            ecoTunersBuilder.setEconomizingMinTemp(getEconomizingMinTemp(equipRef))
+            ecoTunersBuilder.setEconomizingMaxTemp(getEconomizingMaxTemp(equipRef))
+            ecoTunersBuilder.setEconomizingMinHumidity(getEconomizingMinHumidity(equipRef))
+            ecoTunersBuilder.setEconomizingMaxHumidity(getEconomizingMaxHumidity(equipRef))
+            ecoTunersBuilder.setEconomizingDryBulbThreshold(getEconomizingDryBulbThreshold(equipRef))
+            ecoTunersBuilder.setEnthalpyDuctCompensationOffset(getEnthalpyDuctCompensationOffset(equipRef))
+            ecoTunersBuilder.setDuctCompensationOffset(getDuctTemperatureOffset(equipRef))
+            ecoTunersBuilder.setOaoDamperMatTarget(getOaoDamperMatTarget(equipRef))
+            ecoTunersBuilder.setOaoDamperMatMin(getOaoDamperMatMin(equipRef))
             ecoTunersBuilder.setOutsideDamperMinOpen(0)
             ecoTunersBuilder.setAoutFanEconomizer(getAnalogOutFanDuringEconomizer(hsApi, equipRef))
-            
-            settings3.setEcoTuners(ecoTunersBuilder.build())
+            settings3.genertiTuners = getGenericTunerDetails(hsEquip)
 
             when (equip.profile) {
                 ProfileType.HYPERSTATSPLIT_CPU.name -> {
-                    settings3.genertiTuners = getGenericTunerDetails(equipRef)
                     settings3.hyperStatConfigsCpu = getStagedFanVoltageDetails(equipRef)
+                    ecoTunersBuilder.setExhaustFanStage1Threshold(hsEquip.exhaustFanStage1Threshold.readDefaultVal().toInt())
+                    ecoTunersBuilder.setExhaustFanStage2Threshold(hsEquip.exhaustFanStage2Threshold.readDefaultVal().toInt())
+                    ecoTunersBuilder.setExhaustFanHysteresis(hsEquip.exhaustFanHysteresis.readDefaultVal().toInt())
+                }
+                ProfileType.HYPERSTATSPLIT_4PIPE_UV.name -> {
+                    val fcuTuners = HyperSplit.HyperSplitTunersFcu_t.newBuilder()
+                    fcuTuners.setAuxHeating1Activate(hsEquip.auxHeating1Activate.readPriorityVal().toInt())
+                    fcuTuners.setAuxHeating2Activate(hsEquip.auxHeating2Activate.readPriorityVal().toInt())
+                    fcuTuners.setAnalogoutAtRecFanAnalogVoltage(hsEquip.fanOutRecirculate.readPriorityVal().toInt() * 10)
+                    settings3.fcuTuners = fcuTuners.build()
                 }
             }
 
+            settings3.setEcoTuners(ecoTunersBuilder.build())
             return settings3.build()
         }
 
-        /**
-         * Function which constructs the setting4 message details
-         * @param equipRef
-         * @param nodeAddress
-         * return HyperStatSettingsMessage4_t
-         */
-        fun getSetting4Message(equipRef: String, hsApi: CCUHsApi): HyperSplitSettingsMessage4_t {
+        fun getSetting4Message(equipRef: String): HyperSplitSettingsMessage4_t {
+
             val settings4 = HyperSplitSettingsMessage4_t.newBuilder()
-
-            settings4.setOutsideDamperMinOpenDuringRecirculation(getOutsideDamperMinOpenDuringRecirculation(hsApi, equipRef))
-            settings4.setOutsideDamperMinOpenDuringConditioning(getOutsideDamperMinOpenDuringConditioning(hsApi, equipRef))
-            settings4.setOutsideDamperMinOpenDuringFanLow(getOutsideDamperMinOpenDuringFanLow(hsApi, equipRef))
-            settings4.setOutsideDamperMinOpenDuringFanMedium(getOutsideDamperMinOpenDuringFanMedium(hsApi, equipRef))
-            settings4.setOutsideDamperMinOpenDuringFanHigh(getOutsideDamperMinOpenDuringFanHigh(hsApi, equipRef))
-
+            val hsEquip = Domain.getDomainEquip(equipRef) as HyperStatSplitEquip
+            settings4.setOutsideDamperMinOpenDuringRecirculation(hsEquip.outsideDamperMinOpenDuringRecirculation.readDefaultVal().toInt())
+            settings4.setOutsideDamperMinOpenDuringConditioning(hsEquip.outsideDamperMinOpenDuringConditioning.readDefaultVal().toInt())
+            settings4.setOutsideDamperMinOpenDuringFanLow(hsEquip.outsideDamperMinOpenDuringFanLow.readDefaultVal().toInt())
+            settings4.setOutsideDamperMinOpenDuringFanMedium(hsEquip.outsideDamperMinOpenDuringFanMedium.readDefaultVal().toInt())
+            settings4.setOutsideDamperMinOpenDuringFanHigh(hsEquip.outsideDamperMinOpenDuringFanHigh.readDefaultVal().toInt())
+            settings4.setStageUpTimer(readTunerByDomainName(DomainName.hyperstatStageUpTimerCounter, equipRef).toInt())
+            settings4.setStageDownTimer(readTunerByDomainName(DomainName.hyperstatStageDownTimerCounter, equipRef).toInt())
+            when(hsEquip) {
+                is Pipe4UVEquip -> {
+                    settings4.setSaTemperingSetpoint(readTunerByDomainName(DomainName.saTemperingSetpoint, equipRef).toInt() * 10)
+                    settings4.setFaceBypassDamperRelayActivationHysteresis(
+                        readTunerByDomainName(DomainName.faceBypassDamperRelayActivationHysteresis, equipRef).toInt())
+                    settings4.setControlVia(
+                        if (hsEquip.controlVia.readDefaultVal().toInt() == 0) {
+                            HyperSplit.HyperSplitControlVia_t.HYPERSPLIT_CONTROL_VIA_F_AND_B_DAMPER
+                        } else {
+                            HyperSplit.HyperSplitControlVia_t.HYPERSPLIT_CONTROL_VIA_FULLY_MODULATING_VALVE
+                        }
+                    )
+                    settings4.setEnableSaTempering(hsEquip.enableSaTemperingControl.isEnabled())
+                    settings4.setSaTemperingIntegrationTime(
+                        readTunerByDomainName(DomainName.saTemperingTemperatureIntegralTime, equipRef).toInt()
+                    )
+                    settings4.setSaTemperingIntegralConstant(
+                        (readTunerByDomainName(DomainName.saTemperingIntegralKFactor, equipRef) * 100).toInt()
+                    )
+                    settings4.setSaTemperingProportionalTemperatureRange(
+                        readTunerByDomainName(DomainName.saTemperingTemperatureProportionalRange, equipRef).toInt()
+                    )
+                    settings4.setSaTemperingProportionalConstant(
+                        (readTunerByDomainName(DomainName.saTemperingProportionalKFactor, equipRef) * 100).toInt()
+                    )
+                }
+            }
             return settings4.build()
         }
 
-
-
-        private fun getEconomizingToMainCoolingLoopMap(hsApi: CCUHsApi, equipRef: String): Int {
-            
-            return readTuner(hsApi, equipRef, "domainName == \"" + DomainName.standaloneEconomizingToMainCoolingLoopMap + "\"").toInt()
-            
+        private fun getEconomizingToMainCoolingLoopMap(equipRef: String): Int {
+            return readTuner(
+                equipRef,
+                "domainName == \"" + DomainName.standaloneEconomizingToMainCoolingLoopMap + "\""
+            ).toInt()
         }
 
-        private fun getEconomizingMinTemp(hsApi: CCUHsApi, equipRef: String): Int {
-
-            return readTuner(hsApi, equipRef, "domainName == \"" + DomainName.standaloneEconomizingMinTemperature + "\"").toInt()
-
+        private fun getEconomizingMinTemp(equipRef: String): Int {
+            return readTuner(
+                equipRef,
+                "domainName == \"" + DomainName.standaloneEconomizingMinTemperature + "\""
+            ).toInt()
         }
 
-        private fun getEconomizingMaxTemp(hsApi: CCUHsApi, equipRef: String): Int {
-
-            return readTuner(hsApi, equipRef, "domainName == \"" + DomainName.standaloneEconomizingMaxTemperature + "\"").toInt()
-
-        }
-        
-        private fun getEconomizingMinHumidity(hsApi: CCUHsApi, equipRef: String): Int {
-
-            return readTuner(hsApi, equipRef, "domainName == \"" + DomainName.standaloneEconomizingMinHumidity + "\"").toInt()
+        private fun getEconomizingMaxTemp(equipRef: String): Int {
+            return readTuner(
+                equipRef,
+                "domainName == \"" + DomainName.standaloneEconomizingMaxTemperature + "\""
+            ).toInt()
 
         }
 
-        private fun getEconomizingMaxHumidity(hsApi: CCUHsApi, equipRef: String): Int {
-
-            return readTuner(hsApi, equipRef, "domainName == \"" + DomainName.standaloneEconomizingMaxHumidity + "\"").toInt()
-
+        private fun getEconomizingMinHumidity(equipRef: String): Int {
+            return readTuner(
+                equipRef,
+                "domainName == \"" + DomainName.standaloneEconomizingMinHumidity + "\""
+            ).toInt()
         }
 
-        private fun getEconomizingDryBulbThreshold(hsApi: CCUHsApi, equipRef: String): Int {
-
-            return readTuner(hsApi, equipRef, "domainName == \"" + DomainName.standaloneEconomizingDryBulbThreshold + "\"").toInt()
-
+        private fun getEconomizingMaxHumidity(equipRef: String): Int {
+            return readTuner(
+                equipRef,
+                "domainName == \"" + DomainName.standaloneEconomizingMaxHumidity + "\""
+            ).toInt()
         }
 
-        private fun getEnthalpyDuctCompensationOffset(hsApi: CCUHsApi, equipRef: String): Int {
-
-            return Math.round(readTuner(hsApi, equipRef, "domainName == \"" + DomainName.standaloneEnthalpyDuctCompensationOffset + "\"").toFloat())
-
+        private fun getEconomizingDryBulbThreshold(equipRef: String): Int {
+            return readTuner(
+                equipRef,
+                "domainName == \"" + DomainName.standaloneEconomizingDryBulbThreshold + "\""
+            ).toInt()
         }
 
-        private fun getDuctTemperatureOffset(hsApi: CCUHsApi, equipRef: String): Int {
-
-            return Math.round(readTuner(hsApi, equipRef, "domainName == \"" + DomainName.standaloneDuctTemperatureOffset + "\"").toFloat())
-
+        private fun getEnthalpyDuctCompensationOffset(equipRef: String): Int {
+            return Math.round(readTuner(
+                equipRef,
+                "domainName == \"" + DomainName.standaloneEnthalpyDuctCompensationOffset + "\""
+            ).toFloat())
         }
 
-        private fun getExhaustFanStage1Threshold(hsApi: CCUHsApi, equipRef: String): Int {
-
-            return readConfig(hsApi, equipRef, "domainName == \"" + DomainName.exhaustFanStage1Threshold + "\"").toInt()
-
+        private fun getDuctTemperatureOffset(equipRef: String): Int {
+            return Math.round(readTuner(
+                equipRef,
+                "domainName == \"" + DomainName.standaloneDuctTemperatureOffset + "\""
+            ).toFloat())
         }
 
-        private fun getExhaustFanStage2Threshold(hsApi: CCUHsApi, equipRef: String): Int {
 
-            return readConfig(hsApi, equipRef, "domainName == \"" + DomainName.exhaustFanStage2Threshold + "\"").toInt()
-
+        private fun getOaoDamperMatTarget(equipRef: String): Int {
+            return readTuner(
+                equipRef,
+                "domainName == \"" + DomainName.standaloneOutsideDamperMixedAirTarget + "\""
+            ).toInt()
         }
 
-        private fun getExhaustFanHysteresis(hsApi: CCUHsApi, equipRef: String): Int {
-
-            return readConfig(hsApi, equipRef, "domainName == \"" + DomainName.exhaustFanHysteresis + "\"").toInt()
-
-        }
-
-        private fun getOaoDamperMatTarget(hsApi: CCUHsApi, equipRef: String): Int {
-
-            return readTuner(hsApi, equipRef, "domainName == \"" + DomainName.standaloneOutsideDamperMixedAirTarget + "\"").toInt()
-
-        }
-
-        private fun getOaoDamperMatMin(hsApi: CCUHsApi, equipRef: String): Int {
-
-            return readTuner(hsApi, equipRef, "domainName == \"" + DomainName.standaloneOutsideDamperMixedAirMinimum + "\"").toInt()
-
-        }
-
-        private fun getOutsideDamperMinOpenDuringConditioning(hsApi: CCUHsApi, equipRef: String): Int {
-
-            return readConfig(hsApi, equipRef, "domainName == \"" + DomainName.outsideDamperMinOpenDuringConditioning + "\"").toInt()
-
+        private fun getOaoDamperMatMin(equipRef: String): Int {
+            return readTuner(
+                equipRef,
+                "domainName == \"" + DomainName.standaloneOutsideDamperMixedAirMinimum + "\""
+            ).toInt()
         }
 
         private fun getAnalogOutFanDuringEconomizer(hsApi: CCUHsApi, equipRef: String): Int {
             return 10 * readConfig(hsApi, equipRef, "domainName == \"" + DomainName.fanOutEconomizer + "\"").toInt()
         }
-
-        private fun getOutsideDamperMinOpenDuringRecirculation(hsApi: CCUHsApi, equipRef: String): Int {
-
-            return readConfig(hsApi, equipRef, "domainName == \"" + DomainName.outsideDamperMinOpenDuringRecirculation + "\"").toInt()
-
-        }
-
-        private fun getOutsideDamperMinOpenDuringFanLow(hsApi: CCUHsApi, equipRef: String): Int {
-
-            return readConfig(hsApi, equipRef, "domainName == \"" + DomainName.outsideDamperMinOpenDuringFanLow + "\"").toInt()
-
-        }
-
-        private fun getOutsideDamperMinOpenDuringFanMedium(hsApi: CCUHsApi, equipRef: String): Int {
-
-            return readConfig(hsApi, equipRef, "domainName == \"" + DomainName.outsideDamperMinOpenDuringFanMedium + "\"").toInt()
-
-        }
-
-        private fun getOutsideDamperMinOpenDuringFanHigh(hsApi: CCUHsApi, equipRef: String): Int {
-
-            return readConfig(hsApi, equipRef, "domainName == \"" + DomainName.outsideDamperMinOpenDuringFanHigh + "\"").toInt()
-
-        }
-
 
         /**
          * Function which collects the equip details from node address
@@ -238,492 +234,466 @@ class HyperSplitSettingsUtil {
          */
         private fun getEquipDetails(nodeAddress: Int): Equip {
             return Equip.Builder()
-                .setHashMap(CCUHsApi.getInstance().read("equip and group == \"$nodeAddress\"")).build()
-        }
-
-        /**
-         * Function to check the is AutoForce configuration enabled or not
-         * @param equipRef
-         * @param hsApi
-         * return Boolean
-         */
-        private fun isAutoForceEnabled(hsApi: CCUHsApi, equipRef: String): Boolean {
-            return (readConfig(
-                hsApi, 
-                equipRef,
-                "domainName == \"" + DomainName.autoForceOccupied + "\""
-            ) == 1.0)
-        }
-
-        /**
-         * Function to check the is AutoAway configuration enabled or not
-         * @param equipRef
-         * @param hsApi
-         * @return Boolean
-         */
-        private fun isAutoAwayEnabled(hsApi: CCUHsApi, equipRef: String): Boolean {
-            return (readConfig(
-                hsApi,
-                equipRef,
-                "domainName == \"" + DomainName.autoAway + "\""
-            ) == 1.0)
+                .setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"$nodeAddress\"")).build()
         }
 
         /**
          * Function which reads all the Relay toggle configuration and mapping details
-         * @param equipRef
-         * @param hsApi
          * @return HyperstatRelay_t
          */
-        /*
-            In HyperStat Controls Message "Relay Config" contains separate variables for "enabled" and "mapping".
-            
-            In HyperSplit Controls Message, each relay has a single "mapping" variable where 0=disabled.
-         */
-        private fun getRelayConfigDetails(hsApi: CCUHsApi, equipRef: String): HyperSplit.HyperSplitRelayConfig_t {
+        private fun getRelayConfigDetails(equip: HyperStatSplitEquip): HyperSplit.HyperSplitRelayConfig_t {
             val relayConfiguration = HyperSplit.HyperSplitRelayConfig_t.newBuilder()
-            
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.relay1OutputEnable + "\"") == 0.0) {
-                relayConfiguration.relay1Mapping = getHyperSplitRelayMapping(0)
-            } else {
-                relayConfiguration.relay1Mapping = getHyperSplitRelayMapping(readConfig(hsApi, equipRef, "domainName == \"" + DomainName.relay1OutputAssociation + "\"").toInt() + 1)
-            }
+            val relays = listOf(
+                Pair(equip.relay1OutputEnable.isEnabled(), equip.relay1OutputAssociation),
+                Pair(equip.relay2OutputEnable.isEnabled(), equip.relay2OutputAssociation),
+                Pair(equip.relay3OutputEnable.isEnabled(), equip.relay3OutputAssociation),
+                Pair(equip.relay4OutputEnable.isEnabled(), equip.relay4OutputAssociation),
+                Pair(equip.relay5OutputEnable.isEnabled(), equip.relay5OutputAssociation),
+                Pair(equip.relay6OutputEnable.isEnabled(), equip.relay6OutputAssociation),
+                Pair(equip.relay7OutputEnable.isEnabled(), equip.relay7OutputAssociation),
+                Pair(equip.relay8OutputEnable.isEnabled(), equip.relay8OutputAssociation)
+            )
 
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.relay2OutputEnable + "\"") == 0.0) {
-                relayConfiguration.relay2Mapping = getHyperSplitRelayMapping(0)
-            } else {
-                relayConfiguration.relay2Mapping = getHyperSplitRelayMapping(readConfig(hsApi, equipRef, "domainName == \"" + DomainName.relay2OutputAssociation + "\"").toInt() + 1)
-            }
+            fun disableIt() = HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED
+            relays.forEachIndexed { index, (enabled, association) ->
+                when (index) {
+                    0 -> relayConfiguration.relay1Mapping =
+                        if (enabled) getRelayMapping(association, equip) else disableIt()
 
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.relay3OutputEnable + "\"") == 0.0) {
-                relayConfiguration.relay3Mapping = getHyperSplitRelayMapping(0)
-            } else {
-                relayConfiguration.relay3Mapping = getHyperSplitRelayMapping(readConfig(hsApi, equipRef, "domainName == \"" + DomainName.relay3OutputAssociation + "\"").toInt() + 1)
-            }
+                    1 -> relayConfiguration.relay2Mapping =
+                        if (enabled) getRelayMapping(association, equip) else disableIt()
 
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.relay4OutputEnable + "\"") == 0.0) {
-                relayConfiguration.relay4Mapping = getHyperSplitRelayMapping(0)
-            } else {
-                relayConfiguration.relay4Mapping = getHyperSplitRelayMapping(readConfig(hsApi, equipRef, "domainName == \"" + DomainName.relay4OutputAssociation + "\"").toInt() + 1)
-            }
+                    2 -> relayConfiguration.relay3Mapping =
+                        if (enabled) getRelayMapping(association, equip) else disableIt()
 
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.relay5OutputEnable + "\"") == 0.0) {
-                relayConfiguration.relay5Mapping = getHyperSplitRelayMapping(0)
-            } else {
-                relayConfiguration.relay5Mapping = getHyperSplitRelayMapping(readConfig(hsApi, equipRef, "domainName == \"" + DomainName.relay5OutputAssociation + "\"").toInt() + 1)
-            }
+                    3 -> relayConfiguration.relay4Mapping =
+                        if (enabled) getRelayMapping(association, equip) else disableIt()
 
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.relay6OutputEnable + "\"") == 0.0) {
-                relayConfiguration.relay6Mapping = getHyperSplitRelayMapping(0)
-            } else {
-                relayConfiguration.relay6Mapping = getHyperSplitRelayMapping(readConfig(hsApi, equipRef, "domainName == \"" + DomainName.relay6OutputAssociation + "\"").toInt() + 1)
-            }
+                    4 -> relayConfiguration.relay5Mapping =
+                        if (enabled) getRelayMapping(association, equip) else disableIt()
 
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.relay7OutputEnable + "\"") == 0.0) {
-                relayConfiguration.relay7Mapping = getHyperSplitRelayMapping(0)
-            } else {
-                relayConfiguration.relay7Mapping = getHyperSplitRelayMapping(readConfig(hsApi, equipRef, "domainName == \"" + DomainName.relay7OutputAssociation + "\"").toInt() + 1)
-            }
+                    5 -> relayConfiguration.relay6Mapping =
+                        if (enabled) getRelayMapping(association, equip) else disableIt()
 
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.relay8OutputEnable + "\"") == 0.0) {
-                relayConfiguration.relay8Mapping = getHyperSplitRelayMapping(0)
-            } else {
-                relayConfiguration.relay8Mapping = getHyperSplitRelayMapping(readConfig(hsApi, equipRef, "domainName == \"" + DomainName.relay8OutputAssociation + "\"").toInt() + 1)
-            }
+                    6 -> relayConfiguration.relay7Mapping =
+                        if (enabled) getRelayMapping(association, equip) else disableIt()
 
+                    7 -> relayConfiguration.relay8Mapping =
+                        if (enabled) getRelayMapping(association, equip) else disableIt()
+                }
+            }
             return relayConfiguration.build()
         }
 
-        private fun getHyperSplitRelayMapping(intAssociation: Int): HyperSplit.HyperSplitRelayMapping_t {
-            // These are hard-coded. If the order of either enum changes (Haystack or Controll Message), this will need to be updated.
-            if (intAssociation == 0) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED
-            else if (intAssociation == CpuRelayType.COOLING_STAGE1.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_COOLING_STAGE_1
-            else if (intAssociation == CpuRelayType.COOLING_STAGE2.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_COOLING_STAGE_2
-            else if (intAssociation == CpuRelayType.COOLING_STAGE3.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_COOLING_STAGE_3
-            else if (intAssociation == CpuRelayType.HEATING_STAGE1.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HEATING_STAGE_1
-            else if (intAssociation == CpuRelayType.HEATING_STAGE2.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HEATING_STAGE_2
-            else if (intAssociation == CpuRelayType.HEATING_STAGE3.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HEATING_STAGE_3
-            else if (intAssociation == CpuRelayType.FAN_LOW_SPEED.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_LOW_SPEED
-            else if (intAssociation == CpuRelayType.FAN_MEDIUM_SPEED.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_MEDIUM_SPEED
-            else if (intAssociation == CpuRelayType.FAN_HIGH_SPEED.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_HIGH_SPEED
-            else if (intAssociation == CpuRelayType.FAN_ENABLED.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_ENABLE
-            else if (intAssociation == CpuRelayType.OCCUPIED_ENABLED.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_OCCUPIED_ENABLE
-            else if (intAssociation == CpuRelayType.HUMIDIFIER.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HUMIDIFIER
-            else if (intAssociation == CpuRelayType.DEHUMIDIFIER.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DEHUMIDIFIER
-            else if (intAssociation == CpuRelayType.EX_FAN_STAGE1.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_EXAUST_1
-            else if (intAssociation == CpuRelayType.EX_FAN_STAGE2.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_EXAUST_2
-            else if (intAssociation == CpuRelayType.DCV_DAMPER.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_DCV_DAMPER
-            else if (intAssociation == CpuRelayType.EXTERNALLY_MAPPED.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED
-            else if (intAssociation == CpuRelayType.COMPRESSOR_STAGE1.ordinal +1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_COMPRESSOR_STAGE_1
-            else if (intAssociation == CpuRelayType.COMPRESSOR_STAGE2.ordinal +1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_COMPRESSOR_STAGE_2
-            else if (intAssociation == CpuRelayType.COMPRESSOR_STAGE3.ordinal +1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_COMPRESSOR_STAGE_3
-            else if (intAssociation == CpuRelayType.CHANGE_OVER_O_COOLING.ordinal +1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_O_ENERGISE_IN_COOLING
-            else if (intAssociation == CpuRelayType.CHANGE_OVER_B_HEATING.ordinal +1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_B_ENERGISE_IN_HEATING
-            else if (intAssociation == CpuRelayType.AUX_HEATING_STAGE1.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_AUX_HEATING_1
-            else if (intAssociation == CpuRelayType.AUX_HEATING_STAGE2.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_AUX_HEATING_2
+        private fun getRelayMapping(
+            point: Point,
+            equip: HyperStatSplitEquip
+        ): HyperSplit.HyperSplitRelayMapping_t {
+            val association = point.readDefaultVal().toInt()
 
-            // This should never happen
-            else { return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED }
+            fun getCpuRelayMapping(): HyperSplit.HyperSplitRelayMapping_t {
+                return when (CpuRelayType.values()[association]) {
+                    CpuRelayType.COOLING_STAGE1 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_COOLING_STAGE_1
+                    CpuRelayType.COOLING_STAGE2 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_COOLING_STAGE_2
+                    CpuRelayType.COOLING_STAGE3 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_COOLING_STAGE_3
+                    CpuRelayType.HEATING_STAGE1 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HEATING_STAGE_1
+                    CpuRelayType.HEATING_STAGE2 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HEATING_STAGE_2
+                    CpuRelayType.HEATING_STAGE3 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HEATING_STAGE_3
+                    CpuRelayType.FAN_LOW_SPEED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_LOW_SPEED
+                    CpuRelayType.FAN_MEDIUM_SPEED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_MEDIUM_SPEED
+                    CpuRelayType.FAN_HIGH_SPEED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_HIGH_SPEED
+                    CpuRelayType.FAN_ENABLED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_ENABLE
+                    CpuRelayType.OCCUPIED_ENABLED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_OCCUPIED_ENABLE
+                    CpuRelayType.HUMIDIFIER -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HUMIDIFIER
+                    CpuRelayType.DEHUMIDIFIER -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DEHUMIDIFIER
+                    CpuRelayType.EX_FAN_STAGE1 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_EXAUST_1
+                    CpuRelayType.EX_FAN_STAGE2 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_EXAUST_2
+                    CpuRelayType.DCV_DAMPER -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_DCV_DAMPER
+                    CpuRelayType.EXTERNALLY_MAPPED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED
+                    CpuRelayType.COMPRESSOR_STAGE1 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_COMPRESSOR_STAGE_1
+                    CpuRelayType.COMPRESSOR_STAGE2 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_COMPRESSOR_STAGE_2
+                    CpuRelayType.COMPRESSOR_STAGE3 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_COMPRESSOR_STAGE_3
+                    CpuRelayType.CHANGE_OVER_O_COOLING -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_O_ENERGISE_IN_COOLING
+                    CpuRelayType.CHANGE_OVER_B_HEATING -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_B_ENERGISE_IN_HEATING
+                    CpuRelayType.AUX_HEATING_STAGE1 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_AUX_HEATING_1
+                    CpuRelayType.AUX_HEATING_STAGE2 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_AUX_HEATING_2
+                    else -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED
+                }
+            }
 
+            fun getPipe4UVRelayMapping(): HyperSplit.HyperSplitRelayMapping_t {
+                return when (Pipe4UVRelayControls.values()[association]) {
+                    Pipe4UVRelayControls.FAN_LOW_SPEED_VENTILATION -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_LOW_SPEED_VENTILATION
+                    Pipe4UVRelayControls.FAN_LOW_SPEED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_LOW_SPEED
+                    Pipe4UVRelayControls.FAN_MEDIUM_SPEED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_MEDIUM_SPEED
+                    Pipe4UVRelayControls.FAN_HIGH_SPEED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_HIGH_SPEED
+                    Pipe4UVRelayControls.COOLING_WATER_VALVE -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_COOLING_VALVE
+                    Pipe4UVRelayControls.HEATING_WATER_VALVE -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HEATING_VALVE
+                    Pipe4UVRelayControls.AUX_HEATING_STAGE1 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_AUX_HEATING_1
+                    Pipe4UVRelayControls.AUX_HEATING_STAGE2 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_AUX_HEATING_2
+                    Pipe4UVRelayControls.FAN_ENABLED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_ENABLE
+                    Pipe4UVRelayControls.OCCUPIED_ENABLED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_OCCUPIED_ENABLE
+                    Pipe4UVRelayControls.FACE_BYPASS_DAMPER -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_F_AND_B_DAMPER
+                    Pipe4UVRelayControls.DCV_DAMPER -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_DCV_DAMPER
+                    Pipe4UVRelayControls.HUMIDIFIER -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HUMIDIFIER
+                    Pipe4UVRelayControls.DEHUMIDIFIER -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DEHUMIDIFIER
+                    Pipe4UVRelayControls.EXTERNALLY_MAPPED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED
+                }
+            }
+            return when (equip) {
+                is HsSplitCpuEquip -> getCpuRelayMapping()
+                is Pipe4UVEquip -> getPipe4UVRelayMapping()
+                else -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED
+            }
         }
 
-        /**
-         * Function which reads all the Analog Out toggle configuration and mapping details
-         * @param equipRef
-         * @param hsApi
-         * @return HypersplitAnalogOut_t
-         */
-        /*
-            In HyperStat Controls Message "Analog Out Config" contains separate variables for "enabled" and "mapping".
+        private fun getAnalogConfigDetails(equip: HyperStatSplitEquip): HyperSplitAnalogOutConfig_t {
+            val config = HyperSplitAnalogOutConfig_t.newBuilder()
+            val analogOuts = listOf(
+                Pair(equip.analog1OutputEnable.isEnabled(), equip.analog1OutputAssociation),
+                Pair(equip.analog2OutputEnable.isEnabled(), equip.analog2OutputAssociation),
+                Pair(equip.analog3OutputEnable.isEnabled(), equip.analog3OutputAssociation),
+                Pair(equip.analog4OutputEnable.isEnabled(), equip.analog4OutputAssociation)
+            )
 
-            In HyperSplit Controls Message, each analog out has a single "mapping" variable where 0=disabled.
-         */
-        private fun getAnalogOutConfigDetails(hsApi: CCUHsApi, equipRef: String): HyperSplit.HyperSplitAnalogOutConfig_t {
-            val analogOutConfiguration = HyperSplit.HyperSplitAnalogOutConfig_t.newBuilder()
-            val defaultAnalogOutMinSetting = 0
-            val defaultAnalogOutMaxSetting = 10
+            fun disableIt() = HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED
 
-
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.analog1OutputEnable + "\"") == 0.0) {
-                analogOutConfiguration.analogOut1Mapping = getHyperSplitAnalogOutMapping(0)
-            } else {
-                analogOutConfiguration.analogOut1Mapping = getHyperSplitAnalogOutMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.analog1OutputAssociation + "\"").toInt() + 1
+            fun minMaxValue(equipRef: String, analog: Int): Pair<Int, Int> {
+                return Pair(
+                    CCUHsApi.getInstance()
+                        .readDefaultVal("min and analog == $analog and equipRef == \"$equipRef\"")
+                        .toInt() * 10,
+                    CCUHsApi.getInstance()
+                        .readDefaultVal("max and analog == $analog and equipRef == \"$equipRef\"")
+                        .toInt() * 10
                 )
-
-                if ((analogOutConfiguration.analogOut1Mapping.ordinal - 1) != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
-                    analogOutConfiguration.analogOut1AtMinSetting = (readConfig(
-                        hsApi, equipRef, "analog == 1 and sp and config and min"
-                    ) * 10).toInt()
-                    analogOutConfiguration.analogOut1AtMaxSetting = (readConfig(
-                        hsApi, equipRef, "analog == 1 and sp and config and max "
-                    ) * 10).toInt()
-                } else {
-                    analogOutConfiguration.analogOut1AtMinSetting = defaultAnalogOutMinSetting
-                    analogOutConfiguration.analogOut1AtMaxSetting = defaultAnalogOutMaxSetting * 10
-                }
             }
 
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.analog2OutputEnable + "\"") == 0.0) {
-                analogOutConfiguration.analogOut2Mapping = getHyperSplitAnalogOutMapping(0)
-            } else {
-                analogOutConfiguration.analogOut2Mapping = getHyperSplitAnalogOutMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.analog2OutputAssociation + "\"").toInt() + 1
-                )
+            analogOuts.forEachIndexed { index, (enabled, association) ->
+                when (index) {
+                    0 -> {
+                        val mapping = if (enabled) getHyperSplitAnalogOutMapping(
+                            association,
+                            equip
+                        ) else disableIt()
+                        val minMax = minMaxValue(equip.equipRef, 1)
+                        config.setAnalogOut1Mapping(mapping)
+                        config.setAnalogOut1AtMinSetting(minMax.first)
+                        config.setAnalogOut1AtMaxSetting(minMax.second)
+                    }
 
-                if ((analogOutConfiguration.analogOut2Mapping.ordinal - 1) != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
-                    analogOutConfiguration.analogOut2AtMinSetting = (readConfig(
-                        hsApi, equipRef, "analog == 2 and sp and config and min"
-                    ) * 10).toInt()
-                    analogOutConfiguration.analogOut2AtMaxSetting = (readConfig(
-                        hsApi, equipRef, "analog == 2 and sp and config and max "
-                    ) * 10).toInt()
-                } else {
-                    analogOutConfiguration.analogOut2AtMinSetting = defaultAnalogOutMinSetting
-                    analogOutConfiguration.analogOut2AtMaxSetting = defaultAnalogOutMaxSetting * 10
+                    1 -> {
+                        val mapping = if (enabled) getHyperSplitAnalogOutMapping(
+                            association,
+                            equip
+                        ) else disableIt()
+                        val minMax = minMaxValue(equip.equipRef, 2)
+                        config.setAnalogOut2Mapping(mapping)
+                        config.setAnalogOut2AtMinSetting(minMax.first)
+                        config.setAnalogOut2AtMaxSetting(minMax.second)
+                    }
+
+                    2 -> {
+                        val mapping = if (enabled) getHyperSplitAnalogOutMapping(
+                            association,
+                            equip
+                        ) else disableIt()
+                        val minMax = minMaxValue(equip.equipRef, 3)
+                        config.setAnalogOut3Mapping(mapping)
+                        config.setAnalogOut3AtMinSetting(minMax.first)
+                        config.setAnalogOut3AtMaxSetting(minMax.second)
+                    }
+
+                    3 -> {
+                        val mapping = if (enabled) getHyperSplitAnalogOutMapping(
+                            association,
+                            equip
+                        ) else disableIt()
+                        val minMax = minMaxValue(equip.equipRef, 4)
+                        config.setAnalogOut4Mapping(mapping)
+                        config.setAnalogOut4AtMinSetting(minMax.first)
+                        config.setAnalogOut4AtMaxSetting(minMax.second)
+                    }
+
+                    else -> {}
                 }
             }
-
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.analog3OutputEnable + "\"") == 0.0) {
-                analogOutConfiguration.analogOut3Mapping = getHyperSplitAnalogOutMapping(0)
-            } else {
-                analogOutConfiguration.analogOut3Mapping = getHyperSplitAnalogOutMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.analog3OutputAssociation + "\"").toInt() + 1
-                )
-
-                if ((analogOutConfiguration.analogOut3Mapping.ordinal - 1) != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
-                    analogOutConfiguration.analogOut3AtMinSetting = (readConfig(
-                        hsApi, equipRef, "analog == 3 and sp and config and min"
-                    ) * 10).toInt()
-                    analogOutConfiguration.analogOut3AtMaxSetting = (readConfig(
-                        hsApi, equipRef, "analog == 3 and sp and config and max "
-                    ) * 10).toInt()
-                } else {
-                    analogOutConfiguration.analogOut3AtMinSetting = defaultAnalogOutMinSetting
-                    analogOutConfiguration.analogOut3AtMaxSetting = defaultAnalogOutMaxSetting * 10
-                }
-            }
-
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.analog4OutputEnable + "\"") == 0.0) {
-                analogOutConfiguration.analogOut4Mapping = getHyperSplitAnalogOutMapping(0)
-            } else {
-                analogOutConfiguration.analogOut4Mapping = getHyperSplitAnalogOutMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.analog4OutputAssociation + "\"").toInt() + 1
-                )
-
-                if ((analogOutConfiguration.analogOut4Mapping.ordinal - 1) != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
-                    analogOutConfiguration.analogOut4AtMinSetting = (readConfig(
-                        hsApi, equipRef, "analog == 4 and sp and config and min"
-                    ) * 10).toInt()
-                    analogOutConfiguration.analogOut4AtMaxSetting = (readConfig(
-                        hsApi, equipRef, "analog == 4 and sp and config and max "
-                    ) * 10).toInt()
-                } else {
-                    analogOutConfiguration.analogOut4AtMinSetting = defaultAnalogOutMinSetting
-                    analogOutConfiguration.analogOut4AtMaxSetting = defaultAnalogOutMaxSetting * 10
-                }
-            }
-
-            return analogOutConfiguration.build()
+            return config.build()
         }
 
-        private fun getHyperSplitAnalogOutMapping(intAssociation: Int): HyperSplit.HyperSplitAnalogOutMapping_t {
-
-            if (intAssociation == 0) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED
-            else if (intAssociation == CpuControlType.COOLING.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_COOLING
-            else if (intAssociation == CpuControlType.LINEAR_FAN.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_LINEAR_FAN
-            else if (intAssociation == CpuControlType.HEATING.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_HEATING
-            else if (intAssociation == CpuControlType.OAO_DAMPER.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_OAO_DAMPER
-            else if (intAssociation == CpuControlType.STAGED_FAN.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_STAGED_FAN
-            else if (intAssociation == CpuControlType.RETURN_DAMPER.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED // This will display as NONE in Connect Module UI
-            else if (intAssociation == CpuControlType.EXTERNALLY_MAPPED.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED // This will display as NONE in Connect Module UI
-            else if (intAssociation == CpuControlType.COMPRESSOR_SPEED.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPILT_AOUT_COMPRESSOR_SPEED
-            else if (intAssociation == CpuControlType.DCV_MODULATING_DAMPER.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPILT_AOUT_DCV_DAMPER
-            // This should never happen
-            else { return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED }
-
+        private fun getHyperSplitAnalogOutMapping(point: Point, equip: HyperStatSplitEquip): HyperSplit.HyperSplitAnalogOutMapping_t {
+            val association = point.readDefaultVal().toInt()
+            fun getCpuAnalogOutMapping(): HyperSplit.HyperSplitAnalogOutMapping_t {
+                return when (CpuAnalogControlType.values()[association]) {
+                    CpuAnalogControlType.COOLING -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_COOLING
+                    CpuAnalogControlType.LINEAR_FAN -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_LINEAR_FAN
+                    CpuAnalogControlType.HEATING -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_HEATING
+                    CpuAnalogControlType.OAO_DAMPER -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_OAO_DAMPER
+                    CpuAnalogControlType.STAGED_FAN -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_STAGED_FAN
+                    CpuAnalogControlType.RETURN_DAMPER -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_RETURN_DAMPER
+                    CpuAnalogControlType.EXTERNALLY_MAPPED -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED
+                    CpuAnalogControlType.COMPRESSOR_SPEED -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPILT_AOUT_COMPRESSOR_SPEED
+                    CpuAnalogControlType.DCV_MODULATING_DAMPER -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPILT_AOUT_DCV_DAMPER
+                }
+            }
+            fun getPipe4UVAnalogOutMapping(): HyperSplit.HyperSplitAnalogOutMapping_t {
+                return when (Pipe4UvAnalogOutControls.values()[association]) {
+                    Pipe4UvAnalogOutControls.HEATING_WATER_MODULATING_VALVE -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_HEATING_MODULATING_VALVE
+                    Pipe4UvAnalogOutControls.COOLING_WATER_MODULATING_VALVE -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_COOLING_MODULATING_VALVE
+                    Pipe4UvAnalogOutControls.FACE_DAMPER_VALVE -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_F_AND_B_DAMPER
+                    Pipe4UvAnalogOutControls.FAN_SPEED -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_LINEAR_FAN
+                    Pipe4UvAnalogOutControls.OAO_DAMPER -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_OAO_DAMPER
+                    Pipe4UvAnalogOutControls.DCV_MODULATING_DAMPER -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPILT_AOUT_DCV_DAMPER
+                    Pipe4UvAnalogOutControls.EXTERNALLY_MAPPED -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED
+                }
+            }
+            return when(equip) {
+                is HsSplitCpuEquip -> getCpuAnalogOutMapping()
+                is Pipe4UVEquip -> getPipe4UVAnalogOutMapping()
+                else -> { HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED }
+            }
         }
-
         /**
          * Function which reads all the Universal In toggle configuration and mapping details
-         * @param equipRef
-         * @param hsApi
          * @return HypersplitUniversalIn_t
          */
-        private fun getUniversalInConfigDetails(hsApi: CCUHsApi, equipRef: String): HyperSplit.HyperSplitUniversalInConfig_t {
+        private fun getUniversalInConfigDetails(equip: HyperStatSplitEquip): HyperSplit.HyperSplitUniversalInConfig_t {
             val universalIn = HyperSplit.HyperSplitUniversalInConfig_t.newBuilder()
+            fun disableIt() = HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_DISABLED
+            listOf(
+                Pair(equip.universalIn1Enable.isEnabled(), equip.universalIn1Association),
+                Pair(equip.universalIn2Enable.isEnabled(), equip.universalIn2Association),
+                Pair(equip.universalIn3Enable.isEnabled(), equip.universalIn3Association),
+                Pair(equip.universalIn4Enable.isEnabled(), equip.universalIn4Association),
+                Pair(equip.universalIn5Enable.isEnabled(), equip.universalIn5Association),
+                Pair(equip.universalIn6Enable.isEnabled(), equip.universalIn6Association),
+                Pair(equip.universalIn7Enable.isEnabled(), equip.universalIn7Association),
+                Pair(equip.universalIn8Enable.isEnabled(), equip.universalIn8Association)
+            ).forEachIndexed { index, (enabled, association) ->
+                when (index) {
+                    0 -> {
+                        universalIn.universalIn1Mapping =
+                            if (enabled) getSplitUniversalMapping(
+                                association.readDefaultVal().toInt()
+                            ) else disableIt()
+                    }
+                    1 -> {
+                        universalIn.universalIn2Mapping =
+                            if (enabled) getSplitUniversalMapping(
+                                association.readDefaultVal().toInt()
+                            ) else disableIt()
+                    }
+                    2 -> {
+                        universalIn.universalIn3Mapping =
+                            if (enabled) getSplitUniversalMapping(
+                                association.readDefaultVal().toInt()
+                            ) else disableIt()
+                    }
+                    3 -> {
+                        universalIn.universalIn4Mapping =
+                            if (enabled) getSplitUniversalMapping(
+                                association.readDefaultVal().toInt()
+                            ) else disableIt()
+                    }
+                    4 -> {
+                        universalIn.universalIn5Mapping =
+                            if (enabled) getSplitUniversalMapping(
+                                association.readDefaultVal().toInt()
+                            ) else disableIt()
+                    }
+                    5 -> {
+                        universalIn.universalIn6Mapping =
+                            if (enabled) getSplitUniversalMapping(
+                                association.readDefaultVal().toInt()
+                            ) else disableIt()
+                    }
+                    6 -> {
+                        universalIn.universalIn7Mapping =
+                            if (enabled) getSplitUniversalMapping(
+                                association.readDefaultVal().toInt()
+                            ) else disableIt()
+                    }
+                    7 -> {
+                        universalIn.universalIn8Mapping =
+                            if (enabled) getSplitUniversalMapping(
+                                association.readDefaultVal().toInt()
+                            ) else disableIt()
+                    }
+                    else -> {}
+                }
 
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.universalIn1Enable + "\"") == 0.0) {
-                universalIn.universalIn1Mapping = getHyperSplitUniversalInMapping(0)
-            } else {
-                universalIn.universalIn1Mapping = getHyperSplitUniversalInMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.universalIn1Association + "\"").toInt()
-                )
             }
-
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.universalIn2Enable + "\"") == 0.0) {
-                universalIn.universalIn2Mapping = getHyperSplitUniversalInMapping(0)
-            } else {
-                universalIn.universalIn2Mapping = getHyperSplitUniversalInMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.universalIn2Association + "\"").toInt()
-                )
-            }
-
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.universalIn3Enable + "\"") == 0.0) {
-                universalIn.universalIn3Mapping = getHyperSplitUniversalInMapping(0)
-            } else {
-                universalIn.universalIn3Mapping = getHyperSplitUniversalInMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.universalIn3Association + "\"").toInt()
-                )
-            }
-
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.universalIn4Enable + "\"") == 0.0) {
-                universalIn.universalIn4Mapping = getHyperSplitUniversalInMapping(0)
-            } else {
-                universalIn.universalIn4Mapping = getHyperSplitUniversalInMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.universalIn4Association + "\"").toInt()
-                )
-            }
-
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.universalIn5Enable + "\"") == 0.0) {
-                universalIn.universalIn5Mapping = getHyperSplitUniversalInMapping(0)
-            } else {
-                universalIn.universalIn5Mapping = getHyperSplitUniversalInMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.universalIn5Association + "\"").toInt()
-                )
-            }
-
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.universalIn6Enable + "\"") == 0.0) {
-                universalIn.universalIn6Mapping = getHyperSplitUniversalInMapping(0)
-            } else {
-                universalIn.universalIn6Mapping = getHyperSplitUniversalInMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.universalIn6Association + "\"").toInt()
-                )
-            }
-
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.universalIn7Enable + "\"") == 0.0) {
-                universalIn.universalIn7Mapping = getHyperSplitUniversalInMapping(0)
-            } else {
-                universalIn.universalIn7Mapping = getHyperSplitUniversalInMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.universalIn7Association + "\"").toInt()
-                )
-            }
-
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.universalIn8Enable + "\"") == 0.0) {
-                universalIn.universalIn8Mapping = getHyperSplitUniversalInMapping(0)
-            } else {
-                universalIn.universalIn8Mapping = getHyperSplitUniversalInMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.universalIn8Association + "\"").toInt()
-                )
-            }
-
             return universalIn.build()
         }
 
-        private fun getHyperSplitUniversalInMapping(intAssociation: Int): HyperSplit.HyperSplitUniversalInMapping_t {
+        private fun getSplitUniversalMapping(intAssociation: Int): HyperSplit.HyperSplitUniversalInMapping_t {
             return when (intAssociation)  {
-                CpuUniInType.NONE.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_DISABLED
+                UniversalInputs.VOLTAGE_INPUT.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                UniversalInputs.BUILDING_STATIC_PRESSURE1.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                UniversalInputs.BUILDING_STATIC_PRESSURE2.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                UniversalInputs.BUILDING_STATIC_PRESSURE10.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                UniversalInputs.OUTSIDE_AIR_DAMPER_FEEDBACK.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                UniversalInputs.CURRENT_TX_30.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                UniversalInputs.CURRENT_TX_60.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                UniversalInputs.CURRENT_TX_120.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                UniversalInputs.CURRENT_TX_200.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
 
-                CpuUniInType.VOLTAGE_INPUT.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
-                CpuUniInType.BUILDING_STATIC_PRESSURE1.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
-                CpuUniInType.BUILDING_STATIC_PRESSURE2.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
-                CpuUniInType.BUILDING_STATIC_PRESSURE10.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
-                CpuUniInType.OUTSIDE_AIR_DAMPER_FEEDBACK.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
-                CpuUniInType.CURRENT_TX_30.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
-                CpuUniInType.CURRENT_TX_60.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
-                CpuUniInType.CURRENT_TX_100.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
-                CpuUniInType.CURRENT_TX_120.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
-                CpuUniInType.CURRENT_TX_150.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
-                CpuUniInType.CURRENT_TX_200.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
-                CpuUniInType.DOOR_WINDOW_SENSOR.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
-                CpuUniInType.DOOR_WINDOW_SENSOR_TITLE24.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                UniversalInputs.THERMISTOR_INPUT.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                UniversalInputs.DISCHARGE_FAN_AM_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                UniversalInputs.DISCHARGE_FAN_RUN_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                UniversalInputs.DISCHARGE_FAN_TRIP_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                UniversalInputs.EXHAUST_FAN_RUN_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                UniversalInputs.EXHAUST_FAN_TRIP_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                UniversalInputs.FIRE_ALARM_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE // FIRE_ALARM_STATUS_NO
+                UniversalInputs.FIRE_ALARM_STATUS_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                UniversalInputs.HIGH_DIFFERENTIAL_PRESSURE_SWITCH.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                UniversalInputs.LOW_DIFFERENTIAL_PRESSURE_SWITCH.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                UniversalInputs.CHILLED_WATER_SUPPLY_TEMPERATURE.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                UniversalInputs.HOT_WATER_SUPPLY_TEMPERATURE.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
 
-                CpuUniInType.THERMISTOR_INPUT.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-                CpuUniInType.DISCHARGE_FAN_AM_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-                CpuUniInType.DISCHARGE_FAN_RUN_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-                CpuUniInType.DISCHARGE_FAN_TRIP_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-                CpuUniInType.EXHAUST_FAN_RUN_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-                CpuUniInType.EXHAUST_FAN_TRIP_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-                CpuUniInType.FIRE_ALARM_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-                CpuUniInType.HIGH_DIFFERENTIAL_PRESSURE_SWITCH.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-                CpuUniInType.LOW_DIFFERENTIAL_PRESSURE_SWITCH.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-                CpuUniInType.EMERGENCY_SHUTOFF_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-                CpuUniInType.EMERGENCY_SHUTOFF_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-                CpuUniInType.GENERIC_ALARM_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-                CpuUniInType.GENERIC_ALARM_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-                CpuUniInType.DOOR_WINDOW_SENSOR_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-                CpuUniInType.DOOR_WINDOW_SENSOR_TITLE24_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                UniversalInputs.EMERGENCY_SHUTOFF_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_EMERGENCY_SHUT_OFF_NO
+                UniversalInputs.EMERGENCY_SHUTOFF_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_EMERGENCY_SHUT_OFF_NC
 
-                CpuUniInType.SUPPLY_AIR_TEMPERATURE.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_SAT
-                CpuUniInType.MIXED_AIR_TEMPERATURE.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_MAT
-                CpuUniInType.OUTSIDE_AIR_TEMPERATURE.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_OAT
+                UniversalInputs.GENERIC_ALARM_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_GENERIC_FAULT_NO
+                UniversalInputs.GENERIC_ALARM_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_GENERIC_FAULT_NC
 
-                CpuUniInType.DUCT_STATIC_PRESSURE1_1.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_PRESSURE_0_1
-                CpuUniInType.DUCT_STATIC_PRESSURE1_2.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_PRESSURE_0_2
-                CpuUniInType.DUCT_STATIC_PRESSURE1_10.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_PRESSURE_0_10
+                UniversalInputs.SUPPLY_AIR_TEMPERATURE.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_SAT
+                UniversalInputs.MIXED_AIR_TEMPERATURE.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_MAT
+                UniversalInputs.OUTSIDE_AIR_TEMPERATURE.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_OAT
 
-                CpuUniInType.CURRENT_TX_10.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_10
-                CpuUniInType.CURRENT_TX_20.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_20
-                CpuUniInType.CURRENT_TX_50.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_50
+                UniversalInputs.DUCT_STATIC_PRESSURE1_1.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_PRESSURE_0_1
+                UniversalInputs.DUCT_STATIC_PRESSURE1_2.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_PRESSURE_0_2
+                UniversalInputs.DUCT_STATIC_PRESSURE1_10.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_PRESSURE_0_10
 
-                CpuUniInType.FILTER_STATUS_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_FILTER_NO
-                CpuUniInType.FILTER_STATUS_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_FILTER_NC
+                UniversalInputs.CURRENT_TX_10.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_10
+                UniversalInputs.CURRENT_TX_20.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_20
+                UniversalInputs.CURRENT_TX_50.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_50
+                UniversalInputs.CURRENT_TX_100.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_100
+                UniversalInputs.CURRENT_TX_150.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_150
 
-                CpuUniInType.CONDENSATE_STATUS_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CONDENSATE_NO
-                CpuUniInType.CONDENSATE_STATUS_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CONDENSATE_NC
-                CpuUniInType.RUN_FAN_STATUS_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_RUN_FAN_STATUS_NO
-                CpuUniInType.RUN_FAN_STATUS_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_RUN_FAN_STATUS_NC
+                UniversalInputs.FILTER_STATUS_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_FILTER_NO
+                UniversalInputs.FILTER_STATUS_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_FILTER_NC
+
+                UniversalInputs.CONDENSATE_STATUS_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CONDENSATE_NO
+                UniversalInputs.CONDENSATE_STATUS_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CONDENSATE_NC
+                UniversalInputs.RUN_FAN_STATUS_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_RUN_FAN_STATUS_NO
+                UniversalInputs.RUN_FAN_STATUS_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_RUN_FAN_STATUS_NC
+
+                UniversalInputs.DOOR_WINDOW_SENSOR_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_NON_TITLE24_DOOR_WINDOW_NO
+                UniversalInputs.DOOR_WINDOW_SENSOR_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_NON_TITLE24_DOOR_WINDOW_NC
+
+                UniversalInputs.DOOR_WINDOW_SENSOR_NO_TITLE_24.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_TITLE24_DOOR_WINDOW_NO
+                UniversalInputs.DOOR_WINDOW_SENSOR_TITLE24_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_TITLE24_DOOR_WINDOW_NC
+
+                UniversalInputs.DOOR_WINDOW_SENSOR.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_NON_TITLE24_AI_DOOR_WINDOW // AI
+                UniversalInputs.DOOR_WINDOW_SENSOR_TITLE24.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_TITLE24_AI_DOOR_WINDOW // AI
+
+                UniversalInputs.KEYCARD_SENSOR_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_KEY_CARD_NO
+                UniversalInputs.KEYCARD_SENSOR_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_KEY_CARD_NC
+
                 else -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_DISABLED
+
             }
         }
 
         /**
          * Function which reads all the Sensor Bus toggle configuration and mapping details
-         * @param equipRef
-         * @param hsApi
          * @return HypersplitSenorBusMapping_t
          */
-        private fun getSensorBusConfigDetails(hsApi: CCUHsApi, equipRef: String): HyperSplit.HyperSplitSensorBusConfig_t {
+        private fun getSensorBusConfigDetails(equip: HyperStatSplitEquip): HyperSplit.HyperSplitSensorBusConfig_t {
             val sensorBus = HyperSplit.HyperSplitSensorBusConfig_t.newBuilder()
 
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.sensorBusAddress0Enable + "\"") > 0.0) {
+            fun getHyperSplitSensorBusTempMapping(intAssociation: Int): HyperSplit.HyperSplitSenorBusMapping_t {
+                return when (intAssociation) {
+                    0 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_DISABLED
+                    CpuSensorBusType.SUPPLY_AIR.ordinal + 1 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_SAT
+                    CpuSensorBusType.MIXED_AIR.ordinal + 1 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_MAT
+                    CpuSensorBusType.OUTSIDE_AIR.ordinal + 1 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_OAT
+                    else -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_DISABLED
+                }
+            }
+
+            fun getHyperSplitSensorBusPressureMapping(intAssociation: Int): HyperSplit.HyperSplitSenorBusMapping_t {
+                return when (intAssociation) {
+                    0 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_DISABLED
+                    1 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_PRESSURE
+                    2 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_FILTER_MONITOR
+                    else -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_DISABLED
+                }
+            }
+
+            fun disableIt() = HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_DISABLED
+
+            if (equip.sensorBusAddress0Enable.isEnabled()) {
                 sensorBus.sensorBus1Mapping = getHyperSplitSensorBusTempMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.temperatureSensorBusAdd0 + "\"").toInt() + 1)
-            } else if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.sensorBusPressureEnable + "\"") > 0.0) {
+                    equip.temperatureSensorBusAdd0.readDefaultVal().toInt() + 1
+                )
+            } else if (equip.sensorBusPressureEnable.isEnabled()) {
                 sensorBus.sensorBus1Mapping = getHyperSplitSensorBusPressureMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.pressureSensorBusAdd0 + "\"").toInt())
+                    equip.pressureSensorBusAdd0.readDefaultVal().toInt()
+                )
             } else {
-                sensorBus.sensorBus1Mapping = getHyperSplitSensorBusTempMapping(0)
+                sensorBus.sensorBus1Mapping = disableIt()
             }
 
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.sensorBusAddress1Enable + "\"") == 0.0) {
-                sensorBus.sensorBus2Mapping = getHyperSplitSensorBusTempMapping(0)
-            } else {
+            if (equip.sensorBusAddress1Enable.isEnabled()) {
                 sensorBus.sensorBus2Mapping = getHyperSplitSensorBusTempMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.temperatureSensorBusAdd1 + "\"").toInt() + 1
+                    equip.temperatureSensorBusAdd1.readDefaultVal().toInt() + 1
                 )
-            }
-
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.sensorBusAddress2Enable + "\"") == 0.0) {
-                sensorBus.sensorBus3Mapping = getHyperSplitSensorBusTempMapping(0)
             } else {
-                sensorBus.sensorBus3Mapping = getHyperSplitSensorBusTempMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.temperatureSensorBusAdd2 + "\"").toInt() + 1
-                )
+                sensorBus.sensorBus2Mapping = disableIt()
             }
 
-            // addr3 is no longer used for HSS
-
+            if (equip.sensorBusAddress2Enable.isEnabled()) {
+                sensorBus.sensorBus3Mapping = getHyperSplitSensorBusTempMapping(
+                    equip.temperatureSensorBusAdd2.readDefaultVal().toInt() + 1
+                )
+            } else {
+                sensorBus.sensorBus3Mapping = disableIt()
+            }
             return sensorBus.build()
 
         }
 
-        private fun getHyperSplitSensorBusTempMapping(intAssociation: Int): HyperSplit.HyperSplitSenorBusMapping_t {
-            return when (intAssociation) {
-                0 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_DISABLED
-                CpuSensorBusType.SUPPLY_AIR.ordinal + 1 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_SAT
-                CpuSensorBusType.MIXED_AIR.ordinal + 1 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_MAT
-                CpuSensorBusType.OUTSIDE_AIR.ordinal + 1 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_OAT
-                else -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_DISABLED
-            }
-        }
-
-        private fun getHyperSplitSensorBusPressureMapping(intAssociation: Int): HyperSplit.HyperSplitSenorBusMapping_t {
-            return when (intAssociation) {
-                0 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_DISABLED
-                1 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_PRESSURE
-                else -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_DISABLED
-            }
-        }
-
         /**
          * Function to read all the generic tuners which are required for Hyperstat to run on standalone mode
-         * @param equipRef
          * @return HyperSplitTunersGeneric_t
          */
-        private fun getGenericTunerDetails(equipRef: String): HyperSplit.HyperSplitTunersGeneric_t {
+        private fun getGenericTunerDetails(equip: HyperStatSplitEquip): HyperSplit.HyperSplitTunersGeneric_t {
             val genericTuners = HyperSplit.HyperSplitTunersGeneric_t.newBuilder()
             genericTuners.unoccupiedSetback = (TunerUtil.readTunerValByQuery(
-                "domainName == \"" + DomainName.unoccupiedZoneSetback + "\"", equipRef) * 10).toInt()
+                "domainName == \"" + DomainName.unoccupiedZoneSetback + "\"", equip.equipRef) * 10).toInt()
+            genericTuners.unoccupiedSetback = (CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and zone and unoccupied and setback and roomRef == \"" + equip.roomRef + "\"") * 10).toInt()
+
             genericTuners.minFanRuntimePostconditioning = (
-                    TunerUtil.readTunerValByQuery("domainName == \"" + DomainName.minFanRuntimePostConditioning + "\"", equipRef)).toInt()
+                    TunerUtil.readTunerValByQuery("domainName == \"" + DomainName.minFanRuntimePostConditioning + "\"", equip.equipRef)).toInt()
             genericTuners.relayActivationHysteresis =
-                TunerUtil.readTunerValByQuery("domainName == \"" + DomainName.standaloneRelayActivationHysteresis + "\"", equipRef).toInt()
+                TunerUtil.readTunerValByQuery("domainName == \"" + DomainName.standaloneRelayActivationHysteresis + "\"", equip.equipRef).toInt()
             genericTuners.analogFanSpeedMultiplier =
-                (TunerUtil.readTunerValByQuery("domainName == \"" + DomainName.standaloneAnalogFanSpeedMultiplier + "\"", equipRef) * 10 ).toInt()
-            genericTuners.humidityHysteresis = TunerUtil.getHysteresisPoint("humidity", equipRef).toInt()
+                (TunerUtil.readTunerValByQuery("domainName == \"" + DomainName.standaloneAnalogFanSpeedMultiplier + "\"", equip.equipRef) * 10 ).toInt()
+            genericTuners.humidityHysteresis = TunerUtil.getHysteresisPoint("humidity", equip.equipRef).toInt()
             genericTuners.autoAwayZoneSetbackTemp =
                 (TunerUtil.readTunerValByQuery("domainName == \"" + DomainName.autoAwaySetback + "\"") * 10).toInt()
-            genericTuners.autoAwayTime = TunerUtil.readTunerValByQuery("domainName == \"" + DomainName.autoAwayTime + "\"", equipRef).toInt()
+            genericTuners.autoAwayTime = TunerUtil.readTunerValByQuery("domainName == \"" + DomainName.autoAwayTime + "\"", equip.equipRef).toInt()
             genericTuners.forcedOccupiedTime =
-                TunerUtil.readTunerValByQuery("domainName == \"" + DomainName.forcedOccupiedTime + "\"", equipRef).toInt()
+                TunerUtil.readTunerValByQuery("domainName == \"" + DomainName.forcedOccupiedTime + "\"", equip.equipRef).toInt()
             return genericTuners.build()
         }
 
-        /**
-         * Function which reads a default value for the point from haystack
-         * @param hsApi
-         * @param equipRef
-         * @param markers
-         * @return Double
-         */
         private fun readConfig(hsApi: CCUHsApi, equipRef: String, markers: String): Double {
             return hsApi.readDefaultVal(
                 "point and $markers and equipRef == \"$equipRef\""
             )
         }
 
-        /**
-         * Function which reads a Tuner point from haystack
-         * @param hsApi
-         * @param equipRef
-         * @param markers
-         * @return Double
-         */
-        private fun readTuner(hsApi: CCUHsApi, equipRef: String, markers: String): Double {
+        private fun readTuner(equipRef: String, markers: String): Double {
             return TunerUtil.readTunerValByQuery(
                 "$markers and equipRef == \"$equipRef\""
             )
+        }
+
+        private fun readTunerByDomainName(domainName: String, equipRef: String): Double {
+            return TunerUtil.readTunerValByQuery("domainName == \"$domainName\" and equipRef == \"$equipRef\"")
         }
         
         var ccuControlMessageTimer :Long = 0
@@ -817,23 +787,22 @@ class HyperSplitSettingsUtil {
             return stagedFanVoltages.build()
         }
 
-        /**
-         * Function to read all the linear fan speeds which are required for Hyperstat Split to run
-         * @param equipRef
-         * @return HyperSplitLinearFanSpeeds_t
-         */
-        fun getLinearFanSpeedDetails(equipRef: String): HyperSplit.HypersplitLinearFanSpeeds_t? {
+
+        fun getLinearFanSpeedDetails(equip: HyperStatSplitEquip): HyperSplit.HypersplitLinearFanSpeeds_t? {
             val linearFanSpeedBuilder = HyperSplit.HypersplitLinearFanSpeeds_t.newBuilder()
             val ccuHsApi = CCUHsApi.getInstance()
-            val equipRefQuery = "equipRef == \"$equipRef\""
+            val equipRefQuery = "equipRef == \"${equip.equipRef}\""
 
             val fanSpeedLevels = listOf("low", "medium", "high")
-
+            val linearMapping = if (equip is HsSplitCpuEquip) {
+                CpuAnalogControlType.LINEAR_FAN.ordinal
+            } else {
+                Pipe4UvAnalogOutControls.FAN_SPEED.ordinal
+            }
             for (fanSpeed in fanSpeedLevels) {
                 for (analog in listOf(1, 2, 3, 4)) {
                     val query = "analog == $analog and $fanSpeed and sp and fan and $equipRefQuery"
-                    if (ccuHsApi.readEntity(query).isNotEmpty()&& getAnalogOutMapping(ccuHsApi,equipRef,analog)
-                        == CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED.ordinal) {
+                    if (ccuHsApi.readEntity(query).isNotEmpty()&& getAnalogOutMapping(ccuHsApi,equip.equipRef,analog) == linearMapping) {
                         val fanLevel = ccuHsApi.readPointPriorityValByQuery(query).toInt()
                         when (fanSpeed) {
                             "low" -> linearFanSpeedBuilder.linearFanLowSpeedLevel = fanLevel
@@ -847,30 +816,36 @@ class HyperSplitSettingsUtil {
             return linearFanSpeedBuilder.build()
         }
 
-        /**
-         * Function to read all the staged fan speed which are required for Hyperstat to run
-         * @param equipRef
-         * @return HypersplitStagedFanSpeeds_t
-         */
-        fun getStagedFanSpeedDetails(equipRef: String): HyperSplit.HypersplitStagedFanSpeeds_t? {
+
+        fun getStagedFanSpeedDetails(equip: HyperStatSplitEquip): HyperSplit.HypersplitStagedFanSpeeds_t? {
             val stagedFanSpeedBuilder = HyperSplit.HypersplitStagedFanSpeeds_t.newBuilder()
-            val ccuHsApi = CCUHsApi.getInstance()
-            val equipRefQuery = "equipRef == \"$equipRef\""
+            if (equip is HsSplitCpuEquip) {
+                val ccuHsApi = CCUHsApi.getInstance()
+                val equipRefQuery = "equipRef == \"${equip.equipRef}\""
 
-            val fanSpeedLevels = listOf("low", "medium", "high")
+                val fanSpeedLevels = listOf("low", "medium", "high")
 
-            for (fanSpeed in fanSpeedLevels) {
-                for (analog in listOf(1, 2, 3, 4)) {
-                    val query = "analog == $analog and $fanSpeed and sp and fan and $equipRefQuery"
-                    if (ccuHsApi.readEntity(query).isNotEmpty() && getAnalogOutMapping(ccuHsApi,equipRef,analog)
-                        == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
-                        val fanLevel = ccuHsApi.readPointPriorityValByQuery(query).toInt()
-                        when (fanSpeed) {
-                            "low" -> stagedFanSpeedBuilder.stagedFanLowSpeedLevel = fanLevel
-                            "medium" -> stagedFanSpeedBuilder.stagedFanMediumSpeedLevel = fanLevel
-                            "high" -> stagedFanSpeedBuilder.stagedFanHighSpeedLevel = fanLevel
+                for (fanSpeed in fanSpeedLevels) {
+                    for (analog in listOf(1, 2, 3, 4)) {
+                        val query =
+                            "analog == $analog and $fanSpeed and sp and fan and $equipRefQuery"
+                        if (ccuHsApi.readEntity(query).isNotEmpty() && getAnalogOutMapping(
+                                ccuHsApi,
+                                equip.equipRef,
+                                analog
+                            )
+                            == CpuAnalogControlType.STAGED_FAN.ordinal
+                        ) {
+                            val fanLevel = ccuHsApi.readPointPriorityValByQuery(query).toInt()
+                            when (fanSpeed) {
+                                "low" -> stagedFanSpeedBuilder.stagedFanLowSpeedLevel = fanLevel
+                                "medium" -> stagedFanSpeedBuilder.stagedFanMediumSpeedLevel =
+                                    fanLevel
+
+                                "high" -> stagedFanSpeedBuilder.stagedFanHighSpeedLevel = fanLevel
+                            }
+                            break
                         }
-                        break
                     }
                 }
             }
@@ -879,9 +854,22 @@ class HyperSplitSettingsUtil {
 
         fun getMisSettings(equipRef: String): Int {
             val equip = HyperStatSplitEquip(equipRef)
-            val disableTouch = equip.disableTouch.readDefaultVal().toInt()
-            val enableBrightness = equip.enableBrightness.readDefaultVal().toInt()
-            return (disableTouch shl 1) or (enableBrightness shl 2)  // bit 0: enableExternal10kTemperatureSensor sending always 0
+            // bit 0: enableExternal10kTemperatureSensor sending always 0 currently not used, but can be set in future
+            val enableExternal10kTemperatureSensor = false
+            val disableTouch = equip.disableTouch.isEnabled()
+            val brightnessVariationEnable = equip.enableBrightness.isEnabled()
+            val desiredTempDisplay = equip.enableDesiredTempDisplay.isEnabled()
+            val enableBacklight = equip.enableBacklight.isEnabled()
+
+            var miscSettings = 0
+
+            if (enableExternal10kTemperatureSensor) miscSettings = miscSettings or (1 shl 0)
+            if (disableTouch)                       miscSettings = miscSettings or (1 shl 1)
+            if (brightnessVariationEnable)          miscSettings = miscSettings or (1 shl 2)
+            if (desiredTempDisplay)                 miscSettings = miscSettings or (1 shl 3)
+            if (enableBacklight)                    miscSettings = miscSettings or (1 shl 4)
+
+            return miscSettings
         }
 
         private fun getAnalogOutMapping(
@@ -904,6 +892,13 @@ class HyperSplitSettingsUtil {
             ).toInt()
         }
 
+        fun getPin(point: Point): Int {
+            return try {
+                Base64Util.decode(point.readDefaultStrVal()).toInt()
+            } catch (e: Exception) {
+                0
+            }
+        }
     }
     
 }

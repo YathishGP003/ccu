@@ -31,9 +31,9 @@ import a75f.io.logic.bo.building.statprofiles.util.BasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.HyperStatProfileTuners
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
+import a75f.io.logic.bo.building.statprofiles.util.canWeDoConditioning
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoCooling
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoHeating
-import a75f.io.logic.bo.building.statprofiles.util.canWeRunFan
 import a75f.io.logic.bo.building.statprofiles.util.fetchBasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.fetchHyperStatTuners
 import a75f.io.logic.bo.building.statprofiles.util.fetchUserIntents
@@ -728,7 +728,7 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
                 ): Boolean {
                     val mode = equip.fanOpMode.readPriorityVal().toInt()
                     return if (mode == StandaloneFanStage.AUTO.ordinal) {
-                        (canWeRunFan(basicSettings) && (currentState
+                        (canWeDoConditioning(basicSettings) && (currentState
                                 || (fanEnabledStatus && fanLoopOutput > 0 && isLowestStageActive) ||
                                 (isLowestStageActive && runFanLowDuringDoorWindow)))
                     } else {

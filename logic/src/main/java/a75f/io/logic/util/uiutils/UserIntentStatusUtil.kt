@@ -8,8 +8,8 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.EpidemicState
 import a75f.io.logic.bo.building.ZoneTempState
-import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.hvac.Stage
+import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.util.ExecutorTask
 
@@ -67,6 +67,17 @@ fun getAuxHeatStatus(portStages: Map<String, Int>): String? {
     }
 }
 
+fun getValveStatus(portStages: Map<String, Int>, analogOutStages: Map<String, Int>): String? {
+    val analogs = mutableListOf<String>()
+    if (StatusMsgKeys.COOLING_VALVE.name in portStages || StatusMsgKeys.COOLING_VALVE.name in analogOutStages) {
+        analogs.add("Cooling Valve ON")
+    }
+    if (StatusMsgKeys.HEATING_VALVE.name in portStages || StatusMsgKeys.HEATING_VALVE.name in analogOutStages) {
+        analogs.add("Heating Valve ON")
+    }
+    return analogs.joinToString(" | ").takeIf { analogs.isNotEmpty() }
+}
+
 fun getAnalogStatus(analogOutStages: HashMap<String, Int>): String? {
     val analogs = mutableListOf<String>()
     if (analogOutStages.containsKey(StatusMsgKeys.COOLING.name)) analogs.add("Cooling Analog ON")
@@ -113,6 +124,7 @@ fun getStatusMsg(
         || analogOutStages.containsKey("Water Valve") || analogOutStages.containsKey("WATER_VALVE")) {
         statusParts.add("Water Valve ON")
     }
+    getValveStatus(portStages, analogOutStages)?.let { statusParts.add(it) }
 
     getAuxHeatStatus(portStages)?.let { statusParts.add(it) }
 

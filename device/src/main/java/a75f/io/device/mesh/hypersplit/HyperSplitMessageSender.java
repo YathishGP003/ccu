@@ -7,9 +7,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
-import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.BuildConfig;
 import a75f.io.device.HyperSplit;
@@ -66,7 +63,7 @@ public class HyperSplitMessageSender {
      */
     public static void sendSettingsMessage(Zone zone, int address, String equipRef) {
         HyperSplit.HyperSplitSettingsMessage_t settings = HyperSplitMessageGenerator.getSettingsMessage(
-                zone.getDisplayName(), address, equipRef);
+                zone.getDisplayName(), equipRef);
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, settings.toString());
         }
@@ -96,7 +93,7 @@ public class HyperSplitMessageSender {
      * @param equipRef
      */
     public static void sendSettings4Message(int address, String equipRef, boolean checkDuplicate) {
-        HyperSplit.HyperSplitSettingsMessage4_t settings4 = HyperSplitMessageGenerator.getSetting4Message(address, equipRef);
+        HyperSplit.HyperSplitSettingsMessage4_t settings4 = HyperSplitMessageGenerator.getSetting4Message(equipRef);
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, settings4.toString());
         }
@@ -199,9 +196,9 @@ public class HyperSplitMessageSender {
     }
 
     public static void sendAdditionalSettingMessages(int address, String equipRef){
-        HyperSplit.HyperSplitSettingsMessage2_t settingsMessage2 = HyperSplitMessageGenerator.getSetting2Message(address, equipRef);
+        HyperSplit.HyperSplitSettingsMessage2_t settingsMessage2 = HyperSplitMessageGenerator.getSetting2Message(equipRef);
         HyperSplit.HyperSplitSettingsMessage3_t settingsMessage3 = HyperSplitMessageGenerator.getSetting3Message(address, equipRef);
-        HyperSplit.HyperSplitSettingsMessage4_t settingsMessage4 = HyperSplitMessageGenerator.getSetting4Message(address, equipRef);
+        HyperSplit.HyperSplitSettingsMessage4_t settingsMessage4 = HyperSplitMessageGenerator.getSetting4Message(equipRef);
 
         if (DLog.isLoggingEnabled()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Debugger Enabled");

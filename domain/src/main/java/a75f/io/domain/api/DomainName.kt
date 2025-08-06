@@ -21,6 +21,8 @@ object DomainName {
     const val smartnodeDevice = "smartnodeDevice"
     const val cmBoardDevice = "cmBoardDevice"
     const val ccuTemperatureInfluence = "ccuTemperatureInfluence"
+    const val hyperstatSplit4PEcon = "hyperstatSplit4PEcon"
+    const val hyperstatSplit2PEcon = "hyperstatSplit2PEcon"
 
     //Tuners
     const val userLimitSpread = "userLimitSpread"
@@ -1409,6 +1411,7 @@ object DomainName {
 
     const val disableTouch = "disableTouch"
     const val enableBrightness = "enableBrightness"
+    const val enableBacklight = "enableBacklight"
     const val enableCo2Display = "enableCo2Display"
     const val fanRunSensorNC = "fanRunSensorNC"
     const val fanRunSensorNO = "fanRunSensorNO"
@@ -1445,6 +1448,72 @@ object DomainName {
     const val analog3MaxCHWValve = "analog3MaxCHWValve"
     const val analog4MinCHWValve = "analog4MinCHWValve"
     const val analog4MaxCHWValve = "analog4MaxCHWValve"
+
+    //Pipe4UV
+    const val controlVia = "controlVia"
+    const val fanLowSpeedVentilation = "fanLowSpeedVentilation"
+    const val chilledWaterModulatingCoolValve = "chilledWaterModulatingCoolValve"
+    const val hotWaterModulatingHeatValve = "hotWaterModulatingHeatValve"
+    const val chilledWaterCoolValve = "chilledWaterCoolValve"
+    const val hotWaterHeatValve = "hotWaterHeatValve"
+
+    const val enableSaTemperingControl = "enableSaTemperingControl"
+    const val enableSpaceTempDisplay = "enableSpaceTempDisplay"
+    const val enableInstallerAccess = "enableInstallerAccess"
+    const val pinLockInstallerAccess = "pinLockInstallerAccess"
+    const val enableConditioningModeFanAccess = "enableConditioningModeFanAccess"
+    const val pinLockConditioningModeFanAccess = "pinLockConditioningModeFanAccess"
+
+    const val analog1MaxHotWaterValve = "analog1MaxHotWaterValve"
+    const val analog2MaxHotWaterValve = "analog2MaxHotWaterValve"
+    const val analog3MaxHotWaterValve = "analog3MaxHotWaterValve"
+    const val analog4MaxHotWaterValve = "analog4MaxHotWaterValve"
+    const val analog1MinHotWaterValve = "analog1MinHotWaterValve"
+    const val analog2MinHotWaterValve = "analog2MinHotWaterValve"
+    const val analog3MinHotWaterValve = "analog3MinHotWaterValve"
+    const val analog4MinHotWaterValve = "analog4MinHotWaterValve"
+
+    const val analog1MinChilledWaterValve = "analog1MinChilledWaterValve"
+    const val analog1MaxChilledWaterValve = "analog1MaxChilledWaterValve"
+    const val analog2MinChilledWaterValve = "analog2MinChilledWaterValve"
+    const val analog2MaxChilledWaterValve = "analog2MaxChilledWaterValve"
+    const val analog3MinChilledWaterValve = "analog3MinChilledWaterValve"
+    const val analog3MaxChilledWaterValve = "analog3MaxChilledWaterValve"
+    const val analog4MinChilledWaterValve = "analog4MinChilledWaterValve"
+    const val analog4MaxChilledWaterValve = "analog4MaxChilledWaterValve"
+
+    const val analog1MaxFaceBypassDamper = "analog1MaxFaceBypassDamper"
+    const val analog2MaxFaceBypassDamper = "analog2MaxFaceBypassDamper"
+    const val analog3MaxFaceBypassDamper = "analog3MaxFaceBypassDamper"
+    const val analog4MaxFaceBypassDamper = "analog4MaxFaceBypassDamper"
+
+    const val analog1MinFaceBypassDamper = "analog1MinFaceBypassDamper"
+    const val analog2MinFaceBypassDamper = "analog2MinFaceBypassDamper"
+    const val analog3MinFaceBypassDamper = "analog3MinFaceBypassDamper"
+    const val analog4MinFaceBypassDamper = "analog4MinFaceBypassDamper"
+
+
+    const val analog4MinFanSpeed = "analog4MinFanSpeed"
+    const val analog4MaxFanSpeed = "analog4MaxFanSpeed"
+
+    const val faceBypassDamperRelayActivationHysteresis = "faceBypassDamperRelayActivationHysteresis"
+    const val saTemperingIntegralKFactor = "saTemperingIntegralKFactor"
+    const val saTemperingTemperatureIntegralTime = "saTemperingTemperatureIntegralTime"
+    const val saTemperingProportionalKFactor = "saTemperingProportionalKFactor"
+    const val saTemperingTemperatureProportionalRange = "saTemperingTemperatureProportionalRange"
+    const val saTemperingSetpoint = "saTemperingSetpoint"
+
+    const val enableDesiredTempDisplay = "enableDesiredTempDisplay"
+    const val faceBypassDamperCmd = "faceBypassDamperCmd"
+    const val faceBypassDamperModulatingCmd = "faceBypassDamperModulatingCmd"
+    const val chilledWaterLeavingTempSensor = "chilledWaterLeavingTempSensor"
+    const val hotWaterLeavingTempSensor = "hotWaterLeavingTempSensor"
+    const val keyCardSensorNO = "keyCardSensorNO"
+    const val keyCardSensorNC = "keyCardSensorNC"
+    const val doorWindowSensorNO = "doorWindowSensorNO"
+    const val doorWindowSensorNOTitle24 = "doorWindowSensorNOTitle24"
+    const val doorWindowSensorNC = "doorWindowSensorNC"
+    const val doorWindowSensor = "doorWindowSensor"
 
 }
 

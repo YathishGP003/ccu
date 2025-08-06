@@ -50,6 +50,7 @@ import a75f.io.messaging.exceptions.MessageHandlingFailed;
 
 import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_VAL;
 import static a75f.io.messaging.handler.MyStatReconfigurationKt.reconfigureMyStat;
+import static a75f.io.messaging.handler.UnitVentilatorReconfigurationHandlerKt.reconfigureUnitVentilator;
 import static a75f.io.messaging.handler.TiReconfigKt.tiReconfiguration;
 
 public class UpdatePointHandler implements MessageHandler
@@ -159,6 +160,11 @@ public class UpdatePointHandler implements MessageHandler
             updatePoints(localPoint);
             hayStack.scheduleSync();
             return;
+        }
+
+        if (HSUtil.isUnitVentilatorEquip(pointUid, CCUHsApi.getInstance()) &&
+                !isReconfigurationPoint(localPoint)) {
+            reconfigureUnitVentilator(msgObject, localPoint);
         }
 
         if (HSUtil.isSystemConfigOutputPoint(pointUid, CCUHsApi.getInstance())

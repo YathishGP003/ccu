@@ -3,7 +3,6 @@ package a75f.io.device.mesh.hypersplit;
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
 import static a75f.io.logic.bo.building.schedules.Occupancy.UNOCCUPIED;
 
-
 import com.google.protobuf.ByteString;
 
 import java.util.HashMap;
@@ -19,34 +18,27 @@ import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.device.util.DeviceConfigurationUtil;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.equips.HyperStatSplitEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.schedules.Occupancy;
-import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.statprofiles.util.BasicSettings;
 import a75f.io.logic.tuners.TunerConstants;
 
 public class HyperSplitMessageGenerator {
 
-    /**
-     * Generates seed message for a node from haystack data.
-     *
-     * @param zone
-     * @param address
-     * @param equipRef
-     * @return
-     */
     public static HyperSplit.HyperSplitCcuDatabaseSeedMessage_t getSeedMessage(String zone, int address,
                                                                              String equipRef) {
         // HSS Seed message has a Settings3 field, but it is not filled anymore. This is to prevent edge cases that result from excessive message length.
         // Settings3 is now sent separately from the Seed Message.
-        HyperSplit.HyperSplitSettingsMessage_t hyperSplitSettingsMessage_t = getSettingsMessage(zone, address,
+        HyperSplit.HyperSplitSettingsMessage_t hyperSplitSettingsMessage_t = getSettingsMessage(zone,
                 equipRef);
         HyperSplit.HyperSplitControlsMessage_t hyperSplitControlsMessage_t = getControlMessage(address,
                 equipRef).build();
-        HyperSplit.HyperSplitSettingsMessage2_t hyperSplitSettingsMessage2_t = getSetting2Message(address, equipRef);
+        HyperSplit.HyperSplitSettingsMessage2_t hyperSplitSettingsMessage2_t = getSetting2Message(equipRef);
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitSettingsMessage_t.toString());
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitControlsMessage_t.toString());
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitSettingsMessage2_t);
@@ -60,16 +52,8 @@ public class HyperSplitMessageGenerator {
 
     }
 
-    /**
-     * Generate settings message for a node from haystack data.
-     *
-     * @param zone
-     * @param address
-     * @param equipRef
-     * @return
-     */
-    public static HyperSplit.HyperSplitSettingsMessage_t getSettingsMessage(String zone, int address,
-                                                                          String equipRef) {
+    public static HyperSplit.HyperSplitSettingsMessage_t getSettingsMessage(String zone,
+                                                                            String equipRef) {
         int temperatureMode = (int) Domain.readValAtLevelByDomain(DomainName.temperatureMode,
                 TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
 
@@ -95,7 +79,7 @@ public class HyperSplitMessageGenerator {
             CcuLog.d(L.TAG_CCU_DEVICE, "Zone max heating user limit not found; falling back to BuildingTuner value of " + maxHeatingUserTemp);
         }
 
-
+        HyperStatSplitEquip equip = (HyperStatSplitEquip) Domain.INSTANCE.getDomainEquip(equipRef);
         HyperSplit.HyperSplitSettingsMessage_t.Builder msg = HyperSplit.HyperSplitSettingsMessage_t.newBuilder()
                 .setRoomName(zone)
                 .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef) * 10))
@@ -104,36 +88,29 @@ public class HyperSplitMessageGenerator {
                 .setMaxCoolingUserTemp(maxCoolingUserTemp)
                 .setMinHeatingUserTemp(minHeatingUserTemp)
                 .setMaxHeatingUserTemp(maxHeatingUserTemp)
-                .setTemperatureOffset((int) (10*DeviceHSUtil.getTempOffset(address)))
-                .setHumidityMinSetpoint(getHumidityMinSp(equipRef))
-                .setHumidityMaxSetpoint(getHumidityMaxSp(equipRef))
+                .setTemperatureOffset((int)(equip.getTemperatureOffset().readDefaultVal() * 10))
+                .setHumidityMinSetpoint((int)(equip.getTargetHumidifier().readDefaultVal()))
+                .setHumidityMaxSetpoint((int)(equip.getTargetDehumidifier().readDefaultVal()))
                 .setShowCentigrade(DeviceConfigurationUtil.Companion.getUserConfiguration() == 1)
-                .setDisplayHumidity(isDisplayHumidity(equipRef))
-                .setDisplayCO2(isDisplayCo2(equipRef))
-                .setDisplayVOC(isDisplayVoc(equipRef))
-                .setDisplayPM25(isDisplayP2p5(equipRef))
-                .setCo2AlertTarget((int)readCo2ThresholdValue(equipRef))
-                .setPm25AlertTarget((int)readPm2p5TargetValue(equipRef))
-                .setVocAlertTarget((int)readVocThresholdValue(equipRef))
+                .setDisplayHumidity(equip.getEnableHumidityDisplay().readDefaultVal() > 0)
+                .setDisplayCO2(equip.getEnableCO2Display().readDefaultVal() > 0)
+                .setDisplayPM25(equip.getEnablePm25Display().readDefaultVal() > 0)
+                .setCo2AlertTarget((int)equip.getCo2Threshold().readDefaultVal())
+                .setPm25AlertTarget((int)equip.getPm25Target().readDefaultVal())
                 .setTemperatureMode(temperatureMode == 0 ? HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_DUAL_FIXED_DB
                         : HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_DUAL_VARIABLE_DB)
-                .setHyperstatLinearFanSpeeds(HyperSplitSettingsUtil.Companion.getLinearFanSpeedDetails(equipRef))
-                .setHyperstatStagedFanSpeeds(HyperSplitSettingsUtil.Companion.getStagedFanSpeedDetails(equipRef))
-                .setMiscSettings1(HyperSplitSettingsUtil.Companion.getMisSettings(equipRef));
+                .setHyperstatLinearFanSpeeds(HyperSplitSettingsUtil.Companion.getLinearFanSpeedDetails(equip))
+                .setHyperstatStagedFanSpeeds(HyperSplitSettingsUtil.Companion.getStagedFanSpeedDetails(equip))
+                .setMiscSettings1(HyperSplitSettingsUtil.Companion.getMisSettings(equipRef))
+                .setInstallerLockPin(HyperSplitSettingsUtil.Companion.getPin(equip.getPinLockInstallerAccess()))
+                .setUserLockPin(HyperSplitSettingsUtil.Companion.getPin(equip.getPinLockConditioningModeFanAccess()));
         return msg.build();
 
     }
 
-    /**
-     * Generate control message for a node from haystack data.
-     * @param address
-     * @param equipRef
-     * @return
-     */
     public static HyperSplit.HyperSplitControlsMessage_t.Builder getControlMessage(int address, String equipRef) {
-
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap device = hayStack.read("device and addr == \"" + address + "\"");
+        HashMap device = hayStack.readEntity("device and addr == \"" + address + "\"");
 
         HyperSplit.HyperSplitControlsMessage_t.Builder controls = HyperSplit.HyperSplitControlsMessage_t.newBuilder();
         controls.setSetTempCooling((int)(getDesiredTempCooling(equipRef) * 2));
@@ -144,67 +121,73 @@ public class HyperSplitMessageGenerator {
                 StandaloneFanStage.values()[(int)getFanMode(equipRef)]
         );
         controls.setFanSpeed(getDeviceFanMode(settings));
-        controls.setConditioningMode(getConditioningMode(settings,address));
+        controls.setConditioningMode(getConditioningMode(settings));
         controls.setUnoccupiedMode(isInUnOccupiedMode(equipRef));
         controls.setOperatingMode(getOperatingMode(equipRef));
         controls.setFanSpeed(getDeviceFanMode(settings));
-        controls.setConditioningMode(getConditioningMode(settings,address));
+        controls.setConditioningMode(getConditioningMode(settings));
         controls.setUnoccupiedMode(isInUnOccupiedMode(equipRef));
 
         if (!device.isEmpty()) {
             DeviceHSUtil.getEnabledCmdPointsWithRefForDevice(device, hayStack).forEach(rawPoint -> {
                 int mappedVal;
                 double logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
-                CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hs split ##getControlMessage: not writable id->"+rawPoint.getId()+"<logicalVal:>"+logicalVal);
-                if (Globals.getInstance().isTemporaryOverrideMode()) {
-                    mappedVal = (short)logicalVal;
-                } else {
-                    mappedVal = (DeviceUtil.isAnalog(rawPoint)
-                            ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
-                            : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
+                if(Globals.getInstance().isTestMode()) {
+                    // In test mode, we read the historical value and write it back to the point.
+                    Double hisVal = hayStack.readHisValById(rawPoint.getId());
+                    if (rawPoint.getMarkers().contains(Tags.WRITABLE)) {
+                        Double priorityVal = hayStack.readPointPriorityVal(rawPoint.getId());
+                        hayStack.writeHisValById(rawPoint.getId(), priorityVal);
+                    }
+                    setHyperSplitPort(controls, rawPoint, hisVal);
                 }
-                CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hs split ##getControlMessage: not writable id->"+rawPoint.getId()+"<mappedVal:>"+mappedVal);
+                else {
 
-                if(rawPoint.getMarkers().contains(Tags.WRITABLE)){
-                    hayStack.writeDefaultVal(rawPoint.getId(), (double) mappedVal);
-                    double value = hayStack.readPointPriorityVal(rawPoint.getId());
-                    hayStack.writeHisValById(rawPoint.getId(), value);
-                }else{
-                    hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
-                }
-                setHyperSplitPort(controls, rawPoint, mappedVal);
-            });
-            CcuLog.i(L.TAG_CCU_DEVICE, "===================Device Layer==================================");
+                    if (Globals.getInstance().isTemporaryOverrideMode()) {
+                        mappedVal = (short) logicalVal;
+                    } else {
+                        mappedVal = (DeviceUtil.isAnalog(rawPoint)
+                                ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
+                                : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
+                    }
+                    if (rawPoint.getMarkers().contains(Tags.WRITABLE)) {
+                        hayStack.writeDefaultVal(rawPoint.getId(), (double) mappedVal);
+                        double value = hayStack.readPointPriorityVal(rawPoint.getId());
+                        hayStack.writeHisValById(rawPoint.getId(), value);
+                    } else {
+                        hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
+                    }
+                    setHyperSplitPort(controls, rawPoint, mappedVal);
+                }});
             DeviceHSUtil.getEnabledCmdPointsWithRefForDevice(device, hayStack)
                     .forEach( rawPoint -> {
                         int mappedVal;
 
                         // Points written from CCU algos will fall under this block.
                         // Updating the physical point value based on logical point value is done here.
-                        if (!rawPoint.getMarkers().contains(Tags.WRITABLE)) {
-                            double logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
-                            CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hs split $$getControlMessage: not writable id->"+rawPoint.getId()+"<logicalVal:>"+logicalVal);
-                            mappedVal = (DeviceUtil.isAnalog(rawPoint)
-                                    ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
-                                    : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
-                            CcuLog.i(L.TAG_CCU_DEVICE,
-                                    rawPoint.getType()+" "+logicalVal+" domainName "+rawPoint.getDomainName() +" =  "+mappedVal);
-                            CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hs split $$getControlMessage: not writable id->"+rawPoint.getId()+"<mappedVal:>"+mappedVal);
-                        } else {
-                            // Points written from Sequencer will fall under this block.
-                            // Sequencer writes directly to the physical point, so we just need to read it here.
-                            mappedVal = (short) hayStack.readPointPriorityVal(rawPoint.getId());
-                            CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hs split $$getControlMessage: writable id->"+rawPoint.getId()+"<mappedVal:>"+mappedVal);
-                            CcuLog.i(L.TAG_CCU_DEVICE,
-                                    rawPoint.getType()+" writing externally mapped val: domainName "+rawPoint.getDomainName() +" =  "+mappedVal);
-                        }
-                        CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE hs split $$getControlMessage: writeHisValById id->"+rawPoint.getId()+"<mappedVal:>"+mappedVal);
-                        hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
-                        setHyperSplitPort(controls, rawPoint, mappedVal);
-                    });
-            CcuLog.i(L.TAG_CCU_DEVICE, "=====================================================");
+                        if(!Globals.getInstance().isTestMode()) {
+                            if (!rawPoint.getMarkers().contains(Tags.WRITABLE)) {
+                                double logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
+                                CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hs split $$getControlMessage: not writable id->" + rawPoint.getId() + "<logicalVal:>" + logicalVal);
+                                mappedVal = (DeviceUtil.isAnalog(rawPoint)
+                                        ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
+                                        : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
+                                CcuLog.i(L.TAG_CCU_DEVICE,
+                                        rawPoint.getType() + " " + logicalVal + " domainName " + rawPoint.getDomainName() + " =  " + mappedVal);
+                                CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hs split $$getControlMessage: not writable id->" + rawPoint.getId() + "<mappedVal:>" + mappedVal);
+                            } else {
+                                // Points written from Sequencer will fall under this block.
+                                // Sequencer writes directly to the physical point, so we just need to read it here.
+                                mappedVal = (short) hayStack.readPointPriorityVal(rawPoint.getId());
+                                CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hs split $$getControlMessage: writable id->" + rawPoint.getId() + "<mappedVal:>" + mappedVal);
+                                CcuLog.i(L.TAG_CCU_DEVICE,
+                                        rawPoint.getType() + " writing externally mapped val: domainName " + rawPoint.getDomainName() + " =  " + mappedVal);
+                            }
+                            CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE hs split $$getControlMessage: writeHisValById id->" + rawPoint.getId() + "<mappedVal:>" + mappedVal);
+                            hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
+                            setHyperSplitPort(controls, rawPoint, mappedVal);
+                        }});
         }
-
         return controls;
     }
 
@@ -304,7 +287,7 @@ public class HyperSplitMessageGenerator {
         return HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_OFF;
     }
 
-    private static HyperSplit.HyperSplitConditioningMode_e getConditioningMode(BasicSettings settings, int address){
+    private static HyperSplit.HyperSplitConditioningMode_e getConditioningMode(BasicSettings settings){
         try {
             if(settings.getConditioningMode() == StandaloneConditioningMode.AUTO)
                 return HyperSplit.HyperSplitConditioningMode_e.HYPERSPLIT_CONDITIONING_MODE_AUTO;
@@ -327,17 +310,9 @@ public class HyperSplitMessageGenerator {
         return curOccupancyMode == UNOCCUPIED || curOccupancyMode == AUTOAWAY;
     }
 
-    private static int getHumidityMinSp(String equipRef) {
-        return CCUHsApi.getInstance().readDefaultVal("point and domainName == \"" + DomainName.targetHumidifier + "\" and equipRef == \"" + equipRef + "\"").intValue();
-    }
-
-    private static int getHumidityMaxSp(String equipRef) {
-        return CCUHsApi.getInstance().readDefaultVal("point and domainName == \"" + DomainName.targetDehumidifier + "\" and equipRef == \"" + equipRef + "\"").intValue();
-    }
-
     private static double getStandaloneCoolingDeadband(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap collingDeadband = hayStack.read("point and deadband and cooling and zone and not multiplier and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\"");
+        HashMap collingDeadband = hayStack.readEntity("point and deadband and cooling and zone and not multiplier and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\"");
         try {
             return HSUtil.getPriorityVal(Objects.requireNonNull(collingDeadband.get("id")).toString());
         } catch (NullPointerException e) {
@@ -350,7 +325,7 @@ public class HyperSplitMessageGenerator {
     public static double getStandaloneHeatingDeadband(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap deadbandPoint =
-                hayStack.read("point and deadband and heating and zone and not multiplier and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+
+                hayStack.readEntity("point and deadband and heating and zone and not multiplier and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+
                         "\"");
         try {
             return HSUtil.getPriorityVal(Objects.requireNonNull(deadbandPoint.get("id")).toString());
@@ -358,56 +333,17 @@ public class HyperSplitMessageGenerator {
             CcuLog.e(L.TAG_CCU_DEVICE,"Error getStandaloneHeatingDeadband", e);
             return 0;
         }
-
     }
 
-    public static double readCo2ThresholdValue(String equipRef) {
-        return CCUHsApi.getInstance().readDefaultVal(
-                "point and domainName == \"" + DomainName.co2Threshold + "\" and equipRef == \""+equipRef+ "\""
-        );
-    }
 
-    public static double readVocThresholdValue(String equipRef) {
-        double vocThreshold = CCUHsApi.getInstance().readDefaultVal(
-                "point and domainName == \"" + DomainName.vocThreshold + "\" and equipRef == \""+equipRef+ "\""
-        );
-        return vocThreshold > 0 ? vocThreshold : 4000;
-    }
-
-    public static double readPm2p5TargetValue(String equipRef) {
-        return CCUHsApi.getInstance().readDefaultVal(
-                "point and domainName == \"" + DomainName.pm25Target + "\" and equipRef == \""+equipRef+ "\""
-        );
-    }
-
-    public static boolean isDisplayHumidity(String equipRef){
-        return CCUHsApi.getInstance().readDefaultVal(
-                "point and domainName == \"" + DomainName.enableHumidityDisplay + "\" and equipRef == \""+equipRef+ "\"") == 1;
-    }
-
-    public static boolean isDisplayVoc(String equipRef){
-        return CCUHsApi.getInstance().readDefaultVal(
-                "point and domainName == \"" + DomainName.enableVOCDisplay + "\" and equipRef == \""+equipRef+ "\"") == 1;
-    }
-
-    public static boolean isDisplayCo2(String equipRef){
-        return CCUHsApi.getInstance().readDefaultVal(
-                "point and domainName == \"" + DomainName.enableCO2Display + "\" and equipRef == \""+equipRef+ "\"") == 1;
-    }
-
-    public static boolean isDisplayP2p5(String equipRef){
-        return CCUHsApi.getInstance().readDefaultVal(
-                "point and domainName == \"" + DomainName.enablePm25Display + "\" and equipRef == \""+equipRef+ "\"") == 1;
-    }
-
-    public static HyperSplit.HyperSplitSettingsMessage2_t getSetting2Message(int address, String equipRef){
-        return HyperSplitSettingsUtil.Companion.getSetting2Message(address,equipRef,CCUHsApi.getInstance());
+    public static HyperSplit.HyperSplitSettingsMessage2_t getSetting2Message(String equipRef){
+        return HyperSplitSettingsUtil.Companion.getSetting2Message(equipRef);
     }
     public static HyperSplit.HyperSplitSettingsMessage3_t getSetting3Message(int address, String equipRef){
         return HyperSplitSettingsUtil.Companion.getSetting3Message(address,equipRef,CCUHsApi.getInstance());
     }
-    public static HyperSplit.HyperSplitSettingsMessage4_t getSetting4Message(int address, String equipRef){
-        return HyperSplitSettingsUtil.Companion.getSetting4Message(equipRef, CCUHsApi.getInstance());
+    public static HyperSplit.HyperSplitSettingsMessage4_t getSetting4Message(String equipRef){
+        return HyperSplitSettingsUtil.Companion.getSetting4Message(equipRef);
     }
 
     public static HyperSplit.HyperSplitControlsMessage_t getHypersplitRebootControl(int address){

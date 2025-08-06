@@ -40,3 +40,22 @@ data class MyStatTuners(
     var waterValveSamplingDuringLoopDeadbandOnTime: Int = 2,   // min
     var waterValveSamplingDuringLoopDeadbandWaitTime: Int = 5  // min
 ) : BaseStatTuners()
+
+
+data class UvTuners(
+    var heatingThreshold: Double = 85.0, // (°F)
+    var coolingThreshold: Double = 65.0, // (°F)
+    var auxHeating1Activate: Double = 3.0,      // (F)
+    var auxHeating2Activate: Double = 4.0,      // (F)
+    var waterValveSamplingOnTime: Int = 2,   // min
+    var waterValveSamplingWaitTime: Int = 3, // min
+    var waterValveSamplingDuringLoopDeadbandOnTime: Int = 2,   // min
+    var waterValveSamplingDuringLoopDeadbandWaitTime: Int = 5,  // min
+    var saTemperingSetpoint: Double = 70.0, // (°F)
+    var saTemperingIntegralKFactor: Double = 0.5,
+    var saTemperingTemperatureIntegralTime: Int = 30,
+    var saTemperingProportionalKFactor: Double = 0.5,
+    var saTemperingTemperatureProportionalRange: Double = 10.0, // (°F)
+    var economizingToMainCoolingLoopMap: Double = 30.0, // %
+    var faceBypassDamperActivationHysteresis: Double = 10.0 // %
+) : BaseStatTuners()

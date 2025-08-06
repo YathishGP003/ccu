@@ -46,14 +46,11 @@ public class AlertsFragment extends Fragment implements AlertManager.AlertListLi
 	private Disposable alertDeleteDisposable;
 	private HashMap<Object, Object> useCelsius;
 
-
 	public static AlertsFragment newInstance()
 	{
-
 		return new AlertsFragment();
 	}
-	
-	
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState)

@@ -467,6 +467,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
+        if(!isSystemViewVisible()) return; //if system view is not visible then we are not setting the system profile
         spSystemProfile.setSelection(L.ccu().systemProfile != null ?
                 systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
     }

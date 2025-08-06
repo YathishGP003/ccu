@@ -49,5 +49,24 @@ enum class MyStatFanStages {
     HIGH_ALL_TIME,
 }
 
+enum class UvFanStages {
+    OFF,
+    AUTO,
+    LOW_CUR_OCC,
+    LOW_OCC,
+    LOW_ALL_TIME,
+    MEDIUM_CUR_OCC,
+    MEDIUM_OCC,
+    MEDIUM_ALL_TIME,
+    HIGH_CUR_OCC,
+    HIGH_OCC,
+    HIGH_ALL_TIME,
+}
+
+enum class ControlVia {
+    FACE_AND_BYPASS_DAMPER,
+    FULLY_MODULATING_VALVE
+}
+
 
 

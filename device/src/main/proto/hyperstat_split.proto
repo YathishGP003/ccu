@@ -39,7 +39,9 @@ enum HyperSplitProfiles_t {
   HYPERSPLIT_PROFILE_VRV = 5;
   HYPERSPLIT_PROFILE_SENSE = 6;
   HYPERSPLIT_PROFILE_CONVENTIONAL_PACKAGE_UNIT_ECONOMIZER = 7;
-  HYPERSPLIT_PROFILE_NUM_OF = 8;
+  HYPERSPLIT_PROFILE_2_PIPE_UNIT_VENTILATOR = 8;
+  HYPERSPLIT_PROFILE_4_PIPE_UNIT_VENTILATOR = 9;
+  HYPERSPLIT_PROFILE_NUM_OF = 10;
 }
 
 message HyperSplitTunersGeneric_t {
@@ -62,6 +64,7 @@ message HyperSplitTunersFcu_t {
   uint32 watreValueSamplingWaitTime = 6; // Typical value 5-300
   uint32 waterValveSamplingDuringLoopDeadbandOnTime = 7; // Typical value 0-30
   uint32 waterValveSamplingDuringLoopDeadbandWaitTime = 8; // Typical value 5-300
+  optional uint32 analogoutAtRecFanAnalogVoltage = 9; // The voltage at which fan should be operated is determined based on configuration parameter called Analog2atRecirc.
 }
 
 message HypersplitLinearFanSpeeds_t {
@@ -115,7 +118,10 @@ message HyperSplitSettingsMessage_t {
   /* miscSettings
        bit 0: enableExternal10kTemperatureSensor(1 if external sensor is enabled
        bit 1: disableTouch(1 will disable touch)
-       bit 2: brightnessVariationEnable (1 will enable automatic brightness control) */
+       bit 2: brightnessVariationEnable (1 will enable automatic brightness control)
+       bit 3: display Space temp
+       bit 4: display desired temp
+       Both display space and desired temp cannot be true*/
   uint32 miscSettings1 =18;
   bool beaconingEnabled = 19; // 0 if beaconing disabled, 1 if beaconing enabled
   uint32 humidityMinSetpoint = 20; // Minimum humidity setpont 0-100% in which Hyperstat will set system to Humidify if humidity level is less than
@@ -123,6 +129,8 @@ message HyperSplitSettingsMessage_t {
   uint32 occupancySensorSensitivityLevel = 22; // Sensitivity level setting for the motion sensor 1-10, one being the most sensitive
   HypersplitLinearFanSpeeds_t hyperstatLinearFanSpeeds = 23; // When linear fan is enabled these voltages provide user intent
   HypersplitStagedFanSpeeds_t hyperstatStagedFanSpeeds = 24;   // When staged fan is enabled these voltages provide user intent
+  optional uint32 installerLockPin = 25; // 4 digits - (No LOCK = 0000)
+  optional uint32 userLockPin = 26; // 4 digits - (No LOCK = 0000)
 }
 
 message HyperSplitConfigsCcu_t {
@@ -242,7 +250,12 @@ enum HyperSplitRelayMapping_t {
   HYPERSPILT_RELAY_B_ENERGISE_IN_HEATING = 22;
   HYPERSPILT_RELAY_AUX_HEATING_1 = 23;
   HYPERSPILT_RELAY_AUX_HEATING_2 = 24;
-  HYPERSPLIT_RELAY_NUM_OF = 25;
+  HYPERSPLIT_RELAY_FAN_LOW_SPEED_VENTILATION = 25;
+  HYPERSPLIT_RELAY_WATER_VALVE = 26;
+  HYPERSPLIT_RELAY_COOLING_VALVE = 27;
+  HYPERSPLIT_RELAY_HEATING_VALVE = 28;
+  HYPERSPLIT_RELAY_F_AND_B_DAMPER = 29;
+  HYPERSPLIT_RELAY_NUM_OF = 30;
 }
 
 enum HyperSplitUniversalInMapping_t {
@@ -268,7 +281,19 @@ enum HyperSplitUniversalInMapping_t {
   HYPERSPLIT_UIN_GENERIC_FAULT_NC = 19;
   HYPERSPLIT_UIN_RUN_FAN_STATUS_NO = 20;
   HYPERSPLIT_UIN_RUN_FAN_STATUS_NC = 21;
-  HYPERSPLIT_UIN_NUM_OF = 22;
+
+  HYPERSPLIT_UIN_EMERGENCY_SHUT_OFF_NO = 22;
+  HYPERSPLIT_UIN_EMERGENCY_SHUT_OFF_NC = 23;
+  HYPERSPLIT_UIN_TITLE24_DOOR_WINDOW_NO = 24;
+  HYPERSPLIT_UIN_TITLE24_DOOR_WINDOW_NC = 25;
+  HYPERSPLIT_UIN_NON_TITLE24_DOOR_WINDOW_NO = 26;
+  HYPERSPLIT_UIN_NON_TITLE24_DOOR_WINDOW_NC = 27;
+  HYPERSPLIT_UIN_TITLE24_AI_DOOR_WINDOW = 28;
+  HYPERSPLIT_UIN_NON_TITLE24_AI_DOOR_WINDOW = 29;
+  HYPERSPLIT_UIN_KEY_CARD_NO = 30;
+  HYPERSPLIT_UIN_KEY_CARD_NC = 31;
+  HYPERSPLIT_UIN_SUPPLY_WATER_TEMP = 32;
+  HYPERSPLIT_UIN_NUM_OF = 33;
 }
 
 enum HyperSplitSenorBusMapping_t {
@@ -277,7 +302,8 @@ enum HyperSplitSenorBusMapping_t {
   HYPERSPLIT_SBUS_MAT = 2;
   HYPERSPLIT_SBUS_OAT = 3;
   HYPERSPLIT_SBUS_PRESSURE = 4;
-  HYPERSPLIT_SBUS_NUM_OF = 5;
+  HYPERSPLIT_SBUS_FILTER_MONITOR = 5;
+  HYPERSPLIT_SBUS_NUM_OF = 6;
 }
 
 enum SensorBusConnectedTypes_t {
@@ -311,7 +337,11 @@ enum HyperSplitAnalogOutMapping_t {
     HYPERSPLIT_AOUT_RESERVED = 7;
     HYPERSPILT_AOUT_COMPRESSOR_SPEED = 8;
     HYPERSPILT_AOUT_DCV_DAMPER = 9;
-    HYPERSPLIT_AOUT_NUM_OF = 10;
+    HYPERSPLIT_AOUT_WATER_VALVE = 10;
+    HYPERSPLIT_AOUT_COOLING_MODULATING_VALVE = 11;
+    HYPERSPLIT_AOUT_HEATING_MODULATING_VALVE = 12;
+    HYPERSPLIT_AOUT_F_AND_B_DAMPER = 13;
+    HYPERSPLIT_AOUT_NUM_OF = 14;
 }
 
 message HyperSplitAnalogOutConfig_t {
@@ -446,10 +476,26 @@ message HyperSplitDiagnosticsMessage_t {
   // For example 0b00100000110001100011, means Sensor Address 0, T & H connected, Sensor Address 1, T & H connected, Sensor Address 2, T & H connected, Sensor Address 3, P connected
 }
 
+enum HyperSplitControlVia_t {
+  HYPERSPLIT_CONTROL_VIA_F_AND_B_DAMPER = 0;
+  HYPERSPLIT_CONTROL_VIA_FULLY_MODULATING_VALVE = 1;
+  HYPERSPLIT_CONTROL_VIA_NUM_OF = 2;
+}
+
 message HyperSplitSettingsMessage4_t {
   optional uint32 outsideDamperMinOpenDuringConditioning = 1;
   optional uint32 outsideDamperMinOpenDuringRecirculation = 2;
   optional uint32 outsideDamperMinOpenDuringFanLow = 3;
   optional uint32 outsideDamperMinOpenDuringFanMedium = 4;
   optional uint32 outsideDamperMinOpenDuringFanHigh = 5;
+  optional uint32 saTemperingSetpoint = 6; // Temperature value 1/10 F
+  optional uint32 faceBypassDamperRelayActivationHysteresis = 7;
+  optional uint32 stageUpTimer = 8; // min
+  optional uint32 stageDownTimer = 9;  // min
+  optional uint32 saTemperingProportionalConstant = 10; // default 50 - k constants for Proportional in 1/100
+  optional uint32 saTemperingIntegralConstant = 11; // default 50 - k constant for Integral in 1/100
+  optional uint32 saTemperingProportionalTemperatureRange = 12; // default 15 - temp range in 1/10 deg that the proportional control will apply
+  optional uint32 saTemperingIntegrationTime = 13; // default 30 - time in  minutes the integration takes to max out
+  optional HyperSplitControlVia_t controlVia = 14;
+  optional bool enableSaTempering = 15;
 }

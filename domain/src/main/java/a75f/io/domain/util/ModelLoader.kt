@@ -201,6 +201,9 @@ object ModelLoader {
     fun getDefaultSystemProfileModel(): ModelDirective {
         return ModelCache.getModelById(MODEL_DEFAULT_SYSTEM_PROFILE)
     }
+    fun getSplitPipe4Model(): ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_SPLIT_PIPE4)
+    }
 
     fun getModelForDomainName( domainName : String) : ModelDirective {
         return when(domainName) {

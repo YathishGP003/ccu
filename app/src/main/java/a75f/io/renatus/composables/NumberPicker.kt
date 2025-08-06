@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -175,8 +176,8 @@ fun TempOffsetPicker(
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = listStartIndex)
     val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
 
-    val itemHeightPixels = remember { mutableStateOf(0) }
-    val itemHeightDp = pixelsToDp(itemHeightPixels.value)
+    val itemHeightPixels = remember { mutableIntStateOf(0) }
+    val itemHeightDp = pixelsToDp(itemHeightPixels.intValue)
 
     val fadingEdgeGradient = remember {
         Brush.verticalGradient(
@@ -381,3 +382,98 @@ fun DurationPicker(
         }
     }
 }
+
+    @OptIn(ExperimentalFoundationApi::class)
+    @Composable
+    fun PinPassword(
+        items: List<String>,
+        state: PickerState = rememberPickerState(),
+        modifier: Modifier = Modifier,
+        onChanged: (String) -> Unit = {},
+        startIndex: Int = 0,
+        visibleItemsCount: Int = 3,
+        textModifier: Modifier = Modifier,
+        textStyle: TextStyle = LocalTextStyle.current,
+        dividerColor: Color = primaryColor,
+    ) {
+
+        val visibleItemsMiddle = visibleItemsCount / 2
+        val listScrollCount = Integer.MAX_VALUE
+        val listScrollMiddle = listScrollCount / 2
+        val listStartIndex = listScrollMiddle - listScrollMiddle % items.size - visibleItemsMiddle + startIndex
+
+        fun getItem(index: Int) = items[index % items.size]
+
+        val listState = rememberLazyListState(initialFirstVisibleItemIndex = listStartIndex)
+        val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
+
+        val itemHeightPixels = remember { mutableIntStateOf(0) }
+        val itemHeightDp = pixelsToDp(itemHeightPixels.value)
+
+        val fadingEdgeGradient = remember {
+            Brush.verticalGradient(
+                0f to Color.Transparent,
+                0.5f to Color.Black,
+                1f to Color.Transparent
+            )
+        }
+        var isFirstLaunch by remember { mutableStateOf(true) }
+
+        LaunchedEffect(listState) {
+            snapshotFlow { listState.firstVisibleItemIndex }
+                .map { index -> getItem(index + visibleItemsMiddle) }
+                .distinctUntilChanged()
+                .collect { item ->
+                    state.selectedItem = item
+                    if (isFirstLaunch) {
+                        isFirstLaunch = false // Skip the first call
+                    } else {
+                        onChanged(item)
+                    }
+                }
+        }
+
+
+        Box {
+            LazyColumn(
+                state = listState,
+                flingBehavior = flingBehavior,
+                modifier = modifier
+                    .padding(PaddingValues(top = 40.dp))
+                    .height(itemHeightDp * visibleItemsCount)
+                    .fadingEdge(fadingEdgeGradient),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                items(listScrollCount) { index ->
+                    Text(
+                        text = getItem(index),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 24.sp,
+                        style = textStyle,
+                        modifier = Modifier
+                            .onSizeChanged { size -> itemHeightPixels.value = size.height }
+                            .then(textModifier),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+
+            Divider(
+                color = dividerColor,
+                modifier = Modifier
+                    .offset(y = itemHeightDp * visibleItemsMiddle + 40.dp)
+                    .width(40.dp)
+                    .align(Alignment.TopCenter)
+            )
+
+            Divider(
+                color = dividerColor,
+                modifier = Modifier
+                    .offset(y = itemHeightDp * (visibleItemsMiddle + 1) + 40.dp)
+                    .width(40.dp)
+                    .align(Alignment.TopCenter)
+            )
+        }
+    }

@@ -2,7 +2,9 @@ package a75f.io.renatus.profiles.hss
 
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
+import a75f.io.renatus.profiles.hss.cpu.AnalogOutVoltage
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuState
+import a75f.io.renatus.profiles.hss.cpu.StagedFanVoltage
 
 fun updateHyperStatSplitConfigFromState(config: HyperStatSplitConfiguration, state: HyperStatSplitState) {
     config.temperatureOffset.currentVal = state.temperatureOffset
@@ -94,7 +96,16 @@ fun updateHyperStatSplitConfigFromState(config: HyperStatSplitConfiguration, sta
     config.displayPM2p5.enabled = state.displayPM2p5
 
     config.disableTouch.enabled = state.disableTouch
+    config.backLight.enabled = state.backLight
     config.enableBrightness.enabled = state.enableBrightness
+
+    config.installerPassword.currentVal = state.installerPassword
+    config.conditioningModePassword.currentVal = state.conditioningModePassword
+    config.installerPinEnable.enabled = state.installerPinEnable
+    config.conditioningModePinEnable.enabled = state.conditioningModePinEnable
+
+    config.desiredTemp.enabled = state.desiredTemp
+    config.spaceTemp.enabled = state.spaceTemp
 }
 
 fun updateDynamicPoints(config: HyperStatSplitCpuConfiguration, state: HyperStatSplitCpuState) {
@@ -183,5 +194,101 @@ fun updateDynamicPoints(config: HyperStatSplitCpuConfiguration, state: HyperStat
     config.stagedFanVoltages.compressorStage1Voltage.currentVal = state.stagedFanVoltages.compressorStage1Voltage.toDouble()
     config.stagedFanVoltages.compressorStage2Voltage.currentVal = state.stagedFanVoltages.compressorStage2Voltage.toDouble()
     config.stagedFanVoltages.compressorStage3Voltage.currentVal = state.stagedFanVoltages.compressorStage3Voltage.toDouble()
+}
+
+fun updateAnalogOutDynamicConfig(config: HyperStatSplitCpuConfiguration, state: HyperStatSplitCpuState) {
+    state.analogOut1MinMax = AnalogOutVoltage(
+        config.analogOut1Voltage.coolingMinVoltage.currentVal.toInt(),
+        config.analogOut1Voltage.coolingMaxVoltage.currentVal.toInt(),
+        config.analogOut1Voltage.heatingMinVoltage.currentVal.toInt(),
+        config.analogOut1Voltage.heatingMaxVoltage.currentVal.toInt(),
+        config.analogOut1Voltage.oaoDamperMinVoltage.currentVal.toInt(),
+        config.analogOut1Voltage.oaoDamperMaxVoltage.currentVal.toInt(),
+        config.analogOut1Voltage.returnDamperMinVoltage.currentVal.toInt(),
+        config.analogOut1Voltage.returnDamperMaxVoltage.currentVal.toInt(),
+        config.analogOut1Voltage.compressorMinVoltage.currentVal.toInt(),
+        config.analogOut1Voltage.compressorMaxVoltage.currentVal.toInt(),
+        config.analogOut1Voltage.dcvModulationMinVoltage.currentVal.toInt(),
+        config.analogOut1Voltage.dcvModulationMaxVoltage.currentVal.toInt(),
+        config.analogOut1Voltage.linearFanMinVoltage.currentVal.toInt(),
+        config.analogOut1Voltage.linearFanMaxVoltage.currentVal.toInt(),
+        config.analogOut1Voltage.linearFanAtFanLow.currentVal.toInt(),
+        config.analogOut1Voltage.linearFanAtFanMedium.currentVal.toInt(),
+        config.analogOut1Voltage.linearFanAtFanHigh.currentVal.toInt()
+    )
+
+    state.analogOut2MinMax = AnalogOutVoltage(
+        config.analogOut2Voltage.coolingMinVoltage.currentVal.toInt(),
+        config.analogOut2Voltage.coolingMaxVoltage.currentVal.toInt(),
+        config.analogOut2Voltage.heatingMinVoltage.currentVal.toInt(),
+        config.analogOut2Voltage.heatingMaxVoltage.currentVal.toInt(),
+        config.analogOut2Voltage.oaoDamperMinVoltage.currentVal.toInt(),
+        config.analogOut2Voltage.oaoDamperMaxVoltage.currentVal.toInt(),
+        config.analogOut2Voltage.returnDamperMinVoltage.currentVal.toInt(),
+        config.analogOut2Voltage.returnDamperMaxVoltage.currentVal.toInt(),
+        config.analogOut2Voltage.compressorMinVoltage.currentVal.toInt(),
+        config.analogOut2Voltage.compressorMaxVoltage.currentVal.toInt(),
+        config.analogOut2Voltage.dcvModulationMinVoltage.currentVal.toInt(),
+        config.analogOut2Voltage.dcvModulationMaxVoltage.currentVal.toInt(),
+        config.analogOut2Voltage.linearFanMinVoltage.currentVal.toInt(),
+        config.analogOut2Voltage.linearFanMaxVoltage.currentVal.toInt(),
+        config.analogOut2Voltage.linearFanAtFanLow.currentVal.toInt(),
+        config.analogOut2Voltage.linearFanAtFanMedium.currentVal.toInt(),
+        config.analogOut2Voltage.linearFanAtFanHigh.currentVal.toInt()
+    )
+
+    state.analogOut3MinMax = AnalogOutVoltage(
+        config.analogOut3Voltage.coolingMinVoltage.currentVal.toInt(),
+        config.analogOut3Voltage.coolingMaxVoltage.currentVal.toInt(),
+        config.analogOut3Voltage.heatingMinVoltage.currentVal.toInt(),
+        config.analogOut3Voltage.heatingMaxVoltage.currentVal.toInt(),
+        config.analogOut3Voltage.oaoDamperMinVoltage.currentVal.toInt(),
+        config.analogOut3Voltage.oaoDamperMaxVoltage.currentVal.toInt(),
+        config.analogOut3Voltage.returnDamperMinVoltage.currentVal.toInt(),
+        config.analogOut3Voltage.returnDamperMaxVoltage.currentVal.toInt(),
+        config.analogOut3Voltage.compressorMinVoltage.currentVal.toInt(),
+        config.analogOut3Voltage.compressorMaxVoltage.currentVal.toInt(),
+        config.analogOut3Voltage.dcvModulationMinVoltage.currentVal.toInt(),
+        config.analogOut3Voltage.dcvModulationMaxVoltage.currentVal.toInt(),
+        config.analogOut3Voltage.linearFanMinVoltage.currentVal.toInt(),
+        config.analogOut3Voltage.linearFanMaxVoltage.currentVal.toInt(),
+        config.analogOut3Voltage.linearFanAtFanLow.currentVal.toInt(),
+        config.analogOut3Voltage.linearFanAtFanMedium.currentVal.toInt(),
+        config.analogOut3Voltage.linearFanAtFanHigh.currentVal.toInt()
+    )
+
+    state.analogOut4MinMax = AnalogOutVoltage(
+        config.analogOut4Voltage.coolingMinVoltage.currentVal.toInt(),
+        config.analogOut4Voltage.coolingMaxVoltage.currentVal.toInt(),
+        config.analogOut4Voltage.heatingMinVoltage.currentVal.toInt(),
+        config.analogOut4Voltage.heatingMaxVoltage.currentVal.toInt(),
+        config.analogOut4Voltage.oaoDamperMinVoltage.currentVal.toInt(),
+        config.analogOut4Voltage.oaoDamperMaxVoltage.currentVal.toInt(),
+        config.analogOut4Voltage.returnDamperMinVoltage.currentVal.toInt(),
+        config.analogOut4Voltage.returnDamperMaxVoltage.currentVal.toInt(),
+        config.analogOut4Voltage.compressorMinVoltage.currentVal.toInt(),
+        config.analogOut4Voltage.compressorMaxVoltage.currentVal.toInt(),
+        config.analogOut4Voltage.dcvModulationMinVoltage.currentVal.toInt(),
+        config.analogOut4Voltage.dcvModulationMaxVoltage.currentVal.toInt(),
+        config.analogOut4Voltage.linearFanMinVoltage.currentVal.toInt(),
+        config.analogOut4Voltage.linearFanMaxVoltage.currentVal.toInt(),
+        config.analogOut4Voltage.linearFanAtFanLow.currentVal.toInt(),
+        config.analogOut4Voltage.linearFanAtFanMedium.currentVal.toInt(),
+        config.analogOut4Voltage.linearFanAtFanHigh.currentVal.toInt()
+    )
+
+    state.stagedFanVoltages = StagedFanVoltage(
+        config.stagedFanVoltages.recircVoltage.currentVal.toInt(),
+        config.stagedFanVoltages.economizerVoltage.currentVal.toInt(),
+        config.stagedFanVoltages.heatStage1Voltage.currentVal.toInt(),
+        config.stagedFanVoltages.coolStage1Voltage.currentVal.toInt(),
+        config.stagedFanVoltages.compressorStage1Voltage.currentVal.toInt(),
+        config.stagedFanVoltages.heatStage2Voltage.currentVal.toInt(),
+        config.stagedFanVoltages.coolStage2Voltage.currentVal.toInt(),
+        config.stagedFanVoltages.compressorStage2Voltage.currentVal.toInt(),
+        config.stagedFanVoltages.heatStage3Voltage.currentVal.toInt(),
+        config.stagedFanVoltages.coolStage3Voltage.currentVal.toInt(),
+        config.stagedFanVoltages.compressorStage3Voltage.currentVal.toInt()
+    )
 }
 

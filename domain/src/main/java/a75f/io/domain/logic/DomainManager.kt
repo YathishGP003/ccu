@@ -2,7 +2,6 @@ package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.BypassDamperEquip
-import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.OAOEquip
 import a75f.io.domain.VavAcbEquip
 import a75f.io.domain.api.Device
@@ -15,6 +14,7 @@ import a75f.io.domain.devices.CCUDevice
 import a75f.io.domain.devices.CmBoardDevice
 import a75f.io.domain.devices.ConnectDevice
 import a75f.io.domain.devices.HyperStatDevice
+import a75f.io.domain.devices.HyperStatSplitDevice
 import a75f.io.domain.devices.MyStatDevice
 import a75f.io.domain.equips.BuildingEquip
 import a75f.io.domain.equips.CCUDiagEquip
@@ -27,8 +27,8 @@ import a75f.io.domain.equips.DabStagedVfdSystemEquip
 import a75f.io.domain.equips.DefaultSystemEquip
 import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.equips.OtnEquip
-import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.PlcEquip
+import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.equips.VavModulatingRtuSystemEquip
@@ -41,6 +41,9 @@ import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
+import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
+import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
+import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
 import a75f.io.domain.util.CommonQueries
 import a75f.io.logger.CcuLog
 import io.seventyfivef.ph.core.Tags
@@ -132,11 +135,14 @@ object DomainManager {
                     (it.contains("mystat") && it.contains("cpu")) -> Domain.equips[it["id"].toString()] = MyStatCpuEquip(it["id"].toString())
                     (it.contains("mystat") && it.contains("hpu")) -> Domain.equips[it["id"].toString()] = MyStatHpuEquip(it["id"].toString())
                     (it.contains("mystat") && it.contains("pipe2")) -> Domain.equips[it["id"].toString()] = MyStatPipe2Equip(it["id"].toString())
-                    it.contains("hyperstatsplit") -> {
-                        CcuLog.i(Domain.LOG_TAG, "Build domain hyperstatsplit is addded $it")
-                        Domain.equips[it["id"].toString()] = HyperStatSplitEquip(it["id"].toString())
+                    it.contains("economizer") && it.contains("cpu") -> {
+                        CcuLog.i(Domain.LOG_TAG, "Build domain hssplit is added $it")
+                        Domain.equips[it["id"].toString()] = HsSplitCpuEquip(it["id"].toString())
                     }
-
+                    (it.contains("domainName") && it["domainName"].toString() == DomainName.hyperstatSplit4PEcon) -> {
+                        CcuLog.i(Domain.LOG_TAG, "Build domain hyperstatSplit4PEcon is added $it")
+                        Domain.equips[it["id"].toString()] = Pipe4UVEquip(it["id"].toString())
+                    }
                 }
             }
 
@@ -259,6 +265,10 @@ object DomainManager {
                     (equip.contains("hyperstat") && (equip.contains("cpu") || equip.contains("hpu") || equip.contains("pipe2") ||
                             equip.contains(a75f.io.api.haystack.Tags.MONITORING))) -> Domain.devices[equip["id"].toString()] = HyperStatDevice(deviceMap["id"].toString())
                     (equip.contains("mystat") && (equip.contains("cpu") || equip.contains("hpu") || equip.contains("pipe2"))) -> Domain.devices[equip["id"].toString()] = MyStatDevice(deviceMap["id"].toString())
+                    (deviceMap.contains("domainName") && deviceMap["domainName"].toString() == DomainName.hyperstatSplitDevice) -> {
+                        CcuLog.i(Domain.LOG_TAG, "Added HyperStatSplit device to domain")
+                        Domain.devices[equip["id"].toString()] = HyperStatSplitDevice(deviceMap["id"].toString())
+                    }
                 }
             }
         }
@@ -308,7 +318,23 @@ object DomainManager {
                     equip.markers.contains("pipe2") -> Domain.equips[equip.id] = MyStatPipe2Equip(equip.id)
                 }
             }
-            equip.markers.contains("hyperstatsplit") -> Domain.equips[equip.id] = HyperStatSplitEquip(equip.id)
+            equip.markers.contains("hyperstatsplit") ->
+                when {
+
+                    equip.domainName == DomainName.hyperstatSplit4PEcon -> {
+                        CcuLog.i(Domain.LOG_TAG, "Update domain hyperstatSplit4PEcon is added $equip")
+                        Domain.equips[equip.id] = Pipe4UVEquip(equip.id)
+                    }
+                    equip.domainName == DomainName.hyperstatSplit2PEcon -> {
+                        CcuLog.i(Domain.LOG_TAG, "Update domain hyperstatSplit2PEcon is added $equip")
+                       // need yo add the equip  to domain
+                    }
+
+                    equip.domainName== DomainName.hyperstatSplitCPU -> {
+                        CcuLog.i(Domain.LOG_TAG, "Update domain hssplit is added $equip")
+                        Domain.equips[equip.id] = HsSplitCpuEquip(equip.id)
+                    }
+                }
         }
     }
 

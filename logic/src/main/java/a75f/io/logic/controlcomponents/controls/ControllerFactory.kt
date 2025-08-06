@@ -6,11 +6,13 @@ import a75f.io.logic.controlcomponents.handlers.AuxHeatingController
 import a75f.io.logic.controlcomponents.handlers.DcvDamperController
 import a75f.io.logic.controlcomponents.handlers.DehumidifierController
 import a75f.io.logic.controlcomponents.handlers.EnableController
+import a75f.io.logic.controlcomponents.handlers.FanAndByPassControllers
 import a75f.io.logic.controlcomponents.handlers.FanEnableController
 import a75f.io.logic.controlcomponents.handlers.FanRunCommandController
 import a75f.io.logic.controlcomponents.handlers.HumidifierController
 import a75f.io.logic.controlcomponents.handlers.OccupiedEnabledController
 import a75f.io.logic.controlcomponents.handlers.StageControlHandler
+import a75f.io.logic.controlcomponents.handlers.ValveController
 import a75f.io.logic.controlcomponents.handlers.WaterValveController
 import a75f.io.logic.controlcomponents.util.ControllerNames
 import a75f.io.logic.controlcomponents.util.logIt
@@ -32,7 +34,9 @@ open class ControllerFactory {
         stageUpTimer: Point = Point("stageUpTimer", ""),
         stageDownTimer: Point = Point("stageUpTimer", ""),
         economizingAvailable: CalibratedPoint = CalibratedPoint("economizingAvailable", "", 0.0),
+        fanLowVentilation: CalibratedPoint = CalibratedPoint("fanLowVentilation", "", 0.0),
         lockOutActive: CalibratedPoint = CalibratedPoint("lockOutActive", "", 0.0),
+        occupancyPoint: CalibratedPoint = CalibratedPoint("occupancyPoint", "", 0.0),
         logTag: String
     ): StageControlHandler {
         if (!controllers.containsKey(controllerName)) {
@@ -44,7 +48,9 @@ open class ControllerFactory {
                 stageUpTimer = stageUpTimer,
                 stageDownTimer = stageDownTimer,
                 economizingAvailable = economizingAvailable,
+                fanLowVentilation = fanLowVentilation,
                 lockOutActive = lockOutActive,
+                occupancyMode = occupancyPoint,
                 logTag = logTag
             )
             controllers[controllerName] = stageController
@@ -363,6 +369,80 @@ open class ControllerFactory {
         return controllers[ControllerNames.FAN_RUN_COMMAND_CONTROLLER] as FanRunCommandController
     }
 
+    fun addCoolingValveController(
+        controllers: HashMap<String, Any>, coolingLoop: Point, logTag: String,
+        onConstrains: List<Constraint> = emptyList(),
+        offConstrains: List<Constraint> = emptyList(),
+    ): ValveController {
+        if (!controllers.containsKey(ControllerNames.COOLING_VALVE_CONTROLLER)) {
+            val controller = ValveController(ControllerNames.COOLING_VALVE_CONTROLLER, coolingLoop, logTag)
+            if (onConstrains.isNotEmpty()) {
+                onConstrains.forEach { constraint ->
+                    controller.addOnConstraint(constraint)
+                }
+            }
+            if (offConstrains.isNotEmpty()) {
+                offConstrains.forEach { constraint ->
+                    controller.addOffConstraint(constraint)
+                }
+            }
+            controllers[ControllerNames.COOLING_VALVE_CONTROLLER] = controller
+            logIt(logTag, "Controller added with name: COOLING_VALVE_CONTROLLER")
+        }
+        return controllers[ControllerNames.COOLING_VALVE_CONTROLLER] as ValveController
+    }
+
+    fun addHeatingValveController(
+        controllers: HashMap<String, Any>, heatingLoop: Point, logTag: String,
+        onConstrains: List<Constraint> = emptyList(),
+        offConstrains: List<Constraint> = emptyList(),
+    ): ValveController {
+        if (!controllers.containsKey(ControllerNames.HEATING_VALVE_CONTROLLER)) {
+            val controller = ValveController(ControllerNames.HEATING_VALVE_CONTROLLER, heatingLoop, logTag)
+            if (onConstrains.isNotEmpty()) {
+                onConstrains.forEach { constraint ->
+                    controller.addOnConstraint(constraint)
+                }
+            }
+            if (offConstrains.isNotEmpty()) {
+                offConstrains.forEach { constraint ->
+                    controller.addOffConstraint(constraint)
+                }
+            }
+            controllers[ControllerNames.HEATING_VALVE_CONTROLLER] = controller
+            logIt(logTag, "Controller added with name: HEATING_VALVE_CONTROLLER")
+        }
+        return controllers[ControllerNames.HEATING_VALVE_CONTROLLER] as ValveController
+    }
+
+    fun addFaceBypassController(
+        controllers: HashMap<String, Any>, coolingLoop: Point, heatingLoop: Point,
+        faceBypassActivationHis: Point, logTag: String,
+        onConstrains: List<Constraint> = emptyList(),
+        offConstrains: List<Constraint> = emptyList(),
+    ): FanAndByPassControllers {
+        if (!controllers.containsKey(ControllerNames.FACE_BYPASS_CONTROLLER)) {
+            val controller = FanAndByPassControllers(
+                coolingLoop,
+                heatingLoop,
+                faceBypassActivationHis,
+                logTag
+            )
+            if (onConstrains.isNotEmpty()) {
+                onConstrains.forEach { constraint ->
+                    controller.addOnConstraint(constraint)
+                }
+            }
+            if (offConstrains.isNotEmpty()) {
+                offConstrains.forEach { constraint ->
+                    controller.addOffConstraint(constraint)
+                }
+            }
+            controllers[ControllerNames.FACE_BYPASS_CONTROLLER] = controller
+            logIt(logTag, "Controller added with name: FACE_BYPASS_CONTROLLER")
+        }
+        return controllers[ControllerNames.FACE_BYPASS_CONTROLLER] as FanAndByPassControllers
+    }
 
     private fun addConstraintsIfExist(
         controller: Controller,

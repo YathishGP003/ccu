@@ -68,9 +68,11 @@ class HyperStatSplitProfileSelectionFragment : BaseDialogFragment() {
 
       val goBack = view.findViewById<View>(R.id.goBackImage)
       val cpuEconCell = view.findViewById<View>(R.id.cpuEconCell)
+      val pipe4 = view.findViewById<View>(R.id.pipe4cell)
 
       goBack.setOnClickListener { removeDialogFragment(HYPERSTATSPLIT_PROFILE_SELECTION_ID) }
       cpuEconCell.setOnClickListener { showCPUEconConfigFragment() }
+      pipe4.setOnClickListener{showPipe4EconConfigFragment()}
 
    }
 
@@ -81,6 +83,17 @@ class HyperStatSplitProfileSelectionFragment : BaseDialogFragment() {
             mRoomName,
             mFloorName,
             ProfileType.HYPERSTATSPLIT_CPU,
+            NodeType.HYPERSTATSPLIT
+         ), FragmentBLEInstructionScreen.ID
+      )
+   }
+   private fun showPipe4EconConfigFragment() {
+      showDialogFragment(
+         FragmentBLEInstructionScreen.getInstance(
+            mNodeAddress,
+            mRoomName,
+            mFloorName,
+            ProfileType.HYPERSTATSPLIT_4PIPE_UV,
             NodeType.HYPERSTATSPLIT
          ), FragmentBLEInstructionScreen.ID
       )

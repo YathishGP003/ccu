@@ -71,6 +71,7 @@ import androidx.annotation.Nullable;
 import androidx.core.text.HtmlCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -2764,9 +2765,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
     private RemotePointUpdateInterface remotePointUpdateInterface = (message, id, value) -> {
         CcuLog.d(LOG_TAG, "--updateMessage::>> " + message);
-        getActivity().runOnUiThread(() -> {
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-        });
+        if(isAdded() && isResumed()) {
+            FragmentActivity activity = getActivity();
+            if(activity != null) {
+                activity.runOnUiThread(() -> {
+                    Toast.makeText(CCUHsApi.getInstance().getContext(), message, Toast.LENGTH_SHORT).show();
+                });
+            }
+        }
         if(!isPointFollowingScheduleOrEvent(id)) {
             CCUHsApi.getInstance().writeDefaultValById(id, Double.parseDouble(value));
             CCUHsApi.getInstance().writeHisValById(id, Double.parseDouble(value));

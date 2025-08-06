@@ -1043,15 +1043,15 @@
     <string name="lable_epidemic_settings_text">Epidemic Mode Settings</string>
 
     <!--PAIRING INSTRUCTION Screen-->
-    <string name="title_pairsn">SMART NODE | PAIRING STEPS </string>
-    <string name="title_pairhn">HELIO NODE | PAIRING STEPS </string>
+    <string name="title_pairsn">Smart Node | Pairing Steps </string>
+    <string name="title_pairhn">Helio Node | Pairing Steps </string>
     <string name="title_pairss">SMART STAT | PAIRING STEPS </string>
-    <string name="title_pair_sn_manual">SMART NODE | MANUAL PAIRING STEPS </string>
-    <string name="title_pair_hn_manual">HELIO NODE | MANUAL PAIRING STEPS </string>
-    <string name="title_pair_hs_manual">HYPER STAT | MANUAL PAIRING STEPS </string>
-    <string name="title_pair_hss_manual">HYPER STAT SPLIT| MANUAL PAIRING STEPS </string>
-    <string name="title_pair_ms_manual">MYSTAT| MANUAL PAIRING STEPS </string>
-    <string name="title_pair_cn_manual">CONNECTNODE| MANUAL PAIRING STEPS </string>
+    <string name="title_pair_sn_manual">Smart Node | Manual Pairing Steps </string>
+    <string name="title_pair_hn_manual">Helio Node | Manual Pairing Steps </string>
+    <string name="title_pair_hs_manual">HyperStat | Manual Pairing Steps </string>
+    <string name="title_pair_hss_manual">HyperStat Split | Manual Pairing Steps </string>
+    <string name="title_pair_ms_manual">MyStat | Manual Pairing Steps </string>
+    <string name="title_pair_cn_manual">Connect Node | Manual Pairing Steps </string>
 
     <string name="button_pair">PAIR</string>
 
@@ -1428,11 +1428,11 @@
     <string name="buttonDesableDelay">2000</string>
     <string name="analogin1">Analog-in1</string>
     <string name="analogin2">Analog-in2</string>
-    <string name="title_pairhss">HYPERSTAT | PAIRING STEPS </string>
-    <string name="title_pair_mystat">MYSTAT | PAIRING STEPS </string>
-    <string name="title_pair_connectnode">CONNECTNODE | PAIRING STEPS </string>
+    <string name="title_pairhss">HyperStat | Pairing Steps </string>
+    <string name="title_pair_mystat">MyStat | Pairing Steps </string>
+    <string name="title_pair_connectnode">Connect Node | Pairing Steps </string>
 
-    <string name="title_pairhssplit">HYPERSTAT SPLIT | PAIRING STEPS </string>
+    <string name="title_pairhssplit">HyperStat Split | Pairing Steps </string>
     <string name="prefs_theme_key">isEnabled</string>
     <string name="prefs_access_local_assests">accessLocalAssetFile</string>
     <string name="txt_CCU_occupancy_status">Occupancy Status on IE Gateway :</string>

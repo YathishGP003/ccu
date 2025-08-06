@@ -44,7 +44,6 @@ public class AlternatePairingFragment extends BaseDialogFragment {
     private static String mRoomName;
     private static String mFloorName;
     private final ProfileType mProfileType;
-
     @BindView(R.id.imageGoback)
     ImageView imageGoback;
     @BindView(R.id.pairinginstruct)
@@ -76,9 +75,15 @@ public class AlternatePairingFragment extends BaseDialogFragment {
             if(CCUUiUtil.isDaikinEnvironment(requireContext())) {
                 imageView.setImageResource(R.drawable.manual_pairing_smartnode_daikin);
             } else if (CCUUiUtil.isCarrierThemeEnabled(requireContext())){
-                imageView.setImageResource(R.drawable.manual_pairing_smartnode_carrier);
-            } else {
-                imageView.setImageResource(R.drawable.manual_pairing_smartnode);
+                imageView.setImageResource(R.drawable.manual_pairing_sn_carrier);
+            }
+            else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
+                imageView.setImageResource(R.drawable.manual_pairing_sn_airoverse);
+            }
+            else {
+                imageView.setImageResource(R.drawable.manual_pairing_sn_75f);
+                manualPairingLayout.setBackgroundResource(R.drawable.bg_logoscreen);
+
             }
         }
         else if (mNodeType == NodeType.HELIO_NODE) {
@@ -86,11 +91,12 @@ public class AlternatePairingFragment extends BaseDialogFragment {
             if(CCUUiUtil.isDaikinEnvironment(requireContext())) {
                 imageView.setImageResource(R.drawable.manual_pairing_helionode_daikin);
             } else if(CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
-                {
-                    imageView.setImageResource(R.drawable.manual_pairing_helionode_carrier);
-                }
+                imageView.setImageResource(R.drawable.manual_pairing_hn_carrier);
+            } else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())){
+                imageView.setImageResource(R.drawable.manual_pairing_hn_airoverse);
             } else {
-                imageView.setImageResource(R.drawable.manual_pairing_helionode);
+                imageView.setImageResource(R.drawable.manual_pairing_hn_75f);
+                manualPairingLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
         }
         else if (mNodeType == NodeType.HYPER_STAT) {
@@ -98,40 +104,47 @@ public class AlternatePairingFragment extends BaseDialogFragment {
             if (CCUUiUtil.isDaikinEnvironment(requireContext())) {
                 imageView.setImageResource(R.drawable.manual_pairing_hyperstat_daikin);
             } else if (CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
-                imageView.setImageResource(R.drawable.alternate_pairing_hyperstat_carrier);
+                imageView.setImageResource(R.drawable.manual_pairing_hs_carrier);
+            }
+            else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
+                imageView.setImageResource(R.drawable.manual_pairing_hs_airoverse);
             } else {
-                imageView.setImageResource(R.drawable.manual_pairing_hyperstat);
+                imageView.setImageResource(R.drawable.manual_pairing_hs_75f);
+                manualPairingLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
         }
         else if (mNodeType == NodeType.HYPERSTATSPLIT) {
             title.setText(R.string.title_pair_hss_manual);
             if (CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
-                imageView.setImageResource(R.drawable.hyperstat_split_carrier_manual);
-            } else {
-                imageView.setImageResource(R.drawable.hyperstat_split_pairing_steps_manual);
+                imageView.setImageResource(R.drawable.manual_pairing_hss_carrier);
+            }
+            else if(CCUUiUtil.isAiroverseThemeEnabled(requireContext())){
+                imageView.setImageResource(R.drawable.manual_pairing_hss_airoverse);
+            }else {
+                imageView.setImageResource(R.drawable.manual_pairing_hss_75f);
                 manualPairingLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
         }
         else if (mNodeType == NodeType.MYSTAT) {
             title.setText(R.string.title_pair_ms_manual);
             if (CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
-                imageView.setImageResource(R.drawable.carr_ms_alt_paring);
+                imageView.setImageResource(R.drawable.manual_pairing_ms_carrier);
             } else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
-                imageView.setImageResource(R.drawable.air_ms_alt_paring);
+                imageView.setImageResource(R.drawable.manual_pairing_ms_airoverse);
             }
             else {
-                imageView.setImageResource(R.drawable.ms_paring_75_alt);
+                imageView.setImageResource(R.drawable.manual_pairing_ms_75f);
                 manualPairingLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
         }
         else if (mNodeType == NodeType.CONNECTNODE) {
             title.setText(R.string.title_pair_cn_manual);
             if (CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
-                imageView.setImageResource(R.drawable.cn_alt_pairing_carrier);
+                imageView.setImageResource(R.drawable.manual_pairing_cn_carrier);
             } else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
-                imageView.setImageResource(R.drawable.cn_alt_pairing_75f);
+                imageView.setImageResource(R.drawable.manual_pairing_cn_airoverse);
             } else {
-                imageView.setImageResource(R.drawable.cn_alt_pairing_75f);
+                imageView.setImageResource(R.drawable.manual_pairing_cn_75f);
                 manualPairingLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
         }
@@ -167,6 +180,35 @@ public class AlternatePairingFragment extends BaseDialogFragment {
             dynamicNodeAddress.setLayoutParams(params);
 
         }
+
+        if(CCUUiUtil.isAiroverseThemeEnabled(requireContext()) || CCUUiUtil.isCarrierThemeEnabled(requireContext()) ||
+                mNodeType == NodeType.HYPERSTATSPLIT || mNodeType == NodeType.MYSTAT ||
+                mNodeType == NodeType.HYPER_STAT || mNodeType == NodeType.CONNECTNODE){
+
+            int topMargin;
+            if (mNodeType == NodeType.HYPER_STAT ) {
+                topMargin = 60;
+            } else if (mNodeType == NodeType.MYSTAT )  {
+                topMargin = 60;
+            }
+            else if (mNodeType == NodeType.CONNECTNODE){
+                topMargin=70;
+
+            }
+            else if(mNodeType == NodeType.HYPERSTATSPLIT){
+
+                topMargin = 60;
+            } else {
+                topMargin = 75;
+            }
+
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams)
+                    imageView.getLayoutParams();
+            params.topMargin = topMargin;
+            imageView.setLayoutParams(params);
+        }
+
+
         dynamicNodeAddress.setText(mPairingAddress.toString());
         imageGoback.setOnClickListener( v -> {
             removeDialogFragment(ID);
@@ -277,8 +319,8 @@ public class AlternatePairingFragment extends BaseDialogFragment {
         super.onStart();
         Dialog dialog = getDialog();
         if (dialog != null) {
-            int width = 1165;
-            int height = 720;
+            int width = ViewGroup.LayoutParams.MATCH_PARENT;
+            int height = ViewGroup.LayoutParams.MATCH_PARENT;
             dialog.getWindow().setLayout(width, height);
         }
     }

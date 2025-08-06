@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -56,7 +57,7 @@ import butterknife.Optional;
 
 public class FragmentBLEInstructionScreen extends BaseDialogFragment
 {
-    
+
     public static final String ID = FragmentBLEInstructionScreen.class.getSimpleName();
     @BindView(R.id.pairinginstruct)
     ImageView pairinginstruct;
@@ -66,7 +67,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
     Zone        mZone;
     ProfileType mProfileType;
     short       mNodeAddress;
-    
+
     String mRoomName;
     String mFloorName;
 
@@ -105,7 +106,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         openBLEPairing();
     }
 
-    
+
     private void openBLEPairing()
     {
         if (mProfileType == ProfileType.SSE)
@@ -480,8 +481,8 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         }
 
     }
-    
-    
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState)
@@ -496,8 +497,8 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         mNodeType = NodeType.valueOf(getArguments().getString(NODE_TYPE));
         return view;
     }
-    
-    
+
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
@@ -509,12 +510,13 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             if(CCUUiUtil.isDaikinEnvironment(requireContext())) {
                 pairinginstruct.setVisibility(View.GONE);
                 pairinginstructDaikin.setVisibility(View.VISIBLE);
-            } else if (CCUUiUtil.isCarrierThemeEnabled(requireContext())){
-                pairinginstruct.setImageResource(R.drawable.image_pairing_screen_sn_carrier);
-            } else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())){
-                pairinginstruct.setImageResource(R.drawable.image_auto_pairing_screen_sn_airoverse);
-            }else {
-                pairinginstruct.setImageResource(R.drawable.image_pairing_screen_sn);
+            } else if (CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_sn_carrier);
+            } else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_sn_airoverse);
+            } else {
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_sn_75f);
+                pairingInstructionMainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
 
         }
@@ -526,12 +528,14 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 pairinginstructDaikin.setVisibility(View.VISIBLE);
             } else if(CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
                 {
-                    pairinginstruct.setImageResource(R.drawable.image_pairing_screen_hn_carrier);
+                    pairinginstruct.setImageResource(R.drawable.pairing_steps_hn_carrier);
+
                 }
-            } else if(CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
-                pairinginstruct.setImageResource(R.drawable.image_auto_pairing_screen_hn_airoverse);
+            } else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_hn_airoverse);
             } else {
-                pairinginstruct.setImageResource(R.drawable.image_pairing_screen_hn);
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_hn_75f);
+                pairingInstructionMainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
         }
         else if (mNodeType == NodeType.SMART_STAT)
@@ -544,22 +548,22 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             if (CCUUiUtil.isDaikinEnvironment(requireContext()))
                 pairinginstruct.setImageResource(R.drawable.daikenhsspairscreen);
             else if (CCUUiUtil.isCarrierThemeEnabled(requireContext()))
-                pairinginstruct.setImageResource(R.drawable.carrierhspairingscreen);
-            else if(CCUUiUtil.isAiroverseThemeEnabled(requireContext()))
-                pairinginstruct.setImageResource(R.drawable.image_auto_pairing_screen_hs_airoverse);
-            else
-            pairinginstruct.setImageResource(R.drawable.monitoringpairscreen);
-        }
-        else if (mNodeType == NodeType.HYPERSTATSPLIT) {
-            title.setText(R.string.title_pairhssplit);
-            if (CCUUiUtil.isCarrierThemeEnabled(requireContext()))
-                pairinginstruct.setImageResource(R.drawable.hyperstatsplit_carrier_pairing_steps);
-            else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
-                pairinginstruct.setImageResource(R.drawable.hyperstat_split_pairing_screen_airoverse);
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_hs_carrier);
+            else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext()))
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_hs_airoverse);
+            else {
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_hs_75f);
                 pairingInstructionMainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
-            else {
-                pairinginstruct.setImageResource(R.drawable.hyperstat_split_pairing_screen);
+
+        } else if (mNodeType == NodeType.HYPERSTATSPLIT) {
+            title.setText(R.string.title_pairhssplit);
+            if (CCUUiUtil.isCarrierThemeEnabled(requireContext()))
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_hss_carrier);
+            else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_hss_airoverse);
+            } else {
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_hss_75f);
                 pairingInstructionMainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
         } else if (mNodeType == NodeType.MYSTAT) {
@@ -567,28 +571,54 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             if (CCUUiUtil.isDaikinEnvironment(requireContext()))
                 pairinginstruct.setImageResource(R.drawable.daikenhsspairscreen);
             else if (CCUUiUtil.isCarrierThemeEnabled(requireContext()))
-                pairinginstruct.setImageResource(R.drawable.carr_ms_paring);
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_ms_carrier);
             else if(CCUUiUtil.isAiroverseThemeEnabled(requireContext()))
-                pairinginstruct.setImageResource(R.drawable.air_ms_paring);
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_ms_airoverse);
             else {
-                pairinginstruct.setImageResource(R.drawable.ms_paring_75);
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_ms_75f);
                 pairingInstructionMainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
         } else if (mNodeType == NodeType.CONNECTNODE) {
             title.setText(R.string.title_pair_connectnode);
             if (CCUUiUtil.isCarrierThemeEnabled(requireContext()))
-                pairinginstruct.setImageResource(R.drawable.carr_ms_paring);
-            else if(CCUUiUtil.isAiroverseThemeEnabled(requireContext()))
-                pairinginstruct.setImageResource(R.drawable.air_ms_paring);
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_cn_carrier);
+            else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext()))
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_cn_airoverse);
             else {
-                pairinginstruct.setImageResource(R.drawable.cn_pairing_75f);
+                pairinginstruct.setImageResource(R.drawable.pairing_steps_cn_75f);
                 pairingInstructionMainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
         }
+
+        if(CCUUiUtil.isAiroverseThemeEnabled(requireContext()) || CCUUiUtil.isCarrierThemeEnabled(requireContext()) ||
+                mNodeType == NodeType.HYPERSTATSPLIT || mNodeType == NodeType.MYSTAT ||
+                mNodeType == NodeType.HYPER_STAT || mNodeType == NodeType.CONNECTNODE){
+
+            int topMargin;
+            if (mNodeType == NodeType.HYPER_STAT ) {
+                topMargin = 20;
+            } else if (mNodeType == NodeType.MYSTAT ) {
+                topMargin = 20;
+            }
+            else if (mNodeType == NodeType.CONNECTNODE){
+                topMargin=50;
+            }
+            else if(mNodeType == NodeType.HYPERSTATSPLIT){
+
+                topMargin = 20;
+            } else {
+                topMargin = 60;
+            }
+
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams)
+                    pairinginstruct.getLayoutParams();
+            params.topMargin = topMargin;
+            pairinginstruct.setLayoutParams(params);
+        }
+
+
     }
 
-    
-    
     @Override
     public void onStart()
     {
@@ -601,8 +631,8 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             dialog.getWindow().setLayout(width, height);
         }
     }
-    
-    
+
+
     @Override
     public String getIdString()
     {

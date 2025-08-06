@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -42,6 +43,9 @@ public class HyperStatMonitoringPairScreen extends BaseDialogFragment {
 
     @BindView(R.id.hyperStatMonitoringPairing)
     ImageView pairImage;
+
+    @BindView(R.id.hyperstat_monitoring_pairing_main_layout)
+    RelativeLayout hyperstatMonitoringPairingMainLayout;
 
 
     @BindView(R.id.imageGoback)
@@ -112,13 +116,25 @@ public class HyperStatMonitoringPairScreen extends BaseDialogFragment {
         if(CCUUiUtil.isDaikinEnvironment(requireContext())){
             pairImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.daikenhsspairscreen, null));
         } else if(CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
-            pairImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.carrierhspairingscreen, null));
+            pairImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.pairing_steps_hs_carrier, null));
             pairImage = view.findViewById(R.id.hyperStatMonitoringPairing);
         } else if(CCUUiUtil.isDaikinEnvironment(getContext())) {
             pairImage.setImageDrawable(getResources().getDrawable(R.drawable.daikenhsspairscreen));
         } else if(CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
-            pairImage.setImageDrawable(getResources().getDrawable(R.drawable.image_auto_pairing_screen_hs_airoverse));
+            pairImage.setImageDrawable(getResources().getDrawable(R.drawable.pairing_steps_hs_airoverse));
+        } else{
+            pairImage.setImageResource(R.drawable.pairing_steps_hs_75f);
+            hyperstatMonitoringPairingMainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
         }
+
+        int topMargin;
+        topMargin=20;
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams)
+                    pairImage.getLayoutParams();
+            params.topMargin = topMargin;
+            pairImage.setLayoutParams(params);
+
+
         return view;
     }
 

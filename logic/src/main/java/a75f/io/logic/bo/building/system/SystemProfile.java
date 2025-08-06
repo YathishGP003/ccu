@@ -108,6 +108,7 @@ public abstract class SystemProfile
     public CalibratedPoint mechanicalCoolingActive = new CalibratedPoint("coolingLockOut","cooling", 0.0);
     public CalibratedPoint mechanicalHeatingActive = new CalibratedPoint("heatingLockOut","heating", 0.0);
     public CalibratedPoint lockoutCompressorActive = new CalibratedPoint("compressor","heating", 0.0);
+    public CalibratedPoint economizationAvailable = new CalibratedPoint("economizationAvailable" , "economizationAvailable", 0.0);
 
     private Timer bypassHeatingLockoutTimer;
     private Timer bypassCoolingLockoutTimer;

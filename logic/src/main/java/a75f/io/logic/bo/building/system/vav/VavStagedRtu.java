@@ -82,7 +82,6 @@ public class VavStagedRtu extends VavSystemProfile {
     public VavStagedSystemEquip systemEquip;
 
     private int lastSystemSATRequests = 0;
-    private CalibratedPoint economizationAvailable = null;
 
     public void initTRSystem() {
         trSystem =  new VavTRSystem();
@@ -139,7 +138,6 @@ public class VavStagedRtu extends VavSystemProfile {
         initTRSystem();
         updateStagesSelected();
         systemStatusHandler = new SystemStageHandler(systemEquip.getConditioningStages());
-        economizationAvailable = new CalibratedPoint(DomainName.economizingAvailable , systemEquip.getEquipRef(), 0.0);
     }
     
     @Override

@@ -120,7 +120,6 @@ class DabAdvancedAhu : DabSystemProfile() {
     val cmRelayStatus = BitSet()
     val analogStatus = arrayOf(0.0, 0.0, 0.0, 0.0, 0.0)
     var factory: SystemControllerFactory = SystemControllerFactory(controllers)
-    private lateinit var economizationAvailable: CalibratedPoint
 
     override fun getProfileName(): String {
         return if (BuildConfig.BUILD_TYPE.equals(DabProfile.CARRIER_PROD, ignoreCase = true)) {
@@ -141,7 +140,6 @@ class DabAdvancedAhu : DabSystemProfile() {
         updateStagesSelected()
         systemStatusHandler = SystemStageHandler(systemEquip.cmEquip.conditioningStages)
         connectStatusHandler = SystemStageHandler(systemEquip.connectEquip1.conditioningStages)
-        economizationAvailable = CalibratedPoint(DomainName.economizingAvailable , systemEquip.equipRef, 0.0)
     }
 
     private fun updatePrerequisite() {

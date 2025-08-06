@@ -113,7 +113,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
     private var connectControllers: HashMap<String, Any> = HashMap()
     var factory: SystemControllerFactory = SystemControllerFactory(controllers)
     private var connectfactory: SystemControllerFactory = SystemControllerFactory(connectControllers)
-    private lateinit var economizationAvailable: CalibratedPoint
 
     private fun initTRSystem() {
         trSystem = VavTRSystem()
@@ -133,7 +132,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
         updateStagesSelected()
         systemStatusHandler = SystemStageHandler(systemEquip.cmEquip.conditioningStages)
         connectStatusHandler = SystemStageHandler(systemEquip.connectEquip1.conditioningStages)
-        economizationAvailable = CalibratedPoint(DomainName.economizingAvailable , systemEquip.equipRef, 0.0)
     }
 
     private fun updatePrerequisite() {

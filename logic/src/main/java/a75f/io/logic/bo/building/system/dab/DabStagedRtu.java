@@ -76,7 +76,6 @@ public class DabStagedRtu extends DabSystemProfile
     SystemController.State currentConditioning = OFF;
     public DabStagedSystemEquip systemEquip;
     SystemStageHandler systemStatusHandler;
-    private CalibratedPoint economizationAvailable = null;
 
     public String getProfileName() {
         if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
@@ -101,7 +100,6 @@ public class DabStagedRtu extends DabSystemProfile
         systemEquip = (DabStagedSystemEquip) Domain.systemEquip;
         updateStagesSelected();
         systemStatusHandler = new SystemStageHandler(systemEquip.getConditioningStages());
-        economizationAvailable = new CalibratedPoint(DomainName.economizingAvailable , systemEquip.getEquipRef(), 0.0);
     }
 
     SystemControllerFactory factory = new SystemControllerFactory(controllers);

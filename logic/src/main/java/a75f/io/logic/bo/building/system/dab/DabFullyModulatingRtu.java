@@ -57,7 +57,6 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
 
     private final SystemControllerFactory factory = new SystemControllerFactory(controllers);
     private SystemStageHandler systemStatusHandler;
-    private CalibratedPoint economizationAvailable = null;
 
     public String getProfileName() {
         if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
@@ -211,8 +210,6 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
     public void addSystemEquip() {
         systemEquip = (DabModulatingRtuSystemEquip) Domain.systemEquip;
         systemStatusHandler = new SystemStageHandler(systemEquip.getConditioningStages());
-        economizationAvailable = new CalibratedPoint(DomainName.economizingAvailable , systemEquip.getEquipRef(), 0.0);
-        //updateSystemPoints();
     }
     
     @Override

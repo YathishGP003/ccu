@@ -1144,7 +1144,7 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
     @Composable
     private fun ShowDropdownList(expanded: MutableState<Boolean>) {
         val configurationTypes = listOf(
-            MSTP_CONFIGURATION,
+//            MSTP_CONFIGURATION,
             IP_CONFIGURATION
         )
 
@@ -1154,7 +1154,7 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
             onDismissRequest = { expanded.value = false },
             modifier = Modifier
                 .width(280.dp)
-                .height(120.dp)
+                .height(60.dp)
                 .background(Color.White)
                 .border(0.5.dp, Color.LightGray)
                 .shadow(1.dp, shape = RoundedCornerShape(2.dp))

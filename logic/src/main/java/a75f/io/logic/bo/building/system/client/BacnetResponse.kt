@@ -19,7 +19,7 @@ data class ReadResponse(
 )
 
 data class MultiReadResponse(
-    val source: Source?,//Source,
+    //val source: Source?,//Source,
     @SerializedName("rpm_response")
     val rpResponse: RpResponseMultiRead,
     val error: BacnetError?,

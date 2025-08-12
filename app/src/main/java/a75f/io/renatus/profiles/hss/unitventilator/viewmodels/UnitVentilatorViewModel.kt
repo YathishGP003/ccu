@@ -175,21 +175,22 @@ open class UnitVentilatorViewModel : HyperStatSplitViewModel() {
 
         if ((viewState.value as Pipe4UvViewState).controlVia == 1) {
             if (isAnyAnalogEnabledAndMapped(Pipe4UvAnalogOutControls.FACE_DAMPER_VALVE.ordinal)) {
-                return Pair(true, Html.fromHtml("The profile must have <b>Face & Bypass Damper </b> mapped in control via  when <b>Face & Bypass Damper </b> is selected in Analog-Out. Please map the <b>Face & Bypass Damper</b>  in control via option .", Html.FROM_HTML_MODE_LEGACY))
+                return Pair(true, Html.fromHtml("The profile must have <b>Face & Bypass Damper </b> mapped in control via  when <b>Face & Bypass Modulating Damper </b> is selected in Analog-Out. Please map the <b>Face & Bypass Damper</b>  in control via option .", Html.FROM_HTML_MODE_LEGACY))
             }
         }
 
         if ((viewState.value as Pipe4UvViewState).saTempering) {
 
             if(!((isAnyAnalogEnabledAndMapped(Pipe4UvAnalogOutControls.FAN_SPEED.ordinal) ||
-                        isAnyRelayMappedToControlForUnitVentilator(Pipe4UVRelayControls.FAN_LOW_SPEED_VENTILATION))&&
+                        isAnyRelayMappedToControlForUnitVentilator(Pipe4UVRelayControls.FAN_LOW_SPEED_VENTILATION)) &&
+                        (isAnyUniversalInMapped(UniversalInputs.SUPPLY_AIR_TEMPERATURE)|| isAnySensorBusMapped(CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY)) &&
                 (isAnyAnalogEnabledAndMapped(Pipe4UvAnalogOutControls.DCV_MODULATING_DAMPER.ordinal) ||
                         isAnyAnalogEnabledAndMapped(Pipe4UvAnalogOutControls.OAO_DAMPER.ordinal)) &&
                         (isAnyRelayMappedToControlForUnitVentilator(Pipe4UVRelayControls.HEATING_WATER_VALVE)||
                                 isAnyAnalogEnabledAndMapped(Pipe4UvAnalogOutControls.HEATING_WATER_MODULATING_VALVE.ordinal)))
                 )
             {
-                return Pair(true, Html.fromHtml("The profile must have one <b>Heating Water Valve, Fan Low Speed - Ventilation or Fan Speed in Analog-Out and OAO Damper/DCV Damper</b> mapped when Supply Air Tempering is enabled", Html.FROM_HTML_MODE_LEGACY))
+                return Pair(true, Html.fromHtml("The profile must have one <b>Heating Water Valve, Fan Low Speed - Ventilation or Fan Speed in Analog-Out , Discharge Air temperature in Universal input or Sensor Bus and OAO Damper/DCV Damper</b> mapped when Supply Air Tempering is enabled", Html.FROM_HTML_MODE_LEGACY))
             }
         }
 

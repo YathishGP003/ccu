@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -35,19 +34,19 @@ import a75f.io.renatus.BLE.FragmentDeviceScan;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.connectnode.ConnectNodeFragment;
-import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
+import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe4UVFragment;
-import a75f.io.renatus.profiles.mystat.ui.MyStatCpuFragment;
-import a75f.io.renatus.profiles.mystat.ui.MyStatHpuFragment;
-import a75f.io.renatus.profiles.mystat.ui.MyStatPipe2Fragment;
-import a75f.io.renatus.profiles.ti.TIFragment;
-import a75f.io.renatus.profiles.oao.OAOProfileFragment;
-import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2Pipe2Fragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatCpuFragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatHpuFragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatPipe2Fragment;
+import a75f.io.renatus.profiles.oao.OAOProfileFragment;
 import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
+import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
+import a75f.io.renatus.profiles.ti.TIFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -483,7 +482,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         else if (mProfileType == ProfileType.HYPERSTATSPLIT_4PIPE_UV) {
             if (L.isSimulation()) {
                 showDialogFragment(Pipe4UVFragment.Companion.newInstance(mNodeAddress, mRoomName,
-                        mFloorName, mNodeType, mProfileType), ConnectNodeFragment.Companion.getIdString());
+                        mFloorName, mNodeType, mProfileType), Pipe4UVFragment.Companion.getID());
             } else {
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);

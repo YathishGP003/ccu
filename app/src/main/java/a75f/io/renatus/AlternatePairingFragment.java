@@ -308,6 +308,7 @@ public class AlternatePairingFragment extends BaseDialogFragment {
             case CONNECTNODE:
                 showDialogFragment(ConnectNodeFragment.Companion.newInstance(mPairingAddress, mRoomName,
                         mFloorName, mNodeType, mProfileType), ConnectNodeFragment.Companion.getIdString());
+                break;
             case HYPERSTATSPLIT_4PIPE_UV:
                 showDialogFragment(Pipe4UVFragment.Companion.newInstance(mPairingAddress,mRoomName,mFloorName,
                         mNodeType,ProfileType.HYPERSTATSPLIT_4PIPE_UV), Pipe4UVFragment.Companion.getID());

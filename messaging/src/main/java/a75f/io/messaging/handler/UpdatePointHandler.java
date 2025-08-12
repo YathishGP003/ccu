@@ -165,6 +165,7 @@ public class UpdatePointHandler implements MessageHandler
         if (HSUtil.isUnitVentilatorEquip(pointUid, CCUHsApi.getInstance()) &&
                 !isReconfigurationPoint(localPoint)) {
             reconfigureUnitVentilator(msgObject, localPoint);
+            hayStack.scheduleSync();
         }
 
         if (HSUtil.isSystemConfigOutputPoint(pointUid, CCUHsApi.getInstance())

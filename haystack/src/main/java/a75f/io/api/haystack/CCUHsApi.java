@@ -3541,4 +3541,12 @@ public class CCUHsApi
     private boolean isIdValid(Object id) {
        return id != null && !id.toString().toLowerCase().contains("null");
     }
+
+    public HGrid readPointArrRemote(List<HDict> idList) {
+        HDict[] dictArr  = idList.toArray(new HDict[idList.size()]);
+        String response = HttpUtil.executePost(pointWriteManyTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        CcuLog.d(TAG_CCU_HS, "ReadPointMany Remote Response : " + response);
+        return response == null ? null : new HZincReader(response).readGrid();
+    }
+
 }

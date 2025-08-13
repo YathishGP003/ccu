@@ -52,6 +52,7 @@ import android.widget.ToggleButton;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 
 import org.json.JSONException;
@@ -60,8 +61,10 @@ import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
+import org.projecthaystack.HList;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
+import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
 
@@ -71,6 +74,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -324,12 +328,11 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
         for (int addr = 1000; addr <= 10900; addr += 100) {
             addressBand.add(String.valueOf(addr));
         }
+        setNodeAddress();
 
-        ArrayList<HashMap> equipments = ccuHsApi.readAll("equip and zone or (equip and oao and not hyperstatsplit) or equip and connectModule");
-        if (equipments.isEmpty())
+        if (isNoEquipDeviceFoundUsingAddressBand()) {
             getRegisteredAddressBand(); // doing this when no equips available
-        else
-            setNodeAddress();
+        }
 
         mAddressBandSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -348,8 +351,6 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
                             toast.show();
                         }
                         Domain.ccuEquip.getAddressBand().writeDefaultVal(addressBandSelected);
-                        regAddressBands.remove(addressBand);
-                        regAddressBands.add(addressBandSelected);
                         try {
                             String confString = prefs.getString(BACNET_CONFIGURATION);
                             JSONObject config = new JSONObject(confString);
@@ -378,9 +379,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
         else mNext.setVisibility(View.GONE);
 
         if (!isFreshRegister) {
-            List<HashMap<Object, Object>> equips = ccuHsApi.readAllEntities("equip and (zone or bypassDamper or oao)");
-            List<HashMap<Object, Object>> connectModules = ccuHsApi.readAllEntities("device and connectModule");
-            mAddressBandSpinner.setEnabled(equips.isEmpty() && connectModules.isEmpty());
+            mAddressBandSpinner.setEnabled(isNoEquipDeviceFoundUsingAddressBand());
         }
 
         imageTemp.setOnClickListener(view -> {
@@ -1008,9 +1007,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
 
             if (intent.getAction().equals(ACTION_SETTING_SCREEN)) {
                 if (mAddressBandSpinner != null) {
-                    List<HashMap<Object, Object>>  equips = CCUHsApi.getInstance().readAllEntities("equip and (zone or bypassDamper or oao)");
-                    List<HashMap<Object, Object>> connectModule = CCUHsApi.getInstance().readAllEntities("device and connectModule");
-                    mAddressBandSpinner.setEnabled(equips.isEmpty() && connectModule.isEmpty());
+                    mAddressBandSpinner.setEnabled(isNoEquipDeviceFoundUsingAddressBand());
                 }
             }
         }
@@ -1041,30 +1038,11 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
     }
 
     private void getRegisteredAddressBand() {
+        CcuLog.d(TAG, "getRegisteredAddressBand() called");
         ExecutorTask.executeAsync(
                 ()-> regAddressBands.clear(),
-                ()->{
-                    HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-                    String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
-                    HDict tDict = new HDictBuilder().add("filter", "domainName == \"" + DomainName.addressBand + "\" and siteRef == " + siteUID).toDict();
-                    HGrid addressPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
-                    if(addressPoint == null) {
-                        CcuLog.w(L.TAG_CCU_REGISTER_GATHER_DETAILS,"HGrid(schedulePoint) is null.");
-                        new Handler(Looper.getMainLooper()).post(() -> {
-                            Toast.makeText(getActivity(),"Couldn't find the remote node addresses, Please choose the node address which is not used already.", Toast.LENGTH_LONG).show();
-                            setNodeAddress();
-                        });
-                    }
-                    Iterator it = addressPoint.iterator();
-                    while (it.hasNext())
-                    {
-                        HRow r = (HRow) it.next();
-                        if (r.has("val")) {
-                            regAddressBands.add(r.get("val").toString());
-                        }
-                    }
-                },
-                this::setNodeAddress
+                ()-> populateRegisteredAddressBands(),
+                () -> CcuLog.d(TAG, "getRegisteredAddressBand() completed")
         );
     }
 
@@ -1096,5 +1074,82 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
         if(imageTemp != null){
             imageTemp.updateData();
         }
+    }
+
+    private void populateRegisteredAddressBands() {
+        CcuLog.d(TAG, "populateRegisteredAddressBands() called");
+        String addressPointQuery = "domainName == \"" + DomainName.addressBand + "\"" +
+                " and siteRef == " + CCUHsApi.getInstance().getSiteIdRef().toString() +
+                " and ccuRef != " + CCUHsApi.getInstance().getCcuId();
+        List<HDict> addressPointsDictList = CCUHsApi.getInstance().readRemoteEntitiesByQuery(addressPointQuery);
+        if(addressPointsDictList == null || addressPointsDictList.isEmpty()) {
+            showUnableToFindAddressBandToast();
+            CcuLog.d(TAG, "No address points found for the query: " + addressPointQuery);
+        } else {
+            CcuLog.d(TAG, "Address points fetched: " + addressPointsDictList.size());
+            HGrid remoteAddressBandsDefaultVal = CCUHsApi.getInstance().readPointArrRemote(getAddressBandPointsIdList(addressPointsDictList));
+            if(remoteAddressBandsDefaultVal == null) {
+                CcuLog.w(TAG,"HGrid(addressPointPriorityArray) is null.");
+            } else {
+                CcuLog.i(TAG,"Address bands fetched successfully.");
+                updateRegisteredAddressBands(remoteAddressBandsDefaultVal);
+            }
+        }
+        CcuLog.d(TAG, "populateRegisteredAddressBands() completed");
+    }
+
+    private void showUnableToFindAddressBandToast() {
+        new Handler(Looper.getMainLooper()).post(() -> {
+            if(isAdded() && isResumed()) {
+                FragmentActivity activity = getActivity();
+                if(activity != null) {
+                    Toast.makeText(activity,"Couldn't find the remote node addresses, Please choose the node address which is not used already.", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    private List<HDict> getAddressBandPointsIdList(List<HDict> addressPointsDictList) {
+        return addressPointsDictList.stream()
+                .filter(dict -> dict.has("id"))
+                .map(dict -> new HDictBuilder().add("id", dict.id()).toDict())
+                .collect(Collectors.toList());
+    }
+
+    private void updateRegisteredAddressBands(HGrid remoteAddressBandsDefaultVal) {
+        Iterator rowIterator = remoteAddressBandsDefaultVal.iterator();
+        while (rowIterator.hasNext()) {
+            HRow row = (HRow) rowIterator.next();
+            HVal data = row.get("data");
+            CcuLog.i(TAG, "Imported point array " + data);
+            if (data instanceof HList && ((HList) data).size() > 0) {
+                HList dataList = (HList) data;
+                for (int index = 0; index < dataList.size(); index++) {
+                    HDict dataElement = (HDict) dataList.get(index);
+                    if (Integer.parseInt(dataElement.get("level").toString()) == 8) {
+                        regAddressBands.add(dataElement.get("val").toString());
+                    }
+                }
+            } else {
+                CcuLog.i(TAG, "Point array does not exist for " + row);
+            }
+        }
+        CcuLog.d(TAG, "Registered address bands updated with size: "  + regAddressBands.size()
+                + ", addresses: " + regAddressBands);
+    }
+
+    private boolean isNoEquipDeviceFoundUsingAddressBand() {
+        String equipOrDeviceUsingAddressBandQuery =
+                "("
+                        + Tags.EQUIP + " and "
+                        + "("
+                        + "(" + Tags.ZONE + " and not " + Tags.MODBUS + " and not " + Tags.BACNET_DEVICE_ID + ")"
+                        + " or domainName == \"" + DomainName.smartnodeOAO + "\""
+                        + " or domainName == \"" + DomainName.smartnodeBypassDamper + "\""
+                        + ")" +
+                        ")"
+                        + " or " +
+                        "(" + Tags.DEVICE + " and (" + Tags.CONNECTMODULE + " or " + Tags.PCN + "))";
+        return CCUHsApi.getInstance().readAllEntities(equipOrDeviceUsingAddressBandQuery).isEmpty();
     }
 }

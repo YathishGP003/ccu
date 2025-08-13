@@ -562,6 +562,8 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
             CcuLog.d(L.TAG_CCU_SYSTEM,"profile Container is not found");
             return false;
         }
+        CcuLog.d(L.TAG_CCU_SYSTEM,"profile Container is  found");
+
         return true;
     }
 

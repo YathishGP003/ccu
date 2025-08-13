@@ -15,8 +15,6 @@ abstract class UnitVentilatorConfiguration(
 ) {
     lateinit var controlVia: ValueConfig
     lateinit var saTempering: EnableConfig
-    lateinit var fanRecirculate :ValueConfig
-    lateinit var fanEconomizer: ValueConfig
     abstract fun getActiveConfiguration(): HyperStatSplitConfiguration
 
     abstract fun getRelayMap(): Map<String, Boolean>
@@ -32,8 +30,6 @@ abstract class UnitVentilatorConfiguration(
     override fun getValueConfigs(): List<ValueConfig> {
         return super.getValueConfigs().toMutableList().apply {
             add(controlVia)
-            add(fanRecirculate)
-            add(fanEconomizer)
         }
     }
 

@@ -14,8 +14,6 @@ import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.SensorTemp
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuAnalogControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorConfiguration
-import a75f.io.logic.bo.building.statprofiles.util.getUvPossibleFanMode
 
 /**
  * Created for HyperStat Split by Nick P on 07-24-2023.
@@ -31,17 +29,13 @@ class HyperStatSplitAssociationUtil {
         }
 
         //Function which checks the Analog out is Associated  to FAN_SPEED
-        fun isAnalogOutAssociatedToFanSpeed(analogOut: AssociationConfig): Boolean {
+        private fun isAnalogOutAssociatedToFanSpeed(analogOut: AssociationConfig): Boolean {
             return (analogOut.associationVal == CpuAnalogControlType.LINEAR_FAN.ordinal)
         }
 
-        //Function which checks the Analog out is Associated  to OAO_DAMPER
-        fun isAnalogOutAssociatedToOaoDamper(analogOut: AssociationConfig): Boolean {
-            return (analogOut.associationVal == CpuAnalogControlType.OAO_DAMPER.ordinal)
-        }
 
         //Function which checks the Analog out is Associated  to STAGED_FAN_SPEED
-        fun isAnalogOutAssociatedToStagedFanSpeed(analogOut: AssociationConfig): Boolean {
+        private fun isAnalogOutAssociatedToStagedFanSpeed(analogOut: AssociationConfig): Boolean {
             return (analogOut.associationVal == CpuAnalogControlType.STAGED_FAN.ordinal)
         }
 
@@ -50,7 +44,7 @@ class HyperStatSplitAssociationUtil {
         }
 
 
-        fun isAnyRelayEnabledMapped(config: HyperStatSplitCpuConfiguration, association: CpuRelayType): Boolean{
+        private fun isAnyRelayEnabledMapped(config: HyperStatSplitCpuConfiguration, association: CpuRelayType): Boolean{
             return when {
                 (config.relay1Enabled.enabled && config.relay1Association.associationVal == association.ordinal) -> true
                 (config.relay2Enabled.enabled && config.relay2Association.associationVal == association.ordinal) -> true
@@ -64,19 +58,6 @@ class HyperStatSplitAssociationUtil {
             }
         }
 
-        fun isAnyAnalogAssociatedToOAO(config: HyperStatSplitCpuConfiguration): Boolean {
-            return when {
-                (config.analogOut1Enabled.enabled &&
-                        isAnalogOutAssociatedToOaoDamper(config.analogOut1Association)) -> true
-                (config.analogOut2Enabled.enabled &&
-                        isAnalogOutAssociatedToOaoDamper(config.analogOut2Association)) -> true
-                (config.analogOut3Enabled.enabled &&
-                        isAnalogOutAssociatedToOaoDamper(config.analogOut3Association)) -> true
-                (config.analogOut4Enabled.enabled &&
-                        isAnalogOutAssociatedToOaoDamper(config.analogOut4Association)) -> true
-                else -> false
-            }
-        }
 
 
         fun isAnySensorBusAddressMappedToOutsideAir(
@@ -137,23 +118,21 @@ class HyperStatSplitAssociationUtil {
 
         fun getHssProfileFanLevel(
             equip: HyperStatSplitEquip,
-            config: HyperStatSplitConfiguration?
         ): Int {
             return when (equip) {
-                is HsSplitCpuEquip -> getEconSelectedFanLevel(equip)
-                is Pipe4UVEquip -> getUvPossibleFanMode(config as UnitVentilatorConfiguration)
+                is HsSplitCpuEquip , is Pipe4UVEquip -> getEconSelectedFanLevel(equip)
                 else -> 0
             }
         }
 
-        fun getEconSelectedFanLevel(hssEquip: HsSplitCpuEquip): Int {
+         fun getEconSelectedFanLevel(hssEquip: HyperStatSplitEquip): Int {
 
             var fanLevel = 0
 
-            if(hssEquip.linearFanSpeed.pointExists() || hssEquip.stagedFanSpeed.pointExists()) return 21 // All options are enabled due to
+            if(hssEquip.linearFanSpeed.pointExists() || hssEquip.stagedFanSpeed.pointExists() || hssEquip.fanSignal.pointExists()) return 21 // All options are enabled due to
             // analog fan speed
 
-            if (hssEquip.fanLowSpeed.pointExists()) fanLevel += 6
+            if (hssEquip.fanLowSpeed.pointExists() || hssEquip.fanLowSpeedVentilation.pointExists()) fanLevel += 6
             if (hssEquip.fanMediumSpeed.pointExists()) fanLevel += 7
             if (hssEquip.fanHighSpeed.pointExists()) fanLevel += 8
 

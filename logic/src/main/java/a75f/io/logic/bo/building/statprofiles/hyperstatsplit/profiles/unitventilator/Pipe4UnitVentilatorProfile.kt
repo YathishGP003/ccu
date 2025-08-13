@@ -127,7 +127,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
                 runRelayOperations(config, basicSettings, pipe4Tuners)
                 runAnalogOutOperations(config, basicSettings, pipe4Tuners, hssEquip.analogOutStages)
                 operateSaTempering(hssEquip, pipe4Tuners, basicSettings)
-                val analogFanType = operateAuxBasedFan(hssEquip)
+                val analogFanType = operateAuxBasedFan(hssEquip, basicSettings)
                 runSpecifiedAnalogFanSpeed(analogFanType, config)
             } else {
                 resetAllLogicalPointValues()

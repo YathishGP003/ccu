@@ -26,16 +26,10 @@ open class UnitVentilatorEquip(equipRef:String) : HyperStatSplitEquip(equipRef){
     val analog3MaxFanSpeed = Point(DomainName.analog3MaxFanSpeed, equipRef)
     val analog4MaxFanSpeed = Point(DomainName.analog4MaxFanSpeed, equipRef)
 
-    // config
-
     val controlVia = Point(DomainName.controlVia, equipRef)
     val enableSaTemperingControl = Point(DomainName.enableSaTemperingControl, equipRef)
-    val fanSignal = Point(DomainName.fanSignal,equipRef)
-    //relay
     val faceBypassDamperCmd = Point(DomainName.faceBypassDamperCmd, equipRef)
-    //analog
     val faceBypassDamperModulatingCmd = Point(DomainName.faceBypassDamperModulatingCmd, equipRef)
-
 
     val saTemperingSetpoint = Point(DomainName.saTemperingSetpoint, equipRef)
     val saTemperingIntegralKFactor = Point(DomainName.saTemperingIntegralKFactor, equipRef)

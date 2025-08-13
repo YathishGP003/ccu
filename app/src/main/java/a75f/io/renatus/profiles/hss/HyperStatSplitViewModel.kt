@@ -86,7 +86,6 @@ open class HyperStatSplitViewModel : ViewModel() {
     lateinit var zoneVOCThresholdList: List<String>
     lateinit var zoneVOCTargetList: List<String>
     lateinit var zonePM2p5TargetList: List<String>
-    lateinit var fanRecirculateList: List<String>
 
     var minMaxVoltage = List(11) { Option(it, it.toString()) }
     var testVoltage = List(101) { Option(it, it.toString()) }
@@ -303,7 +302,6 @@ open class HyperStatSplitViewModel : ViewModel() {
         zoneVOCThresholdList = getListByDomainName(DomainName.vocThreshold, equipModel)
         zoneVOCTargetList = getListByDomainName(DomainName.vocTarget, equipModel)
         zonePM2p5TargetList = getListByDomainName(DomainName.pm25Target, equipModel)
-        fanRecirculateList = getListByDomainName(DomainName.fanOutRecirculate, equipModel)
     }
 
 

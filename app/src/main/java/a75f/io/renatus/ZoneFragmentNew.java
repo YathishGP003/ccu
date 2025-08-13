@@ -125,6 +125,7 @@ import a75f.io.domain.equips.HyperStatSplitEquip;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.hyperstat.MonitoringEquip;
+import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip;
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
@@ -1716,7 +1717,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                             if (p.getProfile().startsWith(ProfileType.HYPERSTATSPLIT_CPU.name())) {
                                 HashMap<String, Object> cpuEconEquipPoints = HyperStatSplitZoneViewKt.getHyperStatSplitProfileEquipPoints(p,ProfileType.HYPERSTATSPLIT_CPU);
-                                HyperStatSplitEquip updatedDomainEquip = new HyperStatSplitEquip(updatedEquipId);
+                                HsSplitCpuEquip updatedDomainEquip = new HsSplitCpuEquip(updatedEquipId);
                                 HyperStatSplitZoneViewKt.loadHyperStatSplitProfile(cpuEconEquipPoints, inflater, linearLayoutZonePoints, updatedDomainEquip,  p.getGroup(),requireActivity());
                             }
 
@@ -2229,7 +2230,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTATSPLIT_CPU.name())) {
                 HashMap<String, Object> cpuEconEquipPoints = HyperStatSplitZoneViewKt.getHyperStatSplitProfileEquipPoints(updatedEquip, ProfileType.HYPERSTATSPLIT_CPU);
-                HyperStatSplitEquip updatedDomainEquip = new HyperStatSplitEquip(updatedEquip.getId());
+                HsSplitCpuEquip updatedDomainEquip = new HsSplitCpuEquip(updatedEquip.getId());
                 HyperStatSplitZoneViewKt.loadHyperStatSplitProfile(cpuEconEquipPoints, inflater, linearLayoutZonePoints, updatedDomainEquip, updatedEquip.getGroup(),requireActivity());
             }
 

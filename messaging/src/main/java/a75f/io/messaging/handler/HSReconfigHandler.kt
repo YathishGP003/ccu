@@ -181,6 +181,7 @@ private fun writePointFromJson(configPoint: Point, msgObject: JsonObject, haySta
         }
         val durationDiff = returnDurationDiff(msgObject);
         hayStack.writePointLocal(configPoint.id, level, who, value.toDouble(), durationDiff)
+        hayStack.writeHisValById(configPoint.id, value.toDouble())
         CcuLog.d(
             L.TAG_CCU_PUBNUB,
             "HS: writePointFromJson - level: $level who: $who val: $value durationDiff: $durationDiff"

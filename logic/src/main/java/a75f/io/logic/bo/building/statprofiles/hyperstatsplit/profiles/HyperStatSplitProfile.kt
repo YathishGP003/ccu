@@ -250,12 +250,7 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
             return StandaloneFanStage.AUTO
         }
 
-        if ((occupancyStatus == Occupancy.OCCUPIED
-                    || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED
-                    || occupancyStatus == Occupancy.FORCEDOCCUPIED
-                    || Occupancy.values()[currentOperatingMode] == Occupancy.PRECONDITIONING
-                    || occupancyStatus == Occupancy.DEMAND_RESPONSE_OCCUPIED)
-            && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
+        if (isSoftOccupied(equip.occupancyMode) && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
             logIt("Resetting the Fan status back to ${StandaloneFanStage.values()[fanModeSaved]}")
             updateUserIntentPoints(
                 equipRef = equip.equipRef,

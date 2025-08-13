@@ -34,7 +34,6 @@ open class UnitVentilatorFragment : HyperStatSplitFragment() {
         CoolingControl(viewModel,modifier)
         HeatingControl(viewModel,modifier)
         FanSpeed(viewModel)
-        FanRecirculateControl(viewModel,modifier)
     }
 
     @Composable
@@ -1268,41 +1267,6 @@ open class UnitVentilatorFragment : HyperStatSplitFragment() {
                         it.value.toInt()
                 }
             )
-        }
-    }
-    @OptIn(ExperimentalLayoutApi::class)
-    @Composable
-    private fun FanRecirculateControl(viewModel: UnitVentilatorViewModel,modifier: Modifier) {
-        FlowRow(modifier = modifier.padding(start = 25.dp)) {
-            var entities = 0
-            if (viewModel.isAnyAnalogMappedToControl(Pipe4UvAnalogOutControls.FAN_SPEED.ordinal)) {
-                entities += 1
-                Box(
-                    modifier = Modifier
-                        .weight(2f)
-                        .padding(top = 10.dp, bottom = 10.dp)
-                ) {
-                    StyledTextView(
-                        "Fan out \nduring Recirculate",
-                        fontSize = 20,
-                        textAlignment = TextAlign.Left
-                    )
-                }
-                Box(modifier = Modifier.weight(1f)) {
-                    SpinnerElementString(
-                        defaultSelection = (viewModel.viewState.value as Pipe4UvViewState).fanRecirculate
-                            .toString(),
-                        items = viewModel.fanRecirculateList, unit = "V",
-                        itemSelected = {
-                            (viewModel.viewState.value as Pipe4UvViewState).fanRecirculate =
-                                it.toInt()
-                        }, previewWidth = 70)
-                }
-            }
-            if (entities % 2 == 1) {
-                Box(modifier = Modifier.weight(2f))
-                Box(modifier = Modifier.weight(1f))
-            }
         }
     }
 }

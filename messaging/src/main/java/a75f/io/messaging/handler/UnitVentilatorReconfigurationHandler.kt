@@ -6,7 +6,7 @@ import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
-import a75f.io.domain.equips.hyperstat.HyperStatEquip
+import a75f.io.domain.equips.HyperStatSplitEquip
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
 import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
 import a75f.io.domain.logic.DeviceBuilder
@@ -21,8 +21,7 @@ import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.UvFanStages
 import a75f.io.logic.bo.building.statprofiles.util.getSplitConfiguration
-import a75f.io.logic.bo.building.statprofiles.util.getUvPossibleFanMode
-import a75f.io.logic.bo.building.statprofiles.util.getUvPossibleFanModeSettings
+import a75f.io.logic.bo.building.statprofiles.util.getUvFanModeLevel
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.messaging.handler.MessageUtil.Companion.returnDurationDiff
 import com.google.gson.JsonObject
@@ -80,7 +79,7 @@ fun reconfigureUnitVentilator(msgObject: JsonObject, configPoint: Point) {
         )
 
         if (configPoint.domainName != DomainName.fanOpMode) {
-            updateFanMode(configPoint.equipRef, config)
+            updateFanMode(configPoint.equipRef)
         }
     }
     writePointFromJson(configPoint, msgObject, hayStack)
@@ -114,6 +113,7 @@ private fun writePointFromJson(configPoint: Point, msgObject: JsonObject, haySta
         }
         val durationDiff = returnDurationDiff(msgObject)
         hayStack.writePointLocal(configPoint.id, level, who, value.toDouble(), durationDiff)
+        hayStack.writeHisValById(configPoint.id, value.toDouble())
         CcuLog.d(
             L.TAG_CCU_PUBNUB,
             "Unit Ventilator: writePointFromJson - level: $level who: $who val: $value  durationDiff: $durationDiff"
@@ -138,11 +138,10 @@ private fun isFanModeCurrentOccupied(value: Int): Boolean {
     return (basicSettings == UvFanStages.LOW_CUR_OCC || basicSettings == UvFanStages.HIGH_CUR_OCC || basicSettings == UvFanStages.MEDIUM_CUR_OCC)
 }
 
-fun updateFanMode(equipId: String, config: UnitVentilatorConfiguration) {
-    val fanLevel = getUvPossibleFanMode(config)
-    val equip = HyperStatEquip(equipId)
+fun updateFanMode(equipId: String) {
+    val equip = HyperStatSplitEquip(equipId)
     fun resetFanToOff() = equip.fanOpMode.writePointValue(StandaloneFanStage.OFF.ordinal.toDouble())
-    val possibleFanMode = getUvPossibleFanModeSettings(fanLevel)
+    val possibleFanMode = getUvFanModeLevel(equip)
     val currentFanMode = StandaloneFanStage.values()[equip.fanOpMode.readPriorityVal().toInt()]
     fun isWithinLow(): Boolean {
         return (currentFanMode.ordinal in listOf(

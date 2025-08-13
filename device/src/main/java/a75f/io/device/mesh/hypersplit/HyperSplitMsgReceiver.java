@@ -3,9 +3,8 @@ package a75f.io.device.mesh.hypersplit;
 import static a75f.io.api.haystack.Tags.HYPERSTATSPLIT;
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
 import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getSplitConfiguration;
+import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getUvFanModeLevel;
 import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getUvPossibleConditioningMode;
-import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getUvPossibleFanMode;
-import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getUvPossibleFanModeSettings;
 import static a75f.io.logic.bo.util.CCUUtils.isCurrentTemperatureWithinLimits;
 import static a75f.io.logic.util.uiutils.UserIntentStatusUtilKt.updateUserIntentPoints;
 
@@ -37,6 +36,7 @@ import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.HyperStatSplitEquip;
+import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -840,8 +840,8 @@ public class HyperSplitMsgReceiver {
         }
         if (equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_4PIPE_UV.name())) {
             Pipe4UVConfiguration config = (Pipe4UVConfiguration) getSplitConfiguration(equipId);
-            int fanLevel = getUvPossibleFanMode(config);
-            possibleFanMode = getUvPossibleFanModeSettings(fanLevel);
+            Pipe4UVEquip pipe4UVEquip = new Pipe4UVEquip(equipId);
+            possibleFanMode = getUvFanModeLevel(pipe4UVEquip);
             possibleConditioningMode = getUvPossibleConditioningMode(config);
         }
         

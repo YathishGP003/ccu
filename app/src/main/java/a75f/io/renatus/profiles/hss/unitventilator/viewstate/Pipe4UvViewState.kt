@@ -38,11 +38,8 @@ class Pipe4UvViewState : HyperStatSplitState() {
         )
     )
 
-
     var controlVia by mutableIntStateOf(0)
     var saTempering by mutableStateOf(false)
-    var fanRecirculate by mutableIntStateOf(0)
-    var fanEconomizer by mutableIntStateOf(0)
 
     companion object{
         fun fromProfileConfigToState(config: Pipe4UVConfiguration): Pipe4UvViewState {
@@ -88,8 +85,7 @@ class Pipe4UvViewState : HyperStatSplitState() {
                 compareAnalogOutMinMax(this.analogOut2MinMax, otherViewState.analogOut2MinMax) &&
                 compareAnalogOutMinMax(this.analogOut3MinMax, otherViewState.analogOut3MinMax) &&
                 compareAnalogOutMinMax(this.analogOut4MinMax, otherViewState.analogOut4MinMax) &&
-                this.controlVia == otherViewState.controlVia && this.saTempering == otherViewState.saTempering &&
-                this.fanRecirculate == otherViewState.fanRecirculate && this.fanEconomizer == otherViewState.fanEconomizer
+                this.controlVia == otherViewState.controlVia && this.saTempering == otherViewState.saTempering
     }
 
     fun updateConfigFromViewState (config: Pipe4UVConfiguration) {
@@ -183,9 +179,6 @@ class Pipe4UvViewState : HyperStatSplitState() {
         config.analogOut4Voltage.fanAtMedium.currentVal = state.analogOut4MinMax.fanAtMedium.toDouble()
         config.analogOut4Voltage.fanAtHigh.currentVal = state.analogOut4MinMax.fanAtHigh.toDouble()
 
-        config.fanRecirculate.currentVal = state.fanRecirculate.toDouble()
-        config.fanEconomizer.currentVal = state.fanEconomizer.toDouble()
-
     }
     fun configAnalogOut(config: Pipe4UVConfiguration, state: Pipe4UvViewState) {
         state.analogOut1Enabled = config.analogOut1Enabled.enabled
@@ -276,9 +269,6 @@ class Pipe4UvViewState : HyperStatSplitState() {
             fanAtMedium = config.analogOut4Voltage.fanAtMedium.currentVal.toInt(),
             fanAtHigh = config.analogOut4Voltage.fanAtHigh.currentVal.toInt()
         )
-
-        state.fanEconomizer = config.fanEconomizer.currentVal.toInt()
-        state.fanRecirculate = config.fanRecirculate.currentVal.toInt()
     }
 
     data class AnalogOutVoltage(

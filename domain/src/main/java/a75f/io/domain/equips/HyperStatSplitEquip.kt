@@ -313,6 +313,11 @@ open class HyperStatSplitEquip (equipRef : String) : DomainEquip(equipRef) {
     val enableDesiredTempDisplay = Point(DomainName.enableDesiredTempDisplay, equipRef)
     val emergencyShutoffNO = Point(DomainName.emergencyShutoffNO, equipRef)
     val emergencyShutoffNC = Point(DomainName.emergencyShutoffNC, equipRef)
+
+    val linearFanSpeed = Point(DomainName.linearFanSpeed, equipRef)
+    val stagedFanSpeed = Point(DomainName.stagedFanSpeed, equipRef)
+
+    val fanSignal = Point(DomainName.fanSignal, equipRef)
     fun isCondensateTripped(): Boolean = condensateStatusNC.readHisVal() > 0.0 || condensateStatusNO.readHisVal() > 0.0
 
 }

@@ -49,8 +49,6 @@ class Pipe4UVConfiguration(
             config.getAnalogOut4Voltage()
             config.controlVia = getDefaultValConfig(DomainName.controlVia, model)
             config.saTempering = getDefaultEnableConfig(DomainName.enableSaTemperingControl, model)
-            config.fanEconomizer = getDefaultValConfig(DomainName.fanOutEconomizer, model)
-            config.fanRecirculate = getDefaultValConfig(DomainName.fanOutRecirculate, model)
         }
         return config
     }
@@ -282,13 +280,6 @@ class Pipe4UVConfiguration(
         zoneCO2DamperOpeningRate.currentVal =
             getDefault(equip.co2DamperOpeningRate, equip, zoneCO2DamperOpeningRate)
 
-        fanRecirculate.currentVal = getDefault(
-            equip.fanOutRecirculate, equip, fanRecirculate
-        )
-        fanEconomizer.currentVal = getDefault(
-            equip.fanOutEconomizer, equip, fanEconomizer
-        )
-
     }
 
     private fun getAnalogOut1Voltage() {
@@ -444,36 +435,30 @@ class Pipe4UVConfiguration(
         }
     }
 
-    fun isAnyRelayMappedToFanLowVentilation(): Boolean {
+    private fun isAnyRelayMappedToFanLowVentilation(): Boolean {
         return isAnyRelayEnabledAndMapped(Pipe4UVRelayControls.FAN_LOW_SPEED_VENTILATION)
     }
 
-    fun isAnyRelayEnabledAndMappedToCoolingValve(): Boolean {
-        return isAnyRelayEnabledAndMapped(Pipe4UVRelayControls.COOLING_WATER_VALVE)
+    fun isAnyCoolingPortMappedInRelayOrAO(): Boolean {
+        return isAnyRelayEnabledAndMapped(Pipe4UVRelayControls.COOLING_WATER_VALVE) || isAnyAnalogEnabledAndMapped(
+            Pipe4UvAnalogOutControls.COOLING_WATER_MODULATING_VALVE
+        )
     }
 
-    fun isCoolingWaterValveEnabledAndMapped(): Boolean {
-        return isAnyAnalogEnabledAndMapped(Pipe4UvAnalogOutControls.COOLING_WATER_MODULATING_VALVE)
+    fun isAnyHeatingPortMappedInRelayOrAO(): Boolean {
+        return isAnyRelayEnabledAndMapped(Pipe4UVRelayControls.HEATING_WATER_VALVE) || isAnyAuxHeatingStageMapped() ||
+                isAnyAnalogEnabledAndMapped(Pipe4UvAnalogOutControls.HEATING_WATER_MODULATING_VALVE)
     }
 
-    fun isHeatingWaterValveEnabledAndMapped(): Boolean {
-        return isAnyAnalogEnabledAndMapped(Pipe4UvAnalogOutControls.HEATING_WATER_MODULATING_VALVE)
+    private fun isAnyAuxHeatingStageMapped(): Boolean {
+        return isAnyRelayEnabledAndMapped(Pipe4UVRelayControls.AUX_HEATING_STAGE1) || isAnyRelayEnabledAndMapped(
+            Pipe4UVRelayControls.AUX_HEATING_STAGE2
+        )
     }
 
-    fun isFaceDamperValveEnabledAndMapped(): Boolean {
-        return isAnyAnalogEnabledAndMapped(Pipe4UvAnalogOutControls.FACE_DAMPER_VALVE)
-    }
 
-    fun isFanSpeedEnabledAndMapped(): Boolean {
-        return isAnyAnalogEnabledAndMapped(Pipe4UvAnalogOutControls.FAN_SPEED)
-    }
-
-    fun isOaoDamperEnabledAndMapped(): Boolean {
-        return isAnyAnalogEnabledAndMapped(Pipe4UvAnalogOutControls.OAO_DAMPER)
-    }
-
-    fun isDcvModulatingDamperEnabledAndMapped(): Boolean {
-        return isAnyAnalogEnabledAndMapped(Pipe4UvAnalogOutControls.DCV_MODULATING_DAMPER)
+    fun isAnyAnalogEnabledAndMapped(mapping: Pipe4UvAnalogOutControls): Boolean {
+        return getAnalogEnabledAssociations().any { (enabled, type) -> enabled && type == mapping.ordinal }
     }
 
     fun isAnyRelayEnabledAndMapped(mapping: Pipe4UVRelayControls): Boolean {
@@ -540,9 +525,7 @@ class Pipe4UVConfiguration(
         var dcvModulationMinVoltage: ValueConfig, var dcvModulationMaxVoltage: ValueConfig,
         var faceAndBypassDamperMin: ValueConfig, var faceAndBypassDamperMax: ValueConfig
     )
-    fun isAnyAnalogEnabledAndMapped(mapping: Pipe4UvAnalogOutControls): Boolean {
-        return getAnalogEnabledAssociations().any { (enabled, type) -> enabled && type == mapping.ordinal }
-    }
+
 }
 
 enum class Pipe4UvAnalogOutControls {

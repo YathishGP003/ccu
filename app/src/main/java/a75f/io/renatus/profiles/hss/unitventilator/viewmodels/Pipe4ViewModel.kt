@@ -17,8 +17,8 @@ import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventil
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UnitVentilatorProfile
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorProfile
+import a75f.io.logic.bo.building.statprofiles.util.getUvFanModeLevel
 import a75f.io.logic.bo.building.statprofiles.util.getUvPossibleConditioningMode
-import a75f.io.logic.bo.building.statprofiles.util.getUvPossibleFanMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.util.modifyConditioningMode
 import a75f.io.logic.util.modifyFanMode
@@ -220,12 +220,12 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
         }
 
         profileConfiguration.apply {
+            val pipe4Equip = Pipe4UVEquip(equipId)
             val possibleConditioningMode =
                 getUvPossibleConditioningMode(profileConfiguration as UnitVentilatorConfiguration)
             val possibleFanMode =
-                getUvPossibleFanMode(profileConfiguration as UnitVentilatorConfiguration)
-            val pipe4Equip = Pipe4UVEquip(equipId)
-            modifyFanMode(possibleFanMode, pipe4Equip.fanOpMode)
+                getUvFanModeLevel(pipe4Equip)
+            modifyFanMode(possibleFanMode.ordinal, pipe4Equip.fanOpMode)
             modifyConditioningMode(
                 possibleConditioningMode.ordinal,
                 pipe4Equip.conditioningMode,

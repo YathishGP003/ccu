@@ -1,8 +1,8 @@
 package a75f.io.domain.equips.unitVentilator
 
-import a75f.io.domain.equips.HyperStatSplitEquip
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.equips.HyperStatSplitEquip
 
 /**
  * Author: Manjunath Kundaragi
@@ -24,8 +24,6 @@ class HsSplitCpuEquip(equipRef: String): HyperStatSplitEquip(equipRef) {
     val exhaustFanStage1 = Point(DomainName.exhaustFanStage1, equipRef)
     val exhaustFanStage2 = Point(DomainName.exhaustFanStage2, equipRef)
 
-    val linearFanSpeed = Point(DomainName.linearFanSpeed, equipRef)
-    val stagedFanSpeed = Point(DomainName.stagedFanSpeed, equipRef)
     val heatingSignal = Point(DomainName.heatingSignal, equipRef)
     val coolingSignal = Point(DomainName.coolingSignal, equipRef)
     val compressorSpeed = Point(DomainName.compressorSpeed, equipRef)

@@ -5,6 +5,7 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
 import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
 import a75f.io.logic.bo.building.hvac.Stage
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitProfile
 import a75f.io.logic.bo.building.statprofiles.util.AuxActiveStages
@@ -106,14 +107,6 @@ abstract class UnitVentilatorProfile(equipRef: String, nodeAddress: Short, tag: 
                     }
                 }
 
-                if (hssEquip.fanSignal.pointExists()) {
-                    val fanOutRecirculate =
-                        getPercentFromVolt(hssEquip.fanOutRecirculate.readDefaultVal().roundToInt())
-                    hssEquip.fanSignal.writeHisVal(fanOutRecirculate.toDouble())
-                    if (fanOutRecirculate > 0) {
-                        hssEquip.analogOutStages[StatusMsgKeys.FAN_SPEED.name] = fanOutRecirculate
-                    }
-                }
                 if (hssEquip.faceBypassDamperModulatingCmd.pointExists()) {
                     hssEquip.faceBypassDamperModulatingCmd.writeHisVal(saTemperingLoopOutput.toDouble())
                 }
@@ -126,9 +119,6 @@ abstract class UnitVentilatorProfile(equipRef: String, nodeAddress: Short, tag: 
                             hssEquip.hotWaterModulatingHeatValve.writeHisVal(0.0)
 
                             if (fanLoopCounter == 0) {
-                                if (hssEquip.fanSignal.pointExists()) {
-                                    hssEquip.fanSignal.writeHisVal(0.0)
-                                }
                                 if (hssEquip.faceBypassDamperModulatingCmd.pointExists()) {
                                     hssEquip.faceBypassDamperModulatingCmd.writeHisVal(0.0)
                                 }
@@ -155,49 +145,51 @@ abstract class UnitVentilatorProfile(equipRef: String, nodeAddress: Short, tag: 
      */
     private fun noZoneLoad() = (coolingLoopOutput == 0 && heatingLoopOutput == 0)
 
-    fun operateAuxBasedFan(equip: UnitVentilatorEquip): String? {
-        val auxType = if (isAuxStage1Active && isAuxStage2Active) {
-            AuxActiveStages.BOTH
-        } else if (isAuxStage2Active) {
-            AuxActiveStages.AUX2
-        } else if (isAuxStage1Active) {
-            AuxActiveStages.AUX1
-        } else {
-            AuxActiveStages.NONE
-        }
-        if (auxType != AuxActiveStages.NONE) {
-            val sequenceMap = when (auxType) {
-                AuxActiveStages.BOTH, AuxActiveStages.AUX2 -> mutableMapOf(
-                    equip.fanHighSpeed to Stage.FAN_3.displayName,
-                    equip.fanMediumSpeed to Stage.FAN_2.displayName,
-                    equip.fanLowSpeed to Stage.FAN_1.displayName,
-                    equip.fanLowSpeedVentilation to Stage.FAN_1.displayName,
-                    equip.fanEnable to StatusMsgKeys.FAN_ENABLED.name
-                )
-
-                AuxActiveStages.AUX1 -> mutableMapOf(
-                    equip.fanMediumSpeed to Stage.FAN_2.displayName,
-                    equip.fanHighSpeed to Stage.FAN_3.displayName,
-                    equip.fanLowSpeed to Stage.FAN_1.displayName,
-                    equip.fanLowSpeedVentilation to Stage.FAN_1.displayName,
-                    equip.fanEnable to StatusMsgKeys.FAN_ENABLED.name
-                )
-
-                else -> emptyMap()
+    fun operateAuxBasedFan(equip: UnitVentilatorEquip, basicSettings: BasicSettings): String? {
+        if (basicSettings.fanMode == StandaloneFanStage.AUTO) {
+            val auxType = if (isAuxStage1Active && isAuxStage2Active) {
+                AuxActiveStages.BOTH
+            } else if (isAuxStage2Active) {
+                AuxActiveStages.AUX2
+            } else if (isAuxStage1Active) {
+                AuxActiveStages.AUX1
+            } else {
+                AuxActiveStages.NONE
             }
-            // Before operating AUX based fan reset all points except fanEnable
-            sequenceMap.forEach { (point, statusMsg) ->
-                if ((point.domainName != DomainName.fanEnable) && point.pointExists()) {
-                    point.writeHisVal(0.0)
+            if (auxType != AuxActiveStages.NONE) {
+                val sequenceMap = when (auxType) {
+                    AuxActiveStages.BOTH, AuxActiveStages.AUX2 -> mutableMapOf(
+                        equip.fanHighSpeed to Stage.FAN_3.displayName,
+                        equip.fanMediumSpeed to Stage.FAN_2.displayName,
+                        equip.fanLowSpeed to Stage.FAN_1.displayName,
+                        equip.fanLowSpeedVentilation to Stage.FAN_1.displayName,
+                        equip.fanEnable to StatusMsgKeys.FAN_ENABLED.name
+                    )
+
+                    AuxActiveStages.AUX1 -> mutableMapOf(
+                        equip.fanMediumSpeed to Stage.FAN_2.displayName,
+                        equip.fanHighSpeed to Stage.FAN_3.displayName,
+                        equip.fanLowSpeed to Stage.FAN_1.displayName,
+                        equip.fanLowSpeedVentilation to Stage.FAN_1.displayName,
+                        equip.fanEnable to StatusMsgKeys.FAN_ENABLED.name
+                    )
+
+                    else -> emptyMap()
                 }
-                equip.relayStages.remove(statusMsg)
-            }
-            sequenceMap.forEach { (point, statusMsg) ->
-                if (point.pointExists()) {
-                    point.writeHisVal(1.0)
-                    equip.relayStages[statusMsg] = 1
-                    logIt("Operating AUX based fan: ${point.domainName}")
-                    return point.domainName
+                // Before operating AUX based fan reset all points except fanEnable
+                sequenceMap.forEach { (point, statusMsg) ->
+                    if ((point.domainName != DomainName.fanEnable) && point.pointExists()) {
+                        point.writeHisVal(0.0)
+                    }
+                    equip.relayStages.remove(statusMsg)
+                }
+                sequenceMap.forEach { (point, statusMsg) ->
+                    if (point.pointExists()) {
+                        point.writeHisVal(1.0)
+                        equip.relayStages[statusMsg] = 1
+                        logIt("Operating AUX based fan: ${point.domainName}")
+                        return point.domainName
+                    }
                 }
             }
         }

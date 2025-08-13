@@ -205,15 +205,15 @@ class HSSplitHaystackUtil(
 
         fun getActualFanMode(equip: HyperStatSplitEquip, position: Int): Int{
             return HyperStatSplitAssociationUtil.getSelectedFanModeByLevel(
-                fanLevel = HyperStatSplitAssociationUtil.getHssProfileFanLevel(equip, getSplitConfiguration(equip.getId())),
+                fanLevel = HyperStatSplitAssociationUtil.getHssProfileFanLevel(equip),
                 selectedFan = position
             ).ordinal
 
         }
 
-        fun getFanSelectionMode(hssEquip: HyperStatSplitEquip, position: Int,configuration: HyperStatSplitConfiguration): Int{
+        fun getFanSelectionMode(hssEquip: HyperStatSplitEquip, position: Int): Int{
             return HyperStatSplitAssociationUtil.getSelectedFanMode(
-                fanLevel = HyperStatSplitAssociationUtil.getHssProfileFanLevel(hssEquip,configuration),
+                fanLevel = HyperStatSplitAssociationUtil.getHssProfileFanLevel(hssEquip),
                 selectedFan = position
             )
         }

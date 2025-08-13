@@ -112,7 +112,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
             zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
         }
         updateTitle24LoopCounter(hyperStatSplitTuners, basicSettings)
-        if (isEmergencyShutoffActive(hssEquip).not() && isDoorOpen.not()) {
+        if (isEmergencyShutoffActive(hssEquip).not() && isDoorOpen.not() && isCondensateTripped.not()) {
             if (basicSettings.fanMode != StandaloneFanStage.OFF) {
                 runRelayOperations(config, basicSettings)
                 runAnalogOutOperations(config, basicSettings, hssEquip.analogOutStages)

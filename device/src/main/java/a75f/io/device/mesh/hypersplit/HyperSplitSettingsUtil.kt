@@ -13,6 +13,7 @@ import a75f.io.domain.api.Point
 import a75f.io.domain.equips.HyperStatSplitEquip
 import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
+import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.CpuSensorBusType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.UniversalInputs
@@ -101,7 +102,6 @@ class HyperSplitSettingsUtil {
                     val fcuTuners = HyperSplit.HyperSplitTunersFcu_t.newBuilder()
                     fcuTuners.setAuxHeating1Activate(hsEquip.auxHeating1Activate.readPriorityVal().toInt())
                     fcuTuners.setAuxHeating2Activate(hsEquip.auxHeating2Activate.readPriorityVal().toInt())
-                    fcuTuners.setAnalogoutAtRecFanAnalogVoltage(hsEquip.fanOutRecirculate.readPriorityVal().toInt() * 10)
                     settings3.fcuTuners = fcuTuners.build()
                 }
             }

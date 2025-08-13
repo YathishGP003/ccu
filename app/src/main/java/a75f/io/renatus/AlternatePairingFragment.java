@@ -12,6 +12,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
+
+import a75f.io.device.serial.SmartNodeSettings2_t;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
@@ -150,7 +152,7 @@ public class AlternatePairingFragment extends BaseDialogFragment {
             }
         }
 
-        if(CCUUiUtil.isCarrierThemeEnabled(requireContext())
+        if(CCUUiUtil.isCarrierThemeEnabled(requireContext()) || CCUUiUtil.isAiroverseThemeEnabled(requireContext())
                 || mNodeType == NodeType.HYPERSTATSPLIT || mNodeType == NodeType.MYSTAT ||
                 mNodeType == NodeType.HYPER_STAT || mNodeType == NodeType.CONNECTNODE)
         {
@@ -160,16 +162,21 @@ public class AlternatePairingFragment extends BaseDialogFragment {
             int topMargin;
 
             if (mNodeType == NodeType.HYPER_STAT ) {
-                leftMargin = 525;
-                topMargin = 250;
-            } else if (mNodeType == NodeType.MYSTAT || mNodeType == NodeType.CONNECTNODE) {
-                leftMargin = 490;
-                topMargin = 255;
-            }
-            else if(mNodeType == NodeType.HYPERSTATSPLIT){
-                leftMargin = 490;
-                topMargin = 255;
-            } else {
+                leftMargin = 552;
+                topMargin = 260;
+            } else if (mNodeType == NodeType.MYSTAT ) {
+                leftMargin = 552;
+                topMargin = 260;
+            } else if (mNodeType==NodeType.CONNECTNODE) {
+                leftMargin=555;
+                topMargin=260;
+            } else if(mNodeType == NodeType.HYPERSTATSPLIT) {
+                leftMargin = 552;
+                topMargin = 265;
+            }else if(mNodeType==NodeType.SMART_NODE || mNodeType==NodeType.HELIO_NODE){
+                leftMargin=552;
+                topMargin=255;
+            }else {
                 leftMargin = 490;
                 topMargin = 275;
             }
@@ -179,7 +186,6 @@ public class AlternatePairingFragment extends BaseDialogFragment {
             params.leftMargin = leftMargin;
             params.topMargin = topMargin;
             dynamicNodeAddress.setLayoutParams(params);
-
         }
 
         if(CCUUiUtil.isAiroverseThemeEnabled(requireContext()) || CCUUiUtil.isCarrierThemeEnabled(requireContext()) ||
@@ -208,8 +214,6 @@ public class AlternatePairingFragment extends BaseDialogFragment {
             params.topMargin = topMargin;
             imageView.setLayoutParams(params);
         }
-
-
         dynamicNodeAddress.setText(mPairingAddress.toString());
         imageGoback.setOnClickListener( v -> {
             removeDialogFragment(ID);

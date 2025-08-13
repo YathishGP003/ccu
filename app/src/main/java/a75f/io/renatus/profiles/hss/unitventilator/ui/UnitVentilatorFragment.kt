@@ -380,11 +380,11 @@ open class UnitVentilatorFragment : HyperStatSplitFragment() {
                 }
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementOption(
-                        defaultSelection = (viewModel.viewState.value as Pipe4UvViewState).analogOut4MinMax.fanAtHigh.toString(),
+                        defaultSelection = (viewModel.viewState.value as Pipe4UvViewState).analogOut4MinMax.fanAtLow.toString(),
                         items = viewModel.testVoltage,
                         unit = "%",
                         itemSelected = {
-                            (viewModel.viewState.value as Pipe4UvViewState).analogOut4MinMax.fanAtHigh =
+                            (viewModel.viewState.value as Pipe4UvViewState).analogOut4MinMax.fanAtLow =
                                 it.value.toInt()
                         },
                         previewWidth = 70

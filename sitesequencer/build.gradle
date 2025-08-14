@@ -96,7 +96,7 @@ android {
 
 dependencies {
 
-    implementation 'androidx.work:work-runtime-ktx:2.7.1'
+    implementation 'androidx.work:work-runtime-ktx:2.8.1'
     testImplementation 'junit:junit:4.13.1'
 
     implementation 'com.udojava:EvalEx:2.0'

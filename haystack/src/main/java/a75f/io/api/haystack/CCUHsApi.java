@@ -1689,7 +1689,7 @@ public class CCUHsApi
         if (syncManager.isEntitySyncProgress()) {
             syncManager.scheduleSync();
         } else {
-            syncManager.syncEntities(true);
+            syncManager.syncEntities(false);
         }
     }
 

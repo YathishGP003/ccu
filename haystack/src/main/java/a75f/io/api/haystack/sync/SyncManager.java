@@ -63,6 +63,10 @@ public class SyncManager {
             return;
         }
 
+        WorkManager.getInstance(CCUHsApi.getInstance()
+                    .getContext())
+                    .cancelUniqueWork(SYNC_WORK_TAG);
+
         WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
                         workPolicyKeep ? ExistingWorkPolicy.KEEP : ExistingWorkPolicy.REPLACE,
                         getSyncWorkRequest())

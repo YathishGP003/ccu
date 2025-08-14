@@ -174,6 +174,7 @@ class ConnectNodeViewModel(application: Application) : AndroidViewModel(applicat
                 reg.parameters[paramIndex] .apply {
                     isDisplayInUI = newParam.isDisplayInUI
                     userIntentPointTags = newParam.userIntentPointTags
+                    isSchedulable = newParam.isSchedulable
                 }
 
 

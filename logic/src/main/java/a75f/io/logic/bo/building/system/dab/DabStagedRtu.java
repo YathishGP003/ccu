@@ -185,16 +185,22 @@ public class DabStagedRtu extends DabSystemProfile
             systemFanLoopOp = getSystemLoopOutputValue(Tags.FAN);
         }
 
-        systemEquip.getCoolingLoopOutput().writeHisVal(systemCoolingLoopOp);
-        systemEquip.getHeatingLoopOutput().writeHisVal(systemHeatingLoopOp);
-        systemEquip.getFanLoopOutput().writeHisVal(systemFanLoopOp);
-        systemEquip.getCompressorLoopOutput().writeHisVal(systemCompressorLoop);
+        systemEquip.getCoolingLoopOutput().writePointValue(systemCoolingLoopOp);
+        systemCoolingLoopOp = systemEquip.getCoolingLoopOutput().readHisVal();
+        systemEquip.getHeatingLoopOutput().writePointValue(systemHeatingLoopOp);
+        systemHeatingLoopOp = systemEquip.getHeatingLoopOutput().readHisVal();
+        systemEquip.getFanLoopOutput().writePointValue(systemFanLoopOp);
+        systemFanLoopOp = systemEquip.getFanLoopOutput().readHisVal();
+        systemEquip.getCompressorLoopOutput().writePointValue(systemCompressorLoop);
+        systemCompressorLoop = systemEquip.getCompressorLoopOutput().readHisVal();
 
         systemCo2LoopOp = getCo2LoopOp();
         systemEquip.getCo2LoopOutput().writePointValue(systemCo2LoopOp);
+        systemCo2LoopOp = systemEquip.getCo2LoopOutput().readHisVal();
 
         systemDcvLoopOp = systemCo2LoopOp;
         systemEquip.getDcvLoopOutput().writePointValue(systemCo2LoopOp);
+        systemDcvLoopOp = systemEquip.getDcvLoopOutput().readHisVal();
 
         updateStagesSelected();
         addControllers();
@@ -350,7 +356,7 @@ public class DabStagedRtu extends DabSystemProfile
             if (relay.readDefaultVal() > 0) {
                 Stage mappedStage = Stage.values()[(int) association.readDefaultVal()];
                 newState = getStageStatus(mappedStage);
-                getLogicalPhysicalMap().get(relay).writeHisVal(newState);
+                getLogicalPhysicalMap().get(relay).writePointValue(newState);
                 CcuLog.i(L.TAG_CCU_SYSTEM, "Relay: " + relay.getDomainName() + ", Stage: " + mappedStage + ", State: " + newState);
             }
         });

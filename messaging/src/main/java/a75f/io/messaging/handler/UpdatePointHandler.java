@@ -171,7 +171,8 @@ public class UpdatePointHandler implements MessageHandler
         if (HSUtil.isSystemConfigOutputPoint(pointUid, CCUHsApi.getInstance())
                 || HSUtil.isSystemConfigHumidifierType(pointUid, CCUHsApi.getInstance())
                 || HSUtil.isSystemConfigIE(pointUid, CCUHsApi.getInstance())
-                || (HSUtil.skipUserIntentOrTunerForV2(localPoint) && HSUtil.isAdvanceAhuV2(pointUid, CCUHsApi.getInstance()))) {
+                || (HSUtil.skipUserIntentOrTunerForV2(localPoint) && HSUtil.isAdvanceAhuV2(pointUid, CCUHsApi.getInstance()))
+                && HSUtil.skipLoopOutputPointsForV2(localPoint)) {
             ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
             hayStack.scheduleSync();

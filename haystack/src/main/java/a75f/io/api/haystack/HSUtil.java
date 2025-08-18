@@ -344,6 +344,10 @@ public class HSUtil {
         return !(localPoint.getMarkers().contains("userIntent")) && !(localPoint.getMarkers().contains("tuner"));
     }
 
+    public static boolean skipLoopOutputPointsForV2(Point localPoint) {
+        return !(localPoint.getMarkers().contains("loop") && (localPoint.getMarkers().contains("output")));
+    }
+
     public static boolean isSSEConfig(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
         return pointEntity.containsKey(Tags.SSE) && (pointEntity.containsKey(Tags.CMD)

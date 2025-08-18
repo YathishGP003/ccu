@@ -307,6 +307,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
             systemFanLoopOp = systemEquip.getFanLoopOutput().readHisVal();
         }
         systemEquip.getFanLoopOutput().writePointValue(systemFanLoopOp);
+        systemFanLoopOp = systemEquip.getFanLoopOutput().readHisVal();
     }
 
     private void updateCompressorLoopOutput(DabSystemController dabSystem) {

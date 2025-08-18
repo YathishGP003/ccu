@@ -165,7 +165,8 @@ class AdvAhuEconAlgoHandler(private val connectEquip: ConnectModuleEquip) {
         }
 
         // Step 6: Update the loop output and damper values to the points
-        connectEquip.outsideAirFinalLoopOutput.writeHisVal(outsideAirFinalLoopOutput.toDouble())
+        connectEquip.outsideAirFinalLoopOutput.writePointValue(outsideAirFinalLoopOutput.toDouble())
+        outsideAirFinalLoopOutput = connectEquip.outsideAirFinalLoopOutput.readHisVal().toInt()
         connectEquip.outsideDamperCmd.writeHisVal(outsideAirFinalLoopOutput.toDouble())
         connectEquip.returnDamperCmd.writeHisVal(returnAirFinalOutput)
 
@@ -480,7 +481,8 @@ class AdvAhuEconAlgoHandler(private val connectEquip: ConnectModuleEquip) {
         }
         // If the free cooling output is non zero, then set the economizingAvailable to true
         connectEquip.economizingAvailable.writeHisVal((if (economizingLoopOutput > 0) 1 else 0).toDouble())
-        connectEquip.economizingLoopOutput.writeHisVal(economizingLoopOutput.toDouble())
+        connectEquip.economizingLoopOutput.writePointValue(economizingLoopOutput.toDouble())
+        economizingLoopOutput = connectEquip.economizingLoopOutput.readHisVal().toInt()
     }
 
     private fun isAnyAnalogAssociatedToOAO(): Boolean {
@@ -646,11 +648,13 @@ class AdvAhuEconAlgoHandler(private val connectEquip: ConnectModuleEquip) {
     }
 
     fun updateLoopPoints() {
-        connectEquip.economizingLoopOutput.writeHisVal(economizingLoopOutput.toDouble())
+        connectEquip.economizingLoopOutput.writePointValue(economizingLoopOutput.toDouble())
+        economizingLoopOutput = connectEquip.economizingLoopOutput.readHisVal().toInt()
         connectEquip.dcvAvailable.writeHisVal((if (isDcvAvailable()) 1 else 0).toDouble())
         connectEquip.outsideAirCalculatedMinDamper.writeHisVal(outsideAirCalculatedMinDamper)
         connectEquip.matThrottle.writeHisVal((if (matThrottle) 1 else 0).toDouble())
-        connectEquip.outsideAirFinalLoopOutput.writeHisVal(outsideAirFinalLoopOutput.toDouble())
+        connectEquip.outsideAirFinalLoopOutput.writePointValue(outsideAirFinalLoopOutput.toDouble())
+        outsideAirFinalLoopOutput = connectEquip.outsideAirFinalLoopOutput.readHisVal().toInt()
     }
 
     fun resetLoopPoints() {

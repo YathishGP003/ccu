@@ -345,32 +345,32 @@ class DabAdvancedAhu : DabSystemProfile() {
 
         if (AutoCommissioningUtil.isAutoCommissioningStarted()) {
 
-            systemEquip.coolingLoopOutput.writeDefaultVal(systemCoolingLoopOp)
-            systemCoolingLoopOp = systemEquip.coolingLoopOutput.readPriorityVal()
+            systemEquip.coolingLoopOutput.writePointValue(systemCoolingLoopOp)
+            systemCoolingLoopOp = systemEquip.coolingLoopOutput.readHisVal()
 
-            systemEquip.heatingLoopOutput.writeDefaultVal(systemHeatingLoopOp)
-            systemHeatingLoopOp = systemEquip.heatingLoopOutput.readPriorityVal()
+            systemEquip.heatingLoopOutput.writePointValue(systemHeatingLoopOp)
+            systemHeatingLoopOp = systemEquip.heatingLoopOutput.readHisVal()
 
-            systemEquip.fanLoopOutput.writeDefaultVal(systemFanLoopOp)
-            systemFanLoopOp = systemEquip.fanLoopOutput.readPriorityVal()
+            systemEquip.fanLoopOutput.writePointValue(systemFanLoopOp)
+            systemFanLoopOp = systemEquip.fanLoopOutput.readHisVal()
 
-            systemEquip.co2LoopOutput.writeDefaultVal(systemCo2LoopOp)
-            systemCo2LoopOp = systemEquip.co2LoopOutput.readPriorityVal()
+            systemEquip.co2LoopOutput.writePointValue(systemCo2LoopOp)
+            systemCo2LoopOp = systemEquip.co2LoopOutput.readHisVal()
 
-            systemEquip.cmEquip.satCoolingLoopOutput.writeDefaultVal(systemSatCoolingLoopOp)
-            systemSatCoolingLoopOp = systemEquip.cmEquip.satCoolingLoopOutput.readPriorityVal()
+            systemEquip.cmEquip.satCoolingLoopOutput.writePointValue(systemSatCoolingLoopOp)
+            systemSatCoolingLoopOp = systemEquip.cmEquip.satCoolingLoopOutput.readHisVal()
 
-            systemEquip.cmEquip.satHeatingLoopOutput.writeDefaultVal(systemSatHeatingLoopOp)
-            systemSatHeatingLoopOp = systemEquip.cmEquip.satHeatingLoopOutput.readPriorityVal()
+            systemEquip.cmEquip.satHeatingLoopOutput.writePointValue(systemSatHeatingLoopOp)
+            systemSatHeatingLoopOp = systemEquip.cmEquip.satHeatingLoopOutput.readHisVal()
 
-            systemEquip.cmEquip.fanPressureLoopOutput.writeDefaultVal(staticPressureFanLoopOp)
-            staticPressureFanLoopOp = systemEquip.cmEquip.fanPressureLoopOutput.readPriorityVal()
+            systemEquip.cmEquip.fanPressureLoopOutput.writePointValue(staticPressureFanLoopOp)
+            staticPressureFanLoopOp = systemEquip.cmEquip.fanPressureLoopOutput.readHisVal()
 
-            systemEquip.compressorLoopOutput.writeDefaultVal(systemCompressorLoop)
-            systemCompressorLoop = systemEquip.compressorLoopOutput.readPriorityVal()
+            systemEquip.compressorLoopOutput.writePointValue(systemCompressorLoop)
+            systemCompressorLoop = systemEquip.compressorLoopOutput.readHisVal()
 
-            systemEquip.dcvLoopOutput.writeDefaultVal(systemCo2LoopOp)
-            systemCo2LoopOp = systemEquip.dcvLoopOutput.readPriorityVal()
+            systemEquip.dcvLoopOutput.writePointValue(systemCo2LoopOp)
+            systemDcvLoopOp = systemEquip.dcvLoopOutput.readHisVal()
 
         }
     }
@@ -398,15 +398,28 @@ class DabAdvancedAhu : DabSystemProfile() {
 
     private fun updateLoopOpPoints() {
         systemEquip.coolingLoopOutput.writePointValue(systemCoolingLoopOp)
+        systemCoolingLoopOp = systemEquip.coolingLoopOutput.readHisVal()
         systemEquip.heatingLoopOutput.writePointValue(systemHeatingLoopOp)
+        systemHeatingLoopOp = systemEquip.heatingLoopOutput.readHisVal()
         systemEquip.fanLoopOutput.writePointValue(systemFanLoopOp)
+        systemFanLoopOp = systemEquip.fanLoopOutput.readHisVal()
         systemEquip.co2LoopOutput.writePointValue(systemCo2LoopOp)
+        systemCo2LoopOp = systemEquip.co2LoopOutput.readHisVal()
         systemEquip.cmEquip.satCoolingLoopOutput.writePointValue(systemSatCoolingLoopOp)
+        systemSatCoolingLoopOp = systemEquip.cmEquip.satCoolingLoopOutput.readHisVal()
         systemEquip.cmEquip.satHeatingLoopOutput.writePointValue(systemSatHeatingLoopOp)
+        systemSatHeatingLoopOp = systemEquip.cmEquip.satHeatingLoopOutput.readHisVal()
         systemEquip.cmEquip.fanPressureLoopOutput.writePointValue(staticPressureFanLoopOp)
+        staticPressureFanLoopOp = systemEquip.cmEquip.fanPressureLoopOutput.readHisVal()
         systemEquip.operatingMode.writePointValue(DabSystemController.getInstance().systemState.ordinal.toDouble())
         systemEquip.cmEquip.co2BasedDamperControl.writePointValue(systemCo2LoopOp)
+        systemCo2LoopOp = systemEquip.cmEquip.co2BasedDamperControl.readHisVal()
         systemEquip.cmEquip.compressorLoopOutput.writePointValue(systemCompressorLoop)
+        systemCompressorLoop = systemEquip.cmEquip.compressorLoopOutput.readHisVal()
+
+        systemEquip.dcvLoopOutput.writePointValue(systemCo2LoopOp)
+        systemDcvLoopOp = systemEquip.dcvLoopOutput.readPriorityVal()
+
         systemEquip.connectEquip1.let {
             it.coolingLoopOutput.writePointValue(systemCoolingLoopOp)
             it.heatingLoopOutput.writePointValue(systemHeatingLoopOp)

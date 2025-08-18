@@ -235,8 +235,13 @@ class DabStagedVfdRtuFragment : DStagedRtuFragment() {
                             },
                             mappingSelection = viewState.analogOut2Association,
                             analogOutValList = (0..10).map { it.toString() },
-                            analogOutVal = (0..10).map { it }
-                                .indexOf((viewState.analogOut2FanSpeedTestSignal.toInt()) / 10),
+                            analogOutVal =
+                            try {
+                                (0..10).map { it }.indexOf(viewModel.getAnalog2Out().toInt())
+                            } catch (e: UninitializedPropertyAccessException) {
+                                (0..10).map { it }
+                                        .indexOf((viewState.analogOut2FanSpeedTestSignal.toInt()) / 10)
+                            },
                             onAnalogOutChanged = {
                                 viewState.analogOut2FanSpeedTestSignal = it.toDouble()
                                 viewModel.sendAnalogTestSignal(it.toDouble())

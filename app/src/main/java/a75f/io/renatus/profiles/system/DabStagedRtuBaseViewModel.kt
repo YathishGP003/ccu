@@ -175,6 +175,10 @@ open class DabStagedRtuBaseViewModel : ViewModel() {
         MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
     }
 
+    fun getAnalog2Out(): Double {
+        return Domain.cmBoardDevice.analog2Out.readHisVal()
+    }
+
     fun updateSystemMode() {
         val systemProfile = L.ccu().systemProfile as DabStagedRtu
         val possibleConditioningMode = when {

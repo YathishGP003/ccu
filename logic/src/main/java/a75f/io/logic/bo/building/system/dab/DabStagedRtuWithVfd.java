@@ -131,8 +131,8 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         if (!isSystemOccupied() && isLockoutActiveDuringUnoccupied()) {
             signal = 0;
         }
-        vfdSystemEquip.getFanSignal().writeHisVal(signal);
-        Domain.cmBoardDevice.getAnalog2Out().writeHisVal(signal);
+        vfdSystemEquip.getFanSignal().writePointValue(signal);
+        Domain.cmBoardDevice.getAnalog2Out().writePointValue(signal);
         CcuLog.d(L.TAG_CCU_SYSTEM, " analog2 fan Signal : " + signal);
     }
 
@@ -141,16 +141,16 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         if ((systemCoolingLoopOp > 0 && isCoolingLockoutActive()) ||
                 (systemHeatingLoopOp > 0 && isHeatingLockoutActive())) {
             double signal = ANALOG_SCALE * min; // Use minimum value when in lockout
-            vfdSystemEquip.getCompressorSpeed().writeHisVal(signal);
-            Domain.cmBoardDevice.getAnalog2Out().writeHisVal(signal);
+            vfdSystemEquip.getCompressorSpeed().writePointValue(signal);
+            Domain.cmBoardDevice.getAnalog2Out().writePointValue(signal);
             CcuLog.d(L.TAG_CCU_SYSTEM, " Lockout Active : Compressor speed Signal : " + signal);
             return;
         }
         double max = vfdSystemEquip.getAnalog2MaxCompressorSpeed().readDefaultVal();
         double signal = ANALOG_SCALE * getModulatedOutput(systemCompressorLoop, min, max);
         CcuLog.d(L.TAG_CCU_SYSTEM, " analog2 Compressor speed Signal : " + signal);
-        vfdSystemEquip.getCompressorSpeed().writeHisVal(signal);
-        Domain.cmBoardDevice.getAnalog2Out().writeHisVal(signal);
+        vfdSystemEquip.getCompressorSpeed().writePointValue(signal);
+        Domain.cmBoardDevice.getAnalog2Out().writePointValue(signal);
     }
 
     public void handleDcvModulation(DabStagedVfdSystemEquip vfdSystemEquip) {
@@ -163,8 +163,8 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
             signal = ANALOG_SCALE * min; // Use minimum value when not occupied
         }
         CcuLog.d(L.TAG_CCU_SYSTEM, " analog2 DCV Damper Signal : " + signal);
-        vfdSystemEquip.getDamperModulation().writeHisVal(signal);
-        Domain.cmBoardDevice.getAnalog2Out().writeHisVal(signal);
+        vfdSystemEquip.getDamperModulation().writePointValue(signal);
+        Domain.cmBoardDevice.getAnalog2Out().writePointValue(signal);
     }
 
     @Override

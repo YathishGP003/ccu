@@ -32,6 +32,9 @@ public class InstallTypeFragment extends Fragment {
     RelativeLayout layoutPreconfigCCU;
     RelativeLayout layoutReplaceCCU;
     RelativeLayout layoutWithoutCloud;
+
+    View preConfigLineTop;
+    View preConfigLineDown;
     DefaultSystem systemProfile = null;
     //InstallType mCallback;
     Prefs prefs;
@@ -61,13 +64,27 @@ public class InstallTypeFragment extends Fragment {
         layoutPreconfigCCU = root_view.findViewById(R.id.layoutPreconfigCCU);
         layoutReplaceCCU = root_view.findViewById(R.id.layoutReplaceCCU);
         layoutWithoutCloud = root_view.findViewById(R.id.layoutWithoutCloud);
+        preConfigLineTop = root_view.findViewById(R.id.preViewLineTop);
+        preConfigLineDown = root_view.findViewById(R.id.preViewLineDown);
 
         prefs = new Prefs(getActivity());
 
         //TODO: enable when implement
-        layoutPreconfigCCU.setEnabled(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD) || BuildConfig.BUILD_TYPE.equalsIgnoreCase("qa"));
-        layoutPreconfigCCU.setVisibility((BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD) ||BuildConfig.BUILD_TYPE.equalsIgnoreCase("qa"))
-                                                        ? View.VISIBLE : View.GONE);
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)|| BuildConfig.BUILD_TYPE.equalsIgnoreCase("qa"))
+        {
+            preConfigLineTop.setVisibility(View.VISIBLE);
+            preConfigLineDown.setVisibility(View.VISIBLE);
+            layoutPreconfigCCU.setEnabled(true);
+            layoutPreconfigCCU.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            preConfigLineTop.setVisibility(View.GONE);
+            preConfigLineDown.setVisibility(View.GONE);
+            layoutPreconfigCCU.setEnabled(false);
+            layoutPreconfigCCU.setVisibility(View.GONE);
+        }
+
         layoutReplaceCCU.setEnabled(true);
         layoutWithoutCloud.setEnabled(false);
 

@@ -175,6 +175,7 @@
 
             <View
                 android:layout_width="517dp"
+                android:id="@+id/preViewLineTop"
                 android:layout_height="0.5dp"
                 android:layout_gravity="end"
                 android:layout_marginTop="10dp"
@@ -228,6 +229,7 @@
                 android:layout_gravity="end"
                 android:layout_marginTop="10dp"
                 android:alpha="0.37"
+                android:id="@+id/preViewLineDown"
                 android:background="@color/line_greycolor" />
 
 

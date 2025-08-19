@@ -376,7 +376,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
                     }
 
                     MyStatHpuAnalogOutMapping.FAN_SPEED -> {
-                        if (isAuxAvailableAndActive(relayOutputPoints)) return
+                        if (isAuxAvailableAndActive(relayOutputPoints) && basicSettings.fanMode.name == MyStatFanStages.AUTO.name ) return
                         doAnalogFanAction(
                             Port.ANALOG_OUT_ONE,
                             analogOut1FanSpeedConfig.low.currentVal.toInt(),

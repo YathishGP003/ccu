@@ -256,7 +256,7 @@ object DomainManager {
 
     }
 
-    private fun addDomainDevices(hayStack: CCUHsApi) {
+     fun addDomainDevices(hayStack: CCUHsApi) {
         hayStack.readAllEntities("zone and equip").forEach { equip ->
 
             val deviceMap = hayStack.readEntity("domainName and device and equipRef == \"${equip["id"]}\"")

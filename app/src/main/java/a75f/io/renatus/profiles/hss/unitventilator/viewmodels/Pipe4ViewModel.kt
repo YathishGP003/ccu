@@ -1,6 +1,7 @@
 package a75f.io.renatus.profiles.hss.unitventilator.viewmodels
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getListOfDisNameByDomainName
 import a75f.io.domain.api.DomainName
@@ -98,6 +99,8 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
                     ProgressDialogUtils.hideProgressDialog()
                     pairingCompleteListener.onPairingComplete()
                 }
+                LSerial.getInstance()
+                    .sendHyperSplitSeedMessage(deviceAddress, zoneRef, floorRef)
                 CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
             }
         }

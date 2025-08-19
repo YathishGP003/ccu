@@ -75,7 +75,7 @@ open class HyperStatSplitViewModel : ViewModel() {
     var openCancelDialog by mutableStateOf(false)
 
     lateinit var temperatureOffsetsList: List<String>
-    lateinit var fanLowMedHighSpeedsList: List<String>
+    private lateinit var fanLowMedHighSpeedsList: List<String>
     lateinit var outsideDamperMinOpenList: List<String>
     lateinit var exhaustFanThresholdList: List<String>
     lateinit var exhaustFanHysteresisList: List<String>
@@ -83,8 +83,8 @@ open class HyperStatSplitViewModel : ViewModel() {
     lateinit var prePurgeOutsideDamperOpenList: List<String>
     lateinit var zoneCO2ThresholdList: List<String>
     lateinit var zoneCO2TargetList: List<String>
-    lateinit var zoneVOCThresholdList: List<String>
-    lateinit var zoneVOCTargetList: List<String>
+    private lateinit var zoneVOCThresholdList: List<String>
+    private lateinit var zoneVOCTargetList: List<String>
     lateinit var zonePM2p5TargetList: List<String>
 
     var minMaxVoltage = List(11) { Option(it, it.toString()) }
@@ -196,19 +196,19 @@ open class HyperStatSplitViewModel : ViewModel() {
     }
 
 
-    fun getTestSignalForRelay(index: Int):Boolean{
+    fun getTestSignalForRelay(index: Int): Boolean {
 
-        if(equipRef!=null){
+        if (equipRef != null) {
             val device = getDomainHyperStatSplitDevice(equipRef!!)
             return when (index) {
-                0 -> device.relay1.readPointValue() >0
-                1 -> device.relay2.readPointValue() >0
-                2 -> device.relay3.readPointValue() >0
-                3 -> device.relay4.readPointValue() >0
-                4 -> device.relay5.readPointValue() >0
-                5 -> device.relay6.readPointValue() >0
-                6 -> device.relay7.readPointValue() >0
-                7 -> device.relay8.readPointValue() >0
+                0 -> device.relay1.readPointValue() > 0
+                1 -> device.relay2.readPointValue() > 0
+                2 -> device.relay3.readPointValue() > 0
+                3 -> device.relay4.readPointValue() > 0
+                4 -> device.relay5.readPointValue() > 0
+                5 -> device.relay6.readPointValue() > 0
+                6 -> device.relay7.readPointValue() > 0
+                7 -> device.relay8.readPointValue() > 0
                 else -> false
             }
         }

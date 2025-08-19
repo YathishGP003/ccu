@@ -12,6 +12,7 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.cutover.BuildingEquipCutOverMapping
 import a75f.io.domain.cutover.devicePointWithDomainNameExists
 import a75f.io.domain.cutover.getDeviceDomainNameFromDis
+import a75f.io.domain.logic.DomainManager.addDomainDevices
 import a75f.io.domain.util.TagsUtil
 import a75f.io.domain.util.highPriorityDispatcher
 import a75f.io.logger.CcuLog
@@ -39,6 +40,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         val deviceId = hayStack.addDevice(hayStackDevice)
         hayStackDevice.id = deviceId
         DomainManager.addDevice(hayStackDevice)
+        addDomainDevices(hayStack)
         val time = measureTimeMillis {
             createPoints(modelDef, configuration, hayStackDevice)
         }

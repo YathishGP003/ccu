@@ -251,7 +251,7 @@ fun isConnectModuleExist(): Boolean {
      ahuSettings: AhuSettings
  ): String {
     val systemEquip = getAdvancedAhuSystemEquip()
-    if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(connectEquip1 = connectEquip)) {
+    if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(systemEquip = systemEquip, connectEquip1 = connectEquip)) {
         return "Emergency Shut Off mode is active"
     }
      val systemStages = connectEquip.conditioningStages

@@ -166,6 +166,20 @@ public class RestoreCCUHsApi {
         return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
     }
 
+    public HGrid getAllFloors(String siteId, RetryCountCallback retryCountCallback){
+        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HDict ccuDict = new HDictBuilder().add("filter",
+                "floor and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
+    }
+
+    public HGrid getAllZones(String siteId, RetryCountCallback retryCountCallback){
+        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HDict ccuDict = new HDictBuilder().add("filter",
+                "room and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
+    }
+
     public HGrid getModBusSubEquips(String parentEquipRef, RetryCountCallback retryCountCallback){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("filter",

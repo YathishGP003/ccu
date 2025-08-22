@@ -228,6 +228,37 @@ public class RestoreCCU {
 
         floorAndZoneIds.put(Tags.ROOMREF, roomRefSet);
         floorAndZoneIds.put(Tags.FLOORREF, floorRefSet);
+
+        HGrid floorGird = restoreCCUHsApi.getAllFloors( siteCode ,retryCountCallback);
+        HGrid zoneGird = restoreCCUHsApi.getAllZones(siteCode , retryCountCallback);
+
+        if (floorGird == null || zoneGird == null) {
+            throw new NullHGridException("Null occurred while fetching floors or zones.");
+        }
+        // In case of zone/floor which not have any module paired with it, we need to add them
+        Iterator floorGridIterator = floorGird.iterator();
+        while (floorGridIterator.hasNext()) {
+            HRow floorRow = (HRow) floorGridIterator.next();
+            String floorRef = floorRow.get(Tags.ID).toString();
+            if(!floorAndZoneIds.get(Tags.FLOORREF).contains(floorRef)) {
+                floorRefSet.add(floorRef);
+                floorAndZoneIds.put(Tags.FLOORREF,floorRefSet);
+                CcuLog.d("CCU_REPLACE", "Floor Ref added: " + floorRef);
+            }
+        }
+
+        Iterator zoneGridIterator = zoneGird.iterator();
+        while (zoneGridIterator.hasNext()) {
+            HRow zoneRow = (HRow) zoneGridIterator.next();
+            String roomRef = zoneRow.get(Tags.ID).toString();
+            if(!floorAndZoneIds.get(Tags.ROOMREF).contains(roomRef)) {
+                roomRefSet.add(roomRef);
+                floorAndZoneIds.put(Tags.ROOMREF,roomRefSet);
+                CcuLog.d("CCU_REPLACE", "Room Ref added: " + roomRef);
+
+            }
+        }
+
         editor.commit();
         return floorAndZoneIds;
     }

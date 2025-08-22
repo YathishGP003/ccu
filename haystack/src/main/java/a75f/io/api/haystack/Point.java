@@ -166,6 +166,7 @@ public class Point extends Entity
     public void setBacnetType(String bacnetType) { this.bacnetType = bacnetType; }
     public String getCurStatus() { return curStatus;}
     public void setCurStatus(String curStatus) { this.curStatus = curStatus;}
+    public void setUnit(String unit) {this.unit = unit;}
     public Map<String, HVal> getTags() {
         return tags;
     }

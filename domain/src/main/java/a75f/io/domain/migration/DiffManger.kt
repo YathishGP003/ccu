@@ -2,6 +2,7 @@ package a75f.io.domain.migration
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.util.ModelCache
 import a75f.io.domain.util.ResourceHelper

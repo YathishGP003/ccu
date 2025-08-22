@@ -320,7 +320,8 @@ public class Globals {
                 migrationHandler.temperatureModeMigration();
                 /*checkBacnetIdMigrationRequired migration script will update source model version
                  of system Equip, This will affect DM TO DM migration*/
-                migrationHandler.checkBacnetIdMigrationRequired();
+                //This was released in 2.18. No longer required.
+                //migrationHandler.checkBacnetIdMigrationRequired();
                 migrationHandler.removeRedundantDevicePoints();
 
                 CcuLog.i(L.TAG_CCU_INIT, "Init Watchdog");

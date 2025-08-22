@@ -3,6 +3,7 @@ package a75f.io.domain.migration
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
+import a75f.io.domain.api.Ccu
 import a75f.io.domain.api.Device
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getBypassEquipByDomainName
@@ -32,6 +33,7 @@ import a75f.io.logger.CcuLog
 import android.util.Log
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
+import io.seventyfivef.domainmodeler.client.ModelTagDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -43,6 +45,12 @@ import io.seventyfivef.domainmodeler.common.point.Condition
 import io.seventyfivef.domainmodeler.common.point.DependentConfiguration
 import io.seventyfivef.domainmodeler.common.point.Operator
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
+import io.seventyfivef.ph.core.Tags
+import org.projecthaystack.HBool
+import org.projecthaystack.HList
+import org.projecthaystack.HNum
+import org.projecthaystack.HStr
+import org.projecthaystack.HVal
 
 /**
  * Created by Manjunath K on 16-06-2023.
@@ -93,7 +101,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             if(equips.isNotEmpty()) {
                 addEntityData(entityData.tobeAdded, newModel, equips, siteRef)
                 removeEntityData(entityData.tobeDeleted, oldModel, equips, siteRef)
-                updateEntityData(entityData.tobeUpdated, newModel, equips, siteRef)
+                updateEntityData(entityData.tobeUpdated, newModel, oldModel, equips, siteRef)
                 updateEquipVersion(newModel, equips, siteRef)
             }
         }
@@ -388,6 +396,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
     }
 
     private fun updateEntityData(tobeUpdate: MutableList<EntityConfig>, newModel: ModelDirective,
+                                 currentModel : ModelDirective,
                                  equips: List<Equip>, siteRef: String) {
         Log.d(Domain.LOG_TAG, "updateEntityData called")
         val equipBuilder = ProfileEquipBuilder (haystack)
@@ -416,13 +425,11 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             equips.forEach equips@{equip ->
                 Log.d(Domain.LOG_TAG, "loop equip item diffDomain ${equip.domainName} ")
                 val modelPointDef = newModel.points.find { it.domainName == diffDomain.domainName }
+                val curModelPointDef = currentModel.points.find { it.domainName == diffDomain.domainName }
                 val equipMap = haystack.readMapById(equip.id)
                 val profileConfiguration = getProfileConfig(equipMap["profile"].toString())
                 updateRef(equipMap, profileConfiguration)
                 modelPointDef?.run {
-                   /* val status = toBeAddedForEquip(modelPointDef, equip.id, profileConfiguration, true, entityMapper)
-                    Log.d(Domain.LOG_TAG, "eligible to update $status")
-                    if (status) {*/
                         val hayStackPoint = equipBuilder.buildPoint(
                             PointBuilderConfig(
                                 modelPointDef,
@@ -440,6 +447,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                             Log.d(Domain.LOG_TAG, "point not found: $diffDomain.domainName")
                             return@equips
                         }
+                        extractAndAppendExternalEdits(curModelPointDef, hayStackPoint, point);
                         Log.d(Domain.LOG_TAG, "updated haystack point: $hayStackPoint")
                         if (Domain.readEquip(newModel.id)["roomRef"].toString().replace("@","") == "SYSTEM") {
                             hayStackPoint.roomRef = "SYSTEM"
@@ -598,4 +606,60 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
         return false
     }
 
+    private fun extractAndAppendExternalEdits(oldPointDef : ModelPointDef?, newPoint : Point, oldPoint : HashMap<Any, Any>) {
+        if (oldPointDef == null) {
+            CcuLog.i(Domain.LOG_TAG, "Invalid model point")
+            return
+        }
+        val dbPoint = Point.Builder().setHashMap(oldPoint).build()
+        getExternallyAddedTags(oldPointDef.tags, oldPoint).forEach {
+            newPoint.tags[it.key] = it.value
+        }
+        if (oldPointDef.name != dbPoint.displayName.substringAfterLast("-")) {
+            CcuLog.i(Domain.LOG_TAG, "dis override detected ${oldPointDef.name} - ${dbPoint.displayName}")
+            newPoint.displayName = dbPoint.displayName;
+        }
+        if (!oldPointDef.defaultUnit.isNullOrEmpty()
+                && !dbPoint.unit.isNullOrEmpty()
+                && oldPointDef.defaultUnit != dbPoint.unit) {
+            CcuLog.i(Domain.LOG_TAG,"unit override detected ${oldPointDef.defaultUnit} - ${dbPoint.unit}")
+            newPoint.unit = dbPoint.unit
+        }
+    }
+
+    private fun getExternallyAddedTags(pointTagsSet : Set<ModelTagDef>, pointMap : HashMap<Any, Any>)
+                                    : Map<String, HVal> {
+        val ccuAddedTags = mutableSetOf(Tags.ID,
+            Tags.EQUIP_REF, Tags.DEVICE_REF, Tags.ROOM_REF, Tags.FLOOR_REF,
+            Tags.SITE_REF, Tags.KIND, Tags.TZ,
+            "domainName" , "sourcePoint", "bacnettype", "bacnetid", "ccuRef",
+            "enum","hisInterpolate", "group",
+            "createdDateTime","lastModifiedBy","lastModifiedDateTime"
+        )
+        val modelPointTags = mutableMapOf<String, Any?>()
+        pointTagsSet.forEach {
+            if (it.name !in ccuAddedTags) {
+                modelPointTags[it.name] = it.defaultValue ?: "marker"
+            }
+        }
+        CcuLog.i(Domain.LOG_TAG," modelPointTags : $modelPointTags")
+
+        val externallyAddedTags = mutableMapOf<String, HVal>()
+        for ((key, value) in pointMap) {
+            if (key !in modelPointTags && key !in ccuAddedTags ) {
+                externallyAddedTags[key.toString()] = anyToHVal(value)
+            }
+        }
+        CcuLog.i(Domain.LOG_TAG, " Externally added tag for ${pointMap["dis"]} "+externallyAddedTags)
+        return externallyAddedTags
+    }
+
+    private fun anyToHVal(value: Any?): HVal {
+        return when (value) {
+            is HVal -> value
+            is Number -> HNum.make(value.toDouble())
+            is Boolean -> HBool.make(value)
+            else -> HStr.make(value.toString())
+        }
+    }
 }

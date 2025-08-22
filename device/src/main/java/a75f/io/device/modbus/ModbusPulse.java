@@ -216,7 +216,11 @@ public class ModbusPulse {
             } else if (register.getParameterDefinitionType().equals("boolean")) {
                 
                 if (!register.getParameters().isEmpty()) {
-                    respVal = parseBitRangeVal(response, register.getParameters().get(0).bitParamRange);
+                    if(register.getParameters().get(0).bitParamRange != null) {
+                        respVal = parseBitRangeVal(response, register.getParameters().get(0).bitParamRange);
+                    } else {
+                        respVal = parseBitRangeVal(response, register.getParameters().get(0).getStartBit(), register.getParameters().get(0).getEndBit());
+                    }
                 }
             }  else if (register.getParameterDefinitionType().equals("int64")) {
                 
@@ -227,8 +231,15 @@ public class ModbusPulse {
                         respVal = parseInt64Val(response);
                     }
                 }
-            }else if(register.getParameterDefinitionType().equals("unsigned long") ||
-                    register.getParameterDefinitionType().equals("long") ||
+            } else if(register.getParameterDefinitionType().equals("unsigned long")){
+                if (!register.getParameters().isEmpty()) {
+                    if (register.getWordOrder() != null && register.getWordOrder().equals("littleEndian")) {
+                        respVal = parseLittleEndianUnsignedLongVal(response);
+                    } else {
+                        respVal = parseUnsignedLongVal(response);
+                    }
+                }
+            } else if(register.getParameterDefinitionType().equals("long") ||
                     register.getParameterDefinitionType().equals("int32")){
                 if (!register.getParameters().isEmpty()) {
                     if (register.getWordOrder() != null && register.getWordOrder().equals("littleEndian")) {
@@ -298,8 +309,8 @@ public class ModbusPulse {
     }
     
     public static int parseIntVal(RtuMessageResponse response) {
-        return (response.getMessageData()[MODBUS_DATA_START_INDEX] & 0xFF) << 8 |
-                      (response.getMessageData()[MODBUS_DATA_START_INDEX + 1] & 0xFF) ;
+        return (short) ((response.getMessageData()[MODBUS_DATA_START_INDEX] & 0xFF) << 8 |
+                      (response.getMessageData()[MODBUS_DATA_START_INDEX + 1] & 0xFF)) ;
     }
     
     public static long parseLongVal(RtuMessageResponse response) {
@@ -307,7 +318,7 @@ public class ModbusPulse {
                            (response.getMessageData()[MODBUS_DATA_START_INDEX + 1] & 0xFF);
     }
 
-    public static long parseInt32Val(RtuMessageResponse response) {
+    public static long parseUnsignedLongVal(RtuMessageResponse response) {
         long responseVal = 0;
         for (int i = 0; i < 4; i++) {
             responseVal <<= Long.BYTES;
@@ -316,12 +327,27 @@ public class ModbusPulse {
         return responseVal;
     }
 
+    public static int parseInt32Val(RtuMessageResponse response) {
+        int responseVal = 0;
+        for (int i = 0; i < 4; i++) {
+            responseVal <<= Long.BYTES;
+            responseVal |= (response.getMessageData()[MODBUS_DATA_START_INDEX + i] & 0xFF);
+        }
+        return responseVal;
+    }
 
-    public static long parseLittleEndianInt32Val(RtuMessageResponse response) {
+    public static long parseLittleEndianUnsignedLongVal(RtuMessageResponse response) {
         return ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 2] & 0xFF) << 24 |
                 ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 3] & 0xFF) << 16 |
                 ((long)response.getMessageData()[MODBUS_DATA_START_INDEX] & 0xFF) << 8 |
                 ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 1] & 0xFF);
+    }
+
+    public static int parseLittleEndianInt32Val(RtuMessageResponse response) {
+        return ((int)response.getMessageData()[MODBUS_DATA_START_INDEX + 2] & 0xFF) << 24 |
+                ((int)response.getMessageData()[MODBUS_DATA_START_INDEX + 3] & 0xFF) << 16 |
+                ((int)response.getMessageData()[MODBUS_DATA_START_INDEX] & 0xFF) << 8 |
+                ((int)response.getMessageData()[MODBUS_DATA_START_INDEX + 1] & 0xFF);
     }
 
 
@@ -349,7 +375,8 @@ public class ModbusPulse {
         String [] arrOfLimits = range.split("-");
         
         if (arrOfLimits.length != 2) {
-            throw new IllegalArgumentException(" Invalid Range : "+range);
+            CcuLog.w(L.TAG_CCU_MODBUS, "Invalid bit range format: " + range);
+            return 0;
         }
     
         int lowerLimit = Integer.parseInt(arrOfLimits[0]);
@@ -358,6 +385,18 @@ public class ModbusPulse {
         long responseVal = parseLongVal(response);
 
         return (int) extractBits(responseVal, upperLimit-lowerLimit + 1, lowerLimit);
+    }
+
+    public static int parseBitRangeVal(RtuMessageResponse response, Integer lowerLimit, Integer upperLimit) {
+        if(lowerLimit == null || upperLimit == null || lowerLimit > upperLimit) {
+            CcuLog.w(L.TAG_CCU_MODBUS, "Invalid bit range: lowerLimit=" + lowerLimit + ", upperLimit=" + upperLimit);
+            return 0;
+        }
+
+        long responseVal = parseLongVal(response);
+
+        return (int) extractBits(responseVal, upperLimit-lowerLimit + 1, lowerLimit);
+
     }
     
     public static int parseBitVal(RtuMessageResponse response, int position) {

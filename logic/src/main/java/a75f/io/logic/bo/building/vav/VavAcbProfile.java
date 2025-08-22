@@ -130,7 +130,7 @@ public class VavAcbProfile extends VavProfile
         }
         loopOp = Math.max(0, loopOp);
         try {
-            updateIaqCompensatedMinDamperPos(nodeAddr, equip);
+            updateIaqCompensatedMinDamperPos(equip, systemMode);
         } catch (UnknownRecException e) {
             CcuLog.e(L.TAG_CCU_ZONE, "IaqCompensation cannot be performed ", e);
         }
@@ -265,17 +265,8 @@ public class VavAcbProfile extends VavProfile
         heatingLoop.setEnabled();
         coolingLoop.setDisabled();
     }
-    
-    /**
-     * Thermistor measurements interpret junk reading when they are actually not connected.
-     * Avoid running the loop when the air temps are outside a reasonable range to make sure they are not picked by the
-     * algorithm.
-     */
-    private boolean isSupplyAirTempValid(double sat) {
-        return !(sat < 0) && !(sat > 200);
-    }
-    
-    private void updateIaqCompensatedMinDamperPos(Integer node, Equip equip, SystemMode systemMode) {
+
+    private void updateIaqCompensatedMinDamperPos(Equip equip, SystemMode systemMode) {
 
         boolean  enabledCO2Control = vavEquip.getEnableCo2Control().readDefaultVal() > 0;
         if (enabledCO2Control) { CcuLog.e(L.TAG_CCU_ZONE, "DCV Tuners: co2Target " + co2Loop.getCo2Target() + ", co2Threshold " + co2Loop.getCo2Threshold()); }

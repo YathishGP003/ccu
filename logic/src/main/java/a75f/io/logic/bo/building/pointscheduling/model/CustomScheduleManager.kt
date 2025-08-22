@@ -986,7 +986,11 @@ class CustomScheduleManager {
             val dayItem = days[i]
 
             val scheduledDay = dayItem.day.toString().toInt()
-            if (scheduledDay != currentDay) continue
+
+            //if current day is monday (0) then previous day is sunday (6)
+            // this below previous day check is for overnight schedule #40186
+            val previousDay = if (currentDay == 0) 6 else currentDay - 1
+            if (scheduledDay != currentDay && scheduledDay != previousDay) continue
             CcuLog.d(
                 L.TAG_CCU_POINT_SCHEDULE,
                 "Processing day item: ${dayItem.day}," +
@@ -1001,26 +1005,50 @@ class CustomScheduleManager {
             val startTotalMinutes = startHour * 60 + startMinute
             val endTotalMinutes = endHour * 60 + endMinute
 
-            // overnight schedule
-            if(endTotalMinutes <= startTotalMinutes){
-                val value = dayItem.`val`.toString().toDouble()
-                CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "custom value found. value=$value")
-                return mapOf(true to dayItem)
-            }
-
             CcuLog.d(
                 L.TAG_CCU_POINT_SCHEDULE,
                 "Current total minutes: $currentTotalMinutes, " +
                         "Start total minutes: $startTotalMinutes, " +
-                        "End total minutes: $endTotalMinutes"
+                        "End total minutes: $endTotalMinutes, "+
+                        "Scheduled day: $scheduledDay, "+
+                        "Current day: $currentDay "
             )
+
+
+            // overnight schedule
+            if (endTotalMinutes <= startTotalMinutes) {
+                CcuLog.d(
+                    L.TAG_CCU_POINT_SCHEDULE,
+                    "Detected overnight schedule: scheduledDay=$scheduledDay, " +
+                            "previousDay=$previousDay, currentDay=$currentDay, " +
+                            "startTotalMinutes=$startTotalMinutes, endTotalMinutes=$endTotalMinutes"
+                )
+                if (scheduledDay == previousDay && currentTotalMinutes <= endTotalMinutes) {
+                    // After midnight part of yesterday’s overnight schedule
+                    val value = dayItem.`val`.toString().toDouble()
+                    CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "overnight(previous day) value=$value")
+                    return mapOf(true to dayItem)
+                }
+
+                if (scheduledDay == currentDay && currentTotalMinutes >= startTotalMinutes) {
+                    // Before midnight part of today’s overnight schedule
+                    val value = dayItem.`val`.toString().toDouble()
+                    CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "overnight(current day) value=$value")
+                    return mapOf(true to dayItem)
+                }
+
+                CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "no active overnight schedule match.")
+            }
+
 
             CcuLog.d(
                 L.TAG_CCU_POINT_SCHEDULE,
                 "Checking schedule: stt:stm - $startHour:$startMinute to ett:etm - $endHour:$endMinute for day $scheduledDay"
             )
 
-            if (currentTotalMinutes in startTotalMinutes..endTotalMinutes) {
+            if (scheduledDay == currentDay &&
+                currentTotalMinutes in startTotalMinutes..endTotalMinutes
+            ) {
                 val value = dayItem.`val`.toString().toDouble()
                 CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "custom value found. value=$value")
                 return mapOf(true to dayItem)

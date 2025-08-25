@@ -107,7 +107,7 @@ public class HeartBeatUtil {
         }
     }
 
-    private static String getTimeDifference(Date currTime, Date updatedTime, StringBuffer message){
+    public static String getTimeDifference(Date currTime, Date updatedTime, StringBuffer message){
         long mins = TimeUnit.MILLISECONDS.toMinutes(currTime.getTime() - updatedTime.getTime());
         if(mins < 1){
             return message.append("Just now")
@@ -157,7 +157,7 @@ public class HeartBeatUtil {
         return timeFormatter.format(time);
     }
 
-    public static boolean isZoneAlive(ArrayList<HashMap> equips){
+    public static boolean isZoneAlive(ArrayList<HashMap<Object, Object>> equips){
         if (equips == null || equips.isEmpty()) {
             return false;
         }

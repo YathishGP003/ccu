@@ -2,9 +2,7 @@ package a75f.io.renatus;
 
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
 import static a75f.io.api.haystack.Tags.BACNET;
-import static a75f.io.api.haystack.Tags.BACNET_POINT_UPDATE;
 import static a75f.io.api.haystack.Tags.CONNECTMODULE;
-import static a75f.io.api.haystack.Tags.MODBUS;
 import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
 import static a75f.io.logic.bo.building.definitions.ProfileType.CONNECTNODE;
 import static a75f.io.logic.bo.util.CCUUtils.getTruncatedString;
@@ -15,14 +13,19 @@ import static a75f.io.logic.L.TAG_CCU_INIT;
 import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.disconnectedIntervals;
-import static a75f.io.logic.bo.util.CustomScheduleUtilKt.fetchScheduleStatusMessageForPointsUnderCustomControl;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
+import static a75f.io.renatus.schedules.ScheduleUtil.*;
+import static a75f.io.renatus.ui.nontempprofiles.helper.BacnetKt.fetchZoneDataForBacnet;
+import static a75f.io.renatus.ui.nontempprofiles.helper.BacnetKt.loadBacnetZone;
+import static a75f.io.renatus.ui.nontempprofiles.helper.ConnectModuleKt.loadConnectModuleZone;
+import static a75f.io.renatus.ui.nontempprofiles.helper.ModbusKt.loadModbusZone;
+import static a75f.io.renatus.ui.nontempprofiles.utilities.CcuUtilsKt.cleanUpObservableList;
+import static a75f.io.renatus.ui.nontempprofiles.utilities.UiUtilKt.showHeaderViewUI;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -37,10 +40,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.text.SpannableString;
 import android.text.Spanned;
-import android.util.Pair;
-import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -67,13 +67,14 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.compose.ui.platform.ComposeView;
 import androidx.core.text.HtmlCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -87,11 +88,9 @@ import org.joda.time.base.BaseInterval;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HStr;
 
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -100,7 +99,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -111,17 +109,12 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.bacnet.parser.BacnetModelDetailResponse;
-import a75f.io.api.haystack.bacnet.parser.BacnetPoint;
 import a75f.io.api.haystack.bacnet.parser.BacnetZoneViewItem;
-import a75f.io.api.haystack.bacnet.parser.PresentationData;
-import a75f.io.api.haystack.bacnet.parser.ValueConstraint;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
-import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.device.mesh.Pulse;
 import a75f.io.device.mesh.hypersplit.HyperSplitMsgReceiver;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.device.mesh.mystat.MyStatMsgReceiverKt;
-import a75f.io.domain.equips.HyperStatSplitEquip;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.hyperstat.MonitoringEquip;
@@ -129,6 +122,7 @@ import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip;
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
@@ -161,14 +155,9 @@ import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler;
 import a75f.io.logic.util.uiutils.MyStatUserIntentHandler;
 import a75f.io.messaging.handler.UpdateEntityHandler;
 import a75f.io.messaging.handler.UpdatePointHandler;
-import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants;
 import a75f.io.renatus.anrwatchdog.ANRHandler;
-import a75f.io.renatus.bacnet.GridSpacingItemDecoration;
-import a75f.io.renatus.bacnet.ZoneRecyclerBacnetParamAdapter;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvZoneViewKt;
 import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitZoneViewKt;
-import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
-import a75f.io.renatus.modbus.util.UtilSourceKt;
 import a75f.io.renatus.model.ZoneViewData;
 import a75f.io.renatus.profiles.hyperstatv2.util.HyperStatZoneViewKt;
 import a75f.io.renatus.profiles.mystat.ui.MyStatZoneUiKt;
@@ -176,6 +165,9 @@ import a75f.io.renatus.schedules.CustomControlDialog;
 import a75f.io.renatus.schedules.NamedSchedule;
 import a75f.io.renatus.schedules.ScheduleGroupFragment;
 import a75f.io.renatus.schedules.ScheduleUtil;
+import a75f.io.renatus.ui.model.HeaderViewItem;
+import a75f.io.renatus.ui.nontempprofiles.utilities.CcuUtilsKt;
+import a75f.io.renatus.ui.nontempprofiles.viewmodel.NonTempProfileViewModel;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.HeartBeatUtil;
@@ -222,7 +214,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     GridLayout gridlayout;
     TableLayout tableLayout;
     private Animation in = null;
-    private Animation inleft = null;
     public static final String AIRFLOW_SENSOR = "airflow sensor";
 
     private int prevPosition = -1;
@@ -273,10 +264,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
     private List<BacnetZoneViewItem> bacNetPointsList = new ArrayList<>();
 
-    private ZoneRecyclerBacnetParamAdapter zoneRecyclerBacnetParamAdapter;
-
-    private RecyclerView bacnetRecyclerView;
-
     private Equip visibleEquip;
 
     public ZoneFragmentNew() {
@@ -291,6 +278,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private boolean isZoneViewReady = false;
 
     private boolean isItemSelectedEvent = false;
+
+    public ArrayList<NonTempProfileViewModel> nonTempProfileViewModels = new ArrayList<>();
     public static ZoneFragmentNew newInstance() {
         return new ZoneFragmentNew();
     }
@@ -314,32 +303,32 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         lvFloorList = view.findViewById(R.id.floorList);
 
-        weather_data = getView().findViewById(R.id.weather_data);
-        place = getView().findViewById(R.id.place);
-        temperature = getView().findViewById(R.id.temperature);
-        weather_condition = getView().findViewById(R.id.weather_condition);
-        weather_icon = getView().findViewById(R.id.weather_icon);
-        maximumTemp = getView().findViewById(R.id.maximumTemp);
-        minimumTemp = getView().findViewById(R.id.minimumTemp);
-        note = getView().findViewById(R.id.note);
-        weather_icon_offline = getView().findViewById(R.id.weather_icon_offline);
-        offline_description = getView().findViewById(R.id.offlineModeDesc);
+        weather_data = view.findViewById(R.id.weather_data);
+        place = view.findViewById(R.id.place);
+        temperature = view.findViewById(R.id.temperature);
+        weather_condition = view.findViewById(R.id.weather_condition);
+        weather_icon = view.findViewById(R.id.weather_icon);
+        maximumTemp = view.findViewById(R.id.maximumTemp);
+        minimumTemp = view.findViewById(R.id.minimumTemp);
+        note = view.findViewById(R.id.note);
+        weather_icon_offline = view.findViewById(R.id.weather_icon_offline);
+        offline_description = view.findViewById(R.id.offlineModeDesc);
 
         scrollViewParent = view.findViewById(R.id.scrollView_zones);
         tableLayout = view.findViewById(R.id.tableRoot);
         gridlayout = view.findViewById(R.id.gridview);
 
         in = AnimationUtils.makeInAnimation(getActivity(), false);
-        inleft = AnimationUtils.makeInAnimation(getActivity(), true);
+        Animation inleft = AnimationUtils.makeInAnimation(getActivity(), true);
         in.setDuration(400);
         inleft.setDuration(400);
 
         //recyclerView.setHasFixedSize(true);
-        prefs = new Prefs(getContext().getApplicationContext());
+        prefs = new Prefs(Globals.getInstance().getApplicationContext());
         expandableListDetail = new HashMap<>();
 
         floorList = HSUtil.getFloors();
-        Collections.sort(floorList, new FloorComparator());
+        floorList.sort(new FloorComparator());
 
         mFloorListAdapter = new DataArrayAdapter<>(getActivity(), R.layout.listviewitem, floorList);
         lvFloorList.setAdapter(mFloorListAdapter);
@@ -353,19 +342,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             lvFloorList.setContentDescription(floorList.get(0).getDisplayName());
         }
         floorMenu = view.findViewById(R.id.floorMenu);
-        floorMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFloor();
-            }
-        });
+        floorMenu.setOnClickListener(v -> openFloor());
 
-        lvFloorList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectFloor(position);
-            }
-        });
+        lvFloorList.setOnItemClickListener((parent, view1, position, id) -> selectFloor(position));
 
         siteLocationChangedReceiver = new BroadcastReceiver() {
             @Override public void onReceive(Context context, Intent intent) {
@@ -466,8 +445,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and group ==\""+ nodeAddress +"\"");
         if (!equip.isEmpty()) {
             HashMap<Object, Object> zone = CCUHsApi.getInstance().readMapById(equip.get("roomRef").toString());
-            ArrayList<HashMap> equipsInZone = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""
-                                                                             +zone.get("id")+ "\"");
+            ArrayList<HashMap<Object, Object>> equipsInZone = CCUHsApi.getInstance()
+                    .readAllEntities("equip and zone and roomRef ==\""
+                            + zone.get("id") + "\"");
             if(!equipsInZone.isEmpty()) {
                 boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equipsInZone);
                 View statusView  = zoneStatus.get(zone.get("dis").toString());
@@ -480,49 +460,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
     @Override
     public void updateBacnetUi(String id) {
-        CcuLog.d(BACNET_POINT_UPDATE, "--update received for bacnet point id is -->" + id + "<--Called on thread: " + Thread.currentThread().getName());
 
-        String pointId = id;
-        if (!pointId.startsWith("@")) {
-            pointId = "@" + id;
-        }
-        if (visibleEquip != null) {
-            HashMap<Object, Object> map = CCUHsApi.getInstance().readMapById(pointId);
-            if (map != null && !map.isEmpty()) {
-                String equipRef = (String) map.get("equipRef");
-                CcuLog.d(BACNET_POINT_UPDATE, "equip ref for point -->" + equipRef);
-                CcuLog.d(BACNET_POINT_UPDATE, "equip ref for visible equip-->" + visibleEquip.getId());
-                if (equipRef.trim().equalsIgnoreCase(visibleEquip.getId().trim())) {
-                    List<BacnetModelDetailResponse> list = buildBacnetModel(visibleEquip.getRoomRef());
-                    String equipName = "";
-                    List<BacnetZoneViewItem> pointList = new ArrayList<>();
-                    if(!list.isEmpty()){
-                        BacnetModelDetailResponse item = list.get(0);
-                        equipName = item.getName();
-                        CcuLog.d(BACNET_POINT_UPDATE, "EquipName:: " + equipName);
-                        List<BacnetPoint> bacnetPoints = item.getPoints();
-                        pointList = fetchZoneDataForBacnet(bacnetPoints, visibleEquip.getTags().get("bacnetConfig").toString());
-                        CcuLog.d(BACNET_POINT_UPDATE, "bacNetPointsList after receving update::> " + pointList.size());
-
-                        if(!pointList.isEmpty()){
-                            bacNetPointsList.clear();
-                            bacNetPointsList.addAll(pointList);
-
-                            requireActivity().runOnUiThread(() -> {
-                                zoneRecyclerBacnetParamAdapter.notifyDataSetChanged();
-                            });
-                            CcuLog.d(BACNET_POINT_UPDATE, "---successfully updated ui-----");
-                        }
-                    }
-                } else {
-                    CcuLog.d(BACNET_POINT_UPDATE, "equip ref didnt match");
-                }
-            } else {
-                CcuLog.d(BACNET_POINT_UPDATE, "no bacnet equip present for this point");
-            }
-        } else {
-            CcuLog.d(BACNET_POINT_UPDATE, "no bacnet equip visible");
-        }
     }
 
     public void refreshDesiredTemp(String nodeAddress, String pointcoolDT1, String pointheatDT1,
@@ -531,7 +469,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             int i;
             for (i = 0; i < seekArcArrayList.size(); i++) {
                 GridItem gridItem = (GridItem) seekArcArrayList.get(i).getTag();
-                if (gridItem.getNodeAddress() == Short.valueOf(nodeAddress)) {
+                if (gridItem.getNodeAddress() == Short.parseShort(nodeAddress)) {
                     double pointHeatDT;
                     if (CCUUiUtil.isDomainEquip(nodeAddress, "node")) {
                         pointHeatDT = CCUUiUtil.readPriorityValByGroupId(DomainName.desiredTempHeating, nodeAddress);
@@ -557,18 +495,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                     int currentModeType = CCUHsApi.getInstance().readHisValByQuery("hvacMode and roomRef == \""
                             + roomRef + "\"").intValue();
-                    //float coolDt = Float.parseFloat(pointcoolDT);
-                    //float heatDt = Float.parseFloat(pointheatDT);
                     if ((tempSeekArc.getCoolingDesiredTemp() != pointcoolDT) || (tempSeekArc.getHeatingDesiredTemp() != pointheatDT)
                             || tempSeekArc.getTemperatureMode() != currentModeType) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                CcuLog.d(LOG_TAG + "Scheduler", "refreshDesiredTemp22 =" + pointcoolDT + "," + pointheatDT + "," + nodeAddress);
-                                tempSeekArc.setCoolingDesiredTemp((float) pointcoolDT, false);
-                                tempSeekArc.setHeatingDesiredTemp((float) pointheatDT, false);
-                                tempSeekArc.invalidate();
-                            }
+                        getActivity().runOnUiThread(() -> {
+                            CcuLog.d(LOG_TAG + "Scheduler", "refreshDesiredTemp22 =" + pointcoolDT + "," + pointheatDT + "," + nodeAddress);
+                            tempSeekArc.setCoolingDesiredTemp((float) pointcoolDT, false);
+                            tempSeekArc.setHeatingDesiredTemp((float) pointheatDT, false);
+                            tempSeekArc.invalidate();
                         });
                     }
                 }
@@ -590,10 +523,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         @Override
                         public void run() {
                             TextView scheduleStatus = tempZoneDetails.findViewById(R.id.schedule_status_tv);
-                            //Spinner scheduleSpinner = tempZoneDetails.findViewById(R.id.schedule_spinner);
                             TextView vacationStatusTV = tempZoneDetails.findViewById(R.id.vacation_status);
                             TextView specialScheduleStatusText = tempZoneDetails.findViewById(R.id.special_status_status);
-                            ImageButton vacationImageButton = tempZoneDetails.findViewById(R.id.vacation_edit_button);
                             vacationStatusTV.setText(vacationStatus);
                             specialScheduleStatusText.setText(specialScheduleStatus);
                             int temperatureMode = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
@@ -605,7 +536,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 scheduleStatus.setText(setPointStatusMessage(status, TemperatureMode.values()[temperatureMode]));
                             }
                             } catch (Exception e) {
-                            e.printStackTrace();
                             }
                         }
                     });
@@ -682,7 +612,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            updateNonTemperatureBasedZones(nonTempControlOpen, zonePointsOpen, equipOpen, getLayoutInflater());
+                           // updateNonTemperatureBasedZones(nonTempControlOpen, zonePointsOpen, equipOpen, getLayoutInflater());
                             tableLayout.invalidate();
                         }
                     });
@@ -785,21 +715,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             try {
                 mDrawerLayout.closeDrawer(drawer_screen);
             } catch (Exception e) {
-                e.printStackTrace();
                 if (mDrawerLayout.isShown()) {
                     mDrawerLayout.closeDrawer(drawer_screen);
                 }
+                e.printStackTrace();
             }
 
             mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
                 @Override
-                public void onDrawerSlide(View drawerView, float slideOffset) {}
+                public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {}
 
                 @Override
-                public void onDrawerOpened(View drawerView) {}
+                public void onDrawerOpened(@NonNull View drawerView) {}
 
                 @Override
-                public void onDrawerClosed(View drawerView) {
+                public void onDrawerClosed(@NonNull View drawerView) {
                     // Remove listener immediately after closing the drawer
                     mDrawerLayout.removeDrawerListener(this);
                     showWeather(onAnimationEnd);
@@ -846,14 +776,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private void loadGrid(View rootView) {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.loadGrid");
         rowcount = 0;
-        if (floorList.size() > 0) {
-            ArrayList<HashMap> roomList =
-                CCUHsApi.getInstance().readAll("room and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
+        if (!floorList.isEmpty()) {
+            ArrayList<HashMap<Object, Object>> roomList =
+                CCUHsApi.getInstance().readAllEntities("room and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
             imag = new ImageView(getActivity());
             tableLayout.removeAllViews();
             gridItems.clear();
             tableRows.clear();
-            LinearLayout rowLayout = null;
+            LinearLayout rowLayout;
             numRows = (roomList.size() / columnCount);
             if (roomList.size() % columnCount != 0)
                 numRows++;
@@ -913,26 +843,26 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
     private int loadZone(View rootView, LinearLayout[] tablerowLayout, HashMap roomMap) {
 
-        String zoneTitle = "";
+        String zoneTitle;
         LayoutInflater inflater = LayoutInflater.from(getContext());
 
         zoneTitle = roomMap.get("dis").toString();
-        ArrayList<HashMap> equips =
-            CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\"" + roomMap.get("id").toString() + "\"");
+        ArrayList<HashMap<Object, Object>> equips =
+            CCUHsApi.getInstance().readAllEntities("equip and zone and roomRef ==\"" + roomMap.get("id").toString() + "\"");
         if (equips.size() > 0) {// zones has devices paired
             boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equips);
             HashMap<Object, Object> connectNode = ConnectNodeUtil.Companion.getConnectNodeForZone(roomMap.get("id").toString(), CCUHsApi.getInstance());
             if (!connectNode.isEmpty()) {
                 isZoneAlive = CCUUtils.isConnectModuleAlive(connectNode.get(Tags.ID).toString());
             }
-            HashMap<String, ArrayList<HashMap>> zoneData = new HashMap<String, ArrayList<HashMap>>();
+            HashMap<String, ArrayList<HashMap>> zoneData = new HashMap<>();
             for (HashMap zoneModel : equips) {
                 if (zoneData.containsKey(zoneModel.get("roomRef").toString())) {
                     ArrayList<HashMap> exisiting = zoneData.get(zoneModel.get("roomRef").toString());
                     exisiting.add(zoneModel);
                     zoneData.put(zoneModel.get("roomRef").toString(), exisiting);
                 } else {
-                    ArrayList<HashMap> newData = new ArrayList<HashMap>();
+                    ArrayList<HashMap> newData = new ArrayList<>();
                     newData.add(zoneModel);
                     zoneData.put(zoneModel.get("roomRef").toString(), newData);
                 }
@@ -1093,7 +1023,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         final String[] equipId = {p.getId()};
         int i = gridPosition;
-        View arcView = null;
+        View arcView;
         arcView = inflater.inflate(R.layout.zones_item, (ViewGroup) rootView, false);
         View zoneDetails = inflater.inflate(R.layout.zones_item_details, null);
         TextView    scheduleStatus      = zoneDetails.findViewById(R.id.schedule_status_tv);
@@ -1120,7 +1050,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         zoneStatus.put(zoneTitle, textViewModule);
 
         seekArc.scaletoNormal(260, 210);
-        String floorName = floorList.get(mFloorListAdapter.getSelectedPostion()).getDisplayName();
 
         float heatUpperLimitVal;
         float heatLowerLimitVal ;
@@ -1219,13 +1148,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             HashMap heatDT;
                             HashMap avgDT;
                            if(CCUUiUtil.isDomainEquip(zoneEquip.getId(), "equip")){
-                               coolDT = CCUHsApi.getInstance().read("point and domainName == \"" + DomainName.desiredTempCooling + "\" and equipRef == \"" + zoneEquip.getId() + "\"");
-                               heatDT = CCUHsApi.getInstance().read("point and domainName == \"" + DomainName.desiredTempHeating + "\" and equipRef == \"" + zoneEquip.getId() + "\"");
-                               avgDT = CCUHsApi.getInstance().read("point and domainName == \"" + DomainName.desiredTemp + "\" and equipRef == \"" + zoneEquip.getId() + "\"");
+                               coolDT = CCUHsApi.getInstance().readEntity("point and domainName == \"" + DomainName.desiredTempCooling + "\" and equipRef == \"" + zoneEquip.getId() + "\"");
+                               heatDT = CCUHsApi.getInstance().readEntity("point and domainName == \"" + DomainName.desiredTempHeating + "\" and equipRef == \"" + zoneEquip.getId() + "\"");
+                               avgDT = CCUHsApi.getInstance().readEntity("point and domainName == \"" + DomainName.desiredTemp + "\" and equipRef == \"" + zoneEquip.getId() + "\"");
                            }else{
-                               coolDT = CCUHsApi.getInstance().read("point and temp and desired and cooling and sp and equipRef == \"" + zoneEquip.getId() + "\"");
-                               heatDT = CCUHsApi.getInstance().read("point and temp and desired and heating and sp and equipRef == \"" + zoneEquip.getId() + "\"");
-                               avgDT = CCUHsApi.getInstance().read("point and temp and desired and (avg or average) and sp and equipRef == \"" + zoneEquip.getId() + "\"");
+                               coolDT = CCUHsApi.getInstance().readEntity("point and temp and desired and cooling and sp and equipRef == \"" + zoneEquip.getId() + "\"");
+                               heatDT = CCUHsApi.getInstance().readEntity("point and temp and desired and heating and sp and equipRef == \"" + zoneEquip.getId() + "\"");
+                               avgDT = CCUHsApi.getInstance().readEntity("point and temp and desired and (avg or average) and sp and equipRef == \"" + zoneEquip.getId() + "\"");
                            }
                             setPointVal(coolDT.get("id").toString(), curCoolDt, heatDT.get("id").toString(), curHeatDt, avgDT.get("id").toString(), curAvgDt);
                         }
@@ -1334,7 +1263,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         seekArc.scaletoNormal(260, 210);
                         showWeather();
                         clickedView = -1;
-                        isExpanded = false;
                     }
                 } else {
                     zoneOpen = true;
@@ -1424,7 +1352,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     Observable.fromCallable(() -> ScheduleManager.getInstance().getVacationStateString(zoneId))
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(status -> vacationStatusTV.setText(status));
+                            .subscribe(vacationStatusTV::setText);
 
                     Observable.fromCallable(() -> ScheduleManager.getInstance().getScheduleStateString(zoneId))
                             .subscribeOn(Schedulers.io())
@@ -1476,12 +1404,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         FragmentManager childFragmentManager = getFragmentManager();
                         childFragmentManager.beginTransaction();
                         schedulerFragment.show(childFragmentManager, "dialog");
-
-                        /*schedulerFragment.setOnExitListener(() -> {
-                            Toast.makeText(vacationImageView.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
-                            mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
-                            ScheduleManager.getInstance().updateSchedules(equipOpen);
-                        });*/
                     });
                     specialScheduleImageButton.setOnClickListener(splScheduleImageView ->
                             imageButtonClickListener(splScheduleImageView, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager(),true));
@@ -1772,13 +1694,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             FragmentManager childFragmentManager = childFragmentManager2;
             childFragmentManager.beginTransaction();
             scheduleGroupFragment.show(childFragmentManager, "dialog");
-
-            //TODO WHY WE NEED BELOW CODE?
-            /*schedulerFragment.setOnExitListener(() -> {
-                Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
-                mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
-                ScheduleManager.getInstance().updateSchedules(equipOpen);
-            });*/
         }
 
     }
@@ -1920,12 +1835,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             FragmentManager childFragmentManager = getFragmentManager();
             childFragmentManager.beginTransaction();
             schedulerFragment.show(childFragmentManager, "dialog");
-
-           /* schedulerFragment.setOnExitListener(() -> {
-                Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
-                mSchedule = Schedule.getScheduleByEquipId(equipId);
-                ScheduleManager.getInstance().updateSchedules(equipOpen);
-            });*/
         });
         scheduleImageButton.setOnClickListener(v ->
         {
@@ -1934,12 +1843,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             FragmentManager childFragmentManager = getFragmentManager();
             childFragmentManager.beginTransaction();
             schedulerFragment.show(childFragmentManager, "dialog");
-
-            /*schedulerFragment.setOnExitListener(() -> {
-                Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
-                mSchedule = Schedule.getScheduleByEquipId(equipId);
-                ScheduleManager.getInstance().updateSchedules(equipOpen);
-            });*/
         });
         specialScheduleImageButton.setOnClickListener(v ->
         {
@@ -1947,12 +1850,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             FragmentManager childFragmentManager = getChildFragmentManager();
             childFragmentManager.beginTransaction();
             schedulerFragment.show(childFragmentManager, "dialog");
-
-            /*schedulerFragment.setOnExitListener(() -> {
-                Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
-                mSchedule = Schedule.getScheduleByEquipId(equipId);
-                ScheduleManager.getInstance().updateSchedules(equipOpen);
-            });*/
         });
         if(mScheduleType >= 2){
             if(!isSelectedScheduleAvailable) {
@@ -2270,73 +2167,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
     }
 
-
-    private void updateNonTemperatureBasedZones(NonTempControl nonTempControlOpen, View zonePointsOpen, Equip equipOpen, LayoutInflater inflater) {
-        CcuLog.i("UI_PROFILING","ZoneFragmentNew.updateNonTemperatureBasedZones");
-
-        Equip p = equipOpen;
-        View zoneDetails = zonePointsOpen;
-        LinearLayout linearLayoutZonePoints = zoneDetails.findViewById(R.id.lt_profilepoints);
-        NonTempControl nonTempControl = nonTempControlOpen;
-
-        linearLayoutZonePoints.removeAllViews();
-        if (p != null) {
-            if (p.getProfile().startsWith("EMR")) {
-                disableVisibiltyForZoneScheduleUI(zoneDetails);
-                HashMap emPoints = ZoneViewData.getEMEquipPoints(p.getId());
-                CcuLog.i("PointsValue", "EM Points:" + emPoints.toString());
-                if (emPoints.size() > 0) {
-                    loadEMPointsUI(emPoints, inflater, linearLayoutZonePoints, p.getGroup());
-                    double totalEm = (double) emPoints.get("Energy Reading");
-                    double currentEm = (double) emPoints.get("Current Rate");
-                    int currentValue = new BigDecimal(currentEm).intValue();
-                    nonTempControl.setEmCurrentText(String.valueOf(currentValue));
-                    nonTempControl.setEmTotalText(String.format("%.0f", totalEm));
-                    nonTempControl.setEmCurrentText(String.valueOf(currentValue));
-                    nonTempControl.setEmTotalUnitText("KWh");
-                    nonTempControl.setEmCurrentUnitText("KW");
-                }
-            }
-            if (p.getProfile().startsWith("PLC")) {
-                disableVisibiltyForZoneScheduleUI(zoneDetails);
-                HashMap plcPoints = ZoneViewData.getPiEquipPoints(p.getId());
-                if (plcPoints.size() > 0) {
-                    CcuLog.i("PointsValue", "PiLoop Points:" + plcPoints.toString());
-                    loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints, p.getGroup());
-                    double targetValue = (double) plcPoints.get("Target Value");
-                    double inputValue = (double) plcPoints.get("Input Value");
-                    if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").equals("\u00B0F")) {
-                        nonTempControl.setPiInputText(String.format("%.2f", fahrenheitToCelsius(inputValue)));
-                        nonTempControl.setPiOutputText(String.valueOf(fahrenheitToCelsius(targetValue)));
-                        nonTempControl.setPiInputUnitText("\u00B0C");
-                    } else {
-                        nonTempControl.setPiInputText(String.format("%.2f", inputValue));
-                        nonTempControl.setPiOutputText(String.valueOf(targetValue));
-                        nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
-                    }
-
-                    if ((boolean) plcPoints.get("Dynamic Setpoint")) {
-                        nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
-                    } else if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").equals("\u00B0F")){
-                        nonTempControl.setPiOutputUnitText("\u00B0C");
-                    } else {
-                        nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
-                    }
-                }
-            }
-        }
-        CcuLog.i("UI_PROFILING","ZoneFragmentNew.updateNonTemperatureBasedZone Done");
-
-    }
-
-
     private void viewNonTemperatureBasedZone(LayoutInflater inflater, View rootView,
                                              ArrayList<HashMap> zoneMap, String zoneTitle, int gridPosition,
                                              LinearLayout[] tablerowLayout, boolean isZoneAlive, String roomRef)
     {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.viewNonTemperatureBasedZone");
-
-
+        cleanUpObservableList(nonTempProfileViewModels);
+        nonTempProfileViewModels.clear();
         Equip p = null;
         int i = gridPosition;
         View arcView = null;
@@ -2346,6 +2183,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         TextView vacationText = zoneDetails.findViewById(R.id.vacationText);
         ImageView vacationEditButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         LinearLayout linearLayoutZonePoints = zoneDetails.findViewById(R.id.lt_profilepoints);
+        ComposeView embededComposeView = zoneDetails.findViewById(R.id.compose_profile_points);
         GridItem gridItemObj = new GridItem();
         gridItemObj.setGridID(i);
         gridItemObj.setGridItem("NonTemp");
@@ -2392,11 +2230,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 e.printStackTrace();
             }
         }
-        if (zoneMap.size() > 0) {
-            CcuLog.i("ProfileTypes", "Points:" + zoneMap.toString());
+        if (!zoneMap.isEmpty()) {
+            CcuLog.i("ProfileTypes", "Points:" + zoneMap);
             p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
-
-            String equipId = p.getId();
             HashMap zoneEquips = zoneMap.get(0);
             if ((zoneEquips.get("profile").toString()).contains("PLC")) {
                 vacationStatusTV.setVisibility(View.GONE);
@@ -2468,12 +2304,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             nonTempControl.setImage(R.drawable.ic_no_device_paired_icon);
             nonTempControl.setImageViewExpanded(R.drawable.ic_no_device_paired_expanded_icon);
         }
-        //ScaleImageToNormal(250,210,imageView);
-        ScaleControlToNormal(270,210,nonTempControl);
+        ScaleControlToNormal(270, 210, nonTempControl);
         nonTempControl.setExpand(false);
-
-        //imageView.setOnClickListener(new View.OnClickListener() {
         Equip nonTempEquip = p;
+
         nonTempControl.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("ResourceType")
             @Override
@@ -2483,7 +2317,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 int clickposition = gridItemNew.getGridID();
                 if (clickedView != -1) {
                     if (clickposition != clickedView) {
-                        int newRowCount = 0;
+                        CcuUtilsKt.stopObservingAllEquipHealth(nonTempProfileViewModels);
+                        cleanUpObservableList(nonTempProfileViewModels);
+                        nonTempProfileViewModels.clear();
                         int tableRowCount = tableLayout.getChildCount();
                         if (tableLayout.getChildCount() > 1) {
                             boolean viewFound = false;
@@ -2511,13 +2347,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                             nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
                                             gridItem.invalidate();
                                         } else {
-                                            SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
+                                            SeekArc seekArcExpanded = gridItem.findViewById(R.id.seekArc);
                                             seekArcExpanded.setDetailedView(false);
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
                                             seekArcExpanded.scaletoNormal(260, 210);
 
                                         }
-                                        isExpanded = false;
                                         imageOn = false;
                                         viewFound = true;
                                         break;
@@ -2553,13 +2388,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             }
                         }
                     } else if (clickposition == clickedView) {
+                        CcuUtilsKt.stopObservingAllEquipHealth(nonTempProfileViewModels);
+                        cleanUpObservableList(nonTempProfileViewModels);
+                        nonTempProfileViewModels.clear();
                         v.setBackgroundColor(getResources().getColor(R.color.white));
                         status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                         textEquipment.setTextAppearance(getActivity(), R.style.label_black);
                         textEquipment.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                         tableLayout.removeView(zoneDetails);
                         imageOn = false;
-                        //ScaleImageToNormal(250,210,imageView);
                         ScaleControlToNormal(270, 210, nonTempControl);
                         nonTempControl.setExpand(false);
                         showWeather();
@@ -2576,7 +2413,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     v.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                     status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                     int index = clickedView / columnCount + 1;
-                    //ScaleImageToBig(250,210,imageView);
                     ScaleControlToExpand(250, 210, nonTempControl);
                     nonTempControl.setExpand(true);
                     nonTempControlOpen = nonTempControl;
@@ -2594,7 +2430,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                 if (isExpanded) {
                     linearLayoutZonePoints.removeAllViews();
-
                     if (ConnectNodeUtil.Companion.isConnectNodePaired(roomRef)) {
                         HashMap<Object, Object> connectNodeDevice = ConnectNodeUtil.Companion.getConnectNodeForZone(roomRef, CCUHsApi.getInstance());
                         disableVisibiltyForZoneScheduleUI(zoneDetails);
@@ -2606,27 +2441,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 modbusDevices.addAll(equipmentDevice.getEquips());
                             }
                         }
-
                         View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
-                        TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
-                        TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
-                        TextView textViewUpdatedTimeHeading = zoneDetails.findViewById(R.id.last_updated);
-                        TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
-
-                        String connectNodeId = connectNodeDevice.get(Tags.ID).toString();
-                        String connectNodeAddr = connectNodeDevice.get("addr").toString();
-
-                        HeartBeatUtil.moduleStatusForConnectNode(textViewModule, connectNodeId);
-                        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTimeForCn(connectNodeId));
-
-                        tvEquipmentType.setText("Connect Node (" + connectNodeAddr + ")");
-                        textViewModule.setVisibility(View.VISIBLE);
-                        textViewUpdatedTimeHeading.setVisibility(View.VISIBLE);
-                        textViewUpdatedTime.setVisibility(View.VISIBLE);
-                        LinearLayout equipScheduleStatusLayout = zoneDetails.findViewById(R.id.equip_schedule_status_layout);
-                        equipScheduleStatusLayout.setVisibility(View.GONE);
-
                         if (modbusDevices.isEmpty()) {
+                            zoneDetails.findViewById(R.id.equipment_type_layout).setVisibility(View.VISIBLE);
+                            zoneDetails.findViewById(R.id.last_updated_layout).setVisibility(View.VISIBLE);
+                            TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
+                            TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
+                            TextView textViewUpdatedTimeHeading = zoneDetails.findViewById(R.id.last_updated);
+                            TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
+                            String connectNodeAddr = connectNodeDevice.get("addr").toString();
+                            tvEquipmentType.setText("Connect Node (" + connectNodeAddr + ")");
+                            textViewModule.setVisibility(View.VISIBLE);
+                            textViewUpdatedTimeHeading.setVisibility(View.VISIBLE);
+                            textViewUpdatedTime.setVisibility(View.VISIBLE);
+
                             LinearLayout noEquipPairedLayout = zoneDetails.findViewById(R.id.noEquipPaired);
                             LinearLayout modbusLayout = zoneDetails.findViewById(R.id.modbus_layout_detain);
                             TextView noModelMessage = zoneDetails.findViewById(R.id.tvNoEquipPaired);
@@ -2650,67 +2478,54 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             CcuLog.i(L.TAG_CONNECT_NODE, "Non temp equips are null.");
                             return;
                         }
-
+                        int index = 0;
                         for (EquipmentDevice modbusDevice : ConnectNodeUtil.Companion.reorderEquipments(fetchAllModbusEquips(nonTempEquip))) {
-                            loadExternalEquipUi(
-                                    CONNECTMODULE,
+                            boolean isLastUpdatedTimeShowable = false;
+                            if(index == 0) {
+                                index =1;
+                                isLastUpdatedTimeShowable = true;
+                            }
+                            loadConnectModuleZone(
+                                    nonTempProfileViewModels,
                                     modbusDevice.deviceEquipRef,
                                     getEquipmentDeviceName(CONNECTMODULE, modbusDevice),
-                                    false,
+                                    isLastUpdatedTimeShowable,
                                     modbusDevice,
                                     inflater.inflate(R.layout.item_modbus_detail_view, null),
                                     linearLayoutZonePoints,
                                     connectNodeDevice
                             );
                         }
-                    }
-
-                    else if (nonTempEquip != null) {
-                        //
+                    } else if (nonTempEquip != null) {
                         if (nonTempEquip.getProfile().startsWith("EMR")) {
-
                             disableVisibiltyForZoneScheduleUI(zoneDetails);
-                            HashMap emPoints = ZoneViewData.getEMEquipPoints(nonTempEquip.getId());
-                            CcuLog.i("PointsValue", "EM Points:" + emPoints.toString());
-                            loadEMPointsUI(emPoints, inflater, linearLayoutZonePoints, nonTempEquip.getGroup());
-
-                            double energyRead = (double) emPoints.get("Energy Reading");
-                            double currentRead = (double) emPoints.get("Current Rate");
-                            int currentValue = new BigDecimal(currentRead).intValue();
-                            nonTempControl.setEmTotalText(String.format("%.0f", energyRead));
-                            nonTempControl.setEmCurrentText(String.valueOf(currentValue));
-                            //nonTempControl.setEmTotalText(emPoints.get("Energy Reading").toString());
-                            nonTempControl.setEmTotalUnitText("KWh");
-                            //nonTempControl.setEmCurrentText(emPoints.get("Current Rate").toString());
-                            nonTempControl.setEmCurrentUnitText("KW");
-
+                            NonTempProfileViewModel viewModel = new NonTempProfileViewModel();
+                            nonTempProfileViewModels.add(viewModel);
+                            viewModel.setEquipId(nonTempEquip.getId());
+                            showHeaderViewUI(embededComposeView,
+                                    viewModel,
+                                    nonTempEquip.getId()
+                            );
+                            viewModel.setEquipName("Energy Meter (" + nonTempEquip.getGroup() + ")");
+                            viewModel.setProfile("EMR");
+                            viewModel.loadEmrPoints(nonTempEquip.getId());
+                            viewModel.observeEquipHealthByGroupId(nonTempEquip.getGroup());
                         }
                         if (nonTempEquip.getProfile().startsWith("PLC")) {
+                            linearLayoutZonePoints.setVisibility(View.GONE);
                             disableVisibiltyForZoneScheduleUI(zoneDetails);
-                            HashMap plcPoints = ZoneViewData.getPiEquipPoints(nonTempEquip.getId());
-                            CcuLog.i("PointsValue", "PiLoop Points:" + plcPoints.toString());
-                            loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints, nonTempEquip.getGroup());
-
-                            double targetValue = (double) plcPoints.get("Target Value");
-                            double inputValue = (double) plcPoints.get("Input Value");
-                            if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").toString().equals("\u00B0F")) {
-                                nonTempControl.setPiInputText(String.format("%.2f", fahrenheitToCelsius(inputValue)));
-                                nonTempControl.setPiInputUnitText(" \u00B0C");
-                            } else {
-                                nonTempControl.setPiInputText(String.format("%.2f", inputValue));
-                                nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
-                                nonTempControl.setPiOutputText(String.valueOf(targetValue));
-                            }
-
-                            if ((boolean) plcPoints.get("Dynamic Setpoint")) {
-                                nonTempControl.setPiOutputText(String.valueOf(targetValue));
-                                nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
-                            } else if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").toString().equals("\u00B0F")) {
-                                nonTempControl.setPiOutputText(String.valueOf(fahrenheitToCelsius(targetValue)));
-                                nonTempControl.setPiOutputUnitText("\u00B0C");
-                            } else {
-                                nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
-                            }
+                            NonTempProfileViewModel viewModel = new NonTempProfileViewModel();
+                            nonTempProfileViewModels.add(viewModel);
+                            viewModel.setProfile("PLC");
+                            viewModel.setEquipId(nonTempEquip.getId());
+                            viewModel.setEquipName("Pi Loop Controller ("+nonTempEquip.getGroup()+")");
+                            showHeaderViewUI(embededComposeView,
+                                    viewModel,
+                                    nonTempEquip.getId()
+                            );
+                            List<HeaderViewItem> headerItems = viewModel.getPlcUiItems(nonTempEquip.getId());
+                            viewModel.initializeHeaderViewPoints(headerItems);
+                            viewModel.observeEquipHealthByGroupId(nonTempEquip.getGroup());
                         }
                         if (nonTempEquip.getProfile().startsWith("MODBUS")) {
                             // Showing point based schedule layout for modbus devices
@@ -2719,16 +2534,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                             HashMap<Object, Object> parentModbusEquip = CCUHsApi.getInstance().readEntity("equip " +  // parent modbbus equip
                                     "and not equipRef and roomRef  == " + "\""+nonTempEquip.getRoomRef()+"\"");
+
                             for (EquipmentDevice modbusDevice: fetchAllModbusEquips(nonTempEquip)) {
-                                loadExternalEquipUi(
-                                        "MODBUS",
+                                loadModbusZone(
+                                        nonTempProfileViewModels,
                                         modbusDevice.deviceEquipRef,
                                         getEquipmentDeviceName("MODBUS", modbusDevice),
                                         isLastUpdatedTimeShowable(parentModbusEquip, modbusDevice),
                                         modbusDevice,
                                         inflater.inflate(R.layout.item_modbus_detail_view, null),
-                                        linearLayoutZonePoints,
-                                        null
+                                        linearLayoutZonePoints
                                 );
                             }
                         }
@@ -2736,19 +2551,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             disableVisibiltyForZoneScheduleUI(zoneDetails);
                             displayRoomSpecificCustomControlFields(zoneDetails, nonTempEquip);
 
-                            HashMap<Object, Object> parentBacnetEquip = CCUHsApi.getInstance().readEntity("equip " +  // parent modbbus equip
-                                    "and not equipRef and roomRef  == " + "\""+nonTempEquip.getRoomRef()+"\"");
                             HashMap<Object,Object> bacnetDevice = CCUHsApi.getInstance().readEntity("device and equipRef == \"" + nonTempEquip.getId() + "\"");
                             visibleEquip = nonTempEquip;
-                            loadExternalEquipUi(
-                                    "BACNET",
+                            loadBacnetZone(
+                                    nonTempProfileViewModels,
                                     nonTempEquip.getId(),
                                     getEquipmentDeviceName("BACNET", nonTempEquip),
                                     true,
                                     bacnetDevice,
                                     inflater.inflate(R.layout.item_modbus_detail_view, null),
                                     linearLayoutZonePoints,
-                                    null
+                                    bacNetPointsList,
+                                    remotePointUpdateInterface
                             );
                         }
                     } else {
@@ -2780,88 +2594,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
     };
 
-    private List<BacnetZoneViewItem> fetchZoneDataForBacnet(List<BacnetPoint> bacnetPoints, String bacnetConfig){
-        List<BacnetZoneViewItem> listBacnetZoneViewItems = new ArrayList<>();
-        List<String> parameterList = new ArrayList<>();
-        for (BacnetPoint bacnetPoint : bacnetPoints){
-            CcuLog.d(BACNET, "bacnet tags: " + bacnetPoint.getEquipTagNames());
-            boolean isWritable = false;
-            String objectTypeFromProtocolData = bacnetPoint.getProtocolData().getBacnet().getObjectType();
-            String objectType = BacNetConstants.ObjectType.OBJECT_ANALOG_VALUE.getKey();
-            List<Pair<String,Integer>> spinnerValues = new ArrayList<>();
-            if(bacnetPoint.getEquipTagNames().contains("writable")){
-                isWritable = true;
-                PresentationData presentationData = bacnetPoint.getPresentationData();
-                ValueConstraint valueConstraint = bacnetPoint.getValueConstraint();
-                if(objectTypeFromProtocolData.equalsIgnoreCase("MultiStateValue")){
-                    objectType = BacNetConstants.ObjectType.OBJECT_MULTI_STATE_VALUE.getKey();
-                } else if(objectTypeFromProtocolData.equalsIgnoreCase("MultiStateInput")){
-                    objectType = BacNetConstants.ObjectType.OBJECT_MULTI_STATE_INPUT.getKey();
-                } else if(objectTypeFromProtocolData.equalsIgnoreCase("MultiStateOutput")){
-                    objectType = BacNetConstants.ObjectType.OBJECT_MULTI_STATE_OUTPUT.getKey();
-                }
-                else if(objectTypeFromProtocolData.equalsIgnoreCase("BinaryValue")){
-                    objectType = BacNetConstants.ObjectType.OBJECT_BINARY_VALUE.getKey();
-                } else if(objectTypeFromProtocolData.equalsIgnoreCase("BinaryInput")){
-                    objectType = BacNetConstants.ObjectType.OBJECT_BINARY_INPUT.getKey();
-                } else if(objectTypeFromProtocolData.equalsIgnoreCase("BinaryOutput")){
-                    objectType = BacNetConstants.ObjectType.OBJECT_BINARY_OUTPUT.getKey();
-                } else if(objectTypeFromProtocolData.equalsIgnoreCase("AnalogInput")){
-                    objectType = BacNetConstants.ObjectType.OBJECT_ANALOG_INPUT.getKey();
-                } else if(objectTypeFromProtocolData.equalsIgnoreCase("AnalogOutput")){
-                    objectType = BacNetConstants.ObjectType.OBJECT_ANALOG_OUTPUT.getKey();
-                }else{
-                    objectType = BacNetConstants.ObjectType.OBJECT_ANALOG_VALUE.getKey();
-                }
-
-                if(presentationData != null && valueConstraint != null){
-                    if(valueConstraint.getMinValue() != null && valueConstraint.getMinValue() != null){
-                        int minValue = valueConstraint.getMinValue().intValue();
-                        int maxValue = valueConstraint.getMaxValue().intValue();
-                            //float step = Float.parseFloat(presentationData.getTagValueIncrement(
-                        double step = Double.parseDouble(presentationData.getTagValueIncrement());
-                        spinnerValues = generateValuesForSpinner(minValue, maxValue, step);
-                        CcuLog.d(BACNET, "For point id--> " + bacnetPoint.getId() + " MinValue: " + minValue + " MaxValue: " + maxValue + " Increment Value: " + step);
-                    }else {
-                        CcuLog.d(BACNET, "For point id--> " + bacnetPoint.getId() + " there is no min max value checking multi state");
-                        List<Pair<String,Integer>> finalSpinnerValues = spinnerValues;
-                        valueConstraint.getAllowedValues().forEach(allowedValue -> {
-                            CcuLog.d(BACNET, "For point id--> " + bacnetPoint.getId() + " Allowed Value: " + allowedValue);
-                            finalSpinnerValues.add(new Pair<>(allowedValue.getValue(), allowedValue.getIndex()));
-                        });
-                    }
-                }
-            }
-
-            if(bacnetPoint.getProtocolData().getBacnet().getDisplayInUIDefault()){
-                String pointName = bacnetPoint.getDisName();
-                String pointId = bacnetPoint.getId();
-                String value = CCUHsApi.getInstance().readDefaultStrVal(pointId);
-                String hisValue = String.valueOf(CCUHsApi.getInstance().readHisValById(pointId));
-                String defaultValById = String.valueOf(CCUHsApi.getInstance().readDefaultValById(pointId));
-                CcuLog.d(BACNET, "pointName:: " + pointName + "pointId: " + pointId + "value: " + value
-                        + "hisValue: " + hisValue + "defaultValById: " + defaultValById);
-                String curretValue = "";
-                parameterList.add(pointName + " : " + hisValue);
-                curretValue = hisValue;
-
-                BacnetZoneViewItem bacnetZoneViewItem = new BacnetZoneViewItem(pointName, curretValue,
-                        bacnetConfig, true, bacnetPoint, isWritable, spinnerValues, objectType);
-                listBacnetZoneViewItems.add(bacnetZoneViewItem);
-            }
-        }
-        return listBacnetZoneViewItems;
-    }
-
-    public List<Pair<String,Integer>> generateValuesForSpinner(double minValue, double maxValue, double step) {
-        List<Pair<String,Integer>> arrayList = new ArrayList<>();
-        DecimalFormat df = new DecimalFormat("#.##");
-        for (double value = minValue; value <= maxValue; value += step) {
-            String formattedValue = df.format(value);
-            arrayList.add(new Pair<>(formattedValue,Integer.valueOf(0)));
-        }
-        return arrayList;
-    }
 
     private boolean isLastUpdatedTimeShowable(HashMap<Object, Object> parentModbusEquip, EquipmentDevice modbusDevice) {
         return (Integer.parseInt(parentModbusEquip.get("group").toString()) == modbusDevice.getSlaveId() &&
@@ -2919,7 +2651,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             textViewValue2.setVisibility(View.VISIBLE);
             textViewLabel2.setVisibility(View.VISIBLE);
         } else {
-            LinearLayout.LayoutParams existingLayoutParams = (LinearLayout.LayoutParams) textViewValue1.getLayoutParams();
+            LinearLayout.LayoutParams existingLayoutParams
+                    = (LinearLayout.LayoutParams) textViewValue1.getLayoutParams();
 
             LinearLayout.LayoutParams newLayoutParams = new LinearLayout.LayoutParams(
                     existingLayoutParams.width,
@@ -3194,7 +2927,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         CCUUiUtil.setSpinnerDropDownColor(spinnerValue2,getContext());
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
         if( isCelsiusTunerAvailableStatus()) {
-            textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(cpuEquipPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+            textAirflowValue.setText(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(cpuEquipPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]", ""))) + " \u00B0C");
         } else {
             textAirflowValue.setText(cpuEquipPoints.get("Discharge Airflow").toString());
         }
@@ -4027,7 +3760,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewUpdatedTime.setVisibility(View.GONE);
         TextView textViewUpdatedText = viewStatus.findViewById(R.id.last_updated);
         textViewUpdatedText.setVisibility(View.GONE);
-        textViewStatus.setGravity(Gravity.CENTER|Gravity.CENTER_HORIZONTAL|Gravity.CENTER_VERTICAL);
+        textViewStatus.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
         textViewStatus.setText(Html.fromHtml("<b>No device currently Paired</b> <br>Please go to the Floor Layout on " +
                 "settings page to pair a new device</br>"));
         viewStatus.setPadding(0, 0, 0, 40);
@@ -4036,103 +3769,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public void loadPLCPointsUI(HashMap plcPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
-        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
-        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
-        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
-        View viewPointRow2 = inflater.inflate(R.layout.zones_item_type1, null);
-
-        View loopOpRow = inflater.inflate(R.layout.zones_item_type1, null);
-        TextView loopOpRowLabel = loopOpRow.findViewById(R.id.text_point1label);
-        TextView loopOpRowValue = loopOpRow.findViewById(R.id.text_point1value);
-        loopOpRowLabel.setText("Loop Output : ");
-        loopOpRowValue.setText(plcPoints.get("LoopOutput") + "%");
-
-        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
-        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
-        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
-        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
-        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
-
-        TextView labelInputAir = viewPointRow1.findViewById(R.id.text_point1label);
-        TextView a2SensorLabel = viewPointRow1.findViewById(R.id.text_pointA2SensorLabel);
-        TextView labelTarget = viewPointRow1.findViewById(R.id.text_point2label);
-        TextView labelOffsetAir = viewPointRow2.findViewById(R.id.text_point1label);
-        LinearLayout lt_column2 = loopOpRow.findViewById(R.id.lt_column2);
-        TextView label2 = viewPointRow2.findViewById(R.id.text_point2label);
-
-        TextView textViewInputAir = viewPointRow1.findViewById(R.id.text_point1value);
-        TextView a2SensorValue = viewPointRow1.findViewById(R.id.text_pointA2SensorValue);
-        TextView textViewTargetAir = viewPointRow1.findViewById(R.id.text_point2value);
-        TextView textViewOffsetAir = viewPointRow2.findViewById(R.id.text_point1value);
-        TextView value2 = viewPointRow2.findViewById(R.id.text_point2value);
-        LinearLayout lt_column_a2Sensor = viewPointRow1.findViewById(R.id.lt_column_a2Sensor);
-
-        label2.setVisibility(View.GONE);
-        value2.setVisibility(View.GONE);
-        lt_column2.setVisibility(View.GONE);
-        a2SensorLabel.setVisibility(View.GONE);
-        a2SensorValue.setVisibility(View.GONE);
-        lt_column_a2Sensor.setVisibility(View.GONE);
-
-        textViewTitle.setText(plcPoints.get("Profile").toString() + " (" + nodeAddress + ")");
-        textViewStatus.setText(plcPoints.get("Status").toString());
-        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
-
-        labelInputAir.setText("Input (" + plcPoints.get("Unit Type").toString() + ") : ");
-
-        double processValue = (double) plcPoints.get("Input Value");
-        if (plcPoints.get("Unit Type").equals("Generic Alarm NO")
-                || plcPoints.get("Unit Type").equals("Generic Alarm NC")) {
-            if (processValue == 0) {
-                textViewInputAir.setText("Normal" + plcPoints.get("Unit").toString());
-            } else {
-                textViewInputAir.setText("Alarm" + plcPoints.get("Unit").toString());
-            }
-        } else {
-            textViewInputAir.setText(String.format("%.2f", processValue) + " " + plcPoints.get("Unit").toString());
-        }
-        if (plcPoints.get("Unit").equals("\u00B0F")) {
-            if (isCelsiusTunerAvailableStatus()) {
-                textViewInputAir.setText(String.format("%.2f", fahrenheitToCelsius(processValue)) + " " + " \u00B0C");
-            }
-        }
-        try {
-            if ((boolean) plcPoints.get("Dynamic Setpoint") == true) {
-                a2SensorLabel.setText("Target (" + plcPoints.get("Dynamic Unit Type").toString() + ") : ");
-                a2SensorValue.setText(plcPoints.get("ai2Sensor").toString()+" "+plcPoints.get("ai2SensorUnit").toString());
-                a2SensorLabel.setVisibility(View.VISIBLE);
-                a2SensorValue.setVisibility(View.VISIBLE);
-                lt_column_a2Sensor.setVisibility(View.VISIBLE);
-                labelTarget.setText("Dynamic Target ("+plcPoints.get("Dynamic Unit Type").toString() + ") : ");
-                textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
-                labelOffsetAir.setText("Offset (" + plcPoints.get("Dynamic Unit Type").toString() + ") : ");
-                textViewOffsetAir.setText(plcPoints.get("Offset Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
-                linearLayoutZonePoints.addView(viewTitle);
-                linearLayoutZonePoints.addView(viewStatus);
-                linearLayoutZonePoints.addView(loopOpRow);
-                linearLayoutZonePoints.addView(viewPointRow1);
-                linearLayoutZonePoints.addView(viewPointRow2);
-
-            } else {
-                labelTarget.setText(plcPoints.get("Dynamic Unit Type").toString().replace("Native-", "") + " : ");
-                if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").equals("\u00B0F")) {
-                    textViewTargetAir.setText(fahrenheitToCelsius(Double.parseDouble(plcPoints.get("Target Value").toString())) + " " + "\u00B0C");
-                } else {
-                    textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
-                }
-                viewPointRow1.setPadding(0, 0, 0, 40);
-                linearLayoutZonePoints.addView(viewTitle);
-                linearLayoutZonePoints.addView(viewStatus);
-                linearLayoutZonePoints.addView(loopOpRow);
-                linearLayoutZonePoints.addView(viewPointRow1);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
     }
 
     public void setPointVal(String coolid, double coolval, String heatid, double heatval, String avgid, double avgval) {
@@ -4578,6 +4214,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
 
         seekArcArrayList.add(seekArc);
+        ComposeView embededComposeView = zoneDetails.findViewById(R.id.compose_profile_points);
         seekArc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -4694,7 +4331,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    isExpanded = true;
                 }
 
                 zoneOpen = false;
@@ -4703,15 +4339,26 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 for (int k = 0; k < openZoneMap.size(); k++) {
                     Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
                     if (updatedEquip.getProfile().contains("MONITORING")) {
-                        HashMap monitoringEquipPoints = HyperStatZoneViewKt.getHyperStatMonitoringEquipPoints(updatedEquip, CCUHsApi.getInstance());
-                        seekArc.setCurrentTemp(Float.parseFloat(monitoringEquipPoints.get("curtempwithoffset").toString()));
-                        loadMonitoringPointsUI(monitoringEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
+                        NonTempProfileViewModel viewModel = new NonTempProfileViewModel();
+                        seekArc.setCurrentTemp(Float.parseFloat(viewModel.monitorTemp(updatedEquip)+""));
+                        nonTempProfileViewModels.add(viewModel);
+                        viewModel.setProfile("MONITORING");
+                        viewModel.setEquipId(updatedEquip.getId());
+                        viewModel.setEquipName("MONITORING ("+updatedEquip.getGroup()+")");
+                        viewModel.loadHyperStatMonitoringEquipPoints(updatedEquip.getId());
+                        showHeaderViewUI(embededComposeView,
+                                viewModel,
+                                updatedEquip.getId()
+                        );
+                        viewModel.observeEquipHealthByGroupId(updatedEquip.getGroup().toString());
+
                     }
                 }
             }
         });
     }
 
+    @SuppressLint("SetTextI18n")
     private void loadOTNPointsUI(HashMap point, LayoutInflater inflater,
                                  LinearLayout linearLayoutZonePoints,
                                  String nodeAddress) {
@@ -4860,8 +4507,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         LocalDate ZoneLastTimeOfDay = ZonelastInterval.getStart().toDateTime().toLocalDate();
         Interval systemLastInterval = systemIntervals.get(systemIntervals.size()-1);
         LocalDate systemLastTimeOfDay = systemLastInterval.getStart().toDateTime().toLocalDate();
-        /** checking for overnight for sunday ,if it is has overnight sch for sunday
-         we need to add the building occupancy for next week monday also **/
+        // checking for overnight for sunday ,if it is has overnight sch for sunday
+        // we need to add the building occupancy for next week monday also **/
         if(ZoneLastTimeOfDay.isAfter(systemLastTimeOfDay))
         {
             Interval nextWeekDaySystemInterval = ScheduleUtil.AddingNextWeekDayForOverNight(systemSchedule);
@@ -4899,8 +4546,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private void generateOccupancyContainmentBreachedDialog(ArrayList<Interval> intervalSpills, Schedule zoneSchedule, ContainmentDialogClickListener listener) {
         StringBuilder spillZones = new StringBuilder();
         for (Interval i : intervalSpills) {
-            spillZones.append(
-                    getDayString(i.getStart().getDayOfWeek()) + " (" + i.getStart().hourOfDay().get() + ":" + (i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()) + " - " + i.getEnd().hourOfDay().get() + ":" + (i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()) + ") \n");
+            spillZones.append(getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(i.getEnd().hourOfDay().get()).append(":").append(i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
         }
         CommonTimeSlotFinder commonTimeSlotFinder = new CommonTimeSlotFinder();
         List<List<CommonTimeSlotFinder.TimeSlot>> commonTimeSlot =  commonTimeSlotFinder.
@@ -4947,7 +4593,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         Zone zone = new Zone.Builder().setHashMap(zoneHashMap).build();
         String ref = zone.getScheduleRef();
 
-        Double scheduleType = null;
+        Double scheduleType;
         if(CCUUiUtil.isDomainEquip(equipId, "equip")) {
             scheduleType =  CCUUiUtil.readPriorityValByEquipRef(DomainName.scheduleType, equipId);
         } else {
@@ -4982,60 +4628,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
     }
 
-    private void externalEquipsLayoutSetup(LinearLayout linearLayoutZonePoints, View zoneDetails) {
-        RelativeLayout.LayoutParams paramsLL = (RelativeLayout.LayoutParams) linearLayoutZonePoints.getLayoutParams();
-        paramsLL.removeRule(RelativeLayout.BELOW);
-        paramsLL.addRule(RelativeLayout.BELOW, R.id.pointBasedScheduleLayout);
-        paramsLL.setMarginStart(40);
-        linearLayoutZonePoints.setLayoutParams(paramsLL);
-        linearLayoutZonePoints.setPadding(0, 0, 0, 20);
-        linearLayoutZonePoints.addView(zoneDetails);
-    }
-
-    private void loadExternalEquipUi(
-            String profileName,
-            String equipId,
-            String equipmentDeviceName,
-            Boolean showLastUpdatedTime,
-            Object equipPointDetails,
-            View zoneDetailsView,
-            LinearLayout linearLayoutZonePoints,
-            HashMap<Object, Object> connectNodeDevice
-    ) {
-        externalEquipsLayoutSetup(linearLayoutZonePoints, zoneDetailsView);
-
-        switch (profileName) {
-            case "MODBUS":
-                EquipmentDevice modbusDevice = (EquipmentDevice) equipPointDetails;
-                setEquipmentDeviceName(zoneDetailsView, equipmentDeviceName);
-                controlLastUpdatedVisibilityForModbusEquips(zoneDetailsView, modbusDevice.getSlaveId(), showLastUpdatedTime);
-                setPointScheduleStatusForExternalEquip(zoneDetailsView, equipId);
-                setupExternalEquipParamRecyclerView(zoneDetailsView, MODBUS, modbusDevice, null);
-                break;
-            case "BACNET":
-                HashMap<Object,Object> bacnetDevice = (HashMap<Object,Object>) equipPointDetails;
-                setEquipmentDeviceName(zoneDetailsView, equipmentDeviceName);
-                setBacnetEquipmentDeviceType(zoneDetailsView, bacnetDevice);
-                controlLastUpdatedVisibilityForModbusEquips(zoneDetailsView, Integer.parseInt(bacnetDevice.get("addr").toString()), showLastUpdatedTime);
-                setPointScheduleStatusForExternalEquip(zoneDetailsView, equipId);
-                setupExternalEquipParamRecyclerView(zoneDetailsView, BACNET, bacNetPointsList, null);
-                break;
-            case CONNECTMODULE:
-                setEquipmentDeviceName(zoneDetailsView, equipmentDeviceName);
-                controlLastUpdatedVisibilityForModbusEquips(zoneDetailsView, ((EquipmentDevice) equipPointDetails).getSlaveId(), showLastUpdatedTime);
-                setPointScheduleStatusForExternalEquip(zoneDetailsView, equipId);
-                setupExternalEquipParamRecyclerView(zoneDetailsView, CONNECTMODULE, equipPointDetails, connectNodeDevice);
-                break;
-            case "PCN":
-                break;
-        }
-    }
 
     private List<EquipmentDevice> fetchAllModbusEquips(Equip nonTempEquip) {
         List<EquipmentDevice> modbusDevices = new ArrayList<>();
-        for(EquipmentDevice equipmentDevice : buildModbusModel(nonTempEquip.getRoomRef())) {
+        for (EquipmentDevice equipmentDevice : buildModbusModel(nonTempEquip.getRoomRef())) {
             modbusDevices.add(equipmentDevice);
-            if(null != equipmentDevice.getEquips()) {
+            if (null != equipmentDevice.getEquips()) {
                 modbusDevices.addAll(equipmentDevice.getEquips());
             }
         }
@@ -5074,31 +4672,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             pointsWithoutScheduleRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             pointsWithoutScheduleRecyclerView.setAdapter(pointsWithoutSchedulelistAdapter);
         }
-    }
-
-    private List<Parameter> fetchAllExternalParameterPoints(EquipmentDevice equipmentDevice) {
-        List<Parameter> parameterList = new ArrayList<>();
-
-        UtilSourceKt.getParametersList(equipmentDevice).forEach( parameter -> {
-            if (parameter.isDisplayInUI())
-                parameterList.add(parameter);
-        });
-
-        return parameterList;
-    }
-
-    private List<Parameter> getSortedParameterList(EquipmentDevice modbusDevice) {
-        return fetchAllExternalParameterPoints(modbusDevice)
-                .stream()
-                .sorted(Comparator.comparing(param -> {
-                    Integer pointNum = param.getLogicalPointTags().stream()
-                            .filter(tag -> "pointNum".equals(tag.getTagName()))
-                            .map(tag -> (Integer.parseInt(tag.getTagValue())))
-                            .findFirst()
-                            .orElse(Integer.MAX_VALUE);
-                    return pointNum;
-                }))
-                .collect(Collectors.toList());
     }
 
     private String getEquipmentDeviceName(String profileType, Object profileParam) {
@@ -5159,107 +4732,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             default:
                 return "";
         }
-    }
-
-    private void setEquipmentDeviceName(View zoneDetailsView, String equipmentDeviceName) {
-        ((TextView) zoneDetailsView.findViewById(R.id.tvEquipmentType)).setText(equipmentDeviceName);
-    }
-
-    private void setBacnetEquipmentDeviceType(View zoneDetailsView, HashMap<Object, Object> bacnetDevice) {
-        boolean isIpEquip = false;
-        if (visibleEquip != null) {
-            isIpEquip = visibleEquip.getMarkers().contains("bacnetCur");
-        }
-        zoneDetailsView.findViewById(R.id.tvEquipmentTypeDesc).setVisibility(View.VISIBLE);
-        if (isIpEquip) {
-            ((TextView) zoneDetailsView.findViewById(R.id.tvEquipmentTypeDesc)).setText("BACnet-IP Device");
-        } else {
-            ((TextView) zoneDetailsView.findViewById(R.id.tvEquipmentTypeDesc)).setText("BACnet-MSTP Device");
-        }
-
-    }
-
-    private void controlLastUpdatedVisibilityForModbusEquips(
-            View zoneDetails,
-            int slaveId,
-            boolean showLastUpdatedTime
-    ) {
-        TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
-        TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
-        LinearLayout lastUpdatedLayout = zoneDetails.findViewById(R.id.last_updated_layout);
-
-        if(showLastUpdatedTime) {
-            textViewModule.setVisibility(View.VISIBLE);
-            lastUpdatedLayout.setVisibility(View.VISIBLE);
-            HeartBeatUtil.moduleStatus(textViewModule,
-                    Integer.toString(slaveId));
-            textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(
-                    Integer.toString(slaveId)));
-        }
-        else {
-            textViewModule.setVisibility(View.GONE);
-            lastUpdatedLayout.setVisibility(View.GONE);
-        }
-    }
-
-    private void setPointScheduleStatusForExternalEquip(View zoneDetails, String equipRef) {
-        TextView equipStatusTitle = zoneDetails.findViewById(R.id.equip_schedule_status_title);
-        equipStatusTitle.setText(R.string.equip_schedule_status);
-        equipStatusTitle.setTextAppearance(R.style.title_bold);
-        equipStatusTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
-        equipStatusTitle.setTextColor(getResources().getColor(R.color.black, null));
-        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) equipStatusTitle.getLayoutParams();
-        params.setMargins(0, 0, 8, 0); // left, top, right, bottom in pixels
-        equipStatusTitle.setLayoutParams(params);
-        RecyclerView equipScheduleStatus = zoneDetails.findViewById(R.id.recycler_equip_schedule_status);
-        equipScheduleStatus.setLayoutManager(new LinearLayoutManager(getContext()));
-        List <SpannableString> equipScheduleStatusList = fetchScheduleStatusMessageForPointsUnderCustomControl(equipRef);
-        TextListAdapter textListAdapter = new TextListAdapter(equipScheduleStatusList);
-        equipScheduleStatus.setAdapter(textListAdapter);
-    }
-
-    private void setupExternalEquipParamRecyclerView(View zoneDetails, String profileName, Object profileData, HashMap<Object, Object> connectNodeDevice) {
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
-        RecyclerView equipParams = zoneDetails.findViewById(R.id.recyclerParams);
-        equipParams.setLayoutManager(gridLayoutManager);
-
-        // Add spacing (e.g., 32 pixels between columns)
-        int columnSpacing = 60;
-        equipParams.addItemDecoration(new GridSpacingItemDecoration(2, columnSpacing));
-
-        RecyclerView.Adapter<? extends RecyclerView.ViewHolder> adapter;
-
-        switch (profileName) {
-            case MODBUS:
-                EquipmentDevice modbusDevice = (EquipmentDevice) profileData;
-                adapter = new ZoneRecyclerModbusParamAdapter(getContext(),
-                        modbusDevice.getDeviceEquipRef(),
-                        getSortedParameterList(modbusDevice));
-                break;
-
-            case BACNET:
-                //noinspection unchecked
-                bacnetRecyclerView = equipParams;
-                List<BacnetZoneViewItem> bacNetPointsList = (List<BacnetZoneViewItem>) profileData;
-                zoneRecyclerBacnetParamAdapter = new ZoneRecyclerBacnetParamAdapter(getContext(),
-                        bacNetPointsList, remotePointUpdateInterface);
-                adapter = zoneRecyclerBacnetParamAdapter;
-                break;
-
-            case CONNECTMODULE:
-                EquipmentDevice cnDevice = (EquipmentDevice) profileData;
-                adapter = new ZoneRecyclerModbusParamAdapter(getContext(), cnDevice.getDeviceEquipRef(),
-                        connectNodeDevice.get(Tags.ID).toString(),
-                        getSortedParameterList(cnDevice), true);
-
-                break;
-
-            default:
-                return;
-        }
-
-        equipParams.setAdapter(adapter);
-        equipParams.invalidate();
     }
 }
 

@@ -961,3 +961,20 @@ fun TextViewWithHint(modifier: Modifier, text: AnnotatedString, hintText: String
         SubTitleNoPadding(text = hintText, fontSize = 18f, modifier = Modifier, fontWeight = FontWeight.Normal)
     }
 }
+
+@Composable
+fun LabelTextView(text: String, widthValue:Int =210, fontSize : Int = 20
+                  , paddingStart: Int = 20) {
+    Text(
+        modifier = Modifier
+            .padding(PaddingValues(start = paddingStart.dp))
+            .width(widthValue.dp),
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = fontSize.sp,
+            color = Color.Black
+        ),
+        text = text
+    )
+}

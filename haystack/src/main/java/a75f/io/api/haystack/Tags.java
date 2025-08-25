@@ -282,6 +282,9 @@ public class Tags
     public static final String pipe4 = "pipe4";
     public static final String pipe2 = "pipe2";
     public static final String ECONOMIZER = "economizer";
+    public static final String CCU_ZONE_SCREEN = "CCU_ZONE_SCREEN";
+
+    public static final String CCU_POINT_OBSERVER = "CCU_POINT_OBSERVER";
 
     public static final String PCN = "pcn";
 }

@@ -51,6 +51,7 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.userintent.UserIntentDialog;
+import a75f.io.renatus.views.userintent.UserIntentDialogListener;
 import a75f.io.util.ExecutorTask;
 
 public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRecyclerModbusParamAdapter.ViewHolder> implements ModbusDataInterface {
@@ -160,7 +161,12 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 if(p != null && isPointFollowingScheduleOrEvent(p.getId())) {
                                     FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
                                     if (!UserIntentDialog.Companion.isDialogAlreadyVisible()) {
-                                        UserIntentDialog userIntentDialog = new UserIntentDialog(p.getId(), v);
+                                        UserIntentDialog userIntentDialog = new UserIntentDialog(p.getId(), v,   new UserIntentDialogListener() {
+                                            @Override
+                                            public void onFinished(int selectedIndex) {
+
+                                            }
+                                        });
                                         userIntentDialog.show(fragmentManager, "UserIntentDialog");
                                     }
                                     userAction = true;

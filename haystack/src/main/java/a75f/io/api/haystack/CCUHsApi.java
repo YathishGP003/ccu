@@ -64,6 +64,8 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
 import a75f.io.api.haystack.exception.NullHGridException;
+import a75f.io.api.haystack.observer.HisWriteObservable;
+import a75f.io.api.haystack.observer.PointWriteObservable;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
 import a75f.io.api.haystack.sync.CareTakerResponse;
 import a75f.io.api.haystack.sync.EntityParser;
@@ -1046,6 +1048,7 @@ public class CCUHsApi
             PointWriteCache.Companion.getInstance().writePoint(uid, b.toDict());
             CcuLog.d(TAG_CCU_HS, "PointWrite- "+id+" : "+val);
         }
+        PointWriteObservable.INSTANCE.notifyWritableChange(id.toString(), val);
         return hGrid;
     }
 
@@ -1073,6 +1076,7 @@ public class CCUHsApi
             CcuLog.d(TAG_CCU_HS, "PointWrite- "+id+" : "+val);
             PointWriteCache.Companion.getInstance().writePoint(uid, b.toDict());
         }
+        PointWriteObservable.INSTANCE.notifyWritableChange(id.toString(), val);
     }
 
     public void clearPointArrayLevel(String id, int level, boolean local) {
@@ -1375,6 +1379,7 @@ public class CCUHsApi
         }
         CcuLog.d(TAG_CCU_HS,"writeHisValById "+id+" timeMS: "+(System.currentTimeMillis()- time)+
                 " prevVal: "+prevVal+" currentVal: "+val+" item: "+item);
+        HisWriteObservable.INSTANCE.notifyChange(id, val);
     }
 
     /**
@@ -1390,6 +1395,7 @@ public class CCUHsApi
             return;
         }
         tagsDb.putHisItem(id, val);
+        HisWriteObservable.INSTANCE.notifyChange(id, val);
     }
 
     /**
@@ -1404,6 +1410,7 @@ public class CCUHsApi
 
     public void writeHisValByQuery(String query, Double val)
     {
+        String pointId = null;
         if (CACHED_HIS_QUERY)
         {
             String cachedId = QueryCache.getInstance().get(query);
@@ -1425,6 +1432,7 @@ public class CCUHsApi
                     }
                 }
             }
+            pointId = cachedId;
         } else {
             HashMap point = read(query);
             if (point.isEmpty()) {
@@ -1439,8 +1447,10 @@ public class CCUHsApi
                     HisItem item = new HisItem(id, new Date(), val);
                     hisWrite(item);
                 }
+                pointId = id;
             }
         }
+        HisWriteObservable.INSTANCE.notifyChange(pointId, val);
     }
 
     public void deleteEntity(String id) {

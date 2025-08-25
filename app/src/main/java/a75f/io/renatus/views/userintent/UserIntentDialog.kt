@@ -1,6 +1,5 @@
 package a75f.io.renatus.views.userintent
 
-import a75f.io.api.haystack.Point
 import a75f.io.logger.CcuLog
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.composables.DropDownWithoutLabel
@@ -39,7 +38,8 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 
 
-class UserIntentDialog(val pointId: String, private val spinnerView: View): BaseDialogFragment() {
+class UserIntentDialog(val pointId: String, private val spinnerView: View? = null,
+                       private var onFinishedListener: UserIntentDialogListener): BaseDialogFragment() {
 
     private lateinit var viewModel: UserIntentViewModel
     companion object {
@@ -218,7 +218,12 @@ class UserIntentDialog(val pointId: String, private val spinnerView: View): Base
         //TODO: Once MVVM architecture is implemented, this logic should be modified instead of programmatically setting the spinner value
         if(viewModel.isSaveButtonClicked.value) {
             CcuLog.d("CCU_USER_INTENT", "UserIntentDialog.onDismiss() - Programmatically selecting spinner value for index: ${viewModel.currentSelectedIndex.intValue}")
+            onFinishedListener.onFinished(viewModel.currentSelectedIndex.intValue)
             (spinnerView as AppCompatSpinner).setSelection(viewModel.currentSelectedIndex.intValue)
         }
     }
+}
+
+interface UserIntentDialogListener {
+    fun onFinished(selectedIndexOnDialogFinish: Int)
 }

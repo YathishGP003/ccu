@@ -61,6 +61,7 @@ import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants;
 import a75f.io.renatus.R;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.userintent.UserIntentDialog;
+import a75f.io.renatus.views.userintent.UserIntentDialogListener;
 
 public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRecyclerBacnetParamAdapter.ViewHolder> implements ModbusDataInterface {
 
@@ -165,7 +166,12 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
             if(isPointFollowingScheduleOrEvent(p.getId())) {
                 FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
                 if (!UserIntentDialog.Companion.isDialogAlreadyVisible()) {
-                    UserIntentDialog userIntentDialog = new UserIntentDialog(p.getId(), v);
+                    UserIntentDialog userIntentDialog = new UserIntentDialog(p.getId(), v, new UserIntentDialogListener() {
+                        @Override
+                        public void onFinished(int selectedIndex) {
+
+                        }
+                    });
                     userIntentDialog.show(fragmentManager, "UserIntentDialog");
                 }
                 isUserInteraction.set(true);

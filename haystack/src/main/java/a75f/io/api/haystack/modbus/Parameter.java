@@ -78,6 +78,7 @@ public class Parameter {
     private String wordOrder;
     private Boolean isSchedulable = false;
     private String logicalId = "";
+    private Double defaultValue = null;
     public String getParameterId() {
         return parameterId;
     }
@@ -199,6 +200,14 @@ public class Parameter {
     }
     public boolean setIsSchedulable(boolean isSchedulable) {
         return this.isSchedulable = isSchedulable;
+    }
+
+    public Double getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(Double defaultValue) {
+        this.defaultValue = defaultValue;
     }
 
     public static class EncounterCommandConverter implements PropertyConverter<List<Command>, String> {

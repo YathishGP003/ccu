@@ -38,7 +38,9 @@ public class Register {
     @Expose
     public String multiplier;
 
-
+    @SerializedName("defaultValue")
+    @Expose
+    public Double defaultValue = null;
 
     @SerializedName("parameters")
     @Expose
@@ -100,6 +102,14 @@ public class Register {
         this.multiplier = multiplier;
     }
 
+    public Double getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(Double defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
     public static class EncounterParameterConverter implements PropertyConverter<List<Parameter>, String> {
 
         @Override
@@ -126,7 +136,13 @@ public class Register {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(registerNumber).append(":").append(registerAddress).append(":").append(registerType).append(":").append(parameterDefinitionType).append(":").append(wordOrder).append(":").append(multiplier).append(" ");
+        sb.append(registerNumber).append(":")
+                .append(registerAddress).append(":")
+                .append(registerType).append(":")
+                .append(parameterDefinitionType).append(":")
+                .append(wordOrder).append(":")
+                .append(multiplier).append(":")
+                .append(defaultValue).append(" ");
         
         for(Parameter p : parameters) {
             sb.append(p.toString());

@@ -32,6 +32,7 @@ const val MAX_VAL = "maxVal"
 const val INCREMENTAL_VAL = "incrementVal"
 const val CELL = "cell"
 const val VERSION = "version"
+const val DEFAULT_VALUE = "defaultValue"
 
 /**
  * @param zoneRef
@@ -146,6 +147,7 @@ private fun getRegister(rawMap: HashMap<Any, Any>, connectModule: HashMap<Any, A
     register.parameterDefinitionType = getValue(rawMap, PARAM_DEFINITION_TYPE)
     register.wordOrder = getValue(rawMap, WORD_ORDER)
     register.multiplier = getValue(rawMap, MULTIPLIER)
+    register.defaultValue = if(rawMap.containsKey(DEFAULT_VALUE)) rawMap[DEFAULT_VALUE].toString().toDouble() else null
     register.parameters = mutableListOf(getParameter(physicalPoint, rawMap, connectModule))
     return register
 }

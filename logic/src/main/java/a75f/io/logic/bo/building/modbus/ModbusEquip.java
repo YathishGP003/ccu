@@ -196,6 +196,9 @@ public class ModbusEquip {
         }
 
         for(Parameter configParam : configParams){
+            Double defaultValue = configParam.getDefaultValue();
+            String disName = configParam.getName();
+            CcuLog.d(TAG, "disName: "+disName+"  ModbusEquip default value: "+defaultValue);
             Point.Builder logicalParamPoint = new Point.Builder()
                         .setDisplayName(equipDis+"-"+configParam.getName()+modelSuffix)
                         .setShortDis(configParam.getName())
@@ -253,7 +256,7 @@ public class ModbusEquip {
                     configParam.userIntentPointTags.removeIf(marker -> marker.getTagName().equals(Tags.SCHEDULABLE));
                 }
             }
-
+            boolean isWritable = false;
             for(LogicalPointTags marker : configParam.getLogicalPointTags()) {
                 if(Objects.nonNull(marker.getTagValue())){
                     if(marker.getTagName().contains("bacnetId")) {
@@ -306,7 +309,10 @@ public class ModbusEquip {
                     logicalParamPoint.addMarker(marker.getTagName());
                     physicalParamPoint.addMarker(marker.getTagName());
                 }
-                CcuLog.d("Modbus", modbusEquipType+"MBEquip logical and physical  markers="+marker.getTagName());
+                if (marker.getTagName().contains("writable")) {
+                    isWritable = true;
+                }
+                CcuLog.d(TAG, modbusEquipType+"MBEquip logical and physical  markers="+marker.getTagName());
             }
             if(Objects.nonNull(configParam.getUserIntentPointTags())) {
                 for (UserIntentPointTags marker : configParam.getUserIntentPointTags()) {
@@ -344,6 +350,9 @@ public class ModbusEquip {
                     } else {
                         logicalParamPoint.addMarker(marker.getTagName());
                         physicalParamPoint.addMarker(marker.getTagName());
+                    }
+                    if (marker.getTagName().contains("writable")) {
+                        isWritable = true;
                     }
                     CcuLog.d("Modbus", modbusEquipType + "MBEquip UserIntent  markers=" + marker.getTagName());
                 }
@@ -384,76 +393,73 @@ public class ModbusEquip {
             Point logicalPoint = logicalParamPoint.build();
             String logicalParamId = CCUHsApi.getInstance().addPoint(logicalPoint);
             RawPoint physicalPoint = physicalParamPoint.setPointRef(logicalParamId).build();
-
+            String physicalParamId = CCUHsApi.getInstance().addPoint(physicalPoint);
             // Do not create physical point if it is connect node
             if (!isConnectNode) {
-                String physicalParamId = CCUHsApi.getInstance().addPoint(physicalPoint);
-                CCUHsApi.getInstance().writeHisValById(physicalParamId,0.0);
-                if (physicalPoint.getMarkers().contains("writable")) {
-                    CCUHsApi.getInstance().writeDefaultValById(physicalParamId,0.0);
+                if(defaultValue != null){
+                    CCUHsApi.getInstance().writeHisValById(physicalParamId,defaultValue);
+                    if (physicalPoint.getMarkers().contains("writable")) {
+                        CCUHsApi.getInstance().writeDefaultValById(physicalParamId,defaultValue);
+                    }
+                } else {
+                    CCUHsApi.getInstance().writeHisValById(physicalParamId,0.0);
+                    if (physicalPoint.getMarkers().contains("writable")) {
+                        CCUHsApi.getInstance().writeDefaultValById(physicalParamId,0.0);
+                    }
                 }
             }
             if (configParam.getUserIntentPointTags() != null) {
                 if (configParam.getCommands() != null && !configParam.getCommands().isEmpty()) {
-                    CCUHsApi.getInstance().writeHisValById(logicalParamId, Double.parseDouble(configParam.getCommands().get(0).getBitValues()));
-                    CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(configParam.getCommands().get(0).getBitValues()));
-                    if (isZonePoint(logicalPoint)) {
-                        CCUHsApi.getInstance().writePoint(
-                                logicalParamId,
-                                17,
-                                CCUHsApi.getInstance().getCCUUserName(),
-                                Double.parseDouble(configParam.getCommands().get(0).getBitValues()),
-                                0
-                        );
-                    }
-                } else {
-                    if (logicalPoint.getMinVal() != null) {
-                        CCUHsApi.getInstance().writeHisValById(logicalParamId, Double.parseDouble(logicalPoint.getMinVal()));
-                        CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(logicalPoint.getMinVal()));
+                    if (defaultValue != null) {
+                        CcuLog.d(TAG, "writing default value for command point pointId: " + logicalParamId +
+                                " default value: " + defaultValue);
+                        CCUHsApi.getInstance().writeHisValById(logicalParamId, defaultValue);
+                        if(isWritable) CCUHsApi.getInstance().writeDefaultValById(logicalParamId, defaultValue);
                         if (isZonePoint(logicalPoint)) {
                             CCUHsApi.getInstance().writePoint(
                                     logicalParamId,
                                     17,
                                     CCUHsApi.getInstance().getCCUUserName(),
-                                    Double.parseDouble(logicalPoint.getMinVal()),
+                                    defaultValue,
                                     0
                             );
                         }
                     } else {
-                        CCUHsApi.getInstance().writeHisValById(logicalParamId, 0.0);
-                        CCUHsApi.getInstance().writeDefaultValById(logicalParamId, 0.0);
+                        CCUHsApi.getInstance().writeHisValById(logicalParamId, Double.parseDouble(configParam.getCommands().get(0).getBitValues()));
+                        if(isWritable) CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(configParam.getCommands().get(0).getBitValues()));
                         if (isZonePoint(logicalPoint)) {
                             CCUHsApi.getInstance().writePoint(
                                     logicalParamId,
                                     17,
                                     CCUHsApi.getInstance().getCCUUserName(),
-                                    0.0,
-                                    0
-                            );
-                        }
-                    }
-                }
-
-            } else {
-                if (configParam.getConditions() != null && !configParam.getConditions().isEmpty()) {
-                    CCUHsApi.getInstance().writeHisValById(logicalParamId, Double.parseDouble(configParam.getConditions().get(0).getBitValues()));
-                    if (logicalPoint.getMarkers().contains("writable")) {
-                        CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(configParam.getConditions().get(0).getBitValues()));
-                        if (isZonePoint(logicalPoint)) {
-                            CCUHsApi.getInstance().writePoint(
-                                    logicalParamId,
-                                    17,
-                                    CCUHsApi.getInstance().getCCUUserName(),
-                                    Double.parseDouble(configParam.getConditions().get(0).getBitValues()),
+                                    Double.parseDouble(configParam.getCommands().get(0).getBitValues()),
                                     0
                             );
                         }
                     }
                 } else {
-                    if (logicalPoint.getMinVal() != null) {
-                        CCUHsApi.getInstance().writeHisValById(logicalParamId, Double.parseDouble(logicalPoint.getMinVal()));
+                    if (defaultValue != null) {
+                        CcuLog.d(TAG, "writing default value pointId: " + logicalParamId +
+                                " default value: " + defaultValue);
+                        CCUHsApi.getInstance().writeHisValById(logicalParamId, defaultValue);
+                        if(isWritable) CCUHsApi.getInstance().writeDefaultValById(logicalParamId, defaultValue);
+                        if (isZonePoint(logicalPoint)) {
+                            CCUHsApi.getInstance().writePoint(
+                                    logicalParamId,
+                                    17,
+                                    CCUHsApi.getInstance().getCCUUserName(),
+                                    defaultValue,
+                                    0
+                            );
+                        }
+                    } else if (logicalPoint.getMinVal() != null) {
+                        CcuLog.d(TAG, "writing min value pointId: " + logicalParamId +
+                                " min value: " + logicalPoint.getMinVal());
+                        CCUHsApi.getInstance().writeHisValById(logicalParamId,
+                                Double.parseDouble(logicalPoint.getMinVal()));
                         if (logicalPoint.getMarkers().contains("writable")) {
-                            CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(logicalPoint.getMinVal()));
+                            CCUHsApi.getInstance().writeDefaultValById(logicalParamId,
+                                    Double.parseDouble(logicalPoint.getMinVal()));
                             if (isZonePoint(logicalPoint)) {
                                 CCUHsApi.getInstance().writePoint(
                                         logicalParamId,
@@ -465,6 +471,88 @@ public class ModbusEquip {
                             }
                         }
                     } else {
+                        CcuLog.d(TAG, "writing 0 value pointId: " + logicalParamId + " value: " + 0);
+                        CCUHsApi.getInstance().writeHisValById(logicalParamId, 0.0);
+                        if(isWritable) CCUHsApi.getInstance().writeDefaultValById(logicalParamId, 0.0);
+                        if (logicalPoint.getMarkers().contains("writable")) {
+                            if (isZonePoint(logicalPoint)) {
+                                CCUHsApi.getInstance().writePoint(
+                                        logicalParamId,
+                                        17,
+                                        CCUHsApi.getInstance().getCCUUserName(),
+                                        0.0,
+                                        0
+                                );
+                            }
+                        }
+                    }
+                }
+
+            } else {
+                if (configParam.getConditions() != null && !configParam.getConditions().isEmpty()) {
+                    CCUHsApi.getInstance().writeHisValById(logicalParamId,
+                            Double.parseDouble(configParam.getConditions().get(0).getBitValues()));
+                    if (defaultValue != null) {
+                        if(isWritable) CCUHsApi.getInstance().writeDefaultValById(logicalParamId, defaultValue);
+                        CCUHsApi.getInstance().writeHisValById(logicalParamId, defaultValue);
+                        if (isZonePoint(logicalPoint)) {
+                            CCUHsApi.getInstance().writePoint(
+                                    logicalParamId,
+                                    17,
+                                    CCUHsApi.getInstance().getCCUUserName(),
+                                    defaultValue,
+                                    0
+                            );
+                        }
+                    } else if (logicalPoint.getMarkers().contains("writable")) {
+                        if(isWritable) CCUHsApi.getInstance().writeDefaultValById(logicalParamId,
+                                Double.parseDouble(configParam.getConditions().get(0).getBitValues()));
+
+                        if (isZonePoint(logicalPoint)) {
+                            CCUHsApi.getInstance().writePoint(
+                                    logicalParamId,
+                                    17,
+                                    CCUHsApi.getInstance().getCCUUserName(),
+                                    Double.parseDouble(configParam.getConditions().get(0).getBitValues()),
+                                    0
+                            );
+                        }
+                    }
+                } else {
+                    if (defaultValue != null) {
+                        CcuLog.d(TAG, "writing default value pointId: " +
+                                logicalParamId + " default value: " + defaultValue);
+                        CCUHsApi.getInstance().writeHisValById(physicalParamId, defaultValue);
+                        if(isWritable) CCUHsApi.getInstance().writeDefaultValById(logicalParamId, defaultValue);
+                        if (isZonePoint(logicalPoint)) {
+                            CCUHsApi.getInstance().writePoint(
+                                    logicalParamId,
+                                    17,
+                                    CCUHsApi.getInstance().getCCUUserName(),
+                                    Double.parseDouble(logicalPoint.getMinVal()),
+                                    0
+                            );
+                        }
+                    } else if (logicalPoint.getMinVal() != null) {
+                        CcuLog.d(TAG, "writing min value pointId: " + logicalParamId +
+                                " min value: " + logicalPoint.getMinVal());
+                        CCUHsApi.getInstance().writeHisValById(logicalParamId,
+                                Double.parseDouble(logicalPoint.getMinVal()));
+                        if (logicalPoint.getMarkers().contains("writable")) {
+                            CCUHsApi.getInstance().writeDefaultValById(logicalParamId,
+                                    Double.parseDouble(logicalPoint.getMinVal()));
+                            if (isZonePoint(logicalPoint)) {
+                                CCUHsApi.getInstance().writePoint(
+                                        logicalParamId,
+                                        17,
+                                        CCUHsApi.getInstance().getCCUUserName(),
+                                        Double.parseDouble(logicalPoint.getMinVal()),
+                                        0
+                                );
+                            }
+                        }
+                    } else {
+                        CcuLog.d(TAG, "writing 0 value pointId: " + logicalParamId + " value: " + 0);
                         CCUHsApi.getInstance().writeHisValById(logicalParamId, 0.0);
                         if (logicalPoint.getMarkers().contains("writable")) {
                             CCUHsApi.getInstance().writeDefaultValById(logicalParamId, 0.0);
@@ -481,7 +569,6 @@ public class ModbusEquip {
                     }
                 }
             }
-
         }
 
         if(modbusLevel.equals("zone")) {

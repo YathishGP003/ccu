@@ -296,7 +296,7 @@
     },
     {
       "id": "4:648221881845039292",
-      "lastPropertyId": "21:7695628867179591397",
+      "lastPropertyId": "22:7688351577495163634",
       "name": "Parameter",
       "properties": [
         {
@@ -405,6 +405,12 @@
           "id": "21:7695628867179591397",
           "name": "logicalId",
           "type": 9
+        },
+        {
+          "id": "22:7688351577495163634",
+          "name": "defaultValue",
+          "type": 8,
+          "flags": 2
         }
       ],
       "relations": []
@@ -435,7 +441,7 @@
     },
     {
       "id": "6:2989990805532220522",
-      "lastPropertyId": "8:1472387833238648659",
+      "lastPropertyId": "9:8716987527487947084",
       "name": "Register",
       "properties": [
         {
@@ -479,6 +485,12 @@
           "id": "8:1472387833238648659",
           "name": "multiplier",
           "type": 9
+        },
+        {
+          "id": "9:8716987527487947084",
+          "name": "defaultValue",
+          "type": 8,
+          "flags": 2
         }
       ],
       "relations": []

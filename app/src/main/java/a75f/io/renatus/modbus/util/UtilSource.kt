@@ -49,6 +49,7 @@ fun getParameters(equipment: EquipmentDevice): MutableList<RegisterItem> {
                     register.displayInUi.value = parameterTemp.isDisplayInUI
                     register.schedulable.value = parameterTemp.isSchedulable
                     register.param = mutableStateOf(parameterTemp)
+                    parameterTemp.defaultValue = registerTemp.defaultValue
                     parameterList.add(register)
                 }
             }

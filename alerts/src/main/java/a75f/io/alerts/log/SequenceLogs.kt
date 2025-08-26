@@ -37,6 +37,7 @@ const val SEQUENCE_RUNNER = "Seq_Runner"
 const val CONTEXT_SERVICE = "ctx"
 
 enum class LogOperation(val key: String, val value: String) {
+    CLEAR_POINT_VALUES(HAYSTACK_SERVICE, "CLEAR_POINT_VALUES"),
     FIND_ENTITY_BY_FILTER(HAYSTACK_SERVICE, "findEntityByFilter"),
     FIND_BY_FILTER(HAYSTACK_SERVICE, "findByFilter"),
     FIND_BY_ID(HAYSTACK_SERVICE, "findById"),

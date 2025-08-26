@@ -2,6 +2,7 @@ package a75f.io.domain.util
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
@@ -61,5 +62,28 @@ class PointsUtil(private val hayStack : CCUHsApi) {
             DomainName.hyperstatMonitoring -> ModelLoader.getHyperStatMonitoringModel() as SeventyFiveFProfileDirective
             else -> null
         }
+    }
+
+    /**
+     * Overwrites a point's current value with its default value from the associated equipment model.
+     *
+     * This function:
+     * 1. Retrieves the equipment reference for the point
+     * 2. Gets the model ID from the equipment
+     * 3. Fetches the model definition from cache
+     * 4. Finds the matching point definition by domain name
+     * 5. Writes the default value to the point via CCUHsApi
+     *
+     * @param point The target point to overwrite.
+     *
+     */
+    fun overWriteDefaultValGeneric(point: Point) {
+        val localPoint = hayStack.readMapById(point.equipRef)
+        val modelId = localPoint.get("sourceModel")
+        val model = ModelCache.getModelById(modelId.toString())
+        val pointDef = model.points.find { it.domainName == point.domainName}
+        val defaultval = pointDef?.defaultValue as Number
+        CCUHsApi.getInstance().writeDefaultTunerValById(point.id,defaultval.toDouble())
+        CcuLog.d(Domain.LOG_TAG, "Default value written for point: ${point.displayName} with value: $defaultval")
     }
 }

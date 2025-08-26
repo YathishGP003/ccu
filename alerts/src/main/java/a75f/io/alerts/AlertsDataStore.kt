@@ -123,6 +123,14 @@ class AlertsDataStore @JvmOverloads constructor(
       return alertQuery.build().find()
    }
 
+   fun getActiveCCUSanityFailedAlerts(): List<Alert> {
+      val alertQuery = alertBox.query()
+      alertQuery.equal(Alert_.isFixed, false)
+         .equal(Alert_.mTitle, "SANITY CHECK STATUS")
+         .orderDesc(Alert_.startTime)
+      return alertQuery.build().find()
+   }
+
    fun getActiveDeviceDeadAlerts(): List<Alert> {
       val alertQuery = alertBox.query()
       alertQuery.equal(Alert_.isFixed, false)

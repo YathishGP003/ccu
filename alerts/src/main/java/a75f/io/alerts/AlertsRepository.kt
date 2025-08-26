@@ -159,6 +159,8 @@ class AlertsRepository(
 
    fun getActiveCMDeadAlerts() = dataStore.getActiveCMDeadAlerts()
 
+   fun getActiveCCUSanityALerts() = dataStore.getActiveCCUSanityFailedAlerts()
+
    fun getActiveDeviceDeadAlerts() = dataStore.getActiveDeviceDeadAlerts()
 
    fun getUnsyncedAlerts() = dataStore.getUnSyncedAlerts()

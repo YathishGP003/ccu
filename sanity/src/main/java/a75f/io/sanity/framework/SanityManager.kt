@@ -1,5 +1,6 @@
 package a75f.io.sanity.framework
 
+import a75f.io.alerts.AlertManager
 import android.content.Context
 import android.util.Log
 import androidx.work.Data
@@ -20,12 +21,23 @@ class SanityManager {
      * Runs all sanity suites once and returns a flow of results.
      */
     fun runOnce(runner: SanityRunner): Flow<Pair<SanityCase, SanityResult>> = flow {
+        var failCount = 0
         for (suite in SanitySuiteRegistry.sanitySuites.values) {
             suite.getCases().forEach { case ->
                 val result = runner.runCase(case)
+                if(result.result == SanityResultType.FAILED) {
+                    failCount++
+                }
                 emit(case to result)
                 delay(1000) // TODO- TEST
             }
+        }
+        if(failCount > 0) {
+            Log.e(SANITTY_TAG, "Sanity checks completed with $failCount failures.")
+        } else {
+            // Clear any existing sanity alerts if all checks passed
+            AlertManager.getInstance().fixCCUSanityAlerts()
+            Log.i(SANITTY_TAG, "Sanity checks completed successfully with no failures.")
         }
     }
 

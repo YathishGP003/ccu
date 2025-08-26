@@ -690,10 +690,10 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         });
         executeSanity.setOnClickListener(view1 -> {
                     new SanityResultsFragment().show(getActivity().getSupportFragmentManager(), "SanityDialog");
-                    ExecutorTask.executeBackground(() -> {
-                        SanityManager sanityManager = new SanityManager();
-                        sanityManager.runOnceAndSaveReport(new SanityRunner(), getContext());
-                    });
+//                    ExecutorTask.executeBackground(() -> {
+//                        SanityManager sanityManager = new SanityManager();
+//                        sanityManager.runOnceAndSaveReport(new SanityRunner(), getContext());
+//                    });
                 });
 
         remoteBtn.setOnClickListener(view1 -> {

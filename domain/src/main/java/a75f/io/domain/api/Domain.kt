@@ -36,6 +36,7 @@ object Domain {
 
     const val LOG_TAG = "CCU_DOMAIN"
     const val LOG_TAG_TUNER = "CCU_DOMAIN_TUNER"
+    const val SANITTY_TAG = "CCU_SANITY"
 
     val domainScope = CoroutineScope(Dispatchers.IO + Job())
     var hayStack: CCUHsApi = CCUHsApi.getInstance()

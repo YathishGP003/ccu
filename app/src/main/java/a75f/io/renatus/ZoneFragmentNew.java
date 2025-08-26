@@ -4482,7 +4482,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         scheduleImageButton.setVisibility(View.VISIBLE);
         CCUHsApi.getInstance().scheduleSync();
 
-        setScheduleType(scheduleTypeId, ScheduleType.ZONE, zoneMap);
+        int currentScheduleType = CCUHsApi.getInstance().readDefaultValById(scheduleTypeId).intValue();
+        if (currentScheduleType != ScheduleType.ZONE.ordinal()) {
+            setScheduleType(scheduleTypeId, ScheduleType.ZONE, zoneMap);
+            CcuLog.d(L.TAG_CCU_UI, "Schedule Type updated");
+        }
         mScheduleTypeMap.put(zoneMap.get(0).get("id").toString(), ScheduleType.ZONE.ordinal());
     }
 

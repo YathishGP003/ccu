@@ -229,7 +229,12 @@ object Domain {
         if (point?.valueConstraint is MultiStateConstraint) {
 
             (point.valueConstraint as MultiStateConstraint).allowedValues.forEach{ state ->
-                valuesList.add(state.value)
+                if(state.dis!=null){
+                    valuesList.add(state.dis!!)
+                }
+                else {
+                    valuesList.add(state.value)
+                }
             }
 
         } else if (point?.valueConstraint is NumericConstraint) {
@@ -247,6 +252,7 @@ object Domain {
         }
         return valuesList
     }
+
 
     /**
      * Retrieves the minimum value, maximum value, and increment value for a given domain name

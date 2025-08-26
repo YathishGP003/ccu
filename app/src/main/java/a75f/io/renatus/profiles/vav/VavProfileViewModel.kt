@@ -140,9 +140,7 @@ class VavProfileViewModel : ViewModel() {
         damperShapesList = getListByDomainName(DomainName.damperShape, model)
         reheatTypesList = getListByDomainName(DomainName.reheatType, model)
         zonePrioritiesList = getListByDomainName(DomainName.zonePriority, model)
-
         temperatureOffsetsList = getListByDomainName(DomainName.temperatureOffset, model)
-
         maxCoolingDamperPosList = getListByDomainName(DomainName.maxCoolingDamperPos, model)
         minCoolingDamperPosList = getListByDomainName(DomainName.minCoolingDamperPos, model)
         maxHeatingDamperPosList = getListByDomainName(DomainName.maxHeatingDamperPos, model)

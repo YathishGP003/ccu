@@ -15,6 +15,7 @@ import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
 import a75f.io.renatus.profiles.system.advancedahu.Option
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -40,12 +42,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.lang.Float.max
 
 /**
  * Created by Manjunath K on 27-03-2024.
@@ -454,3 +460,42 @@ fun DependentPointMappingView(toggleName : String, toggleState :Boolean = false,
         }
     }
 }
+
+
+@Composable
+fun VerticalScrollbar(
+    modifier: Modifier,
+    listState: LazyListState
+) {
+    val thumbMinHeight = 48.dp
+    val scrollbarWidth = 8.dp
+    val cornerRadius = 4.dp
+
+    Canvas(modifier = modifier) {
+        val totalItems = listState.layoutInfo.totalItemsCount
+        if (totalItems == 0) return@Canvas
+
+        val viewportHeight = size.height
+        val firstVisibleItemIndex = listState.firstVisibleItemIndex
+        val visibleItems = listState.layoutInfo.visibleItemsInfo.size
+        val contentHeight = (totalItems * (listState.layoutInfo.visibleItemsInfo.firstOrNull()?.size ?: 0)).toFloat()
+
+
+        var thumbHeight = viewportHeight * (viewportHeight / max(contentHeight, viewportHeight))
+        val thumbHeightPx = max(thumbHeight, thumbMinHeight.toPx())
+
+
+        val scrollY = (firstVisibleItemIndex.toFloat() / (totalItems - visibleItems).coerceAtLeast(1)) *
+                (viewportHeight - thumbHeightPx)
+
+
+        drawRoundRect(
+            color = Color.Gray.copy(alpha = 0.6f),
+            topLeft = Offset(x = size.width - scrollbarWidth.toPx(), y = scrollY),
+            size = Size(width = scrollbarWidth.toPx(), height = thumbHeightPx),
+            cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
+
+        )
+    }
+}
+

@@ -2,8 +2,10 @@ package a75f.io.renatus.bacnet
 
 import a75f.io.renatus.R
 import a75f.io.renatus.bacnet.models.BacnetDevice
+import a75f.io.renatus.composables.VerticalScrollbar
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.compose.ComposeUtil.Companion.greyColor
+import a75f.io.renatus.compose.ComposeUtil.Companion.greyDropDownScrollBarColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.modbus.util.DEVICE_ID
 import a75f.io.renatus.modbus.util.DEVICE_IP
@@ -17,6 +19,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,6 +37,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -45,14 +51,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.DialogFragment
+import java.lang.Float.max
 
 class BacnetDeviceSelectionFragment : DialogFragment() {
 
@@ -98,6 +112,7 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
     fun ShowOptions(
         items: List<BacnetDevice>
     ) {
+        val listState = rememberLazyListState()
         var searchText by remember { mutableStateOf("") }
         val filteredItems = if (searchText.isEmpty()) {
             items
@@ -152,7 +167,8 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
                     .padding(top = 20.dp)
             ) {
 
-                LazyColumn (
+                LazyColumn(
+                    state = listState,
                     contentPadding = PaddingValues(bottom = 40.dp)
                 ) {
                     if (isMstpView) {
@@ -177,9 +193,17 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
                         }
                     }
                 }
+                VerticalScrollbar(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .fillMaxHeight()
+                        .width(10.dp)
+                        .padding(2.dp),
+                    listState = listState
+                )
             }
-        }
 
+        }
     }
 
     fun getIdString(): String {
@@ -216,7 +240,7 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 22.sp,
+                    fontSize = 20.sp,
                     color = Color.Black
                 )
             )
@@ -229,7 +253,7 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 22.sp,
+                    fontSize = 20.sp,
                     color = Color.Black
                 )
             )
@@ -242,7 +266,7 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 22.sp,
+                    fontSize = 20.sp,
                     color = Color.Black
                 )
             )
@@ -255,7 +279,7 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 22.sp,
+                    fontSize = 20.sp,
                     color = Color.Black
                 ),
             )

@@ -1,7 +1,6 @@
 package a75f.io.logic.bo.building.vav;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
@@ -87,7 +86,7 @@ public class VavParallelFanProfile extends VavProfile
         }
 
         boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), equip.getRoomRef(), Occupancy.OCCUPIED);
-        updateIaqCompensatedMinDamperPos(occupied);
+        updateIaqCompensatedMinDamperPos(occupied, systemMode);
         if (loopOp == 0) {
             damper.currentPosition = damper.iaqCompensatedMinPos;
         } else {
@@ -249,23 +248,25 @@ public class VavParallelFanProfile extends VavProfile
         CcuLog.d(L.TAG_CCU_ZONE,"updateReheatDuringSystemHeating valveStart "+valveStart);
     }
 
-    private void updateIaqCompensatedMinDamperPos(boolean occupied) {
-        
-        double co2 = vavEquip.getZoneCO2().readHisVal();
-        boolean  enabledCO2Control = vavEquip.getEnableCo2Control().readDefaultVal() > 0 ;
-        if (enabledCO2Control) { CcuLog.e(L.TAG_CCU_ZONE, "DCV Tuners: co2Target " + co2Loop.getCo2Target() + ", co2Threshold " + co2Loop.getCo2Threshold()); }
+    private void updateIaqCompensatedMinDamperPos(boolean occupied, SystemMode systemMode) {
 
-        double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
+        double co2 = vavEquip.getZoneCO2().readHisVal();
+        boolean enabledCO2Control = vavEquip.getEnableCo2Control().readDefaultVal() > 0;
+        if (enabledCO2Control) {
+            CcuLog.e(L.TAG_CCU_ZONE, "DCV Tuners: co2Target " + co2Loop.getCo2Target() + ", co2Threshold " + co2Loop.getCo2Threshold());
+        }
+
+        double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
-        if(epidemicState != EpidemicState.OFF && L.ccu().oaoProfile != null) {
+        if (systemMode != SystemMode.OFF && epidemicState != EpidemicState.OFF && L.ccu().oaoProfile != null) {
             double smartPurgeDABDamperMinOpenMultiplier = L.ccu().oaoProfile.getOAOEquip().getSystemPurgeVavDamperMinOpenMultiplier().readPriorityVal();
-            damper.iaqCompensatedMinPos = (int)(damper.minPosition * smartPurgeDABDamperMinOpenMultiplier);
-        }else {
+            damper.iaqCompensatedMinPos = (int) (damper.minPosition * smartPurgeDABDamperMinOpenMultiplier);
+        } else {
             damper.iaqCompensatedMinPos = damper.minPosition;
         }
-        
+
         //CO2 loop output from 0-50% modulates damper min position.
-        if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0) {
+        if (systemMode != SystemMode.OFF && enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0) {
             damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.minPosition) * Math.min(50, co2Loop.getLoopOutput()) / 50;
             CcuLog.d(L.TAG_CCU_ZONE, "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
         }

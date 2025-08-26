@@ -130,7 +130,7 @@ public class VavAcbProfile extends VavProfile
         }
         loopOp = Math.max(0, loopOp);
         try {
-            updateIaqCompensatedMinDamperPos(nodeAddr, equip);
+            updateIaqCompensatedMinDamperPos(equip, systemMode);
         } catch (UnknownRecException e) {
             CcuLog.e(L.TAG_CCU_ZONE, "IaqCompensation cannot be performed ", e);
         }
@@ -265,17 +265,8 @@ public class VavAcbProfile extends VavProfile
         heatingLoop.setEnabled();
         coolingLoop.setDisabled();
     }
-    
-    /**
-     * Thermistor measurements interpret junk reading when they are actually not connected.
-     * Avoid running the loop when the air temps are outside a reasonable range to make sure they are not picked by the
-     * algorithm.
-     */
-    private boolean isSupplyAirTempValid(double sat) {
-        return !(sat < 0) && !(sat > 200);
-    }
-    
-    private void updateIaqCompensatedMinDamperPos(Integer node, Equip equip) {
+
+    private void updateIaqCompensatedMinDamperPos(Equip equip, SystemMode systemMode) {
 
         boolean  enabledCO2Control = vavEquip.getEnableCo2Control().readDefaultVal() > 0;
         if (enabledCO2Control) { CcuLog.e(L.TAG_CCU_ZONE, "DCV Tuners: co2Target " + co2Loop.getCo2Target() + ", co2Threshold " + co2Loop.getCo2Threshold()); }
@@ -287,14 +278,14 @@ public class VavAcbProfile extends VavProfile
         
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
-        if(epidemicState != EpidemicState.OFF && L.ccu().oaoProfile != null) {
+        if(systemMode != SystemMode.OFF && epidemicState != EpidemicState.OFF && L.ccu().oaoProfile != null) {
             double smartPurgeDABDamperMinOpenMultiplier = L.ccu().oaoProfile.getOAOEquip().getSystemPurgeVavDamperMinOpenMultiplier().readPriorityVal();
             damper.iaqCompensatedMinPos = (int)(damper.minPosition * smartPurgeDABDamperMinOpenMultiplier);
         } else {
             damper.iaqCompensatedMinPos = damper.minPosition;
         }
         //CO2 loop output from 0-50% modulates damper min position.
-        if (enabledCO2Control && occupied && co2Loop.getLoopOutput(vavEquip.getZoneCO2().readHisVal()) > 0) {
+        if (systemMode != SystemMode.OFF && enabledCO2Control && occupied && co2Loop.getLoopOutput(vavEquip.getZoneCO2().readHisVal()) > 0) {
             damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, co2Loop.getLoopOutput()) / 50;
             CcuLog.d(L.TAG_CCU_ZONE,"CO2LoopOp :"+co2Loop.getLoopOutput()+", adjusted minposition "+damper.iaqCompensatedMinPos);
         }

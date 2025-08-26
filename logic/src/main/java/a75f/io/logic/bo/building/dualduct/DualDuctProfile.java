@@ -5,8 +5,6 @@ import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
-import android.util.Log;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,7 +31,6 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.TemperatureProfileUtil;
-import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
 public class DualDuctProfile extends ZoneProfile {
@@ -126,8 +123,8 @@ public class DualDuctProfile extends ZoneProfile {
         setDamperLimits(coolingDamper, "cooling");
         setDamperLimits(heatingDamper, "heating");
         
-        coolingDamper.iaqCompensatedMinPos = getIAQCompensatedDamperPosition(coolingDamper);
-        heatingDamper.iaqCompensatedMinPos = getIAQCompensatedDamperPosition(heatingDamper);
+        coolingDamper.iaqCompensatedMinPos = getIAQCompensatedDamperPosition(coolingDamper, systemMode);
+        heatingDamper.iaqCompensatedMinPos = getIAQCompensatedDamperPosition(heatingDamper, systemMode);
         
         coolingDamper.currentPosition = (int)(coolingDamper.iaqCompensatedMinPos +
                                 (coolingDamper.maxPosition - coolingDamper.iaqCompensatedMinPos) *
@@ -214,7 +211,7 @@ public class DualDuctProfile extends ZoneProfile {
         }
     }
     
-    private int getIAQCompensatedDamperPosition(Damper damper) {
+    private int getIAQCompensatedDamperPosition(Damper damper, SystemMode systemMode) {
     
         CO2Loop co2Loop = dualDuctEquip.getCo2Loop();
         VOCLoop vocLoop = dualDuctEquip.getVOCLoop();
@@ -234,21 +231,21 @@ public class DualDuctProfile extends ZoneProfile {
         double        epidemicMode  = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
     
-        if((epidemicState != EpidemicState.OFF) && (L.ccu().oaoProfile != null)){
+        if(systemMode != SystemMode.OFF &&(epidemicState != EpidemicState.OFF) && (L.ccu().oaoProfile != null)){
             double smartPurgeDABDamperMinOpenMultiplier = L.ccu().oaoProfile.getOAOEquip().getSystemPurgeDabDamperMinOpenMultiplier().readPriorityVal();
             damper.iaqCompensatedMinPos =(int) (damper.minPosition * smartPurgeDABDamperMinOpenMultiplier);
         } else {
             damper.iaqCompensatedMinPos = damper.minPosition;
         }
         //CO2 loop output from 0-50% modulates damper min position.
-        if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0)
+        if (systemMode != SystemMode.OFF && enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0)
         {
             damper.iaqCompensatedMinPos =
                 damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * co2Loop.getLoopOutput() / 100;
             CcuLog.d(L.TAG_CCU_ZONE, "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
         }
         //VOC loop output from 0-50% modulates damper min position.
-        if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0)
+        if (systemMode != SystemMode.OFF && enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0)
         {
             damper.iaqCompensatedMinPos =
                 damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * vocLoop.getLoopOutput() / 100;

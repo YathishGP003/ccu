@@ -354,7 +354,7 @@ abstract class HyperStatConfiguration(
 
         fun getPort(portName: String): RawPoint.Builder? {
             val port = hayStack.readHDict("point and deviceRef == \"$deviceRef\" and domainName == \"$portName\"")
-            if (port.isEmpty) return null
+            if (port == null || port.isEmpty) return null
             return RawPoint.Builder().setHDict(port)
         }
 

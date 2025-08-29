@@ -219,4 +219,28 @@ class VavStagedVfdRtuViewModel : StagedRtuProfileViewModel() {
             false
         }
     }
+
+
+    fun getAnalogOutVal(
+        viewModel: VavStagedVfdRtuViewModel,
+        viewState: StagedRtuVfdViewState
+    ): Int {
+        return try {
+            if (viewModel.isVavStagedWithVfdProfile()) {
+                (0..10).map { it }.indexOf(viewModel.getAnalog2Out().toInt())
+            } else {
+                0
+            }
+        } catch (e: UninitializedPropertyAccessException) {
+            (0..10).map { it }
+                .indexOf((viewState.analogOut2FanSpeedTestSignal.toInt()) / 10)
+        }
+    }
+
+
+    private fun isVavStagedWithVfdProfile(): Boolean {
+        val systemEquip = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
+        return (systemEquip["profile"].toString() == "vavStagedRtuVfdFan" ||
+                systemEquip["profile"].toString() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU.name)
+    }
 }

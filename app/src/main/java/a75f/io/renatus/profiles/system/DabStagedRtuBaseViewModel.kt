@@ -34,6 +34,7 @@ import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -169,14 +170,16 @@ open class DabStagedRtuBaseViewModel : ViewModel() {
     }
 
     fun sendAnalogTestSignal(value: Double) {
-        Globals.getInstance().isTestMode = true
-        TestSignalManager.backUpPoint(Domain.cmBoardDevice.analog2Out)
-        Domain.cmBoardDevice.analog2Out.writePointValue(10 * value)
-        MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
+        CoroutineScope(Dispatchers.IO).launch {
+            Globals.getInstance().isTestMode = true
+            TestSignalManager.backUpPoint(Domain.cmBoardDevice.analog2Out)
+            Domain.cmBoardDevice.analog2Out.writePointValue(10 * value)
+            MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
+        }
     }
 
     fun getAnalog2Out(): Double {
-        return Domain.cmBoardDevice.analog2Out.readHisVal()
+        return Domain.cmBoardDevice.analog2Out.readHisVal() / 10
     }
 
     fun updateSystemMode() {

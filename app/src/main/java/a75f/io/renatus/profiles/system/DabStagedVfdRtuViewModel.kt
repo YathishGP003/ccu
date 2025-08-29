@@ -216,4 +216,27 @@ class DabStagedVfdRtuViewModel : DabStagedRtuBaseViewModel() {
             false
         }
     }
+
+    fun getAnalogOutVal(
+        viewModel: DabStagedVfdRtuViewModel,
+        viewState: StagedRtuVfdViewState
+    ): Int {
+        return try {
+            if (viewModel.isDabStagedWithVfdProfile()) {
+                (0..10).map { it }.indexOf(viewModel.getAnalog2Out().toInt())
+            } else {
+                0
+            }
+        } catch (e: UninitializedPropertyAccessException) {
+            (0..10).map { it }
+                .indexOf((viewState.analogOut2FanSpeedTestSignal.toInt()) / 10)
+        }
+    }
+
+
+    private fun isDabStagedWithVfdProfile(): Boolean {
+        val systemEquip = hayStack.readEntity(CommonQueries.SYSTEM_PROFILE)
+        return (systemEquip["profile"].toString() == "dabStagedRtuVfdFan" ||
+                systemEquip["profile"].toString() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU.name)
+    }
 }

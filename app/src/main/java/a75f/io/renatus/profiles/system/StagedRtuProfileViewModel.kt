@@ -39,6 +39,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import a75f.io.logic.util.modifyConditioningMode
+import kotlinx.coroutines.CoroutineScope
 import kotlin.system.measureTimeMillis
 
 open class StagedRtuProfileViewModel : ViewModel() {
@@ -170,15 +171,17 @@ open class StagedRtuProfileViewModel : ViewModel() {
      //this function is only for VFD Profile
     fun sendAnalogTestSignal(value: Double) {
         if(L.ccu().systemProfile.profileName == ProfileNameVFD) {
-            Globals.getInstance().isTestMode = true
-            TestSignalManager.backUpPoint(Domain.cmBoardDevice.analog2Out)
-            Domain.cmBoardDevice.analog2Out.writePointValue(10 * value)
-            MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
+            CoroutineScope(Dispatchers.IO).launch {
+                Globals.getInstance().isTestMode = true
+                TestSignalManager.backUpPoint(Domain.cmBoardDevice.analog2Out)
+                Domain.cmBoardDevice.analog2Out.writePointValue(10 * value)
+                MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
+            }
         }
     }
 
     fun getAnalog2Out(): Double {
-        return Domain.cmBoardDevice.analog2Out.readHisVal()
+        return Domain.cmBoardDevice.analog2Out.readHisVal() / 10
     }
 
     fun updateSystemMode() {

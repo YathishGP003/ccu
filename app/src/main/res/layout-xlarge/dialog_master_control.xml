@@ -90,11 +90,12 @@
                         <Spinner
                             android:id="@+id/buildinglimmin"
                             style="@style/customSpinnerDownArrow"
-                            android:layout_width="wrap_content"
+                            android:layout_width="110dp"
+                            android:dropDownWidth="match_parent"
+                            android:paddingLeft="5dp"
                             android:layout_height="40dp"
                             android:layout_marginStart="120dp"
                             android:overlapAnchor="false"
-
                             android:textColor="@color/selection_gray"
                             tools:listitem="@layout/spinner_dropdown_item" />
 
@@ -106,7 +107,8 @@
                         <Spinner
                             android:id="@+id/buildinglimitmax"
                             style="@style/customSpinnerDownArrow"
-                            android:layout_width="wrap_content"
+                            android:layout_width="110dp"
+                            android:dropDownWidth="match_parent"
                             android:layout_height="40dp"
                             android:layout_marginStart="20dp"
                             android:overlapAnchor="false"
@@ -129,9 +131,10 @@
                         <Spinner
                             android:id="@+id/buildingtozonediff"
                             style="@style/customSpinnerDownArrow"
-                            android:layout_width="wrap_content"
+                            android:layout_width="110dp"
+                            android:dropDownWidth="match_parent"
                             android:layout_height="40dp"
-                            android:layout_marginStart="28dp"
+                            android:layout_marginStart="26dp"
                             tools:listitem="@layout/spinner_dropdown_item" />
 
 
@@ -186,7 +189,8 @@
                         <Spinner
                             android:id="@+id/heatinglimmin"
                             style="@style/customSpinnerDownArrow"
-                            android:layout_width="wrap_content"
+                            android:layout_width="110dp"
+                            android:dropDownWidth="match_parent"
                             android:layout_height="40dp"
                             android:layout_marginStart="80dp"
                             android:entries="@array/heating_limit"
@@ -201,7 +205,8 @@
                         <Spinner
                             android:id="@+id/coolinglimmin"
                             style="@style/customSpinnerDownArrow"
-                            android:layout_width="wrap_content"
+                            android:layout_width="110dp"
+                            android:dropDownWidth="match_parent"
                             android:layout_height="40dp"
                             android:layout_marginStart="24dp"
                             android:entries="@array/cooling_limit"
@@ -224,7 +229,8 @@
                         <Spinner
                             android:id="@+id/heatinglimmax"
                             style="@style/customSpinnerDownArrow"
-                            android:layout_width="wrap_content"
+                            android:layout_width="110dp"
+                            android:dropDownWidth="match_parent"
                             android:layout_height="40dp"
                             android:layout_marginStart="75dp"
                             android:entries="@array/heating_limit"
@@ -239,7 +245,8 @@
                         <Spinner
                             android:id="@+id/coolinglimmax"
                             style="@style/customSpinnerDownArrow"
-                            android:layout_width="wrap_content"
+                            android:layout_width="110dp"
+                            android:dropDownWidth="match_parent"
                             android:layout_height="40dp"
                             android:layout_marginStart="20dp"
                             android:entries="@array/cooling_limit"
@@ -270,7 +277,8 @@
                         <Spinner
                             android:id="@+id/heatingdeadband"
                             style="@style/customSpinnerDownArrow"
-                            android:layout_width="wrap_content"
+                            android:layout_width="110dp"
+                            android:dropDownWidth="match_parent"
                             android:layout_height="40dp"
                             android:layout_marginStart="120dp"
                             android:entries="@array/deadband"
@@ -286,14 +294,13 @@
                         <Spinner
                             android:id="@+id/coolingdeadband"
                             style="@style/customSpinnerDownArrow"
-                            android:layout_width="wrap_content"
+                            android:layout_width="110dp"
+                            android:dropDownWidth="match_parent"
                             android:layout_height="40dp"
                             android:layout_marginStart="60dp"
                             android:entries="@array/deadband"
                             android:overlapAnchor="false"
                             tools:listitem="@layout/spinner_dropdown_item" />
-
-
                     </LinearLayout>
 
                     <TextView
@@ -318,11 +325,11 @@
                         <Spinner
                             android:id="@+id/unoccupiedzonesetback"
                             style="@style/customSpinnerDownArrow"
-                            android:layout_width="wrap_content"
+                            android:layout_width="110dp"
+                            android:dropDownWidth="match_parent"
                             android:layout_height="40dp"
                             android:layout_marginStart="220dp"
                             tools:listitem="@layout/spinner_dropdown_item" />
-
 
                     </LinearLayout>
 

@@ -466,6 +466,9 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
         if (status.toString().isEmpty() && systemEquip.getFanEnable().readHisVal() > 0) {
             status.append("Fan ON");
         }
+        if (status.toString().isEmpty()) {
+            status.append("System OFF");
+        }
 
         if (systemEquip.getRelay3OutputEnable().readDefaultVal() > 0) {
             double relay3Association = systemEquip.getRelay3OutputAssociation().readDefaultVal();

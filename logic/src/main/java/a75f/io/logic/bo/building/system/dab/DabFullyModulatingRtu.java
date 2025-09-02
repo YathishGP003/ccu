@@ -1,5 +1,19 @@
 package a75f.io.logic.bo.building.system.dab;
 
+import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
+import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getAnalogMax;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getAnalogMin;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getChilledWaterValveSignal;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getCompressorSpeedSignal;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getFanSpeedSignal;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getHeatingSignal;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getModulatedAnalogVal;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getModulatedAnalogValDuringEcon;
+import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getOutsideAirDamperSignal;
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+
 import android.content.Intent;
 
 import java.util.ArrayList;
@@ -9,7 +23,6 @@ import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
-import a75f.io.domain.api.Ccu;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.api.PhysicalPoint;
@@ -36,20 +49,6 @@ import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuAnalogOutMinMaxC
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig;
 import a75f.io.logic.bo.util.CCUUtils;
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
-
-import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
-import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getAnalogMax;
-import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getAnalogMin;
-import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getChilledWaterValveSignal;
-import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getCompressorSpeedSignal;
-import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getFanSpeedSignal;
-import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getHeatingSignal;
-import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getModulatedAnalogVal;
-import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getModulatedAnalogValDuringEcon;
-import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getOutsideAirDamperSignal;
-import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
-import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
-import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
 
 public class DabFullyModulatingRtu extends DabSystemProfile {
     private static final int ANALOG_SCALE = 10;
@@ -186,6 +185,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
 
         if (status.toString().isEmpty() && systemEquip.getConditioningStages().getFanEnable().readHisVal() > 0) {
             status.append("Fan ON");
+        }
+        if (status.toString().isEmpty()) {
+            status.append("System OFF");
         }
 
         if (systemEquip.getRelay3OutputEnable().readDefaultVal() > 0) {

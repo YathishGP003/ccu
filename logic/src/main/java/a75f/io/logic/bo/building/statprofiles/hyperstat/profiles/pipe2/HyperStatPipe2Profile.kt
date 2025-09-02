@@ -53,6 +53,7 @@ import a75f.io.logic.bo.building.statprofiles.util.updateOperatingMode
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.util.ControllerNames
 import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler
+import java.util.Date
 
 
 /**
@@ -67,10 +68,11 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
     private var coolingThreshold = 65.0
     private var lastWaterValveTurnedOnTime: Long = System.currentTimeMillis()
     private var waterSamplingStartTime: Long = 0
-    private lateinit var waterValveLoop:  CalibratedPoint
+
+    private var waterValveLoop = CalibratedPoint(DomainName.waterValve, "waterValveLoop",0.0)
 
     private val pipe2DeviceMap: MutableMap<Int, Pipe2V2Equip> = mutableMapOf()
-
+    private var isWaterValveActiveDueToLoop = false
     private var analogLogicalPoints: HashMap<Int, String> = HashMap()
     private var relayLogicalPoints: HashMap<Int, String> = HashMap()
 
@@ -129,7 +131,6 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
 
         heatingThreshold = hyperStatTuners.heatingThreshold
         coolingThreshold = hyperStatTuners.coolingThreshold
-        waterValveLoop = CalibratedPoint(DomainName.waterValve, equip.equipRef,0.0)
         if (equipOccupancyHandler != null) {
             occupancyStatus = equipOccupancyHandler.currentOccupiedMode
             zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
@@ -152,7 +153,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
 
         doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip)
         runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(userIntents)
-
+        isWaterValveActiveDueToLoop = false
         if (occupancyStatus == Occupancy.WINDOW_OPEN) resetLoopOutputs()
 
         runForKeyCardSensor(config, equip)
@@ -400,13 +401,17 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
         config: Pipe2Configuration, relayStages: HashMap<String, Int>,
         basicSettings: BasicSettings
     ) {
+        if (isWaterValveActiveDueToLoop) {
+            logIt("Sampling not required, because water valve is active due to loop")
+            return
+        }
 
         if (basicSettings.conditioningMode == StandaloneConditioningMode.OFF) {
             resetWaterValve(equip)
             return
         }
 
-        if (!config.isAnyRelayEnabledAssociated(association = HsPipe2RelayMapping.WATER_VALVE.ordinal) ||
+        if (!config.isAnyRelayEnabledAssociated(association = HsPipe2RelayMapping.WATER_VALVE.ordinal) &&
             !config.isAnyAnalogOutEnabledAssociated(association = HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal)
         ) {
             logIt( "No mapping for water value")
@@ -443,8 +448,10 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
             logIt( "No water sampling, because tuner value is zero!")
             return
         }
-        logIt("waitTimeToDoSampling:  $waitTimeToDoSampling onTimeToDoSampling: $onTimeToDoSampling")
-        logIt("Current : ${System.currentTimeMillis()}: Last On: $lastWaterValveTurnedOnTime")
+
+        logIt("waitTimeToDoSampling:  $waitTimeToDoSampling onTimeToDoSampling: $onTimeToDoSampling\n" +
+                "Current : ${Date(System.currentTimeMillis())}: Last On:  ${Date(lastWaterValveTurnedOnTime)}"
+        )
 
         if (waterSamplingStartTime == 0L) {
             val minutes = milliToMin(System.currentTimeMillis() - lastWaterValveTurnedOnTime)
@@ -730,7 +737,12 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
             ControllerNames.WATER_VALVE_CONTROLLER -> {
                 if (waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
                     updateStatus(equip.waterValve, result as Boolean, StatusMsgKeys.WATER_VALVE.name)
+                    if (result) {
+                        isWaterValveActiveDueToLoop = true
+                        lastWaterValveTurnedOnTime = System.currentTimeMillis()
+                    }
                 }
+
             }
 
             ControllerNames.FAN_SPEED_CONTROLLER -> {
@@ -912,7 +924,11 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
     ) {
         if (basicSettings.conditioningMode != StandaloneConditioningMode.OFF && basicSettings.fanMode != StandaloneFanStage.OFF) {
             updateLogicalPoint(logicalPointsList[port]!!, loopOutput.toDouble())
-            if (loopOutput > 0) analogOutStages[StatusMsgKeys.WATER_VALVE.name] = 1
+            if (loopOutput > 0) {
+                analogOutStages[StatusMsgKeys.WATER_VALVE.name] = 1
+                isWaterValveActiveDueToLoop = true
+                lastWaterValveTurnedOnTime = System.currentTimeMillis()
+            }
         } else {
             updateLogicalPoint(logicalPointsList[port]!!, 0.0)
         }
@@ -1001,7 +1017,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
                     "Fan Mode : ${settings.fanMode} Conditioning Mode ${settings.conditioningMode} \n" +
                     "heatingThreshold: $heatingThreshold  coolingThreshold : $coolingThreshold \n" +
                     "Current Temp : $currentTemp " +
-                    "Desired (Heating: ${userIntents.heatingDesiredTemp}" +
+                    "Desired (Heating: ${userIntents.heatingDesiredTemp} " +
                     "Cooling: ${userIntents.coolingDesiredTemp})\n" +
                     "Loop Outputs: (Heating: $heatingLoopOutput Cooling: $coolingLoopOutput " +
                     "Fan : $fanLoopOutput DCV $dcvLoopOutput) \n"

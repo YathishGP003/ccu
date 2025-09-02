@@ -22,7 +22,4 @@ class MyStatPipe2Equip(equipRef: String) : MyStatEquip(equipRef) {
     val fanSignal = Point(DomainName.fanSignal, equipRef)
     val modulatingWaterValve = Point(DomainName.modulatingWaterValve, equipRef)
     val leavingWaterTemperature = Point(DomainName.leavingWaterTemperature, equipRef)
-    var waterValveLoop = CalibratedPoint(DomainName.waterValve, equipRef,0.0)
-    var lastWaterValveTurnedOnTime: Long = System.currentTimeMillis()
-    var waterSamplingStartTime: Long = 0
 }

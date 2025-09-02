@@ -3,9 +3,11 @@ package a75f.io.logic.bo.building.statprofiles.mystat.profiles
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
+import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
@@ -45,6 +47,7 @@ import a75f.io.logic.bo.building.statprofiles.util.updateOperatingMode
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.util.ControllerNames
 import a75f.io.logic.util.uiutils.MyStatUserIntentHandler
+import java.util.Date
 
 /**
  * Created by Manjunath K on 16-01-2025.
@@ -55,6 +58,10 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
     private var supplyWaterTempTh2 = 0.0
     private var heatingThreshold = 85.0
     private var coolingThreshold = 65.0
+    private var waterValveLoop = CalibratedPoint(DomainName.waterValve, "waterValveLoop",0.0)
+    private var lastWaterValveTurnedOnTime: Long = System.currentTimeMillis()
+    private var waterSamplingStartTime: Long = 0
+    private var isWaterValveActiveDueToLoop = false
 
     private val pipe2DeviceMap: MutableMap<Int, MyStatPipe2Equip> = mutableMapOf()
 
@@ -141,7 +148,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip, equip.analogOutStages, equip.relayStages)
         runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(userIntents)
         supplyWaterTempTh2 = equip.leavingWaterTemperature.readHisVal()
-
+        isWaterValveActiveDueToLoop = false
         if (occupancyStatus == Occupancy.WINDOW_OPEN) resetLoopOutputs()
         updateLoopOutputs(
             coolingLoopOutput, equip.coolingLoopOutput,
@@ -245,7 +252,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         equip: MyStatPipe2Equip, userIntents: UserIntents,
         controllerFactory: MyStatControlFactory
     ) {
-        controllerFactory.addPipe2Controllers(config)
+        controllerFactory.addPipe2Controllers(config, waterValveLoop)
         runControllers(equip, basicSettings, config, userIntents)
     }
 
@@ -253,7 +260,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         equip: MyStatPipe2Equip, basicSettings: MyStatBasicSettings,
         config: MyStatPipe2Configuration, userIntents: UserIntents
     ) {
-        equip.waterValveLoop.data = waterValveLoop(userIntents).toDouble()
+        waterValveLoop.data = waterValveLoop(userIntents).toDouble()
         zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
 
         controllers.forEach { (controllerName, value) ->
@@ -283,12 +290,16 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         when (controllerName) {
 
             ControllerNames.WATER_VALVE_CONTROLLER -> {
-                if (equip.waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
+                if (waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
                     updateStatus(
                         equip.waterValve,
                         result as Boolean,
                         StatusMsgKeys.WATER_VALVE.name
                     )
+                    if (result) {
+                        isWaterValveActiveDueToLoop = true
+                        lastWaterValveTurnedOnTime = System.currentTimeMillis()
+                    }
                 }
             }
 
@@ -417,15 +428,18 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
                 .find { it.ordinal == config.analogOut1Association.associationVal }
             when (analogMapping) {
                 MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE -> {
-                    if (equip.waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
-                        equip.waterValveLoop.data = waterValveLoop(userIntents).toDouble()
+                    if (waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
+                        waterValveLoop.data = waterValveLoop(userIntents).toDouble()
                         if (basicSettings.fanMode != MyStatFanStages.OFF) {
                             updateLogicalPoint(
                                 logicalPointsList[Port.ANALOG_OUT_ONE]!!,
-                                equip.waterValveLoop.data
+                                waterValveLoop.data
                             )
-                            if (equip.waterValveLoop.data > 0) analogOutStages[StatusMsgKeys.WATER_VALVE.name] =
-                                1
+                            if (waterValveLoop.data > 0) {
+                                analogOutStages[StatusMsgKeys.WATER_VALVE.name] = 1
+                                isWaterValveActiveDueToLoop = true
+                                lastWaterValveTurnedOnTime = System.currentTimeMillis()
+                            }
                         } else {
                             updateLogicalPoint(logicalPointsList[Port.ANALOG_OUT_ONE]!!, 0.0)
                         }
@@ -569,6 +583,10 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         basicSettings: MyStatBasicSettings
     ) {
 
+        if (isWaterValveActiveDueToLoop) {
+            logIt("Sampling not required, because water valve is active due to loop")
+            return
+        }
         if (basicSettings.conditioningMode == StandaloneConditioningMode.OFF) {
             resetWaterValve(equip)
             return
@@ -588,7 +606,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
                     && (getCurrentLogicalPointStatus(analogLogicalPoints[MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal]!!).toInt() != 0)))
         }
 
-        logIt("waterSamplingStarted Time " + equip.waterSamplingStartTime)
+        logIt("waterSamplingStarted Time $waterSamplingStartTime")
 
         val waitTimeToDoSampling: Int
         val onTimeToDoSampling: Int
@@ -604,34 +622,34 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         if (waitTimeToDoSampling == 0 || onTimeToDoSampling == 0) {
             //resetting the water valve value value only when the tuner value is zero
             if (resetIsRequired()) {
-                equip.waterSamplingStartTime = 0
-                equip.lastWaterValveTurnedOnTime = System.currentTimeMillis()
+                waterSamplingStartTime = 0
+                lastWaterValveTurnedOnTime = System.currentTimeMillis()
                 resetWaterValve(equip)
             }
             logIt("No water sampling, because tuner value is zero!")
             return
         }
         logIt("waitTimeToDoSampling:  $waitTimeToDoSampling onTimeToDoSampling: $onTimeToDoSampling\n" +
-                    "Current : ${System.currentTimeMillis()}: Last On: ${equip.lastWaterValveTurnedOnTime}"
+                    "Current : ${Date(System.currentTimeMillis())}: Last On:  ${Date(lastWaterValveTurnedOnTime)}"
         )
 
-        if (equip.waterSamplingStartTime == 0L) {
-            val minutes = milliToMin(System.currentTimeMillis() - equip.lastWaterValveTurnedOnTime)
+        if (waterSamplingStartTime == 0L) {
+            val minutes = milliToMin(System.currentTimeMillis() - lastWaterValveTurnedOnTime)
             logIt(
                 "sampling will start in : ${waitTimeToDoSampling - minutes} current : $minutes"
             )
             if (minutes >= waitTimeToDoSampling) {
-                doWaterSampling(equip, relayStages)
+                doWaterSampling(relayStages)
             }
         } else {
             val samplingSinceFrom =
-                milliToMin(System.currentTimeMillis() - equip.waterSamplingStartTime)
+                milliToMin(System.currentTimeMillis() - waterSamplingStartTime)
             logIt(
                 "Water sampling is running since from $samplingSinceFrom minutes"
             )
             if (samplingSinceFrom >= onTimeToDoSampling) {
-                equip.waterSamplingStartTime = 0
-                equip.lastWaterValveTurnedOnTime = System.currentTimeMillis()
+                waterSamplingStartTime = 0
+                lastWaterValveTurnedOnTime = System.currentTimeMillis()
                 resetWaterValve(equip)
                 logIt( "Resetting WATER_VALVE to OFF")
             } else {
@@ -641,10 +659,9 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
     }
 
     private fun doWaterSampling(
-        equip: MyStatPipe2Equip,
         relayStages: HashMap<String, Int>,
     ) {
-        equip.waterSamplingStartTime = System.currentTimeMillis()
+        waterSamplingStartTime = System.currentTimeMillis()
         updateLogicalPoint(relayLogicalPoints[MyStatPipe2RelayMapping.WATER_VALVE.ordinal], 1.0)
         updateLogicalPoint(analogLogicalPoints[MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal], 100.0)
         relayStages[StatusMsgKeys.WATER_VALVE.name] = 1
@@ -673,7 +690,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
     }
 
     private fun resetWaterValve(equip: MyStatPipe2Equip) {
-        if (equip.waterSamplingStartTime == 0L) {
+        if (waterSamplingStartTime == 0L) {
             if (isConfigPresent(MyStatPipe2RelayMapping.WATER_VALVE)) {
                 resetLogicalPoint(relayLogicalPoints[MyStatPipe2RelayMapping.WATER_VALVE.ordinal]!!)
             }

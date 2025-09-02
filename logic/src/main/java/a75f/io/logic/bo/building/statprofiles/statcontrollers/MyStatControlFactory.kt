@@ -52,11 +52,11 @@ class MyStatControlFactory(
         addDcvDamperIfRequired(L.TAG_CCU_MSHPU)
     }
 
-    fun addPipe2Controllers(config: MyStatPipe2Configuration) {
+    fun addPipe2Controllers(config: MyStatPipe2Configuration, waterValveLoop: CalibratedPoint) {
         val pipe2Equip = equip as MyStatPipe2Equip
         addFanSpeedControllers(config, L.TAG_CCU_MSPIPE2, pipe2Equip.fanLoopOutput)
         addAuxStage1Controller(L.TAG_CCU_MSPIPE2, pipe2Equip.auxHeatingStage1, pipe2Equip.auxHeating1Activate)
-        addWaterValveControllerIfRequired()
+        addWaterValveControllerIfRequired(waterValveLoop)
         addFanEnableIfRequired(L.TAG_CCU_MSPIPE2)
         addOccupiedEnabledIfRequired(L.TAG_CCU_MSPIPE2)
         addHumidifierIfRequired(L.TAG_CCU_MSPIPE2)
@@ -236,11 +236,11 @@ class MyStatControlFactory(
         }
     }
 
-    private fun addWaterValveControllerIfRequired() {
+    private fun addWaterValveControllerIfRequired(waterValveLoop: CalibratedPoint) {
         if ((equip as MyStatPipe2Equip).waterValve.pointExists()) {
             controllerFactory.addWaterValveController(
                 controllers,
-                waterValveLoop = (equip as MyStatPipe2Equip).waterValveLoop,
+                waterValveLoop = waterValveLoop,
                 actionHysteresis = equip.standaloneRelayActivationHysteresis,
                 logTag = L.TAG_CCU_MSPIPE2
             )

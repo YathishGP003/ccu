@@ -835,7 +835,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             new Handler(Looper.getMainLooper()).postDelayed(ANRHandler::configureANRWatchdog, 10000);
         }
         if(PreferenceUtil.getIsCcuLaunched()) {
-            Toast.makeText(getContext(), "CCU Ready", Toast.LENGTH_SHORT).show();
+            try {
+                Toast.makeText(getContext(), "CCU Ready", Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                //ignore as this might fail if activity is not in foreground
+                CcuLog.e("UI_PROFILING", "Failed to show CCU Ready toast", e);
+                e.printStackTrace();
+            }
             CCUUtils.setCCUReadyProperty("true");
             PreferenceUtil.setIsCcuLaunched(false);
         }

@@ -2,10 +2,14 @@ package a75f.io.logic.bo.building.statprofiles.statcontrollers
 
 import a75f.io.domain.equips.HyperStatSplitEquip
 import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
+import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
+import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
 import a75f.io.domain.util.CalibratedPoint
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UVConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.StagesCounts
 import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
@@ -64,6 +68,21 @@ class SplitControllerFactory(
         addHumidifierController()
         addDehumidifierController()
     }
+    fun addPipe2Controllers(
+        config: Pipe2UVConfiguration, isPrePurgeActive: () -> Boolean,
+        fanLowVentilation: CalibratedPoint, waterValveLoop: CalibratedPoint
+    ) {
+        addFanSpeedController(config, isPrePurgeActive, fanLowVentilation, zoneOccupancyState)
+        addWaterValveController(waterValveLoop)
+        addAuxHeatingStage1Controller()
+        addAuxHeatingStage2Controller()
+        addFanEnabledController()
+        addOccupiedEnableController()
+        addFaceBypassController()
+        addDcvDamperController()
+        addHumidifierController()
+        addDehumidifierController()
+    }
 
     private fun addCoolingValveController() {
         if ((equip as Pipe4UVEquip).chilledWaterCoolValve.pointExists()) {
@@ -91,8 +110,21 @@ class SplitControllerFactory(
         }
     }
 
+    private fun addWaterValveController(waterValveLoop: CalibratedPoint) {
+        if ((equip as Pipe2UVEquip).waterValve.pointExists()) {
+            controlFactory.addWaterValveController(
+                controllers,
+                waterValveLoop = waterValveLoop,
+                actionHysteresis = equip.standaloneRelayActivationHysteresis,
+                logTag = L.TAG_CCU_HSSPLIT_PIPE2_UV
+            )
+        } else {
+            removeController(ControllerNames.WATER_VALVE_CONTROLLER)
+        }
+    }
+
     private fun addFaceBypassController() {
-        if ((equip as Pipe4UVEquip).faceBypassDamperCmd.pointExists()) {
+        if ((equip as UnitVentilatorEquip).faceBypassDamperCmd.pointExists()) {
             controlFactory.addFaceBypassController(
                 controllers,
                 equip.coolingLoopOutput,

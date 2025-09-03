@@ -36,6 +36,8 @@ import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.connectnode.ConnectNodeFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
+import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe2UVFragment;
+import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe4UVFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
@@ -483,6 +485,15 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             if (L.isSimulation()) {
                 showDialogFragment(Pipe4UVFragment.Companion.newInstance(mNodeAddress, mRoomName,
                         mFloorName, mNodeType, mProfileType), Pipe4UVFragment.Companion.getID());
+            } else {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
+        else if (mProfileType == ProfileType.HYPERSTATSPLIT_2PIPE_UV) {
+            if (L.isSimulation()) {
+                showDialogFragment(Pipe2UVFragment.Companion.newInstance(mNodeAddress, mRoomName,
+                        mFloorName, mNodeType, mProfileType), Pipe2UVFragment.Companion.getID());
             } else {
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);

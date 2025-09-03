@@ -7,6 +7,7 @@ import a75f.io.api.haystack.Point
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.HyperStatSplitEquip
+import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
 import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
 import a75f.io.domain.logic.DeviceBuilder
@@ -20,8 +21,8 @@ import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventil
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.UvFanStages
+import a75f.io.logic.bo.building.statprofiles.util.getPossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.getSplitConfiguration
-import a75f.io.logic.bo.building.statprofiles.util.getUvFanModeLevel
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.messaging.handler.MessageUtil.Companion.returnDurationDiff
 import com.google.gson.JsonObject
@@ -97,6 +98,7 @@ fun reconfigureUnitVentilator(msgObject: JsonObject, configPoint: Point) {
 fun getUnitVentilatorModelByEquipRef(equipRef: String): ModelDirective? {
     return when (Domain.getDomainEquip(equipRef) as UnitVentilatorEquip) {
         is Pipe4UVEquip -> ModelLoader.getSplitPipe4Model()
+        is Pipe2UVEquip -> ModelLoader.getSplitPipe2Model()
         else -> null
     }
 }
@@ -141,7 +143,7 @@ private fun isFanModeCurrentOccupied(value: Int): Boolean {
 fun updateFanMode(equipId: String) {
     val equip = HyperStatSplitEquip(equipId)
     fun resetFanToOff() = equip.fanOpMode.writePointValue(StandaloneFanStage.OFF.ordinal.toDouble())
-    val possibleFanMode = getUvFanModeLevel(equip)
+    val possibleFanMode = getPossibleFanMode(equip)
     val currentFanMode = StandaloneFanStage.values()[equip.fanOpMode.readPriorityVal().toInt()]
     fun isWithinLow(): Boolean {
         return (currentFanMode.ordinal in listOf(

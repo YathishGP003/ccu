@@ -331,7 +331,6 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
             resetWaterValve(equip)
         }
         triggerFanForAuxIfRequired(basicSettings, configuration, equip)
-
     }
 
 
@@ -661,8 +660,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
                         HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE -> {
                             if (waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
                                 doAnalogWaterValveAction(
-                                    port, basicSettings, waterValveLoop(userIntents),
-                                    analogOutStages
+                                    port, basicSettings, analogOutStages
                                 )
                             }
                         }
@@ -742,7 +740,6 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
                         lastWaterValveTurnedOnTime = System.currentTimeMillis()
                     }
                 }
-
             }
 
             ControllerNames.FAN_SPEED_CONTROLLER -> {
@@ -919,12 +916,11 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
     }
 
     private fun doAnalogWaterValveAction(
-        port: Port, basicSettings: BasicSettings, loopOutput: Int,
-        analogOutStages: HashMap<String, Int>
+        port: Port, basicSettings: BasicSettings, analogOutStages: HashMap<String, Int>
     ) {
         if (basicSettings.conditioningMode != StandaloneConditioningMode.OFF && basicSettings.fanMode != StandaloneFanStage.OFF) {
-            updateLogicalPoint(logicalPointsList[port]!!, loopOutput.toDouble())
-            if (loopOutput > 0) {
+            updateLogicalPoint(logicalPointsList[port]!!, waterValveLoop.data)
+            if (waterValveLoop.data > 0) {
                 analogOutStages[StatusMsgKeys.WATER_VALVE.name] = 1
                 isWaterValveActiveDueToLoop = true
                 lastWaterValveTurnedOnTime = System.currentTimeMillis()

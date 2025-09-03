@@ -17,7 +17,6 @@ import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatS
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
-import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.getSplitConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getUvPossibleConditioningMode
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -152,54 +151,6 @@ class HSSplitHaystackUtil(
                 is HyperStatSplitCpuConfiguration -> getPossibleConditioningModeSettings(config)
                 else -> getUvPossibleConditioningMode(config as UnitVentilatorConfiguration)
             }
-        }
-
-        fun getSplitPossibleFanModeSettings(node: Int): PossibleFanMode {
-            try {
-
-                val equip = CCUHsApi.getInstance().readEntity("equip and group == \"${node}\"")
-
-                if (equip.isNotEmpty() && equip.containsKey("profile")) {
-                    val config = when (equip["profile"].toString()) {
-                        ProfileType.HYPERSTATSPLIT_CPU.name -> HyperStatSplitCpuConfiguration(
-                            node,
-                            NodeType.HYPERSTATSPLIT.name,
-                            0,
-                            equip["roomRef"].toString(),
-                            equip["floorRef"].toString(),
-                            ProfileType.HYPERSTATSPLIT_CPU,
-                            ModelLoader.getHyperStatSplitCpuModel() as SeventyFiveFProfileDirective
-                        ).getActiveConfiguration()
-
-                        // this case should never happen
-                        else -> HyperStatSplitCpuConfiguration(
-                            node,
-                            NodeType.HYPERSTATSPLIT.name,
-                            0,
-                            equip["roomRef"].toString(),
-                            equip["floorRef"].toString(),
-                            ProfileType.HYPERSTATSPLIT_CPU,
-                            ModelLoader.getHyperStatSplitCpuModel() as SeventyFiveFProfileDirective
-                        ).getActiveConfiguration()
-
-                    }
-
-                    val fanLevel = HyperStatSplitAssociationUtil.getSelectedFanLevel(config)
-                    if (fanLevel == 1) return PossibleFanMode.AUTO
-                    if (fanLevel == 6) return PossibleFanMode.LOW
-                    if (fanLevel == 7) return PossibleFanMode.MED
-                    if (fanLevel == 8) return PossibleFanMode.HIGH
-                    if (fanLevel == 13) return PossibleFanMode.LOW_MED
-                    if (fanLevel == 14) return PossibleFanMode.LOW_HIGH
-                    if (fanLevel == 15) return PossibleFanMode.MED_HIGH
-                    if (fanLevel == 21) return PossibleFanMode.LOW_MED_HIGH
-
-                }
-
-            } catch (e:Exception) {
-                CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, "Exception getPossibleFanModeSettings: ${e.localizedMessage}")
-            }
-            return PossibleFanMode.OFF
         }
 
 

@@ -9,6 +9,7 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
 import a75f.io.domain.api.Domain
 import a75f.io.domain.equips.HyperStatSplitEquip
+import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -21,6 +22,7 @@ import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHayst
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getSelectedConditioningMode
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getHssProfileFanLevel
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UnitVentilatorProfile
 import a75f.io.logic.bo.building.statprofiles.util.CPUECON_FULL
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.HSSPLIT_FULL
@@ -91,28 +93,48 @@ fun loadHyperStatSplitProfile(
                     .replace("[^0-9.]".toRegex(), "").toFloat().toString().toDouble()
             ).toString() + " \u00B0C"
         } else {
-            textAirflowValue.text = equipPoints[StatZoneStatus.DISCHARGE_AIRFLOW.name].toString()
+            textAirflowValue.text = equipPoints[StatZoneStatus.DISCHARGE_AIRFLOW.name].toString() + "°F"
         }
         textAirflowValue.visibility = View.VISIBLE
     } else {
         viewSat.findViewById<TextView>(R.id.text_airflowValue).visibility = View.GONE
     }
 
-    val textMatValue = viewMat.findViewById<TextView>(R.id.text_airflowValue)
-    if(!equipPoints.containsKey(equipPoints[StatZoneStatus.MIXED_AIR_TEMP.name])) {
-        textMatValue.visibility = View.GONE
-        viewMat.visibility = View.GONE
-    } else {
-        textMatValue.visibility = View.VISIBLE
+   //2pipe UV
+    val textAirflowValue = viewMat.findViewById<TextView>(R.id.text_airflowValue)
+    val textViewMat = viewMat.findViewById<TextView>(R.id.text_discharge_airflow)
+    if (equipPoints.containsKey(StatZoneStatus.SUPPLY_TEMP.name)) {
+        val profile = L.getProfile(nodeAddress.toLong())
+        var supplyWaterTempVal = equipPoints[StatZoneStatus.SUPPLY_TEMP.name].toString() + "°F"
+            .replace("[^0-9.]".toRegex(), "")
+        if (ProfileType.valueOf(equipPoints[StatZoneStatus.PROFILE_NAME.name].toString()) == ProfileType.HYPERSTATSPLIT_2PIPE_UV) {
+            textViewMat.text = "Supply Water Temperature :"
+        }
+        viewMat.visibility = View.VISIBLE
         if (UnitUtils.isCelsiusTunerAvailableStatus()) {
-            textMatValue.text = UnitUtils.fahrenheitToCelsiusTwoDecimal(
+            supplyWaterTempVal = UnitUtils.fahrenheitToCelsiusTwoDecimal(
+                equipPoints[StatZoneStatus.SUPPLY_TEMP.name].toString()
+                    .replace("[^0-9.]".toRegex(), "").toFloat().toString().toDouble()
+            ).toString() + " \u00B0C"
+        }
+        textAirflowValue.text = " $supplyWaterTempVal (${(profile as Pipe2UnitVentilatorProfile).supplyDirection()})"
+    }
+    ///hssplit
+    else if(equipPoints.containsKey(StatZoneStatus.MIXED_AIR_TEMP.name)) {
+        viewMat.visibility = View.VISIBLE
+        if (UnitUtils.isCelsiusTunerAvailableStatus()) {
+            textAirflowValue.text = UnitUtils.fahrenheitToCelsiusTwoDecimal(
                 equipPoints[StatZoneStatus.MIXED_AIR_TEMP.name].toString()
                     .replace("[^0-9.]".toRegex(), "").toFloat().toString().toDouble()
             ).toString() + " \u00B0C"
         } else {
-            textMatValue.text = equipPoints[StatZoneStatus.MIXED_AIR_TEMP.name].toString()
+            textAirflowValue.text = equipPoints[StatZoneStatus.MIXED_AIR_TEMP.name].toString() + "°F"
         }
     }
+    else {
+        viewMat.visibility = View.GONE
+    }
+
     linearLayoutZonePoints.addView(viewTitle)
     linearLayoutZonePoints.addView(viewStatus)
     linearLayoutZonePoints.addView(viewMat)
@@ -379,7 +401,6 @@ fun getHyperStatSplitProfileEquipPoints(equipMap: Equip, profileType: ProfileTyp
             if(equip.dischargeAirTemperature.pointExists()){
                 equipPoints[StatZoneStatus.DISCHARGE_AIRFLOW.name] = "${equip.dischargeAirTemperature.readHisVal()} \u2109"
             }
-
             equipPoints[StatZoneStatus.MIXED_AIR_TEMP.name] = "${equip.mixedAirTemperature.readHisVal()} \u2109"
         }
 
@@ -388,7 +409,13 @@ fun getHyperStatSplitProfileEquipPoints(equipMap: Equip, profileType: ProfileTyp
             equipPoints[StatZoneStatus.DISCHARGE_AIRFLOW.name] = "${equip.dischargeAirTemperature.readHisVal()} \u2109"
         }
         }
+
         ProfileType.HYPERSTATSPLIT_2PIPE_UV->{
+
+            if((equip as Pipe2UVEquip).leavingWaterTemperature.pointExists()) {
+                equipPoints[StatZoneStatus.SUPPLY_TEMP.name] = "${equip.leavingWaterTemperature.readHisVal()} \u2109"
+            }
+
         }
         else->{}
 

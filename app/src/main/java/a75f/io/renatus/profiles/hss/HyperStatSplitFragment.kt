@@ -5,8 +5,9 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuAnalogControlType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.SUPPLY_WATER_TEMPERATURE
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.PinPassword
@@ -31,8 +32,18 @@ import a75f.io.renatus.modbus.util.CANCEL
 import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuState
+import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.Pipe2UvViewModel
+import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.Pipe4ViewModel
+import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe2UvViewState
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe4UvViewState
+import a75f.io.renatus.profiles.system.UNIVERSAL_IN1
+import a75f.io.renatus.profiles.system.UNIVERSAL_IN2
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN3
+import a75f.io.renatus.profiles.system.UNIVERSAL_IN4
+import a75f.io.renatus.profiles.system.UNIVERSAL_IN5
+import a75f.io.renatus.profiles.system.UNIVERSAL_IN6
+import a75f.io.renatus.profiles.system.UNIVERSAL_IN7
+import a75f.io.renatus.profiles.system.UNIVERSAL_IN8
 import a75f.io.renatus.util.TestSignalManager
 import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
@@ -62,6 +73,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -115,8 +127,22 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             when (viewModel.profileType) {
                 ProfileType.HYPERSTATSPLIT_CPU -> TitleTextView("CPU & ECONOMIZER")
                 ProfileType.HYPERSTATSPLIT_4PIPE_UV -> TitleTextView("4 Pipe & Economizer")
+                ProfileType.HYPERSTATSPLIT_2PIPE_UV -> TitleTextView("2 Pipe & Economizer")
                 else -> TitleTextView("CPU & ECONOMIZER")
             }
+        }
+    }
+
+    @Composable
+    fun ShowProgressBar() {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator(color = primaryColor)
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(text = "Loading Profile Configuration")
         }
     }
 
@@ -183,7 +209,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     ToggleButton(
                         defaultSelection = viewModel.viewState.value.enableOutsideAirOptimization,
                         onEnabled = {
-                            if (!it && viewModel.isAnyAnalogMappedToControl(viewModel.getProfileBasedEnumValueAnalog(HyperStatSplitConfiguration.HyperStatSplitControlType.OAO_DAMPER.name))) {
+                            if (!it && viewModel.isAnyAnalogMappedToControl(viewModel.getProfileBasedEnumValueAnalog(HyperStatSplitControlType.OAO_DAMPER.name))) {
                                 showToast("To disable Outside Air Optimization, disable all OAO Damper analog outputs first.", requireContext())
                             } else if (!it && viewModel.isPrePurgeEnabled()) {
                                 showToast("To disable Outside Air Optimization, disable Pre-Purge first.", requireContext())
@@ -215,6 +241,22 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             }
 
             if (viewModel.profileType == ProfileType.HYPERSTATSPLIT_4PIPE_UV || viewModel.profileType == ProfileType.HYPERSTATSPLIT_2PIPE_UV) {
+
+
+                fun setTemping(value: Boolean) {
+                    when(viewModel){
+                        is Pipe4ViewModel -> (viewModel.viewState.value as Pipe4UvViewState).saTempering = value
+                        is Pipe2UvViewModel -> (viewModel.viewState.value as Pipe2UvViewState).saTempering = value
+                    }
+                }
+
+                fun getTemping(): Boolean {
+                    return when(viewModel){
+                        is Pipe4ViewModel -> (viewModel.viewState.value as Pipe4UvViewState).saTempering
+                        is Pipe2UvViewModel -> (viewModel.viewState.value as Pipe2UvViewState).saTempering
+                        else -> false
+                    }
+                }
                 Row(
                     modifier = Modifier
                         .padding(vertical = 10.dp)
@@ -232,9 +274,9 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     }
                     Box(modifier = Modifier.weight(1f)) {
                         ToggleButtonStateful(
-                            defaultSelection = (viewModel.viewState.value as Pipe4UvViewState).saTempering,
+                            defaultSelection = getTemping(),
                             onEnabled = {
-                                (viewModel.viewState.value as Pipe4UvViewState).saTempering = it
+                                setTemping(it)
                             }
                         )
                     }
@@ -657,15 +699,22 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         } else {
             analogOutEnums.filter { it.value != DomainName.oaoDamper }
         }
-        if (viewModel.profileType == ProfileType.HYPERSTATSPLIT_4PIPE_UV || viewModel.profileType.equals(
-                ProfileType.HYPERSTATSPLIT_2PIPE_UV
-        )
-        ) {
-            val controlViaMode = (viewModel.viewState.value as Pipe4UvViewState).controlVia
+        if (viewModel.profileType == ProfileType.HYPERSTATSPLIT_4PIPE_UV || viewModel.profileType == ProfileType.HYPERSTATSPLIT_2PIPE_UV)
+        {
+            val controlViaMode = when (viewModel) {
+                is Pipe4ViewModel -> (viewModel.viewState.value as Pipe4UvViewState).controlVia
+                is Pipe2UvViewModel -> (viewModel.viewState.value as Pipe2UvViewState).controlVia
+              else -> (viewModel.viewState.value as Pipe4UvViewState).controlVia
+            }
+
             if (controlViaMode == 1) {
                 enabledEnums = enabledEnums.filter { it.value != DomainName.faceBypassDamperModulatingCmd }
             } else if (controlViaMode == 0) {
-                enabledEnums= enabledEnums.filter { it.value != DomainName.hotWaterModulatingHeatValve && it.value != DomainName.chilledWaterModulatingCoolValve }
+                enabledEnums = if (isPipe2UvProfile(viewModel = viewModel)) {
+                    enabledEnums.filter { it.value != DomainName.modulatingWaterValve }
+                } else {
+                    enabledEnums.filter { it.value != DomainName.hotWaterModulatingHeatValve && it.value != DomainName.chilledWaterModulatingCoolValve }
+                }
             }
         }
 
@@ -785,10 +834,11 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     defaultSelection = enabled,
                 ) {
                     if (!it || viewModel.viewState.value.enableOutsideAirOptimization || !(
-                            (analogOutName.contains("1") && viewModel.viewState.value.analogOut1Association == viewModel.getProfileBasedEnumValueAnalog(HyperStatSplitConfiguration.HyperStatSplitControlType.OAO_DAMPER.name)) ||
-                            (analogOutName.contains("2") && viewModel.viewState.value.analogOut2Association == viewModel.getProfileBasedEnumValueAnalog(HyperStatSplitConfiguration.HyperStatSplitControlType.OAO_DAMPER.name)) ||
-                            (analogOutName.contains("3") && viewModel.viewState.value.analogOut3Association == viewModel.getProfileBasedEnumValueAnalog(HyperStatSplitConfiguration.HyperStatSplitControlType.OAO_DAMPER.name)) ||
-                            (analogOutName.contains("4") && viewModel.viewState.value.analogOut4Association == viewModel.getProfileBasedEnumValueAnalog(HyperStatSplitConfiguration.HyperStatSplitControlType.OAO_DAMPER.name))
+                            (analogOutName.contains("1") && viewModel.viewState.value.analogOut1Association == viewModel.getProfileBasedEnumValueAnalog(HyperStatSplitControlType.OAO_DAMPER.name)) ||
+                            (analogOutName.contains("2") && viewModel.viewState.value.analogOut2Association == viewModel.getProfileBasedEnumValueAnalog(
+                                HyperStatSplitControlType.OAO_DAMPER.name)) ||
+                            (analogOutName.contains("3") && viewModel.viewState.value.analogOut3Association == viewModel.getProfileBasedEnumValueAnalog(HyperStatSplitControlType.OAO_DAMPER.name)) ||
+                            (analogOutName.contains("4") && viewModel.viewState.value.analogOut4Association == viewModel.getProfileBasedEnumValueAnalog(HyperStatSplitControlType.OAO_DAMPER.name))
                         )
                     ) {
                         onEnabledChanged(it)
@@ -1059,12 +1109,27 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             ) {
                 AOTHConfig(UNIVERSAL_IN1,
                     viewModel.viewState.value.universalIn1Config.enabled,
-                    { viewModel.viewState.value.universalIn1Config.enabled = it },
+                    {
+                        if (isPipe2UvProfile(viewModel = viewModel)) {
+                            viewModel.viewState.value.universalIn1Config.enabled = it
+                        } else
+                            viewModel.viewState.value.universalIn1Config.enabled = it
+                    },
                     universalEnum.find { it.index == viewModel.viewState.value.universalIn1Config.association } ?: universalEnum[0],
                     universalEnum,
                     "",
                     viewModel.viewState.value.universalIn1Config.enabled,
-                    { viewModel.viewState.value.universalIn1Config.association = it.index })
+                    {
+                        if (isPipe2UvProfile(viewModel)) {
+                            viewModel.viewState.value.universalIn1Config.association = SUPPLY_WATER_TEMPERATURE
+                        } else {
+                            viewModel.viewState.value.universalIn1Config.association =
+                                it.index
+                        }
+                    },
+                    isPipe2UvProfile = isPipe2UvProfile(viewModel),
+                    mappingText = a75f.io.renatus.profiles.system.SUPPLY_WATER_TEMPERATURE)
+
                 AOTHConfig(UNIVERSAL_IN2,
                     viewModel.viewState.value.universalIn2Config.enabled,
                     { viewModel.viewState.value.universalIn2Config.enabled = it },
@@ -1125,14 +1190,6 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         }
     }
 
-    private val UNIVERSAL_IN1 = "Universal-In 1"
-    private  val UNIVERSAL_IN2 = "Universal-In 2"
-    private val UNIVERSALIN3 = "Universal-In 3"
-    private val UNIVERSAL_IN4 = "Universal-In 4"
-    private val UNIVERSAL_IN5 = "Universal-In 5"
-    private val UNIVERSAL_IN6 = "Universal-In 6"
-    private val UNIVERSAL_IN7 = "Universal-In 7"
-    private val UNIVERSAL_IN8 = "Universal-In 8"
 
     @Composable
     fun AOTHConfig(
@@ -1143,34 +1200,50 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         items: List<HyperStatSplitViewModel.Option>,
         unit: String = "",
         isEnabled: Boolean,
-        onSelect: (HyperStatSplitViewModel.Option) -> Unit
+        onSelect: (HyperStatSplitViewModel.Option) -> Unit,
+        mappingText :String = "",
+        isPipe2UvProfile: Boolean = false,
     ) {
         Row(
             modifier = Modifier
                 .wrapContentWidth()
                 .padding(10.dp)
         ) {
+
             Box(modifier = Modifier.wrapContentWidth()) {
-                ToggleButtonStateful(defaultSelection = default) { onEnabled(it) }
+                if(isPipe2UvProfile) {
+                    ToggleButtonStateful(defaultSelection = true, onEnabled = {}, isDisabled = false)
+                }
+                else {
+                    ToggleButtonStateful(defaultSelection = default) { onEnabled(it) }
+                }
             }
             Box(modifier = Modifier
                 .weight(1.5f)
                 .padding(start = 15.dp, top = 12.dp)) {
                 StyledTextView(name, fontSize = 20)
             }
+
             Box(modifier = Modifier
                 .weight(4f)
                 .padding(start = 16.dp)) {
-                SearchSpinnerElement(
-                    default = spinnerDefault,
-                    allItems = items,
-                    enabledItems = items,
-                    unit = unit,
-                    onSelect = { onSelect(it) },
-                    width = 375,
-                    expandedWidth = 490,
-                    isEnabled = isEnabled
-                )
+                if (isPipe2UvProfile) {
+                    Column {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        StyledTextView(mappingText, fontSize = 20)
+                    }
+                } else {
+                    SearchSpinnerElement(
+                        default = spinnerDefault,
+                        allItems = items,
+                        enabledItems = items,
+                        unit = unit,
+                        onSelect = { onSelect(it) },
+                        width = 375,
+                        expandedWidth = 490,
+                        isEnabled = isEnabled
+                    )
+                }
             }
         }
     }
@@ -2874,14 +2947,12 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             conditioningPin.clear()
             conditioningPin.addAll(listOf(0, 0, 0, 0))
             viewModel.viewState.value.conditioningModePassword = "0"
-            CcuLog.d("USER_TEST", "Reset the conditioning pin to 0000")
         }
 
         fun resetInstallerPin() {
             installerPin.clear()
             installerPin.addAll(listOf(0, 0, 0, 0))
             viewModel.viewState.value.installerPassword = "0"
-            CcuLog.d("USER_TEST", "Reset the installer pin to 0000")
         }
 
         /**
@@ -2891,24 +2962,19 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
          */
 
         if (viewModel.viewState.value.installerPassword == "0") {
-            CcuLog.d("USER_TEST", "Installer password is empty, setting default pin to 0000")
             installerPin.clear()
             installerPin.addAll(listOf(0, 0, 0, 0))
         } else {
-            CcuLog.d("USER_TEST", "Installer password is updating")
             installerPin.clear()
-            CcuLog.d("USER_TEST", "Installer password is: ${viewModel.viewState.value.installerPassword}")
             // Decode the Base64 encoded password and convert to a list of integers
             installerPin.addAll(decodingPin(viewModel.viewState.value.installerPassword))
         }
 
         if (viewModel.viewState.value.conditioningModePassword == "0") {
-            CcuLog.d("USER_TEST", "conditioningPin password is updating")
             conditioningPin.clear()
             conditioningPin.addAll(listOf(0, 0, 0, 0))
         } else {
             conditioningPin.clear()
-            CcuLog.d("USER_TEST", "conditioningPin password is: ${viewModel.viewState.value.conditioningModePassword}")
             conditioningPin.addAll(decodingPin(viewModel.viewState.value.conditioningModePassword))
         }
 
@@ -2916,7 +2982,6 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
 
         val onToggle: (String, Boolean) -> Unit = { pinTitle, isEnabled ->
 
-            CcuLog.d("USER_TEST", "Pin toggle for $pinTitle: $isEnabled")
             selectedPinTitle = if (isEnabled) pinTitle else ""
             isDialogVisible = isEnabled
 
@@ -2939,7 +3004,6 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         // for cancel button click
         val onCancel: (String, Boolean) -> Unit = { pinTitle, enable ->
 
-            CcuLog.d("USER_TEST", "Pin cancel for $pinTitle: $enable")
             selectedPinTitle = if (enable) pinTitle else ""
             isDialogVisible = enable
 
@@ -2948,14 +3012,14 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 INSTALLER_ACCESS -> {
                     if (!enable && (viewModel.viewState.value.installerPassword == "0")) {
                         resetInstallerPin()
-                        viewModel.viewState.value.installerPinEnable = enable
+                        viewModel.viewState.value.installerPinEnable = false
                     }
                 }
 
                 CONDITIONING_ACCESS -> {
                     if (!enable && (viewModel.viewState.value.conditioningModePassword == "0")) {
                         resetConditioningPin()
-                        viewModel.viewState.value.conditioningModePinEnable = enable
+                        viewModel.viewState.value.conditioningModePinEnable = false
                     }
                 }
 
@@ -3008,7 +3072,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     }
                 }
             }
-// Pin dialog visibility check
+
+            // Pin dialog visibility check
 
             if (isDialogVisible) {
 
@@ -3032,16 +3097,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         INSTALLER_ACCESS -> {
 
                             viewModel.viewState.value.installerPassword = Base64.STANDARD.encode(installerPin.joinToString(separator = "") { it.toString() })
-                            CcuLog.i("USER_TEST", "Installer PIN updated successfully: ${viewModel.viewState.value.installerPassword}")
                         }
                         CONDITIONING_ACCESS -> {
                             viewModel.viewState.value.conditioningModePassword = Base64.STANDARD.encode(conditioningPin.joinToString(separator = "") { it.toString() })
-                            CcuLog.i("USER_TEST", "Installer PIN updated successfully: ${viewModel.viewState.value.conditioningModePassword}")
                         }
                         else -> CcuLog.i("USER_TEST", "No valid PIN selected")
                     }
                     isDialogVisible = false
-                    CcuLog.i("USER_TEST", "updated successfully ")
                 }
             }
         }
@@ -3132,16 +3194,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     textModifier = Modifier.width(30.dp),
                     startIndex = pinDigits[index],
                     onChanged = { selected ->
-                        CcuLog.i("USER_TEST","pinDigit ${pinDigits.toList()}  Original Digit ${originalPin.toList()}  selectedInt ${selected.toInt()}")
                         val selectedInt = selected.toInt()
                         // Update the pin digit
                         pinDigits[index] = selectedInt
                         // Compare current PIN with original PIN or the pin 0,0,0,0 making save btn to disable state
                         val isChanged =  (pinDigits.toList()== listOf(0,0,0,0) || pinDigits.toList() != originalPin.toList())
-                        CcuLog.i("USER_TEST","pinDigit ${pinDigits.toList()}  Original Digit ${originalPin.toList()}  selectedInt ${selected.toInt()}  ischanged ${isChanged}")
                         onSaveState(isChanged)
                         originalPin[index]= selectedInt
-                        CcuLog.i("USER_TEST","pinDigit ${pinDigits.toList()}  Original Digit ${originalPin.toList()}  selectedInt ${selected.toInt()}")
                     }
                 )
             }
@@ -3169,6 +3228,9 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             val height = 672
             dialog.window!!.setLayout(width, height)
         }
+    }
+    private fun isPipe2UvProfile(viewModel: HyperStatSplitViewModel): Boolean {
+        return viewModel.profileType.name == ProfileType.HYPERSTATSPLIT_2PIPE_UV.name
     }
 
 

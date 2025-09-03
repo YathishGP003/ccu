@@ -1244,6 +1244,7 @@ object DomainName {
     const val analog1MinWaterValve = "analog1MinWaterValve"
     const val analog2MinWaterValve = "analog2MinWaterValve"
     const val analog3MinWaterValve = "analog3MinWaterValve"
+    const val analog4MinWaterValve = "analog4MinWaterValve"
     const val analog1MinFanSpeed = "analog1MinFanSpeed"
     const val analog2MinFanSpeed = "analog2MinFanSpeed"
     const val analog3MinFanSpeed = "analog3MinFanSpeed"
@@ -1251,6 +1252,7 @@ object DomainName {
     const val analog1MaxWaterValve = "analog1MaxWaterValve"
     const val analog2MaxWaterValve = "analog2MaxWaterValve"
     const val analog3MaxWaterValve = "analog3MaxWaterValve"
+    const val analog4MaxWaterValve = "analog4MaxWaterValve"
     const val analog1MaxFanSpeed = "analog1MaxFanSpeed"
     const val analog2MaxFanSpeed = "analog2MaxFanSpeed"
     const val analog3MaxFanSpeed = "analog3MaxFanSpeed"
@@ -1514,6 +1516,8 @@ object DomainName {
     const val doorWindowSensorNOTitle24 = "doorWindowSensorNOTitle24"
     const val doorWindowSensorNC = "doorWindowSensorNC"
     const val doorWindowSensor = "doorWindowSensor"
+    const val fanOutSaTempering = "fanOutSaTempering"
+
 
 }
 

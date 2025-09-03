@@ -131,6 +131,7 @@ public class HyperSplitMessageGenerator {
         if (!device.isEmpty()) {
             DeviceHSUtil.getEnabledCmdPointsWithRefForDevice(device, hayStack).forEach(rawPoint -> {
                 int mappedVal;
+
                 double logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
                 if(Globals.getInstance().isTestMode()) {
                     // In test mode, we read the historical value and write it back to the point.

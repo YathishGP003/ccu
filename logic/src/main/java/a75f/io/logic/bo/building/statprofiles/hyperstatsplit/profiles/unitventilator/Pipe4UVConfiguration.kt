@@ -25,20 +25,12 @@ class Pipe4UVConfiguration(
 
     override fun getValueConfigs(): List<ValueConfig> {
         return super.getValueConfigs().toMutableList().apply {
-            add(controlVia)
             Collections.addAll(addValueConfig(analogOut1Voltage, this))
             Collections.addAll(addValueConfig(analogOut2Voltage, this))
             Collections.addAll(addValueConfig(analogOut3Voltage, this))
             Collections.addAll(addValueConfig(analogOut4Voltage, this))
         }
     }
-
-    override fun getEnableConfigs(): List<EnableConfig> {
-        return super.getEnableConfigs().toMutableList().apply {
-            add(saTempering)
-        }
-    }
-
     override fun getDefaultConfiguration(): UnitVentilatorConfiguration {
         var config = super.getDefaultConfiguration()
         config = config as Pipe4UVConfiguration
@@ -526,6 +518,11 @@ class Pipe4UVConfiguration(
         var faceAndBypassDamperMin: ValueConfig, var faceAndBypassDamperMax: ValueConfig
     )
 
+    override fun toString(): String {
+        return super.toString().apply {
+            "satTempering=$saTempering, controlVia=$controlVia, analogOut1Voltage=$analogOut1Voltage, analogOut2Voltage=$analogOut2Voltage, analogOut3Voltage=$analogOut3Voltage, analogOut4Voltage=$analogOut4Voltage"
+        }
+    }
 }
 
 enum class Pipe4UvAnalogOutControls {

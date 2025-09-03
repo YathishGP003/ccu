@@ -54,6 +54,7 @@ import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.connectnode.ConnectNodeFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
+import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe2UVFragment;
 import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe4UVFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatCpuFragment;
@@ -491,6 +492,11 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                         showDialogFragment(Pipe4UVFragment.Companion.newInstance(mPairingAddress,mName,mFloorName,
                                         mNodeType,ProfileType.HYPERSTATSPLIT_4PIPE_UV),
                                 HyperStatSplitCpuFragment.Companion.getID());
+                        break;
+                    case HYPERSTATSPLIT_2PIPE_UV:
+                        showDialogFragment(Pipe2UVFragment.Companion.newInstance(mPairingAddress,mName,mFloorName,
+                                        mNodeType,ProfileType.HYPERSTATSPLIT_2PIPE_UV),
+                                Pipe2UVFragment.Companion.getID());
                         break;
                     case MYSTAT_CPU:
                         showDialogFragment(MyStatCpuFragment.Companion.newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType), MyStatCpuFragment.Companion.getID());

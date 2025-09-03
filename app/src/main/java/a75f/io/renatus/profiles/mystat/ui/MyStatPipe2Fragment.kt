@@ -15,6 +15,7 @@ import a75f.io.renatus.profiles.mystat.testVoltage
 import a75f.io.renatus.profiles.mystat.viewmodels.MyStatPipe2ViewModel
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatPipe2ViewState
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
+import a75f.io.renatus.profiles.system.SUPPLY_WATER_TEMPERATURE
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
@@ -168,7 +169,7 @@ class MyStatPipe2Fragment : MyStatFragment() {
                     toggleName = UNIVERSAL_IN,
                     toggleState = true,
                     toggleEnabled = { viewModel.viewState.value.universalIn1.enabled = true },
-                    mappingText = "Supply Water Temperature",
+                    mappingText = SUPPLY_WATER_TEMPERATURE,
                     false
                 )
             }

@@ -132,10 +132,12 @@ fun getStatusMsg(
 
 
     // Fallback if no fan stages but fan is enabled
-    if (!statusParts.any { it.contains("Fan") } && !analogOutStages.containsKey(StatusMsgKeys.FAN_SPEED.name) && portStages.containsKey(
-            StatusMsgKeys.FAN_ENABLED.name
-        )) {
-        statusParts.add("Fan ON")
+    if (!statusParts.any { it.contains("Fan") } && !analogOutStages.containsKey(StatusMsgKeys.FAN_SPEED.name)) {
+        if (portStages.containsKey(StatusMsgKeys.FAN_ENABLED.name)) {
+            statusParts.add("Fan ON")
+        } else if (portStages.containsKey(StatusMsgKeys.EQUIP_ON.name)) {
+            statusParts.add("Equipment ON")
+        }
     }
     getAnalogStatus(analogOutStages)?.let { statusParts.add(it) }
 

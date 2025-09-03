@@ -415,6 +415,29 @@ open class ControllerFactory {
         return controllers[ControllerNames.HEATING_VALVE_CONTROLLER] as ValveController
     }
 
+    fun addWaterValveController(
+        controllers: HashMap<String, Any>, heatingLoop: Point, logTag: String,
+        onConstrains: List<Constraint> = emptyList(),
+        offConstrains: List<Constraint> = emptyList(),
+    ): ValveController {
+        if (!controllers.containsKey(ControllerNames.HEATING_VALVE_CONTROLLER)) {
+            val controller = ValveController(ControllerNames.HEATING_VALVE_CONTROLLER, heatingLoop, logTag)
+            if (onConstrains.isNotEmpty()) {
+                onConstrains.forEach { constraint ->
+                    controller.addOnConstraint(constraint)
+                }
+            }
+            if (offConstrains.isNotEmpty()) {
+                offConstrains.forEach { constraint ->
+                    controller.addOffConstraint(constraint)
+                }
+            }
+            controllers[ControllerNames.HEATING_VALVE_CONTROLLER] = controller
+            logIt(logTag, "Controller added with name: HEATING_VALVE_CONTROLLER")
+        }
+        return controllers[ControllerNames.HEATING_VALVE_CONTROLLER] as ValveController
+    }
+
     fun addFaceBypassController(
         controllers: HashMap<String, Any>, coolingLoop: Point, heatingLoop: Point,
         faceBypassActivationHis: Point, logTag: String,

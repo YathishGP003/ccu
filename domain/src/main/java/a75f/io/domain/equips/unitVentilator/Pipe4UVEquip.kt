@@ -4,7 +4,7 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 
 
-class Pipe4UVEquip (equipRef:String):UnitVentilatorEquip(equipRef){
+class Pipe4UVEquip(equipRef: String) : UnitVentilatorEquip(equipRef) {
     val analog1MaxHotWaterValve = Point(DomainName.analog1MaxHotWaterValve, equipRef)
     val analog2MaxHotWaterValve = Point(DomainName.analog2MaxHotWaterValve, equipRef)
     val analog3MaxHotWaterValve = Point(DomainName.analog3MaxHotWaterValve, equipRef)

@@ -6,7 +6,6 @@ import a75f.io.domain.api.DomainName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2AnalogOutMapping
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.AOTHConfig
@@ -19,6 +18,7 @@ import a75f.io.renatus.profiles.hyperstatv2.util.MinMaxConfig
 import a75f.io.renatus.profiles.hyperstatv2.viewmodels.Pipe2ViewModel
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.Pipe2ViewState
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
+import a75f.io.renatus.profiles.system.SUPPLY_WATER_TEMPERATURE
 import a75f.io.renatus.profiles.system.THERMISTOR_1
 import a75f.io.renatus.profiles.system.THERMISTOR_2
 import a75f.io.renatus.util.highPriorityDispatcher
@@ -211,7 +211,7 @@ class HyperStatV2Pipe2Fragment : HyperStatFragmentV2() {
                 DependentPointMappingView(toggleName = THERMISTOR_2,
                     toggleState = true,
                     toggleEnabled = { thermistor2EnableConfig.enabled = true } ,
-                    mappingText = "Supply Water Temperature", false)
+                    mappingText = SUPPLY_WATER_TEMPERATURE, false)
             }
         }
     }

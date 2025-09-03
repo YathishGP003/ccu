@@ -35,6 +35,7 @@ import androidx.compose.ui.window.DialogProperties
 
 const val NO_COMPRESSOR = "The O/B changeover relay is mapped, but the compressor is not mapped."
 const val NO_OB_REALLY = "The compressor is mapped, but the O/B changeover relay is not mapped."
+const val NO_MAT_SENSOR = "The DCV Damper is mapped, but Mixed Air Temperature sensor is not mapped."
 
 @Composable
 fun ErrorDialog(

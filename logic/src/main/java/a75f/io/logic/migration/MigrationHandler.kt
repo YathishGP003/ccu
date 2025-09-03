@@ -4,7 +4,6 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HayStackConstants
-import a75f.io.api.haystack.HisItem
 import a75f.io.api.haystack.HisItemCache
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
@@ -120,6 +119,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe2FanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
+import a75f.io.logic.bo.building.statprofiles.util.getPossibleFanMode
 import a75f.io.logic.bo.building.system.DefaultSystemConfig
 import a75f.io.logic.bo.building.system.vav.config.DabModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
@@ -543,9 +543,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 val equipId = HsSplitCpuEquip(equip["id"].toString())
                 val possibleConditioningMode =
                     HSSplitHaystackUtil.getPossibleConditioningModeSettings(equipId)
-                val possibleFanMode = HSSplitHaystackUtil.getSplitPossibleFanModeSettings(
-                    equip["group"].toString().toInt()
-                )
+                val possibleFanMode = getPossibleFanMode(equipId)
                 modifyFanMode(possibleFanMode.ordinal, equipId.fanOpMode)
                 modifyConditioningMode(
                     possibleConditioningMode.ordinal,

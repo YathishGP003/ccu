@@ -5,7 +5,6 @@ package a75f.io.logic.bo.building.hvac
  * Modified to add OAO Damper by Nick P on 07-24-2023.
  */
 enum class StatusMsgKeys {
-
     COOLING,
     FAN_SPEED,
     HEATING,
@@ -18,4 +17,5 @@ enum class StatusMsgKeys {
     AUX_HEATING_STAGE2,
     COOLING_VALVE,
     HEATING_VALVE,
+    EQUIP_ON
 }

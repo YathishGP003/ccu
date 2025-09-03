@@ -14,6 +14,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuAnalogControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UVConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVRelayControls
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UvAnalogOutControls
@@ -115,11 +116,11 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
     lateinit var installerPinEnable: EnableConfig
     lateinit var conditioningModePinEnable: EnableConfig
 
-    lateinit var installerPassword :StringValueConfig
-    lateinit var conditioningModePassword :StringValueConfig
+    lateinit var installerPassword: StringValueConfig
+    lateinit var conditioningModePassword: StringValueConfig
 
-    lateinit var desiredTemp : EnableConfig
-    lateinit var spaceTemp : EnableConfig
+    lateinit var desiredTemp: EnableConfig
+    lateinit var spaceTemp: EnableConfig
 
     /**
      * Get a list of domainNames of all base-configs
@@ -283,25 +284,43 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
         return mutableListOf<ValueConfig>()
     }
 
-     private fun getAddressAssociations() {
+    private fun getAddressAssociations() {
         address0SensorAssociation = SensorTempHumidityAssociationConfig(
-            temperatureAssociation = getDefaultAssociationConfig(DomainName.temperatureSensorBusAdd0, model),
-            humidityAssociation = getDefaultAssociationConfig(DomainName.humiditySensorBusAdd0, model)
+            temperatureAssociation = getDefaultAssociationConfig(
+                DomainName.temperatureSensorBusAdd0,
+                model
+            ),
+            humidityAssociation = getDefaultAssociationConfig(
+                DomainName.humiditySensorBusAdd0,
+                model
+            )
         )
-        pressureAddress0SensorAssociation = getDefaultAssociationConfig(DomainName.pressureSensorBusAdd0, model)
+        pressureAddress0SensorAssociation =
+            getDefaultAssociationConfig(DomainName.pressureSensorBusAdd0, model)
         address1SensorAssociation = SensorTempHumidityAssociationConfig(
-            temperatureAssociation = getDefaultAssociationConfig(DomainName.temperatureSensorBusAdd1, model),
-            humidityAssociation = getDefaultAssociationConfig(DomainName.humiditySensorBusAdd1, model)
+            temperatureAssociation = getDefaultAssociationConfig(
+                DomainName.temperatureSensorBusAdd1,
+                model
+            ),
+            humidityAssociation = getDefaultAssociationConfig(
+                DomainName.humiditySensorBusAdd1,
+                model
+            )
         )
         address2SensorAssociation = SensorTempHumidityAssociationConfig(
-            temperatureAssociation = getDefaultAssociationConfig(DomainName.temperatureSensorBusAdd2, model),
-            humidityAssociation = getDefaultAssociationConfig(DomainName.humiditySensorBusAdd2, model)
+            temperatureAssociation = getDefaultAssociationConfig(
+                DomainName.temperatureSensorBusAdd2,
+                model
+            ),
+            humidityAssociation = getDefaultAssociationConfig(
+                DomainName.humiditySensorBusAdd2,
+                model
+            )
         )
     }
 
 
-
-    fun getActiveEnableConfigs(equip : HyperStatSplitEquip) {
+    fun getActiveEnableConfigs(equip: HyperStatSplitEquip) {
         apply {
             address0Enabled.enabled = equip.sensorBusAddress0Enable.readDefaultVal() > 0
             sensorBusPressureEnable.enabled = equip.sensorBusPressureEnable.readDefaultVal() > 0
@@ -338,66 +357,86 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
 
         apply {
             if (relay1Enabled.enabled) {
-                relay1Association.associationVal = equip.relay1OutputAssociation.readDefaultVal().toInt()
+                relay1Association.associationVal =
+                    equip.relay1OutputAssociation.readDefaultVal().toInt()
             }
             if (relay2Enabled.enabled) {
-                relay2Association.associationVal = equip.relay2OutputAssociation.readDefaultVal().toInt()
+                relay2Association.associationVal =
+                    equip.relay2OutputAssociation.readDefaultVal().toInt()
             }
             if (relay3Enabled.enabled) {
-                relay3Association.associationVal = equip.relay3OutputAssociation.readDefaultVal().toInt()
+                relay3Association.associationVal =
+                    equip.relay3OutputAssociation.readDefaultVal().toInt()
             }
             if (relay4Enabled.enabled) {
-                relay4Association.associationVal = equip.relay4OutputAssociation.readDefaultVal().toInt()
+                relay4Association.associationVal =
+                    equip.relay4OutputAssociation.readDefaultVal().toInt()
             }
             if (relay5Enabled.enabled) {
-                relay5Association.associationVal = equip.relay5OutputAssociation.readDefaultVal().toInt()
+                relay5Association.associationVal =
+                    equip.relay5OutputAssociation.readDefaultVal().toInt()
             }
             if (relay6Enabled.enabled) {
-                relay6Association.associationVal = equip.relay6OutputAssociation.readDefaultVal().toInt()
+                relay6Association.associationVal =
+                    equip.relay6OutputAssociation.readDefaultVal().toInt()
             }
             if (relay7Enabled.enabled) {
-                relay7Association.associationVal = equip.relay7OutputAssociation.readDefaultVal().toInt()
+                relay7Association.associationVal =
+                    equip.relay7OutputAssociation.readDefaultVal().toInt()
             }
             if (relay8Enabled.enabled) {
-                relay8Association.associationVal = equip.relay8OutputAssociation.readDefaultVal().toInt()
+                relay8Association.associationVal =
+                    equip.relay8OutputAssociation.readDefaultVal().toInt()
             }
 
             if (analogOut1Enabled.enabled) {
-                analogOut1Association.associationVal = equip.analog1OutputAssociation.readDefaultVal().toInt()
+                analogOut1Association.associationVal =
+                    equip.analog1OutputAssociation.readDefaultVal().toInt()
             }
             if (analogOut2Enabled.enabled) {
-                analogOut2Association.associationVal = equip.analog2OutputAssociation.readDefaultVal().toInt()
+                analogOut2Association.associationVal =
+                    equip.analog2OutputAssociation.readDefaultVal().toInt()
             }
             if (analogOut3Enabled.enabled) {
-                analogOut3Association.associationVal = equip.analog3OutputAssociation.readDefaultVal().toInt()
+                analogOut3Association.associationVal =
+                    equip.analog3OutputAssociation.readDefaultVal().toInt()
             }
             if (analogOut4Enabled.enabled) {
-                analogOut4Association.associationVal = equip.analog4OutputAssociation.readDefaultVal().toInt()
+                analogOut4Association.associationVal =
+                    equip.analog4OutputAssociation.readDefaultVal().toInt()
             }
 
             if (universal1InEnabled.enabled) {
-                universal1InAssociation.associationVal = equip.universalIn1Association.readDefaultVal().toInt()
+                universal1InAssociation.associationVal =
+                    equip.universalIn1Association.readDefaultVal().toInt()
             }
             if (universal2InEnabled.enabled) {
-                universal2InAssociation.associationVal = equip.universalIn2Association.readDefaultVal().toInt()
+                universal2InAssociation.associationVal =
+                    equip.universalIn2Association.readDefaultVal().toInt()
             }
             if (universal3InEnabled.enabled) {
-                universal3InAssociation.associationVal = equip.universalIn3Association.readDefaultVal().toInt()
+                universal3InAssociation.associationVal =
+                    equip.universalIn3Association.readDefaultVal().toInt()
             }
             if (universal4InEnabled.enabled) {
-                universal4InAssociation.associationVal = equip.universalIn4Association.readDefaultVal().toInt()
+                universal4InAssociation.associationVal =
+                    equip.universalIn4Association.readDefaultVal().toInt()
             }
             if (universal5InEnabled.enabled) {
-                universal5InAssociation.associationVal = equip.universalIn5Association.readDefaultVal().toInt()
+                universal5InAssociation.associationVal =
+                    equip.universalIn5Association.readDefaultVal().toInt()
             }
             if (universal6InEnabled.enabled) {
-                universal6InAssociation.associationVal = equip.universalIn6Association.readDefaultVal().toInt()
+                universal6InAssociation.associationVal =
+                    equip.universalIn6Association.readDefaultVal().toInt()
             }
             if (universal7InEnabled.enabled) {
-                universal7InAssociation.associationVal = equip.universalIn7Association.readDefaultVal().toInt()
+                universal7InAssociation.associationVal =
+                    equip.universalIn7Association.readDefaultVal().toInt()
             }
             if (universal8InEnabled.enabled) {
-                universal8InAssociation.associationVal = equip.universalIn8Association.readDefaultVal().toInt()
+                universal8InAssociation.associationVal =
+                    equip.universalIn8Association.readDefaultVal().toInt()
             }
         }
     }
@@ -406,22 +445,29 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
         apply {
 
             if (address0Enabled.enabled) {
-                address0SensorAssociation.temperatureAssociation.associationVal = equip.temperatureSensorBusAdd0.readDefaultVal().toInt()
-                address0SensorAssociation.humidityAssociation.associationVal = equip.humiditySensorBusAdd0.readDefaultVal().toInt()
+                address0SensorAssociation.temperatureAssociation.associationVal =
+                    equip.temperatureSensorBusAdd0.readDefaultVal().toInt()
+                address0SensorAssociation.humidityAssociation.associationVal =
+                    equip.humiditySensorBusAdd0.readDefaultVal().toInt()
             }
 
             if (sensorBusPressureEnable.enabled) {
-                pressureAddress0SensorAssociation.associationVal = equip.pressureSensorBusAdd0.readDefaultVal().toInt()
+                pressureAddress0SensorAssociation.associationVal =
+                    equip.pressureSensorBusAdd0.readDefaultVal().toInt()
             }
 
             if (address1Enabled.enabled) {
-                address1SensorAssociation.temperatureAssociation.associationVal = equip.temperatureSensorBusAdd1.readDefaultVal().toInt()
-                address1SensorAssociation.humidityAssociation.associationVal = equip.humiditySensorBusAdd1.readDefaultVal().toInt()
+                address1SensorAssociation.temperatureAssociation.associationVal =
+                    equip.temperatureSensorBusAdd1.readDefaultVal().toInt()
+                address1SensorAssociation.humidityAssociation.associationVal =
+                    equip.humiditySensorBusAdd1.readDefaultVal().toInt()
             }
 
             if (address2Enabled.enabled) {
-                address2SensorAssociation.temperatureAssociation.associationVal = equip.temperatureSensorBusAdd2.readDefaultVal().toInt()
-                address2SensorAssociation.humidityAssociation.associationVal = equip.humiditySensorBusAdd2.readDefaultVal().toInt()
+                address2SensorAssociation.temperatureAssociation.associationVal =
+                    equip.temperatureSensorBusAdd2.readDefaultVal().toInt()
+                address2SensorAssociation.humidityAssociation.associationVal =
+                    equip.humiditySensorBusAdd2.readDefaultVal().toInt()
             }
 
         }
@@ -440,7 +486,8 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
 
             zonePM2p5Target.currentVal = equip.pm25Target.readDefaultVal()
 
-            if (prePurge.enabled) prePurgeOutsideDamperOpen.currentVal = equip.prePurgeOutsideDamperOpen.readDefaultVal()
+            if (prePurge.enabled) prePurgeOutsideDamperOpen.currentVal =
+                equip.prePurgeOutsideDamperOpen.readDefaultVal()
 
             displayHumidity.enabled = equip.enableHumidityDisplay.readDefaultVal() > 0.0
             displayCO2.enabled = equip.enableCO2Display.readDefaultVal() > 0.0
@@ -450,23 +497,26 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
             enableBrightness.enabled = equip.enableBrightness.readDefaultVal() > 0.0
             backLight.enabled = equip.enableBacklight.readDefaultVal() > 0.0
 
-            enableOutsideAirOptimization.enabled = equip.enableOutsideAirOptimization.readDefaultVal() > 0.0
+            enableOutsideAirOptimization.enabled =
+                equip.enableOutsideAirOptimization.readDefaultVal() > 0.0
 
             installerPinEnable.enabled = equip.installerPinEnable.readDefaultVal() > 0.0
-            conditioningModePinEnable.enabled = equip.enableConditioningModeFanAccess.readDefaultVal() > 0.0
+            conditioningModePinEnable.enabled =
+                equip.enableConditioningModeFanAccess.readDefaultVal() > 0.0
             desiredTemp.enabled = equip.enableDesiredTempDisplay.readDefaultVal() > 0.0
             spaceTemp.enabled = equip.enableSpaceTempDisplay.readDefaultVal() > 0.0
 
-            installerPassword.currentVal = if(equip.pinLockInstallerAccess.pointExists()) {
+            installerPassword.currentVal = if (equip.pinLockInstallerAccess.pointExists()) {
                 equip.pinLockInstallerAccess.readDefaultStrVal()
             } else {
                 "0" // If the point does not exist, return an empty string
             }
-            conditioningModePassword.currentVal = if(equip.pinLockConditioningModeFanAccess.pointExists()) {
-                equip.pinLockConditioningModeFanAccess.readDefaultStrVal()
-            } else {
-                "0" // If the point does not exist, return an empty string
-            }
+            conditioningModePassword.currentVal =
+                if (equip.pinLockConditioningModeFanAccess.pointExists()) {
+                    equip.pinLockConditioningModeFanAccess.readDefaultStrVal()
+                } else {
+                    "0" // If the point does not exist, return an empty string
+                }
         }
     }
 
@@ -568,11 +618,16 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
      * Get the default enable config for the domain name
      */
     private fun getEconomizerConfigs() {
-        outsideDamperMinOpenDuringRecirc = getDefaultValConfig(DomainName.outsideDamperMinOpenDuringRecirculation, model)
-        outsideDamperMinOpenDuringConditioning = getDefaultValConfig(DomainName.outsideDamperMinOpenDuringConditioning, model)
-        outsideDamperMinOpenDuringFanLow = getDefaultValConfig(DomainName.outsideDamperMinOpenDuringFanLow, model)
-        outsideDamperMinOpenDuringFanMedium = getDefaultValConfig(DomainName.outsideDamperMinOpenDuringFanMedium, model)
-        outsideDamperMinOpenDuringFanHigh = getDefaultValConfig(DomainName.outsideDamperMinOpenDuringFanHigh, model)
+        outsideDamperMinOpenDuringRecirc =
+            getDefaultValConfig(DomainName.outsideDamperMinOpenDuringRecirculation, model)
+        outsideDamperMinOpenDuringConditioning =
+            getDefaultValConfig(DomainName.outsideDamperMinOpenDuringConditioning, model)
+        outsideDamperMinOpenDuringFanLow =
+            getDefaultValConfig(DomainName.outsideDamperMinOpenDuringFanLow, model)
+        outsideDamperMinOpenDuringFanMedium =
+            getDefaultValConfig(DomainName.outsideDamperMinOpenDuringFanMedium, model)
+        outsideDamperMinOpenDuringFanHigh =
+            getDefaultValConfig(DomainName.outsideDamperMinOpenDuringFanHigh, model)
 
         exhaustFanStage1Threshold = getDefaultValConfig(DomainName.exhaustFanStage1Threshold, model)
         exhaustFanStage2Threshold = getDefaultValConfig(DomainName.exhaustFanStage2Threshold, model)
@@ -602,17 +657,20 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
         backLight = getDefaultEnableConfig(DomainName.enableBacklight, model)
         enableBrightness = getDefaultEnableConfig(DomainName.enableBrightness, model)
 
-        enableOutsideAirOptimization = getDefaultEnableConfig(DomainName.enableOutsideAirOptimization, model)
+        enableOutsideAirOptimization =
+            getDefaultEnableConfig(DomainName.enableOutsideAirOptimization, model)
 
         // Pin enable configs
         installerPinEnable = getDefaultEnableConfig(DomainName.enableInstallerAccess, model)
-        conditioningModePinEnable = getDefaultEnableConfig(DomainName.enableConditioningModeFanAccess, model)
+        conditioningModePinEnable =
+            getDefaultEnableConfig(DomainName.enableConditioningModeFanAccess, model)
 
         desiredTemp = getDefaultEnableConfig(DomainName.enableDesiredTempDisplay, model)
         spaceTemp = getDefaultEnableConfig(DomainName.enableSpaceTempDisplay, model)
 
         installerPassword = getDefaultStringConfig(DomainName.pinLockInstallerAccess, model)
-        conditioningModePassword = getDefaultStringConfig(DomainName.pinLockConditioningModeFanAccess, model)
+        conditioningModePassword =
+            getDefaultStringConfig(DomainName.pinLockConditioningModeFanAccess, model)
     }
 
 
@@ -639,7 +697,7 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
                 "\nanalogOut1Association=${analogOut1Association.associationVal}," + " " + "\nanalogOut2Association=${analogOut2Association.associationVal}," +
                 "" + "\nanalogOut3Association=${analogOut3Association.associationVal}," + "\nanalogOut4Association=${analogOut4Association.associationVal})" +
                 "\ntemperatureOffset=${temperatureOffset.currentVal}, " + "\nautoForceOccupied=${autoForceOccupied.enabled}," +
-                "\nautoAway=${autoAway.enabled}, " + "\noutsideDamperMinOpenDuringRecirc=${outsideDamperMinOpenDuringRecirc.currentVal}," +
+                "\nautoAway=${autoAway.enabled} " + "\noutsideDamperMinOpenDuringRecirc=${outsideDamperMinOpenDuringRecirc.currentVal}," +
                 "\noutsideDamperMinOpenDuringConditioning=${outsideDamperMinOpenDuringConditioning.currentVal}," +
                 "\noutsideDamperMinOpenDuringFanLow=${outsideDamperMinOpenDuringFanLow.currentVal}," +
                 "\noutsideDamperMinOpenDuringFanMedium=${outsideDamperMinOpenDuringFanMedium.currentVal}," +
@@ -651,8 +709,9 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
                 "\nzoneCO2Threshold=${zoneCO2Threshold.currentVal}," + "\nzoneCO2Target=${zoneCO2Target.currentVal}," +
                 "\nzonePM2p5Target=${zonePM2p5Target.currentVal}," +
                 "\ndisplayHumidity=${displayHumidity.enabled}," + "\ndisplayCO2=${displayCO2.enabled}," +
-                "\ndisplayPM2p5=${displayPM2p5.enabled}),  installer pin Enable =${installerPinEnable.enabled} , con" +
-                "\ndisableTouch=${disableTouch.enabled}, backlight =${backLight.enabled} " + "\nenableBrightness=${enableBrightness.enabled},+"
+                "\ndisplayPM2p5=${displayPM2p5.enabled}),  installer pin Enable =${installerPinEnable.enabled} , conditioning mode pin enable =${conditioningModePinEnable}" +
+                "\ninstallerPassword=${installerPassword.currentVal}, conditioningModePassword=${conditioningModePassword.currentVal}" +
+                "\ndisableTouch=${disableTouch.enabled}, backlight =${backLight.enabled} " + "\nenableBrightness=${enableBrightness.enabled}"
     }
 
     fun getHighestStage(stage1: Int, stage2: Int, stage3: Int): Int {
@@ -663,7 +722,11 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
         else -1
     }
 
-    private fun availableHighestStages(stage1: Int, stage2: Int, stage3: Int): Triple<Boolean, Boolean, Boolean> {
+    private fun availableHighestStages(
+        stage1: Int,
+        stage2: Int,
+        stage3: Int
+    ): Triple<Boolean, Boolean, Boolean> {
         var isStage1Selected = false
         var isStage2Selected = false
         var isStage3Selected = false
@@ -701,16 +764,45 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
 
     fun getAnalogOutsConfigurationMapping(): List<Triple<Boolean, Int, Port>> {
         return listOf(
-            Triple(analogOut1Enabled.enabled, analogOut1Association.associationVal, Port.ANALOG_OUT_ONE),
-            Triple(analogOut2Enabled.enabled, analogOut2Association.associationVal, Port.ANALOG_OUT_TWO),
-            Triple(analogOut3Enabled.enabled, analogOut3Association.associationVal, Port.ANALOG_OUT_THREE),
-            Triple(analogOut4Enabled.enabled, analogOut4Association.associationVal, Port.ANALOG_OUT_FOUR)
+            Triple(
+                analogOut1Enabled.enabled,
+                analogOut1Association.associationVal,
+                Port.ANALOG_OUT_ONE
+            ),
+            Triple(
+                analogOut2Enabled.enabled,
+                analogOut2Association.associationVal,
+                Port.ANALOG_OUT_TWO
+            ),
+            Triple(
+                analogOut3Enabled.enabled,
+                analogOut3Association.associationVal,
+                Port.ANALOG_OUT_THREE
+            ),
+            Triple(
+                analogOut4Enabled.enabled,
+                analogOut4Association.associationVal,
+                Port.ANALOG_OUT_FOUR
+            )
         )
     }
-    open fun analogOut1TypeToString(): String { return "0-10v" }
-    open fun analogOut2TypeToString(): String { return "0-10v" }
-    open fun analogOut3TypeToString(): String { return "0-10v" }
-    open fun analogOut4TypeToString(): String { return "0-10v" }
+
+    open fun analogOut1TypeToString(): String {
+        return "0-10v"
+    }
+
+    open fun analogOut2TypeToString(): String {
+        return "0-10v"
+    }
+
+    open fun analogOut3TypeToString(): String {
+        return "0-10v"
+    }
+
+    open fun analogOut4TypeToString(): String {
+        return "0-10v"
+    }
+
     abstract fun getHighestFanStageCount(): Int
 
     fun getRelayEnabledAssociations(): List<Pair<Boolean, Int>> = buildList {
@@ -728,13 +820,13 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
         }
     }
 
-    fun getAnalogEnabledAssociations():List<Pair<Boolean,Int>> = buildList{
+    fun getAnalogEnabledAssociations(): List<Pair<Boolean, Int>> = buildList {
         listOf(
             analogOut1Enabled to analogOut1Association,
             analogOut2Enabled to analogOut2Association,
             analogOut3Enabled to analogOut3Association,
             analogOut4Enabled to analogOut4Association
-        ).forEach { (enable,association)->
+        ).forEach { (enable, association) ->
             if (enable.enabled) add(true to association.associationVal)
         }
     }
@@ -743,16 +835,22 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
      * Function to get the point value if config exist else return the current value model default value
      */
     fun getDefault(point: Point, equip: HyperStatSplitEquip, valueConfig: ValueConfig): Double {
-        return if(Domain.readPointForEquip(point.domainName,equip.equipRef).isEmpty())
+        return if (Domain.readPointForEquip(point.domainName, equip.equipRef).isEmpty())
             valueConfig.currentVal
         else
             point.readDefaultVal()
     }
 
-    fun isFanEnabled(config: HyperStatSplitConfiguration, relayControl:String = HyperStatSplitControlType.FAN_ENABLED.name) = isAnyRelayEnabledAndMapped(config, relayControl)
+    fun isFanEnabled(
+        config: HyperStatSplitConfiguration,
+        relayControl: String = HyperStatSplitControlType.FAN_ENABLED.name
+    ) = isAnyRelayEnabledAndMapped(config, relayControl)
 
 
-    fun isAnyRelayEnabledAndMapped(config: HyperStatSplitConfiguration,relayType: String): Boolean {
+    fun isAnyRelayEnabledAndMapped(
+        config: HyperStatSplitConfiguration,
+        relayType: String
+    ): Boolean {
         return when (config) {
             is Pipe4UVConfiguration -> {
                 val target = Pipe4UVRelayControls.valueOf(relayType)
@@ -763,6 +861,13 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
 
             is HyperStatSplitCpuConfiguration -> {
                 val target = CpuRelayType.valueOf(relayType)
+                config.getRelayEnabledAssociations().any { (enabled, type) ->
+                    enabled && type == target.ordinal
+                }
+            }
+
+            is Pipe2UVConfiguration -> {
+                val target = Pipe4UVRelayControls.valueOf(relayType)
                 config.getRelayEnabledAssociations().any { (enabled, type) ->
                     enabled && type == target.ordinal
                 }
@@ -792,18 +897,22 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
         return when (profileConfiguration) {
             is HyperStatSplitCpuConfiguration -> CpuRelayType.valueOf(enumName).ordinal
             is Pipe4UVConfiguration -> Pipe4UVRelayControls.valueOf(enumName).ordinal
+            is Pipe2UVConfiguration -> Pipe4UVRelayControls.valueOf(enumName).ordinal
             else -> {
                 HyperStatSplitControlType.valueOf(enumName).ordinal
             }
         }
     }
+}
 
     /// this enum is used only  for string reference
     enum class HyperStatSplitControlType {
-        HEATING_WATER_VALVE,COOLING_WATER_VALVE,FACE_DAMPER_VALVE ,OAO_DAMPER, DCV_MODULATING_DAMPER, EXTERNALLY_MAPPED,   COOLING, LINEAR_FAN, HEATING, STAGED_FAN, RETURN_DAMPER, COMPRESSOR_SPEED,FAN_ENABLED
+        HEATING_WATER_VALVE,COOLING_WATER_VALVE,FACE_DAMPER_VALVE ,OAO_DAMPER, DCV_MODULATING_DAMPER, EXTERNALLY_MAPPED, COOLING,
+        LINEAR_FAN, HEATING, STAGED_FAN, RETURN_DAMPER, COMPRESSOR_SPEED,FAN_ENABLED , FAN_SPEED
+        ,HEATING_WATER_MODULATING_VALVE ,COOLING_WATER_MODULATING_VALVE ,FAN_LOW_SPEED_VENTILATION  ,FAN_LOW_SPEED,WATER_VALVE ,WATER_MODULATING_VALVE
+
     }
 
-}
 
 data class SensorTempHumidityAssociationConfig(
     var temperatureAssociation: AssociationConfig,
@@ -821,8 +930,7 @@ enum class UniversalInputs {
     INDEX_71, INDEX_72, HIGH_DIFFERENTIAL_PRESSURE_SWITCH, LOW_DIFFERENTIAL_PRESSURE_SWITCH, INDEX_75, INDEX_76, INDEX_77, INDEX_78, INDEX_79, INDEX_80,
     INDEX_81, INDEX_82, CONDENSATE_STATUS_NO, CONDENSATE_STATUS_NC, INDEX_85, INDEX_86, INDEX_87, INDEX_88, INDEX_89, INDEX_90,
     EMERGENCY_SHUTOFF_NO, EMERGENCY_SHUTOFF_NC, GENERIC_ALARM_NO, GENERIC_ALARM_NC, DOOR_WINDOW_SENSOR_NC, DOOR_WINDOW_SENSOR, DOOR_WINDOW_SENSOR_TITLE24_NC, DOOR_WINDOW_SENSOR_TITLE24, RUN_FAN_STATUS_NO, RUN_FAN_STATUS_NC,
-    FIRE_ALARM_STATUS_NC, DOOR_WINDOW_SENSOR_NO, DOOR_WINDOW_SENSOR_NO_TITLE_24, KEYCARD_SENSOR_NO, KEYCARD_SENSOR_NC, CHILLED_WATER_SUPPLY_TEMPERATURE, HOT_WATER_SUPPLY_TEMPERATURE
-
+    FIRE_ALARM_STATUS_NC, DOOR_WINDOW_SENSOR_NO, DOOR_WINDOW_SENSOR_NO_TITLE_24, KEYCARD_SENSOR_NO, KEYCARD_SENSOR_NC, CHILLED_WATER_SUPPLY_TEMPERATURE, HOT_WATER_SUPPLY_TEMPERATURE,SUPPLY_WATER_TEMPERATURE
 
 }
 

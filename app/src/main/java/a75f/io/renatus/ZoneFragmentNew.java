@@ -118,6 +118,7 @@ import a75f.io.device.mesh.mystat.MyStatMsgReceiverKt;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.hyperstat.MonitoringEquip;
+import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip;
 import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip;
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip;
 import a75f.io.logger.CcuLog;
@@ -1668,6 +1669,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 Pipe4UVEquip updatedDomain = new Pipe4UVEquip(p.getId());
                                 HyperStatSplitZoneViewKt.loadHyperStatSplitProfile(pipe4Points, inflater, linearLayoutZonePoints, updatedDomain, p.getGroup(), requireActivity());
                             }
+                            if(p.getProfile().startsWith(ProfileType.HYPERSTATSPLIT_2PIPE_UV.name())) {
+                                HashMap<String, Object> pipe2Points = HyperStatSplitZoneViewKt.getHyperStatSplitProfileEquipPoints(p, ProfileType.HYPERSTATSPLIT_2PIPE_UV);
+                                Pipe2UVEquip updatedDomain = new Pipe2UVEquip(p.getId());
+                                HyperStatSplitZoneViewKt.loadHyperStatSplitProfile(pipe2Points, inflater, linearLayoutZonePoints, updatedDomain, p.getGroup(), requireActivity());
+                            }
 
                         }
                     }
@@ -2154,6 +2160,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             if(updatedEquip.getProfile().startsWith(ProfileType.HYPERSTATSPLIT_4PIPE_UV.name())) {
                 HashMap<String, Object> pipe4Points = HyperStatSplitZoneViewKt.getHyperStatSplitProfileEquipPoints(updatedEquip, ProfileType.HYPERSTATSPLIT_4PIPE_UV);
                 Pipe4UVEquip updatedDomain = new Pipe4UVEquip(p.getId());
+                HyperStatSplitZoneViewKt.loadHyperStatSplitProfile(pipe4Points, inflater, linearLayoutZonePoints, updatedDomain, updatedEquip.getGroup(), requireActivity());
+            }
+            if(updatedEquip.getProfile().startsWith(ProfileType.HYPERSTATSPLIT_2PIPE_UV.name())) {
+                HashMap<String, Object> pipe4Points = HyperStatSplitZoneViewKt.getHyperStatSplitProfileEquipPoints(updatedEquip, ProfileType.HYPERSTATSPLIT_2PIPE_UV);
+                Pipe2UVEquip updatedDomain = new Pipe2UVEquip(p.getId());
                 HyperStatSplitZoneViewKt.loadHyperStatSplitProfile(pipe4Points, inflater, linearLayoutZonePoints, updatedDomain, updatedEquip.getGroup(), requireActivity());
             }
         }

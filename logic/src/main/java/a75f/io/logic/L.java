@@ -54,6 +54,7 @@ public class L
     public static final String TAG_CCU_LOOP = "CCU_LOOP";
     public static final String TAG_CCU_HSSPLIT_CPUECON = "CCU_HSSPLIT_CPUECON";
     public static final String TAG_CCU_HSSPLIT_PIPE4_UV = "CCU_HSS_UVPIPE4";
+    public static final String TAG_CCU_HSSPLIT_PIPE2_UV = "CCU_HSS_UVPIPE2";
     public static final String TAG_CCU_MESSAGING = "CCU_MESSAGING";
     public static final String TAG_CCU_COPY_CONFIGURATION = "CCU_COPY_CONFIGURATION";
     public static final String TAG_CCU_WEATHER = "CCU_WEATHER";

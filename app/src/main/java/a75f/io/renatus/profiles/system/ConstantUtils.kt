@@ -53,3 +53,5 @@ const val UNIVERSAL_IN5 = "Universal-In 5"
 const val UNIVERSAL_IN6 = "Universal-In 6"
 const val UNIVERSAL_IN7 = "Universal-In 7"
 const val UNIVERSAL_IN8 = "Universal-In 8"
+
+const val SUPPLY_WATER_TEMPERATURE = "Supply Water Temperature"

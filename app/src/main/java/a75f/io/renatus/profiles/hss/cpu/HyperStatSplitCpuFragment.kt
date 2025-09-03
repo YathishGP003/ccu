@@ -12,8 +12,8 @@ import a75f.io.renatus.composables.DuplicatePointDialog
 import a75f.io.renatus.composables.ErrorDialog
 import a75f.io.renatus.composables.MissingPointDialog
 import a75f.io.renatus.composables.NO_COMPRESSOR
+import a75f.io.renatus.composables.NO_MAT_SENSOR
 import a75f.io.renatus.composables.NO_OB_REALLY
-import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hss.HyperStatSplitFragment
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
@@ -22,19 +22,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
@@ -129,6 +123,12 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
         if (viewModel.noCompressorStages) {
             ErrorDialog(NO_COMPRESSOR, onDismissRequest = { viewModel.noCompressorStages = false })
         }
+        if (viewModel.noMatSensor) {
+            ErrorDialog(
+                msg = NO_MAT_SENSOR,
+                onDismissRequest = { viewModel.noMatSensor = false }
+            )
+        }
 
         Column {
             LazyColumn(
@@ -164,19 +164,6 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
                     }
                 }
             }
-        }
-    }
-
-    @Composable
-    fun ShowProgressBar() {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CircularProgressIndicator(color = ComposeUtil.primaryColor)
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(text = "Loading Profile Configuration")
         }
     }
 

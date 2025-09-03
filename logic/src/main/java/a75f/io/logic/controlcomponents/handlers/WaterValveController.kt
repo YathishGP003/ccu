@@ -29,7 +29,7 @@ class WaterValveController(
         val status = controller.getActiveControl()
         logIt(
             logTag,
-            "Running $controllerName with current: ${current.readHisVal()} Status = $status"
+            "Running $controllerName with current: ${current.readHisVal()} hysteresis ${activationHysteresis.readPriorityVal()} Status = $status"
         )
         return status
     }

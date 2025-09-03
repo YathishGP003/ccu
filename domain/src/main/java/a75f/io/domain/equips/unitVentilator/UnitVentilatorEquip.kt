@@ -36,6 +36,7 @@ open class UnitVentilatorEquip(equipRef:String) : HyperStatSplitEquip(equipRef){
     val saTemperingTemperatureIntegralTime = Point(DomainName.saTemperingTemperatureIntegralTime, equipRef)
     val saTemperingProportionalKFactor = Point(DomainName.saTemperingProportionalKFactor, equipRef)
     val saTemperingTemperatureProportionalRange = Point(DomainName.saTemperingTemperatureProportionalRange, equipRef)
+    val fanOutSaTempering = Point(DomainName.fanOutSaTempering, equipRef)
 
 
 }

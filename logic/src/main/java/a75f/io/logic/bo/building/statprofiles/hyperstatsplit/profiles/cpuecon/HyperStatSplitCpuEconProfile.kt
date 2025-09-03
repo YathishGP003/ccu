@@ -103,7 +103,9 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         resetLoopOutputs()
         evaluateLoopOutputs(userIntents, basicSettings, hyperStatSplitTuners, hssEquip)
         val highestCoolingStages = config.getHighestCoolingStageCount()
+        doDcv(hssEquip, outsideDamperMinOpen)
         evaluateOAOLoop(basicSettings, isCondensateTripped, outsideDamperMinOpen, config, highestCoolingStages, hssEquip.oaoDamper.pointExists(), hssEquip)
+
         updateOccupancyDetection(hssEquip)
         updateLoopOutputs(hssEquip)
 
@@ -740,7 +742,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
                 }
                 updateStatus(equip.fanEnable, currentStatus, StatusMsgKeys.FAN_ENABLED.name)
             }
-            ControllerNames.OCCUPIED_ENABLED -> updateStatus(equip.occupiedEnable,result)
+            ControllerNames.OCCUPIED_ENABLED -> updateStatus(equip.occupiedEnable,result, StatusMsgKeys.EQUIP_ON.name)
             ControllerNames.HUMIDIFIER_CONTROLLER -> updateStatus(equip.humidifierEnable,result)
             ControllerNames.DEHUMIDIFIER_CONTROLLER -> updateStatus(equip.dehumidifierEnable,result)
             ControllerNames.EXHAUST_FAN_STAGE1_CONTROLLER -> updateStatus(equip.exhaustFanStage1,result)

@@ -2,8 +2,8 @@ package a75f.io.device.mesh.hypersplit;
 
 import static a75f.io.api.haystack.Tags.HYPERSTATSPLIT;
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
+import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getPossibleFanMode;
 import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getSplitConfiguration;
-import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getUvFanModeLevel;
 import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getUvPossibleConditioningMode;
 import static a75f.io.logic.bo.util.CCUUtils.isCurrentTemperatureWithinLimits;
 import static a75f.io.logic.util.uiutils.UserIntentStatusUtilKt.updateUserIntentPoints;
@@ -36,6 +36,7 @@ import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.HyperStatSplitEquip;
+import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip;
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -268,7 +269,7 @@ public class HyperSplitMsgReceiver {
             writeOutsideAirHumiditySensorVal(rawPoint, point, regularUpdateMessage, hayStack, equipRef);
         }
         else if (rawPoint.getDomainName().equals(DomainName.ductStaticPressureSensor)) {
-            writePressureSensorVal(rawPoint, point, regularUpdateMessage, hayStack, equipRef);
+            writePressureSensorVal(rawPoint, point, regularUpdateMessage, hayStack, equipRef); // filterDeltaPressureSensor
         }
         else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_UVI) {
             writeUviSensorVal(rawPoint, point, regularUpdateMessage, hayStack);
@@ -498,7 +499,8 @@ public class HyperSplitMsgReceiver {
             DomainName.mixedAirTemperature,
             DomainName.outsideTemperature,
             DomainName.hotWaterLeavingTempSensor,
-            DomainName.chilledWaterLeavingTempSensor
+            DomainName.chilledWaterLeavingTempSensor,
+            DomainName.leavingWaterTemperature
     );
 
     private static Map<String, MinMaxVoltage> voltagePoints;
@@ -836,12 +838,13 @@ public class HyperSplitMsgReceiver {
 
         if (equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_CPU.name())) {
             possibleConditioningMode = HSSplitHaystackUtil.Companion.getPossibleConditioningModeSettings(nodeAddress);
-            possibleFanMode = HSSplitHaystackUtil.Companion.getSplitPossibleFanModeSettings(nodeAddress);
+            HsSplitCpuEquip hsSplitCpuEquip = new HsSplitCpuEquip(equipId);
+            possibleFanMode = getPossibleFanMode(hsSplitCpuEquip);
         }
         if (equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_4PIPE_UV.name())) {
             Pipe4UVConfiguration config = (Pipe4UVConfiguration) getSplitConfiguration(equipId);
             Pipe4UVEquip pipe4UVEquip = new Pipe4UVEquip(equipId);
-            possibleFanMode = getUvFanModeLevel(pipe4UVEquip);
+            possibleFanMode = getPossibleFanMode(pipe4UVEquip);
             possibleConditioningMode = getUvPossibleConditioningMode(config);
         }
         

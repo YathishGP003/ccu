@@ -97,6 +97,7 @@ private fun fillMyStatControls(
 
     fun getPortValue(port: PhysicalPoint): Double {
         val logicalPointRef = port.readPoint().pointRef
+
         if (!Globals.getInstance().isTestMode) {  // Skip logical point ref update when test mode is on
             if (logicalPointRef == null) {
                 CcuLog.e(L.TAG_CCU_DEVICE, "Logical point ref is missing for ${port.domainName}")
@@ -132,6 +133,7 @@ private fun fillMyStatControls(
                 relayBitmap = relayBitmap or (1 shl index)
             }
         }
+
         buildr.setRelayBitmap(relayBitmap)
 
         val mappedVal = getPortValue(device.analog1Out)

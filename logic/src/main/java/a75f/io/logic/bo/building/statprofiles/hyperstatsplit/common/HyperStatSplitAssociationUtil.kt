@@ -4,6 +4,7 @@ import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.equips.HyperStatSplitEquip
 import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
+import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
@@ -120,7 +121,7 @@ class HyperStatSplitAssociationUtil {
             equip: HyperStatSplitEquip,
         ): Int {
             return when (equip) {
-                is HsSplitCpuEquip , is Pipe4UVEquip -> getEconSelectedFanLevel(equip)
+                is HsSplitCpuEquip , is Pipe4UVEquip , is Pipe2UVEquip -> getEconSelectedFanLevel(equip)
                 else -> 0
             }
         }
@@ -136,7 +137,7 @@ class HyperStatSplitAssociationUtil {
             if (hssEquip.fanMediumSpeed.pointExists()) fanLevel += 7
             if (hssEquip.fanHighSpeed.pointExists()) fanLevel += 8
 
-            if (fanLevel == 0 && hssEquip.fanEnable.pointExists()) {
+            if (fanLevel == 0 && (hssEquip.fanEnable.pointExists() || hssEquip.occupiedEnable.pointExists())) {
                 fanLevel = 1
             }
 

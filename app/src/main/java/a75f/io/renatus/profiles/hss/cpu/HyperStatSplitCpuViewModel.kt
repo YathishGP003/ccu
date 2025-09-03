@@ -3,7 +3,6 @@ package a75f.io.renatus.profiles.hss.cpu
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
-import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
 import a75f.io.domain.logic.DeviceBuilder
@@ -14,16 +13,14 @@ import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getPossibleConditioningModeSettings
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getSplitPossibleFanModeSettings
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.CpuEconSensorBusTempAssociation
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.UniversalInputs
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuAnalogControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile
+import a75f.io.logic.bo.building.statprofiles.util.getPossibleFanMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
-import a75f.io.logic.getSchedule
 import a75f.io.logic.util.modifyConditioningMode
 import a75f.io.logic.util.modifyFanMode
 import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.correctSensorBusTempPoints
@@ -60,6 +57,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
     var openMissingDialog by mutableStateOf(false)
     var noOBRelay by mutableStateOf(false)
     var noCompressorStages by mutableStateOf(false)
+    var noMatSensor by mutableStateOf(false)
 
     override fun init(bundle: Bundle, context: Context, hayStack: CCUHsApi) {
         super.init(bundle, context, hayStack)
@@ -264,6 +262,14 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
             return false
         }
 
+        if (isAnyAnalogMappedToControl(CpuAnalogControlType.DCV_MODULATING_DAMPER.ordinal)) {
+            if (!(isAnySensorBusMapped(CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY)
+                        || isAnyUniversalInMapped(UniversalInputs.MIXED_AIR_TEMPERATURE))) {
+                noMatSensor = true
+                return false
+            }
+        }
+
         return true
     }
 
@@ -388,10 +394,9 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
                 }
             }
         }
-
-        val possibleConditioningMode = getPossibleConditioningModeSettings(profileConfiguration as HyperStatSplitCpuConfiguration)
-        val possibleFanMode = getSplitPossibleFanModeSettings(profileConfiguration.nodeAddress)
         val hssEquip = HsSplitCpuEquip(equipId)
+        val possibleConditioningMode = getPossibleConditioningModeSettings(profileConfiguration as HyperStatSplitCpuConfiguration)
+        val possibleFanMode = getPossibleFanMode(hssEquip)
         modifyFanMode(possibleFanMode.ordinal,hssEquip.fanOpMode)
         modifyConditioningMode(possibleConditioningMode.ordinal, hssEquip.conditioningMode, allStandaloneProfileConditions)
         DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())

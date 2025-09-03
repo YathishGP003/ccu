@@ -12,6 +12,7 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.HyperStatSplitEquip
 import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
+import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
 import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -19,6 +20,8 @@ import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.CpuSensorB
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.UniversalInputs
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuAnalogControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UVRelayControls
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UvAnalogOutControls
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVRelayControls
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UvAnalogOutControls
 import a75f.io.logic.tuners.TunerUtil
@@ -61,6 +64,9 @@ class HyperSplitSettingsUtil {
                 is Pipe4UVEquip-> {
                     settings2.profile = HyperSplit.HyperSplitProfiles_t.HYPERSPLIT_PROFILE_4_PIPE_UNIT_VENTILATOR
                 }
+                is Pipe2UVEquip -> {
+                    settings2.profile = HyperSplit.HyperSplitProfiles_t.HYPERSPLIT_PROFILE_2_PIPE_UNIT_VENTILATOR
+                }
             }
             return settings2.build()
         }
@@ -102,6 +108,26 @@ class HyperSplitSettingsUtil {
                     val fcuTuners = HyperSplit.HyperSplitTunersFcu_t.newBuilder()
                     fcuTuners.setAuxHeating1Activate(hsEquip.auxHeating1Activate.readPriorityVal().toInt())
                     fcuTuners.setAuxHeating2Activate(hsEquip.auxHeating2Activate.readPriorityVal().toInt())
+                    fcuTuners.apply {
+                        setAnalogoutAtRecFanAnalogVoltage(hsEquip.fanOutRecirculate.readPriorityVal().toInt() * 10)
+                        setAuxHeating1Activate(hsEquip.auxHeating1Activate.readPriorityVal().toInt())
+                        setAuxHeating2Activate(hsEquip.auxHeating2Activate.readPriorityVal().toInt())
+                    }
+                    settings3.fcuTuners = fcuTuners.build()
+                }
+                ProfileType.HYPERSTATSPLIT_2PIPE_UV.name -> {
+                    val fcuTuners = HyperSplit.HyperSplitTunersFcu_t.newBuilder()
+                    fcuTuners.apply {
+                        analogoutAtRecFanAnalogVoltage = hsEquip.fanOutRecirculate.readPriorityVal().toInt() * 10
+                        auxHeating1Activate = hsEquip.auxHeating1Activate.readPriorityVal().toInt()
+                        auxHeating2Activate = hsEquip.auxHeating2Activate.readPriorityVal().toInt()
+                        twoPipeHeatingThreshold = (hsEquip as Pipe2UVEquip).hyperstatPipe2FancoilHeatingThreshold.readPriorityVal().toInt()
+                        twoPipeCoolingThreshold = hsEquip.hyperstatPipe2FancoilCoolingThreshold.readPriorityVal().toInt()
+                        waterValueSamplingOnTime = hsEquip.waterValveSamplingOnTime.readPriorityVal().toInt()
+                        watreValueSamplingWaitTime = hsEquip.waterValveSamplingWaitTime.readPriorityVal().toInt()
+                        waterValveSamplingDuringLoopDeadbandOnTime = hsEquip.waterValveSamplingLoopDeadbandOnTime.readPriorityVal().toInt()
+                        waterValveSamplingDuringLoopDeadbandWaitTime = hsEquip.waterValveSamplingLoopDeadbandWaitTime.readPriorityVal().toInt()
+                    }
                     settings3.fcuTuners = fcuTuners.build()
                 }
             }
@@ -340,9 +366,29 @@ class HyperSplitSettingsUtil {
                     Pipe4UVRelayControls.EXTERNALLY_MAPPED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED
                 }
             }
+
+            fun getPipe2UVRelayMapping(): HyperSplit.HyperSplitRelayMapping_t {
+                return when (Pipe2UVRelayControls.values()[association]) {
+                    Pipe2UVRelayControls.FAN_LOW_SPEED_VENTILATION -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_LOW_SPEED_VENTILATION
+                    Pipe2UVRelayControls.FAN_LOW_SPEED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_LOW_SPEED
+                    Pipe2UVRelayControls.FAN_MEDIUM_SPEED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_MEDIUM_SPEED
+                    Pipe2UVRelayControls.FAN_HIGH_SPEED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_HIGH_SPEED
+                    Pipe2UVRelayControls.WATER_VALVE -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_WATER_VALVE
+                    Pipe2UVRelayControls.AUX_HEATING_STAGE1 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_AUX_HEATING_1
+                    Pipe2UVRelayControls.AUX_HEATING_STAGE2 -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_AUX_HEATING_2
+                    Pipe2UVRelayControls.FACE_BYPASS_DAMPER -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_F_AND_B_DAMPER
+                    Pipe2UVRelayControls.DCV_DAMPER -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPILT_RELAY_DCV_DAMPER
+                    Pipe2UVRelayControls.FAN_ENABLED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_ENABLE
+                    Pipe2UVRelayControls.OCCUPIED_ENABLED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_OCCUPIED_ENABLE
+                    Pipe2UVRelayControls.HUMIDIFIER -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HUMIDIFIER
+                    Pipe2UVRelayControls.DEHUMIDIFIER -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DEHUMIDIFIER
+                    Pipe2UVRelayControls.EXTERNALLY_MAPPED -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED
+                }
+            }
             return when (equip) {
                 is HsSplitCpuEquip -> getCpuRelayMapping()
                 is Pipe4UVEquip -> getPipe4UVRelayMapping()
+                is Pipe2UVEquip -> getPipe2UVRelayMapping()
                 else -> HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED
             }
         }
@@ -447,9 +493,22 @@ class HyperSplitSettingsUtil {
                     Pipe4UvAnalogOutControls.EXTERNALLY_MAPPED -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED
                 }
             }
+
+            fun getPipe2UVAnalogOutMapping(): HyperSplit.HyperSplitAnalogOutMapping_t {
+                return when (Pipe2UvAnalogOutControls.values()[association]) {
+                    Pipe2UvAnalogOutControls.WATER_MODULATING_VALVE -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_WATER_VALVE
+                    Pipe2UvAnalogOutControls.FACE_DAMPER_VALVE -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_F_AND_B_DAMPER
+                    Pipe2UvAnalogOutControls.FAN_SPEED -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_LINEAR_FAN
+                    Pipe2UvAnalogOutControls.DCV_MODULATING_DAMPER -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPILT_AOUT_DCV_DAMPER
+                    Pipe2UvAnalogOutControls.OAO_DAMPER -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_OAO_DAMPER
+                    Pipe2UvAnalogOutControls.EXTERNALLY_MAPPED -> HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED
+                }
+            }
+
             return when(equip) {
                 is HsSplitCpuEquip -> getCpuAnalogOutMapping()
                 is Pipe4UVEquip -> getPipe4UVAnalogOutMapping()
+                is Pipe2UVEquip -> getPipe2UVAnalogOutMapping()
                 else -> { HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED }
             }
         }

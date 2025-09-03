@@ -1,8 +1,12 @@
 package a75f.io.messaging.handler;
 
+import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_VAL;
 import static a75f.io.logic.bo.building.BackfillUtilKt.updateBackfillDuration;
-import static a75f.io.messaging.handler.HSReconfigHandlerKt.reconfigureHSV2;
 import static a75f.io.messaging.handler.DataSyncHandler.isCloudEntityHasLatestValue;
+import static a75f.io.messaging.handler.HSReconfigHandlerKt.reconfigureHSV2;
+import static a75f.io.messaging.handler.MyStatReconfigurationKt.reconfigureMyStat;
+import static a75f.io.messaging.handler.TiReconfigKt.tiReconfiguration;
+import static a75f.io.messaging.handler.UnitVentilatorReconfigurationHandlerKt.reconfigureUnitVentilator;
 
 import android.content.Context;
 import android.util.Log;
@@ -47,11 +51,6 @@ import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.messaging.MessageHandler;
 import a75f.io.messaging.exceptions.MessageHandlingFailed;
-
-import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_VAL;
-import static a75f.io.messaging.handler.MyStatReconfigurationKt.reconfigureMyStat;
-import static a75f.io.messaging.handler.UnitVentilatorReconfigurationHandlerKt.reconfigureUnitVentilator;
-import static a75f.io.messaging.handler.TiReconfigKt.tiReconfiguration;
 
 public class UpdatePointHandler implements MessageHandler
 {

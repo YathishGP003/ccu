@@ -95,6 +95,8 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
     lateinit var curState: ZoneState
     var occupancyStatus: Occupancy = Occupancy.NONE
 
+    fun isPointExist(point: Point) = point.pointExists()
+
     override fun getEquip(): Equip? {
         val equip = CCUHsApi.getInstance().readHDict("equip and group == \"$nodeAddress\"")
         return Equip.Builder().setHDict(equip).build()
@@ -155,7 +157,8 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
             hssEquip.fanLowSpeed to Stage.FAN_1.displayName,
             hssEquip.fanMediumSpeed to Stage.FAN_2.displayName,
             hssEquip.fanHighSpeed to Stage.FAN_3.displayName,
-            hssEquip.fanEnable to StatusMsgKeys.FAN_ENABLED.name
+            hssEquip.fanEnable to StatusMsgKeys.FAN_ENABLED.name,
+            hssEquip.occupiedEnable to StatusMsgKeys.EQUIP_ON.name
         ).forEach {
             if (it.key.pointExists()) {
                 it.key.writeHisVal(1.0)
@@ -228,17 +231,23 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
         equip: HyperStatSplitEquip, fanModeSaved: Int, basicSettings: BasicSettings
     ): StandaloneFanStage {
 
-        logIt("FanModeSaved in Shared Preference $fanModeSaved")
-        val currentOperatingMode = equip.occupancyMode.readHisVal().toInt()
+        logIt("FanModeSaved in Shared Preference $fanModeSaved & occupancyStatus : $occupancyStatus")
 
         // If occupancy is unoccupied or demand response unoccupied and the fan mode is current occupied then remove the fan mode from cache
-        if ((occupancyStatus == Occupancy.UNOCCUPIED || occupancyStatus == Occupancy.DEMAND_RESPONSE_UNOCCUPIED ) && isFanModeCurrentOccupied(fanModeSaved)) {
-            logIt("Clearing FanModeSaved in Shared Preference $fanModeSaved")
-            FanModeCacheStorage.getHyperStatSplitFanModeCache().removeFanModeFromCache(equip.equipRef)
-            logIt("Clearing FanModeSaved in Shared Preference ${FanModeCacheStorage.getHyperStatSplitFanModeCache().getFanModeFromCache(equip.equipRef)}")
+        if ((occupancyStatus == Occupancy.UNOCCUPIED || occupancyStatus == Occupancy.DEMAND_RESPONSE_UNOCCUPIED) && isFanModeCurrentOccupied(
+                fanModeSaved
+            )
+        ) {
+            FanModeCacheStorage.getHyperStatSplitFanModeCache()
+                .removeFanModeFromCache(equip.equipRef)
+            logIt(
+                "Clearing FanModeSaved in Shared Preference ${
+                    FanModeCacheStorage.getHyperStatSplitFanModeCache()
+                        .getFanModeFromCache(equip.equipRef)
+                }"
+            )
         }
         logIt("Fall back fan mode " + basicSettings.fanMode + " conditioning mode " + basicSettings.conditioningMode)
-        logIt("Fan Details :$occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved")
         if (isEligibleToAuto(basicSettings, equip)) {
             logIt("Resetting the Fan status back to  AUTO: ")
             updateUserIntentPoints(
@@ -440,7 +449,6 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
         if (epidemicState == EpidemicState.PREPURGE) {
             fanLoopOutput = hssEquip.standalonePrePurgeFanSpeedTuner.readPriorityVal().toInt()
         }
-
     }
 
     /**
@@ -482,7 +490,6 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
         if (fanLoopCounter == 0) previousFanLoopVal = fanLoopOutput
         if (fanLoopCounter > 0) fanLoopCounter--
     }
-
 
     fun getAnalogEconomizerValueActivated(hssEquip: HyperStatSplitEquip): Double {
         return if (hssEquip.fanOutEconomizer.pointExists()) {
@@ -568,29 +575,33 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
 
     }
 
-    /*
-         DCV is enabled when:
-         ○ Zone is in Occupied Mode AND
-         ○ Zone CO2 (sensed on HyperLite) > Zone CO2 Threshold
-     */
-    private fun doDcv(hssEquip: HyperStatSplitEquip, standaloneOutsideAirDamperMinOpen: Int) {
+
+    fun doDcv(hssEquip: HyperStatSplitEquip, standaloneOutsideAirDamperMinOpen: Int) {
         dcvAvailable = false
-        val zoneSensorCO2 = hssEquip.zoneCO2.readHisVal()
-        val zoneCO2Threshold = hssEquip.co2Threshold.readDefaultVal()
-        val co2DamperOpeningRate = hssEquip.co2DamperOpeningRate.readDefaultVal()
-        logIt(
-            "zoneSensorCO2: $zoneSensorCO2, zoneCO2Threshold: $zoneCO2Threshold, co2DamperOpeningRate: $co2DamperOpeningRate"
-        )
+
         if (isSoftOccupied(zoneOccupancyState)) {
+            val zoneSensorCO2 = hssEquip.zoneCO2.readHisVal()
+            val zoneCO2Threshold = hssEquip.co2Threshold.readDefaultVal()
+            val co2DamperOpeningRate = hssEquip.co2DamperOpeningRate.readDefaultVal()
+            logIt(
+                "zoneSensorCO2: $zoneSensorCO2, zoneCO2Threshold: $zoneCO2Threshold, co2DamperOpeningRate: $co2DamperOpeningRate"
+            )
             if (zoneSensorCO2 > zoneCO2Threshold) {
+                val oaoDamperMatTarget = hssEquip.standaloneOutsideDamperMixedAirTarget.readPriorityVal()
+                val oaoDamperMatMin = hssEquip.standaloneOutsideDamperMixedAirMinimum.readPriorityVal()
+                val matTemp = hssEquip.mixedAirTemperature.readHisVal()
                 dcvAvailable = true
-                dcvLoopOutput = max(
-                    0,
-                    min(((zoneSensorCO2 - zoneCO2Threshold) / co2DamperOpeningRate).toInt(), 100)
-                )
-                outsideAirCalculatedMinDamper = max(dcvLoopOutput, standaloneOutsideAirDamperMinOpen)
-            } else {
-                outsideAirCalculatedMinDamper = standaloneOutsideAirDamperMinOpen
+                dcvLoopOutput = ((zoneSensorCO2 - zoneCO2Threshold) / co2DamperOpeningRate).coerceIn(0.0, 100.0).toInt()
+
+                if (matTemp > oaoDamperMatMin && matTemp < oaoDamperMatTarget) {
+                    dcvLoopOutput =
+                        (dcvLoopOutput - dcvLoopOutput * ((oaoDamperMatTarget - matTemp) / (oaoDamperMatTarget - oaoDamperMatMin))).toInt()
+                } else {
+                    if (matTemp < oaoDamperMatMin) {
+                        dcvLoopOutput = 0
+                    }
+                    outsideAirCalculatedMinDamper = standaloneOutsideAirDamperMinOpen
+                }
             }
         } else if (epidemicState != EpidemicState.PREPURGE) {
             outsideAirCalculatedMinDamper = 0
@@ -600,28 +611,6 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
         hssEquip.dcvAvailable.writeHisVal(dcvAvailableNum)
         hssEquip.dcvLoopOutput.writeHisVal(dcvLoopOutput.toDouble())
         hssEquip.outsideAirCalculatedMinDamper.writeHisVal(outsideAirCalculatedMinDamper.toDouble())
-    }
-
-    private fun doDcvForDcvDamper(hssEquip: HyperStatSplitEquip) {
-        dcvAvailable = false
-        val zoneSensorCO2 = hssEquip.zoneCO2.readHisVal()
-        val zoneCO2Threshold = hssEquip.co2Threshold.readDefaultVal()
-        val co2DamperOpeningRate = hssEquip.co2DamperOpeningRate.readDefaultVal()
-        logIt(
-            "zoneSensorCO2: $zoneSensorCO2, zoneCO2Threshold: $zoneCO2Threshold, co2DamperOpeningRate: $co2DamperOpeningRate"
-        )
-        if (isSoftOccupied(zoneOccupancyState)) {
-            if (zoneSensorCO2 > zoneCO2Threshold) {
-                dcvAvailable = true
-                dcvLoopOutput = max(
-                    0,
-                    min(((zoneSensorCO2 - zoneCO2Threshold) / co2DamperOpeningRate).toInt(), 100)
-                )
-            }
-        }
-        val dcvAvailableNum = if (dcvAvailable) 1.0 else 0.0
-        hssEquip.dcvAvailable.writeHisVal(dcvAvailableNum)
-        hssEquip.dcvLoopOutput.writeHisVal(dcvLoopOutput.toDouble())
     }
 
     /*
@@ -835,11 +824,9 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
             economizingLoopOutput = 0
             dcvAvailable = false
             dcvLoopOutput = 0
-            if (hssEquip.dcvDamper.pointExists()) doDcvForDcvDamper(hssEquip)
             outsideAirLoopOutput = 0
             matThrottle = false
             outsideAirFinalLoopOutput = 0
-
             val externalTemp: Double
             val externalHumidity: Double
             // Even if there's not an OAO damper, still calculate enthalpy for portal widgets
@@ -879,7 +866,6 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
             handleSmartPrePurgeControl(hssEquip)
 
             doEconomizing(numberConfiguredCoolingStages, config, hssEquip)
-            doDcv(hssEquip, effectiveOutsideDamperMinOpen)
 
             outsideAirLoopOutput = if (epidemicState == EpidemicState.PREPURGE) {
                 max(economizingLoopOutput, outsideAirCalculatedMinDamper)

@@ -930,9 +930,14 @@
     <string name="title_hyperstatMonitoring">Monitoring</string>
     <string name="desc_hypersense">Equipment connector for monitoring data.</string>
     <string name="title_cpuEcon">Conventional Package Unit &amp; Economizer</string>
-    <string name="title_hss_pipe4UV">Unit Ventilator: 4 Pipe with Economizer</string>
     <string name="desc_cpuEcon">Unitary equipment with 3 stages for Heating, Cooling, Fan and Outside Air Optimization. User can select Fan Low/High/Auto.</string>
+
+    //Uv
+    <string name="title_hss_pipe4UV">Unit Ventilator: 4 Pipe with Economizer</string>
+    <string name="title_hss_pipe2UV">Unit Ventilator: 2 Pipe with Economizer</string>
     <string name="desc_hss_pipe4UV">A water coil fed by separate Heating and Cooling pipes with Fan, Face &amp; Bypass Damper and Outside Air Optimization.</string>
+    <string name="desc_hss_pipe2UV">A coil fed by 1 pair of supply pipes with Fan, Face &amp; Bypass Damper and Outside Air Optimization.</string>
+
 
     <!--WTM Module Screen-->
     <string name="title_wtmmodule">WTM | SELECT MODULE TYPE</string>

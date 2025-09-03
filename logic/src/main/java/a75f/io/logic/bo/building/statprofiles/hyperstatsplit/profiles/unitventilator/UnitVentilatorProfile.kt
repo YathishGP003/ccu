@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventi
 
 import a75.io.algos.ControlLoop
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
 import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
 import a75f.io.logic.bo.building.hvac.Stage
@@ -13,9 +14,7 @@ import a75f.io.logic.bo.building.statprofiles.util.BasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.ControlVia
 import a75f.io.logic.bo.building.statprofiles.util.UvTuners
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoHeating
-import a75f.io.logic.bo.building.statprofiles.util.getPercentFromVolt
 import a75f.io.logic.controlcomponents.util.isSoftOccupied
-import kotlin.math.roundToInt
 
 /**
  * Author: Manjunath Kundaragi
@@ -28,7 +27,7 @@ abstract class UnitVentilatorProfile(equipRef: String, nodeAddress: Short, tag: 
     var saTemperingLoopOutput = 0
     var isAuxStage1Active = false
     var isAuxStage2Active = false
-
+    var lastWaterValveTurnedOnTime: Long = System.currentTimeMillis()
     /**
      * This method is used to calculate the SA tempering loop output based on the current and target values.
      * It uses the proportional and integral gains, as well as the proportional spread and integral max timeout
@@ -66,11 +65,13 @@ abstract class UnitVentilatorProfile(equipRef: String, nodeAddress: Short, tag: 
     private fun getSaTemperingLoopOutput(
         currentValue: Double, targetValue: Double
     ) {
-        saTemperingLoopOutput = if (currentValue <= targetValue) {
+        saTemperingLoopOutput = if (currentValue < targetValue) {
             saTemperingLoopControl.getLoopOutput(targetValue, currentValue).toInt()
         } else {
+            saTemperingLoopControl.reset()
             0
         }
+        saTemperingLoopControl.dumpWithTag(tag)
     }
 
     /**
@@ -87,54 +88,82 @@ abstract class UnitVentilatorProfile(equipRef: String, nodeAddress: Short, tag: 
         tuner: UvTuners,
         basicSettings: BasicSettings
     ) {
-        if (hssEquip.enableSaTemperingControl.isEnabled()
-            && noZoneLoad() && canWeDoHeating(basicSettings.conditioningMode)
+        if (!hssEquip.enableSaTemperingControl.isEnabled() ||
+            !noZoneLoad() || !canWeDoHeating(basicSettings.conditioningMode)
         ) {
+            logIt("Sa Tempering Not applicable..")
+            return
+        }
 
-            if (saTemperingLoopOutput > 0) {
-                if (hssEquip is Pipe4UVEquip) {
-                    if (saTemperingLoopOutput > tuner.relayActivationHysteresis) {
-                        hssEquip.hotWaterHeatValve.writeHisVal(1.0)
-                        hssEquip.relayStages[StatusMsgKeys.HEATING_VALVE.name] = 1
-                    }
-                    if (hssEquip.hotWaterModulatingHeatValve.pointExists()) {
-                        hssEquip.hotWaterModulatingHeatValve.writeHisVal(saTemperingLoopOutput.toDouble())
-                        hssEquip.analogOutStages[StatusMsgKeys.HEATING_VALVE.name] = saTemperingLoopOutput
-                    }
-
-                    if (hssEquip.faceBypassDamperCmd.pointExists() && saTemperingLoopOutput > tuner.faceBypassDamperActivationHysteresis) {
-                        hssEquip.faceBypassDamperCmd.writeHisVal(1.0)
-                    }
-                }
-
-                if (hssEquip.faceBypassDamperModulatingCmd.pointExists()) {
-                    hssEquip.faceBypassDamperModulatingCmd.writeHisVal(saTemperingLoopOutput.toDouble())
-                }
-            } else {
-                if (noZoneLoad()) {
-                    logIt("SA Tempering Loop Output is zero, no zone load detected. Disabling SA tempering control.")
-                    when (hssEquip) {
-                        is Pipe4UVEquip -> {
-                            hssEquip.hotWaterHeatValve.writeHisVal(0.0)
-                            hssEquip.hotWaterModulatingHeatValve.writeHisVal(0.0)
-
-                            if (fanLoopCounter == 0) {
-                                if (hssEquip.faceBypassDamperModulatingCmd.pointExists()) {
-                                    hssEquip.faceBypassDamperModulatingCmd.writeHisVal(0.0)
-                                }
-                                if (hssEquip.faceBypassDamperCmd.pointExists()) {
-                                    hssEquip.faceBypassDamperCmd.writeHisVal(0.0)
-                                }
-                            }
+        if (saTemperingLoopOutput > 0) {
+            hssEquip.apply {
+                when (this) {
+                    is Pipe4UVEquip -> {
+                        if (saTemperingLoopOutput > tuner.relayActivationHysteresis) {
+                            hotWaterHeatValve.writeHisVal(1.0)
+                            relayStages[StatusMsgKeys.HEATING_VALVE.name] = 1
                         }
-                        else -> {}
+                        if (isPointExist(hotWaterModulatingHeatValve)) {
+                            hotWaterModulatingHeatValve.writeHisVal(saTemperingLoopOutput.toDouble())
+                            analogOutStages[StatusMsgKeys.HEATING_VALVE.name] = saTemperingLoopOutput
+                        }
                     }
-                } else {
-                    logIt("SA Tempering Loop Output is zero but zone load exists, maintaining current state.")
+
+                    is Pipe2UVEquip -> {
+                        if (saTemperingLoopOutput > tuner.relayActivationHysteresis) {
+                            waterValve.writeHisVal(1.0)
+                            lastWaterValveTurnedOnTime = System.currentTimeMillis()
+                            relayStages[StatusMsgKeys.WATER_VALVE.name] = 1
+                        }
+                        if (isPointExist(waterModulatingValve)) {
+                            waterModulatingValve.writeHisVal(saTemperingLoopOutput.toDouble())
+                            lastWaterValveTurnedOnTime = System.currentTimeMillis()
+                            relayStages[StatusMsgKeys.WATER_VALVE.name] = 1
+                        }
+                    }
+                }
+
+                if (isPointExist(faceBypassDamperCmd) &&
+                    saTemperingLoopOutput > tuner.faceBypassDamperActivationHysteresis
+                ) {
+                    faceBypassDamperCmd.writeHisVal(1.0)
+                }
+
+                if (isPointExist(faceBypassDamperModulatingCmd)) {
+                    faceBypassDamperModulatingCmd.writeHisVal(saTemperingLoopOutput.toDouble())
                 }
             }
         } else {
-            logIt("Sa Tempering Not applicable..")
+            if (noZoneLoad()) {
+                logIt("SA Tempering Loop Output is zero, no zone load detected. Disabling SA tempering control.")
+                hssEquip.apply {
+                    when (this) {
+                        is Pipe4UVEquip -> {
+                            hotWaterHeatValve.writeHisVal(0.0)
+                            if (isPointExist(hotWaterModulatingHeatValve)) {
+                                hotWaterModulatingHeatValve.writeHisVal(0.0)
+                            }
+                        }
+
+                        is Pipe2UVEquip -> {
+                            waterValve.writeHisVal(0.0)
+                            if (isPointExist(waterModulatingValve)) {
+                                waterModulatingValve.writeHisVal(0.0)
+                            }
+                        }
+                    }
+                    if (fanLoopCounter == 0) {
+                        if (isPointExist(faceBypassDamperModulatingCmd)) {
+                            faceBypassDamperModulatingCmd.writeHisVal(0.0)
+                        }
+                        if (isPointExist(faceBypassDamperCmd)) {
+                            faceBypassDamperCmd.writeHisVal(0.0)
+                        }
+                    }
+                }
+            } else {
+                logIt("SA Tempering Loop Output is zero but zone load exists, maintaining current state.")
+            }
         }
     }
     /**
@@ -145,7 +174,7 @@ abstract class UnitVentilatorProfile(equipRef: String, nodeAddress: Short, tag: 
      */
     private fun noZoneLoad() = (coolingLoopOutput == 0 && heatingLoopOutput == 0)
 
-    fun operateAuxBasedFan(equip: UnitVentilatorEquip, basicSettings: BasicSettings): String? {
+    fun operateAuxBasedFan(equip: UnitVentilatorEquip, basicSettings: BasicSettings): AuxActiveStages? {
         if (basicSettings.fanMode == StandaloneFanStage.AUTO) {
             val auxType = if (isAuxStage1Active && isAuxStage2Active) {
                 AuxActiveStages.BOTH
@@ -163,7 +192,9 @@ abstract class UnitVentilatorProfile(equipRef: String, nodeAddress: Short, tag: 
                         equip.fanMediumSpeed to Stage.FAN_2.displayName,
                         equip.fanLowSpeed to Stage.FAN_1.displayName,
                         equip.fanLowSpeedVentilation to Stage.FAN_1.displayName,
-                        equip.fanEnable to StatusMsgKeys.FAN_ENABLED.name
+                        equip.fanEnable to StatusMsgKeys.FAN_ENABLED.name,
+                        equip.occupiedEnable to StatusMsgKeys.EQUIP_ON.name
+
                     )
 
                     AuxActiveStages.AUX1 -> mutableMapOf(
@@ -171,7 +202,8 @@ abstract class UnitVentilatorProfile(equipRef: String, nodeAddress: Short, tag: 
                         equip.fanHighSpeed to Stage.FAN_3.displayName,
                         equip.fanLowSpeed to Stage.FAN_1.displayName,
                         equip.fanLowSpeedVentilation to Stage.FAN_1.displayName,
-                        equip.fanEnable to StatusMsgKeys.FAN_ENABLED.name
+                        equip.fanEnable to StatusMsgKeys.FAN_ENABLED.name,
+                        equip.occupiedEnable to StatusMsgKeys.EQUIP_ON.name
                     )
 
                     else -> emptyMap()
@@ -188,7 +220,7 @@ abstract class UnitVentilatorProfile(equipRef: String, nodeAddress: Short, tag: 
                         point.writeHisVal(1.0)
                         equip.relayStages[statusMsg] = 1
                         logIt("Operating AUX based fan: ${point.domainName}")
-                        return point.domainName
+                        return auxType
                     }
                 }
             }

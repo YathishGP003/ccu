@@ -42,8 +42,8 @@ import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
 import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
+import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
-import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
 import a75f.io.domain.util.CommonQueries
 import a75f.io.logger.CcuLog
 import io.seventyfivef.ph.core.Tags
@@ -143,6 +143,11 @@ object DomainManager {
                         CcuLog.i(Domain.LOG_TAG, "Build domain hyperstatSplit4PEcon is added $it")
                         Domain.equips[it["id"].toString()] = Pipe4UVEquip(it["id"].toString())
                     }
+                    (it.contains("domainName")&& it["domainName"].toString() == DomainName.hyperstatSplit2PEcon) -> {
+                        CcuLog.i(Domain.LOG_TAG, "Build domain hyperstatSplit2PEcon is added $it")
+                        Domain.equips[it["id"].toString()] = Pipe2UVEquip(it["id"].toString())
+                    }
+
                 }
             }
 
@@ -327,7 +332,7 @@ object DomainManager {
                     }
                     equip.domainName == DomainName.hyperstatSplit2PEcon -> {
                         CcuLog.i(Domain.LOG_TAG, "Update domain hyperstatSplit2PEcon is added $equip")
-                       // need yo add the equip  to domain
+                       Domain.equips[equip.id] = Pipe2UVEquip(equip.id)
                     }
 
                     equip.domainName== DomainName.hyperstatSplitCPU -> {

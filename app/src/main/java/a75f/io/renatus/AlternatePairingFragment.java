@@ -22,6 +22,7 @@ import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.connectnode.ConnectNodeFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
+import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe2UVFragment;
 import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe4UVFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2Pipe2Fragment;
@@ -316,6 +317,11 @@ public class AlternatePairingFragment extends BaseDialogFragment {
             case HYPERSTATSPLIT_4PIPE_UV:
                 showDialogFragment(Pipe4UVFragment.Companion.newInstance(mPairingAddress,mRoomName,mFloorName,
                         mNodeType,ProfileType.HYPERSTATSPLIT_4PIPE_UV), Pipe4UVFragment.Companion.getID());
+                break;
+            case HYPERSTATSPLIT_2PIPE_UV:
+                showDialogFragment(Pipe2UVFragment.Companion.newInstance(mPairingAddress,mRoomName,mFloorName,
+                        mNodeType,ProfileType.HYPERSTATSPLIT_2PIPE_UV), Pipe4UVFragment.Companion.getID());
+                break;
         }
     }
 

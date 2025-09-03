@@ -35,7 +35,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextPainter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -329,8 +328,9 @@ fun LabelBoldTextViewForTable(text: String, modifier: Modifier = Modifier, fontS
 }
 
 @Composable
-fun StyledTextView(text: String, fontSize : Int, textAlignment: TextAlign = TextAlign.Center) {
+fun StyledTextView(text: String, fontSize : Int,modifier: Modifier = Modifier, textAlignment: TextAlign = TextAlign.Center) {
     Text(
+        modifier = modifier,
         style = TextStyle(
             fontFamily = myFontFamily,
             fontWeight = FontWeight.Normal,

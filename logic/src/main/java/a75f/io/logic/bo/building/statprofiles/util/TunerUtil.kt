@@ -10,7 +10,8 @@ import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
-import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
+import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
+import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
 import a75f.io.logic.tuners.TunerUtil
 
 /**
@@ -124,7 +125,7 @@ fun getSplitTuners(equip: HyperStatSplitEquip): BaseStatTuners {
     return hsTuners
 }
 
-fun pipe4UvTuners(equip: Pipe4UVEquip): UvTuners {
+fun getUnitVentilatorTuners(equip: UnitVentilatorEquip): UvTuners {
     val tuners = UvTuners()
     fetchBaseTuners(tuners, equip.equipRef)
     tuners.minFanRuntimePostConditioning = getTuner(DomainName.minFanRuntimePostConditioning, equip.equipRef).toInt()
@@ -135,6 +136,18 @@ fun pipe4UvTuners(equip: Pipe4UVEquip): UvTuners {
     tuners.saTemperingTemperatureProportionalRange = getTuner(DomainName.saTemperingTemperatureProportionalRange, equip.equipRef)
     tuners.economizingToMainCoolingLoopMap = getTuner(DomainName.standaloneEconomizingToMainCoolingLoopMap, equip.equipRef)
     tuners.faceBypassDamperActivationHysteresis = getTuner(DomainName.faceBypassDamperRelayActivationHysteresis, equip.equipRef)
+    when(equip) {
+        is Pipe2UVEquip -> {
+            tuners.waterValveSamplingOnTime = getTuner(DomainName.waterValveSamplingOnTime, equip.equipRef).toInt()
+            tuners.waterValveSamplingWaitTime = getTuner(DomainName.waterValveSamplingWaitTime, equip.equipRef).toInt()
+            tuners.waterValveSamplingDuringLoopDeadbandOnTime = getTuner(DomainName.waterValveSamplingLoopDeadbandOnTime, equip.equipRef).toInt()
+            tuners.waterValveSamplingDuringLoopDeadbandWaitTime = getTuner(DomainName.waterValveSamplingLoopDeadbandWaitTime, equip.equipRef).toInt()
+            tuners.heatingThreshold = getTuner(DomainName.hyperstatPipe2FancoilHeatingThreshold, equip.equipRef)
+            tuners.coolingThreshold = getTuner(DomainName.hyperstatPipe2FancoilCoolingThreshold, equip.equipRef)
+
+            tuners.waterValveSamplingDuringLoopDeadbandWaitTime = getTuner(DomainName.waterValveSamplingLoopDeadbandWaitTime, equip.equipRef).toInt()
+        }
+    }
     return tuners
 }
 

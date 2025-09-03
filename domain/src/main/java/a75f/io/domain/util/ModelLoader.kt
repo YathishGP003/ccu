@@ -204,6 +204,9 @@ object ModelLoader {
     fun getSplitPipe4Model(): ModelDirective {
         return ModelCache.getModelById(MODEL_HYPERSTAT_SPLIT_PIPE4)
     }
+    fun getSplitPipe2Model(): ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_SPLIT_PIPE2)
+    }
 
     fun getModelForDomainName( domainName : String) : ModelDirective {
         return when(domainName) {

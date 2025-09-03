@@ -4,6 +4,7 @@ import a75f.io.domain.api.Domain
 import a75f.io.domain.devices.HyperStatSplitDevice
 import a75f.io.domain.equips.HyperStatSplitEquip
 import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
+import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
@@ -14,6 +15,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getEconSelectedFanLevel
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UVConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorConfiguration
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -49,6 +51,21 @@ fun getSplitConfiguration(equipRef: String): HyperStatSplitConfiguration? {
                 ProfileType.HYPERSTATSPLIT_4PIPE_UV,
                 pipe4Model
             ).getActiveConfiguration()
+
+        }
+
+
+        is Pipe2UVEquip -> {
+            val pipe2Model = ModelLoader.getSplitPipe2Model() as SeventyFiveFProfileDirective
+            return Pipe2UVConfiguration(
+                equip.nodeAddress,
+                NodeType.HYPERSTATSPLIT.toString(),
+                ZonePriority.NONE.ordinal,
+                equip.roomRef!!,
+                equip.floorRef!!,
+                ProfileType.HYPERSTATSPLIT_2PIPE_UV,
+                pipe2Model
+            ).getActiveConfiguration()
         }
 
         else -> {
@@ -57,7 +74,7 @@ fun getSplitConfiguration(equipRef: String): HyperStatSplitConfiguration? {
     }
 }
 
-fun getUvPossibleFanModeSettings(fanLevel: Int): PossibleFanMode {
+fun getPossibleFanModeSettings(fanLevel: Int): PossibleFanMode {
     return when (fanLevel) {
         HsFanConstants.AUTO -> PossibleFanMode.AUTO
         HsFanConstants.LOW -> PossibleFanMode.LOW
@@ -71,13 +88,14 @@ fun getUvPossibleFanModeSettings(fanLevel: Int): PossibleFanMode {
     }
 }
 
-fun getUvFanModeLevel(equip: HyperStatSplitEquip): PossibleFanMode {
-    return getUvPossibleFanModeSettings(getEconSelectedFanLevel(equip))
+fun getPossibleFanMode(equip: HyperStatSplitEquip): PossibleFanMode {
+    return getPossibleFanModeSettings(getEconSelectedFanLevel(equip))
 }
 
 fun getUvPossibleConditioningMode(config: UnitVentilatorConfiguration): PossibleConditioningMode {
     return when (config) {
         is Pipe4UVConfiguration -> getPipe4UvPossibleConditioningModeSettings(config)
+        is Pipe2UVConfiguration -> PossibleConditioningMode.BOTH
         else -> PossibleConditioningMode.OFF
     }
 }

@@ -1,8 +1,10 @@
 package a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator
 
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
-import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
+import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
+import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
@@ -11,6 +13,7 @@ import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.Stage
+import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitControlType
@@ -22,16 +25,20 @@ import a75f.io.logic.bo.building.statprofiles.util.FAN_HIGHEST_STAGE
 import a75f.io.logic.bo.building.statprofiles.util.FAN_LOWEST_STAGE
 import a75f.io.logic.bo.building.statprofiles.util.FAN_MEDIUM_STAGE
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.util.UserIntents
 import a75f.io.logic.bo.building.statprofiles.util.UvTuners
+import a75f.io.logic.bo.building.statprofiles.util.canWeDoConditioning
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoCooling
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoHeating
 import a75f.io.logic.bo.building.statprofiles.util.canWeOperate
+import a75f.io.logic.bo.building.statprofiles.util.canWeRunFan
 import a75f.io.logic.bo.building.statprofiles.util.fetchUserIntents
 import a75f.io.logic.bo.building.statprofiles.util.getSplitConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getUnitVentilatorTuners
 import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
+import a75f.io.logic.bo.building.statprofiles.util.milliToMin
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.handlers.doAnalogOperation
 import a75f.io.logic.controlcomponents.util.ControllerNames
@@ -39,14 +46,21 @@ import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler
 
 /**
  * Author: Manjunath Kundaragi
- * Created on: 24-07-2025
+ * Created on: 07-08-2025
  */
-class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Short) :
-    UnitVentilatorProfile(equipRef, nodeAddress, L.TAG_CCU_HSSPLIT_PIPE4_UV) {
+class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Short) :
+    UnitVentilatorProfile(equipRef, nodeAddress, L.TAG_CCU_HSSPLIT_PIPE2_UV) {
+    lateinit var hssEquip: Pipe2UVEquip
+    private var waterValveLoop = CalibratedPoint(DomainName.waterValve, equipRef,0.0)
+    private var supplyWaterTemp = 0.0
+    private var heatingThreshold = 85.0
+    private var coolingThreshold = 65.0
 
-    lateinit var hssEquip: Pipe4UVEquip
+    private var waterSamplingStartTime: Long = 0
+
+
     override fun updateZonePoints() {
-        hssEquip = Domain.getEquip(equipRef) as Pipe4UVEquip
+        hssEquip = Domain.getEquip(equipRef) as Pipe2UVEquip
 
         if (Globals.getInstance().isTestMode) {
             logIt("Test mode is on: $nodeAddress")
@@ -65,7 +79,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
 
         controllerFactory = SplitControllerFactory(
             hssEquip,
-            L.TAG_CCU_HSSPLIT_PIPE4_UV,
+            L.TAG_CCU_HSSPLIT_PIPE2_UV,
             controllers,
             stageCounts,
             isEconAvailable,
@@ -76,8 +90,9 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         curState = ZoneState.DEADBAND
         occupancyStatus = equipOccupancyHandler.currentOccupiedMode
         controlVia = ControlVia.values()[hssEquip.controlVia.readDefaultVal().toInt()]
-        val config = getSplitConfiguration(equipRef) as Pipe4UVConfiguration
+        val config = getSplitConfiguration(equipRef) as Pipe2UVConfiguration
         resetEquip(hssEquip)
+        supplyWaterTemp = hssEquip.leavingWaterTemperature.readHisVal()
         val pipe4Tuners = getUnitVentilatorTuners(hssEquip)
         val userIntents = fetchUserIntents(hssEquip)
         val averageDesiredTemp = getAverageTemp(userIntents)
@@ -92,7 +107,8 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         val basicSettings = fetchBasicSettings(hssEquip)
         val updatedFanMode = fallBackFanMode(hssEquip, fanModeSaved, basicSettings)
         basicSettings.fanMode = updatedFanMode
-
+        heatingThreshold = pipe4Tuners.heatingThreshold
+        coolingThreshold = pipe4Tuners.coolingThreshold
         loopController.initialise(tuners = pipe4Tuners)
         loopController.dumpLogs()
         handleChangeOfDirection(userIntents, controllerFactory, hssEquip)
@@ -104,6 +120,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
 
         resetLoopOutputs()
         evaluateLoopOutputs(userIntents, basicSettings, pipe4Tuners, hssEquip)
+        waterValveLoop.data = getWaterValveLoop(userIntents).toDouble()
         doDcv(hssEquip, outsideDamperMinOpen)
         evaluateOAOLoop(
             basicSettings,
@@ -124,12 +141,15 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         }
 
         if (isEmergencyShutoffActive(hssEquip).not() && (isDoorOpen.not()) && isCondensateTripped.not()) {
-            if (basicSettings.fanMode != StandaloneFanStage.OFF) {
+            if (canWeRunFan(basicSettings)) {
                 runRelayOperations(config, basicSettings, pipe4Tuners)
                 runAnalogOutOperations(config, basicSettings, pipe4Tuners, hssEquip.analogOutStages)
-                operateSaTempering(hssEquip, pipe4Tuners, basicSettings)
-                val analogFanType = operateAuxBasedFan(hssEquip, basicSettings)
-                runSpecifiedAnalogFanSpeed(analogFanType, config)
+                runAlgorithm(hssEquip, basicSettings, config)
+                processForWaterSampling(hssEquip, pipe4Tuners, basicSettings)
+                runSpecifiedAnalogFanSpeed(operateAuxBasedFan(hssEquip, basicSettings), config)
+                if (supplyWaterTemp > heatingThreshold) {
+                    operateSaTempering(hssEquip, pipe4Tuners, basicSettings)
+                }
             } else {
                 resetAllLogicalPointValues()
             }
@@ -145,18 +165,17 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         if (buildingLimitMinBreached() || buildingLimitMaxBreached()) temperatureState =
             ZoneTempState.EMERGENCY
         logIt(
-            "analogFanSpeedMultiplier  ${pipe4Tuners.analogFanSpeedMultiplier} \n" +
-                    "Current Working mode : $occupancyStatus" + " Current Temp : $currentTemp  " +
-                    "Desired ${userIntents.heatingDesiredTemp} ${userIntents.coolingDesiredTemp} \n" +
-                    "Heating Loop: $heatingLoopOutput Cooling Loop: $coolingLoopOutput Fan Loop Output:: $fanLoopOutput \n" +
-                    "SATempering Loop Output: $saTemperingLoopOutput \n" +
-                    "Economizing Loop Output:: $economizingLoopOutput \n" +
+            "Economizing Loop Output:: $economizingLoopOutput \n" +
                     "DCV Loop Output:: $dcvLoopOutput \n" +
                     "Calculated Min OAO Damper:: $outsideAirCalculatedMinDamper \n" +
                     "OAO Loop Output (before MAT Safety):: $outsideAirLoopOutput \n" +
                     "OAO Loop Output (after MAT Safety and outsideDamperMinOpen):: $outsideAirFinalLoopOutput \n" +
                     "conditioningMode: ${basicSettings.conditioningMode} fan mode ${basicSettings.fanMode}\n" +
-                    "Econ Active $economizingAvailable isCondensateTripped:: $isCondensateTripped \n"
+                    "heatingThreshold : $heatingThreshold" + " coolingThreshold : $coolingThreshold  supplyWaterTemp: $supplyWaterTemp\n" +
+                    "Desired ${userIntents.heatingDesiredTemp} ${userIntents.coolingDesiredTemp} Current Temp $currentTemp \n" +
+                    "Loop (Heating: $heatingLoopOutput Cooling: $coolingLoopOutput Fan: $fanLoopOutput )\n" +
+                    "SATempering Loop Output: $saTemperingLoopOutput | waterValveLoop ${waterValveLoop.data}\n" +
+                    "Econ Active: $economizingAvailable | isCondensateTripped: $isCondensateTripped "
         )
         logResults(config)
         logIt("Equip Running : $curState")
@@ -184,13 +203,12 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
     }
 
     private fun runRelayOperations(
-        config: Pipe4UVConfiguration, basicSettings: BasicSettings, tuners: UvTuners
-    ) {
+        config: Pipe2UVConfiguration, basicSettings: BasicSettings, tuners: UvTuners) {
         updatePrerequisite(config)
         runControllers(hssEquip, basicSettings, config, tuners)
     }
 
-    private fun updatePrerequisite(config: Pipe4UVConfiguration) {
+    private fun updatePrerequisite(config: Pipe2UVConfiguration) {
         if (controllerFactory.equip != hssEquip) {
             controllerFactory.equip = hssEquip
         }
@@ -207,23 +225,42 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
          * when constraint executes they will calculate the value based on the current loop points
          */
         derivedFanLoopOutput.data = hssEquip.fanLoopOutput.readHisVal()
-
         // This is for title 24 compliance
         if (fanLoopCounter > 0) {
             derivedFanLoopOutput.data = previousFanLoopVal.toDouble()
         }
-        logIt("derivedFanLoopOutput $derivedFanLoopOutput")
-        controllerFactory.addPipe4Controllers(config, ::isPrePurgeActive , fanLowVentilationAvailable)
+        controllerFactory.addPipe2Controllers(config, ::isPrePurgeActive , fanLowVentilationAvailable, waterValveLoop)
+
+
         logIt(
-            " isEconAvailable: ${isEconAvailable.data} " + "zoneOccupancyState : ${zoneOccupancyState.data}"
+            " isEconAvailable: ${isEconAvailable.data} " + "zoneOccupancyState : ${zoneOccupancyState.data}\n" +
+                    "derivedFanLoopOutput: ${derivedFanLoopOutput.data} waterValveLoop $waterValveLoop"
         )
     }
 
+    private fun getWaterValveLoop(userIntents: UserIntents): Int {
+        val isHeatingAvailable = supplyWaterTemp > heatingThreshold
+        val isCoolingAvailable = supplyWaterTemp < coolingThreshold
+
+        val zoneNeedsHeating = currentTemp < userIntents.heatingDesiredTemp
+        val zoneNeedsCooling = currentTemp > userIntents.coolingDesiredTemp
+
+        return when {
+            isHeatingAvailable && zoneNeedsHeating -> heatingLoopOutput
+            isCoolingAvailable && zoneNeedsCooling -> coolingLoopOutput
+
+            // No zone demand, but supply is still available
+            isHeatingAvailable -> heatingLoopOutput.takeIf { it > 0 } ?: 0
+            isCoolingAvailable -> coolingLoopOutput.takeIf { it > 0 } ?: 0
+
+            else -> 0 // No demand, no supply
+        }
+    }
 
     private fun runControllers(
-        equip: Pipe4UVEquip,
+        equip: Pipe2UVEquip,
         basicSettings: BasicSettings,
-        config: Pipe4UVConfiguration,
+        config: Pipe2UVConfiguration,
         tuners: UvTuners
     ) {
         controllers.forEach { (controllerName, value) ->
@@ -233,12 +270,29 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         }
     }
 
+
+    private fun runningAtHeatingDirection() = (heatingLoopOutput > 0 && supplyWaterTemp > coolingThreshold)
+    private fun runningAtCoolingDirection() = (coolingLoopOutput > 0 && supplyWaterTemp < coolingThreshold)
+
+    private fun isFanGoodRun(isDoorWindowOpen: Boolean, equip: Pipe2UVEquip): Boolean {
+        return if (isDoorWindowOpen || runningAtHeatingDirection()) {
+            // If current direction is heating then check allow only when valve or heating is available
+            (isPointExist(equip.waterValve) || isPointExist(equip.waterModulatingValve)
+                    || isPointExist(equip.auxHeatingStage1) || isPointExist(equip.auxHeatingStage2))
+        } else if (isDoorWindowOpen || runningAtCoolingDirection()) {
+            isPointExist(equip.waterModulatingValve) || isPointExist(equip.waterValve)
+        } else {
+            false
+        }
+    }
+
+
     private fun updateRelayStatus(
         controllerName: String,
         result: Any,
-        equip: Pipe4UVEquip,
+        equip: Pipe2UVEquip,
         basicSettings: BasicSettings,
-        config: Pipe4UVConfiguration,
+        config: Pipe2UVConfiguration,
         tuners: UvTuners
     ) {
 
@@ -268,6 +322,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
                         else -> false
                     }
                 }
+               // val isFanGoodToRun = isFanGoodRun(isDoorOpen, equip)
 
                 fun isStageActive(
                     stage: Int, currentState: Boolean
@@ -315,21 +370,19 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
                 }
             }
 
-            ControllerNames.COOLING_VALVE_CONTROLLER -> {
-                var status = result as Boolean
-                if (canWeDoCooling(basicSettings.conditioningMode).not() || (economizingAvailable
-                            && coolingLoopOutput <= tuners.economizingToMainCoolingLoopMap)) {
-                    status = false
+            ControllerNames.WATER_VALVE_CONTROLLER -> {
+                if (waterSamplingStartTime == 0L) {
+                    var status = result as Boolean
+                    if (coolingLoopOutput > 0 && (canWeDoCooling(basicSettings.conditioningMode).not() ||
+                                (economizingAvailable && coolingLoopOutput <= tuners.economizingToMainCoolingLoopMap))
+                    ) {
+                        status = false
+                    }
+                    if (heatingLoopOutput > 0 && canWeDoHeating(basicSettings.conditioningMode).not()) {
+                        status = false
+                    }
+                    updateStatus(equip.waterValve, status, StatusMsgKeys.WATER_VALVE.name)
                 }
-                updateStatus(equip.chilledWaterCoolValve, status, StatusMsgKeys.COOLING_VALVE.name)
-            }
-
-            ControllerNames.HEATING_VALVE_CONTROLLER -> {
-                var status = result as Boolean
-                if (canWeDoHeating(basicSettings.conditioningMode).not()) {
-                    status = false
-                }
-                updateStatus(equip.hotWaterHeatValve, status, StatusMsgKeys.HEATING_VALVE.name)
             }
 
             ControllerNames.AUX_HEATING_STAGE1 -> {
@@ -353,9 +406,9 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
             ControllerNames.FACE_BYPASS_CONTROLLER -> {
                 var status = result as Boolean
 
-                if (coolingLoopOutput > 0 && (canWeDoCooling(basicSettings.conditioningMode).not()
-                            || (economizingAvailable && coolingLoopOutput <= tuners.economizingToMainCoolingLoopMap))
-                    || heatingLoopOutput > 0 && canWeDoHeating(basicSettings.conditioningMode).not()
+                if (runningAtCoolingDirection().not() || ( coolingLoopOutput > 0 && (canWeDoCooling(basicSettings.conditioningMode).not()
+                            || (economizingAvailable && coolingLoopOutput <= tuners.economizingToMainCoolingLoopMap)))
+                    || (runningAtHeatingDirection().not() || (heatingLoopOutput > 0 && canWeDoHeating(basicSettings.conditioningMode).not()))
                 ) {
                     status = false
                 }
@@ -398,7 +451,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
 
 
     private fun runAnalogOutOperations(
-        config: Pipe4UVConfiguration,
+        config: Pipe2UVConfiguration,
         basicSettings: BasicSettings,
         tuners: UvTuners,
         analogOutStages: HashMap<String, Int>
@@ -410,35 +463,12 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
                     resetAnalogOutLogicalPoints()
                     return
                 }
-                when (Pipe4UvAnalogOutControls.values()[association]) {
-                    Pipe4UvAnalogOutControls.HEATING_WATER_MODULATING_VALVE -> {
-                        val modulationValue =
-                            if (controlVia == ControlVia.FACE_AND_BYPASS_DAMPER) 0 else heatingLoopOutput
-                        doAnalogOperation(
-                            canWeDoHeating(basicSettings.conditioningMode),
-                            analogOutStages,
-                            StatusMsgKeys.HEATING.name,
-                            modulationValue,
-                            hssEquip.hotWaterModulatingHeatValve
-                        )
-                    }
+                when (Pipe2UvAnalogOutControls.values()[association]) {
 
-                    Pipe4UvAnalogOutControls.COOLING_WATER_MODULATING_VALVE -> {
-                        val modulationValue = if ((controlVia == ControlVia.FACE_AND_BYPASS_DAMPER)
-                            || economizingAvailable && coolingLoopOutput <= tuners.economizingToMainCoolingLoopMap) 0 else coolingLoopOutput
-                        doAnalogOperation(
-                            canWeDoCooling(basicSettings.conditioningMode),
-                            analogOutStages,
-                            StatusMsgKeys.COOLING_VALVE.name,
-                            modulationValue,
-                            hssEquip.chilledWaterModulatingCoolValve
-                        )
-                    }
-
-                    Pipe4UvAnalogOutControls.FACE_DAMPER_VALVE -> {
-                        val loop = if (canWeDoCooling(basicSettings.conditioningMode) && coolingLoopOutput > 0 && controlVia == ControlVia.FACE_AND_BYPASS_DAMPER) {
+                    Pipe2UvAnalogOutControls.FACE_DAMPER_VALVE -> {
+                        val loop = if (canWeDoCooling(basicSettings.conditioningMode) && runningAtCoolingDirection() && controlVia == ControlVia.FACE_AND_BYPASS_DAMPER) {
                             if ((economizingAvailable && coolingLoopOutput <= tuners.economizingToMainCoolingLoopMap)) 0 else coolingLoopOutput
-                        } else if (canWeDoHeating(basicSettings.conditioningMode) && heatingLoopOutput > 0 && controlVia == ControlVia.FACE_AND_BYPASS_DAMPER) {
+                        } else if (canWeDoHeating(basicSettings.conditioningMode) && runningAtHeatingDirection() && controlVia == ControlVia.FACE_AND_BYPASS_DAMPER) {
                             heatingLoopOutput
                         } else 0
                         if (fanLoopCounter > 0 && loop == 0) {
@@ -454,7 +484,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
                         )
                     }
 
-                    Pipe4UvAnalogOutControls.FAN_SPEED -> {
+                    Pipe2UvAnalogOutControls.FAN_SPEED -> {
                         val voltage = config.getFanConfiguration(port)
                         val fanLowPercent = voltage.fanAtLow.currentVal.toInt()
                         val fanMediumPercent = voltage.fanAtMedium.currentVal.toInt()
@@ -473,7 +503,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
                         )
                     }
 
-                    Pipe4UvAnalogOutControls.OAO_DAMPER -> {
+                    Pipe2UvAnalogOutControls.OAO_DAMPER -> {
                         hssEquip.oaoDamper.writeHisVal(outsideAirFinalLoopOutput.toDouble())
                         if (outsideAirFinalLoopOutput > 0) {
                             analogOutStages[StatusMsgKeys.OAO_DAMPER.name] =
@@ -481,54 +511,140 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
                         }
                     }
 
-                    Pipe4UvAnalogOutControls.DCV_MODULATING_DAMPER -> {
+                    Pipe2UvAnalogOutControls.DCV_MODULATING_DAMPER -> {
                         hssEquip.dcvDamperModulating.writePointValue(dcvLoopOutput.toDouble())
                         if (dcvLoopOutput > 0) {
                             analogOutStages[StatusMsgKeys.DCV_DAMPER.name] = dcvLoopOutput
                         }
                     }
 
-                    Pipe4UvAnalogOutControls.EXTERNALLY_MAPPED -> {}
+
+                    Pipe2UvAnalogOutControls.WATER_MODULATING_VALVE -> {
+                        if (waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
+                            if (canWeDoConditioning(basicSettings) && canWeRunFan(basicSettings)) {
+                                var modulationValue = waterValveLoop.data
+                                if (controlVia != ControlVia.FULLY_MODULATING_VALVE ||
+                                    (coolingLoopOutput > 0 && canWeDoCooling(basicSettings.conditioningMode).not()) ||
+                                    (economizingAvailable && coolingLoopOutput <= tuners.economizingToMainCoolingLoopMap)
+                                ) {
+                                    modulationValue = 0.0
+                                }
+                                if (heatingLoopOutput > 0 && canWeDoHeating(basicSettings.conditioningMode).not()) {
+                                    modulationValue = 0.0
+                                }
+
+                                hssEquip.waterModulatingValve.writeHisVal(modulationValue)
+                                if (modulationValue > 0) hssEquip.analogOutStages[StatusMsgKeys.WATER_VALVE.name] = 1
+                            } else {
+                                hssEquip.waterModulatingValve.writeHisVal(0.0)
+                                hssEquip.analogOutStages.remove(StatusMsgKeys.WATER_VALVE.name)
+                            }
+                        }
+                    }
+                    Pipe2UvAnalogOutControls.EXTERNALLY_MAPPED -> {}
                 }
             }
         }
     }
 
-    private fun runTitle24Rule(config: Pipe4UVConfiguration) {
+    private fun isSupplyInHeatingMode(): Boolean {
+        return (supplyWaterTemp > heatingThreshold || supplyWaterTemp in coolingThreshold..heatingThreshold)
+    }
+
+    private fun runAlgorithm(
+        equip: Pipe2UVEquip,
+        basicSettings: BasicSettings,
+        configuration: Pipe2UVConfiguration
+    ) {
+
+        if ((currentTemp > 0) && (basicSettings.fanMode != StandaloneFanStage.OFF)) {
+            when (basicSettings.conditioningMode) {
+                StandaloneConditioningMode.AUTO -> {
+                    if (isSupplyInHeatingMode())
+                        doHeatOnly(basicSettings, configuration, equip)
+                    else if (supplyWaterTemp < coolingThreshold)
+                        doCoolOnly(basicSettings, configuration, equip)
+                }
+
+                StandaloneConditioningMode.COOL_ONLY -> {
+                    doCoolOnly(basicSettings, configuration, equip)
+                }
+
+                StandaloneConditioningMode.HEAT_ONLY -> {
+                    doHeatOnly(basicSettings, configuration, equip)
+                }
+
+                else -> {
+                    logIt( "Conditioning mode is OFF")
+                    resetAllLogicalPointValues()
+
+                }
+            }
+        } else {
+            resetAllLogicalPointValues()
+        }
+    }
+
+
+    private fun doCoolOnly(
+        basicSettings: BasicSettings, config: Pipe2UVConfiguration, equip: Pipe2UVEquip
+    ) {
+        logIt("doCoolOnly: mode ")
+
+        if (supplyWaterTemp > heatingThreshold) {
+            resetWaterValve(equip)
+        }
+
+        val analogFanType = operateAuxBasedFan(hssEquip, basicSettings)
+        runSpecifiedAnalogFanSpeed(analogFanType, config)
+    }
+
+    private fun doHeatOnly(
+        basicSettings: BasicSettings, config: Pipe2UVConfiguration, equip: Pipe2UVEquip
+    ) {
+        logIt("doHeatOnly: mode ")
+        if (supplyWaterTemp < coolingThreshold) {
+            resetWaterValve(equip)
+        }
+        operateAuxBasedFan(equip, basicSettings)
+        val analogFanType = operateAuxBasedFan(hssEquip, basicSettings)
+        runSpecifiedAnalogFanSpeed(analogFanType, config)
+    }
+
+    private fun runTitle24Rule(config: Pipe2UVConfiguration) {
         resetFanStatus()
         fanEnabledStatus = config.isFanEnabled(
             config, HyperStatSplitControlType.FAN_ENABLED.name
         )
         when (config.getLowestFanSelected()) {
-            Pipe4UVRelayControls.FAN_LOW_SPEED_VENTILATION.ordinal -> lowestStageFanLow = true
-            Pipe4UVRelayControls.FAN_LOW_SPEED.ordinal -> lowestStageFanLow = true
-            Pipe4UVRelayControls.FAN_MEDIUM_SPEED.ordinal -> lowestStageFanMedium = true
-            Pipe4UVRelayControls.FAN_HIGH_SPEED.ordinal -> lowestStageFanHigh = true
+            Pipe2UVRelayControls.FAN_LOW_SPEED_VENTILATION.ordinal -> lowestStageFanLow = true
+            Pipe2UVRelayControls.FAN_LOW_SPEED.ordinal -> lowestStageFanLow = true
+            Pipe2UVRelayControls.FAN_MEDIUM_SPEED.ordinal -> lowestStageFanMedium = true
+            Pipe2UVRelayControls.FAN_HIGH_SPEED.ordinal -> lowestStageFanHigh = true
             else -> {}
         }
     }
 
-    private fun logResults(config: Pipe4UVConfiguration) {
+    private fun logResults(config: Pipe2UVConfiguration) {
         val mappings = config.getRelayConfigurationMapping()
         mappings.forEach { (enabled, association, port) ->
             if (enabled) {
-                val mapping = Pipe4UVRelayControls.values()[association]
+                val mapping = Pipe2UVRelayControls.values()[association]
                 val logicalPoint = when (mapping) {
-                    Pipe4UVRelayControls.FAN_LOW_SPEED_VENTILATION -> hssEquip.fanLowSpeedVentilation
-                    Pipe4UVRelayControls.FAN_LOW_SPEED -> hssEquip.fanLowSpeed
-                    Pipe4UVRelayControls.FAN_MEDIUM_SPEED -> hssEquip.fanMediumSpeed
-                    Pipe4UVRelayControls.FAN_HIGH_SPEED -> hssEquip.fanHighSpeed
-                    Pipe4UVRelayControls.COOLING_WATER_VALVE -> hssEquip.chilledWaterCoolValve
-                    Pipe4UVRelayControls.HEATING_WATER_VALVE -> hssEquip.hotWaterHeatValve
-                    Pipe4UVRelayControls.AUX_HEATING_STAGE1 -> hssEquip.auxHeatingStage1
-                    Pipe4UVRelayControls.AUX_HEATING_STAGE2 -> hssEquip.auxHeatingStage2
-                    Pipe4UVRelayControls.FAN_ENABLED -> hssEquip.fanEnable
-                    Pipe4UVRelayControls.OCCUPIED_ENABLED -> hssEquip.occupiedEnable
-                    Pipe4UVRelayControls.FACE_BYPASS_DAMPER -> hssEquip.faceBypassDamperCmd
-                    Pipe4UVRelayControls.DCV_DAMPER -> hssEquip.dcvDamper
-                    Pipe4UVRelayControls.HUMIDIFIER -> hssEquip.humidifierEnable
-                    Pipe4UVRelayControls.DEHUMIDIFIER -> hssEquip.dehumidifierEnable
-                    Pipe4UVRelayControls.EXTERNALLY_MAPPED -> null
+                    Pipe2UVRelayControls.FAN_LOW_SPEED_VENTILATION -> hssEquip.fanLowSpeedVentilation
+                    Pipe2UVRelayControls.FAN_LOW_SPEED -> hssEquip.fanLowSpeed
+                    Pipe2UVRelayControls.FAN_MEDIUM_SPEED -> hssEquip.fanMediumSpeed
+                    Pipe2UVRelayControls.FAN_HIGH_SPEED -> hssEquip.fanHighSpeed
+                    Pipe2UVRelayControls.AUX_HEATING_STAGE1 -> hssEquip.auxHeatingStage1
+                    Pipe2UVRelayControls.AUX_HEATING_STAGE2 -> hssEquip.auxHeatingStage2
+                    Pipe2UVRelayControls.WATER_VALVE -> hssEquip.waterValve
+                    Pipe2UVRelayControls.FAN_ENABLED -> hssEquip.fanEnable
+                    Pipe2UVRelayControls.OCCUPIED_ENABLED -> hssEquip.occupiedEnable
+                    Pipe2UVRelayControls.FACE_BYPASS_DAMPER -> hssEquip.faceBypassDamperCmd
+                    Pipe2UVRelayControls.DCV_DAMPER -> hssEquip.dcvDamper
+                    Pipe2UVRelayControls.HUMIDIFIER -> hssEquip.humidifierEnable
+                    Pipe2UVRelayControls.DEHUMIDIFIER -> hssEquip.dehumidifierEnable
+                    Pipe2UVRelayControls.EXTERNALLY_MAPPED -> null
                 }
                 if (logicalPoint != null) {
                     logIt("$port = $mapping ${logicalPoint.readHisVal()}")
@@ -539,15 +655,14 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         config.getAnalogOutsConfigurationMapping().forEach {
             val (enabled, association, port) = it
             if (enabled) {
-                val mapping = Pipe4UvAnalogOutControls.values()[association]
+                val mapping = Pipe2UvAnalogOutControls.values()[association]
                 val modulation = when (mapping) {
-                    Pipe4UvAnalogOutControls.HEATING_WATER_MODULATING_VALVE -> hssEquip.hotWaterModulatingHeatValve
-                    Pipe4UvAnalogOutControls.COOLING_WATER_MODULATING_VALVE -> hssEquip.chilledWaterModulatingCoolValve
-                    Pipe4UvAnalogOutControls.FACE_DAMPER_VALVE -> hssEquip.faceBypassDamperModulatingCmd
-                    Pipe4UvAnalogOutControls.FAN_SPEED -> hssEquip.fanSignal
-                    Pipe4UvAnalogOutControls.OAO_DAMPER -> hssEquip.oaoDamper
-                    Pipe4UvAnalogOutControls.DCV_MODULATING_DAMPER -> hssEquip.dcvDamperModulating
-                    Pipe4UvAnalogOutControls.EXTERNALLY_MAPPED -> null
+                    Pipe2UvAnalogOutControls.WATER_MODULATING_VALVE -> hssEquip.waterModulatingValve
+                    Pipe2UvAnalogOutControls.FACE_DAMPER_VALVE -> hssEquip.faceBypassDamperModulatingCmd
+                    Pipe2UvAnalogOutControls.FAN_SPEED -> hssEquip.fanSignal
+                    Pipe2UvAnalogOutControls.OAO_DAMPER -> hssEquip.oaoDamper
+                    Pipe2UvAnalogOutControls.DCV_MODULATING_DAMPER -> hssEquip.dcvDamperModulating
+                    Pipe2UvAnalogOutControls.EXTERNALLY_MAPPED -> null
                 }
                 if (modulation != null) {
                     logIt("$port = ${mapping.name}  analogSignal  ${modulation.readHisVal()}")
@@ -556,11 +671,11 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         }
     }
 
-    private fun runSpecifiedAnalogFanSpeed(auxType: AuxActiveStages?, config: Pipe4UVConfiguration) {
+    private fun runSpecifiedAnalogFanSpeed(auxType: AuxActiveStages?, config: Pipe2UVConfiguration) {
         if (auxType != null) {
             val analogOuts = config.getAnalogOutsConfigurationMapping()
             analogOuts.forEach { (enabled, association, port) ->
-                if (enabled && Pipe4UvAnalogOutControls.values()[association] == Pipe4UvAnalogOutControls.FAN_SPEED) {
+                if (enabled && Pipe2UvAnalogOutControls.values()[association] == Pipe2UvAnalogOutControls.FAN_SPEED) {
                     val voltage = config.getFanConfiguration(port)
                     val fanSignal = when (auxType) {
                         AuxActiveStages.AUX2, AuxActiveStages.BOTH -> voltage.fanAtHigh.currentVal.toInt()
@@ -572,6 +687,108 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
                     hssEquip.fanSignal.writeHisVal(fanSignal.toDouble())
                 }
             }
+            if (isPointExist(hssEquip.faceBypassDamperCmd)) {
+                hssEquip.faceBypassDamperCmd.writeHisVal(1.0)
+            }
+            if(isPointExist(hssEquip.faceBypassDamperModulatingCmd)) {
+                hssEquip.faceBypassDamperModulatingCmd.writeHisVal(heatingLoopOutput.toDouble())
+            }
+        }
+    }
+
+    private fun processForWaterSampling(
+        equip: Pipe2UVEquip, tuner: UvTuners,
+        basicSettings: BasicSettings
+    ) {
+
+        if (basicSettings.conditioningMode == StandaloneConditioningMode.OFF) {
+            resetWaterValve(equip)
+            return
+        }
+
+        if (equip.waterValve.pointExists().not() && equip.waterModulatingValve.pointExists().not()
+        ) {
+            logIt( "No mapping for water value")
+            return
+        }
+
+        fun resetIsRequired(): Boolean {
+            return (hssEquip.waterValve.readHisVal().toInt() != 0
+                    || hssEquip.waterModulatingValve.readHisVal().toInt() != 0)
+        }
+
+        logIt("waterSamplingStarted Time $waterSamplingStartTime")
+
+        val waitTimeToDoSampling: Int
+        val onTimeToDoSampling: Int
+        if (supplyWaterTemp in coolingThreshold..heatingThreshold) {
+            waitTimeToDoSampling = tuner.waterValveSamplingDuringLoopDeadbandWaitTime
+            onTimeToDoSampling = tuner.waterValveSamplingDuringLoopDeadbandOnTime
+        } else {
+            waitTimeToDoSampling = tuner.waterValveSamplingWaitTime
+            onTimeToDoSampling = tuner.waterValveSamplingOnTime
+        }
+
+        if (waitTimeToDoSampling == 0 || onTimeToDoSampling == 0) {
+            //resetting the water valve value value only when the tuner value is zero
+            if (resetIsRequired()) {
+                waterSamplingStartTime = 0
+                lastWaterValveTurnedOnTime = System.currentTimeMillis()
+                resetWaterValve(equip)
+            }
+            logIt( "No water sampling, because tuner value is zero!")
+            return
+        }
+        logIt("waitTimeToDoSampling:  $waitTimeToDoSampling onTimeToDoSampling: $onTimeToDoSampling\n"+
+        "Current : ${System.currentTimeMillis()}: Last On: $lastWaterValveTurnedOnTime")
+
+        if (waterSamplingStartTime == 0L) {
+            val minutes = milliToMin(System.currentTimeMillis() - lastWaterValveTurnedOnTime)
+            logIt("sampling will start in : ${waitTimeToDoSampling - minutes} current : $minutes")
+            if (minutes >= waitTimeToDoSampling) {
+                doWaterSampling(hssEquip.relayStages)
+            }
+        } else {
+            val samplingSinceFrom =
+                milliToMin(System.currentTimeMillis() - waterSamplingStartTime)
+            logIt("Water sampling is running since from $samplingSinceFrom minutes")
+            if (samplingSinceFrom >= onTimeToDoSampling) {
+                waterSamplingStartTime = 0
+                lastWaterValveTurnedOnTime = System.currentTimeMillis()
+                resetWaterValve(equip)
+                logIt( "Resetting WATER_VALVE to OFF")
+            } else {
+                hssEquip.relayStages[StatusMsgKeys.WATER_VALVE.name] = 1
+            }
+        }
+    }
+
+    private fun doWaterSampling(
+        relayStages: HashMap<String, Int>,
+    ) {
+        waterSamplingStartTime = System.currentTimeMillis()
+        hssEquip.waterValve.writeHisVal(1.0)
+        hssEquip.waterModulatingValve.writeHisVal(100.0)
+        relayStages[StatusMsgKeys.WATER_VALVE.name] = 1
+        logIt( "Turned ON water valve ")
+    }
+
+    private fun resetWaterValve(equip: Pipe2UVEquip) {
+        if (waterSamplingStartTime == 0L) {
+            hssEquip.waterValve.writeHisVal(0.0)
+            hssEquip.waterModulatingValve.writeHisVal(0.0)
+            equip.relayStages.remove(StatusMsgKeys.WATER_VALVE.name)
+            equip.analogOutStages.remove(StatusMsgKeys.WATER_VALVE.name)
+            logIt( "Resetting WATER_VALVE to OFF")
+        }
+    }
+    fun supplyDirection(): String {
+        return if (supplyWaterTemp > heatingThreshold
+            || supplyWaterTemp in coolingThreshold..heatingThreshold
+        ) {
+            "Heating"
+        } else {
+            "Cooling"
         }
     }
 
@@ -597,6 +814,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         )
     }
 
+
     override fun resetRelayLogicalPoints() {
         hssEquip.apply {
             listOf(
@@ -604,8 +822,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
                 fanLowSpeed,
                 fanMediumSpeed,
                 fanHighSpeed,
-                chilledWaterCoolValve,
-                hotWaterHeatValve,
+                waterValve,
                 auxHeatingStage1,
                 auxHeatingStage2,
                 fanEnable,
@@ -621,8 +838,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
     override fun resetAnalogOutLogicalPoints() {
         hssEquip.apply {
             listOf(
-                hotWaterModulatingHeatValve,
-                chilledWaterModulatingCoolValve,
+                waterModulatingValve,
                 faceBypassDamperModulatingCmd,
                 fanSignal,
                 oaoDamper,
@@ -639,8 +855,9 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
 
     override fun getAverageZoneTemp() = getCurrentTemp()
 
-    override fun getProfileType() = ProfileType.HYPERSTATSPLIT_4PIPE_UV
+    override fun getProfileType() = ProfileType.HYPERSTATSPLIT_2PIPE_UV
 
     override fun <T : BaseProfileConfiguration?> getProfileConfiguration(address: Short) =
         BaseProfileConfiguration() as T
+
 }

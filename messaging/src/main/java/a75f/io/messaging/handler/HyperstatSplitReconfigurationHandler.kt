@@ -21,7 +21,11 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.CpuEconSensorBusTempAssociation
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UVConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UVRelayControls
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UvAnalogOutControls
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVRelayControls
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UvAnalogOutControls
@@ -299,7 +303,7 @@ class HyperstatSplitReconfigurationHandler {
 
             val relay1 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay1 + "\"")
             val relay1Point = RawPoint.Builder().setHDict(relay1).setType("Relay N/O").setEnabled(config.relay1Enabled.enabled)
-            if (config.relay1Enabled.enabled && config.relay1Association.associationVal ==config.getProfileBasedEnumValueRelayType(HyperStatSplitConfiguration.HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
+            if (config.relay1Enabled.enabled && config.relay1Association.associationVal ==config.getProfileBasedEnumValueRelayType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 relay1Point.addMarker(Tags.WRITABLE)
                 relay1Point.addMarker(Tags.UNUSED)
             } else {
@@ -310,7 +314,7 @@ class HyperstatSplitReconfigurationHandler {
 
             val relay2 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay2 + "\"")
             val relay2Point = RawPoint.Builder().setHDict(relay2).setType("Relay N/O").setEnabled(config.relay2Enabled.enabled)
-            if (config.relay2Enabled.enabled && config.relay2Association.associationVal == config.getProfileBasedEnumValueRelayType(HyperStatSplitConfiguration.HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
+            if (config.relay2Enabled.enabled && config.relay2Association.associationVal == config.getProfileBasedEnumValueRelayType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 relay2Point.addMarker(Tags.WRITABLE)
                 relay2Point.addMarker(Tags.UNUSED)
             } else {
@@ -322,7 +326,7 @@ class HyperstatSplitReconfigurationHandler {
 
             val relay3 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay3 + "\"")
             val relay3Point = RawPoint.Builder().setHDict(relay3).setType("Relay N/O").setEnabled(config.relay3Enabled.enabled)
-            if (config.relay3Enabled.enabled && config.relay3Association.associationVal == config.getProfileBasedEnumValueRelayType(HyperStatSplitConfiguration.HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
+            if (config.relay3Enabled.enabled && config.relay3Association.associationVal == config.getProfileBasedEnumValueRelayType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 relay3Point.addMarker(Tags.WRITABLE)
                 relay3Point.addMarker(Tags.UNUSED)
             } else {
@@ -334,7 +338,7 @@ class HyperstatSplitReconfigurationHandler {
 
             val relay4 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay4 + "\"")
             val relay4Point = RawPoint.Builder().setHDict(relay4).setType("Relay N/O").setEnabled(config.relay4Enabled.enabled)
-            if (config.relay4Enabled.enabled && config.relay4Association.associationVal ==config.getProfileBasedEnumValueRelayType(HyperStatSplitConfiguration.HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
+            if (config.relay4Enabled.enabled && config.relay4Association.associationVal ==config.getProfileBasedEnumValueRelayType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 relay4Point.addMarker(Tags.WRITABLE)
                 relay4Point.addMarker(Tags.UNUSED)
             } else {
@@ -346,7 +350,7 @@ class HyperstatSplitReconfigurationHandler {
 
             val relay5 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay5 + "\"")
             val relay5Point = RawPoint.Builder().setHDict(relay5).setType("Relay N/O").setEnabled(config.relay5Enabled.enabled)
-            if (config.relay5Enabled.enabled && config.relay5Association.associationVal == config.getProfileBasedEnumValueRelayType(HyperStatSplitConfiguration.HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
+            if (config.relay5Enabled.enabled && config.relay5Association.associationVal == config.getProfileBasedEnumValueRelayType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 relay5Point.addMarker(Tags.WRITABLE)
                 relay5Point.addMarker(Tags.UNUSED)
             } else {
@@ -358,7 +362,7 @@ class HyperstatSplitReconfigurationHandler {
 
             val relay6 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay6 + "\"")
             val relay6Point = RawPoint.Builder().setHDict(relay6).setType("Relay N/O").setEnabled(config.relay6Enabled.enabled)
-            if (config.relay6Enabled.enabled && config.relay6Association.associationVal == config.getProfileBasedEnumValueRelayType(HyperStatSplitConfiguration.HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
+            if (config.relay6Enabled.enabled && config.relay6Association.associationVal == config.getProfileBasedEnumValueRelayType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 relay6Point.addMarker(Tags.WRITABLE)
                 relay6Point.addMarker(Tags.UNUSED)
             } else {
@@ -370,7 +374,7 @@ class HyperstatSplitReconfigurationHandler {
 
             val relay7 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay7 + "\"")
             val relay7Point = RawPoint.Builder().setHDict(relay7).setType("Relay N/O").setEnabled(config.relay7Enabled.enabled)
-            if (config.relay7Enabled.enabled && config.relay7Association.associationVal ==config.getProfileBasedEnumValueRelayType(HyperStatSplitConfiguration.HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
+            if (config.relay7Enabled.enabled && config.relay7Association.associationVal ==config.getProfileBasedEnumValueRelayType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 relay7Point.addMarker(Tags.WRITABLE)
                 relay7Point.addMarker(Tags.UNUSED)
             } else {
@@ -382,7 +386,7 @@ class HyperstatSplitReconfigurationHandler {
 
             val relay8 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay8 + "\"")
             val relay8Point = RawPoint.Builder().setHDict(relay8).setType("Relay N/O").setEnabled(config.relay8Enabled.enabled)
-            if (config.relay8Enabled.enabled && config.relay8Association.associationVal == config.getProfileBasedEnumValueRelayType(HyperStatSplitConfiguration.HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
+            if (config.relay8Enabled.enabled && config.relay8Association.associationVal == config.getProfileBasedEnumValueRelayType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 relay8Point.addMarker(Tags.WRITABLE)
                 relay8Point.addMarker(Tags.UNUSED)
             } else {
@@ -394,7 +398,7 @@ class HyperstatSplitReconfigurationHandler {
 
             val analogOut1 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.analog1Out + "\"")
             val analogOut1Point = RawPoint.Builder().setHDict(analogOut1).setType(config.analogOut1TypeToString()).setEnabled(config.analogOut1Enabled.enabled)
-            if (config.analogOut1Enabled.enabled && config.analogOut1Association.associationVal == config.getProfileBasedEnumValueAnalogType(HyperStatSplitConfiguration.HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
+            if (config.analogOut1Enabled.enabled && config.analogOut1Association.associationVal == config.getProfileBasedEnumValueAnalogType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 analogOut1Point.addMarker(Tags.WRITABLE)
                 analogOut1Point.addMarker(Tags.UNUSED)
             } else {
@@ -406,7 +410,7 @@ class HyperstatSplitReconfigurationHandler {
 
             val analogOut2 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.analog2Out + "\"")
             val analogOut2Point = RawPoint.Builder().setHDict(analogOut2).setType(config.analogOut2TypeToString()).setEnabled(config.analogOut2Enabled.enabled)
-            if (config.analogOut2Enabled.enabled && config.analogOut2Association.associationVal == config.getProfileBasedEnumValueAnalogType(HyperStatSplitConfiguration.HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
+            if (config.analogOut2Enabled.enabled && config.analogOut2Association.associationVal == config.getProfileBasedEnumValueAnalogType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 analogOut2Point.addMarker(Tags.WRITABLE)
                 analogOut2Point.addMarker(Tags.UNUSED)
             } else {
@@ -418,7 +422,7 @@ class HyperstatSplitReconfigurationHandler {
 
             val analogOut3 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.analog3Out + "\"")
             val analogOut3Point = RawPoint.Builder().setHDict(analogOut3).setType(config.analogOut3TypeToString()).setEnabled(config.analogOut3Enabled.enabled)
-            if (config.analogOut3Enabled.enabled && config.analogOut3Association.associationVal == config.getProfileBasedEnumValueAnalogType(HyperStatSplitConfiguration.HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
+            if (config.analogOut3Enabled.enabled && config.analogOut3Association.associationVal == config.getProfileBasedEnumValueAnalogType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 analogOut3Point.addMarker(Tags.WRITABLE)
                 analogOut3Point.addMarker(Tags.UNUSED)
             } else {
@@ -430,7 +434,7 @@ class HyperstatSplitReconfigurationHandler {
 
             val analogOut4 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.analog4Out + "\"")
             val analogOut4Point = RawPoint.Builder().setHDict(analogOut4).setType(config.analogOut4TypeToString()).setEnabled(config.analogOut4Enabled.enabled)
-            if (config.analogOut4Enabled.enabled && config.analogOut4Association.associationVal == config.getProfileBasedEnumValueAnalogType(HyperStatSplitConfiguration.HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
+            if (config.analogOut4Enabled.enabled && config.analogOut4Association.associationVal == config.getProfileBasedEnumValueAnalogType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 analogOut4Point.addMarker(Tags.WRITABLE)
                 analogOut4Point.addMarker(Tags.UNUSED)
             } else {
@@ -455,6 +459,7 @@ class HyperstatSplitReconfigurationHandler {
                     is HyperStatSplitCpuConfiguration -> return config.isAnalogCoolingEnabled() || config.isCoolStage1Enabled() ||
                             config.isCoolStage2Enabled() || config.isCoolStage3Enabled() ||
                             config.isCompressorStagesAvailable() || config.isAnalogCompressorEnabled()
+                    is Pipe2UVConfiguration -> return  true
 
                     else -> true
                 }
@@ -470,6 +475,7 @@ class HyperstatSplitReconfigurationHandler {
                     is HyperStatSplitCpuConfiguration -> return config.isAnalogHeatingEnabled() || config.isHeatStage1Enabled() ||
                             config.isHeatStage2Enabled() || config.isHeatStage3Enabled() ||
                             config.isCompressorStagesAvailable() || config.isAnalogCompressorEnabled()
+                    is Pipe2UVConfiguration -> return true
 
                     else -> true
                 }
@@ -504,7 +510,7 @@ class HyperstatSplitReconfigurationHandler {
 
             val isFanEnabledWithAllOptions = returnProfileBasedFanModeEnabledStatus(config)
 
-            if (config.isFanEnabled(config,HyperStatSplitConfiguration.HyperStatSplitControlType.FAN_ENABLED.name) && !isFanEnabledWithAllOptions) {
+            if (config.isFanEnabled(config,HyperStatSplitControlType.FAN_ENABLED.name) && !isFanEnabledWithAllOptions) {
                 hayStack.writeDefaultValById(fanModeId, 1.0)
                 hayStack.writeHisValById(fanModeId, 0.0)
                 FanModeCacheStorage.getHyperStatSplitFanModeCache().removeFanModeFromCache(fanModePoint["equipRef"].toString())
@@ -518,6 +524,7 @@ class HyperstatSplitReconfigurationHandler {
         private fun returnProfileBasedFanModeEnabledStatus(
             config: HyperStatSplitConfiguration
         ): Boolean = when (config) {
+
             is Pipe4UVConfiguration -> with(config) {
                 //Analog mapping
                 isAnyAnalogEnabledAndMapped(Pipe4UvAnalogOutControls.FAN_SPEED) ||
@@ -530,6 +537,13 @@ class HyperstatSplitReconfigurationHandler {
             is HyperStatSplitCpuConfiguration -> with(config) {
                 isLinearFanEnabled() || isStagedFanEnabled() ||
                         isFanLowEnabled() || isFanMediumEnabled() || isFanHighEnabled()
+            }
+
+            is Pipe2UVConfiguration -> with(config) {
+                isAnyRelayMappedAndEnabled(Pipe2UVRelayControls.FAN_LOW_SPEED)||
+                       isAnyRelayMappedAndEnabled(Pipe2UVRelayControls.FAN_MEDIUM_SPEED) ||
+                        isAnyRelayMappedAndEnabled(Pipe2UVRelayControls.FAN_HIGH_SPEED) ||
+                        isAnyAnalogMappedAndEnabled(Pipe2UvAnalogOutControls.FAN_SPEED)
             }
 
             else -> false

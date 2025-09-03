@@ -5,11 +5,14 @@ import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UvAnalogOutControls
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.composables.CancelDialog
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.Pipe4ViewModel
+import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.UnitVentilatorViewModel
+import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe4UvViewState
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
@@ -132,6 +135,10 @@ class Pipe4UVFragment : UnitVentilatorFragment(), OnPairingCompleteListener {
                         }
                         GenericView(viewModel)
                         ConfigurationsView(viewModel)
+                        AnalogOutDynamicConfig(viewModel)
+                        ProfileBasedAnalogOutView()
+                        OAODamperConfig(viewModel)
+                        DividerRow()
                         DisplayInDeviceConfig(viewModel)
                         PinPasswordView(viewModel)
                         MiscSettingConfig(viewModel)
@@ -142,19 +149,209 @@ class Pipe4UVFragment : UnitVentilatorFragment(), OnPairingCompleteListener {
         }
     }
 
+    @Composable
+    fun ProfileBasedAnalogOutView(){
+        CoolingControl(viewModel)
+        HeatingControl(viewModel)
+    }
+
 
     @Composable
-    fun ShowProgressBar() {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CircularProgressIndicator(color = ComposeUtil.primaryColor)
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(text = "Loading Profile Configuration")
+    fun CoolingControl(viewModel: UnitVentilatorViewModel, modifier: Modifier = Modifier) {
+        val key = when(viewModel){
+            is Pipe4ViewModel -> Pipe4UvAnalogOutControls.COOLING_WATER_MODULATING_VALVE.ordinal
+            else -> { Pipe4UvAnalogOutControls.COOLING_WATER_MODULATING_VALVE.ordinal}
+        }
+        Column(modifier = modifier) {
+            if (viewModel.isCoolingAOEnabled(key)) {
+                EnableCoolingVoltage(viewModel, key)
+            }
         }
     }
+
+
+
+    @Composable
+    fun EnableCoolingVoltage(viewModel: UnitVentilatorViewModel, type: Int) {
+        if (viewModel.isAnalogEnabledAndMapped(
+                viewModel.viewState.value.analogOut1Enabled,
+                viewModel.viewState.value.analogOut1Association,
+                type
+            )
+        ) {
+            MinMaxConfiguration("Analog-out1 at Min \nCooling Modulating Valve",
+                "Analog-out1 at Max \nCooling Modulating Valve",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut1MinMax.coolingWaterValveMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut1MinMax.coolingWaterValveMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as Pipe4UvViewState).analogOut1MinMax.coolingWaterValveMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as Pipe4UvViewState).analogOut1MinMax.coolingWaterValveMaxVoltage = it.value.toInt()
+                })
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                viewModel.viewState.value.analogOut2Enabled,
+                viewModel.viewState.value.analogOut2Association,
+                type
+            )
+        ) {
+            MinMaxConfiguration("Analog-out2 at Min \nCooling Modulating Valve",
+                "Analog-out2 at Max \nCooling Modulating Valve",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut2MinMax.coolingWaterValveMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut2MinMax.coolingWaterValveMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as Pipe4UvViewState).analogOut2MinMax.coolingWaterValveMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as Pipe4UvViewState).analogOut2MinMax.coolingWaterValveMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                viewModel.viewState.value.analogOut3Enabled,
+                viewModel.viewState.value.analogOut3Association,
+                type
+            )
+        ) {
+            MinMaxConfiguration("Analog-out3 at Min \nCooling Modulating Valve",
+                "Analog-out3 at Max \nCooling Modulating Valve",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut3MinMax.coolingWaterValveMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut3MinMax.coolingWaterValveMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as Pipe4UvViewState).analogOut3MinMax.coolingWaterValveMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as Pipe4UvViewState).analogOut3MinMax.coolingWaterValveMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                viewModel.viewState.value.analogOut4Enabled,
+                viewModel.viewState.value.analogOut4Association,
+                type
+            )
+        ) {
+            MinMaxConfiguration("Analog-out4 at Min \nCooling Modulating Valve",
+                "Analog-out4 at Max \nCooling Modulating Valve",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut4MinMax.coolingWaterValveMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut4MinMax.coolingWaterValveMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as Pipe4UvViewState).analogOut4MinMax.coolingWaterValveMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as Pipe4UvViewState).analogOut4MinMax.coolingWaterValveMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+    }
+
+    @Composable
+    fun HeatingControl(viewModel: UnitVentilatorViewModel, modifier: Modifier = Modifier) {
+
+        val key = when(viewModel){
+            is Pipe4ViewModel -> Pipe4UvAnalogOutControls.HEATING_WATER_MODULATING_VALVE.ordinal
+            else -> { Pipe4UvAnalogOutControls.HEATING_WATER_MODULATING_VALVE.ordinal}
+        }
+        Column(modifier = modifier) {
+            if (viewModel.isHeatingAOEnabled(key)) {
+                EnableHeatingVoltage(viewModel, key)
+            }
+        }
+    }
+
+    @Composable
+    fun EnableHeatingVoltage(viewModel: UnitVentilatorViewModel, type: Int) {
+        if (viewModel.isAnalogEnabledAndMapped(
+                viewModel.viewState.value.analogOut1Enabled,
+                viewModel.viewState.value.analogOut1Association,
+                type
+            )
+        ) {
+            MinMaxConfiguration("Analog-out1 at Min \nHeating Modulating Valve",
+                "Analog-out1 at Max \nHeating Modulating Valve",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value  as Pipe4UvViewState).analogOut1MinMax.hotWaterValveMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut1MinMax.hotWaterValveMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as Pipe4UvViewState).analogOut1MinMax.hotWaterValveMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as Pipe4UvViewState).analogOut1MinMax.hotWaterValveMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                viewModel.viewState.value.analogOut2Enabled,
+                viewModel.viewState.value.analogOut2Association,
+                type
+            )
+        ) {
+            MinMaxConfiguration("Analog-out2 at Min \nHeating Modulating Valve",
+                "Analog-out2 at Max \nHeating Modulating Valve",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut2MinMax.hotWaterValveMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut2MinMax.hotWaterValveMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as Pipe4UvViewState).analogOut2MinMax.hotWaterValveMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as Pipe4UvViewState).analogOut2MinMax.hotWaterValveMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                viewModel.viewState.value.analogOut3Enabled,
+                viewModel.viewState.value.analogOut3Association,
+                type
+            )
+        ) {
+            MinMaxConfiguration("Analog-out3 at Min \nHeating Modulating Valve",
+                "Analog-out3 at Max \nHeating Modulating Valve",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut3MinMax.hotWaterValveMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut3MinMax.hotWaterValveMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as Pipe4UvViewState).analogOut3MinMax.hotWaterValveMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as Pipe4UvViewState).analogOut3MinMax.hotWaterValveMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+        if (viewModel.isAnalogEnabledAndMapped(
+                viewModel.viewState.value.analogOut4Enabled,
+                viewModel.viewState.value.analogOut4Association,
+                type
+            )
+        ) {
+            MinMaxConfiguration("Analog-out4 at Min \nHeating Modulating Valve",
+                "Analog-out4 at Max \nHeating Modulating Valve",
+                viewModel.minMaxVoltage,
+                "V",
+                minDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut4MinMax.hotWaterValveMinVoltage.toString(),
+                maxDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut4MinMax.hotWaterValveMaxVoltage.toString(),
+                onMinSelected = {
+                    (viewModel.viewState.value as Pipe4UvViewState).analogOut4MinMax.hotWaterValveMinVoltage = it.value.toInt()
+                },
+                onMaxSelected = {
+                    (viewModel.viewState.value as Pipe4UvViewState).analogOut4MinMax.hotWaterValveMaxVoltage = it.value.toInt()
+                }
+            )
+        }
+    }
+
 
     override fun onPairingComplete() {
         this.closeAllBaseDialogFragments()

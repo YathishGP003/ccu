@@ -13,12 +13,15 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.CpuEconSensorBusTempAssociation
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration.HyperStatSplitControlType
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitProfile
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.UniversalInputs
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuAnalogControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UVConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UVRelayControls
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UvAnalogOutControls
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVRelayControls
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UvAnalogOutControls
@@ -31,6 +34,7 @@ import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuState
+import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe2UvViewState
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe4UvViewState
 import android.content.Context
 import android.os.Bundle
@@ -157,8 +161,7 @@ open class HyperStatSplitViewModel : ViewModel() {
             }
             sendTestSignalControlMessage()
             CcuLog.d(L.TAG_CCU_HSHST, "R1 ${device.relay1.readPointValue()} R2 ${device.relay2.readPointValue()} R3 ${device.relay3.readPointValue()} R4 ${device.relay4.readPointValue()} A1 ${device.relay5.readPointValue()}, R6 ${device.relay6.readPointValue()} r7 ${device.relay7.readPointValue()} R8 ${device.relay8.readPointValue()} , A1 ${device.analog1Out.readPointValue()} A2 ${device.analog2Out.readPointValue()} A3 ${device.analog3Out.readPointValue()} A4 ${device.analog4Out.readPointValue()}")
-        } else {
-            showToast("Please pair equip to send test command", context)
+        } else { showToast("Please pair equip to send test command", context)
             CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "Please pair equip to send test command")
             return
         }
@@ -200,6 +203,7 @@ open class HyperStatSplitViewModel : ViewModel() {
 
         if (equipRef != null) {
             val device = getDomainHyperStatSplitDevice(equipRef!!)
+            CcuLog.d("USER_TEST","DEVICES $device")
             return when (index) {
                 0 -> device.relay1.readPointValue() > 0
                 1 -> device.relay2.readPointValue() > 0
@@ -247,6 +251,10 @@ open class HyperStatSplitViewModel : ViewModel() {
 
             ProfileType.HYPERSTATSPLIT_CPU -> {
                 viewState.value = HyperStatSplitCpuState.fromProfileConfigToState(config as HyperStatSplitCpuConfiguration)
+            }
+
+            ProfileType.HYPERSTATSPLIT_2PIPE_UV -> {
+                viewState.value = Pipe2UvViewState.fromProfileConfigState(config as Pipe2UVConfiguration)
             }
 
             else -> {
@@ -344,6 +352,7 @@ open class HyperStatSplitViewModel : ViewModel() {
         val enumType = when (profileConfiguration) {
             is HyperStatSplitCpuConfiguration -> CpuAnalogControlType.values()
             is Pipe4UVConfiguration -> Pipe4UvAnalogOutControls.values()
+            is Pipe2UVConfiguration -> Pipe2UvAnalogOutControls.values()
             else -> CpuAnalogControlType.values()
         }
 
@@ -445,21 +454,6 @@ open class HyperStatSplitViewModel : ViewModel() {
     }
 
 
-    fun isAnyRelayMappedToControlForUnitVentilator(type: Pipe4UVRelayControls): Boolean {
-
-        fun isEnabledAndMapped(configState: ConfigState): Boolean {
-            return (configState.enabled && configState.association == type.ordinal)
-        }
-        return (isEnabledAndMapped(this.viewState.value.relay1Config) ||
-                isEnabledAndMapped(this.viewState.value.relay2Config) ||
-                isEnabledAndMapped(this.viewState.value.relay3Config) ||
-                isEnabledAndMapped(this.viewState.value.relay4Config) ||
-                isEnabledAndMapped(this.viewState.value.relay5Config) ||
-                isEnabledAndMapped(this.viewState.value.relay6Config) ||
-                isEnabledAndMapped(this.viewState.value.relay7Config) ||
-                isEnabledAndMapped(this.viewState.value.relay8Config))
-    }
-
     private fun isAnyRelayMappedToControl(
         type: CpuRelayType,
         ignoreConfig: ConfigState
@@ -486,6 +480,7 @@ open class HyperStatSplitViewModel : ViewModel() {
         return when (profileConfiguration) {
             is HyperStatSplitCpuConfiguration -> CpuAnalogControlType.valueOf(enumName).ordinal
             is Pipe4UVConfiguration -> Pipe4UvAnalogOutControls.valueOf(enumName).ordinal
+            is Pipe2UVConfiguration ->Pipe2UvAnalogOutControls.valueOf(enumName).ordinal
             else -> CpuAnalogControlType.valueOf(enumName).ordinal
         }
     }
@@ -495,6 +490,7 @@ open class HyperStatSplitViewModel : ViewModel() {
         return when (profileConfiguration) {
             is HyperStatSplitCpuConfiguration -> CpuRelayType.valueOf(enumName).ordinal
             is Pipe4UVConfiguration -> Pipe4UVRelayControls.valueOf(enumName).ordinal
+            is Pipe2UVConfiguration -> Pipe2UVRelayControls.valueOf(enumName).ordinal
             else -> {
                 HyperStatSplitControlType.valueOf(enumName).ordinal
             }

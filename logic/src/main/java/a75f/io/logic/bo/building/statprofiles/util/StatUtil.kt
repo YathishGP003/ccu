@@ -67,6 +67,9 @@ fun canWeDoHeating(conditioningMode: StandaloneConditioningMode): Boolean {
 fun canWeDoConditioning(basicSettings: BasicSettings): Boolean {
     return (basicSettings.conditioningMode != StandaloneConditioningMode.OFF)
 }
+fun canWeRunFan(basicSettings: BasicSettings): Boolean {
+    return (basicSettings.fanMode != StandaloneFanStage.OFF)
+}
 
 fun canWeOperate(basicSettings: BasicSettings) = canWeDoConditioning(basicSettings)
 

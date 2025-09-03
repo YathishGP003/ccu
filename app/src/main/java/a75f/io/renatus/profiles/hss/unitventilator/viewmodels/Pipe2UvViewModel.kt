@@ -4,7 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
 import a75f.io.domain.config.ProfileConfiguration
-import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
+import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
@@ -16,8 +16,9 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.CpuEconSensorBusTempAssociation
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.UniversalInputs
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVConfiguration
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UnitVentilatorProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UVConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UnitVentilatorProfile
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UvAnalogOutControls
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorProfile
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleFanMode
@@ -33,7 +34,7 @@ import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.
 import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.setOutputTypes
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
-import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe4UvViewState
+import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe2UvViewState
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
 import a75f.io.renatus.util.showErrorDialog
@@ -52,23 +53,42 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
-class Pipe4ViewModel : UnitVentilatorViewModel() {
+class Pipe2UvViewModel :UnitVentilatorViewModel(){
+
+
     override fun init(bundle: Bundle, context: Context, hayStack: CCUHsApi) {
         super.init(bundle, context, hayStack)
-        viewState = mutableStateOf(Pipe4UvViewState())
-        equipModel = ModelLoader.getSplitPipe4Model() as SeventyFiveFProfileDirective
+        viewState = mutableStateOf(Pipe2UvViewState())
+        equipModel = ModelLoader.getSplitPipe2Model() as SeventyFiveFProfileDirective
         deviceModel = ModelLoader.getHyperStatSplitDeviceModel() as SeventyFiveFDeviceDirective
 
-        if (L.getProfile(deviceAddress)!=null && L.getProfile(deviceAddress) is UnitVentilatorProfile){
+        if(L.getProfile(deviceAddress)!=null && L.getProfile(deviceAddress) is UnitVentilatorProfile) {
             hssProfile = L.getProfile(deviceAddress) as UnitVentilatorProfile
-            profileConfiguration = Pipe4UVConfiguration(deviceAddress.toInt(),nodeType.name,0,zoneRef,floorRef,profileType,equipModel).getActiveConfiguration()
-
+            profileConfiguration = Pipe2UVConfiguration(
+                deviceAddress.toInt(),
+                nodeType.name,
+                1,
+                zoneRef,
+                floorRef,
+                ProfileType.HYPERSTATSPLIT_2PIPE_UV,
+                equipModel
+            ).getActiveConfiguration()
             equipRef = profileConfiguration.equipId
         }
-        else {
-            profileConfiguration = Pipe4UVConfiguration(deviceAddress.toInt(), nodeType.name, 0, zoneRef, floorRef, profileType, equipModel).getDefaultConfiguration()
+        else
+        {
+            profileConfiguration = Pipe2UVConfiguration(
+                deviceAddress.toInt(),
+                nodeType.name,
+                1,
+                zoneRef,
+                floorRef,
+                ProfileType.HYPERSTATSPLIT_2PIPE_UV,
+                equipModel
+            ).getDefaultConfiguration()
         }
-        viewState.value = Pipe4UvViewState.fromProfileConfigToState(profileConfiguration as Pipe4UVConfiguration)
+
+        viewState.value = Pipe2UvViewState.fromProfileConfigState(profileConfiguration as Pipe2UVConfiguration)
         this.context = context
         this.hayStack = hayStack
 
@@ -77,10 +97,9 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
         isCopiedConfigurationAvailable()
     }
 
-
-
     override fun saveConfiguration() {
-        if(saveJob == null){
+
+        if (saveJob == null) {
 
             val genericValidation = profileGenericValidation()
             val profileValidation = profileBasedConfig()
@@ -88,22 +107,21 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
                 showErrorDialog(context, genericValidation.second)
                 return
             }
-            if(profileValidation.first){
+            if (profileValidation.first) {
                 showErrorDialog(context, profileValidation.second)
                 return
             }
             ProgressDialogUtils.showProgressDialog(context, "Saving Configuration")
             saveJob = viewModelScope.launch(highPriorityDispatcher) {
                 CCUHsApi.getInstance().resetCcuReady()
-                setUpPipe4Profile()
-                CcuLog.i(Domain.LOG_TAG, "HSS Pipe 4 Profile Setup complete")
+                setupPipe2UvProfile()
                 L.saveCCUState()
                 CCUHsApi.getInstance().setCcuReady()
-                CcuLog.i(Domain.LOG_TAG, "HSS Pipe 4  Profile Pairing complete")
+                CcuLog.i(Domain.LOG_TAG, "HSS Pipe 2  Profile Pairing complete")
                 hayStack.syncEntityTree()
                 withContext(Dispatchers.Main) {
                     context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                    showToast("HSS Pipe 4  Configuration saved successfully", context)
+                    showToast("HSS Pipe 2  Configuration saved successfully", context)
                     CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
                     ProgressDialogUtils.hideProgressDialog()
                     pairingCompleteListener.onPairingComplete()
@@ -113,59 +131,15 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
                 CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
             }
         }
-
-
     }
 
-    private fun profileBasedConfig(): Pair<Boolean,Spanned> {
-
-        if ((viewState.value as Pipe4UvViewState).controlVia == 0) {
-
-            if (profileType == ProfileType.HYPERSTATSPLIT_4PIPE_UV) {
-                if (isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.HEATING_WATER_MODULATING_VALVE.name) ||
-                    isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.COOLING_WATER_MODULATING_VALVE.name)
-                ) {
-                    return Pair(true, Html.fromHtml("The profile must have <b>Fully Modulating Valve</b> mapped in control via  when <b>Cooling Water Valve</b> or <b>Heating Water Valve</b> is selected in Analog-Out. Please map the <b>Fully Modulating Valve</b>  in control via option .", Html.FROM_HTML_MODE_LEGACY))
-                }
-
-            }
-        }
-
-        if ((viewState.value as Pipe4UvViewState).controlVia == 1) {
-            if (isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.FACE_DAMPER_VALVE.name)) {
-                return Pair(true, Html.fromHtml("The profile must have <b>Face & Bypass Damper </b> mapped in control via  when <b>Face & Bypass Modulating Damper </b> is selected in Analog-Out. Please map the <b>Face & Bypass Damper</b>  in control via option .", Html.FROM_HTML_MODE_LEGACY))
-            }
-        }
-
-        if ((viewState.value as Pipe4UvViewState).saTempering) {
-
-            if(!((isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.FAN_SPEED.name) ||
-                        isAnyRelayMappedToControlForUnitVentilator(HyperStatSplitControlType.FAN_LOW_SPEED_VENTILATION.name))&&
-                        ((isAnyUniversalInMapped(UniversalInputs.SUPPLY_AIR_TEMPERATURE))||isAnySensorBusMapped(CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY))&&
-                        (isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.DCV_MODULATING_DAMPER.name) ||
-                                isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.OAO_DAMPER.name)) &&
-                        (isAnyRelayMappedToControlForUnitVentilator(HyperStatSplitControlType.HEATING_WATER_VALVE.name)||
-                                isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.HEATING_WATER_MODULATING_VALVE.name)))
-            )
-            {
-                return Pair(true, Html.fromHtml("The profile must have one <b>Heating Water Valve, Fan Low Speed - Ventilation or Fan Speed in Analog-Out, Discharge Air temperature in Universal input or Sensor Bus and OAO Damper/DCV Damper</b> mapped when Supply Air Tempering is enabled", Html.FROM_HTML_MODE_LEGACY))
-            }
-
-        }
-        return Pair(false, Html.fromHtml("", Html.FROM_HTML_MODE_LEGACY))
-
-    }
-
-    private fun setUpPipe4Profile() {
-        (viewState.value as Pipe4UvViewState).updateConfigFromViewState(
-            profileConfiguration as Pipe4UVConfiguration
-        )
-
+    private fun setupPipe2UvProfile() {
+        (viewState.value as Pipe2UvViewState).updateViewState(profileConfiguration as Pipe2UVConfiguration)
         val equipBuilder = ProfileEquipBuilder(hayStack)
-        val equipDis = hayStack.siteName +  "-pipe4econ-" + profileConfiguration.nodeAddress
+        val equipDis = hayStack.siteName +  "-pipe2econ-" + profileConfiguration.nodeAddress
         val equipId :String
         if (profileConfiguration.isDefault) {
-             equipId = addEquipAndPoints(
+            equipId = addEquipAndPoints(
                 profileConfiguration,
                 hayStack,
                 equipModel,
@@ -195,7 +169,7 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
                     )
 
                     setOutputTypes(
-                        profileConfiguration as Pipe4UVConfiguration,
+                        profileConfiguration as Pipe2UVConfiguration,
                         hayStack
                     )
                     setScheduleType(profileConfiguration)
@@ -206,7 +180,7 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
                         1.0
                     )
 
-                    hssProfile = Pipe4UnitVentilatorProfile(equipId, deviceAddress)
+                    hssProfile = Pipe2UnitVentilatorProfile(equipId, deviceAddress)
                     L.ccu().zoneProfiles.add(hssProfile)
                 }
 
@@ -214,7 +188,8 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
 
         }
         else {
-             equipId = equipBuilder.updateEquipAndPoints(
+
+            equipId = equipBuilder.updateEquipAndPoints(
                 profileConfiguration,
                 equipModel,
                 hayStack.site!!.id,
@@ -252,13 +227,13 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
                         hayStack
                     )
                     mapSensorBusPressureLogicalPoint(
-                        profileConfiguration as Pipe4UVConfiguration,
+                        profileConfiguration as Pipe2UVConfiguration,
                         equipId,
                         hayStack
                     )
                     setScheduleType(profileConfiguration)
                     setOutputTypes(
-                        profileConfiguration as Pipe4UVConfiguration,
+                        profileConfiguration as Pipe2UVConfiguration,
                         hayStack
                     )
 
@@ -272,19 +247,58 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
         }
 
         profileConfiguration.apply {
-            val pipe4Equip = Pipe4UVEquip(equipId)
-            val possibleConditioningMode =
-                getUvPossibleConditioningMode(profileConfiguration as UnitVentilatorConfiguration)
-            val possibleFanMode =
-                getPossibleFanMode(pipe4Equip)
-            modifyFanMode(possibleFanMode.ordinal, pipe4Equip.fanOpMode)
+            val possibleConditioningMode = getUvPossibleConditioningMode(profileConfiguration as UnitVentilatorConfiguration)
+            val pipe2UVEquip = Pipe2UVEquip(equipId)
+            val possibleFanMode = getPossibleFanMode(pipe2UVEquip)
+            modifyFanMode(possibleFanMode.ordinal, pipe2UVEquip.fanOpMode)
             modifyConditioningMode(
                 possibleConditioningMode.ordinal,
-                pipe4Equip.conditioningMode,
+                pipe2UVEquip.conditioningMode,
                 allStandaloneProfileConditions
             )
             DesiredTempDisplayMode.setModeType(zoneRef, hayStack)
         }
+    }
+
+
+    private fun profileBasedConfig(): Pair<Boolean, Spanned> {
+
+        if ((viewState.value as Pipe2UvViewState).controlVia == 0) {
+
+            if(profileType == ProfileType.HYPERSTATSPLIT_2PIPE_UV) {
+                if (isAnyAnalogEnabledAndMapped(Pipe2UvAnalogOutControls.WATER_MODULATING_VALVE.name)) {
+                    return Pair(true, Html.fromHtml("The profile must have <b>Fully Modulating Valve</b> mapped in control via  when <b> Water Modulating Valve</b> is selected in Analog-Out. Please map the <b>Fully Modulating Valve</b>  in control via option .", Html.FROM_HTML_MODE_LEGACY))
+                }
+            }
+        }
+
+        if ((viewState.value as Pipe2UvViewState).controlVia == 1) {
+            if (isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.FACE_DAMPER_VALVE.name)) {
+                return Pair(true, Html.fromHtml("The profile must have <b>Face & Bypass Damper </b> mapped in control via  when <b>Face & Bypass Modulating Damper </b> is selected in Analog-Out. Please map the <b>Face & Bypass Damper</b>  in control via option .", Html.FROM_HTML_MODE_LEGACY))
+            }
+        }
+
+        if ((viewState.value as Pipe2UvViewState).saTempering) {
+
+            if(!((isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.FAN_SPEED.name) ||
+                        isAnyRelayMappedToControlForUnitVentilator(HyperStatSplitControlType.FAN_LOW_SPEED_VENTILATION.name))&&
+                        ((isAnyUniversalInMapped(UniversalInputs.SUPPLY_AIR_TEMPERATURE))||isAnySensorBusMapped(
+                            CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY))&&
+                        (isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.DCV_MODULATING_DAMPER.name) ||
+                                isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.OAO_DAMPER.name)) &&
+                        (isAnyRelayMappedToControlForUnitVentilator(HyperStatSplitControlType.WATER_VALVE.name)||
+                                isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.WATER_MODULATING_VALVE.name)))
+            )
+            {
+                return Pair(true, Html.fromHtml("The profile must have one <b> Water Valve, Fan Low Speed - Ventilation or Fan Speed in Analog-Out, Discharge Air temperature in Universal input or Sensor Bus and OAO Damper/DCV Damper</b> mapped when Supply Air Tempering is enabled", Html.FROM_HTML_MODE_LEGACY))
+            }
+            if(!isAnySupplyWaterTemperatureMappedUniversal())
+            {
+                return Pair(true, Html.fromHtml("The profile must have <b> Supply Water Temperature</b> mapped in Universal Input when Supply Air Tempering is enabled", Html.FROM_HTML_MODE_LEGACY))
+            }
+        }
+        return Pair(false, Html.fromHtml("", Html.FROM_HTML_MODE_LEGACY))
+
     }
 
     private fun addEquipAndPoints(
@@ -296,7 +310,7 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
         requireNotNull(equipModel)
         requireNotNull(deviceModel)
         val equipBuilder = ProfileEquipBuilder(hayStack)
-        val equipDis = hayStack.siteName + "-pipe4econ-" + config.nodeAddress
+        val equipDis = hayStack.siteName + "-pipe2econ-" + config.nodeAddress
         CcuLog.i(Domain.LOG_TAG, " buildEquipAndPoints ${equipModel.domainName} profileType ${config.profileType}" )
         val equipId = equipBuilder.buildEquipAndPoints(
             config, equipModel, hayStack.site!!
@@ -319,26 +333,27 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
     }
 
     override fun hasUnsavedChanges(): Boolean {
-        return !Pipe4UvViewState.fromProfileConfigToState(profileConfiguration as Pipe4UVConfiguration).equalsViewStatePipe4(viewState.value as Pipe4UvViewState)
+        return !Pipe2UvViewState.fromProfileConfigState(profileConfiguration as Pipe2UVConfiguration).equalsViewStatePipe2(viewState.value as Pipe2UvViewState)
     }
 
     fun cancelConfirm() {
         if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is UnitVentilatorProfile) {
             hssProfile = L.getProfile(deviceAddress) as UnitVentilatorProfile
-            profileConfiguration = Pipe4UVConfiguration(
+            profileConfiguration = Pipe2UVConfiguration(
                 deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef, profileType, equipModel
             ).getActiveConfiguration()
         } else {
-            profileConfiguration = Pipe4UVConfiguration(
+            profileConfiguration = Pipe2UVConfiguration(
                 deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef, profileType, equipModel
             ).getDefaultConfiguration()
         }
 
         viewState.value =
-            Pipe4UvViewState.fromProfileConfigToState(profileConfiguration as Pipe4UVConfiguration)
+            Pipe2UvViewState.fromProfileConfigState(profileConfiguration as Pipe2UVConfiguration)
 
         openCancelDialog = false
     }
+
 }

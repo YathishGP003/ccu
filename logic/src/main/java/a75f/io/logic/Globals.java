@@ -66,6 +66,7 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.hpu.HyperStatHp
 import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.monitoring.HyperStatV2MonitoringProfile;
 import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UnitVentilatorProfile;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UnitVentilatorProfile;
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatCpuProfile;
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatHpuProfile;
@@ -620,6 +621,10 @@ public class Globals {
                         case HYPERSTATSPLIT_4PIPE_UV:
                             Pipe4UnitVentilatorProfile pipe4UvProfile = new Pipe4UnitVentilatorProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(pipe4UvProfile);
+                            break;
+                        case HYPERSTATSPLIT_2PIPE_UV:
+                            Pipe2UnitVentilatorProfile pipe2UvProfile = new Pipe2UnitVentilatorProfile(eq.getId(), Short.parseShort(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(pipe2UvProfile);
                             break;
 
                         case MODBUS_PAC:

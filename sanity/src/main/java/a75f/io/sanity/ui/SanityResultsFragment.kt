@@ -4,7 +4,6 @@ import a75f.io.sanity.framework.SanityRunner
 import a75f.io.sanity.R
 import android.app.Dialog
 import android.os.Bundle
-import android.widget.ArrayAdapter
 import android.widget.ListView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
@@ -26,7 +25,7 @@ class SanityResultsFragment : DialogFragment() {
         listView.adapter = adapter
 
         val runner = SanityRunner()
-        viewModel.runSanityCheck(runner)
+        viewModel.runSanityCheck(runner, requireContext())
 
         lifecycleScope.launchWhenStarted {
             viewModel.results.collect { pairList ->

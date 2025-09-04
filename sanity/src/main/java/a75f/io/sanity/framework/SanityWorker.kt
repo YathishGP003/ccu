@@ -1,7 +1,7 @@
 package a75f.io.sanity.framework
 
+import a75f.io.logger.CcuLog
 import android.content.Context
-import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 
@@ -11,7 +11,7 @@ class SanityWorker(
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
-        Log.d(SANITTY_TAG, "SanityWorker started")
+        CcuLog.d(SANITTY_TAG, "SanityWorker started")
         val sanityManager = SanityManager()
         sanityManager.runOnceAndSaveReport(SanityRunner(), this.applicationContext)
         return Result.success()

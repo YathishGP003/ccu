@@ -1,8 +1,8 @@
 package a75f.io.sanity.framework
 
 import a75f.io.alerts.AlertManager
+import a75f.io.logger.CcuLog
 import android.content.Context
-import android.util.Log
 import androidx.work.Data
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
@@ -33,11 +33,11 @@ class SanityManager {
             }
         }
         if(failCount > 0) {
-            Log.e(SANITTY_TAG, "Sanity checks completed with $failCount failures.")
+            CcuLog.e(SANITTY_TAG, "Sanity checks completed with $failCount failures.")
         } else {
             // Clear any existing sanity alerts if all checks passed
             AlertManager.getInstance().fixCCUSanityAlerts()
-            Log.i(SANITTY_TAG, "Sanity checks completed successfully with no failures.")
+            CcuLog.i(SANITTY_TAG, "Sanity checks completed successfully with no failures.")
         }
     }
 
@@ -57,7 +57,7 @@ class SanityManager {
         runner: SanityRunner,
         context: Context
     ) {
-        Log.i(SANITTY_TAG, "Running sanity tests and saving report...")
+        CcuLog.i(SANITTY_TAG, "Running sanity tests and saving report...")
         runBlocking {
             val prefs = context.getSharedPreferences("ccu_sanity_report", Context.MODE_PRIVATE)
             val editor = prefs.edit()
@@ -93,7 +93,7 @@ class SanityManager {
     }
 
     fun scheduleAllSanityPeriodic(context: Context, periodHours: Long) {
-        Log.i(SANITTY_TAG, "Scheduling all sanity suites periodic work every $periodHours hours")
+        CcuLog.i(SANITTY_TAG, "Scheduling all sanity suites periodic work every $periodHours hours")
         val data = Data.Builder()
             .putString("suite_name", "all")
             .build()
@@ -112,6 +112,4 @@ class SanityManager {
             workRequest
         )
     }
-
-
 }

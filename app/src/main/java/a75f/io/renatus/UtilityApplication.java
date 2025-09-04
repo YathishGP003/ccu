@@ -2,6 +2,7 @@ package a75f.io.renatus;
 
 import static a75f.io.alerts.AlertsConstantsKt.DEVICE_RESTART;
 import static a75f.io.alerts.model.AlertCauses.CCU_CRASH;
+import static a75f.io.api.haystack.Constants.TWENTY_FOUR_HOURS;
 import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
 import static a75f.io.logic.util.PreferenceUtil.getSyncStartTime;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
@@ -88,6 +89,7 @@ import a75f.io.renatus.schedules.FileBackupService;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.RebootDataCache;
 import a75f.io.restserver.server.HttpServer;
+import a75f.io.sanity.framework.SanityManager;
 import a75f.io.sitesequencer.SequenceManager;
 import a75f.io.sitesequencer.SequencerSchedulerUtil;
 import a75f.io.usbserial.SerialEvent;
@@ -220,6 +222,7 @@ public abstract class UtilityApplication extends Application implements Globals.
             cancelScheduleJobToResubscribeBacnetMstpCOV("Bacnet MSTP not initialized");
         }
 
+        new SanityManager().scheduleAllSanityPeriodic(getApplicationContext(), TWENTY_FOUR_HOURS);
     }
 
     private void scheduleAlertCleanUpJob() {

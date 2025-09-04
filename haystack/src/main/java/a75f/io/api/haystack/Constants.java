@@ -7,4 +7,5 @@ package a75f.io.api.haystack;
 public class Constants {
     public static final String BUILDING_OCCUPANCY_DIS = "Building Occupancy";
     public static final String KIND_NUMBER = "Number";
+    public static final int TWENTY_FOUR_HOURS = 24;
 }

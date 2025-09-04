@@ -581,8 +581,8 @@ public class VavStagedRtu extends VavSystemProfile {
             status.append(vfdSystemEquip.getFanSignal().readHisVal() > 0 ? " Analog Fan ON " : "");
         }
 
-        if (status.toString().isEmpty() && systemEquip.getConditioningStages().getFanEnable().readHisVal() > 0) {
-            status.append("Fan ON");
+        if (!status.toString().contains("Fan Stages") && systemEquip.getConditioningStages().getFanEnable().readHisVal() > 0) {
+            status.append("| Fan ON");
         }
 
         if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU) {

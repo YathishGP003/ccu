@@ -226,7 +226,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
                     1 -> viewModel.viewState.value.analogOut2Association = association.index
                     2 -> viewModel.viewState.value.analogOut3Association = association.index
                 }
-            }, testVal = 0.0, onTestSignalSelected = { viewModel.updateTestAnalogOut(index+1 , it.toInt()) }, padding = 7)
+            }, testVal = viewModel.getAnalogOutValue(index+1) ?: 0.0, onTestSignalSelected = { viewModel.updateTestAnalogOut(index+1 , it.toInt()) }, padding = 7)
         }
     }
 

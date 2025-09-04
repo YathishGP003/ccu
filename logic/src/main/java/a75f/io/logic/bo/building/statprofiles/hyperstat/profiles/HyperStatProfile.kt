@@ -363,6 +363,15 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
             0, equip.dcvLoopOutput,
             (equip is HpuV2Equip), 0, if (equip is HpuV2Equip) equip.compressorLoopOutput else null,
         )
+
+        coolingLoopOutput = equip.coolingLoopOutput.readHisVal().toInt()
+        heatingLoopOutput = equip.heatingLoopOutput.readHisVal().toInt()
+        fanLoopOutput = equip.fanLoopOutput.readHisVal().toInt()
+        dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
+        if (equip is HpuV2Equip) {
+            compressorLoopOutput = equip.compressorLoopOutput.readHisVal().toInt()
+        }
+
         resetLogicalPoints()
         resetEquip(equip)
         HyperStatUserIntentHandler.updateHyperStatStatus(ZoneTempState.TEMP_DEAD, equip, logTag)

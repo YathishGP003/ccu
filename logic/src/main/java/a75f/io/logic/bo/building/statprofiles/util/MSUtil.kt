@@ -99,7 +99,7 @@ fun getMyStatDevice(nodeAddress: Int): HashMap<Any, Any> {
 
 fun updateLogicalPoint(pointId: String?, value: Double) {
     if (pointId != null) {
-        CCUHsApi.getInstance().writeHisValById(pointId, value)
+        CCUHsApi.getInstance().writePointValue(CCUHsApi.getInstance().readEntity("id == $pointId"), value)
     } else {
         CcuLog.i(L.TAG_CCU_MSHST, "updateLogicalPointIdValue: But point id is null !!")
     }

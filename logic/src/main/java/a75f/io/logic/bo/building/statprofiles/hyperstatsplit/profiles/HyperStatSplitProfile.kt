@@ -317,15 +317,24 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
     }
 
     fun updateLoopOutputs(hssEquip: HyperStatSplitEquip) {
-        hssEquip.coolingLoopOutput.writeHisVal(coolingLoopOutput.toDouble())
-        hssEquip.heatingLoopOutput.writeHisVal(heatingLoopOutput.toDouble())
-        hssEquip.fanLoopOutput.writeHisVal(fanLoopOutput.toDouble())
-        hssEquip.compressorLoopOutput.writeHisVal(compressorLoopOutput.toDouble())
+        hssEquip.coolingLoopOutput.writePointValue(coolingLoopOutput.toDouble())
+        hssEquip.heatingLoopOutput.writePointValue(heatingLoopOutput.toDouble())
+        hssEquip.fanLoopOutput.writePointValue(fanLoopOutput.toDouble())
+        hssEquip.compressorLoopOutput.writePointValue(compressorLoopOutput.toDouble())
 
-        hssEquip.economizingLoopOutput.writeHisVal(economizingLoopOutput.toDouble())
-        hssEquip.dcvLoopOutput.writeHisVal(dcvLoopOutput.toDouble())
-        hssEquip.outsideAirLoopOutput.writeHisVal(outsideAirLoopOutput.toDouble())
-        hssEquip.outsideAirFinalLoopOutput.writeHisVal(outsideAirFinalLoopOutput.toDouble())
+        hssEquip.economizingLoopOutput.writePointValue(economizingLoopOutput.toDouble())
+        hssEquip.dcvLoopOutput.writePointValue(dcvLoopOutput.toDouble())
+        hssEquip.outsideAirLoopOutput.writePointValue(outsideAirLoopOutput.toDouble())
+        hssEquip.outsideAirFinalLoopOutput.writePointValue(outsideAirFinalLoopOutput.toDouble())
+
+        coolingLoopOutput = hssEquip.coolingLoopOutput.readHisVal().toInt()
+        heatingLoopOutput = hssEquip.heatingLoopOutput.readHisVal().toInt()
+        fanLoopOutput = hssEquip.fanLoopOutput.readHisVal().toInt()
+        compressorLoopOutput = hssEquip.compressorLoopOutput.readHisVal().toInt()
+        economizingLoopOutput = hssEquip.economizingLoopOutput.readHisVal().toInt()
+        dcvLoopOutput = hssEquip.dcvLoopOutput.readHisVal().toInt()
+        outsideAirLoopOutput = hssEquip.outsideAirLoopOutput.readHisVal().toInt()
+        outsideAirFinalLoopOutput = hssEquip.outsideAirFinalLoopOutput.readHisVal().toInt()
     }
 
     override fun getNodeAddresses() : HashSet<Short> {
@@ -609,7 +618,8 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
 
         val dcvAvailableNum = if (dcvAvailable) 1.0 else 0.0
         hssEquip.dcvAvailable.writeHisVal(dcvAvailableNum)
-        hssEquip.dcvLoopOutput.writeHisVal(dcvLoopOutput.toDouble())
+        hssEquip.dcvLoopOutput.writePointValue(dcvLoopOutput.toDouble())
+        dcvLoopOutput = hssEquip.dcvLoopOutput.readHisVal().toInt()
         hssEquip.outsideAirCalculatedMinDamper.writeHisVal(outsideAirCalculatedMinDamper.toDouble())
     }
 
@@ -943,7 +953,8 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
                         + " outsideAirFinalLoopOutput " + outsideAirFinalLoopOutput + " effectiveOutsideDamperMinOpen " + effectiveOutsideDamperMinOpen
             )
 
-            hssEquip.outsideAirFinalLoopOutput.writeHisVal(outsideAirFinalLoopOutput.toDouble())
+            hssEquip.outsideAirFinalLoopOutput.writePointValue(outsideAirFinalLoopOutput.toDouble())
+            outsideAirFinalLoopOutput = hssEquip.outsideAirFinalLoopOutput.readHisVal().toInt()
             hssEquip.oaoDamper.writeHisVal(outsideAirFinalLoopOutput.toDouble())
 
             val matThrottleNumber = if (matThrottle) 1.0 else 0.0

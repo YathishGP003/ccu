@@ -99,7 +99,7 @@ class BypassDamperProfile(equipRef: String, addr: Short): ZoneProfile() {
             bypassLoop.dumpWithTag("CCU_BYPASS")
         }
 
-        bdEquip.bypassDamperLoopOutput.writeHisVal(bypassLoopOp)
+        bdEquip.bypassDamperLoopOutput.writePointValue(bypassLoopOp)
         bdEquip.bypassDamperPos.writeHisVal(bypassDamper.currentPosition.toDouble())
 
     }

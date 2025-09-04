@@ -345,6 +345,11 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
             dcvLoopOutput, equip.dcvLoopOutput,
         )
 
+        coolingLoopOutput = equip.coolingLoopOutput.readHisVal().toInt()
+        heatingLoopOutput = equip.heatingLoopOutput.readHisVal().toInt()
+        fanLoopOutput = equip.fanLoopOutput.readHisVal().toInt()
+        dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
+
         updateTitle24LoopCounter(hyperStatTuners, basicSettings)
 
         if (basicSettings.fanMode != StandaloneFanStage.OFF) {

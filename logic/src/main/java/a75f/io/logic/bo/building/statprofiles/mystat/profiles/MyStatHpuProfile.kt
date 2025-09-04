@@ -137,6 +137,13 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
             dcvLoopOutput, equip.dcvLoopOutput,
             true, compressorLoopOutput, equip.compressorLoopOutput
         )
+
+        coolingLoopOutput = equip.coolingLoopOutput.readHisVal().toInt()
+        heatingLoopOutput = equip.heatingLoopOutput.readHisVal().toInt()
+        fanLoopOutput = equip.fanLoopOutput.readHisVal().toInt()
+        dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
+        compressorLoopOutput = equip.compressorLoopOutput.readHisVal().toInt()
+
         if (basicSettings.fanMode != MyStatFanStages.OFF) {
             operateRelays(config,  basicSettings, equip, controllerFactory)
             operateAnalogOutputs(config, equip, basicSettings, equip.analogOutStages, relayLogicalPoints)

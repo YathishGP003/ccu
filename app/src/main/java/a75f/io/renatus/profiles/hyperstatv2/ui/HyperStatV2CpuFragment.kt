@@ -205,7 +205,7 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
                             2 -> viewModel.viewState.value.analogOut3Association = association.index
                         }
 
-                    }, testVal = 0.0,
+                    }, testVal = viewModel.getAnalogOutValue(index+1) ?: 0.0,
                     onTestSignalSelected = {
                             viewModel.updateTestAnalogOut(index+1 , it.toInt())
                         },

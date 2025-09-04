@@ -164,6 +164,11 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
             dcvLoopOutput, equip.dcvLoopOutput
         )
 
+        coolingLoopOutput = equip.coolingLoopOutput.readHisVal().toInt()
+        heatingLoopOutput = equip.heatingLoopOutput.readHisVal().toInt()
+        fanLoopOutput = equip.fanLoopOutput.readHisVal().toInt()
+        dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
+
         operateRelays(config as Pipe2Configuration, basicSettings, equip, userIntents, controllerFactory)
         operateAnalogOutputs(config, equip, basicSettings, equip.analogOutStages, userIntents)
         processForWaterSampling(equip, hyperStatTuners, config, equip.relayStages, basicSettings)

@@ -72,7 +72,8 @@ fun updateLogicalPoint(point: PhysicalPoint, value: Double) {
 }
 
 fun updateSensorData(domainName: String, equipRef: String, value: Double) {
-    hayStack.writeHisValByQuery("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"", value)
+    val map = hayStack.read("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
+    hayStack.writePointValue(map, value)
 }
 
 

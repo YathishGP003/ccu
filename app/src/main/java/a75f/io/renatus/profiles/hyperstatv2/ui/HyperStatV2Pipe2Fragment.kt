@@ -197,7 +197,7 @@ class HyperStatV2Pipe2Fragment : HyperStatFragmentV2() {
                         2 -> viewModel.viewState.value.analogOut3Association = association.index
                     }
 
-                }, testVal = 0.0, onTestSignalSelected = { viewModel.updateTestAnalogOut(index+1 , it.toInt()) }, padding = 7)
+                }, testVal = viewModel.getAnalogOutValue(index+1) ?: 0.0, onTestSignalSelected = { viewModel.updateTestAnalogOut(index+1 , it.toInt()) }, padding = 7)
         }
     }
     @Composable

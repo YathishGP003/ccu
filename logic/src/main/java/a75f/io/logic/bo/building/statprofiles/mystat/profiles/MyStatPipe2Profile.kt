@@ -157,6 +157,11 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
             dcvLoopOutput, equip.dcvLoopOutput,
         )
 
+        coolingLoopOutput = equip.coolingLoopOutput.readHisVal().toInt()
+        heatingLoopOutput = equip.heatingLoopOutput.readHisVal().toInt()
+        fanLoopOutput = equip.fanLoopOutput.readHisVal().toInt()
+        dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
+
         operateRelays(config as MyStatPipe2Configuration, basicSettings, equip, userIntents, controllerFactory)
         handleAnalogOutState(config, equip, basicSettings, equip.analogOutStages, userIntents)
         processForWaterSampling(equip, myStatTuners, config, equip.relayStages, basicSettings)

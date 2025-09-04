@@ -126,6 +126,11 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
             dcvLoopOutput, equip.dcvLoopOutput,
         )
 
+        coolingLoopOutput = equip.coolingLoopOutput.readHisVal().toInt()
+        heatingLoopOutput = equip.heatingLoopOutput.readHisVal().toInt()
+        fanLoopOutput = equip.fanLoopOutput.readHisVal().toInt()
+        dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
+
         updateTitle24LoopCounter(myStatTuners, basicSettings)
         if (basicSettings.fanMode != MyStatFanStages.OFF) {
             operateRelays(config, basicSettings, equip, controllerFactory)

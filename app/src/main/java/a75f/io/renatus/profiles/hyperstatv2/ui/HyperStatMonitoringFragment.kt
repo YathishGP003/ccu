@@ -20,6 +20,7 @@ import a75f.io.renatus.profiles.hyperstatv2.viewmodels.HyperStatViewModel
 import a75f.io.renatus.profiles.hyperstatv2.viewmodels.MonitoringModel
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
 import a75f.io.renatus.profiles.system.advancedahu.Option
+import a75f.io.renatus.profiles.system.advancedahu.duplicateError
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -53,7 +54,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -350,7 +350,12 @@ class HyperStatMonitoringFragment : BaseDialogFragment(), OnPairingCompleteListe
                         contentAlignment = Alignment.CenterEnd
                     ) {
                         SaveTextView(SET) {
-                            viewModel.saveConfiguration()
+                            val error = viewModel.isSameFanStatusPairedInBothThermistors()
+                            if (error.isNotEmpty()) {
+                                showErrorDialog(requireContext(), duplicateError(error))
+                            } else {
+                                viewModel.saveConfiguration()
+                            }
                         }
                     }
                 }

@@ -684,106 +684,77 @@ class NonTempProfileViewModel : ViewModel(), PointSubscriber {
 
 
         if (monitoringPoints["isTh1Enable"] == "true") {
-            if (UnitUtils.isCelsiusTunerAvailableStatus() &&
-                (monitoringPoints["Thermistor1"].toString() != "Generic Fault (NC)")
-                && (monitoringPoints["Thermistor1"].toString() != "Generic Fault (NO)")) {
-                val label = monitoringPoints["Thermistor1"].toString() +
-                        " ( Th1 ) " + " : "
-                val value = (UnitUtils.fahrenheitToCelsiusTwoDecimal(
-                    monitoringPoints["Th1Val"].toString().toDouble()
-                ).toString()) + " " + (" \u00B0C")
-                headerViewItems.add(
-                    HeaderViewItem(
-                        id = hyperStatDevice.th1In.readPoint().pointRef,
-                        disName = label,
-                        currentValue = value,
-                        usesDropdown = false
-                    )
-                )
+            val th1Label = monitoringPoints["Thermistor1"].toString() + " ( Th1 ) : "
+            val thermistor1Val = monitoringPoints["Th1Val"]?.toString()?.toDoubleOrNull() ?: 0.0
+            val thermistor1Status = monitoringPoints["Thermistor1"].toString()
 
-            } else if (monitoringPoints["Thermistor1"].toString() == "Generic Fault (NC)"
-                || monitoringPoints["Thermistor1"].toString() == "Generic Fault (NO)") {
-                val label = monitoringPoints["Thermistor1"].toString() +
-                        " ( Th1 ) " + " : "
-                val value =
-                    (if (monitoringPoints["Th1Val"] as Double > 0) "Fault" else "Normal")
+            val th1Value = when {
+                UnitUtils.isCelsiusTunerAvailableStatus()
+                        && thermistor1Status != "Generic Fault (NC)"
+                        && thermistor1Status != "Generic Fault (NO)"
+                        && thermistor1Status != "Fan Run Status (NO)"
+                        && thermistor1Status != "Fan Run Status (NC)"-> {
+                    "${UnitUtils.fahrenheitToCelsiusTwoDecimal(thermistor1Val)} \u00B0C"
+                }
 
-                headerViewItems.add(
-                    HeaderViewItem(
-                        id = hyperStatDevice.th1In.readPoint().pointRef,
-                        disName = label,
-                        currentValue = value,
-                        usesDropdown = false
-                    )
-                )
-            } else {
-                val label = monitoringPoints["Thermistor1"].toString() +
-                        " ( Th1 ) " + " : "
-                val unit3 =
-                    if (monitoringPoints["Unit3"] != null) monitoringPoints["Unit3"].toString() else ""
-                val value = (monitoringPoints["Th1Val"].toString()) + " " + unit3
+                thermistor1Status == "Generic Fault (NC)" || thermistor1Status == "Generic Fault (NO)" -> {
+                    if (thermistor1Val > 0) "Fault" else "Normal"
+                }
 
-                headerViewItems.add(
-                    HeaderViewItem(
-                        id = hyperStatDevice.th1In.readPoint().pointRef,
-                        disName = label,
-                        currentValue = value,
-                        usesDropdown = false
-                    )
-                )
+                thermistor1Status == "Fan Run Status (NO)" || thermistor1Status == "Fan Run Status (NC)" -> {
+                    if (thermistor1Val > 0) "Fan ON" else "Fan OFF"
+                }
+
+                else -> {
+                    "$thermistor1Val ${monitoringPoints["Unit3"] ?: ""}"
+                }
             }
+
+            headerViewItems.add(
+                HeaderViewItem(
+                    id = hyperStatDevice.th1In.readPoint().pointRef,
+                    disName = th1Label,
+                    currentValue = th1Value,
+                    usesDropdown = false
+                )
+            )
         }
 
         if (monitoringPoints["isTh2Enable"] == "true") {
+            val th2Label = monitoringPoints["Thermistor2"].toString() + " ( Th2 ) : "
+            val thermistor2Val = monitoringPoints["Th2Val"]?.toString()?.toDoubleOrNull() ?: 0.0
+            val thermistor2Status = monitoringPoints["Thermistor2"].toString()
 
-            if (UnitUtils.isCelsiusTunerAvailableStatus()
-                && (monitoringPoints["Thermistor2"].toString() != "Generic Fault (NC)")
-                && (monitoringPoints["Thermistor2"].toString() != "Generic Fault (NO)")) {
-                val label = monitoringPoints["Thermistor2"].toString() +
-                        " ( Th2 ) " + " : "
-                val value = (UnitUtils.fahrenheitToCelsiusTwoDecimal(
-                    monitoringPoints["Th2Val"].toString().toDouble()
-                ).toString()) + " " + (" \u00B0C")
+            val th2Value = when {
+                UnitUtils.isCelsiusTunerAvailableStatus()
+                        && thermistor2Status != "Generic Fault (NC)"
+                        && thermistor2Status != "Generic Fault (NO)"
+                        && thermistor2Status != "Fan Run Status (NO)"
+                        && thermistor2Status != "Fan Run Status (NC)"-> {
+                    "${UnitUtils.fahrenheitToCelsiusTwoDecimal(thermistor2Val)} \u00B0C"
+                }
 
-                headerViewItems.add(
-                    HeaderViewItem(
-                        id = hyperStatDevice.th2In.readPoint().pointRef,
-                        disName = label,
-                        currentValue = value,
-                        usesDropdown = false
-                    )
-                )
+                thermistor2Status == "Generic Fault (NC)" || thermistor2Status == "Generic Fault (NO)" -> {
+                    if (thermistor2Val > 0) "Fault" else "Normal"
+                }
 
-            } else if (monitoringPoints["Thermistor2"].toString() == "Generic Fault (NC)"
-                || monitoringPoints["Thermistor2"].toString() == "Generic Fault (NO)") {
-                val label = monitoringPoints["Thermistor2"].toString() +
-                        " ( Th2 ) " + " : "
-                val value =
-                    (if (monitoringPoints["Th2Val"] as Double > 0) "Fault" else "Normal")
+                thermistor2Status == "Fan Run Status (NO)" || thermistor2Status == "Fan Run Status (NC)" -> {
+                    if (thermistor2Val > 0) "Fan ON" else "Fan OFF"
+                }
 
-                headerViewItems.add(
-                    HeaderViewItem(
-                        id = hyperStatDevice.th2In.readPoint().pointRef,
-                        disName = label,
-                        currentValue = value,
-                        usesDropdown = false
-                    )
-                )
-            } else {
-                val label = monitoringPoints["Thermistor2"].toString() +
-                        " ( Th2 ) " + " : "
-                val value =
-                    (monitoringPoints["Th2Val"].toString()) + " " + (monitoringPoints["Unit4"].toString())
-
-                headerViewItems.add(
-                    HeaderViewItem(
-                        id = hyperStatDevice.th2In.readPoint().pointRef,
-                        disName = label,
-                        currentValue = value,
-                        usesDropdown = false
-                    )
-                )
+                else -> {
+                    "$thermistor2Val ${monitoringPoints["Unit4"]}"
+                }
             }
+
+            headerViewItems.add(
+                HeaderViewItem(
+                    id = hyperStatDevice.th2In.readPoint().pointRef,
+                    disName = th2Label,
+                    currentValue = th2Value,
+                    usesDropdown = false
+                )
+            )
         }
 
         if (monitoringPoints["iAn1Enable"] == "true") {

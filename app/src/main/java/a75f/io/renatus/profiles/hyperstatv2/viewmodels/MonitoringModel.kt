@@ -4,6 +4,8 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.DomainName.fanRunSensorNC
+import a75f.io.domain.api.DomainName.fanRunSensorNO
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
@@ -29,6 +31,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
+import io.seventyfivef.domainmodeler.common.point.PointConfiguration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -124,6 +128,21 @@ class MonitoringModel(application: Application) : HyperStatViewModel(application
                 equipId, hayStack.site!!.id, getDeviceDis())
             setScheduleType(profileConfiguration as MonitoringConfiguration)
         }
+    }
+
+    fun isSameFanStatusPairedInBothThermistors(): String {
+        val th1Val = viewState.value.thermistor1Config.association
+        val th2Val = viewState.value.thermistor2Config.association
+
+        // 4 and 5 are the index of Fan Run Sensor No and Fan Run Sensor NC in the thermistor association list
+        val fanRunSensorNoIndex = 4
+        val fanRunSensorNCIndex = 5
+
+        return if (th1Val == fanRunSensorNoIndex && th2Val == fanRunSensorNoIndex) {
+            "Fan Run Status No"
+        } else if (th1Val == fanRunSensorNCIndex && th2Val == fanRunSensorNCIndex) {
+            "Fan Run Status NC"
+        } else ""
     }
 
     private fun addEquipAndPoints(

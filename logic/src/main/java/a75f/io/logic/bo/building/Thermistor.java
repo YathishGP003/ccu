@@ -33,7 +33,8 @@ public class Thermistor
         thermistors.add(new Thermistor("Generic (1-100)kohms","K\u2126","20K probe lookup table",-40,302,0.5));
         thermistors.add(new Thermistor("Generic Fault (NC)",null,"20K probe lookup table",0,1,1));
         thermistors.add(new Thermistor("Generic Fault (NO)",null,"20K probe lookup table",0,1,1));
-        
+        thermistors.add(new Thermistor("Fan Run Status (NO)",null,"20K probe lookup table",0,1,1));
+        thermistors.add(new Thermistor("Fan Run Status (NC)",null,"20K probe lookup table",0,1,1));
         return thermistors;
     }
 }

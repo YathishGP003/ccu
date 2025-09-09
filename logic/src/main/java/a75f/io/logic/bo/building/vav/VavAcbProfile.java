@@ -127,6 +127,11 @@ public class VavAcbProfile extends VavProfile
             if (coolingLoop.getEnabled()) {
                 loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
             }
+            if (heatingLoop.getEnabled()) {
+                loopOp = (int) heatingLoop.getLoopOutput(roomTemp, setTempHeating);
+            }
+            vavEquip.getCoolingLoopOutput().writePointValue(0);
+            vavEquip.getHeatingLoopOutput().writePointValue(0);
         }
         loopOp = Math.max(0, loopOp);
         try {

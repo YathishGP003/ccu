@@ -1,5 +1,6 @@
 package a75f.io.renatus.ui.nontempprofiles.views
 
+import a75f.io.api.haystack.Tags.MONITORING
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.DetailedViewDropDownHeaderView
 import a75f.io.renatus.composables.HeaderLabelView
@@ -89,12 +90,16 @@ fun HeaderViewList(
         }
 
         if (pointList.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
+            if (!nonTempProfileViewModel.profile
+                    .equals(MONITORING, ignoreCase = true)
             ) {
-                CircularProgressIndicator()
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
         } else {
             LazyVerticalGrid(

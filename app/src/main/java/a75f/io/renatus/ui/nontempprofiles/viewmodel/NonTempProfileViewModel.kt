@@ -17,6 +17,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.Thermistor
 import a75f.io.logic.bo.building.plc.PlcProfile
 import a75f.io.logic.bo.building.sensors.SensorManager
+import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.renatus.ui.model.HeaderViewItem
 import a75f.io.renatus.ui.nontempprofiles.model.ExternalPointItem
@@ -24,6 +25,7 @@ import a75f.io.renatus.ui.nontempprofiles.utilities.getIndexOf
 import a75f.io.renatus.ui.nontempprofiles.utilities.getLastUpdatedViewItem
 import a75f.io.renatus.ui.nontempprofiles.utilities.heartBeatStatus
 import a75f.io.renatus.util.HeartBeatUtil
+import a75f.io.renatus.util.HeartBeatUtil.getLastUpdatedTimeForCn
 import a75f.io.renatus.util.HeartBeatUtil.isModuleAlive
 import android.annotation.SuppressLint
 import android.os.Handler
@@ -207,6 +209,27 @@ class NonTempProfileViewModel : ViewModel(), PointSubscriber {
                     )
                 )
                 externalEquipHeartBeat = isModuleAlive(groupId)
+                handler.postDelayed(this, 60_000L)
+            }
+        }
+        handler.post(runnable!!)
+    }
+
+    fun observeConnectEquipHealthByGroupId(
+        deviceId: String
+    ) {
+        runnable = object : Runnable {
+            override fun run() {
+                val lastUpdatedTime = getLastUpdatedTimeForCn(deviceId)
+                setLastUpdatedPoint(
+                    HeaderViewItem(
+                        id = deviceId,
+                        disName = "Last Updated: ",
+                        currentValue = lastUpdatedTime,
+                        usesDropdown = false
+                    )
+                )
+                externalEquipHeartBeat = CCUUtils.isConnectModuleAlive(deviceId)
                 handler.postDelayed(this, 60_000L)
             }
         }

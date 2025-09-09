@@ -42,7 +42,6 @@ fun loadConnectModuleZone(
         viewModel.equipName = equipmentDeviceName
     }
     viewModel.setEquipStatusPoint(getPointScheduleHeaderViewItem(equipId))
-    // status message
 
     viewModel.initializeDetailedViewPoints(
         getModbusDetailedViewPoints(
@@ -50,6 +49,5 @@ fun loadConnectModuleZone(
             cnDevice.deviceEquipRef
         )
     )
-
-    viewModel.observeExternalEquipHealth(deviceId)
+    viewModel.observeConnectEquipHealthByGroupId(connectNodeDevice["id"].toString())
 }

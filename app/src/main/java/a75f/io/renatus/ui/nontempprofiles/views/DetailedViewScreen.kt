@@ -1,5 +1,7 @@
 package a75f.io.renatus.ui.nontempprofiles.views
 
+import a75f.io.api.haystack.Tags.CONNECTMODULE
+import a75f.io.api.haystack.Tags.MONITORING
 import a75f.io.renatus.composables.DetailedViewDropDown
 import a75f.io.renatus.composables.HeaderLabelView
 import a75f.io.renatus.composables.LabelView
@@ -163,12 +165,16 @@ fun ExternalPointsList(
         }
 
         if (pointList.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+            // no need to show loading for connect module
+            if (!nonTempProfileViewModel.profile
+                    .equals("", ignoreCase = true)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
         } else {
 

@@ -72,6 +72,7 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         viewState.value.isStateChanged = false
 
         isEquipAvailable(ProfileType.SYSTEM_DAB_ADVANCED_AHU)
+        isEquipPaired = true
         if (saveJob == null) {
             ProgressDialogUtils.showProgressDialog(context, "Saving profile configuration")
             saveJob = viewModelScope.launch (highPriorityDispatcher) {

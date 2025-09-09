@@ -66,7 +66,8 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         viewState.value.isSaveRequired = false
         viewState.value.isStateChanged = false
 
-        isEquipAvailable(ProfileType.SYSTEM_VAV_ADVANCED_AHU)
+        isEquipPaired = true
+        isConnectModulePaired = viewState.value.isConnectEnabled
         if (saveJob == null) {
             ProgressDialogUtils.showProgressDialog(context, "Saving profile configuration")
             saveJob = viewModelScope.launch(highPriorityDispatcher) {

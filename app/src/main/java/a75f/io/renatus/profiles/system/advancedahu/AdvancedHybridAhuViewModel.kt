@@ -126,7 +126,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     lateinit var enhancedVentilationOutsideDamperMinOpenList: List<String>
 
 
-    private var isEquipPaired = false
+    var isEquipPaired = false
     private val celsiusEnabled = MutableStateFlow(UnitUtils.isCelsiusTunerAvailableStatus())
 
     var isConnectModulePaired = false

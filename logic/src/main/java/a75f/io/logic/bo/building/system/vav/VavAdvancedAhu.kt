@@ -1200,8 +1200,8 @@ open class VavAdvancedAhu : VavSystemProfile() {
         CcuLog.d(L.TAG_CCU_SYSTEM, "Test Configs set for port $port cache $testConfigs")
     }
 
-    fun setCMRelayStatus(relay: Int, status: Int) = cmRelayStatus.set(relay,(status == 1))
-    fun setAnalogStatus(analog: Int, status: Double)  { analogStatus[analog] = status }
+    fun setCMRelayStatus(relay: Int, status: Int) = cmRelayStatus.set(relay, (status == 1))
+    fun setAnalogStatus(analog: Int, status: Double)  { analogStatus[analog] = ((status / 10)) }
 
     fun isStageEnabled(stage: String, cmRelayMappings: Map<Point, Point>): Boolean {
         cmRelayMappings.forEach { (relay, association) ->

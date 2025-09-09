@@ -232,6 +232,9 @@ public class Globals {
     public Context getApplicationContext() {
         return mApplicationContext;
     }
+    public String getDefaultSharedPreferencesName() {
+        return mApplicationContext.getPackageName() + "_preferences";
+    }
 
 
     public void setApplicationContext(Context mApplicationContext) {
@@ -316,6 +319,11 @@ public class Globals {
                 if (analogMappings != null) {
                     CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Modulating Profile Normalization migration");
                     migrationHandler.doModulatingProfileNormalization(analogMappings);
+                }
+                // if the previous sync was not done, then we need to do it again
+                boolean tunerSyncStatus = getApplicationContext().getSharedPreferences(getDefaultSharedPreferencesName(), Context.MODE_PRIVATE).getBoolean("Tuner_Sync_Status",true);
+                if(!tunerSyncStatus) {
+                    TunerEquip.INSTANCE.syncBuildingTuners(CCUHsApi.getInstance());
                 }
                 /*Below migration scripts should be handled after model migration*/
                 migrationHandler.temperatureModeMigration();

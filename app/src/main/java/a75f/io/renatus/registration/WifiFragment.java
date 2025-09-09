@@ -35,10 +35,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
@@ -78,6 +78,8 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
     private boolean isFreshRegister;
     private BroadcastReceiver mNetworkReceiver;
     private BroadcastReceiver mWifiReceiver;
+
+    private AlertDialog alertDialog;
 
     private final CompositeDisposable disposable = new CompositeDisposable();
     public WifiFragment() {
@@ -197,6 +199,9 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
             if (getUserVisibleHint()) {
                 mainWifiObj = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
                 if (isChecked) {
+                    if(alertDialog!=null && alertDialog.isShowing()) {
+                        alertDialog.dismiss();
+                    }
                     progressbar.setVisibility(View.VISIBLE);
                     if (!mainWifiObj.isWifiEnabled() || isFreshRegister) {
                         mTurnonwifi.setVisibility(View.GONE);
@@ -208,6 +213,18 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
                         mainWifiObj.setWifiEnabled(true);
                     }
                 } else {
+                    boolean tunerSyncStatus = Globals.getInstance().getApplicationContext().getSharedPreferences(Globals.getInstance().getDefaultSharedPreferencesName(), Context.MODE_PRIVATE).getBoolean("Tuner_Sync_Status",false);
+
+                    if(!tunerSyncStatus) {
+                        AlertDialog.Builder AlertBuilder = new AlertDialog.Builder(getActivity());
+                        AlertBuilder.setTitle("Sync Failed");
+                        AlertBuilder.setIcon(R.drawable.ic_alert);
+                        AlertBuilder.setPositiveButton("RETRY", (dialog, which) -> dialog.dismiss());
+                        AlertBuilder.setMessage("Failed to sync data to cloud.Please check your internet connection and retry.");
+                        alertDialog = AlertBuilder.create();
+                        alertDialog.show();
+                    }
+
                     mHandler.removeCallbacks(mRunable);
                     if (mainWifiObj.isWifiEnabled()) {
 
@@ -251,7 +268,7 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
         filterWifi.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         filterWifi.addAction(WifiManager.ACTION_PICK_WIFI_NETWORK);
 
-        Objects.requireNonNull(getActivity()).registerReceiver(mWifiReceiver, filterWifi);
+        requireActivity().registerReceiver(mWifiReceiver, filterWifi);
     }
 
     public void showScanResult() {

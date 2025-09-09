@@ -10,8 +10,12 @@ import a75f.io.domain.logic.TunerEquipBuilder
 import a75f.io.domain.migration.DiffManger
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
+import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.TunerSyncFailed
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
 import io.seventyfivef.ph.core.Tags
 import kotlinx.coroutines.launch
 import org.projecthaystack.HDict
@@ -149,11 +153,13 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
     }
 
 
-    fun syncPointArrays(points: List<HDict>, hClient: HClient, haystack: CCUHsApi) {
+    private  fun syncPointArrays(points: List<HDict>, hClient: HClient, haystack: CCUHsApi) {
         CcuLog.i(L.TAG_CCU_TUNER, "syncPointArrays Size ${points.size}")
         val partitionSize = 25
         val partitions: MutableList<List<HDict>> = ArrayList()
         var limit = 0
+        val pref = Globals.getInstance().applicationContext.getSharedPreferences(Globals.getInstance().defaultSharedPreferencesName,
+            0).edit()
         while (limit < points.size) {
             partitions.add(points.subList(limit, (limit + partitionSize).coerceAtMost(points.size)))
             limit += partitionSize
@@ -165,12 +171,18 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
             )
 
             //We cannot proceed adding new CCU to existing Site without fetching all the point array values.
-            if (writableArrayPoints == null) {
-                CcuLog.e(
-                    L.TAG_CCU_TUNER,
-                    "Failed to fetch point array values while importing existing tuner data."
-                )
-                throw TunerSyncFailed("Failed to fetch tuners")
+            try {
+                if (writableArrayPoints == null) {
+                    CcuLog.e(L.TAG_CCU_TUNER, "Failed to fetch point array values while importing existing tuner data.")
+                    throw TunerSyncFailed("Failed to fetch tuners")
+                }
+            } catch (e: TunerSyncFailed) {
+                pref.putBoolean("Tuner_Sync_Status", false).apply()
+                CcuLog.e(L.TAG_CCU_TUNER, "Tuner sync failed", e)
+                Handler(Looper.getMainLooper()).post(kotlinx.coroutines.Runnable {
+                    Toast.makeText(Globals.getInstance().applicationContext, " Failed to sync data to cloud .Please check your internet connection and retry", Toast.LENGTH_LONG).show()
+                })
+                return
             }
             val rowIterator = writableArrayPoints.iterator()
             while (rowIterator.hasNext()) {
@@ -204,11 +216,19 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
         //TODO - why this was needed
         //hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(hDictList.toTypedArray()))
         }
+
+        if(points.isEmpty()) {
+            pref.putBoolean("Tuner_Sync_Status", false).apply()
+        }
+        else {
+            pref.putBoolean("Tuner_Sync_Status", true).apply()
+        }
+
     }
 
     override fun onRegistrationCompleted(haystack: CCUHsApi) {
         CcuLog.i(L.TAG_CCU_TUNER, "Building Equip onRegistrationCompleted received")
-        haystack.unRegisterOnCcuRegistrationCompletedListener { this }
+        haystack.unRegisterOnCcuRegistrationCompletedListener(this)
         syncBuildingTuners(haystack)
     }
     fun syncBuildingTuners(haystack: CCUHsApi) {

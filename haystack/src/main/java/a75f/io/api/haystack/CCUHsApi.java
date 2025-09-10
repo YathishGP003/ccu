@@ -1719,6 +1719,10 @@ public class CCUHsApi
         syncManager.scheduleSync();
     }
 
+    public void syncNow() {
+        syncManager.syncNow();
+    }
+
     public void syncHisDataWithPeriodicPurge() {
         if(readDefaultVal("offline and mode and point") > 0) {
             CcuLog.d(TAG_CCU_HS," Skip his sync in offlineMode");

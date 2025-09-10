@@ -7,6 +7,9 @@ import android.content.Intent
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class SequencerAlarmReceiver : BroadcastReceiver() {
     val TAG = SequencerParser.TAG_CCU_SITE_SEQUENCER
@@ -25,13 +28,18 @@ class SequencerAlarmReceiver : BroadcastReceiver() {
             }
         }
         // Enqueue your WorkManager task
-        val data = Data.Builder()
+        /*val data = Data.Builder()
             .putString("seqId", seqId) // Add key-value pairs to the Data object
             .build()
         val workRequest = OneTimeWorkRequestBuilder<SequenceWorker>()
             .setInputData(data)
             .build()
-        WorkManager.getInstance(context).enqueue(workRequest)
+        WorkManager.getInstance(context).enqueue(workRequest)*/
+        CoroutineScope(Dispatchers.IO).launch {
+            if (seqId != null) {
+                SequenceWorker.executeSequence(context, seqId, null)
+            }
+        }
         CcuLog.d(TAG, "------------Alarm received end--------------")
     }
 }

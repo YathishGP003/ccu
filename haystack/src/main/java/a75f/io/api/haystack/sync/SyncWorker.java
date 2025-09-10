@@ -33,19 +33,19 @@ public class SyncWorker extends Worker {
     public static final String ENDPOINT_ADD_ENTITY = "addEntity";
     public static final String ENDPOINT_REMOVE_ENTITY = "removeEntity";
     
-    SiteRegistrationHandler siteHandler    = new SiteRegistrationHandler();
-    CcuRegistrationHandler  ccuSyncHandler = new CcuRegistrationHandler();
+    static SiteRegistrationHandler siteHandler    = new SiteRegistrationHandler();
+    static CcuRegistrationHandler  ccuSyncHandler = new CcuRegistrationHandler();
     
-    SyncStatusService syncStatusService;
+    static SyncStatusService syncStatusServiceInstance;
     
     private static boolean isSyncWorkInProgress = false;
     
     public SyncWorker(Context appContext, WorkerParameters workerParams) {
         super(appContext, workerParams);
-        syncStatusService = SyncStatusService.getInstance(getApplicationContext());
+        syncStatusServiceInstance = SyncStatusService.getInstance(getApplicationContext());
     }
     
-    @NonNull
+    /*@NonNull
     @Override
     public Result doWork() {
 
@@ -92,12 +92,70 @@ public class SyncWorker extends Worker {
             isSyncWorkInProgress = false;
         }
         return Result.success();
+    }*/
+
+    @NonNull
+    @Override
+    public Result doWork() {
+        return performSyncWork(syncStatusServiceInstance);
+    }
+
+    public static synchronized Result performSyncWork(SyncStatusService syncStatusService) {
+        CcuLog.i(TAG, " doSyncWork ");
+        if (isSyncWorkInProgress) {
+            CcuLog.i(TAG, " doSyncWork Called : Previous session running ");
+            return Result.retry();
+        }
+        isSyncWorkInProgress = true;
+        try {
+            doSync(syncStatusService);
+        } catch (Exception e) {
+            CcuLog.i(TAG, " doSyncWork Failed ", e);
+            return Result.failure();
+        } finally {
+            isSyncWorkInProgress = false;
+        }
+
+        return Result.success();
+    }
+
+    private static void doSync(SyncStatusService syncStatusService) {
+
+        if (!siteHandler.doSync()) {
+            CcuLog.e(TAG, "Site sync failed");
+            return;
+        }
+        if (!CCUHsApi.getInstance().isCCURegistered()) {
+            CcuLog.e(TAG, "Abort SyncWork : CCU Not registered");
+            return;
+        }
+        if (!ccuSyncHandler.doSync()) {
+            CcuLog.e(TAG, "CCU sync failed");
+            return;
+        }
+
+        if (!syncDeletedEntities(syncStatusService)) {
+            CcuLog.e(TAG, "Deleted entity sync failed");
+            return;
+        }
+
+        if (!syncUnSyncedEntities(syncStatusService)) {
+            CcuLog.e(TAG, "Unsynced entity sync failed");
+            return;
+        }
+        if (!syncUpdatedEntities(syncStatusService)) {
+            CcuLog.e(TAG, "Updated entity sync failed");
+            return;
+        }
+
+        CcuLog.i(TAG, " doSyncWork success");
+        syncStatusService.saveSyncStatus();
     }
     
     public static boolean isSyncWorkInProgress() {
         return isSyncWorkInProgress;
     }
-    private boolean syncUnSyncedEntities() {
+    private static boolean syncUnSyncedEntities(SyncStatusService syncStatusService) {
         
         if (!syncStatusService.hasUnSyncedData()) {
             return true;
@@ -110,7 +168,7 @@ public class SyncWorker extends Worker {
                                                    ENDPOINT_ADD_ENTITY, HZincWriter.gridToString(gridData));
             CcuLog.printLongMessage(TAG, "AddEntity Response : "+response);
             if (response != null) {
-                updateSyncStatus(response, true);
+                updateSyncStatus(response, true, syncStatusService);
             } else {
                 return false;
             }
@@ -121,7 +179,7 @@ public class SyncWorker extends Worker {
         
     }
     
-    private boolean syncUpdatedEntities() {
+    private static boolean syncUpdatedEntities(SyncStatusService syncStatusService) {
         
         if (!syncStatusService.hasUpdatedData()) {
             return true;
@@ -134,7 +192,7 @@ public class SyncWorker extends Worker {
                                                    ENDPOINT_ADD_ENTITY, HZincWriter.gridToString(gridData));
             CcuLog.printLongMessage(TAG, "UpdateEntity Response : "+response);
             if (response != null) {
-                updateSyncStatus(response, false);
+                updateSyncStatus(response, false, syncStatusService);
             } else {
                 return false;
             }
@@ -142,7 +200,7 @@ public class SyncWorker extends Worker {
         return true;
     }
     
-    private boolean syncDeletedEntities() {
+    private static boolean syncDeletedEntities(SyncStatusService syncStatusService) {
         
         if (!syncStatusService.hasDeletedData()) {
             return true;
@@ -171,7 +229,7 @@ public class SyncWorker extends Worker {
                 deletedSyncedItems.addAll(entityList);
             });
 
-            updateDeleteStatus(deletedSyncedItems);
+            updateDeleteStatus(deletedSyncedItems, syncStatusService);
         }
         return true;
 
@@ -180,7 +238,7 @@ public class SyncWorker extends Worker {
     /**
      * First time syncing entities require point arrays to be written to backend.
      */
-    private void updateSyncStatus(String response, boolean pointWriteRequired) {
+    private static void updateSyncStatus(String response, boolean pointWriteRequired, SyncStatusService syncStatusService) {
         ArrayList<String> syncedIds = retrieveIdsFromResponse(response);
         for (String id : syncedIds) {
             syncStatusService.setEntitySynced(id);
@@ -196,12 +254,12 @@ public class SyncWorker extends Worker {
         }
     }
     
-    private void updateDeleteStatus(List<String> entityList) {
+    private static void updateDeleteStatus(List<String> entityList, SyncStatusService syncStatusService) {
         syncStatusService.setDeletedEntitySynced(entityList);
         syncStatusService.saveSyncStatus();
     }
     
-    private ArrayList<String> retrieveIdsFromResponse(String response) {
+    private static ArrayList<String> retrieveIdsFromResponse(String response) {
         HZincReader zReader = new HZincReader(response);
         Iterator it = zReader.readGrid().iterator();
         ArrayList<String> syncedEntities = new ArrayList<>();

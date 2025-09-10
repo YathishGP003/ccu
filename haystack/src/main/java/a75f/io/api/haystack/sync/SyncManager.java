@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
+import a75f.io.util.ExecutorTask;
+
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
 import androidx.work.ExistingWorkPolicy;
@@ -139,6 +141,7 @@ public class SyncManager {
     private OneTimeWorkRequest.Builder getSyncWorkRequestBuilder() {
         return new OneTimeWorkRequest.Builder(SyncWorker.class)
                    .setConstraints(getSyncConstraints())
+                   .setInitialDelay(5, TimeUnit.SECONDS)
                    .setBackoffCriteria(
                        BackoffPolicy.LINEAR,
                        OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
@@ -183,5 +186,10 @@ public class SyncManager {
 
     public boolean isEntitySyncProgress() {
         return SyncWorker.isSyncWorkInProgress();
+    }
+
+    public void syncNow() {
+        CcuLog.d(TAG, "syncNow called on invoked on thread");
+        ExecutorTask.executeBackground(() -> SyncWorker.performSyncWork(SyncStatusService.getInstance(appContext)));
     }
 }

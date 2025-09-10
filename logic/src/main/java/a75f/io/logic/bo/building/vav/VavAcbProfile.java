@@ -250,9 +250,7 @@ public class VavAcbProfile extends VavProfile
     
     private void initLoopVariables() {
         chwValve = ((VavAcbUnit)vavUnit).chwValve;
-        setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
-        setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
-
+        updateSetTemperature();
         if (hasPendingTunerChange()) refreshPITuners();
 
         setDamperLimits( (short) nodeAddr, damper);

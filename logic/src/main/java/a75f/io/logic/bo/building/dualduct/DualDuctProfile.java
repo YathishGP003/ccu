@@ -4,6 +4,9 @@ import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_COOLING_DESIRED;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_HEATING_DESIRED;
+
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -89,6 +92,10 @@ public class DualDuctProfile extends ZoneProfile {
     @Override
     public synchronized void updateZonePoints()
     {
+        double setTempCooling ;
+        double setTempHeating ;
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+
         if (isRFDead()) {
             updateRFDead();
             return;
@@ -97,9 +104,17 @@ public class DualDuctProfile extends ZoneProfile {
             return;
         }
 
-        double setTempCooling = TemperatureProfileUtil.getDesiredTempCooling(dualDuctEquip.nodeAddr);
-        double setTempHeating = TemperatureProfileUtil.getDesiredTempHeating(dualDuctEquip.nodeAddr);
-        double roomTemp       = dualDuctEquip.getCurrentTemp();
+        if (hayStack.isScheduleSlotExitsForRoom(dualDuctEquip.getId())) {
+            Double unoccupiedSetBack = hayStack.getUnoccupiedSetback(dualDuctEquip.getId());
+            CcuLog.d(TAG, "Schedule slot Not  exists for room:   Dual Duct Equip : " + dualDuctEquip.getId() + "node address : " + getNodeAddresses());
+            setTempCooling = DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
+            setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+        } else {
+            setTempCooling = TemperatureProfileUtil.getDesiredTempCooling(dualDuctEquip.nodeAddr);
+            setTempHeating = TemperatureProfileUtil.getDesiredTempHeating(dualDuctEquip.nodeAddr);
+        }
+
+        double roomTemp = dualDuctEquip.getCurrentTemp();
 
         if (dualDuctEquip.hasPendingTunerChange()) dualDuctEquip.refreshPITuners();
 

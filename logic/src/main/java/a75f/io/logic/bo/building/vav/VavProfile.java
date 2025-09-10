@@ -5,6 +5,8 @@ import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.State;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_COOLING_DESIRED;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_HEATING_DESIRED;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -246,6 +248,18 @@ public abstract class VavProfile extends ZoneProfile {
         co2ResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
         spResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
         hwstResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+    }
+
+    public void  updateSetTemperature() {
+        if (hayStack.isScheduleSlotExitsForRoom(vavEquip.getId())) {
+            Double unoccupiedSetBack = hayStack.getUnoccupiedSetback(vavEquip.getId());
+            CcuLog.d(TAG, "Schedule slot Not  exists for room:  VavEquip: " + vavEquip.getId() + "node address : "+ nodeAddr);
+            setTempCooling =  DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
+            setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+        } else {
+            setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
+            setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
+        }
     }
 
     public void refreshPITuners() {

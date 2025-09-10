@@ -5,6 +5,8 @@ import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_COOLING_DESIRED;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_HEATING_DESIRED;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,6 +64,9 @@ public class TIProfile extends ZoneProfile {
 
     @Override
     public void updateZonePoints() {
+        double setTempCooling ;
+        double setTempHeating ;
+        CCUHsApi hayStack = CCUHsApi.getInstance();
         if(isRFDead()){
             state = RFDEAD;
             String curStatus = tiEquip.getEquipStatusMessage().readDefaultStrVal();
@@ -80,8 +85,17 @@ public class TIProfile extends ZoneProfile {
             return;
         }
 
-        double setTempCooling = tiEquip.getDesiredTempCooling().readPriorityVal();
-        double setTempHeating = tiEquip.getDesiredTempHeating().readPriorityVal();
+        if (hayStack.isScheduleSlotExitsForRoom(tiEquip.getId())) {
+            Double unoccupiedSetBack = hayStack.getUnoccupiedSetback(tiEquip.getId());
+            CcuLog.d(TAG, "Schedule slot Not  exists for room:  Ti Equip: " + tiEquip.getId() + "node address : " + mNodeAddr);
+            setTempCooling = DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
+            setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+        } else {
+            setTempCooling = tiEquip.getDesiredTempCooling().readPriorityVal();
+            setTempHeating = tiEquip.getDesiredTempHeating().readPriorityVal();
+        }
+
+
         double roomTemp = tiEquip.getCurrentTemp().readHisVal();
         double systemDefaultTemp = 72.0;
 

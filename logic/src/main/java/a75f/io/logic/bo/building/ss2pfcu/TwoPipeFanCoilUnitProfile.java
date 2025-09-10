@@ -5,6 +5,8 @@ import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_COOLING_DESIRED;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_HEATING_DESIRED;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -92,6 +94,19 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             }
             //fcuWaterSamplingEveryHour(node);
             checkWaterSampling(node);
+            double setTempCooling ;
+            double setTempHeating ;
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            if (hayStack.isScheduleSlotExitsForRoom(twoPfcuEquip.getId())) {
+                Double unoccupiedSetBack = hayStack.getUnoccupiedSetback(twoPfcuEquip.getId());
+                CcuLog.d(TAG, "Schedule slot Not  exists for room:  SmartStat two pipe : " + twoPfcuEquip.getId() + "node address : " + node);
+                setTempCooling = DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
+                setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+            } else {
+                setTempCooling = twoPfcuDevice.getDesiredTempCooling();
+                setTempHeating = twoPfcuDevice.getDesiredTempHeating();
+            }
+
             double averageDesiredTemp = (setTempCooling + setTempHeating) / 2.0;
             if (averageDesiredTemp != twoPfcuDevice.getDesiredTemp()) {
                 twoPfcuDevice.setDesiredTemp(averageDesiredTemp);

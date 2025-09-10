@@ -112,9 +112,7 @@ public class VavParallelFanProfile extends VavProfile
 
     private void initLoopVariables(int node) {
         dischargeSp = 0;
-        setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
-        setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
-
+        updateSetTemperature();
         if (hasPendingTunerChange()) refreshPITuners();
 
         setDamperLimits((short) node, damper);

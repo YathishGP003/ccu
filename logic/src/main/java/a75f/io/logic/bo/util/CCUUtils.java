@@ -45,6 +45,8 @@ import a75f.io.logic.util.PreferenceUtil;
 public class CCUUtils
 {
     private static String TAG_CCU_REF = "CCU_REF";
+    public static int DEFAULT_COOLING_DESIRED = 74;
+    public static int DEFAULT_HEATING_DESIRED = 70;
 
     public static double roundToOneDecimal(double number) {
         DecimalFormat df = new DecimalFormat("#.#");

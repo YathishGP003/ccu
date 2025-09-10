@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.statprofiles.util.StagesCounts
 import a75f.io.logic.bo.building.statprofiles.util.StatLoopController
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
 import a75f.io.logic.bo.building.statprofiles.util.updateLogicalPoint
+import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.controlcomponents.util.ControllerNames
 import a75f.io.logic.controlcomponents.util.isSoftOccupied
 import a75f.io.logic.util.uiutils.MyStatUserIntentHandler
@@ -356,7 +357,10 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
     }
 
     fun getAverageTemp(userIntents: UserIntents) =
-        (userIntents.coolingDesiredTemp + userIntents.heatingDesiredTemp) / 2.0
+        if (haystack.isScheduleSlotExitsForRoom(equip!!.id)) {
+            CcuLog.d(TAG, " Schedule slot not  exists for MyStat room ${equip!!.id} nodeAddress ${equip!!.group}")
+            (CCUUtils.DEFAULT_HEATING_DESIRED + CCUUtils.DEFAULT_COOLING_DESIRED + haystack.getUnoccupiedSetback(equip!!.id)) / 2.0
+        } else (userIntents.coolingDesiredTemp + userIntents.heatingDesiredTemp) / 2.0
 
     fun handleRFDead(equip: MyStatEquip) {
         state = ZoneState.RFDEAD

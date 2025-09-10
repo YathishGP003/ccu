@@ -6,6 +6,9 @@ import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_COOLING_DESIRED;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_HEATING_DESIRED;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -130,8 +133,18 @@ public class SingleStageProfile extends ZoneProfile
             return;
         }
 
-        double setTempCooling = sseEquip.getDesiredTempCooling().readPriorityVal();
-        double setTempHeating = sseEquip.getDesiredTempHeating().readPriorityVal();
+        double setTempCooling;
+        double setTempHeating;
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        if (hayStack.isScheduleSlotExitsForRoom(sseEquip.getId())) {
+            Double unoccupiedSetBack = hayStack.getUnoccupiedSetback(sseEquip.getId());
+            CcuLog.d(TAG, "Schedule slot Not  exists for room:  sseEquip: " + sseEquip.getId() + "node address : " + nodeAddr);
+            setTempCooling = DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
+            setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+        } else {
+            setTempCooling = sseEquip.getDesiredTempCooling().readPriorityVal();
+            setTempHeating = sseEquip.getDesiredTempHeating().readPriorityVal();
+        }
         double avgSetTemp = getDesiredTemp();
         double roomTemp = getCurrentTemp();
         //For dual temp but for single mode we use tuners

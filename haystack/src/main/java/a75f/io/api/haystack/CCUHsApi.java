@@ -2182,6 +2182,41 @@ public class CCUHsApi
         return schedules;
     }
 
+    public Boolean isScheduleSlotExitsForRoom(String equipRef) {
+
+        if (equipRef == null || equipRef.isEmpty()) {
+            CcuLog.e(TAG_CCU_HS, "isScheduleSlotExitsForRoom: Equip is null or empty");
+            return false;
+        }
+        Schedule schedule = getScheduleByRoom(equipRef);
+        if(schedule == null || !schedule.getDays().isEmpty()) {
+            return false;
+        }
+        CcuLog.e(TAG_CCU_HS, "isScheduleSlotExitsForRoom: No schedule found for equip " + equipRef);
+        return true;
+    }
+
+    public Double getUnoccupiedSetback(String equipRef) {
+        if (equipRef == null || equipRef.isEmpty()) {
+            CcuLog.e(TAG_CCU_HS, "getUnoccupiedSetback: Equip is null or empty");
+            return 5.0;
+        }
+        Schedule schedule = getScheduleByRoom(equipRef);
+        if (schedule == null) {
+            CcuLog.e(TAG_CCU_HS, "getUnoccupiedSetback: No schedule found for equip " + equipRef);
+            return 5.0; // Default value if no schedule found
+        }
+        return schedule.getUnoccupiedZoneSetback();
+
+    }
+
+    public Schedule getScheduleByRoom(String equip) {
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equip);
+        HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(equipMap.get("roomRef").toString());
+        Schedule schedule = CCUHsApi.getInstance().getScheduleById(room.get("scheduleRef").toString());
+        return schedule == null ? null : schedule;
+    }
+
     public ArrayList<Schedule> getAllVacationSchedules() {
         ArrayList<Schedule> schedules = new ArrayList<>();
         HGrid scheduleHGrid = tagsDb.readAll("schedule and vacation");

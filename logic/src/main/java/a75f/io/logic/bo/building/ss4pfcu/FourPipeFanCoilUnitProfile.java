@@ -1,5 +1,13 @@
 package a75f.io.logic.bo.building.ss4pfcu;
 
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
+import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
+import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_COOLING_DESIRED;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_HEATING_DESIRED;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,12 +31,6 @@ import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
-import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
-import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 public class FourPipeFanCoilUnitProfile extends ZoneProfile {
 
@@ -86,6 +88,19 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                 CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
                 continue;
 
+            }
+
+            double setTempCooling ;
+            double setTempHeating ;
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            if (hayStack.isScheduleSlotExitsForRoom(fourPfcuEquip.getId())) {
+                Double unoccupiedSetBack = hayStack.getUnoccupiedSetback(fourPfcuEquip.getId());
+                CcuLog.d(TAG, "Schedule slot Not  exists for room:  SmartStat four Pipe : " + fourPfcuEquip.getId() + "node address : " + node);
+                setTempCooling = DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
+                setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+            } else {
+                setTempCooling = fourPfcuDevice.getDesiredTempCooling();
+                setTempHeating = fourPfcuDevice.getDesiredTempHeating();
             }
             double averageDesiredTemp = (setTempCooling + setTempHeating) / 2.0;
             if (averageDesiredTemp != fourPfcuDevice.getDesiredTemp()) {

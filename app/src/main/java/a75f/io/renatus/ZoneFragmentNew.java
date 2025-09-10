@@ -4,22 +4,24 @@ import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
 import static a75f.io.api.haystack.Tags.BACNET;
 import static a75f.io.api.haystack.Tags.CONNECTMODULE;
 import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
-import static a75f.io.logic.bo.building.definitions.ProfileType.CONNECTNODE;
-import static a75f.io.logic.bo.util.CCUUtils.getTruncatedString;
-import static a75f.io.logic.bo.util.CustomScheduleUtilKt.isPointFollowingScheduleOrEvent;
-import static a75f.io.logic.util.bacnet.BacnetModelBuilderKt.buildBacnetModel;
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModel;
 import static a75f.io.logic.L.TAG_CCU_INIT;
 import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
+import static a75f.io.logic.bo.building.definitions.ProfileType.CONNECTNODE;
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.disconnectedIntervals;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_COOLING_DESIRED;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_HEATING_DESIRED;
+import static a75f.io.logic.bo.util.CCUUtils.getTruncatedString;
+import static a75f.io.logic.bo.util.CustomScheduleUtilKt.isPointFollowingScheduleOrEvent;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.renatus.schedules.ScheduleUtil.*;
+import static a75f.io.logic.util.bacnet.BacnetModelBuilderKt.buildBacnetModel;
+import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.ui.nontempprofiles.helper.BacnetKt.fetchZoneDataForBacnet;
 import static a75f.io.renatus.ui.nontempprofiles.helper.BacnetKt.loadBacnetZone;
 import static a75f.io.renatus.ui.nontempprofiles.helper.ConnectModuleKt.loadConnectModuleZone;
@@ -136,8 +138,8 @@ import a75f.io.logic.bo.building.otn.OTNUtil;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
-import a75f.io.logic.bo.building.system.client.RemotePointUpdateInterface;
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage;
+import a75f.io.logic.bo.building.system.client.RemotePointUpdateInterface;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.CustomScheduleUtilKt;
@@ -486,12 +488,23 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                     double pointheatDT;
                     double pointcoolDT;
-                    if (CCUUiUtil.isDomainEquip(nodeAddress, "node")) {
-                        pointheatDT = CCUUiUtil.readPriorityValByGroupId(DomainName.desiredTempHeating, nodeAddress);
-                        pointcoolDT = CCUUiUtil.readPriorityValByGroupId(DomainName.desiredTempCooling, nodeAddress);
-                    } else {
-                        pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and group == \"" + nodeAddress + "\"");
-                        pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and group == \"" + nodeAddress + "\"");
+                    HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and group ==\"" + nodeAddress + "\"");
+
+                    Boolean isScheduleSlotsAvailable = CCUHsApi.getInstance().isScheduleSlotExitsForRoom(equip.get("id").toString());
+
+                    if (isScheduleSlotsAvailable) {
+                        Double unOccupiedSetback = CCUHsApi.getInstance().getUnoccupiedSetback(equip.get("id").toString());
+                        pointcoolDT = DEFAULT_COOLING_DESIRED + unOccupiedSetback;
+                        pointheatDT = DEFAULT_HEATING_DESIRED - unOccupiedSetback;
+                    }
+                    else {
+                        if (CCUUiUtil.isDomainEquip(nodeAddress, "node")) {
+                            pointheatDT = CCUUiUtil.readPriorityValByGroupId(DomainName.desiredTempHeating, nodeAddress);
+                            pointcoolDT = CCUUiUtil.readPriorityValByGroupId(DomainName.desiredTempCooling, nodeAddress);
+                        } else {
+                            pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and group == \"" + nodeAddress + "\"");
+                            pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and group == \"" + nodeAddress + "\"");
+                        }
                     }
 
                     int currentModeType = CCUHsApi.getInstance().readHisValByQuery("hvacMode and roomRef == \""
@@ -1072,14 +1085,24 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         heatLowerLimitVal = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and point and limit and user and min and heating and roomRef == \"" +roomRefZone + "\"").floatValue();
         coolingLowerLimitVal = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and point and limit and user and min and cooling and roomRef == \"" + roomRefZone + "\"").floatValue();
         coolingUpperLimitVal = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and point and limit and user and max and cooling and roomRef == \"" + roomRefZone + "\"").floatValue();
+        Boolean isScheduleSlotsAvailable = CCUHsApi.getInstance().isScheduleSlotExitsForRoom(p.getId());
 
-        if (CCUUiUtil.isDomainEquip(p.getId(), "equip")) {
-            coolingDesired = CCUUiUtil.readPriorityValByRoomRef(DomainName.desiredTempCooling, roomRefZone).floatValue();
-            heatingDesired = CCUUiUtil.readPriorityValByRoomRef(DomainName.desiredTempHeating, roomRefZone).floatValue();
-        } else {
-            coolingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("point and desired and cooling and roomRef == \"" + roomRefZone + "\"").floatValue();
-            heatingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("point and desired and heating and roomRef == \"" + roomRefZone + "\"").floatValue();
+        if (isScheduleSlotsAvailable) {
+            Double unOccupiedSetback = CCUHsApi.getInstance().getUnoccupiedSetback(p.getId());
+            coolingDesired = DEFAULT_COOLING_DESIRED + unOccupiedSetback.floatValue();
+            heatingDesired = DEFAULT_HEATING_DESIRED - unOccupiedSetback.floatValue();
         }
+        else
+        {
+            if (CCUUiUtil.isDomainEquip(p.getId(), "equip")) {
+                coolingDesired = CCUUiUtil.readPriorityValByRoomRef(DomainName.desiredTempCooling, roomRefZone).floatValue();
+                heatingDesired = CCUUiUtil.readPriorityValByRoomRef(DomainName.desiredTempHeating, roomRefZone).floatValue();
+            } else {
+                coolingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and roomRef == \"" + roomRefZone + "\"").floatValue();
+                heatingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and roomRef == \"" + roomRefZone + "\"").floatValue();
+            }
+        }
+
         heatingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("heating and deadband and zone and not multiplier and roomRef == \"" + roomRefZone + "\"").floatValue();
         coolingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and deadband and zone and not multiplier and roomRef == \"" + roomRefZone + "\"").floatValue();
 
@@ -2041,13 +2064,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             heatLowerLimitVal = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and point and limit and user and min and heating and roomRef == \"" + roomRefZone + "\"").floatValue();
             coolingLowerLimitVal = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and point and limit and user and min and cooling and roomRef == \"" + roomRefZone + "\"").floatValue();
             coolingUpperLimitVal = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and point and limit and user and max and cooling and roomRef == \"" + roomRefZone + "\"").floatValue();
-            if (CCUUiUtil.isDomainEquip(equipId, "equip")) {
+        Boolean isScheduleSlotsAvailable = CCUHsApi.getInstance().isScheduleSlotExitsForRoom(p.getId());
+
+        if (isScheduleSlotsAvailable) {
+            Double unOccupiedSetback = CCUHsApi.getInstance().getUnoccupiedSetback(p.getId());
+            coolingDesired = DEFAULT_COOLING_DESIRED + unOccupiedSetback.floatValue();
+            heatingDesired = DEFAULT_HEATING_DESIRED - unOccupiedSetback.floatValue();
+        } else {
+            if (CCUUiUtil.isDomainEquip(p.getId(), "equip")) {
                 coolingDesired = CCUUiUtil.readPriorityValByRoomRef(DomainName.desiredTempCooling, roomRefZone).floatValue();
                 heatingDesired = CCUUiUtil.readPriorityValByRoomRef(DomainName.desiredTempHeating, roomRefZone).floatValue();
             } else {
-                coolingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("desired and cooling and roomRef == \"" + roomRefZone + "\"").floatValue();
-                heatingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("point and desired and heating and roomRef == \"" + roomRefZone + "\"").floatValue();
+                coolingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and roomRef == \"" + roomRefZone + "\"").floatValue();
+                heatingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and roomRef == \"" + roomRefZone + "\"").floatValue();
             }
+        }
             heatingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("heating and deadband and zone and not multiplier and roomRef == \"" + roomRefZone + "\"").floatValue();
             coolingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and deadband and zone and not multiplier and roomRef == \"" + roomRefZone + "\"").floatValue();
 

@@ -224,9 +224,7 @@ public class VavReheatProfile extends VavProfile
 
     private void initLoopVariables() {
         dischargeSp = 0;
-        setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
-        setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
-
+        updateSetTemperature();
         if (hasPendingTunerChange()) refreshPITuners();
 
         setDamperLimits( (short) nodeAddr, damper);

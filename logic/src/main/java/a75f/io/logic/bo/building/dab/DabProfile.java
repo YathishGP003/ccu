@@ -5,6 +5,8 @@ import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_COOLING_DESIRED;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_HEATING_DESIRED;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,7 +22,6 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.domain.equips.DabEquip;
-import a75f.io.domain.logic.DomainManager;
 import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
@@ -168,8 +169,21 @@ public class DabProfile extends ZoneProfile
             return;
         }
         
-        double setTempCooling = dabEquip.getDesiredTempCooling().readPriorityVal();
-        double setTempHeating = dabEquip.getDesiredTempHeating().readPriorityVal();
+        double setTempCooling ;
+        double setTempHeating ;
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+
+        if (hayStack.isScheduleSlotExitsForRoom(dabEquip.getId())) {
+            Double unoccupiedSetBack = hayStack.getUnoccupiedSetback(dabEquip.getId());
+            CcuLog.d(TAG, "Schedule slot Not  exists for room:  DabEquip: " + dabEquip.getId() + "node address : " + nodeAddr);
+            setTempCooling = DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
+            setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+        } else {
+            setTempCooling = dabEquip.getDesiredTempCooling().readPriorityVal();
+            setTempHeating = dabEquip.getDesiredTempHeating().readPriorityVal();
+        }
+
+
         double roomTemp = dabEquip.getCurrentTemp().readHisVal();
         GenericPIController damperOpController = damperController;
 

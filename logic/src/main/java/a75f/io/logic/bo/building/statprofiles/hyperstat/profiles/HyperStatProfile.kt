@@ -26,6 +26,7 @@ import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.updateLoopOutputs
+import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.controlcomponents.util.ControllerNames
 import a75f.io.logic.controlcomponents.util.isSoftOccupied
 import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler
@@ -333,6 +334,10 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
     }
 
     fun getAverageTemp(userIntents: UserIntents): Double {
+        if(haystack.isScheduleSlotExitsForRoom(equip!!.id)) {
+            CcuLog.d(TAG, " Schedule slot not  exists for HyperStat  room ${equip!!.id} nodeAddress ${equip!!.group}")
+            return (CCUUtils.DEFAULT_HEATING_DESIRED + CCUUtils.DEFAULT_COOLING_DESIRED + haystack.getUnoccupiedSetback(equip!!.id)) / 2.0
+        }
         return (userIntents.coolingDesiredTemp + userIntents.heatingDesiredTemp) / 2.0
     }
 

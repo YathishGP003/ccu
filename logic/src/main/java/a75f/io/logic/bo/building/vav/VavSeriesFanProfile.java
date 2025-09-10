@@ -57,10 +57,6 @@ public class VavSeriesFanProfile extends VavProfile
             mInterface.refreshView();
         }
 
-        initLoopVariables((short)nodeAddr);
-        double roomTemp = getCurrentTemp();
-        Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"")).build();
-
         if (isRFDead()) {
             handleRFDead();
             return;
@@ -68,6 +64,10 @@ public class VavSeriesFanProfile extends VavProfile
             updateZoneDead();
             return;
         }
+
+        initLoopVariables((short)nodeAddr);
+        double roomTemp = getCurrentTemp();
+        Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"")).build();
 
         SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
 
@@ -116,9 +116,7 @@ public class VavSeriesFanProfile extends VavProfile
 
     private void initLoopVariables(short node) {
         dischargeSp = 0;
-        setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
-        setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
-
+        updateSetTemperature();
         if (hasPendingTunerChange()) refreshPITuners();
 
         setDamperLimits(node, damper);

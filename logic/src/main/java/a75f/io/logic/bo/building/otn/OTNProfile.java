@@ -5,6 +5,8 @@ import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_COOLING_DESIRED;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_HEATING_DESIRED;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,6 +41,11 @@ public class OTNProfile extends ZoneProfile {
     @Override
     public void updateZonePoints() {
         CcuLog.d(L.TAG_CCU_ZONE, "updateZonePoints : " + mNodeAddr);
+
+
+        double setTempCooling ;
+        double setTempHeating ;
+        CCUHsApi hayStack = CCUHsApi.getInstance();
         if(isRFDead()){
             handleRFDead();
             return;
@@ -46,9 +53,16 @@ public class OTNProfile extends ZoneProfile {
             handleZoneDead();
             return;
         }
+        if (hayStack.isScheduleSlotExitsForRoom(otnEquip.getId())) {
+            Double unoccupiedSetBack = hayStack.getUnoccupiedSetback(otnEquip.getId());
+            CcuLog.d(TAG, "Schedule slot Not  exists for room:  OtnEquip: " + otnEquip.getId() + "node address : " + mNodeAddr);
+            setTempCooling = DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
+            setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+        } else {
+            setTempCooling = otnEquip.getDesiredTempCooling().readPriorityVal();
+            setTempHeating = otnEquip.getDesiredTempHeating().readPriorityVal();
+        }
 
-        double setTempCooling = otnEquip.getDesiredTempCooling().readPriorityVal();
-        double setTempHeating = otnEquip.getDesiredTempHeating().readPriorityVal();
         double roomTemp = otnEquip.getCurrentTemp().readHisVal();
         double systemDefaultTemp = 72.0;
 

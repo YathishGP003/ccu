@@ -29,7 +29,6 @@ import a75f.io.logic.util.bacnet.BacnetConfigConstants
 import a75f.io.logic.util.bacnet.TAG_BACNET
 import a75f.io.renatus.R
 import a75f.io.renatus.bacnet.BacnetDeviceSelectionFragment
-import a75f.io.renatus.bacnet.models.BacnetModel
 import a75f.io.renatus.bacnet.models.BacnetPointState
 import a75f.io.renatus.bacnet.util.CONST_AUTO_DISCOVERY
 import a75f.io.renatus.compose.HeaderCenterLeftAlignedTextView
@@ -42,7 +41,6 @@ import a75f.io.renatus.compose.ImageViewComposable
 import a75f.io.renatus.compose.LabelTextView
 import a75f.io.renatus.compose.LabelTextViewForModbus
 import a75f.io.renatus.compose.ParameterLabel_ForOneColumn
-import a75f.io.renatus.compose.RadioButtonCompose
 import a75f.io.renatus.compose.RadioButtonComposeBacnet
 import a75f.io.renatus.compose.RadioButtonComposeSelectModelCustom
 import a75f.io.renatus.compose.RadioButtonComposeWithToast
@@ -97,6 +95,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
@@ -120,7 +119,6 @@ import androidx.lifecycle.ViewModelProvider
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import org.json.JSONException
 import org.json.JSONObject
-import androidx.compose.foundation.lazy.items
 
 
 /**
@@ -1545,7 +1543,6 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
         // This index -1 refers to parameters equip and other index 0 to n refers index of sub equips
         ParametersListView(data = viewModel.equipModel, indexForSelectAllRelay = -1)
         SubEquipments(viewModel.equipModel)
-        setStateChanged()
     }
 
     @Composable

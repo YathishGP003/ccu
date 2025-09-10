@@ -194,7 +194,6 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             modelName.value = item
             ProgressDialogUtils.showProgressDialog( context, "Fetching $item details")
             fetchBacnetModelDetails(item)
-            isCopiedConfigurationAvailable()
         }
     }
 
@@ -917,7 +916,6 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                     }
                 }
             }
-            isCopiedConfigurationAvailable()
             isUpdateMode.value = true
         } else {
             isUpdateMode.value = false
@@ -1188,15 +1186,6 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-    fun isCopiedConfigurationAvailable() {
-        if(CopyConfiguration.getSelectedBacNetModel() != null && moduleLevel!="system" && (bacnetModel.value.isDevicePaired == false || bacnetModel.value.isDevicePaired == true) && modelName.value.equals(
-                CopyConfiguration.getSelectedBacNetModel(),true)){
-            enablePasteConfiguration()
-        }
-        else{
-            disablePasteConfiguration()
-        }
-    }
 
     private fun updateOriginalModel() {
         val mapOfModifiedPoints = mutableMapOf<String, BacnetPointState>()

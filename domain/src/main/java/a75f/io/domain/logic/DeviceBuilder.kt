@@ -14,6 +14,7 @@ import a75f.io.domain.cutover.devicePointWithDomainNameExists
 import a75f.io.domain.cutover.getDeviceDomainNameFromDis
 import a75f.io.domain.logic.DomainManager.addDomainDevices
 import a75f.io.domain.util.TagsUtil
+import a75f.io.domain.util.extractAndAppendExternalEdits
 import a75f.io.domain.util.highPriorityDispatcher
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
@@ -219,21 +220,14 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
                     try {
                         val newPoint = buildRawPoint(point, profileConfiguration, device)
                         val hayStackPointDict = hayStack.readHDict("domainName == \"" + point.domainName + "\" and deviceRef == \"" + device.id + "\"")
-                        val hayStackPoint = Point.Builder().setHDict(hayStackPointDict).build()
+                        val hayStackPoint = RawPoint.Builder().setHDict(hayStackPointDict).build()
 
-                        if (hayStackPoint.markers.contains(Tags.WRITABLE)) {
-                            newPoint.markers.add(Tags.WRITABLE)
-                        }
-                        if (hayStackPoint.markers.contains(Tags.UNUSED)) {
-                            newPoint.markers.add(Tags.UNUSED)
-                        }
+                        extractAndAppendExternalEdits(point, newPoint, hayStackPointDict)
 
-                        if (!hayStackPoint.equals(newPoint)) {
-                            CcuLog.i(Domain.LOG_TAG, "updateHaystackPoint ${point.domainName}")
-                            hayStack.updatePoint(newPoint, hayStackPoint.id)
-                            newPoint.id = hayStackPoint.id
-                            DomainManager.addRawPoint(newPoint)
-                        }
+                        CcuLog.i(Domain.LOG_TAG, "updateHaystackPoint ${point.domainName}")
+                        hayStack.updatePoint(newPoint, hayStackPoint.id)
+                        newPoint.id = hayStackPoint.id
+                        DomainManager.addRawPoint(newPoint)
                     } catch (e: Exception) {
                         CcuLog.e(Domain.LOG_TAG, "Error updating point ${point.domainName}", e)
                     }
@@ -303,6 +297,9 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             hayStackPoint.createdDateTime = HDateTime.make(existingPoint["createdDateTime"].toString())
         }
         hayStackPoint.lastModifiedBy = hayStack.ccuUserName
+
+        extractAndAppendExternalEdits(def, hayStackPoint, existingPoint)
+
         hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
 
         DomainManager.addRawPoint(hayStackPoint)

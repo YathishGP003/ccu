@@ -104,6 +104,7 @@ public class RawPoint extends Entity
     {
         return displayName;
     }
+    public void setDisplayName(String displayName) { this.displayName = displayName; }
     public ArrayList<String> getMarkers()
     {
         return markers;

@@ -306,7 +306,7 @@ class HyperstatSplitReconfigurationHandler {
             if (config.relay1Enabled.enabled && config.relay1Association.associationVal ==config.getProfileBasedEnumValueRelayType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 relay1Point.addMarker(Tags.WRITABLE)
                 relay1Point.addMarker(Tags.UNUSED)
-            } else {
+            } else if(relay1.has(Tags.UNUSED)) {
                 relay1Point.removeMarkerIfExists(Tags.WRITABLE)
                 hayStack.clearAllAvailableLevelsInPoint(relay1[Tags.ID].toString())
             }
@@ -317,7 +317,7 @@ class HyperstatSplitReconfigurationHandler {
             if (config.relay2Enabled.enabled && config.relay2Association.associationVal == config.getProfileBasedEnumValueRelayType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 relay2Point.addMarker(Tags.WRITABLE)
                 relay2Point.addMarker(Tags.UNUSED)
-            } else {
+            } else if(relay2.has(Tags.UNUSED)) {
                 relay2Point.removeMarkerIfExists(Tags.WRITABLE)
                 relay2Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(relay2[Tags.ID].toString())
@@ -329,7 +329,7 @@ class HyperstatSplitReconfigurationHandler {
             if (config.relay3Enabled.enabled && config.relay3Association.associationVal == config.getProfileBasedEnumValueRelayType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 relay3Point.addMarker(Tags.WRITABLE)
                 relay3Point.addMarker(Tags.UNUSED)
-            } else {
+            } else if(relay3.has(Tags.UNUSED)) {
                 relay3Point.removeMarkerIfExists(Tags.WRITABLE)
                 relay3Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(relay3[Tags.ID].toString())
@@ -341,7 +341,7 @@ class HyperstatSplitReconfigurationHandler {
             if (config.relay4Enabled.enabled && config.relay4Association.associationVal ==config.getProfileBasedEnumValueRelayType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 relay4Point.addMarker(Tags.WRITABLE)
                 relay4Point.addMarker(Tags.UNUSED)
-            } else {
+            } else if(relay4.has(Tags.UNUSED)) {
                 relay4Point.removeMarkerIfExists(Tags.WRITABLE)
                 relay4Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(relay4[Tags.ID].toString())
@@ -353,7 +353,7 @@ class HyperstatSplitReconfigurationHandler {
             if (config.relay5Enabled.enabled && config.relay5Association.associationVal == config.getProfileBasedEnumValueRelayType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 relay5Point.addMarker(Tags.WRITABLE)
                 relay5Point.addMarker(Tags.UNUSED)
-            } else {
+            } else if(relay5.has(Tags.UNUSED)) {
                 relay5Point.removeMarkerIfExists(Tags.WRITABLE)
                 relay5Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(relay5[Tags.ID].toString())
@@ -365,7 +365,7 @@ class HyperstatSplitReconfigurationHandler {
             if (config.relay6Enabled.enabled && config.relay6Association.associationVal == config.getProfileBasedEnumValueRelayType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 relay6Point.addMarker(Tags.WRITABLE)
                 relay6Point.addMarker(Tags.UNUSED)
-            } else {
+            } else if(relay6.has(Tags.UNUSED)) {
                 relay6Point.removeMarkerIfExists(Tags.WRITABLE)
                 relay6Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(relay6[Tags.ID].toString())
@@ -377,7 +377,7 @@ class HyperstatSplitReconfigurationHandler {
             if (config.relay7Enabled.enabled && config.relay7Association.associationVal ==config.getProfileBasedEnumValueRelayType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 relay7Point.addMarker(Tags.WRITABLE)
                 relay7Point.addMarker(Tags.UNUSED)
-            } else {
+            } else if(relay7.has(Tags.UNUSED)) {
                 relay7Point.removeMarkerIfExists(Tags.WRITABLE)
                 relay7Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(relay7[Tags.ID].toString())
@@ -389,7 +389,7 @@ class HyperstatSplitReconfigurationHandler {
             if (config.relay8Enabled.enabled && config.relay8Association.associationVal == config.getProfileBasedEnumValueRelayType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 relay8Point.addMarker(Tags.WRITABLE)
                 relay8Point.addMarker(Tags.UNUSED)
-            } else {
+            } else if(relay8.has(Tags.UNUSED)) {
                 relay8Point.removeMarkerIfExists(Tags.WRITABLE)
                 relay8Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(relay8[Tags.ID].toString())
@@ -401,7 +401,7 @@ class HyperstatSplitReconfigurationHandler {
             if (config.analogOut1Enabled.enabled && config.analogOut1Association.associationVal == config.getProfileBasedEnumValueAnalogType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 analogOut1Point.addMarker(Tags.WRITABLE)
                 analogOut1Point.addMarker(Tags.UNUSED)
-            } else {
+            } else if(analogOut1.has(Tags.UNUSED)) {
                 analogOut1Point.removeMarkerIfExists(Tags.WRITABLE)
                 analogOut1Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(analogOut1[Tags.ID].toString())
@@ -413,7 +413,7 @@ class HyperstatSplitReconfigurationHandler {
             if (config.analogOut2Enabled.enabled && config.analogOut2Association.associationVal == config.getProfileBasedEnumValueAnalogType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 analogOut2Point.addMarker(Tags.WRITABLE)
                 analogOut2Point.addMarker(Tags.UNUSED)
-            } else {
+            } else if(analogOut2.has(Tags.UNUSED)) {
                 analogOut2Point.removeMarkerIfExists(Tags.WRITABLE)
                 analogOut2Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(analogOut2[Tags.ID].toString())
@@ -425,7 +425,7 @@ class HyperstatSplitReconfigurationHandler {
             if (config.analogOut3Enabled.enabled && config.analogOut3Association.associationVal == config.getProfileBasedEnumValueAnalogType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 analogOut3Point.addMarker(Tags.WRITABLE)
                 analogOut3Point.addMarker(Tags.UNUSED)
-            } else {
+            } else if(analogOut3.has(Tags.UNUSED)) {
                 analogOut3Point.removeMarkerIfExists(Tags.WRITABLE)
                 analogOut3Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(analogOut3[Tags.ID].toString())
@@ -437,7 +437,7 @@ class HyperstatSplitReconfigurationHandler {
             if (config.analogOut4Enabled.enabled && config.analogOut4Association.associationVal == config.getProfileBasedEnumValueAnalogType(HyperStatSplitControlType.EXTERNALLY_MAPPED.name,config)) {
                 analogOut4Point.addMarker(Tags.WRITABLE)
                 analogOut4Point.addMarker(Tags.UNUSED)
-            } else {
+            } else if(analogOut4.has(Tags.UNUSED)) {
                 analogOut4Point.removeMarkerIfExists(Tags.WRITABLE)
                 analogOut4Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(analogOut4[Tags.ID].toString())

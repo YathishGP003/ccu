@@ -257,23 +257,11 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
         logIt(
             "doAnalogDCVAction: co2Value : $co2Value zoneCO2Threshold: $cO2Threshold zoneCO2DamperOpeningRate $damperOpeningRate"
         )
-        if (isDcvEligibleToOn(co2Value, cO2Threshold, isDoorOpen, zoneOccupancyState)) {
-            updateLogicalPoint(logicalPointsList[port]!!, dcvLoopOutput.toDouble())
-            analogOutStages[StatusMsgKeys.DCV_DAMPER.name] = dcvLoopOutput
-        } else if (isDcvEligibleToOn(co2Value, cO2Threshold, isDoorOpen, zoneOccupancyState).not()) {
-            updateLogicalPoint(logicalPointsList[port]!!, 0.0)
-        }
-    }
 
-    private fun isDcvEligibleToOn(
-        co2Value: Double,
-        zoneCO2Threshold: Double,
-        isDoorOpen: Boolean,
-        zoneOccupancy: a75f.io.domain.api.Point
-    ): Boolean {
-        return (co2Value > 0 && co2Value > zoneCO2Threshold && dcvLoopOutput > 0 && !isDoorOpen && isSoftOccupied(
-            zoneOccupancy
-        ))
+        updateLogicalPoint(logicalPointsList[port]!!, dcvLoopOutput.toDouble())
+        if (dcvLoopOutput > 0) {
+            analogOutStages[StatusMsgKeys.DCV_DAMPER.name] = dcvLoopOutput
+        }
     }
 
 

@@ -56,7 +56,7 @@ private fun fillHyperStatControls(buildr: HyperStatControlsMessage_t.Builder, eq
         val logicalPointRef = port.readPoint().pointRef
         if (logicalPointRef == null) {
             CcuLog.e(L.TAG_CCU_DEVICE, "Logical point ref is missing for ${port.domainName}")
-            port.writeHisVal(0.0)
+            port.writePointValue(0.0)
         } else {
             val actualPhysicalValue: Double = if (isRelay) {
                 mapDigitalOut(port.readPoint().type, CCUHsApi.getInstance().readHisValById(logicalPointRef) > 0.0).toDouble()
@@ -65,7 +65,7 @@ private fun fillHyperStatControls(buildr: HyperStatControlsMessage_t.Builder, eq
                     CCUHsApi.getInstance().readHisValById(logicalPointRef).toInt().toShort()
                 ).toDouble()
             }
-            port.writeHisVal(actualPhysicalValue)
+            port.writePointValue(actualPhysicalValue)
         }
         val isWritable = port.isWritable()
         val logicalVal = if (isWritable) {
@@ -77,9 +77,6 @@ private fun fillHyperStatControls(buildr: HyperStatControlsMessage_t.Builder, eq
             port.readHisVal()
         } else {
             logicalVal
-        }
-        if (isWritable) {
-            port.writeHisVal(port.readPriorityVal())
         }
         return mappedVal
     }

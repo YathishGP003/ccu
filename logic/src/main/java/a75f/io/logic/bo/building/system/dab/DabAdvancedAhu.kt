@@ -397,6 +397,16 @@ class DabAdvancedAhu : DabSystemProfile() {
     }
 
     private fun updateLoopOpPoints() {
+        systemEquip.connectEquip1.let {
+            it.coolingLoopOutput.writePointValue(systemCoolingLoopOp)
+            it.heatingLoopOutput.writePointValue(systemHeatingLoopOp)
+            it.fanLoopOutput.writePointValue(systemFanLoopOp)
+            it.co2LoopOutput.writePointValue(systemCo2LoopOp)
+            it.compressorLoopOutput.writePointValue(systemCompressorLoop)
+        }
+        // Update the connect module related economizer points
+        advAhuEconImpl.updateLoopPoints()
+
         systemEquip.coolingLoopOutput.writePointValue(systemCoolingLoopOp)
         systemCoolingLoopOp = systemEquip.coolingLoopOutput.readHisVal()
         systemEquip.heatingLoopOutput.writePointValue(systemHeatingLoopOp)
@@ -419,16 +429,6 @@ class DabAdvancedAhu : DabSystemProfile() {
 
         systemEquip.dcvLoopOutput.writePointValue(systemCo2LoopOp)
         systemDcvLoopOp = systemEquip.dcvLoopOutput.readPriorityVal()
-
-        systemEquip.connectEquip1.let {
-            it.coolingLoopOutput.writePointValue(systemCoolingLoopOp)
-            it.heatingLoopOutput.writePointValue(systemHeatingLoopOp)
-            it.fanLoopOutput.writePointValue(systemFanLoopOp)
-            it.co2LoopOutput.writePointValue(systemCo2LoopOp)
-            it.compressorLoopOutput.writePointValue(systemCompressorLoop)
-        }
-        // Update the connect module related economizer points
-        advAhuEconImpl.updateLoopPoints()
     }
 
     private fun resetLoops() {

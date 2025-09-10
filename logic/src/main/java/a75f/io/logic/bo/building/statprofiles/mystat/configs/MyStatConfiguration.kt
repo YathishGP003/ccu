@@ -13,6 +13,7 @@ import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatDevice
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import org.projecthaystack.HDict
 
 /**
  * Created by Manjunath K on 16-01-2025.
@@ -185,19 +186,17 @@ abstract class MyStatConfiguration(
         val device = getMyStatDevice(nodeAddress)
         val deviceRef = device[Tags.ID].toString()
 
-        fun getPort(portName: String): RawPoint.Builder? {
-            val port =
-                hayStack.readHDict("point and deviceRef == \"$deviceRef\" and domainName == \"$portName\"")
-            if ( port == null ||port.isEmpty) return null
-            return RawPoint.Builder().setHDict(port)
+        fun getPortDict(portName: String): HDict? {
+            return hayStack.readHDict("point and deviceRef == \"$deviceRef\" and domainName == \"$portName\"")
         }
 
-        fun updatePort(port: RawPoint.Builder, type: String, isWritable: Boolean) {
+        fun updatePort(portDict: HDict, type: String, isWritable: Boolean) {
+            val port = RawPoint.Builder().setHDict(portDict)
             port.setType(type)
             if (isWritable) {
                 port.addMarker(Tags.WRITABLE)
                 port.addMarker(Tags.UNUSED)
-            } else {
+            } else if(portDict.has(Tags.UNUSED)) {
                 port.removeMarkerIfExists(Tags.WRITABLE)
                 port.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(port.build().id)
@@ -207,16 +206,18 @@ abstract class MyStatConfiguration(
         }
 
         relays.forEach { (relayName, externallyMapped) ->
-            val port = getPort(relayName)
-            if (port != null) updatePort(
-                port, OutputRelayActuatorType.NormallyOpen.displayName, externallyMapped
-            )
+            val portDict = getPortDict(relayName)
+            if (portDict != null && !portDict.isEmpty) {
+                updatePort(
+                    portDict, OutputRelayActuatorType.NormallyOpen.displayName, externallyMapped
+                )
+            }
         }
 
         analogOuts.forEach { (analogName, config) ->
-            val port = getPort(analogName)
-            if (port != null) {
-                updatePort(port, config.second, config.first)
+            val portDict = getPortDict(analogName)
+            if (portDict != null && !portDict.isEmpty) {
+                updatePort(portDict, config.second, config.first)
             }
         }
     }

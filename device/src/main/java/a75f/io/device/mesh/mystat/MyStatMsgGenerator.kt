@@ -101,14 +101,14 @@ private fun fillMyStatControls(
         if (!Globals.getInstance().isTestMode) {  // Skip logical point ref update when test mode is on
             if (logicalPointRef == null) {
                 CcuLog.e(L.TAG_CCU_DEVICE, "Logical point ref is missing for ${port.domainName}")
-                port.writeHisVal(0.0)
+                port.writePointValue(0.0)
             } else {
                 if (port.domainName.contentEquals(DomainName.analog1Out)) {
                     val logicalValue = CCUHsApi.getInstance().readHisValById(logicalPointRef).toInt().toShort()
                     val voltage = mapAnalogOut(device.analog1Out.readPoint().type, logicalValue)
-                    port.writeHisVal(voltage.toDouble())
+                    port.writePointValue(voltage.toDouble())
                 } else {
-                    port.writeHisVal(CCUHsApi.getInstance().readHisValById(logicalPointRef))
+                    port.writePointValue(CCUHsApi.getInstance().readHisValById(logicalPointRef))
                 }
             }
         }

@@ -15,6 +15,7 @@ import a75f.io.domain.cutover.BuildingEquipCutOverMapping
 import a75f.io.domain.cutover.getDomainNameFromDis
 import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.TunerUtil
+import a75f.io.domain.util.extractAndAppendExternalEdits
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
@@ -221,6 +222,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
             modelPointDef?.run {
                 val hayStackPoint = buildPoint(PointBuilderConfig(modelPointDef, profileConfiguration, equipRef, siteRef, tz, equipDis))
+                extractAndAppendExternalEdits(modelPointDef, hayStackPoint, hayStack.readEntity("id==@${hayStackPoint.id}"))
                 hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
                 hayStackPoint.id = existingPoint["id"].toString()
                 if (profileConfiguration.getEnableConfigs().getConfig(point.domainName) != null) {

@@ -299,7 +299,9 @@ open class PhysicalPoint(domainName : String, val deviceRef: String) : Entity (d
         requireId()
         CcuLog.d("CCU_DEVICE", "test-writable physical writePointValue:=======value====> $value <--id--> $id <--iswritable-->${isWritable()} <--default value-->${readDefaultVal()}<--dis-->$dis")
         if (isWritable()) {
-            if (value != readDefaultVal()) {
+            if (value == 0.0) {
+                writeDefaultVal(value)
+            } else if (value != readDefaultVal()) {
                 writeDefaultVal(value)
             }
             val priorityValue = readPriorityVal()

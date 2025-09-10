@@ -146,8 +146,11 @@ public class PlcProfile extends ZoneProfile {
         }
 
         double curCv = (double) Math.round(100 * controlVariable) / 100;
-        int eStatus = (int) (Math.round(100 * controlVariable) / 100);
         plcEquip.getControlVariable().writePointValue(curCv);
+
+        controlVariable = plcEquip.getControlVariable().readHisVal();
+
+        int eStatus = (int) (Math.round(100 * controlVariable) / 100);
 
         String statusMessage = getStatusMessage(eStatus);
         plcEquip.getEquipStatusMessage().writeDefaultVal(statusMessage);

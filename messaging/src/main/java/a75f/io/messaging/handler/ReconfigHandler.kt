@@ -1,7 +1,6 @@
 package a75f.io.messaging.handler
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.RawPoint
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.config.AssociationConfig
@@ -70,19 +69,17 @@ fun setPortConfiguration(
         return
     }
 
-    fun getPort(portName: String): RawPoint.Builder? {
-        val port =
-            hayStack.readHDict("point and deviceRef == \"$deviceRef\" and domainName == \"$portName\"")
-        if (port.isEmpty) return null
-        return RawPoint.Builder().setHDict(port)
+    fun getPortDict(portName: String): HDict? {
+        return hayStack.readHDict("point and deviceRef == \"$deviceRef\" and domainName == \"$portName\"")
     }
 
-    fun updatePort(port: RawPoint.Builder, type: String, isWritable: Boolean) {
+    fun updatePort(portDict: HDict, type: String, isWritable: Boolean) {
+        val port = RawPoint.Builder().setHDict(portDict)
         port.setType(type)
         if (isWritable) {
             port.addMarker(Tags.WRITABLE)
             port.addMarker(Tags.UNUSED)
-        } else {
+        } else if(portDict.has(Tags.UNUSED)){
             port.removeMarkerIfExists(Tags.WRITABLE)
             port.removeMarkerIfExists(Tags.UNUSED)
             hayStack.clearAllAvailableLevelsInPoint(port.build().id)
@@ -92,16 +89,16 @@ fun setPortConfiguration(
     }
 
     relays.forEach { (relayName, externallyMapped) ->
-        val port = getPort(relayName)
-        if (port != null) updatePort(
-            port, OutputRelayActuatorType.NormallyOpen.displayName, externallyMapped
+        val portDict = getPortDict(relayName)
+        if (portDict != null && !portDict.isEmpty) updatePort(
+            portDict, OutputRelayActuatorType.NormallyOpen.displayName, externallyMapped
         )
     }
 
     analogOuts.forEach { (analogName, config) ->
-        val port = getPort(analogName)
-        if (port != null) {
-            updatePort(port, config.second, config.first)
+        val portDict = getPortDict(analogName)
+        if (portDict != null && !portDict.isEmpty) {
+            updatePort(portDict, config.second, config.first)
         }
     }
 

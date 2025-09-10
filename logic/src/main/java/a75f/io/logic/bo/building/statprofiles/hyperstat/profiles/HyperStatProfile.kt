@@ -215,26 +215,11 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
         logIt(
             "doAnalogDCVAction: co2Value : $co2Value zoneCO2Threshold: $zoneCO2Threshold zoneCO2DamperOpeningRate $zoneCO2DamperOpeningRate"
         )
-        if (isDcvEligibleToOn(co2Value, zoneCO2Threshold, isDoorOpen, zoneOccupancyState)) {
-            updateLogicalPoint(logicalPointsList[port]!!, dcvLoopOutput.toDouble())
+
+        updateLogicalPoint(logicalPointsList[port]!!, dcvLoopOutput.toDouble())
+        if (dcvLoopOutput > 0) {
             analogOutStages[StatusMsgKeys.DCV_DAMPER.name] = dcvLoopOutput
-        } else if (isDcvEligibleToOn(co2Value, zoneCO2Threshold, isDoorOpen, zoneOccupancyState).not()) {
-            updateLogicalPoint(logicalPointsList[port]!!, 0.0)
         }
-    }
-    /**
-     * Checks if the DCV is eligible to be turned ON based on CO2 value, zone CO2 threshold,
-     * door open status, and zone occupancy.
-     */
-    private fun isDcvEligibleToOn(
-        co2Value: Double,
-        zoneCO2Threshold: Double,
-        isDoorOpen: Boolean,
-        zoneOccupancy: a75f.io.domain.api.Point
-    ): Boolean {
-        return (co2Value > 0 && co2Value > zoneCO2Threshold && dcvLoopOutput > 0 && !isDoorOpen && isSoftOccupied(
-            zoneOccupancy
-        ))
     }
 
     fun doorWindowIsOpen(

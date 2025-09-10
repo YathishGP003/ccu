@@ -12,6 +12,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.util.StringUtil;
 import a75f.io.device.HyperSplit;
 import a75f.io.device.mesh.DeviceHSUtil;
 import a75f.io.device.mesh.DeviceUtil;
@@ -152,7 +153,7 @@ public class HyperSplitMessageGenerator {
                                 : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
                     }
                     if (rawPoint.getMarkers().contains(Tags.WRITABLE)) {
-                        hayStack.writeDefaultVal(rawPoint.getId(), (double) mappedVal);
+                        hayStack.writeDefaultVal("id==" + StringUtil.addAtSymbolIfMissing(rawPoint.getId()), (double) mappedVal);
                         double value = hayStack.readPointPriorityVal(rawPoint.getId());
                         hayStack.writeHisValById(rawPoint.getId(), value);
                     } else {

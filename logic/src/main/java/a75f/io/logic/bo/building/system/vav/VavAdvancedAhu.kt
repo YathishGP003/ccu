@@ -393,6 +393,16 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
 
     private fun updateLoopOpPoints() {
+        systemEquip.connectEquip1.let {
+            it.coolingLoopOutput.writePointValue(systemCoolingLoopOp)
+            it.heatingLoopOutput.writePointValue(systemHeatingLoopOp)
+            it.fanLoopOutput.writePointValue(systemFanLoopOp)
+            it.co2LoopOutput.writePointValue(systemCo2LoopOp)
+            it.compressorLoopOutput.writePointValue(systemCompressorLoop)
+        }
+        // Update the connect module related economizer points
+        advAhuEconImpl.updateLoopPoints()
+
         systemEquip.coolingLoopOutput.writePointValue(systemCoolingLoopOp)
         systemCoolingLoopOp = systemEquip.coolingLoopOutput.readHisVal()
         systemEquip.heatingLoopOutput.writePointValue(systemHeatingLoopOp)
@@ -412,15 +422,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
         systemCo2LoopOp = systemEquip.cmEquip.co2BasedDamperControl.readHisVal()
         systemEquip.cmEquip.compressorLoopOutput.writePointValue(systemCompressorLoop)
         systemCompressorLoop = systemEquip.cmEquip.compressorLoopOutput.readHisVal()
-        systemEquip.connectEquip1.let {
-            it.coolingLoopOutput.writePointValue(systemCoolingLoopOp)
-            it.heatingLoopOutput.writePointValue(systemHeatingLoopOp)
-            it.fanLoopOutput.writePointValue(systemFanLoopOp)
-            it.co2LoopOutput.writePointValue(systemCo2LoopOp)
-            it.compressorLoopOutput.writePointValue(systemCompressorLoop)
-        }
-        // Update the connect module related economizer points
-        advAhuEconImpl.updateLoopPoints()
     }
 
     private fun resetLoops() {

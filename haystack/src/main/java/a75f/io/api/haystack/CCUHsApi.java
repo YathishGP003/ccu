@@ -65,6 +65,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import a75f.io.api.haystack.exception.NullHGridException;
 import a75f.io.api.haystack.observer.HisWriteObservable;
+import a75f.io.api.haystack.observer.PointScheduleUpdateInf;
 import a75f.io.api.haystack.observer.PointWriteObservable;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
 import a75f.io.api.haystack.sync.CareTakerResponse;
@@ -147,6 +148,12 @@ public class CCUHsApi
             throw new IllegalStateException("Hay stack api is not initialized");
         }
         return instance;
+    }
+
+    private PointScheduleUpdateInf pointScheduleUpdateInf = null;
+
+    public void registerPointScheduleUpdateInf(PointScheduleUpdateInf inf){
+        pointScheduleUpdateInf = inf;
     }
 
     public CCUHsApi(Context c, String hayStackUrl, String careTakerUrl, String gatewayUrl)
@@ -3550,10 +3557,20 @@ public class CCUHsApi
 
     public void updateRecurringSchedule(String id, HDict dict){
         tagsDb.addHDict(id,dict);
+        updateCustomScheduleView();
     }
 
     public void updateEventSchedule(String id, HDict dict){
         tagsDb.addHDict(id,dict);
+        updateCustomScheduleView();
+    }
+
+    public void updateCustomScheduleView(){
+        pointScheduleUpdateInf.updateCustomScheduleView();
+    }
+
+    public void removeCustomScheduleView(){
+        pointScheduleUpdateInf.removeCustomScheduleView();
     }
 
 

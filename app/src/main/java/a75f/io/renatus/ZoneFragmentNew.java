@@ -113,6 +113,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.bacnet.parser.BacnetModelDetailResponse;
 import a75f.io.api.haystack.bacnet.parser.BacnetZoneViewItem;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
+import a75f.io.api.haystack.observer.PointScheduleUpdateInf;
 import a75f.io.device.mesh.Pulse;
 import a75f.io.device.mesh.hypersplit.HyperSplitMsgReceiver;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
@@ -169,6 +170,7 @@ import a75f.io.renatus.schedules.NamedSchedule;
 import a75f.io.renatus.schedules.ScheduleGroupFragment;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.ui.model.HeaderViewItem;
+import a75f.io.renatus.ui.nontempprofiles.helper.ZoneData;
 import a75f.io.renatus.ui.nontempprofiles.utilities.CcuUtilsKt;
 import a75f.io.renatus.ui.nontempprofiles.viewmodel.NonTempProfileViewModel;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -189,7 +191,7 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
-public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
+public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, PointScheduleUpdateInf {
     private static final int DELAY_ZONE_LOAD_MS = 20;
     private static final String LOG_TAG = " ZoneFragmentNew ";
     ExpandableListView expandableListView;
@@ -2215,6 +2217,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
     }
 
+    ZoneData zoneDataForUi= null;
     private void viewNonTemperatureBasedZone(LayoutInflater inflater, View rootView,
                                              ArrayList<HashMap> zoneMap, String zoneTitle, int gridPosition,
                                              LinearLayout[] tablerowLayout, boolean isZoneAlive, String roomRef)
@@ -2222,6 +2225,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.viewNonTemperatureBasedZone");
         cleanUpObservableList(nonTempProfileViewModels);
         nonTempProfileViewModels.clear();
+        zoneDataForUi = null;
+        CCUHsApi.getInstance().registerPointScheduleUpdateInf(this);
         Equip p = null;
         int i = gridPosition;
         View arcView = null;
@@ -2368,6 +2373,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         CcuUtilsKt.stopObservingAllEquipHealth(nonTempProfileViewModels);
                         cleanUpObservableList(nonTempProfileViewModels);
                         nonTempProfileViewModels.clear();
+                        zoneDataForUi = null;
                         int tableRowCount = tableLayout.getChildCount();
                         if (tableLayout.getChildCount() > 1) {
                             boolean viewFound = false;
@@ -2438,6 +2444,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     } else if (clickposition == clickedView) {
                         CcuUtilsKt.stopObservingAllEquipHealth(nonTempProfileViewModels);
                         cleanUpObservableList(nonTempProfileViewModels);
+                        zoneDataForUi = null;
                         nonTempProfileViewModels.clear();
                         v.setBackgroundColor(getResources().getColor(R.color.white));
                         status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
@@ -2482,6 +2489,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         HashMap<Object, Object> connectNodeDevice = ConnectNodeUtil.Companion.getConnectNodeForZone(roomRef, CCUHsApi.getInstance());
                         disableVisibiltyForZoneScheduleUI(zoneDetails);
                         displayRoomSpecificCustomControlFields(zoneDetails, nonTempEquip);
+                        zoneDataForUi = new ZoneData(zoneDetails, nonTempEquip, true);
                         List<EquipmentDevice> modbusDevices = new ArrayList<>();
                         for (EquipmentDevice equipmentDevice : buildModbusModel(roomRef)) {
                             modbusDevices.add(equipmentDevice);
@@ -2579,7 +2587,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             // Showing point based schedule layout for modbus devices
                             disableVisibiltyForZoneScheduleUI(zoneDetails);
                             displayRoomSpecificCustomControlFields(zoneDetails, nonTempEquip);
-
+                            zoneDataForUi = new ZoneData(zoneDetails, nonTempEquip, true);
                             HashMap<Object, Object> parentModbusEquip = CCUHsApi.getInstance().readEntity("equip " +  // parent modbbus equip
                                     "and not equipRef and roomRef  == " + "\""+nonTempEquip.getRoomRef()+"\"");
 
@@ -2598,7 +2606,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         if (nonTempEquip.getProfile().startsWith("BACNET")) {
                             disableVisibiltyForZoneScheduleUI(zoneDetails);
                             displayRoomSpecificCustomControlFields(zoneDetails, nonTempEquip);
-
+                            zoneDataForUi = new ZoneData(zoneDetails, nonTempEquip, true);
                             HashMap<Object,Object> bacnetDevice = CCUHsApi.getInstance().readEntity("device and equipRef == \"" + nonTempEquip.getId() + "\"");
                             visibleEquip = nonTempEquip;
                             loadBacnetZone(
@@ -3933,6 +3941,36 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             UpdateEntityHandler.setZoneDataInterface(null);
         }
     }
+
+    @Override
+    public void updateCustomScheduleView() {
+        getActivity().runOnUiThread(() -> {
+            if (zoneDataForUi != null && zoneDataForUi.isZoneExpanded()) {
+                CcuLog.d("CCU_UI", " Show Custom Schedule View ");
+                showCustomScheduleView(zoneDataForUi);
+                 // run afrer 10 seconds so that points will be updated with schedule/event refs
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    if (zoneDataForUi != null) {
+                        displaySchedulablePointWithoutSchedulesOrEvents(
+                                zoneDataForUi.getEquip(),
+                                zoneDataForUi.getZoneDetails()
+                        );
+                    }
+                }, 10_000);
+            }
+        });
+
+    }
+
+    @Override
+    public void removeCustomScheduleView() {
+        getActivity().runOnUiThread(() -> {
+            CcuLog.d("CCU_UI", " Hide Custom Schedule View ");
+            hideCustomScheduleView(zoneDataForUi);
+        });
+
+    }
+
     class FloorComparator implements Comparator<Floor> {
         @Override
         public int compare(Floor a, Floor b) {
@@ -4648,6 +4686,26 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             default:
                 return "";
         }
+    }
+
+    public void showCustomScheduleView(ZoneData zonedata) {
+        View zoneDetails = zonedata.getZoneDetails();
+        Equip nonTempEquip = zonedata.getEquip();
+        zoneDetails.findViewById(R.id.pointBasedScheduleLayout).setVisibility(View.VISIBLE);
+        updateCustomScheduleLabelValue(zoneDetails, nonTempEquip.getRoomRef());
+        displaySchedulablePointWithoutSchedulesOrEvents(nonTempEquip, zoneDetails);
+    }
+
+    public void hideCustomScheduleView(ZoneData zonedata) {
+        View zoneDetails = zonedata.getZoneDetails();
+
+        ImageButton detailedPointScheduleViewButton = zoneDetails.findViewById(R.id.point_schedule_view_button);
+        detailedPointScheduleViewButton.setVisibility(View.GONE);
+
+        TextView noSchedule = zoneDetails.findViewById(R.id.pointScheduleAvailabilityView);
+        noSchedule.setText(R.string.no_point_schedule_assigned);
+
+        zoneDetails.findViewById(R.id.schedulablePointsWithoutScheduleLayout).setVisibility(View.GONE);
     }
 }
 

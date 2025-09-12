@@ -27,6 +27,7 @@ class UpdateEventHandler : MessageHandler {
         CcuLog.d(L.TAG_CCU_MESSAGING, "UpdateEventHandler Handler called")
         if (jsonObject["command"].asString == UpdateEventHandler().DELETE_EVENT && jsonObject["id"] != null) {
             CCUHsApi.getInstance().removeEntity(jsonObject["id"].asString)
+            CCUHsApi.getInstance().removeCustomScheduleView();
             return
         }
         updateEventEntity(jsonObject)

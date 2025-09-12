@@ -311,7 +311,10 @@ class CustomScheduleManager {
                                     "\n\treason: isWriteToDeviceReq: $isWriteToDeviceReq, overridenValue: $isValueOverriden, hisDataMismatching: $isHisDataMismatching")
                             writeToPhysical(equip, point, priorityValue, priorityValueLevelTriple)
                             if(isHisDataMismatching) {
-                                haystack.writeHisValById(point.id().toString(), priorityValue)
+                                haystack.writeHisValById(
+                                    point.id().toString(),
+                                    CCUHsApi.getInstance().readHisValById(point.id().toString())
+                                )
                             }
                         }
                     } catch (e: Exception) {

@@ -27,6 +27,7 @@ class UpdateRecurringScheduleHandler : MessageHandler {
         CcuLog.d(L.TAG_CCU_MESSAGING, "UpdateRecurringScheduleHandler Handler called")
         if (jsonObject["command"].asString == UpdateRecurringScheduleHandler().DELETE_POINT_SCHEDULE && jsonObject["id"] != null) {
             CCUHsApi.getInstance().removeEntity(jsonObject["id"].asString)
+            CCUHsApi.getInstance().removeCustomScheduleView();
             return
         }
         updateRecurringScheduleEntity(jsonObject)

@@ -37,6 +37,7 @@ import a75f.io.device.serial.MessageType;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.HyperStatSplitEquip;
 import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip;
+import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip;
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -48,6 +49,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UVConfiguration;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVConfiguration;
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage;
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode;
@@ -840,11 +842,15 @@ public class HyperSplitMsgReceiver {
             possibleConditioningMode = HSSplitHaystackUtil.Companion.getPossibleConditioningModeSettings(nodeAddress);
             HsSplitCpuEquip hsSplitCpuEquip = new HsSplitCpuEquip(equipId);
             possibleFanMode = getPossibleFanMode(hsSplitCpuEquip);
-        }
-        if (equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_4PIPE_UV.name())) {
+        } else if (equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_4PIPE_UV.name())) {
             Pipe4UVConfiguration config = (Pipe4UVConfiguration) getSplitConfiguration(equipId);
             Pipe4UVEquip pipe4UVEquip = new Pipe4UVEquip(equipId);
             possibleFanMode = getPossibleFanMode(pipe4UVEquip);
+            possibleConditioningMode = getUvPossibleConditioningMode(config);
+        } else if(equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_2PIPE_UV.name())) {
+            Pipe2UVConfiguration config = (Pipe2UVConfiguration) getSplitConfiguration(equipId);
+            Pipe2UVEquip pipe2UVEquip = new Pipe2UVEquip(equipId);
+            possibleFanMode = getPossibleFanMode(pipe2UVEquip);
             possibleConditioningMode = getUvPossibleConditioningMode(config);
         }
         

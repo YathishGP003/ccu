@@ -15,6 +15,8 @@ import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.Cp
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UVConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UVRelayControls
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UvAnalogOutControls
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVRelayControls
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UvAnalogOutControls
@@ -281,7 +283,7 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
      * Get the default enable config for the domain name
      */
     override fun getDependencies(): List<ValueConfig> {
-        return mutableListOf<ValueConfig>()
+        return mutableListOf()
     }
 
     private fun getAddressAssociations() {
@@ -885,6 +887,7 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
         return when (profileConfiguration) {
             is HyperStatSplitCpuConfiguration -> CpuAnalogControlType.valueOf(enumName).ordinal
             is Pipe4UVConfiguration -> Pipe4UvAnalogOutControls.valueOf(enumName).ordinal
+            is Pipe2UVConfiguration -> Pipe2UvAnalogOutControls.valueOf(enumName).ordinal
             else -> CpuAnalogControlType.valueOf(enumName).ordinal
         }
     }
@@ -897,7 +900,7 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
         return when (profileConfiguration) {
             is HyperStatSplitCpuConfiguration -> CpuRelayType.valueOf(enumName).ordinal
             is Pipe4UVConfiguration -> Pipe4UVRelayControls.valueOf(enumName).ordinal
-            is Pipe2UVConfiguration -> Pipe4UVRelayControls.valueOf(enumName).ordinal
+            is Pipe2UVConfiguration -> Pipe2UVRelayControls.valueOf(enumName).ordinal
             else -> {
                 HyperStatSplitControlType.valueOf(enumName).ordinal
             }

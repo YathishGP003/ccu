@@ -125,7 +125,11 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
             trSystem.resetRequests();
         }
     }
-    
+
+    public void refreshDomainEquip() {
+        systemEquip = (VavModulatingRtuSystemEquip) Domain.systemEquip;
+    }
+
     @Override
     public boolean isCoolingAvailable() {
         return systemEquip.getCoolingSignal().pointExists() || systemEquip.getCompressorSpeed().pointExists();
@@ -147,8 +151,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
     }
 
     private synchronized void updateSystemPoints() {
-
-        systemEquip = (VavModulatingRtuSystemEquip) Domain.systemEquip;
+        refreshDomainEquip();
         if (currentOccupancy == null) {
             currentOccupancy = new CalibratedPoint(DomainName.occupancyMode, systemEquip.getEquipRef(), 0.0);
         }

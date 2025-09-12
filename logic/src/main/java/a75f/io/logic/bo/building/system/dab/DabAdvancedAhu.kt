@@ -201,7 +201,7 @@ class DabAdvancedAhu : DabSystemProfile() {
 
     override fun isHeatingAvailable(): Boolean {
         return ahuStagesCounts.compressorStages.data > 0 || connect1StagesCounts.compressorStages.data > 0
-                || heatingStages > 0 || coolingStagesConnect > 0
+                || heatingStages > 0
                 || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_HEATING)
                 || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_HEATING)
                 || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.COMPOSITE_SIGNAL)

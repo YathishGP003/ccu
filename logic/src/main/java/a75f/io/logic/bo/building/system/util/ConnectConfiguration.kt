@@ -187,6 +187,7 @@ class ConnectConfiguration(open val model: SeventyFiveFProfileDirective, nodeAdd
             addAll(addSensorAssociation(address1SensorAssociation, this))
             addAll(addSensorAssociation(address2SensorAssociation, this))
             addAll(addSensorAssociation(address3SensorAssociation, this))
+            add(damperControlAssociation)
 
         }
     }

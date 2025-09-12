@@ -103,7 +103,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
 
     private synchronized void updateSystemPoints() {
 
-        systemEquip = (DabModulatingRtuSystemEquip) Domain.systemEquip;
+        refreshSystemEquip();
         if (currentOccupancy == null) {
             currentOccupancy = new CalibratedPoint(DomainName.occupancyMode, systemEquip.getEquipRef(), 0.0);
         }
@@ -165,6 +165,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
         if (!systemEquip.getEquipScheduleStatus().readDefaultStrVal().equals(scheduleStatus)) {
             systemEquip.getEquipScheduleStatus().writeDefaultVal(scheduleStatus);
         }
+    }
+    public void refreshSystemEquip() {
+        systemEquip = (DabModulatingRtuSystemEquip) Domain.systemEquip;
     }
 
     @Override

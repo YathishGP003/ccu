@@ -13,13 +13,10 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hvac.ModulatingProfileAnalogMapping
 import a75f.io.logic.bo.building.hvac.ModulatingProfileRelayMapping
-import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.system.setFanTypeToStages
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
-import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.compose.showErrorDialog
@@ -109,6 +106,8 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
                 L.ccu().systemProfile.updateAhuRef(it)
             }
             updateOaoPoints()
+            val modulatingRtu = L.ccu().systemProfile as VavFullyModulatingRtu
+            modulatingRtu.refreshDomainEquip()
             hayStack.syncEntityTree()
             hayStack.setCcuReady()
             initialPortValues = HashMap(profileConfiguration.unusedPorts)

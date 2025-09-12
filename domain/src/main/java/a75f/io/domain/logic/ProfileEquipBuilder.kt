@@ -27,7 +27,6 @@ import io.seventyfivef.ph.core.PointType
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
-import java.util.ArrayList
 import org.projecthaystack.HDateTime
 import kotlin.system.measureTimeMillis
 
@@ -158,7 +157,6 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         } else {
             updatePoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
         }
-        DomainManager.buildDomain(CCUHsApi.getInstance())
         deletePoints(entityConfiguration, equipId)
         DomainManager.buildDomain(CCUHsApi.getInstance())
         return equipId

@@ -2678,10 +2678,10 @@ public class CCUHsApi
 
     public void publishRegistrationSuccessful() {
         CcuLog.d("REGISTRATION", "RegistrationCompletedListeners count "+onCcuRegistrationCompletedListeners.size());
-        onCcuRegistrationCompletedListeners.forEach( listener -> {
+        new ArrayList<>(onCcuRegistrationCompletedListeners).forEach(listener -> {
             listener.onRegistrationCompleted(this);
-            CcuLog.d("REGISTRATION", "RegistrationCompletedListener "+listener);
-        } );
+            CcuLog.d("REGISTRATION", "RegistrationCompletedListener " + listener);
+        });
     }
 
     /**

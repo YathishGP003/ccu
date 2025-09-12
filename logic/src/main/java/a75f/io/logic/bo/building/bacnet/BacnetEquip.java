@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.bacnet;
 import static a75f.io.logic.bo.building.modbus.ModbusEquip.isDouble;
 import static a75f.io.logic.bo.building.modbus.ModbusEquip.isInt;
 import static a75f.io.logic.bo.building.modbus.ModbusEquip.isLong;
+import static a75f.io.logic.bo.util.CustomScheduleUtilKt.updateWritableDataUponCustomControlChanges;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_CONFIGURATION;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.encodeBacnetId;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.getBacNetType;
@@ -493,6 +494,7 @@ public class BacnetEquip {
                 if (updatePointFlag) {
                     if (logicalPoint.getId() != null) {
                         CcuLog.d(TAG_BACNET, "updating point@@-->" + logicalPoint.getId() + "<-->" + logicalPoint.getEquipRef() + "<-->" + logicalPoint);
+                        updateWritableDataUponCustomControlChanges(logicalPoint);
                         CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
                     } else {
                         CcuLog.d(TAG_BACNET, "updating point@@--failed--no id-->" + logicalPoint);

@@ -139,7 +139,6 @@ public class ModbusPulse {
             return;
         }
         HashMap logPoint = hayStack.read("point and id==" + phyPoint.get("pointRef"));
-//        double priorityVal = hayStack.readPointPriorityVal(logPoint.get("id").toString());
         CcuLog.d(L.TAG_CCU_MODBUS,"Response data : "+Arrays.toString(response.getMessageData()));
         double formattedVal = 0;
         switch (UsbModbusUtils.validateFunctionCode(registerType)){
@@ -151,13 +150,13 @@ public class ModbusPulse {
 
                 if(!logPoint.containsKey("writable")) {
                     hayStack.writeHisValById(logPoint.get("id").toString(),formattedVal);
-                    hayStack.writeHisValById(phyPoint.get("id").toString(), formattedVal);
+                    hayStack.writePointValue(phyPoint, formattedVal);
                 } else if (logPoint.containsKey("writable") &&
                         !(logPoint.containsKey(Tags.SCHEDULABLE)
                         && (logPoint.containsKey(Tags.SCHEDULE_REF) || logPoint.containsKey(Tags.EVENT_REF)))) {
                     hayStack.writeHisValById(logPoint.get("id").toString(),formattedVal);
-                    hayStack.writeHisValById(phyPoint.get("id").toString(), formattedVal);
                     hayStack.writePoint(logPoint.get("id").toString(), formattedVal);
+                    hayStack.writePointValue(phyPoint, formattedVal);
                 }
                 //startIndex +=2;
                 break;
@@ -175,16 +174,7 @@ public class ModbusPulse {
                                         " Val "+formattedVal);
 
         LModbus.getModbusCommLock().unlock();
-//        if ((priorityVal != formattedVal) && logPoint.containsKey("writable") && (logPoint.containsKey(Tags.SCHEDULABLE)
-//                        && (logPoint.containsKey(Tags.SCHEDULE_REF) || logPoint.containsKey(Tags.EVENT_REF)))) {
-//            CcuLog.d(L.TAG_CCU_MODBUS, "Received Modbus value is different from Haystack priority value. " +
-//                    "Haystack priority value: " + priorityVal + ", Modbus value: " + formattedVal + ", hence sending the priority data to the device.");
-//            if(readRegister.parameterDefinitionType.equals("float")) {
-//                LModbus.writeRegister(Integer.parseInt(logPoint.get("group").toString()), readRegister, (float) priorityVal);
-//            }  else {
-//                LModbus.writeRegister(Integer.parseInt(logPoint.get("group").toString()), readRegister, (int) priorityVal);
-//            }
-//        }
+        sendUpdatedWritableDataToDevice(logPoint, readRegister, formattedVal);
     }
     
     public static double getRegisterValFromResponse(Register register, RtuMessageResponse response) {
@@ -409,5 +399,20 @@ public class ModbusPulse {
         final long rightShifted = l >>> offset;
         final long mask = (1L << nrBits) - 1L;
         return rightShifted & mask;
+    }
+
+    private static void sendUpdatedWritableDataToDevice(HashMap<Object, Object> logPoint, Register readRegister, double formattedVal) {
+        if(logPoint.containsKey(Tags.WRITABLE)) {
+            double priorityVal = CCUHsApi.getInstance().readPointPriorityVal(Objects.requireNonNull(logPoint.get("id")).toString());
+            if ((priorityVal != formattedVal)) {
+                CcuLog.d(L.TAG_CCU_MODBUS, "Received Modbus value is different from Haystack priority value. " +
+                        "Haystack priority value: " + priorityVal + ", Modbus value: " + formattedVal + ", hence sending the priority data to the device.");
+                if(readRegister.parameterDefinitionType.equals("float")) {
+                    LModbus.writeRegister(Integer.parseInt(Objects.requireNonNull(logPoint.get("group")).toString()), readRegister, (float) priorityVal);
+                }  else {
+                    LModbus.writeRegister(Integer.parseInt(Objects.requireNonNull(logPoint.get("group")).toString()), readRegister, (int) priorityVal);
+                }
+            }
+        }
     }
 }

@@ -8,14 +8,23 @@ import a75f.io.api.haystack.MockTime
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.util.TimeUtil
 import a75f.io.api.haystack.util.hayStack
+import a75f.io.logger.CcuLog
+import a75f.io.logic.L
+import a75f.io.logic.bo.building.pointscheduling.model.CustomScheduleManager.Companion.modbusWritableDataInterface
 import a75f.io.logic.bo.building.pointscheduling.model.Day
+import a75f.io.logic.util.bacnet.sendWriteRequestToMstpEquip
 import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.StyleSpan
 import io.seventyfivef.ph.core.Tags
+import a75f.io.api.haystack.Tags.MODBUS
+import a75f.io.api.haystack.Tags.CONNECTMODULE
+import a75f.io.api.haystack.Tags.BACNET_CONFIG
+import a75f.io.api.haystack.Tags.BACNET
 import org.joda.time.DateTime
 import org.joda.time.Interval
+import org.projecthaystack.HDict
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -57,7 +66,7 @@ fun fetchScheduleStatusMessageForPointsUnderCustomControl(equipRef: String): Lis
     )
 
     val pointScheduleStatusList = equipScheduleStatusString.lines().filter { it.isNotBlank() }.map { singleStatusLine ->
-        var pointStatus = singleStatusLine.trim()
+        val pointStatus = singleStatusLine.trim()
         val regex = Regex("""\bis\b""") // Matches "is" as a word
         val match = regex.find(pointStatus)
         val boldEnd = match?.range?.first ?: 0
@@ -154,7 +163,7 @@ private fun getScheduledIntervals(daysSorted: MutableList<Day>): MutableList<Int
                 day.day +
                         1
             )
-        var scheduledInterval: Interval? = null
+        var scheduledInterval: Interval?
         scheduledInterval = if (startDateTime.isAfter(endDateTime)) {
             if (day.day == DAYS.SUNDAY.ordinal) {
                 if (startDateTime.weekOfWeekyear >= 52) {
@@ -190,19 +199,18 @@ fun isPointFollowingScheduleOrEvent(pointId: String): Boolean {
             && (point.containsKey("scheduleRef") || point.containsKey("eventRef"))
 }
 
-fun fetchForceOverrideLevelValueAndEndTimeIfAvailable(pointId: String, enumString: String?, unit: String?): Triple<String, String, Double> {
-    var valueString: String = ""
-    var endTimeString: String = ""
-    var highestPriorityValue: Double = 0.0
+fun isPointFollowingScheduleOrEvent(point: Point): Boolean {
+    return point.markers.contains(Tags.SCHEDULABLE)
+            && (point.scheduleRef != null || point.eventRef != null)
+}
 
-    var highestLevelValFound = false
+fun fetchForceOverrideLevelValueAndEndTimeIfAvailable(pointId: String, enumString: String?, unit: String?): Pair<String, String> {
+    var valueString = ""
+    var endTimeString = ""
     var forceOverrideLevelFound = false
+
     for ((index, hashMap) in hayStack.readPoint(pointId)?.withIndex() ?: emptyList()) {
         hashMap["val"]?.let { valObject ->
-            if (!highestLevelValFound) {
-                highestPriorityValue = valObject.toString().toDouble()
-                highestLevelValFound = true
-            }
             if (index == HayStackConstants.FORCE_OVERRIDE_LEVEL - 1) {
                 forceOverrideLevelFound = true
                 valueString = getValueByEnum(valObject.toString().toDouble(), enumString, unit)
@@ -211,9 +219,167 @@ fun fetchForceOverrideLevelValueAndEndTimeIfAvailable(pointId: String, enumStrin
                 endTimeString = sdf.format(date)
             }
         }
-        if (highestLevelValFound && forceOverrideLevelFound) {
+        if (forceOverrideLevelFound) {
             break
         }
     }
-    return Triple(valueString, endTimeString, highestPriorityValue)
+    return Pair(valueString, endTimeString)
+}
+
+private fun findExternalProfileType(equipMap: HashMap<Any, Any>) : String {
+    if(equipMap.containsKey(MODBUS) && !equipMap.containsKey(CONNECTMODULE)) {
+        return MODBUS
+    } else if (equipMap.containsKey(BACNET_CONFIG)) {
+        return BACNET
+    } else if (equipMap.containsKey(CONNECTMODULE)) {
+        return CONNECTMODULE
+    } else {
+        CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "No external profile type found for equipId: ${equipMap["id"]}")
+        return ""
+    }
+}
+
+private fun isSchedulableTagRemovedPostUpdate(newPoint: Point): Boolean {
+    return !newPoint.markers.contains(Tags.SCHEDULABLE)
+}
+
+private fun isCustomScheduleRemovedPostUpdate(oldPoint: Point, newPoint: Point): Boolean {
+    return oldPoint.scheduleRef != null && newPoint.scheduleRef == null
+}
+
+private fun isCustomScheduleAndEventUnavailablePostUpdate(oldPoint: Point, newPoint: Point): Boolean {
+    return (oldPoint.scheduleRef != null || oldPoint.eventRef != null) &&
+            (
+                newPoint.scheduleRef == null &&
+                        (newPoint.eventRef == null || isEventRemovedPostUpdate(oldPoint, newPoint))
+            )
+}
+
+private fun isEventRemovedPostUpdate(oldPoint: Point, newPoint: Point): Boolean {
+    val oldPointEventRefList = oldPoint.eventRef?.toString()?.replace("[", "")?.replace("]", "")?.split(",") ?: emptyList()
+    val newPointEventRefList = newPoint.eventRef?.toString()?.replace("[", "")?.replace("]", "")?.split(",") ?: emptyList()
+
+    return oldPointEventRefList.any { it !in newPointEventRefList }
+}
+
+private fun isExternalPointUpdatedToStopCustomControl(oldPoint: Point, newPoint: Point): Boolean {
+    return isPointFollowingScheduleOrEvent(oldPoint) &&
+            (isSchedulableTagRemovedPostUpdate(newPoint)
+                    || isCustomScheduleRemovedPostUpdate(oldPoint, newPoint)
+                    || isCustomScheduleAndEventUnavailablePostUpdate(oldPoint, newPoint))
+}
+
+fun updateWritableDataUponCustomControlChanges(newPoint: Point) {
+    val localPointDict = hayStack.readHDictById(newPoint.id)
+    val oldPoint = Point.Builder().setHDict(localPointDict).build()
+    CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "Updating writable data for point: ${newPoint.id} depending on custom control changes")
+    if(isExternalPointUpdatedToStopCustomControl(oldPoint, newPoint)) {
+        CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "Stopping custom control for point: ${newPoint.id} as it is no longer schedulable or has no custom schedule/event")
+        hayStack.clearPointArrayLevel(newPoint.id, HayStackConstants.DEFAULT_POINT_LEVEL, false)
+        writeToPhysicalIfRequired(
+            doSendValueToDevice = true,
+            equip = hayStack.readMapById(localPointDict.getStr("equipRef")),
+            point = localPointDict,
+            priorityValue = hayStack.readPointPriorityVal(newPoint.id),
+            isImmediate = true
+        )
+    }
+    CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "Writable data updated for point: ${newPoint.id} depending on custom control changes")
+}
+
+fun writeToPhysicalIfRequired (
+    doSendValueToDevice: Boolean,
+    equip: HashMap<Any, Any>,
+    point: HDict,
+    priorityValue: Double,
+    isImmediate: Boolean = false
+) {
+    CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "writeToPhysicalIfRequired called for point: ${point.id()} with priority value: $priorityValue")
+    val profileType = findExternalProfileType(equip)
+    val pointDefaultValue: Double? = hayStack.readNullableValueByLevel(point.id().`val`, HayStackConstants.DEFAULT_POINT_LEVEL)
+    val isValueOverridden = priorityValue != pointDefaultValue
+    val isHisDataMismatching = hayStack.readHisValById(point.id().toString()) != priorityValue
+
+    if(doSendValueToDevice && profileType == BACNET) {
+        CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "Writing to device for Bacnet Point: ${point.id()} with priority value: $priorityValue")
+        writeToPhysical(
+            profileType = profileType,
+            equip = equip,
+            pointDict = point,
+            value = pointDefaultValue
+        )
+    } else if(isImmediate && (doSendValueToDevice || isValueOverridden || isHisDataMismatching)) {
+        CcuLog.d(
+            L.TAG_CCU_POINT_SCHEDULE, "Writing to device for Modbus or ConnectModule point: ${point.id()} with priority value: $priorityValue" +
+                "\n\treason: isWriteToDeviceReq: ${doSendValueToDevice}, overridenValue: $isValueOverridden, hisDataMismatching: $isHisDataMismatching")
+        writeToPhysical(
+            profileType = profileType,
+            equip = equip,
+            pointDict = point,
+            value = priorityValue
+        )
+    }
+
+    if(isHisDataMismatching) {
+        CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "Updating history value for point: ${point.id()} with priority value: $priorityValue")
+        hayStack.writeHisValById(point.id().toString(), priorityValue)
+    }
+}
+
+private fun writeToPhysical (
+    profileType: String,
+    equip: HashMap<Any, Any>,
+    pointDict: HDict,
+    value: Double?,
+) {
+    val pointID = pointDict["id"].toString()
+    when (profileType) {
+        MODBUS -> {
+            CcuLog.d(
+                L.TAG_CCU_POINT_SCHEDULE,
+                "Writing value to Modbus for pointId=${pointID}, value=$value"
+            )
+            modbusWritableDataInterface?.writeRegister(pointID)
+        }
+        BACNET -> {
+            value?.let {
+                val configMap = mutableMapOf<String, String>()
+                equip["bacnetConfig"].toString().split(",").forEach { configItem ->
+                    val configKeyValueList = configItem.split(":")
+                    if (configKeyValueList.size == 2) {
+                        configMap[configKeyValueList[0]] = configKeyValueList[1]
+                    }
+                }
+                val priority = pointDict.getStr("defaultWriteLevel")
+                val bacnetValue = value.toString()
+                val isMstp = equip.containsKey("bacnetMstp")
+                sendWriteRequestToMstpEquip(pointID,priority,bacnetValue,isMstp)
+            } ?: run {
+                CcuLog.d(
+                    L.TAG_CCU_POINT_SCHEDULE,
+                    "No value found to write to Bacnet for pointId=${pointID}"
+                )
+            }
+        }
+        CONNECTMODULE -> {
+            val slaveId = pointDict["group"].toString().toDouble().toInt()
+            val registerAddress = pointDict["registerNumber"].toString().toDouble().toInt()
+            CcuLog.d(
+                L.TAG_CCU_POINT_SCHEDULE,
+                "Writing value to Connect Module for " +
+                        "pointId=${pointID}, " +
+                        "slaveId=$slaveId, " +
+                        "registerAddress=$registerAddress, value=$value"
+            )
+            modbusWritableDataInterface?.writeConnectModbusRegister(
+                slaveId, registerAddress, value ?: 0.0
+            )
+        }
+        "" -> {
+            CcuLog.d(
+                L.TAG_CCU_POINT_SCHEDULE,
+                "No external profile type found for equipId: ${equip["id"]}"
+            )
+        }
+    }
 }

@@ -3615,4 +3615,15 @@ public class CCUHsApi
         return response == null ? null : new HZincReader(response).readGrid();
     }
 
+    public Double readNullableValueByLevel(String id, int level) {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        Double nullableValue = null;
+        if (values != null && values.size() > 0)
+        {
+            HashMap valMap = ((HashMap) values.get(level - 1));
+            nullableValue = valMap.get("val") == null ? null : Double.parseDouble(valMap.get("val").toString());
+        }
+        return nullableValue;
+    }
+
 }

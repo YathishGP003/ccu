@@ -318,6 +318,7 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
 
     implementation project(':sanity')
+    implementation "org.jetbrains.kotlin:kotlin-test:1.7.20"
 }
 repositories {
     mavenCentral()

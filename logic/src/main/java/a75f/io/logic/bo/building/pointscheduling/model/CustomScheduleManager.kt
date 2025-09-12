@@ -5,7 +5,6 @@ import PointDefinition
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HayStackConstants
-import a75f.io.api.haystack.HayStackConstants.DEFAULT_INIT_VAL_LEVEL
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
@@ -15,8 +14,9 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.util.fetchForceOverrideLevelValueAndEndTimeIfAvailable
 import a75f.io.logic.bo.util.getValueByEnum
+import a75f.io.logic.bo.util.writeToPhysicalIfRequired
 import a75f.io.logic.interfaces.ModbusWritableDataInterface
-import a75f.io.logic.util.bacnet.sendWriteRequestToMstpEquip
+import org.joda.time.Duration
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.joda.time.LocalTime
@@ -126,6 +126,7 @@ class CustomScheduleManager {
      */
     private fun removeEventRefFromPoint(expiredEventRefs: MutableList<String>) {
         val points = haystack.readAllHDictByQuery("point and eventRef")
+        var doSendValueToDevice: Boolean
         points.forEach { point ->
             val pointEntity = Point.Builder().setHDict(point).build()
             val pointEventRef: List<String> =
@@ -149,6 +150,7 @@ class CustomScheduleManager {
                     if (pointEventRef.size == 1) {
                         pointEntity.eventRef = null
                         pointEntity.eventDefinitions = null
+                        doSendValueToDevice = true
                     } else {
                         pointEntity.eventRef =
                             HList.make(
@@ -156,6 +158,7 @@ class CustomScheduleManager {
                                     .map { HRef.make(it.replace("@","")) }
                             )
 
+                        doSendValueToDevice = pointEntity.eventRef.size() != pointEntity.eventDefinitions.size()
                         val filteredHDicts: ArrayList<HDict> = ArrayList()
 
                         CcuLog.d(
@@ -197,8 +200,21 @@ class CustomScheduleManager {
                     }
 
                     CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "updating event refs: ${pointEntity.eventRef} for the point: ${pointEntity.id}")
+                    if(doSendValueToDevice && pointEntity.scheduleRef == null) {
+                        CcuLog.d(
+                            L.TAG_CCU_POINT_SCHEDULE,
+                            "Clearing point array level 8 for point: ${pointEntity.id} as it has no scheduleRef and sending value to device"
+                        )
+                        haystack.clearPointArrayLevel(pointEntity.id, HayStackConstants.DEFAULT_POINT_LEVEL, false)
+                        writeToPhysicalIfRequired (
+                            doSendValueToDevice = true,
+                            equip = haystack.readMapById(point.getStr(Tags.EQUIPREF)),
+                            point = point,
+                            priorityValue = haystack.readPointPriorityVal(point.id().`val`),
+                            isImmediate = true
+                        )
+                    }
                     haystack.updatePoint(pointEntity, pointEntity.id.toString())
-
                     CcuLog.d(
                         L.TAG_CCU_POINT_SCHEDULE,
                         "after updating point $point")
@@ -233,7 +249,7 @@ class CustomScheduleManager {
                 CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "fetched>>>>>>>>> Equip: ${equip["dis"].toString()}")
                 // kumar-to-do  -- below query we need to change - mandate schedulable tag
                 val points = haystack.readAllHDictByQuery(
-                    "point and writable and schedulable " +
+                    "point and writable and schedulable and (scheduleRef or eventRef)" +
                             "and equipRef== \"${equip["id"].toString()}\""
                 )
                 if (points.size == 0) {
@@ -255,15 +271,14 @@ class CustomScheduleManager {
                                 "point: ${point.id()}")
                     try {
                         isWriteToDeviceReq = false
-                        val priorityValueLevelTriple = fetchForceOverrideLevelValueAndEndTimeIfAvailable (
+                        val priorityValueLevelPair = fetchForceOverrideLevelValueAndEndTimeIfAvailable (
                             pointId = point.id().toString(),
                             unit = if (point.has("unit")) point.get("unit").toString() else "",
                             enumString = point.get("enum", false)?.toString()
                         )
-                        val priorityValue = priorityValueLevelTriple.third
                         if (point.has(Tags.EVENT_REF)) {
                             val eventProcessTime = measureTimeMillis {
-                                processEvent(point, equipScheduleStatus, equip, priorityValueLevelTriple)
+                                processEvent(point, equipScheduleStatus, equip, priorityValueLevelPair)
                             }
                             CcuLog.d(
                                 L.TAG_CCU_POINT_SCHEDULE,
@@ -271,52 +286,21 @@ class CustomScheduleManager {
                             )
                         } else if (point.has(Tags.SCHEDULE_REF)) {
                             val recurringScheduleProcessTime = measureTimeMillis {
-                                processRecurringSchedule(point, equipScheduleStatus, equip, priorityValueLevelTriple)
+                                processRecurringSchedule(point, equipScheduleStatus, equip, priorityValueLevelPair)
                             }
                             CcuLog.d(
                                 L.TAG_CCU_POINT_SCHEDULE,
                                 "Recurring schedule processing time: $recurringScheduleProcessTime" +
                                         " ms for the point ${point.id()}"
                             )
-                        } else {
-                            CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "No point schedule or event found: $point")
-
-                            val level8Value = haystack.readDefaultValById(point.id().toString())
-                            val level17Value = haystack.readDefaultValByLevel(
-                                point.id().toString(),
-                                DEFAULT_INIT_VAL_LEVEL
-                            )
-                            // CCU should send the highest priority value to the device post this and also when
-                            // the priority value
-                            if (level17Value != level8Value) {
-                                haystack.writeDefaultValById(
-                                    point.id().toString(),
-                                    level17Value
-                                )
-
-                                if(point.has("his")){
-                                    haystack.writeHisValById(
-                                        point.id().toString(),
-                                        level17Value
-                                    )
-                                }
-                                isWriteToDeviceReq = true
-                            }
                         }
-                        val pointDefaultValue = haystack.readDefaultValById(point.id().toString())
-                        val isValueOverriden = priorityValue != pointDefaultValue
-                        val isHisDataMismatching = haystack.readHisValById(point.id().toString()) != priorityValue
-                        if(isWriteToDeviceReq || isValueOverriden || isHisDataMismatching) {
-                            CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "Writing to device with point: ${point.id()} with priority value: $priorityValue" +
-                                    "\n\treason: isWriteToDeviceReq: $isWriteToDeviceReq, overridenValue: $isValueOverriden, hisDataMismatching: $isHisDataMismatching")
-                            writeToPhysical(equip, point, priorityValue, priorityValueLevelTriple)
-                            if(isHisDataMismatching) {
-                                haystack.writeHisValById(
-                                    point.id().toString(),
-                                    CCUHsApi.getInstance().readHisValById(point.id().toString())
-                                )
-                            }
-                        }
+
+                        writeToPhysicalIfRequired (
+                            doSendValueToDevice = isWriteToDeviceReq,
+                            equip = equip,
+                            point = point,
+                            priorityValue =  haystack.readPointPriorityVal(point.id().`val`),
+                        )
                     } catch (e: Exception) {
                         // we don't want to crash the app if there is an error in processing this point
                         // we want to continue processing the other points
@@ -339,7 +323,7 @@ class CustomScheduleManager {
         }
     }
 
-    private fun processEvent(point: HDict, equipScheduleStatus: StringBuilder, equip: HashMap<Any, Any>, priorityLevelValueTriple: Triple<String, String, Double>) {
+    private fun processEvent(point: HDict, equipScheduleStatus: StringBuilder, equip: HashMap<Any, Any>, priorityLevelValuePair: Pair<String, String>) {
         val eventRefs = point[Tags.EVENT_REF].toString()
             .replace("[","")
             .replace("]","")
@@ -353,7 +337,7 @@ class CustomScheduleManager {
             CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "No active event found for point: ${point.id()}")
             // if point has eventRef but not actively available then go for point/recurring schedule if available
             if(point.has(Tags.SCHEDULE_REF)) {
-                processRecurringSchedule(point, equipScheduleStatus, equip, priorityLevelValueTriple)
+                processRecurringSchedule(point, equipScheduleStatus, equip, priorityLevelValuePair)
             }
             return
         }
@@ -408,13 +392,13 @@ class CustomScheduleManager {
                     )
                     val matchingPoints = haystack.readAllHDictByQuery(hayStackQuery)
                     var valueWritten = false
-                    var defaultValue = 0.0
+                    var defaultValue: Double
                     for (matchingPoint in matchingPoints) {
                         if (matchingPoint.get("id").toString() == pointId) {
                             defaultValue = haystack.readDefaultValById(pointId)
                             val unitStr =
                                 if (point.has("unit")) point.get("unit").toString() else ""
-                            val (updatedValue, updatedDefaultVal) = if (point.has("enum")) {
+                            val (updatedValue, _) = if (point.has("enum")) {
                                 val enumStr = point.get("enum").toString()
                                 val enum = getValueByEnum(customValue, enumStr, unitStr)
                                 val customVal = enum.ifEmpty { customValue }
@@ -427,8 +411,8 @@ class CustomScheduleManager {
                                 (customValue.toString() + unitStr) to (defaultValue.toString() + unitStr)
                             }
 
-                            if(priorityLevelValueTriple.first.isNotEmpty()) {
-                                val (forceOverrideValueString, forceOverrideEndTimeString, _) = priorityLevelValueTriple
+                            if(priorityLevelValuePair.first.isNotEmpty()) {
+                                val (forceOverrideValueString, forceOverrideEndTimeString) = priorityLevelValuePair
                                 equipScheduleStatus.append(
                                     (pointDis[pointDis.size - 1]) + " is " + forceOverrideValueString + ", and user intent temporary override ends on ${forceOverrideEndTimeString};\n"
                                 )
@@ -464,7 +448,6 @@ class CustomScheduleManager {
                                     L.TAG_CCU_POINT_SCHEDULE,
                                     "No change in value for pointId=$pointId, currentDefaultVal=$defaultValue  value=$customValue"
                                 )
-                                isWriteToDeviceReq = priorityLevelValueTriple?.let { it.third != customValue } ?: false
                             } else {
                                 CcuLog.d(
                                     L.TAG_CCU_POINT_SCHEDULE,
@@ -508,7 +491,6 @@ class CustomScheduleManager {
                                 "No change in value for pointId=$pointId, " +
                                         "currentDefaultVal=$defaultValue  value=$customValue"
                             )
-                            isWriteToDeviceReq = priorityLevelValueTriple?.let { it.third != customValue } ?: false
                         } else {
                             if (point.has("his")) {
                                 val priorityValue = haystack.readPointPriorityVal(pointId)
@@ -544,7 +526,7 @@ class CustomScheduleManager {
         val datetime = getCurrentDateTime()
 
         val currentDate = LocalDate.parse(datetime.first)
-        var currentTime = LocalTime.parse(datetime.second)
+        val currentTime = LocalTime.parse(datetime.second)
 
         // Filter events that fall within the valid date and time range
         val filteredEvents = filterEventsByDateTimeRange(dicts, currentDate, currentTime, point)
@@ -678,7 +660,7 @@ class CustomScheduleManager {
             val endDateTime = endTime.toDateTime(today.toDateTimeAtStartOfDay())
 
             // Calculate the duration in minutes between start and end
-            val durationMinutes = org.joda.time.Duration(startDateTime, endDateTime).standardMinutes
+            val durationMinutes = Duration(startDateTime, endDateTime).standardMinutes
 
             CcuLog.d(
                 L.TAG_CCU_POINT_SCHEDULE, "Event: ${it["dis"]}, Duration: $durationMinutes mins"
@@ -708,7 +690,7 @@ class CustomScheduleManager {
             val eventStartDateTime = startTime.toDateTime(today.toDateTimeAtStartOfDay())
             val nowDateTime = LocalDateTime.now().toDateTime()
             val diffMillis =
-                org.joda.time.Duration(nowDateTime, eventStartDateTime).abs().millis
+                Duration(nowDateTime, eventStartDateTime).abs().millis
 
             CcuLog.d(
                 L.TAG_CCU_POINT_SCHEDULE, "Event: ${it["dis"]}, Millis to now: $diffMillis"
@@ -723,7 +705,7 @@ class CustomScheduleManager {
         }
     }
 
-    private fun processRecurringSchedule(pointDict: HDict, equipScheduleStatus: StringBuilder, equip: HashMap<Any, Any>, priorityLevelValueTriple: Triple<String, String, Double>) {
+    private fun processRecurringSchedule(pointDict: HDict, equipScheduleStatus: StringBuilder, equip: HashMap<Any, Any>, priorityLevelValuePair: Pair<String, String>) {
         if (!pointDict.has("pointDefinitionRef") || !pointDict.has("scheduleRef")) {
             CcuLog.d(
                 L.TAG_CCU_POINT_SCHEDULE,
@@ -782,7 +764,6 @@ class CustomScheduleManager {
                             L.TAG_CCU_POINT_SCHEDULE,
                             "No change in value for pointId=$pointID, currentDefaultVal=$currentDefaultVal  value=$value"
                         )
-                        isWriteToDeviceReq = priorityLevelValueTriple.third != value
                     } else {
                         if (pointDict.has("his")) {
                             haystack.writeHisValById(
@@ -829,8 +810,8 @@ class CustomScheduleManager {
                         (value.toString() + unitStr) to (pointDefinitionDefaultVal.toString() + unitStr)
                     }
 
-                    if(priorityLevelValueTriple.first.isNotEmpty()) {
-                        val (forceOverrideValueString, forceOverrideEndTimeString, _) = priorityLevelValueTriple
+                    if(priorityLevelValuePair.first.isNotEmpty()) {
+                        val (forceOverrideValueString, forceOverrideEndTimeString) = priorityLevelValuePair
                         equipScheduleStatus.append(
                             (pointDis[pointDis.size - 1]) + " is " + forceOverrideValueString + ", and user intent temporary override ends on ${forceOverrideEndTimeString};\n"
                         )
@@ -870,8 +851,8 @@ class CustomScheduleManager {
                         (value.toString() + unitStr) to (pointDefinition.defaultValue.toString() + unitStr)
                     }
 
-                    if(priorityLevelValueTriple.first.isNotEmpty()) {
-                        val (forceOverrideValueString, forceOverrideEndTimeString, _) = priorityLevelValueTriple
+                    if(priorityLevelValuePair.first.isNotEmpty()) {
+                        val (forceOverrideValueString, forceOverrideEndTimeString) = priorityLevelValuePair
                         equipScheduleStatus.append(
                             (pointDis[pointDis.size - 1]) + " is " + forceOverrideValueString + ", and user intent temporary override ends on ${forceOverrideEndTimeString};\n"
                         )
@@ -899,7 +880,6 @@ class CustomScheduleManager {
                             L.TAG_CCU_POINT_SCHEDULE,
                             "No change in value for pointId=$pointID, currentDefaultVal=$currentDefaultVal  value=$value"
                         )
-                        isWriteToDeviceReq = priorityLevelValueTriple.third != pointDefinition.defaultValue
                     } else {
                         if (pointDict.has("his")) {
                             haystack.writeHisValById(
@@ -925,44 +905,6 @@ class CustomScheduleManager {
                 )
                 continue
             }
-        }
-    }
-
-    private fun writeToPhysical(equip: HashMap<Any, Any>, pointDict: HDict, value: Double, overrideLevelInfo: Triple<String, String, Double>) {
-        val pointID = pointDict["id"].toString()
-        val (forceOverrideValue, _, highestPriorityValue) = overrideLevelInfo
-        if (equip.containsKey("modbus") && !equip.containsKey("connectModule")) {
-            CcuLog.d(
-                L.TAG_CCU_POINT_SCHEDULE,
-                "Writing value to Modbus for pointId=${pointID}, value=$highestPriorityValue"
-            )
-            modbusWritableDataInterface?.writeRegister(pointID)
-        } else if (equip.containsKey("bacnetConfig")) {
-
-            val configMap = mutableMapOf<String, String>()
-            equip["bacnetConfig"].toString().split(",").forEach { configItem ->
-                val configKeyValueList = configItem.split(":")
-                if (configKeyValueList.size == 2) {
-                    configMap[configKeyValueList[0]] = configKeyValueList[1]
-                }
-            }
-            val priority = pointDict.getStr("defaultWriteLevel")
-            val bacnetValue = value.toString()
-            val isMstp = equip.containsKey("bacnetMstp")
-            sendWriteRequestToMstpEquip(pointID,priority,bacnetValue,isMstp)
-        } else if (equip.containsKey("connectModule")) {
-            val slaveId = pointDict["group"].toString().toDouble().toInt()
-            val registerAddress = pointDict["registerNumber"].toString().toDouble().toInt()
-            CcuLog.d(
-                L.TAG_CCU_POINT_SCHEDULE,
-                "Writing value to Connect Module for " +
-                        "pointId=${pointID}, " +
-                        "slaveId=$slaveId, " +
-                        "registerAddress=$registerAddress, value=$highestPriorityValue"
-            )
-            modbusWritableDataInterface?.writeConnectModbusRegister(
-                slaveId, registerAddress, highestPriorityValue
-            )
         }
     }
 

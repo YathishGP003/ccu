@@ -1,5 +1,6 @@
 package a75f.io.messaging.handler;
 
+import static a75f.io.logic.bo.util.CustomScheduleUtilKt.updateWritableDataUponCustomControlChanges;
 import static a75f.io.messaging.handler.DataSyncHandler.isCloudEntityHasLatestValue;
 import android.content.Context;
 
@@ -37,7 +38,6 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.BuildingOccupancyListener;
 import a75f.io.logic.interfaces.ZoneDataInterface;
@@ -138,6 +138,9 @@ public class UpdateEntityHandler implements MessageHandler {
                 CCUHsApi.getInstance().tagsDb.updatePoint(point, entityId);
             } else {
                 Point point = new Point.Builder().setHDict(row).build();
+                if(isExternalPoint(point)) {
+                    updateWritableDataUponCustomControlChanges(point);
+                }
                 updateEquipRefIfRequired(point);
                 CCUHsApi.getInstance().tagsDb.updatePoint(point, entityId);
                 CcuLog.d(L.TAG_CCU_MESSAGING, "UpdateEntityHandler: point updated--> "+row);
@@ -353,5 +356,12 @@ public class UpdateEntityHandler implements MessageHandler {
         HDict[] dictArr = {b.toDict()};
         return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
                 HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+    }
+
+    private static boolean isExternalPoint(Point point) {
+        return point.getMarkers().contains(Tags.ZONE) &&
+                (point.getMarkers().contains(Tags.MODBUS) ||
+                point.getMarkers().contains(Tags.BACNET_DEVICE_ID) ||
+                point.getMarkers().contains(Tags.CONNECTMODULE));
     }
 }

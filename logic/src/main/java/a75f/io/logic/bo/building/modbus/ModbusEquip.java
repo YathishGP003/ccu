@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.modbus;
 
+import static a75f.io.logic.bo.util.CustomScheduleUtilKt.updateWritableDataUponCustomControlChanges;
 import static a75f.io.logic.util.NonModelPointUtilKt.addEquipScheduleStatusPoint;
 
 import org.projecthaystack.HDict;
@@ -616,6 +617,7 @@ public class ModbusEquip {
                 }
 
                 if (continuePointUpdate && logicalPoint.getId() != null) {
+                    updateWritableDataUponCustomControlChanges(logicalPoint);
                     hayStack.updatePoint(logicalPoint, logicalPoint.getId());
                 }
             }

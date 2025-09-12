@@ -164,7 +164,7 @@ public class LModbus {
             }
             ModbusRequest request;
             short[] shortValues;
-            if (register.wordOrder.equals("bigEndian")) {
+            if (register.getWordOrder() == null || register.wordOrder.equals("bigEndian")) {
                 shortValues = ModbusConversions.floatToRegistersBigEndian(writeValue);
             } else {
                 shortValues = ModbusConversions.floatToRegistersLittleEndian(writeValue);

@@ -6,6 +6,7 @@ import a75f.io.api.haystack.Queries
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.Zone
 import a75f.io.api.haystack.util.hayStack
+import a75f.io.api.haystack.util.retainAndRemove
 import a75f.io.logger.CcuLog
 import a75f.io.sanity.framework.SANITTY_TAG
 import a75f.io.sanity.framework.SanityCase
@@ -131,7 +132,8 @@ class ScheduleRefValidation : SanityCase {
         return localId.toCode()
     }
 
-    private fun createZoneSchedulesIfMissing(ccuHsApi: CCUHsApi) {
+    private fun createZoneSchedulesIfMissing(ccuHsApi: CCUHsApi):Boolean {
+        var issue = false
         val rooms: List<HashMap<Any?, Any>> = ccuHsApi.readAllEntities("room")
         for (room: HashMap<Any?, Any> in rooms) {
             val scheduleHashmap = ccuHsApi.readEntity(
@@ -139,6 +141,7 @@ class ScheduleRefValidation : SanityCase {
                         "not special and not vacation and roomRef " + "== " + room["id"]
             )
             if (scheduleHashmap.size == 0) {
+                issue = true
                 val scheduleRef: String =
                     generateDefaultZoneSchedule(room["id"].toString())
                 val scheduleType = ccuHsApi.readPointPriorityValByQuery(
@@ -153,12 +156,35 @@ class ScheduleRefValidation : SanityCase {
                 }
             }
         }
+        return issue
+    }
+
+    fun deleteDuplicateLimits(roomRef: String):Boolean {
+        var issue = false
+        val queries = listOf(
+            "heating and min and user and limit and zone and schedulable and roomRef ==\"$roomRef\"",
+            "heating and max and user and limit and zone and schedulable and roomRef ==\"$roomRef\"",
+            "cooling and max and user and limit and zone and schedulable and roomRef ==\"$roomRef\"",
+            "cooling and min and user and limit and zone and schedulable and roomRef ==\"$roomRef\"",
+            "heating and deadband and zone and schedulable and roomRef ==\"$roomRef\"",
+            "cooling and deadband and zone and schedulable and roomRef ==\"$roomRef\"",
+            "unoccupied and setback and zone and schedulable and roomRef ==\"$roomRef\""
+        )
+
+        queries.forEach { query ->
+            val entities = hayStack.readAllEntities(query)
+            if(entities.size > 1) {
+                retainAndRemove(entities)
+                issue = true
+            }
+        }
+        return issue
     }
 
     override fun execute(): Boolean {
+        var numOfIssue = 0
         issueFound = false
-//        hayStack.deleteWritablePoint("030d7ac8-9b92-4be5-a5b2-94be9cef1b9c") // For testing heatingUserLimitMin
-//        hayStack.deleteEntity("8c885287-c414-4296-82c6-c0441e730c46") // Delete a schedule point for testing
+
         // Step 1: Read all points with room query
         val roomList = CCUHsApi.getInstance().readAllHDictByQuery("room")
         // Step 2: Check if the point has a valid scheduleRef
@@ -169,20 +195,49 @@ class ScheduleRefValidation : SanityCase {
             val scheduleType = CCUHsApi.getInstance().readPointPriorityValByQuery(
                 "scheduleType and roomRef == \"${roomDict.get("id")}\""
             )
-            // If the scheduleType is named, then skip validation since it will be taken care of by NamedScheduleValidation
-            if(scheduleType == null || scheduleType == ScheduleType.NAMED.ordinal.toDouble()) continue
-            // Step 3: Check if the scheduleRef exists in the database and is valid
-            if(scheduleRefPt.isEmpty()) {
-                CcuLog.e(SANITTY_TAG,"Invalid scheduleRef for room: ${roomDict.get("id")}, creating new zone schedule")
-                // Step 4: If the scheduleRef is invalid, log an error and create a new zone schedule
-                createZoneSchedulesIfMissing(CCUHsApi.getInstance())
-                issueFound = true
-                return false
-            }
+
+            if(createZoneSchedulesIfMissing(CCUHsApi.getInstance())) numOfIssue++
         }
 
-        issueFound = false
-        return true
+        // Step 5: Check for duplicate zone schedules and delete them
+        for(room in CCUHsApi.getInstance().readAllEntities("room")){
+            val zoneScheduleOfTheRoom = hayStack.readAllEntities("zone and schedule and not special and not vacation and roomRef"+" == "+ room["id"].toString())
+            if (zoneScheduleOfTheRoom.size > 1) {
+                val roomsZoneScheduleId = room["scheduleRef"].toString().replace("@","")
+                val scheduleRoomFollowing = hayStack.getScheduleById(roomsZoneScheduleId)
+                if ( scheduleRoomFollowing != null
+                    && scheduleRoomFollowing.isZoneSchedule) {
+                    for (zoneSchedule in zoneScheduleOfTheRoom) {
+                        if (!((zoneSchedule["id"].toString().replace("@","")).equals(roomsZoneScheduleId))) {
+                            //delete the duplicate userlimit
+                            //copy the limit value.
+                            //if dulpicate zone Schedule- clear.
+                            CcuLog.i("CCU_SCHEDULABLE", "Delete Schedule"+ zoneSchedule["id"].toString() )
+                            hayStack.deleteEntity(zoneSchedule["id"].toString())
+                        }
+                    }
+                    deleteDuplicateLimits(room["id"].toString())
+                } else {
+                    retainAndRemove(zoneScheduleOfTheRoom)
+                    deleteDuplicateLimits(room["id"].toString())
+                }
+                issueFound = true
+            }
+            issueFound = deleteDuplicateLimits(room["id"].toString())
+        }
+
+        if(numOfIssue > 0) {
+            issueFound = true
+            CcuLog.i(SANITTY_TAG, "ScheduleRefValidation found and fixed $numOfIssue issues.")
+        }
+
+        if(issueFound == true) {
+            CcuLog.i(SANITTY_TAG, "ScheduleRefValidation found and fixed issues.")
+            return false
+        } else {
+            CcuLog.i(SANITTY_TAG, "ScheduleRefValidation found no issues.")
+            return true
+        }
     }
 
     private fun testScheduleDeletion(

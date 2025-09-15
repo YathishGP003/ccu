@@ -63,6 +63,7 @@ import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
+import android.util.Pair;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -137,7 +138,7 @@ public class Communication extends Fragment implements MstpDataInterface {
 
     private String deviceIpAddress = "";
     private int portNumber = 47808;
-    private int subnetMask = 1;
+    private short subnetMask = 1;
     private int bacnetConfigSelectedPosition = 2; // Default value mapped to Normal
 
     @BindView(R.id.spinnerBaudRate) Spinner spinnerBaudRate;
@@ -1418,6 +1419,7 @@ public class Communication extends Fragment implements MstpDataInterface {
     }
     private void getIpAddress() {
         ArrayList<String> ipAddresses = new ArrayList<>();
+        ArrayList<Pair<String,Short>> ipData = new ArrayList<>();
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
@@ -1441,8 +1443,8 @@ public class Communication extends Fragment implements MstpDataInterface {
                             for (InterfaceAddress interfaceAddress : iface.getInterfaceAddresses()) {
                                 CcuLog.d(Tags.BACNET, "Address : " + interfaceAddress);
                                 if (interfaceAddress.getAddress().equals(addr)) {
-                                    subnetMask = interfaceAddress.getNetworkPrefixLength();
-                                    CcuLog.d(Tags.BACNET, "Subnet Mask: " + subnetMask);
+                                    ipData.add(new Pair(addr.getHostAddress(),interfaceAddress.getNetworkPrefixLength()));
+                                    CcuLog.d(Tags.BACNET, "Subnet Mask: " + interfaceAddress.getNetworkPrefixLength());
                                     break;
                                 }
                             }
@@ -1508,6 +1510,15 @@ public class Communication extends Fragment implements MstpDataInterface {
                 } catch (Exception e) {
                    CcuLog.e(TAG_CCU_BACNET,"Exception while updating network object "+e);
                 }
+
+                for (Pair<String,Short> pair : ipData) {
+                    if (pair.first.equals(deviceIpAddress)) {
+                        subnetMask = pair.second;
+                        CcuLog.d(TAG_CCU_BACNET, "Selected IP Address: " + deviceIpAddress + ", Subnet Mask: " + subnetMask);
+                        break;
+                    }
+                }
+
                 updateBbmdIPAddress();
                 updateSelectedIpAddress();
             }

@@ -773,13 +773,6 @@ public abstract class SystemProfile
                 ScheduleManager.getInstance().getSystemOccupancy() != Occupancy.NONE;
     }
 
-    public boolean isSystemOccupiedForDcv() {
-        return ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.OCCUPIED ||
-                ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.FORCEDOCCUPIED ||
-                ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.AUTOFORCEOCCUPIED ||
-                ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.DEMAND_RESPONSE_OCCUPIED;
-    }
-
     public void reset() {
     }
     

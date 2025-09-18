@@ -42,6 +42,7 @@ import a75f.io.logic.bo.building.statprofiles.util.milliToMin
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.handlers.doAnalogOperation
 import a75f.io.logic.controlcomponents.util.ControllerNames
+import a75f.io.logic.controlcomponents.util.isSoftOccupied
 import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler
 
 /**
@@ -518,10 +519,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
                     }
 
                     Pipe2UvAnalogOutControls.DCV_MODULATING_DAMPER -> {
-                        hssEquip.dcvDamperModulating.writePointValue(dcvLoopOutput.toDouble())
-                        if (dcvLoopOutput > 0) {
-                            analogOutStages[StatusMsgKeys.DCV_DAMPER.name] = dcvLoopOutput
-                        }
+                        doDcvAnalogAction(analogOutStages = analogOutStages, equip = hssEquip)
                     }
 
 

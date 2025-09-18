@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 
 public class SystemScheduleUtil {
     
@@ -22,5 +23,12 @@ public class SystemScheduleUtil {
         }
         
         return false;
+    }
+
+    public static boolean isSystemOccupiedForDcv() {
+        return ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.OCCUPIED ||
+                ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.FORCEDOCCUPIED ||
+                ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.AUTOFORCEOCCUPIED ||
+                ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.DEMAND_RESPONSE_OCCUPIED;
     }
 }

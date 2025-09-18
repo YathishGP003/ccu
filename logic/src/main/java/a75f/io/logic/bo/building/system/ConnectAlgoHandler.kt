@@ -13,6 +13,7 @@ import a75f.io.logic.bo.building.system.util.getModulatedOutputDuringEcon
 import a75f.io.logic.bo.building.system.util.getOaoEconToMainCoolingLoop
 import a75f.io.logic.bo.building.system.util.isConnectEconActive
 import a75f.io.logic.bo.building.system.util.isOaEconActive
+import a75f.io.logic.bo.util.SystemScheduleUtil.isSystemOccupiedForDcv
 
 
 fun getAnalogAssociation(enabledControls: MutableSet<AdvancedAhuAnalogOutAssociationType>, connectEquip1: ConnectModuleEquip) {
@@ -132,6 +133,13 @@ fun getConnectLogicalOutput(
                 0.0
             } else {
                 loopOutput
+            }
+        }
+        AdvancedAhuAnalogOutAssociationTypeConnect.CO2_DAMPER -> {
+            if(isSystemOccupiedForDcv()) {
+                loopOutput
+            } else {
+                0.0
             }
         }
 
@@ -513,6 +521,13 @@ fun getConnectAnalogModulation(
                 0.0
             } else {
                 loopOutput
+            }
+        }
+        AdvancedAhuAnalogOutAssociationTypeConnect.CO2_DAMPER -> {
+            if(isSystemOccupiedForDcv()) {
+                loopOutput
+            } else {
+                0.0
             }
         }
         else -> {

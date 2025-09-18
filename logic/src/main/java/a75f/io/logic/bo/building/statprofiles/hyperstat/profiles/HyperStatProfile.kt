@@ -208,7 +208,6 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
         analogOutStages: HashMap<String, Int>,
         zoneCO2Threshold: Double,
         zoneCO2DamperOpeningRate: Double,
-        isDoorOpen: Boolean,
         equip: HyperStatEquip
     ) {
         val co2Value = equip.zoneCo2.readHisVal()
@@ -216,9 +215,11 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
             "doAnalogDCVAction: co2Value : $co2Value zoneCO2Threshold: $zoneCO2Threshold zoneCO2DamperOpeningRate $zoneCO2DamperOpeningRate"
         )
 
-        updateLogicalPoint(logicalPointsList[port]!!, dcvLoopOutput.toDouble())
-        if (dcvLoopOutput > 0) {
-            analogOutStages[StatusMsgKeys.DCV_DAMPER.name] = dcvLoopOutput
+        if (isSoftOccupied(zoneOccupancyState)) {
+            updateLogicalPoint(logicalPointsList[port]!!, dcvLoopOutput.toDouble())
+            if(dcvLoopOutput > 0) { analogOutStages[StatusMsgKeys.DCV_DAMPER.name] = dcvLoopOutput }
+        } else {
+            updateLogicalPoint(logicalPointsList[port]!!, 0.0)
         }
     }
 

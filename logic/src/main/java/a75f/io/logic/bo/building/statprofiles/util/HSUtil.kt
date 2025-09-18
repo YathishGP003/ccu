@@ -29,6 +29,7 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.MonitoringCon
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import kotlin.math.log
 
 /**
  * Created by Manjunath K on 28-04-2025.
@@ -58,26 +59,22 @@ fun logResults(config: HyperStatConfiguration, tag: String, logicalPointsList: H
         Triple(config.relay5Enabled.enabled, config.relay5Association.associationVal, Port.RELAY_FIVE),
         Triple(config.relay6Enabled.enabled, config.relay6Association.associationVal, Port.RELAY_SIX)
     ).forEach { (enabled, association, port) ->
-        if (enabled) {
+        if (enabled && logicalPointsList[port] != null) {
+            val logicalPointValue = haystack.readHisValById(logicalPointsList[port])
             when (config) {
                 is CpuConfiguration -> CcuLog.d(
-                    tag, "$port = ${HsCpuRelayMapping.values()[association]} : ${
-                        haystack.readHisValById(logicalPointsList[port]!!)
-                    }"
+                    tag, "$port = ${HsCpuRelayMapping.values()[association]} : $logicalPointValue"
                 )
 
                 is HpuConfiguration -> CcuLog.d(
-                    tag, "$port = ${HsHpuRelayMapping.values()[association]} : ${
-                        haystack.readHisValById(logicalPointsList[port]!!)
-                    }"
+                    tag, "$port = ${HsHpuRelayMapping.values()[association]} : $logicalPointValue"
                 )
 
                 is Pipe2Configuration -> CcuLog.d(
-                    tag, "$port = ${HsPipe2RelayMapping.values()[association]} : ${
-                        haystack.readHisValById(logicalPointsList[port]!!)
-                    }"
+                    tag, "$port = ${HsPipe2RelayMapping.values()[association]} : $logicalPointValue"
                 )
             }
+
         }
     }
 
@@ -86,24 +83,19 @@ fun logResults(config: HyperStatConfiguration, tag: String, logicalPointsList: H
         Triple(config.analogOut2Enabled.enabled, config.analogOut2Association.associationVal, Port.ANALOG_OUT_TWO),
         Triple(config.analogOut3Enabled.enabled, config.analogOut3Association.associationVal, Port.ANALOG_OUT_THREE)
     ).forEach { (enabled, association, port) ->
-        if (enabled) {
+        if (enabled && logicalPointsList[port] != null) {
+            val logicalPointsValue = haystack.readHisValById(logicalPointsList[port])
             when (config) {
                 is CpuConfiguration -> CcuLog.d(
-                    tag, "$port = ${HsCpuAnalogOutMapping.values()[association]} : ${
-                        haystack.readHisValById(logicalPointsList[port]!!)
-                    }"
+                    tag, "$port = ${HsCpuAnalogOutMapping.values()[association]} : $logicalPointsValue"
                 )
 
                 is HpuConfiguration -> CcuLog.d(
-                    tag, "$port = ${HsHpuAnalogOutMapping.values()[association]} : ${
-                        haystack.readHisValById(logicalPointsList[port]!!)
-                    }"
+                    tag, "$port = ${HsHpuAnalogOutMapping.values()[association]} : $logicalPointsValue"
                 )
 
                 is Pipe2Configuration -> CcuLog.d(
-                    tag, "$port = ${HsPipe2AnalogOutMapping.values()[association]} : ${
-                        haystack.readHisValById(logicalPointsList[port]!!)
-                    }"
+                    tag, "$port = ${HsPipe2AnalogOutMapping.values()[association]} : $logicalPointsValue"
                 )
             }
         }

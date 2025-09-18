@@ -15,6 +15,7 @@ import a75f.io.logic.bo.building.system.util.getModulatedOutputDuringEcon
 import a75f.io.logic.bo.building.system.util.getOaoEconToMainCoolingLoop
 import a75f.io.logic.bo.building.system.util.isConnectEconActive
 import a75f.io.logic.bo.building.system.util.isOaEconActive
+import a75f.io.logic.bo.util.SystemScheduleUtil.isSystemOccupiedForDcv
 
 fun getCMRelayLogicalPhysicalMap(systemEquip: AdvancedHybridSystemEquip): Map<Point, PhysicalPoint> {
     val map: MutableMap<Point, PhysicalPoint> = java.util.HashMap()
@@ -100,6 +101,13 @@ fun getLogicalOutput(
                 0.0
             } else {
                 loopOutput
+            }
+        }
+        AdvancedAhuAnalogOutAssociationType.CO2_DAMPER -> {
+            if(isSystemOccupiedForDcv()) {
+                loopOutput
+            } else {
+                0.0
             }
         }
         else -> {
@@ -464,6 +472,14 @@ fun getAnalogModulation(
                 0.0
             } else {
                 loopOutput
+            }
+        }
+
+        AdvancedAhuAnalogOutAssociationType.CO2_DAMPER -> {
+            if(isSystemOccupiedForDcv()) {
+                loopOutput
+            } else {
+                0.0
             }
         }
         else -> {

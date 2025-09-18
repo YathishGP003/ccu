@@ -6,12 +6,14 @@ import a75f.io.api.haystack.HSUtil
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.HyperStatSplitEquip
+import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.bo.building.EpidemicState
 import a75f.io.logic.bo.building.ZoneProfile
 import a75f.io.logic.bo.building.ZoneState
+import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
@@ -32,6 +34,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getAirEnthalpy
 import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
+import a75f.io.logic.bo.building.statprofiles.util.updateLogicalPoint
 import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.controlcomponents.util.ControllerNames
 import a75f.io.logic.controlcomponents.util.isSoftOccupied
@@ -1022,6 +1025,17 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
         }
         equip.keyCardSensingEnable.writePointValue(keycardEnabled)
         equip.keyCardSensorInput.writePointValue(keycardSensor)
+    }
+
+    fun doDcvAnalogAction (analogOutStages: HashMap<String, Int>, equip: HyperStatSplitEquip) {
+        if (isSoftOccupied(zoneOccupancyState)) {
+            equip.dcvDamperModulating.writePointValue(dcvLoopOutput.toDouble())
+            if (dcvLoopOutput > 0) {
+                analogOutStages[StatusMsgKeys.DCV_DAMPER.name] = dcvLoopOutput
+            }
+        } else {
+            equip.dcvDamperModulating.writePointValue(0.0)
+        }
     }
 
 }

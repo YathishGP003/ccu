@@ -250,7 +250,6 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
         analogOutStages: HashMap<String, Int>,
         cO2Threshold: Double,
         damperOpeningRate: Double,
-        isDoorOpen: Boolean,
         equip: MyStatEquip
     ) {
         val co2Value = equip.zoneCo2.readHisVal()
@@ -258,9 +257,11 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
             "doAnalogDCVAction: co2Value : $co2Value zoneCO2Threshold: $cO2Threshold zoneCO2DamperOpeningRate $damperOpeningRate"
         )
 
-        updateLogicalPoint(logicalPointsList[port]!!, dcvLoopOutput.toDouble())
-        if (dcvLoopOutput > 0) {
-            analogOutStages[StatusMsgKeys.DCV_DAMPER.name] = dcvLoopOutput
+        if (isSoftOccupied(zoneOccupancyState)) {
+            updateLogicalPoint(logicalPointsList[port]!!, dcvLoopOutput.toDouble())
+            if(dcvLoopOutput > 0) { analogOutStages[StatusMsgKeys.DCV_DAMPER.name] = dcvLoopOutput }
+        } else {
+            updateLogicalPoint(logicalPointsList[port]!!, 0.0)
         }
     }
 

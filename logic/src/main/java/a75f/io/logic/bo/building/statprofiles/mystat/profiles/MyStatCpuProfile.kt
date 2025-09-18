@@ -302,7 +302,7 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
                 doAnalogDCVAction(
                     Port.ANALOG_OUT_ONE, analogOutStages, config.co2Threshold.currentVal,
                     config.co2DamperOpeningRate.currentVal,
-                    isDoorOpenState(config, equip), equip
+                    equip
                 )
             }
 

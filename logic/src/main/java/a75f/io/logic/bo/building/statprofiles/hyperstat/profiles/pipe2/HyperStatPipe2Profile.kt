@@ -674,7 +674,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
                             doAnalogDCVAction(
                                 port, analogOutStages, config.zoneCO2Threshold.currentVal,
                                 config.zoneCO2DamperOpeningRate.currentVal,
-                                isDoorOpenState(config, equip), equip
+                                equip
                             )
                         }
 

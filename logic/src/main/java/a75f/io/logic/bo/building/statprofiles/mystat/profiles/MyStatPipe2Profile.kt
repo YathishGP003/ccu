@@ -455,7 +455,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
                     doAnalogDCVAction(
                         Port.ANALOG_OUT_ONE, analogOutStages, config.co2Threshold.currentVal,
                         config.co2DamperOpeningRate.currentVal,
-                        isDoorOpenState(config, equip), equip
+                        equip
                     )
                 }
 

@@ -6,6 +6,7 @@ import static a75f.io.logic.bo.building.hvac.Stage.COOLING_3;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_4;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_5;
 import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.getModulatedOutput;
+import static a75f.io.logic.bo.util.SystemScheduleUtil.isSystemOccupiedForDcv;
 
 import java.util.ArrayList;
 import java.util.HashMap;

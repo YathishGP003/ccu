@@ -381,39 +381,28 @@ fun logMsResults(config: MyStatConfiguration, tag: String, logicalPointsList: Ha
         Triple(config.relay3Enabled.enabled, config.relay3Association.associationVal, Port.RELAY_THREE),
         Triple(config.relay4Enabled.enabled, config.relay4Association.associationVal, Port.RELAY_FOUR)
     ).forEach { (enabled, association, port) ->
-        if (enabled) {
-            when (config) {
-                is MyStatCpuConfiguration -> CcuLog.d(
-                    tag,
-                    "$port = ${MyStatCpuRelayMapping.values()[association]} : ${
-                        haystack.readHisValById(
-                            logicalPointsList[port]!!
-                        )
-                    }"
-                )
+        if (enabled && logicalPointsList[port] != null) {
+                val logicalPointValue = haystack.readHisValById(logicalPointsList[port])
+                when (config) {
+                    is MyStatCpuConfiguration -> CcuLog.d(
+                        tag,
+                        "$port = ${MyStatCpuRelayMapping.values()[association]} : $logicalPointValue"
+                    )
 
-                is MyStatPipe2Configuration -> CcuLog.d(
-                    tag,
-                    "$port = ${MyStatPipe2RelayMapping.values()[association]} : ${
-                        haystack.readHisValById(
-                            logicalPointsList[port]!!
-                        )
-                    }"
-                )
+                    is MyStatPipe2Configuration -> CcuLog.d(
+                        tag,
+                        "$port = ${MyStatPipe2RelayMapping.values()[association]} : $logicalPointValue"
+                    )
 
-                is MyStatHpuConfiguration -> CcuLog.d(
-                    tag,
-                    "$port = ${MyStatHpuRelayMapping.values()[association]} : ${
-                        haystack.readHisValById(
-                            logicalPointsList[port]!!
-                        )
-                    }"
-                )
-            }
+                    is MyStatHpuConfiguration -> CcuLog.d(
+                        tag,
+                        "$port = ${MyStatHpuRelayMapping.values()[association]} : $logicalPointValue"
+                    )
+                }
         }
     }
-    if(!config.analogOut1Enabled.enabled) return
-    val analogOutValue = haystack.readHisValById(logicalPointsList[Port.ANALOG_OUT_ONE]!!)
+    if(!config.analogOut1Enabled.enabled || logicalPointsList[Port.ANALOG_OUT_ONE] == null) return
+    val analogOutValue = haystack.readHisValById(logicalPointsList[Port.ANALOG_OUT_ONE])
 
     val mapping = when (config) {
         is MyStatCpuConfiguration -> MyStatCpuAnalogOutMapping.values()[config.analogOut1Association.associationVal]

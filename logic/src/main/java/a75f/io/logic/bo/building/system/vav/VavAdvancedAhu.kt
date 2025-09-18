@@ -61,6 +61,7 @@ import a75f.io.logic.bo.building.system.util.isConnectModuleExist
 import a75f.io.logic.bo.building.system.util.isOaEconActive
 import a75f.io.logic.bo.building.system.util.needToUpdateConditioningMode
 import a75f.io.logic.bo.building.system.util.roundOff
+import a75f.io.logic.bo.util.SystemScheduleUtil.isSystemOccupiedForDcv
 import a75f.io.logic.tuners.TunerUtil
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -325,7 +326,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         systemSatCoolingLoopOp = getSystemSatCoolingLoop().coerceIn(0.0, 100.0)
         systemSatHeatingLoopOp = getSystemSatHeatingLoop().coerceIn(0.0, 100.0)
         staticPressureFanLoopOp = getSystemStaticPressureFanLoop().coerceIn(0.0, 100.0)
-        systemCo2LoopOp = if (isSystemOccupiedForDcv) getCo2Loop() else 0.0
+        systemCo2LoopOp = if (isSystemOccupiedForDcv()) getCo2Loop() else 0.0
 
         if (currentConditioning == SystemController.State.COOLING) {
             systemCompressorLoop = systemCoolingLoopOp

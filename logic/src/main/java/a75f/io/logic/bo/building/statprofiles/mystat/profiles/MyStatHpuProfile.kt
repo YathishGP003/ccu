@@ -399,7 +399,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
                         doAnalogDCVAction(
                             Port.ANALOG_OUT_ONE, analogOutStages, config.co2Threshold.currentVal,
                             co2DamperOpeningRate.currentVal,
-                            isDoorOpenState(config, equip), equip
+                            equip
                         )
                     }
 

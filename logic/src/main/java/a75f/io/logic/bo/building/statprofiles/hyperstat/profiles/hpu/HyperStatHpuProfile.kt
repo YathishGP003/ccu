@@ -32,7 +32,6 @@ import a75f.io.logic.bo.building.statprofiles.util.BasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.FanConfig
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.FanSpeed
-import a75f.io.logic.bo.building.statprofiles.util.HsFanConstants
 import a75f.io.logic.bo.building.statprofiles.util.HyperStatProfileTuners
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoConditioning
@@ -460,7 +459,6 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
                     equip.analogOutStages,
                     config.zoneCO2Threshold.currentVal,
                     config.zoneCO2DamperOpeningRate.currentVal,
-                    isDoorOpenState(config, equip),
                     equip
                 )
             }

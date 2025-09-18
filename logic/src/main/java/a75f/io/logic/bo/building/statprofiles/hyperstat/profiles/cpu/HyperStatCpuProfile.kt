@@ -444,7 +444,7 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
                         HsCpuAnalogOutMapping.DCV_DAMPER -> {
                             doAnalogDCVAction(
                                 port, equip.analogOutStages, config.zoneCO2Threshold.currentVal,
-                                config.zoneCO2DamperOpeningRate.currentVal, isDoorOpenState(config, equip),equip
+                                config.zoneCO2DamperOpeningRate.currentVal, equip
                             )
                         }
 

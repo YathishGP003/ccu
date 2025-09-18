@@ -1,5 +1,6 @@
 package a75f.io.api.haystack;
 
+import static a75f.io.api.haystack.Tags.FOLLOW_BUILDING;
 import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
 import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
 import static a75f.io.api.haystack.util.TimeUtil.getEndSec;
@@ -58,7 +59,10 @@ public class Schedule extends Entity
     {
         return getMarkers().contains("building") && !getMarkers().contains("named");
     }
-
+    public boolean isZoneFollowBuilding()
+    {
+        return getMarkers().contains(FOLLOW_BUILDING);
+    }
     public boolean isZoneSchedule()
     {
         return getMarkers().contains("zone");

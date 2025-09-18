@@ -2213,12 +2213,22 @@ public class CCUHsApi
             return 5.0;
         }
         Schedule schedule = getScheduleByRoom(equipRef);
-        if (schedule == null) {
-            CcuLog.e(TAG_CCU_HS, "getUnoccupiedSetback: No schedule found for equip " + equipRef);
-            return 5.0; // Default value if no schedule found
-        }
-        return schedule.getUnoccupiedZoneSetback();
+        String query;
 
+        if (!schedule.isNamedSchedule() && schedule.isZoneFollowBuilding()) {
+            query = "default and schedulable and setback and domainName";
+        } else {
+            query = "zone and schedulable and setback and roomRef == \"" + schedule.getRoomRef() + "\"";
+        }
+
+        HashMap unOccupiedSetBack = CCUHsApi.getInstance().readEntity(query);
+
+        if (unOccupiedSetBack.isEmpty()) {
+            return 5.0;
+        } else {
+            return CCUHsApi.getInstance()
+                    .readPointPriorityVal(unOccupiedSetBack.get("id").toString());
+        }
     }
 
     public Schedule getScheduleByRoom(String equip) {

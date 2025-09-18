@@ -156,7 +156,7 @@ fun getMyStatHpuFanLevel(config: MyStatHpuConfiguration): Int {
         return MsFanConstants.LOW_HIGH // All options are enabled due to analog fan speed
     }
 
-    if (config.isAnyRelayEnabledAssociated(association = MyStatCpuRelayMapping.FAN_ENABLED.ordinal)) {
+    if (config.isAnyRelayEnabledAssociated(association = MyStatHpuRelayMapping.FAN_ENABLED.ordinal)) {
         return MsFanConstants.AUTO
     }
 

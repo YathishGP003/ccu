@@ -210,7 +210,7 @@ abstract class UnitVentilatorProfile(equipRef: String, nodeAddress: Short, tag: 
                 }
                 // Before operating AUX based fan reset all points except fanEnable
                 sequenceMap.forEach { (point, statusMsg) ->
-                    if ((point.domainName != DomainName.fanEnable) && point.pointExists()) {
+                    if ((point.domainName != DomainName.fanEnable && point.domainName != DomainName.occupiedEnable) && point.pointExists()) {
                         point.writeHisVal(0.0)
                     }
                     equip.relayStages.remove(statusMsg)

@@ -55,7 +55,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
     private var supplyWaterTemp = 0.0
     private var heatingThreshold = 85.0
     private var coolingThreshold = 65.0
-
+    private var isWaterValveActiveDueToLoop = false
     private var waterSamplingStartTime: Long = 0
 
 
@@ -104,6 +104,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         if (isCondensateTripped) logIt("Condensate overflow detected")
         // At this point, Conditioning Mode will be set to OFF if Condensate Overflow is detected
         // It will revert to previous value when Condensate returns to normal
+        isWaterValveActiveDueToLoop = false
         val basicSettings = fetchBasicSettings(hssEquip)
         val updatedFanMode = fallBackFanMode(hssEquip, fanModeSaved, basicSettings)
         basicSettings.fanMode = updatedFanMode
@@ -382,6 +383,11 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
                         status = false
                     }
                     updateStatus(equip.waterValve, status, StatusMsgKeys.WATER_VALVE.name)
+                    if (status) {
+                        isWaterValveActiveDueToLoop = true
+                        lastWaterValveTurnedOnTime = System.currentTimeMillis()
+                    }
+
                 }
             }
 
@@ -534,7 +540,11 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
                                 }
 
                                 hssEquip.waterModulatingValve.writeHisVal(modulationValue)
-                                if (modulationValue > 0) hssEquip.analogOutStages[StatusMsgKeys.WATER_VALVE.name] = 1
+                                if (modulationValue > 0) {
+                                    hssEquip.analogOutStages[StatusMsgKeys.WATER_VALVE.name] = 1
+                                    isWaterValveActiveDueToLoop = true
+                                    lastWaterValveTurnedOnTime = System.currentTimeMillis()
+                                }
                             } else {
                                 hssEquip.waterModulatingValve.writeHisVal(0.0)
                                 hssEquip.analogOutStages.remove(StatusMsgKeys.WATER_VALVE.name)
@@ -700,6 +710,10 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         equip: Pipe2UVEquip, tuner: UvTuners,
         basicSettings: BasicSettings
     ) {
+        if (isWaterValveActiveDueToLoop) {
+            logIt("Sampling not required, because water valve is active due to loop")
+            return
+        }
 
         if (basicSettings.conditioningMode == StandaloneConditioningMode.OFF) {
             resetWaterValve(equip)

@@ -1010,7 +1010,7 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
             if (intent.getAction().equals(ACTION_USB_REQUIRES_TABLET_REBOOT)) {
                 CcuLog.i("CCU_SERIAL", " SHOW REBOOT DIALOG");
                 CCUUiUtil.showRebootDialog(RenatusLandingActivity.this);
-                Toast.makeText(context, "USB device not connected", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, getString(R.string.usb_devices_not_connected), Toast.LENGTH_LONG).show();
             }
         }
     };
@@ -1045,7 +1045,7 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
 
     private void handleClick(boolean isPortAvailable){
         if(!isPortAvailable){
-            Toast.makeText(context, "Port is busy try after some time", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, getString(R.string.port_is_busy), Toast.LENGTH_SHORT).show();
             return;
         }
         UtilityApplication.startRestServer();

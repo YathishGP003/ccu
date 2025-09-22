@@ -60,7 +60,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="Set Schedule"
+                android:text="@string/set_schedule"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/rangeSeekBar" />
@@ -88,7 +88,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="50dp"
                     android:layout_marginRight="50dp"
-                    android:text="TO"
+                    android:text="@string/to"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
 
                 <NumberPicker
@@ -106,7 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="1dp"
-                android:text="Applies To"
+                android:text="@string/applies_to"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/ltNumberPicker" />

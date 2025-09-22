@@ -65,7 +65,7 @@ public class DashboardFragment extends Fragment implements DashboardRefreshListe
 
 	private void dashboardView() {
 		if(DashboardUtilKt.isDashboardConfig(Globals.getInstance().getApplicationContext())) {
-			ProgressDialogUtils.showProgressDialog(getActivity(),"Loading dashboard...!");
+			ProgressDialogUtils.showProgressDialog(getActivity(),requireContext().getString(R.string.loading_dashboard));
 			emptyDashboard.setVisibility(View.GONE);
 			webView.setVisibility(View.VISIBLE);
 			// Configure WebView settings

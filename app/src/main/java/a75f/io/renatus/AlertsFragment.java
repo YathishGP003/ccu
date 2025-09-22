@@ -94,18 +94,18 @@ public class AlertsFragment extends Fragment implements AlertManager.AlertListLi
 				}
 				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 				builder.setMessage(a.getmTitle() + "\n\n" + message + "\n"
-				                   + "\n Alert Generated at " + getFormattedDate(a.getStartTime())
-				                   + "\n Alert Fixed at "+getFormattedDate(a.getEndTime()))
+				                   + getString(R.string.alert_generated_at) + getFormattedDate(a.getStartTime())
+				                   + getString(R.string.alert_fixed_at)+getFormattedDate(a.getEndTime()))
 				       .setCancelable(false)
 				       .setIcon(R.drawable.ic_dialog_alert)
-				       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				       .setPositiveButton(getString(R.string.ok_button), new DialogInterface.OnClickListener() {
 					       public void onClick(DialogInterface dialog, int id) {
 						       //do things
 					       }
 				       });
 				
 				if (!a.isFixed()) {
-					builder.setNegativeButton("Mark-Fixed", new DialogInterface.OnClickListener() {
+					builder.setNegativeButton(getString(R.string.mark_fixed), new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							AlertManager.getInstance().fixAlert(a);
 							getActivity().runOnUiThread(() -> adapter.notifyDataSetChanged());

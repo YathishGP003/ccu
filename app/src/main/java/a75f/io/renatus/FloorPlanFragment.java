@@ -2,6 +2,7 @@ package a75f.io.renatus;
 
 import static a75f.io.logic.bo.building.NodeType.CONNECTNODE;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.generateBacnetIdForRoom;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.updateBacnetMstpLinearAndCovSubscription;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -46,6 +47,8 @@ import org.projecthaystack.client.CallException;
 import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -53,6 +56,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+import a75f.io.api.haystack.AndroidHSClient;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
@@ -145,6 +149,8 @@ public class FloorPlanFragment extends Fragment {
     @BindView(R.id.moduleList)
     ListView moduleListView;
 
+    AndroidHSClient hsLocalClient;
+
     @BindView(R.id.lt_addfloor)
     LinearLayout addFloorlt;
     @BindView(R.id.lt_addzone)
@@ -156,6 +162,8 @@ public class FloorPlanFragment extends Fragment {
     ArrayList<Zone> roomList = new ArrayList<>();
     private Zone roomToRename;
     private Floor floorToRename;
+
+    public AndroidHSClient hsClientLocal;
     private static FloorPlanFragment instance;
     List<Floor> siteFloorList = new CopyOnWriteArrayList<>();
     List<String> siteRoomList = new CopyOnWriteArrayList<>();
@@ -427,33 +435,60 @@ public class FloorPlanFragment extends Fragment {
             try {
                 HGrid zonePoint = hClient.call("read", HGridBuilder.dictToGrid(zDict));
                 if (zonePoint != null) {
+                    String printer = "";
                     Iterator zit = zonePoint.iterator();
+                    CcuLog.i("HANDLE_ROOM_CHANGE","Get Building Floor Zones(before clearing the list)"+"Site Room List "+siteRoomList);
                     siteRoomList.clear();
+                    CcuLog.i("HANDLE_ROOM_CHANGE","Get Building Floor Zones(after clearing the list)"+"Site Room List "+siteRoomList);
                     while (zit.hasNext()) {
                         HRow zr = (HRow) zit.next();
-
                         if (zr.getStr("dis") != null) {
+                            CcuLog.i("HANDLE_ROOM_CHANGE","Get Building Floor Zones(before adding)"+"HGrid "+zr.getStr("dis")+"Site Room List "+siteRoomList);
                             siteRoomList.add(zr.getStr("dis"));
+                            printer = printer + zr.getStr("dis") + "\t";
+                            CcuLog.i("HANDLE_ROOM_CHANGE","Get Building Floor Zones(after adding)"+"HGrid "+zr.getStr("dis")+"Site Room List "+siteRoomList);
                         }
                     }
+                    // Fetch all the room entites from CCUHSApi with query: room and not oao
+                    // Add a loop and access the dis tag and if its value is not present in siteRoomList, add it there
+                    HDict zLocalDict = new HDictBuilder().add("filter", "room and not oao and siteRef == "+siteUID).toDict();
+                    HGrid zoneLocalPoint=hsClientLocal.call("read",HGridBuilder.dictToGrid(zLocalDict));
+                    Iterator zitlocal = zoneLocalPoint.iterator();
+
+                    while(zitlocal.hasNext()){
+                        HRow zrLocal = (HRow) zitlocal.next();
+                        if(!siteRoomList.contains(zrLocal.getStr("dis"))){
+                            siteRoomList.add(zrLocal.getStr("dis"));
+                        }
+                        else{
+                            return;
+                        }
+
+                    }
+                    CcuLog.d("HANDLE_ROOM_CHANGE", "Remotely fetched zone names: " + printer);
                 }
             } catch (CallException e) {
                 CcuLog.d(L.TAG_CCU_UI, "Failed to fetch room data " + e.getMessage());
                 e.printStackTrace();
             }
         });
+
     }
 
     private void loadExistingZones() {
         siteFloorList.clear();
+        CcuLog.i("HANDLE_ROOM_CHANGE","Loading Existing zones(before clearing the zones)"+"Site Room List "+siteRoomList);
         siteRoomList.clear();
+        CcuLog.i("HANDLE_ROOM_CHANGE","Loading Existing zones(after clearing the zones)"+"Site Room List "+siteRoomList);
         ArrayList<Floor> floorList = HSUtil.getFloors();
         siteFloorList.addAll(floorList);
         for (Floor f : floorList) {
             ArrayList<Zone> zoneList = HSUtil.getZones(f.getId());
             for (Zone zone : zoneList) {
                 if(zone.getDisplayName() != null) {
+                    CcuLog.i("HANDLE_ROOM_CHANGE","Loading Existing zones(before adding zones)"+"Site Room List "+siteRoomList);
                     siteRoomList.add(zone.getDisplayName());
+                    CcuLog.i("HANDLE_ROOM_CHANGE","Loading Existing zones(after adding zones)"+"Site Room List "+siteRoomList);
                 }else {
                     CcuLog.d(L.TAG_CCU_UI, "Zone name is null. Floor: " + f + ", Zone: "+zone.getHDict());
                 }
@@ -596,7 +631,7 @@ public class FloorPlanFragment extends Fragment {
         if (floorToRename != null) {
             if (addFloorEdit.getText().toString().trim().length() > 0) {
                 if (addFloorEdit.getText().toString().length() > 24) {
-                    Toast.makeText(getActivity().getApplicationContext(), "Floor name should have less than 25 characters", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity().getApplicationContext(), getString(R.string.floor_name_should_have_less_chars), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 floorList.remove(floorToRename);
@@ -616,7 +651,7 @@ public class FloorPlanFragment extends Fragment {
                 for (Floor floor : siteFloorList) {
                     if (floor.getDisplayName().equals(addFloorEdit.getText().toString().trim())) {
                         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
-                        adb.setMessage("Floor name already exists in this site,would you like to move all the zones associated with " + floorToRename.getDisplayName() + " to " + hsFloor.getDisplayName() + "?");
+                        adb.setMessage(getString(R.string.floor_name_should_have_less_chars) + floorToRename.getDisplayName() + getString(R.string.to_string) + hsFloor.getDisplayName() + "?");
                         adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
                             if (!CCUHsApi.getInstance().isEntityExisting(floor.getId())) {
                                 hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor,
@@ -696,7 +731,7 @@ public class FloorPlanFragment extends Fragment {
                 CCUHsApi.getInstance().syncEntityTree();
                 siteFloorList.add(hsFloor);
             } else {
-                Toast.makeText(getActivity().getApplicationContext(), "Floor cannot be empty", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity().getApplicationContext(), getString(R.string.floor_cannot_be_empty), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -704,7 +739,7 @@ public class FloorPlanFragment extends Fragment {
     private void addNewFloor(){
         if ((addFloorEdit.getText().toString().trim().length() > 0)) {
             if (addFloorEdit.getText().toString().length() > 24) {
-                Toast.makeText(getActivity().getApplicationContext(), "Floor name should have less than 25 characters", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity().getApplicationContext(), getString(R.string.floor_name_should_have_less_chars), Toast.LENGTH_SHORT).show();
                 return;
             }
             HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
@@ -715,7 +750,7 @@ public class FloorPlanFragment extends Fragment {
             for (Floor floor : siteFloorList) {
                 if (floor.getDisplayName().equals(addFloorEdit.getText().toString().trim())) {
                     AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
-                    adb.setMessage("Floor name already exists in this site,would you like to continue?");
+                    adb.setMessage(getString(R.string.floor_name_already_exists_would_you_like_to_continue));
                     adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
                         if (! CCUHsApi.getInstance().isEntityExisting(floor.getId())) {
                             hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor,
@@ -755,7 +790,7 @@ public class FloorPlanFragment extends Fragment {
 
             hideKeyboard();
             Toast.makeText(getActivity().getApplicationContext(),
-                    "Floor " + addFloorEdit.getText() + " added", Toast.LENGTH_SHORT).show();
+                    getString(R.string.floor_text) + addFloorEdit.getText() + getString(R.string.added_text), Toast.LENGTH_SHORT).show();
 
             HashMap<Object, Object> defaultNamedSchedule =  CCUHsApi.getInstance().readEntity
                     ("named and schedule and default and siteRef == "+CCUHsApi.getInstance().getSiteIdRef().toString());
@@ -770,7 +805,7 @@ public class FloorPlanFragment extends Fragment {
             siteFloorList.add(hsFloor);
 
         } else {
-            Toast.makeText(getActivity().getApplicationContext(), "Floor cannot be empty", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity().getApplicationContext(), getString(R.string.floor_cannot_be_empty), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -795,12 +830,12 @@ public class FloorPlanFragment extends Fragment {
     }
 
     public void toastMessageOnServerDown(){
-        Toast.makeText(getActivity(), "Floor cannot be handled when server is down", Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), getString(R.string.floor_handled_server_is_down), Toast.LENGTH_LONG).show();
     }
 
     private void isConnectedToServer(FloorHandledCondition condition, Floor floor){
         if (!NetworkUtil.isNetworkConnected(getActivity())) {
-            Toast.makeText(getActivity(), "Floor cannot be handled when CCU is offline. Please connect to network.", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), getString(R.string.floor_cannot_be_handled), Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -890,7 +925,7 @@ public class FloorPlanFragment extends Fragment {
                 if (addRoomEdit.getText().toString().trim().length() > 0) {
                     for (String z : siteRoomList) {
                         if (z.equals(addRoomEdit.getText().toString().trim())) {
-                            Toast.makeText(getActivity().getApplicationContext(), "Zone already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity().getApplicationContext(), getString(R.string.zone_already_exists) + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
                             return true;
                         }
                     }
@@ -898,7 +933,7 @@ public class FloorPlanFragment extends Fragment {
                     siteRoomList.remove(roomToRename.getDisplayName());
 
                     if ((addRoomEdit.getText().toString().length() > maxZoneNameLength)) {
-                        Toast.makeText(getActivity().getApplicationContext(), "Zone name should have less than 25 characters", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity().getApplicationContext(), getString(R.string.zone_name_should_have_less_chars), Toast.LENGTH_SHORT).show();
                         return true;
                     }
 
@@ -926,7 +961,7 @@ public class FloorPlanFragment extends Fragment {
                     }
                     return true;
                 } else {
-                    Toast.makeText(getActivity().getApplicationContext(), "Room cannot be empty", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity().getApplicationContext(), getString(R.string.room_cannot_be_empty), Toast.LENGTH_SHORT).show();
                     return false;
                 }
             }
@@ -934,17 +969,17 @@ public class FloorPlanFragment extends Fragment {
             if (addRoomEdit.getText().toString().trim().length() > 0) {
                 for (String z : siteRoomList) {
                     if (z.equals(addRoomEdit.getText().toString().trim())) {
-                        Toast.makeText(getActivity().getApplicationContext(), "Zone already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity().getApplicationContext(), getString(R.string.zone_already_exists) + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
                         return true;
                     }
                 }
                 if ((addRoomEdit.getText().toString().length() > maxZoneNameLength)) {
-                    Toast.makeText(getActivity().getApplicationContext(), "Zone name should have less than 25 characters", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity().getApplicationContext(), getString(R.string.zone_name_should_have_less_chars), Toast.LENGTH_SHORT).show();
                     return true;
                 }
 
                 Toast.makeText(getActivity().getApplicationContext(),
-                        "Room " + addRoomEdit.getText() + " added", Toast.LENGTH_SHORT).show();
+                        getString(R.string.room_text) + addRoomEdit.getText() + getString(R.string.added_text), Toast.LENGTH_SHORT).show();
                 Floor floor = floorList.get(mFloorListAdapter.getSelectedPostion());
                 HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
 
@@ -965,7 +1000,7 @@ public class FloorPlanFragment extends Fragment {
                 if(defaultNamedSchedule.isEmpty()){
                     hsZone.setScheduleRef(zoneSchedule);
                     Toast.makeText(getActivity().getApplicationContext(),
-                                "Zone following zone-schedule as default shared schedule is not available", Toast.LENGTH_SHORT).show();
+                                getString(R.string.zone_following_zone_schedule_not_available), Toast.LENGTH_SHORT).show();
                 }else {
                     hsZone.setScheduleRef(defaultNamedSchedule.get("id").toString());
                 }
@@ -986,7 +1021,7 @@ public class FloorPlanFragment extends Fragment {
                 BacnetUtilKt.addBacnetTags(getActivity().getApplicationContext(), hsZone.getFloorRef(), hsZone.getId());
                 return true;
             } else {
-                Toast.makeText(getActivity().getApplicationContext(), "Room cannot be empty", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity().getApplicationContext(), getString(R.string.room_cannot_be_empty), Toast.LENGTH_SHORT).show();
             }
         }
         return false;
@@ -1031,7 +1066,7 @@ public class FloorPlanFragment extends Fragment {
                 }
             }
             if(HSUtil.isZoneHasSubEquips(selectedZone.getId())){
-                Toast.makeText(getActivity(), "No module can be paired as modbus with sub equips is paired",
+                Toast.makeText(getActivity(), getString(R.string.no_modules_can_be_paired_because_of_modbus),
                         Toast.LENGTH_LONG).show();
                 return;
             }
@@ -1044,7 +1079,7 @@ public class FloorPlanFragment extends Fragment {
             if (mFloorListAdapter.getSelectedPostion() == -1) {
             } else {
                 if (zoneEquips.size() >= 3) {
-                    Toast.makeText(getActivity(), "More than 3 modules are not allowed", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), getString(R.string.more_modules_not_allowed), Toast.LENGTH_LONG).show();
                     return;
                 }
                 // Checks to see if emulated and doesn't popup BLE dialogs
@@ -1055,22 +1090,22 @@ public class FloorPlanFragment extends Fragment {
             }
         } else {
             if (isPLCPaired) {
-                Toast.makeText(getActivity(), "Pi Loop Module is already paired in this zone", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), getString(R.string.pi_loop_already_paired), Toast.LENGTH_LONG).show();
             }
             if (isEMRPaired) {
-                Toast.makeText(getActivity(), "Energy Meter Module is already paired in this zone", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), getString(R.string.energy_meter_module_already_paired), Toast.LENGTH_LONG).show();
             }
             if (isCCUPaired) {
-                Toast.makeText(getActivity(), "CCU as Zone is already paired in this zone", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), getString(R.string.ccu_zone_already_paired), Toast.LENGTH_LONG).show();
             }
             if (isMonitoringPaired) {
-                Toast.makeText(getActivity(), "HyperStat Monitoring is already paired in this zone", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), getString(R.string.hyperstat_monitoring_already_paired), Toast.LENGTH_LONG).show();
             }
             if (isOTNPaired) {
-                Toast.makeText(getActivity(), "OTN is already paired in this zone", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), getString(R.string.otn_already_paired), Toast.LENGTH_LONG).show();
             }
             if (isConnectNodePaired) {
-                Toast.makeText(getActivity(), "Connect Node is already paired in this zone", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), getString(R.string.connect_node_already_paired), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1288,7 +1323,7 @@ public class FloorPlanFragment extends Fragment {
             showDialogFragment(ConnectNodeFragment.Companion.newInstance(Short.parseShort(ConnectNodeUtil.Companion.extractNodeAddressIfConnectPaired(nodeAddress)), zone.getId(),
                     floor.getId(), CONNECTNODE, ProfileType.CONNECTNODE).setIsNewPairing(false), ConnectNodeFragment.Companion.getIdString());
         } else
-            Toast.makeText(getActivity(), "Zone profile is empty, recheck your DB", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), getString(R.string.zone_profile_empty), Toast.LENGTH_LONG).show();
 
 
     }

@@ -5,6 +5,7 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
+import a75f.io.renatus.R
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.Picker
 import a75f.io.renatus.composables.rememberPickerState
@@ -39,6 +40,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -110,7 +112,7 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
         ) {
             CircularProgressIndicator(color = ComposeUtil.primaryColor)
             Spacer(modifier = Modifier.height(10.dp))
-            Text(text = "Loading Profile Configuration")
+            Text(text = stringResource(R.string.loading_profile_configuration))
         }
     }
     //@Preview
@@ -133,9 +135,9 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                 Column(modifier = Modifier.padding(20.dp)) {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         when (viewModel.profileType) {
-                            ProfileType.VAV_SERIES_FAN -> TitleTextView("VAV REHEAT - SERIES")
-                            ProfileType.VAV_PARALLEL_FAN -> TitleTextView("VAV REHEAT - PARALLEL")
-                            else -> TitleTextView("VAV - NO FAN")
+                            ProfileType.VAV_SERIES_FAN -> TitleTextView(stringResource(R.string.vav_reheat_series))
+                            ProfileType.VAV_PARALLEL_FAN -> TitleTextView(stringResource(R.string.vav_reheat_parallel))
+                            else -> TitleTextView(stringResource(R.string.vav_no_fan))
                         }
                     }
                     Spacer(modifier = Modifier.height(20.dp))
@@ -145,7 +147,7 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     ) {
                         Spacer(modifier = Modifier.width(78.dp))
                         DropDownWithLabel(
-                            label = "Damper Type",
+                            label = stringResource(id = R.string.damper_type),
                             list = viewModel.damperTypesList,
                             previewWidth = 165,
                             expandedWidth = 185,
@@ -177,7 +179,7 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             Spacer(modifier = Modifier.width(42.dp))
 
                             DropDownWithLabel(
-                                label = "Shape",
+                                label = stringResource(R.string.shape),
                                 list = viewModel.damperShapesList,
                                 previewWidth = 135,
                                 expandedWidth = 155,
@@ -201,7 +203,7 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     ) {
                         Spacer(modifier = Modifier.width(78.dp))
                         DropDownWithLabel(
-                            label = "Reheat Type",
+                            label = stringResource(R.string.label_reheattype),
                             list = viewModel.reheatTypesList,
                             previewWidth = 165,
                             expandedWidth = 185,
@@ -214,7 +216,7 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         )
                         Spacer(modifier = Modifier.width(85.dp))
                         DropDownWithLabel(
-                            label = "Zone Priority",
+                            label = stringResource(R.string.label_zonepriority),
                             list = viewModel.zonePrioritiesList,
                             previewWidth = 130,
                             expandedWidth = 150,
@@ -235,15 +237,15 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     ) {
                         Spacer(modifier = Modifier.width(78.dp))
                         Row {
-                            HeaderTextView(text = "Thermistor-1", padding = 0)
+                            HeaderTextView(text = stringResource(R.string.vav_label_thermistor1), padding = 0)
                             Spacer(modifier = Modifier.width(160.dp))
-                            LabelTextView(text = "Discharge Airflow Temperature")
+                            LabelTextView(text = stringResource(R.string.vav_label_thermistor1_val))
                         }
                         Spacer(modifier = Modifier.width(63.dp))
                         Row {
-                            HeaderTextView(text = "Thermistor-2", padding = 0)
+                            HeaderTextView(text = stringResource(R.string.vav_label_thermistor2), padding = 0)
                             Spacer(modifier = Modifier.width(115.dp))
-                            LabelTextView(text = "Entering Airflow Temperature")
+                            LabelTextView(text = stringResource(R.string.vav_label_thermistor2_val))
                         }
                     }
 
@@ -261,45 +263,45 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                 }
 
                                 1.0 -> {
-                                    HeaderTextView(text = "Analog Out 2", padding = 0)
+                                    HeaderTextView(text = stringResource(R.string.vav_label_analog_out_2), padding = 0)
                                     Spacer(modifier = Modifier.width(147.dp))
-                                    LabelTextView(text = "Modulating Reheat", widthValue = 216)
+                                    LabelTextView(text = stringResource(R.string.vav_label_modulating_reheat), widthValue = 216)
                                 }
 
                                 2.0 -> {
-                                    HeaderTextView(text = "Analog Out 2", padding = 0)
+                                    HeaderTextView(text = stringResource(R.string.vav_label_analog_out_2), padding = 0)
                                     Spacer(modifier = Modifier.width(147.dp))
-                                    LabelTextView(text = "Modulating Reheat", widthValue = 216)
+                                    LabelTextView(text = stringResource(R.string.vav_label_modulating_reheat), widthValue = 216)
                                 }
 
                                 3.0 -> {
-                                    HeaderTextView(text = "Analog Out 2", padding = 0)
+                                    HeaderTextView(text = stringResource(R.string.vav_label_analog_out_2), padding = 0)
                                     Spacer(modifier = Modifier.width(147.dp))
-                                    LabelTextView(text = "Modulating Reheat", widthValue = 216)
+                                    LabelTextView(text = stringResource(R.string.vav_label_modulating_reheat), widthValue = 216)
                                 }
 
                                 4.0 -> {
-                                    HeaderTextView(text = "Analog Out 2", padding = 0)
+                                    HeaderTextView(text =stringResource(R.string.vav_label_analog_out_2), padding = 0)
                                     Spacer(modifier = Modifier.width(147.dp))
-                                    LabelTextView(text = "Modulating Reheat", widthValue = 216)
+                                    LabelTextView(text = stringResource(R.string.vav_label_modulating_reheat), widthValue = 216)
                                 }
 
                                 5.0 -> {
-                                    HeaderTextView(text = "Analog Out 2", padding = 0)
+                                    HeaderTextView(text = stringResource(R.string.vav_label_analog_out_2), padding = 0)
                                     Spacer(modifier = Modifier.width(147.dp))
-                                    LabelTextView(text = "Modulating Reheat", widthValue = 216)
+                                    LabelTextView(text = stringResource(R.string.vav_label_modulating_reheat), widthValue = 216)
                                 }
 
                                 6.0 -> {
-                                    HeaderTextView(text = "Relay 1", padding = 0)
+                                    HeaderTextView(text = stringResource(R.string.relay1), padding = 0)
                                     Spacer(modifier = Modifier.width(186.dp))
-                                    LabelTextView(text = "Staged Electric Heater", widthValue = 250)
+                                    LabelTextView(text = stringResource(R.string.vav_label_staged_heater), widthValue = 250)
                                 }
 
                                 7.0 -> {
-                                    HeaderTextView(text = "Relay 1", padding = 0)
+                                    HeaderTextView(text = stringResource(R.string.relay1), padding = 0)
                                     Spacer(modifier = Modifier.width(186.dp))
-                                    LabelTextView(text = "Staged Electric Heater", widthValue = 250)
+                                    LabelTextView(text =stringResource(R.string.vav_label_staged_heater), widthValue = 250)
                                 }
                             }
                         }
@@ -316,15 +318,15 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         Row {
                             when (viewModel.profileType) {
                                 ProfileType.VAV_SERIES_FAN -> {
-                                    HeaderTextView(text = "Relay 2", padding = 0)
+                                    HeaderTextView(text = stringResource(R.string.relay2), padding = 0)
                                     Spacer(modifier = Modifier.width(222.dp))
-                                    LabelTextView(text = "Series Fan")
+                                    LabelTextView(text = stringResource(R.string.vav_label_series_fan))
                                 }
 
                                 ProfileType.VAV_PARALLEL_FAN -> {
-                                    HeaderTextView(text = "Relay 2", padding = 0)
+                                    HeaderTextView(text = stringResource(R.string.relay2), padding = 0)
                                     Spacer(modifier = Modifier.width(208.dp))
-                                    LabelTextView(text = "Parallel Fan")
+                                    LabelTextView(text = stringResource(R.string.vav_label_parallel_fan))
                                 }
 
                                 else -> {
@@ -406,7 +408,7 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         Row {
                             if (viewModel.viewState.enableCFMControl) {
                                 DropDownWithLabel(
-                                    label = "K-Factor",
+                                    label = stringResource(R.string.k_factor),
                                     list = viewModel.kFactorsList,
                                     previewWidth = 130,
                                     expandedWidth = 150,
@@ -442,7 +444,7 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             )
                     ) {
                         Picker(
-                            header = "Temperature Offset",
+                            header = stringResource(R.string.temperature_offset),
                             state = valuesPickerState,
                             items = viewModel.temperatureOffsetsList,
                             onChanged = { it: String ->
@@ -458,7 +460,7 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         if (!viewModel.viewState.enableCFMControl) {
                             Spacer(modifier = Modifier.width(if (viewModel.viewState.enableCFMControl) 40.dp else 60.dp))
                             Picker(
-                                header = "Max Damper Pos Cooling",
+                                header = stringResource(R.string.max_damper_pos_cooling),
                                 state = valuesPickerState,
                                 items = viewModel.maxCoolingDamperPosList,
                                 onChanged = { it: String ->
@@ -477,7 +479,7 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             )
                             Spacer(modifier = Modifier.width(if (viewModel.viewState.enableCFMControl) 40.dp else 60.dp))
                             Picker(
-                                header = "Min Damper Pos Cooling",
+                                header = stringResource(R.string.min_damper_pos_cooling),
                                 state = valuesPickerState,
                                 items = viewModel.minCoolingDamperPosList,
                                 onChanged = { it: String ->
@@ -498,7 +500,7 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         } else {
                             Spacer(modifier = Modifier.width(if (viewModel.viewState.enableCFMControl) 40.dp else 60.dp))
                             Picker(
-                                header = "Max CFM Cooling",
+                                header = stringResource(R.string.max_cfm_cooling),
                                 state = valuesPickerState,
                                 items = viewModel.maxCFMCoolingList,
                                 onChanged = { it: String ->
@@ -517,7 +519,7 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             )
                             Spacer(modifier = Modifier.width(if (viewModel.viewState.enableCFMControl) 40.dp else 60.dp))
                             Picker(
-                                header = "Min CFM Cooling",
+                                header = stringResource(R.string.min_cfm_cooling),
                                 state = valuesPickerState,
                                 items = viewModel.minCFMCoolingList,
                                 onChanged = { it: String ->
@@ -536,7 +538,7 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             )
                             Spacer(modifier = Modifier.width(if (viewModel.viewState.enableCFMControl) 40.dp else 60.dp))
                             Picker(
-                                header = "Max CFM Reheating",
+                                header = stringResource(R.string.max_cfm_reheating),
                                 state = valuesPickerState,
                                 items = viewModel.maxCFMReheatingList,
                                 onChanged = { it: String ->
@@ -555,7 +557,7 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             )
                             Spacer(modifier = Modifier.width(if (viewModel.viewState.enableCFMControl) 40.dp else 60.dp))
                             Picker(
-                                header = "Min CFM Reheating",
+                                header = stringResource(R.string.min_cfm_reheating),
                                 state = valuesPickerState,
                                 items = viewModel.minCFMReheatingList,
                                 onChanged = { it: String ->
@@ -576,7 +578,7 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
 
                         Spacer(modifier = Modifier.width(if (viewModel.viewState.enableCFMControl) 40.dp else 60.dp))
                         Picker(
-                            header = "Max Damper Pos Heating",
+                            header = stringResource(R.string.max_damper_pos_heating),
                             state = valuesPickerState,
                             items = viewModel.maxHeatingDamperPosList,
                             onChanged = { it: String ->
@@ -592,7 +594,7 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         )
                         Spacer(modifier = Modifier.width(if (viewModel.viewState.enableCFMControl) 40.dp else 60.dp))
                         Picker(
-                            header = "Min Damper Pos Heating",
+                            header = stringResource(R.string.min_damper_pos_heating),
                             state = valuesPickerState,
                             items = viewModel.minHeatingDamperPosList,
                             onChanged = { it: String ->

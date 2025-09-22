@@ -44,6 +44,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -114,7 +115,7 @@ class OtnProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
         ) {
             CircularProgressIndicator(color = ComposeUtil.primaryColor)
             Spacer(modifier = Modifier.height(10.dp))
-            Text(text = "Loading Profile Configuration")
+            Text(text = stringResource(R.string.loading_profile_configuration))
         }
     }
     //@Preview
@@ -137,13 +138,13 @@ class OtnProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                 Column(modifier = Modifier.padding(20.dp)) {
 
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        TitleTextView("TEMPERATURE INFLUENCING")
+                        TitleTextView(stringResource(R.string.temp_influencing_caps))
                     }
                     Spacer(modifier = Modifier.height(40.dp))
 
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         DropDownWithLabel(
-                            label = "Zone Priority",
+                            label = stringResource(R.string.label_zonepriority),
                             list = viewModel.zonePrioritiesList,
                             previewWidth = 130,
                             expandedWidth = 150,
@@ -191,7 +192,7 @@ class OtnProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     val valuesPickerState = rememberPickerState()
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         TempOffsetPicker(
-                            header = "Room Temp Offset",
+                            header = stringResource(R.string.room_temp_offset),
                             state = valuesPickerState,
                             items = viewModel.temperatureOffsetsList,
                             onChanged = { it: String ->

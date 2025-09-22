@@ -47,6 +47,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -133,7 +134,7 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                 Column(modifier = Modifier.padding(20.dp)) {
 
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        TitleTextView("SSE")
+                        TitleTextView(stringResource(id = R.string.title_sseinput))
                     }
                     Spacer(modifier = Modifier.height(20.dp))
 
@@ -157,21 +158,21 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             {
                                 Spacer(modifier = Modifier.padding(start = 30.dp))
                                 Text(
-                                    text = "ENABLE",
+                                    text = stringResource(id=R.string.title_enable),
                                     fontSize = 20.sp,
                                     color = ComposeUtil.greyColor
                                 )
                                 Spacer(modifier = Modifier.width(270.dp))
                                 Spacer(modifier = Modifier.padding(start = 40.dp))
                                 Text(
-                                    text = "ACTUATOR TYPE",
+                                    text = stringResource(id= R.string.actuator_type),
                                     fontSize = 20.sp,
                                     color = ComposeUtil.greyColor
                                 )
                                 Spacer(modifier = Modifier.width(230.dp))
                                 Spacer(modifier = Modifier.padding(start = 80.dp))
                                 Text(
-                                    text = "TEST SIGNAL",
+                                    text = stringResource(id=R.string.title_testsignal),
                                     fontSize = 20.sp,
                                     color = ComposeUtil.greyColor
                                 )
@@ -187,7 +188,7 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                 Spacer(modifier = Modifier.width(20.dp))
                                 Row {
                                     HeaderTextView(
-                                        text = "TH1 - Airflow Temperature Sensor",
+                                        text = stringResource(id= R.string.th1_airflow_temp_sensor),
                                         padding = 10
                                     )
                                     Spacer(modifier = Modifier.width(10.dp))
@@ -201,7 +202,7 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                 Spacer(modifier = Modifier.width(60.dp))
                                 Row {
                                     HeaderTextView(
-                                        text = "TH2 - Use external 10k Temperature Sensor",
+                                        text = stringResource(id=R.string.th2_use_external_10k_temp_sensor),
                                         padding = 10
                                     )
                                     Spacer(modifier = Modifier.width(10.dp))
@@ -218,7 +219,7 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             ) {
                                 Spacer(modifier = Modifier.width(20.dp))
                                 Row {
-                                    HeaderTextView(text = "Auto Force Occupied", padding = 10)
+                                    HeaderTextView(text = stringResource(R.string.auto_force_occupy), padding = 10)
                                     Spacer(modifier = Modifier.width(30.dp))
                                     ToggleButtonStateful(
                                         defaultSelection = viewModel.viewState.autoForcedOccupiedState.value,
@@ -229,7 +230,7 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                 }
                                 Spacer(modifier = Modifier.width(190.dp))
                                 Row {
-                                    HeaderTextView(text = "Auto Away", padding = 10)
+                                    HeaderTextView(text = stringResource(id= R.string.auto_away), padding = 10)
                                     Spacer(modifier = Modifier.width(30.dp))
                                     ToggleButtonStateful(
                                         defaultSelection = viewModel.viewState.autoAwayState.value,
@@ -244,7 +245,7 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             ) {
                                 Spacer(modifier = Modifier.width(20.dp))
                                 AnalogIn1(
-                                    relayText = "Analog-in1",
+                                    relayText = stringResource(id= R.string.analog_in1),
                                     relayState = viewModel.viewState.analog1InState.value,
                                     onRelayEnabled = {
                                         viewModel.viewState.analog1InState.value = it
@@ -269,7 +270,7 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                 ) {
                                     Picker(
                                         modifier = Modifier.width(120.dp),
-                                        header = "Temperature\n    Offset",
+                                        header = stringResource(R.string.temperature_next_line_offset),
                                         state = valuesPickerState,
                                         items = viewModel.temperatureOffsetsList,
                                         onChanged = { it: String ->
@@ -347,7 +348,7 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
     @Composable
     private fun RelayConfiguration() {
         SystemRelayMappingView(
-            relayText = "Relay-1",
+            relayText = stringResource(id= R.string.label_relay1),
             relayState = viewModel.viewState.relay1State.value,
             onRelayEnabled = {
                 viewModel.viewState.relay1State.value = it
@@ -365,7 +366,7 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
         )
         Spacer(modifier = Modifier.height(10.dp))
         SystemRelayMappingView(
-            relayText = "Relay-2",
+            relayText = stringResource(id= R.string.label_relay2),
             relayState = viewModel.viewState.relay2State.value,
             onRelayEnabled = {
                 viewModel.viewState.relay2State.value = it

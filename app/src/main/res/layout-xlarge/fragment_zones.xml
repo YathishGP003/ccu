@@ -42,7 +42,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_marginLeft="15dp"
                 android:layout_marginTop="15dp"
-                android:text="Loading..."
+                android:text="@string/loading"
                 android:textAppearance="@style/title_white_bold"
                 android:textColor="@color/white" />
 

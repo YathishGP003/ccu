@@ -192,7 +192,7 @@ fun isAllRightParamsSelected(equipDevice: EquipmentDevice) : Boolean {
 }
 
  fun showToast(text: String, context: Context){
-     Handler(Looper.getMainLooper()).post(kotlinx.coroutines.Runnable {
+     Handler(Looper.getMainLooper()).post(Runnable {
          Toast.makeText(context, text, Toast.LENGTH_LONG).show()
      })
 

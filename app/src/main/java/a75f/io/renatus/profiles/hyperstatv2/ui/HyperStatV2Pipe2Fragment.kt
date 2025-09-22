@@ -40,6 +40,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -125,7 +126,7 @@ class HyperStatV2Pipe2Fragment : HyperStatFragmentV2() {
                         )
                     }
                 }
-                item { Title("2 PIPE FCU",Modifier.padding(50.dp,25.dp)) }
+                item { Title(stringResource(R.string.two_pipe_fcu),Modifier.padding(50.dp,25.dp)) }
                 item { TempOffset(Modifier.padding(50.dp,0.dp)) }
                 item { AutoForcedOccupiedAutoAwayConfig(Modifier.padding(50.dp,0.dp)) }
                 item { Label(Modifier.padding(50.dp,0.dp)) }

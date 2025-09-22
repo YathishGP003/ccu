@@ -30,6 +30,7 @@ import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.
 import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.mapSensorBusPressureLogicalPoint
 import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.setOutputTypes
 import a75f.io.renatus.FloorPlanFragment
+import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.hss.HyperStatSplitViewModel
 import a75f.io.renatus.util.ProgressDialogUtils
@@ -42,6 +43,7 @@ import android.text.Html
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -94,11 +96,11 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
     override fun saveConfiguration() {
         if (validateProfileConfig()) {
             if(viewState.value.pressureSensorAddress0.enabled && viewState.value.sensorAddress0.enabled){
-                showErrorDialog(context,Html.fromHtml("The profile must not have <b>Pressure Sensor or Sensor Address 0</b> mapped. Please remove the mapping from the Sensor Bus or Pressure Sensor.", Html.FROM_HTML_MODE_LEGACY))
+                showErrorDialog(context,Html.fromHtml(context.getString(R.string.pressure_sensor_should_be_mapped), Html.FROM_HTML_MODE_LEGACY))
                 return
             }
             if (saveJob == null) {
-                ProgressDialogUtils.showProgressDialog(context, "Saving HyperStat Split Configuration")
+                ProgressDialogUtils.showProgressDialog(context, context.getString(R.string.saving_hss_config))
                 saveJob = viewModelScope.launch(highPriorityDispatcher) {
                     CCUHsApi.getInstance().resetCcuReady()
                     setUpHyperStatSplitProfile()
@@ -109,7 +111,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
                     CcuLog.i(Domain.LOG_TAG, "HSS Profile Pairing complete")
                     withContext(Dispatchers.Main) {
                         context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                        showToast("HSS Configuration saved successfully", context)
+                        showToast(context.getString(R.string.hss_config_saved), context)
                         CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
                         ProgressDialogUtils.hideProgressDialog()
                         pairingCompleteListener.onPairingComplete()

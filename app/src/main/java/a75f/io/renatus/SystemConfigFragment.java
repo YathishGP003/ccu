@@ -564,15 +564,15 @@ public class SystemConfigFragment extends Fragment {
 
     private boolean showConfirmationDialog(Context context, int page) {
         new AlertDialog.Builder(context)
-                .setTitle("Unsaved Changes")
-                .setMessage("You have unsaved changes. Do you want to discard them and proceed?")
-                .setPositiveButton("Proceed", (dialog, which) -> {
+                .setTitle(requireContext().getString(R.string.unsaved_changes))
+                .setMessage(requireContext().getString(R.string.you_have_unsaved_changes))
+                .setPositiveButton(requireContext().getString(R.string.proceed_button), (dialog, which) -> {
                     if (page == 1) oaoPage();
                     else if (page == 2) bypassDamperPage();
                     else if (page == 3) modbusEnergyMeterPage();
                     else if (page == 4) btuMeterPage();
                 })
-                .setNegativeButton("Stay", (dialog, which) -> {
+                .setNegativeButton(requireContext().getString(R.string.stay_button), (dialog, which) -> {
                     state = false;
                 })
                 .setCancelable(false)

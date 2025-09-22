@@ -37,7 +37,7 @@
                         android:id="@+id/scheduleTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Zone Schedule"
+                        android:text="@string/zone_schedule"
                         android:textSize="25sp"
                         android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
                         app:fontFamily="@font/lato_regular"
@@ -96,7 +96,7 @@
                             android:fontFamily="@font/lato_regular"
                             android:gravity="center_horizontal|top"
                             android:padding="2.5dp"
-                            android:text="UNOCCUPIED"
+                            android:text="@string/unoccupied"
                             android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
                             android:textSize="18sp"
                             app:layout_constraintRight_toLeftOf="@+id/addEntry"
@@ -112,7 +112,7 @@
                             android:gravity="center_horizontal|top"
                             android:textSize="19.5sp"
                             android:padding="2.5dp"
-                            android:text="ADD TIMESLOT"
+                            android:text="@string/add_time_slot"
                             android:textColor="?orange_75f"
                             app:layout_constraintRight_toRightOf="parent"
                             tools:ignore="MissingConstraints" />
@@ -203,7 +203,7 @@
                         android:fontFamily="@font/lato_regular"
                         android:gravity="center_vertical|left"
                         android:minHeight="30dp"
-                        android:text="MONDAY"
+                        android:text="@string/monday"
                         android:textSize="19dp"
                         app:layout_constraintBottom_toTopOf="@+id/textViewTuesday"
                         app:layout_constraintLeft_toLeftOf="parent"
@@ -218,7 +218,7 @@
                         android:fontFamily="@font/lato_regular"
                         android:gravity="center_vertical|left"
                         android:minHeight="30dp"
-                        android:text="TUESDAY"
+                        android:text="@string/tuesday"
                         android:textSize="19dp"
                         app:layout_constraintBottom_toTopOf="@+id/textViewWednesday"
                         app:layout_constraintTop_toBottomOf="@+id/textViewMonday"
@@ -232,7 +232,7 @@
                         android:fontFamily="@font/lato_regular"
                         android:gravity="center_vertical|left"
                         android:minHeight="30dp"
-                        android:text="WEDNESDAY"
+                        android:text="@string/wednesday"
                         android:textSize="19dp"
                         app:layout_constraintBottom_toTopOf="@+id/textViewThursday"
                         app:layout_constraintTop_toBottomOf="@+id/textViewTuesday"
@@ -246,7 +246,7 @@
                         android:fontFamily="@font/lato_regular"
                         android:gravity="center_vertical|left"
                         android:minHeight="30dp"
-                        android:text="THURSDAY"
+                        android:text="@string/thursday"
                         android:textSize="19dp"
                         app:layout_constraintBottom_toTopOf="@+id/textViewFriday"
                         app:layout_constraintTop_toBottomOf="@+id/textViewWednesday"
@@ -260,7 +260,7 @@
                         android:fontFamily="@font/lato_regular"
                         android:gravity="center_vertical|left"
                         android:minHeight="30dp"
-                        android:text="FRIDAY"
+                        android:text="@string/friday"
                         android:textSize="19dp"
                         app:layout_constraintBottom_toTopOf="@+id/textViewSaturday"
                         app:layout_constraintTop_toBottomOf="@+id/textViewThursday"
@@ -274,7 +274,7 @@
                         android:fontFamily="@font/lato_regular"
                         android:gravity="center_vertical|left"
                         android:minHeight="30dp"
-                        android:text="SATURDAY"
+                        android:text="@string/saturday"
                         android:textSize="19dp"
                         app:layout_constraintBottom_toTopOf="@+id/textViewSunday"
                         app:layout_constraintTop_toBottomOf="@+id/textViewFriday"
@@ -288,7 +288,7 @@
                         android:fontFamily="@font/lato_regular"
                         android:gravity="center_vertical|left"
                         android:minHeight="30dp"
-                        android:text="SUNDAY"
+                        android:text="@string/sunday"
                         android:textSize="19dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/textViewSaturday"
@@ -805,7 +805,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
                         android:id="@+id/cancelZoneSchedule"
-                        android:text="CANCEL"
+                        android:text="@string/cancel"
                         android:layout_marginRight="19dp"
                         android:textSize="19.5sp"
                         android:textColor="?orange_75f"/>
@@ -820,7 +820,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="SAVE"
+                        android:text="@string/save"
                         android:id="@+id/saveZoneSchedule"
                         android:textSize="19.5sp"
                         android:paddingRight="25dp"
@@ -842,7 +842,7 @@
                     android:layout_weight="1"
                     android:textSize="28sp"
                     android:fontFamily="@font/lato_bold"
-                    android:text="Special Schedule"
+                    android:text="@string/special_schedule"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
                     android:textStyle="bold" />
 
@@ -855,7 +855,7 @@
                     android:textSize="28sp"
                     android:enabled="true"
                     android:fontFamily="@font/lato_bold"
-                    android:text="Add Special Schedule"
+                    android:text="@string/add_special_schedule"
                     android:drawablePadding="12dp"
                     android:drawableEnd="@drawable/ic_baseline_add_24"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
@@ -888,7 +888,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:textSize="25sp"
-                        android:text="Title"
+                        android:text="@string/title"
                         />
 
 
@@ -897,7 +897,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Start Date"
+                        android:text="@string/start_date"
                         android:textSize="25sp"
                         />
 
@@ -906,7 +906,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="End Date"
+                        android:text="@string/end_date"
                         android:textSize="25sp"
                         />
 
@@ -916,7 +916,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:textAlignment="center"
-                        android:text="Action"
+                        android:text="@string/action"
                         android:textSize="25sp"
                         />
 
@@ -953,7 +953,7 @@
                     android:layout_weight="1"
                     android:textSize="28sp"
                     android:fontFamily="@font/lato_bold"
-                    android:text="Vacations"
+                    android:text="@string/vacations_text"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
                     android:textStyle="bold" />
 
@@ -966,7 +966,7 @@
                     android:textSize="28sp"
                     android:enabled="true"
                     android:fontFamily="@font/lato_bold"
-                    android:text="Add Vacation"
+                    android:text="@string/add_vacation"
                     android:drawablePadding="12dp"
                     android:drawableEnd="@drawable/ic_baseline_add_24"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
@@ -1000,7 +1000,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:textSize="25sp"
-                        android:text="Vacation Title"
+                        android:text="@string/vacation_title"
                         />
 
 
@@ -1009,7 +1009,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Start Date"
+                        android:text="@string/start_date"
                         android:textSize="25sp"
                         />
 
@@ -1018,7 +1018,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="End Date"
+                        android:text="@string/end_date"
                         android:textSize="25sp"
                         />
 
@@ -1028,7 +1028,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:textAlignment="center"
-                        android:text="Action"
+                        android:text="@string/action"
                         android:textSize="25sp"
                         />
 

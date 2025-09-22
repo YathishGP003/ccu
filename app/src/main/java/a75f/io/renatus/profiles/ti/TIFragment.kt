@@ -119,12 +119,12 @@ class TIFragment : BaseDialogFragment(), OnPairingCompleteListener {
             ) {
                 item {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        TitleTextView("TEMPERATURE INFLUENCING")
+                        TitleTextView(getString(R.string.temp_influencing_caps))
                     }
                     Spacer(modifier = Modifier.height(50.dp))
 
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        DropDownWithLabel(label = "Zone Priority", list = viewModel.zonePrioritiesList, previewWidth = 130, expandedWidth = 150, onSelected = { selectedIndex ->
+                        DropDownWithLabel(label =getString(R.string.label_zonepriority), list = viewModel.zonePrioritiesList, previewWidth = 130, expandedWidth = 150, onSelected = { selectedIndex ->
                             viewModel.viewState.zonePriority = selectedIndex.toDouble()
                         }, isHeader = false, defaultSelection = viewModel.viewState.zonePriority.toInt(), spacerLimit = 136, heightValue = 211)
                     }
@@ -133,7 +133,7 @@ class TIFragment : BaseDialogFragment(), OnPairingCompleteListener {
 
                     val valuesPickerState = rememberPickerState()
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        TempOffsetPicker(header = "ROOM TEMP OFFSET", state = valuesPickerState, items = viewModel.temperatureOffsetsList, onChanged = { it: String ->
+                        TempOffsetPicker(header = getString(R.string.label_tempoffsetnp), state = valuesPickerState, items = viewModel.temperatureOffsetsList, onChanged = { it: String ->
                             viewModel.viewState.temperatureOffset = it.toDouble()
                         }, startIndex = viewModel.temperatureOffsetsList.indexOf(viewModel.viewState.temperatureOffset.toString()), visibleItemsCount = 3, textModifier = Modifier.padding(8.dp), textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Normal), labelWidth = 240)
                     }
@@ -145,7 +145,7 @@ class TIFragment : BaseDialogFragment(), OnPairingCompleteListener {
 
 
                         key(viewModel.viewState.roomTemperatureType) {
-                            DropDownWithLabel(label = "Room Temperature", list = viewModel.roomTempList, previewWidth = 300, expandedWidth = 300, onSelected = { selectedIndex ->
+                            DropDownWithLabel(label = getString(R.string.room_temperature), list = viewModel.roomTempList, previewWidth = 300, expandedWidth = 300, onSelected = { selectedIndex ->
                                 viewModel.viewState.roomTemperatureType = selectedIndex.toDouble()
                             }, defaultSelection = viewModel.viewState.roomTemperatureType.toInt(), isHeader = false, spacerLimit = 200, heightValue = 211, disabledIndices = roomHideIndices, labelWidth = 240)
                         }
@@ -153,7 +153,7 @@ class TIFragment : BaseDialogFragment(), OnPairingCompleteListener {
                         Spacer(modifier = Modifier.height(30.dp))
 
                         key(viewModel.viewState.supplyAirTemperatureType) {
-                            DropDownWithLabel(label = "Supply Air Temperature", list = viewModel.supplyAirTempList, previewWidth = 300, expandedWidth = 300, onSelected = { selectedIndex ->
+                            DropDownWithLabel(label = getString(R.string.supply_air_temperature), list = viewModel.supplyAirTempList, previewWidth = 300, expandedWidth = 300, onSelected = { selectedIndex ->
                                 viewModel.viewState.supplyAirTemperatureType = selectedIndex.toDouble()
                             }, defaultSelection = viewModel.viewState.supplyAirTemperatureType.toInt(), isHeader = false, paddingLimit = -40, spacerLimit = 200, heightValue = 211, disabledIndices = supplyHideIndices, labelWidth = 240)
                         }
@@ -177,7 +177,7 @@ class TIFragment : BaseDialogFragment(), OnPairingCompleteListener {
         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
             CircularProgressIndicator(color = primaryColor)
             Spacer(modifier = Modifier.height(10.dp))
-            Text(text = "Loading Profile Configuration")
+            Text(text = getString(R.string.loading_profile_configuration))
         }
     }
 

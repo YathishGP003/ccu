@@ -37,6 +37,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -337,17 +338,17 @@ class PlcProfileViewModel : ViewModel() {
     fun saveConfiguration() {
         if (saveJob == null) {
             if(viewState.pidProportionalRange <= 0.0) {
-                Toast.makeText(context, "Proportional Range cannot be 0", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.proportional_range_cannot_be_zero), Toast.LENGTH_SHORT).show()
                 return
             }
-            ProgressDialogUtils.showProgressDialog(context, "Saving Plc Configuration")
+            ProgressDialogUtils.showProgressDialog(context, context.getString(R.string.saving_plc_configuration))
             saveJob = viewModelScope.launch(highPriorityDispatcher) {
                 CCUHsApi.getInstance().resetCcuReady()
                 setUpPlcProfile()
                 CcuLog.i(Domain.LOG_TAG, "PlcProfile Setup complete")
                 withContext(Dispatchers.Main) {
                     context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                    showToast("Plc Configuration saved successfully", context)
+                    showToast(context.getString(R.string.plc_config_saved_successfully), context)
                     CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
                     ProgressDialogUtils.hideProgressDialog()
                     pairingCompleteListener.onPairingComplete()

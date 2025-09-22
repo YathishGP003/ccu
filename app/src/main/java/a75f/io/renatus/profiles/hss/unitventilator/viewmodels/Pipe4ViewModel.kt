@@ -32,6 +32,7 @@ import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.
 import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.mapSensorBusPressureLogicalPoint
 import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.setOutputTypes
 import a75f.io.renatus.FloorPlanFragment
+import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe4UvViewState
 import a75f.io.renatus.util.ProgressDialogUtils
@@ -43,6 +44,7 @@ import android.os.Bundle
 import android.text.Html
 import android.text.Spanned
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -92,7 +94,7 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
                 showErrorDialog(context, profileValidation.second)
                 return
             }
-            ProgressDialogUtils.showProgressDialog(context, "Saving Configuration")
+            ProgressDialogUtils.showProgressDialog(context, context.getString(R.string.saving_configuration))
             saveJob = viewModelScope.launch(highPriorityDispatcher) {
                 CCUHsApi.getInstance().resetCcuReady()
                 setUpPipe4Profile()
@@ -103,7 +105,7 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
                 hayStack.syncEntityTree()
                 withContext(Dispatchers.Main) {
                     context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                    showToast("HSS Pipe 4  Configuration saved successfully", context)
+                    showToast(context.getString(R.string.hss_4_pipe_config_saved), context)
                     CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
                     ProgressDialogUtils.hideProgressDialog()
                     pairingCompleteListener.onPairingComplete()
@@ -125,7 +127,7 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
                 if (isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.HEATING_WATER_MODULATING_VALVE.name) ||
                     isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.COOLING_WATER_MODULATING_VALVE.name)
                 ) {
-                    return Pair(true, Html.fromHtml("The profile must have <b>Fully Modulating Valve</b> mapped in control via  when <b>Cooling Water Valve</b> or <b>Heating Water Valve</b> is selected in Analog-Out. Please map the <b>Fully Modulating Valve</b>  in control via option .", Html.FROM_HTML_MODE_LEGACY))
+                    return Pair(true, Html.fromHtml(context.getString(R.string.profile_must_have_fully_modulating_valve), Html.FROM_HTML_MODE_LEGACY))
                 }
 
             }
@@ -133,7 +135,7 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
 
         if ((viewState.value as Pipe4UvViewState).controlVia == 1) {
             if (isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.FACE_DAMPER_VALVE.name)) {
-                return Pair(true, Html.fromHtml("The profile must have <b>Face & Bypass Damper </b> mapped in control via  when <b>Face & Bypass Modulating Damper </b> is selected in Analog-Out. Please map the <b>Face & Bypass Damper</b>  in control via option .", Html.FROM_HTML_MODE_LEGACY))
+                return Pair(true, Html.fromHtml(context.getString(R.string.profile_must_have_face_bypass_damper), Html.FROM_HTML_MODE_LEGACY))
             }
         }
 
@@ -148,7 +150,7 @@ class Pipe4ViewModel : UnitVentilatorViewModel() {
                                 isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.HEATING_WATER_MODULATING_VALVE.name)))
             )
             {
-                return Pair(true, Html.fromHtml("The profile must have one <b>Heating Water Valve, Fan Low Speed - Ventilation or Fan Speed in Analog-Out, Discharge Air temperature in Universal input or Sensor Bus and OAO Damper/DCV Damper</b> mapped when Supply Air Tempering is enabled", Html.FROM_HTML_MODE_LEGACY))
+                return Pair(true, Html.fromHtml(context.getString(R.string.profile_must_havefully_modulating_valve), Html.FROM_HTML_MODE_LEGACY))
             }
 
         }

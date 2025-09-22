@@ -11,7 +11,23 @@
     <string name="ble_content">BLE</string>
     <string name="edit_icon">&#xf044;</string>
     <string name="delete_icon">&#xf1f8;</string>
-
+    <string name="loading_dashboard">Loading dashboard...!</string>
+    <string name="loading">Loading...</string>
+    <string name="loading_zones">Loading Zones ...</string>
+    <string name="no_device_currently_paired"> <![CDATA[
+            <b>No device currently Paired</b><br>
+            Please go to the Floor Layout on settings page to pair a new device
+        ]]></string>
+    <string name="humidity_text">Humidity: </string>
+    <string name="temporary_hold">Temporary Hold: </string>
+    <string name="yes_text">Yes</string>
+    <string name="temporary_hold_auto">Temporary Hold(AUTO): </string>
+    <string name="no_text">No</string>
+    <string name="data_migration_pending">Data Migration Pending</string>
+    <string name="data_migration_is_in_progress">Data Migration is in progress, please wait for some time</string>
+    <string name="force_trim_will_erase_slots">Force trim will erase the following time slot(s) of  </string>
+    <string name="zone_schedule_outside_building_occupancy">Zone Schedule is outside Building Occupancy</string>
+    <string name="force_trim_and_save">Force-Trim &amp; Save</string>
 
     <string name="unknown_device">unknown device</string>
     <string name="usb">usb</string>
@@ -19,6 +35,12 @@
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="title_activity_test">Test</string>
+    <string name="usb_devices_not_connected">USB device not connected</string>
+    <string name="port_is_busy">Port is busy try after some time</string>
+    <string name="alert_generated_at">\n Alert Generated at \t</string>
+    <string name="alert_fixed_at">\n Alert Fixed at \t</string>
+    <string name="ok_button">OK</string>
+    <string name="mark_fixed">Mark-Fixed</string>
 
 
     <string name="ota_test_level_select_prompt">Select update level:</string>
@@ -42,7 +64,16 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="pick_ccu">Pick CCU</string>
-
+    <string name="zone_schedule">Zone Schedule</string>
+    <string name="unoccupied">UNOCCUPIED</string>
+    <string name="add_time_slot">ADD TIMESLOT</string>
+    <string name="available_devices">Available Devices</string>
+    <string name="smart_device_advertisement_mode_not_finding_device">Please have smart devices in advertisement mode\nand be within range. \n\nNot finding the devices you looking for?</string>
+    <string name="connect_manually">CONNECT MANUALLY</string>
+    <string name="no_devices_found">No devices found</string>
+    <string name="have_smart_device_in_advertisement_mode">Please have smart devices in advertisement \nmode and be within range.</string>
+    <string name="want_to_pair_device_manually">Do you want to Pair to Device Manually?</string>
+    <string name="connect">CONNECT</string>
 
     <string name="conventional_package_unit">Conventional Package Unit</string>
     <string name="conventional_package_unit_econ">CPU &amp; Economizer</string>
@@ -311,6 +342,8 @@
     <string name="sensorbusaddress2"> Address 2</string>
     <string name="sensorbusaddress3"> Address 3</string>
     <string name="hs_connect">HS CONNECT</string>
+    <string name="relays">Relays</string>
+
 
     <string-array name="hyperstatsplit_universal_in_selector">
         <item>  @string/current_tx_0_10 </item>
@@ -598,7 +631,16 @@
     <string name="input_installer_email">Installer Email</string>
     <string name="button_next">Next </string>
     <string name="otp_send_email">Enter email id</string>
-
+    <string name="adding_new_site_progress_dialog">Adding New Site...</string>
+    <string name="site_registration_failed_dialog_title">Site Registration Failed</string>
+    <string name="invalid_email_address">Invalid Email Address</string>
+    <string name="cannot_start_with_special_char_error">Cannot start with Special characters</string>
+    <string name="special_chars_not_allowed_error">Special characters are not allowed</string>
+    <string name="must_enter_value">Must enter Value"</string>
+    <string name="sync_failed">Sync Failed</string>
+    <string name="retry">RETRY</string>
+   <string name="failed_to_sync_data_to_cloud">Failed to sync data to cloud.Please check your internet connection and retry.
+</string>
     <!--Installer Option-->
     <string name="title_installeroption">Installer Options</string>
     <string name="pairingadd">Pairing Start Address </string>
@@ -658,6 +700,7 @@
 
     <!--VAV Staged RTU Profile-->
     <string name="title_mapping">MAPPING</string>
+
     <string name="label_relay1">Relay-1</string>
     <string name="label_relay2">Relay-2</string>
     <string name="label_relay3">Relay-3</string>
@@ -765,6 +808,32 @@
     <string name="label_a4minheat">Analog-Out4 \nAt Min Heating</string>
     <string name="label_a4maxheat">Analog-Out4 \nAt Max Heating</string>
 
+    <!--HSS-->
+    <string name="to_disable_oao">To disable Outside Air Optimization, disable all OAO Damper analog outputs first.</string>
+    <string name="to_disable_oao_prepurge">To disable Outside Air Optimization, disable Pre-Purge first.</string>
+    <string name="toEnable_pre_purge_oao">To enable Pre-Purge, enable Outside Air Optimization first.</string>
+    <string name="supply_air_tempering">Supply Air Tempering</string>
+    <string name="title_temperature">Temperature</string>
+    <string name="title_humidity">Humidity</string>
+    <string name="title_pressure">Pressure</string>
+    <string name="to_enable_analog_out">To enable Analog Out, enable Outside Air Optimization first.</string>
+    <string name="profile_must_have_fully_modulating">The profile must have <b>Fully Modulating Valve</b> mapped in control via  when <b> Water Modulating Valve</b> is selected in Analog-Out. Please map the <b>Fully Modulating Valve</b>  in control via option .</string>
+    <string name="profile_must_have_face_bypass_damper">The profile must have <b>Face &amp; Bypass Damper </b> mapped in control via  when <b>Face &amp; Bypass Modulating Damper </b> is selected in Analog-Out. Please map the <b>Face &amp; Bypass Damper</b>  in control via option .</string>
+    <string name="profile_must_have_water_valve">The profile must have one <b> Water Valve, Fan Low Speed - Ventilation or Fan Speed in Analog-Out, Discharge Air temperature in Universal input or Sensor Bus and OAO Damper/DCV Damper</b> mapped when Supply Air Tempering is enabled</string>
+    <string name="profile_must_have_supply_water_temperature">The profile must have <b> Supply Water Temperature</b> mapped in Universal Input when Supply Air Tempering is enabled</string>
+    <string name="hss_4_pipe_config_saved">HSS Pipe 4  Configuration saved successfully</string>
+    <string name="profile_must_have_fully_modulating_valve">The profile must have <b>Fully Modulating Valve</b> mapped in control via  when <b>Cooling Water Valve</b> or <b>Heating Water Valve</b> is selected in Analog-Out. Please map the <b>Fully Modulating Valve</b>  in control via option .</string>
+    <string name="profile_must_havefully_modulating_valve">The profile must have one <b>Heating Water Valve, Fan Low Speed - Ventilation or Fan Speed in Analog-Out, Discharge Air temperature in Universal input or Sensor Bus and OAO Damper/DCV Damper</b> mapped when Supply Air Tempering is enabled</string>
+    <string name="profile_must_have_mixed_air_temp">The profile must have one <b>Mixed Air Temperature Sensor, Outside Air Temperature Sensor &amp; OAO Damper </b>mapped. Please map the Temperature Sensors on either the Sensor Bus or Universal Inputs and OAO Damper on any one of the Analog-Outs</string>
+    <string name="profile_can_have_discharge_air_temperature">The profile can have only one <b> Discharge Air Temperature Sensor, Mixed Air Temperature Sensor, Outside Air Temperature Sensor, Current TX Sensor, Filter Clogged, Condensate Overflow, Generic Alarm Sensor</b> mapped. Please check the Sensor Bus or Universal Inputs.</string>
+    <string name="profile_must_not_have_pressure_sensor">The profile must not have <b>Pressure Sensor or Sensor Address 0</b> mapped. Please remove the mapping from the Sensor Bus or Pressure Sensor.</string>
+    <string name="profile_must_not_have_fan_low_speed">The profile must not have <b>Fan Low Speed - Ventilation and Fan Low Speed</b> mapped. Please remove any one  mapping from the Relay port.</string>
+    <string name="profile_must_have_supply_water_temp">The profile must  have <b>Supply water temperature </b> mapped. Please map <b> Supply water temperature option in any of the Universal Input ports </b> .</string>
+    <string name="max_2_params">Max of 2 parameters can be displayed at once</string>
+    <string name="max_1_temp">Max of 1 temperature can be displayed at once</string>
+    <string name="min_1_temp">Min of 1 temperature should be displayed</string>
+    <string name="enable_backlight">Enable backlight</string>
+    <string name="pin_lock">PIN Lock</string>
     <!---DCWB Profile-->
     <string name="label_dcwb_enable">DCWB Enable</string>
     <string name="label_dcwb_enabled">DCWB Enabled</string>
@@ -800,9 +869,12 @@
     <string name="label_analog1_dcwb">CHW valve</string>
     <!--Heat Pump Input-->
     <string name="title_enable">ENABLE</string>
+    <string name="actuator_type">ACTUATOR TYPE</string>
     <string name="title_testsignal">TEST SIGNAL</string>
     <string name="title_offset">TEMP OFFSET</string>
     <string name="temperature_offset">Temperature offset</string>
+    <string name="temperature_offset_caps">TEMPERATURE OFFSET</string>
+    <string name="temperature_next_line_offset">Temperature\n Offset</string>
     <string name="label_compstage1">Compressor Stage 1</string>
     <string name="label_compstage2">Compressor Stage 2</string>
     <string name="label_fanlow">Fan Low Speed</string>
@@ -828,7 +900,69 @@
     <string name="label_cpuheatstage2">Heating Stage 2</string>
 
     <string name="label_sensorbustemphumidity">Temperature\nHumidity</string>
-    <string name="label_sensorbuspressure">Pressure</string>
+    <string name="label_sensorbuspressure">Pressure</string>string
+
+
+    <!--HS-->
+
+    <string name="conditioning_mode">Conditioning Mode \t:\t </string>
+    <string name="fan_mode">Fan Mode\t :\t </string>
+    <string name="target_min_humidity">Target Min Humidity \t:</string>
+    <string name="target_max_humidity">Target Max Humidity \t:</string>
+    <string name="supply_water_temperature">Supply Water Temperature: </string>
+    <string name="co2_damper_opening_rate">CO2 Damper Opening Rate</string>
+    <string name="only_two_items_can_be_displayed">Only two items can be displayed on the home screen</string>
+    <string name="display_in_device_home_screen">Display in device home screen</string>
+    <string name="humidity_small">Humidity</string>
+    <string name="co2_title">CO2</string>
+    <string name="pm_2.5">PM 2.5</string>
+    <string name="misc_settings">Misc Settings</string>
+    <string name="disable_touch">Disable Touch</string>
+    <string name="enable_brightness">Enable Brightness</string>
+    <string name="fan_out_cooling_stage1">Fan-Out during\nCooling Stage1</string>
+    <string name="fan_out_cooling_stage2">Fan-Out during\nCooling Stage2</string>
+    <string name="fan_out_cooling_stage3">Fan-Out during\nCooling Stage3</string>
+    <string name="fan_out_heating_stage1">Fan-Out during\nHeating Stage1</string>
+    <string name="fan_out_heating_stage2">Fan-Out during\nHeating Stage2</string>
+    <string name="fan_out_heating_stage3">Fan-Out during\nHeating Stage3</string>
+    <string name="analog_out1_fan_recirculate">Analog-Out1 at\nFan Recirculate</string>
+    <string name="analog_out2_fan_recirculate">Analog-Out2 at\nFan Recirculate</string>
+    <string name="analog_out3_fan_recirculate">Analog-Out3 at\nFan Recirculate</string>
+    <string name="hpu_caps">HEAT PUMP UNIT</string>
+
+    <!--MS-->
+
+    <string name="co2_control">CO2 Control</string>
+    <string name="universal_in">Universal-In</string>
+    <string name="conventional_package_unit_caps">CONVENTIONAL PACKAGE UNIT</string>
+    <string name="analog_out_fan_recirculate">Analog-out at\nFan Recirculate</string>
+    <string name="analog_out_fan_low">Analog-out at\nFan Low</string>
+    <string name="analog_out_fan_high">Analog-out at\nFan High</string>
+    <string name="heat_pump_unit_caps">HEAT PUMP UNIT</string>
+    <string name="two_pipe_fcu_caps">2 PIPE FCU</string>
+    <string name="hpu_message"><![CDATA[
+        <br>HPU Profile can only have either \'O-Energize in Cooling\' or \'B-Energize in Heating\' relays configured.
+        ]]></string>
+    <string name="hpu_message_1"><![CDATA[
+    <br>HPU Profile should have either \'O-Energize in Cooling\' or \'B-Energize in Heating\' relays configured.
+    ]]></string>
+    <string name="saving_configuration">Saving Configuration</string>
+    <string name="mystat_hpu_config_saved">MyStat Hpu Configuration saved successfully</string>
+    <string name="mystat_2_pipe_config_saved">MyStat 2 Pipe Configuration saved successfully</string>
+    <string name="mystat_cpu_config_saved">MyStat Cpu Configuration saved successfully</string>
+    <string name="pressure_sensor_should_be_mapped">
+        <![CDATA[
+        The profile must not have <b>Pressure Sensor or Sensor Address 0</b> mapped. Please remove the mapping from the Sensor Bus or Pressure Sensor.
+        ]]>
+    </string>
+    <string name="saving_hss_config">Saving HyperStat Split Configuration</string>
+    <string name="hss_config_saved">HSS Configuration saved successfully</string>
+    <string name="hss_pipe_2_config_saved">HSS Pipe 2  Configuration saved successfully</string>
+
+
+
+
+
 
     <!--Congrats Screen-->
     <string name="title_congrats">CONGRATULATIONS!</string>
@@ -931,6 +1065,9 @@
     <string name="desc_hypersense">Equipment connector for monitoring data.</string>
     <string name="title_cpuEcon">Conventional Package Unit &amp; Economizer</string>
     <string name="desc_cpuEcon">Unitary equipment with 3 stages for Heating, Cooling, Fan and Outside Air Optimization. User can select Fan Low/High/Auto.</string>
+    <string name="title_cpu_and_economizer">CPU &amp; ECONOMIZER</string>
+    <string name="title_4_pipe_and_economizer">4 Pipe &amp; Economizer</string>
+    <string name="title_2_pipe_and_economizer">2 Pipe &amp; Economizer</string>
 
     //Uv
     <string name="title_hss_pipe4UV">Unit Ventilator: 4 Pipe with Economizer</string>
@@ -949,11 +1086,16 @@
 
     <!--VAV REHEAT - NO FAN Screen-->
     <string name="title_vavnofan">VAV REHEAT - NO FAN</string>
+    <string name="vav_no_fan">VAV - NO FAN</string>
     <string name="title_vav_seriesfan">VAV Reheat - Series</string>
+    <string name="vav_reheat_series">VAV REHEAT - SERIES</string>
     <string name="title_vav_parallelfan">VAV Reheat - Parallel</string>
+    <string name="vav_reheat_parallel">VAV REHEAT - PARALLEL</string>
     <string name="label_damper1type">Damper1 Type</string>
     <string name="label_damper1size">Size</string>
     <string name="label_damper1shape">Shape</string>
+    <string name="shape">Shape</string>
+
     <string name="label_enableoccupance">Enable Occupancy Control</string>
     <string name="label_reheattype">Reheat Type</string>
     <string name="label_enableIAQ">Enable IAQ Control</string>
@@ -989,6 +1131,10 @@
     <string name="label_zeroerrormp">Expected Zero Error at Midpoint</string>
     <string name="label_targetvalue">Target Value</string>
     <string name="label_expectedError">Expected Error Range</string>
+    <string name="please_select_an_input_sensor">Please select an input sensor</string>
+    <string name="proportional_range_cannot_be_zero">Proportional Range cannot be 0</string>
+    <string name="saving_plc_configuration">Saving Plc Configuration</string>
+    <string name="plc_config_saved_successfully">Plc Configuration saved successfully</string>
     <string name="label_setpointsensor">Setpoint Sensor Offset</string>
     <string name="label_native_sensor">Native Sensor Input</string>
     <string name="label_invertloop">Invert Control Loop Output</string>
@@ -1012,6 +1158,8 @@
 
     <!--TEMPERATURE INFLUENCING Screen-->
     <string name="label_tempoffsetnp">ROOM TEMP OFFSET</string>
+    <string name="room_temp_offset">Room Temp Offset</string>
+    <string name="temp_influencing_caps">TEMPERATURE INFLUENCING</string>
 
     <!--SYSTEM DEVICES AND OAO Screen-->
     <string name="label_selectdevicetype">Select Device Type</string>
@@ -1073,6 +1221,22 @@
     <string name="title_unregister">UNREGISTER</string>
     <string name="title_generate_passcode">Generate Passcode</string>
     <string name="title_cloud_status">Cloud Status</string>
+    <string name="unregister_lowercase">Unregister</string>
+    <string name="register_lowercase">Register</string>
+    <string name="registration_failed">Registration Failed !!</string>
+    <string name="error_registering_site">Error registering site. please try again</string>
+    <string name="unable_to_register_site">Unable to register site. Please try again later.</string>
+    <string name="edited_details_saved_successfully_toast">Edited details saved successfully</string>
+    <string name="please_fill_proper_details">Please fill proper details</string>
+    <string name="cant_register_ccu_now">Can\'t register CCU now !</string>
+    <string name="registering_ccu">Registering CCU...</string>
+    <string name="ccu_registration_failed">CCU Registration Failed </string>
+    <string name="ccu_registered_successfully">CCU Registered Successfully</string>
+    <string name="unregister_ccu">Unregister CCU</string>
+    <string name="are_you_sure_you_want_to_unregister">\n Are you sure you want to unregister ccu?</string>
+    <string name="yes">YES</string>
+    <string name="failed_to_unregister_the_ccu">Failed to unregistered the CCU</string>
+    <string name="failed_to_remove_ccu">Failed to remove CCU</string>
 
     <!--Temperature override Screen-->
     <string name="title_io_parameters">I/O \nParameters</string>
@@ -1086,10 +1250,21 @@
     <string name="txt_discard">Discard</string>
     <string name="txt_re_edit">Re Edit</string>
     <string name="txt_force_trim">Force Trim</string>
+    <string name="target_value">Target Value</string>
+
+    <!--PLC Screen-->
+    <string name="loading_profile_configuration">Loading Profile Configuration</string>
+    <string name="pi_loop_controller">PI LOOP CONTROLLER</string>
+    <string name="analogin_1_input_sensor">Analog-in 1 Input Sensor</string>
 
 
     <!--SSE Screen-->
     <string name="title_sseinput">SSE</string>
+    <string name="th1_airflow_temp_sensor">TH1 - Airflow Temperature Sensor</string>
+    <string name="th2_use_external_10k_temp_sensor">TH2 - Use external 10k Temperature Sensor</string>
+    <string name="sse_config_saved_successfully">SSE Configuration saved successfully</string>
+    <string name="saving_sse_configuration">Saving SSE Configuration</string>
+    <string name="please_pair_equip">Please pair equip to send test command</string>
     <string-array name="sse_relay1_mode">
         <item>  Heating </item>
         <item>  Cooling </item>
@@ -1112,6 +1287,7 @@
 
     <string name="dab_dual_duct_label_thermistor1">Thermistor-1</string>
     <string name="dab_dual_duct_label_thermistor2">Thermistor-2</string>
+    <string name="damper_type">Damper Type</string>
 
     <string name="dab_dual_duct_label_thermistor1_val">Discharge Airflow Temperature</string>
 
@@ -1161,6 +1337,22 @@
     <string name="vav_label_modulating_reheat">Modulating Reheat</string>
     <string name="vav_label_analog_out_1">Analog Out 1</string>
     <string name="vav_label_analog_out_2">Analog Out 2</string>
+    <string name="k_factor">K-Factor</string>
+    <string name="max_damper_pos_cooling">Max Damper Pos Cooling</string>
+    <string name="min_damper_pos_cooling">Min Damper Pos Cooling</string>
+    <string name="max_cfm_cooling">Max CFM Cooling</string>
+    <string name="min_cfm_cooling">Min CFM Cooling</string>
+    <string name="max_cfm_reheating">Max CFM Reheating</string>
+    <string name="min_cfm_reheating">Min CFM Reheating</string>
+    <string name="max_damper_pos_heating">Max Damper Pos Heating</string>
+    <string name="min_damper_pos_heating">Min Damper Pos Heating</string>
+    <string name="min_damper_pos_header_heating">Min Damper Pos\n    Heating</string>
+    <string name="vvt_c">VVT-C</string>
+    <string name="unsaved_changes">Unsaved Changes</string>
+    <string name="you_have_unsaved_changes">You have unsaved changes. Do you want to discard them and proceed?</string>
+    <string name="proceed_button">Proceed</string>
+    <string name="stay_button">Stay</string>
+
     <!--BACnet Option-->
     <string name="enable_bacnet">Use BACnet</string>
     <string name="hint_deviceIP">Device IP Address</string>
@@ -1576,6 +1768,31 @@
     <string name="cooling_lockout_desc">Disable Cooling based on Outside Air Temperatures</string>
     <string name="heating_lockout_desc">Disable Heating based on Outside Air Temperatures</string>
     <string name="offline_desc">Enable CCU to operate in standalone, all data syncing with the cloud \nwill be stopped</string>
+    <string name="floor_name_should_have_less_chars">Floor name should have less than 25 characters</string>
+    <string name="floor_name_already_exists">Floor name already exists in this site,would you like to move all the zones associated with</string>
+    <string name="floor_name_already_exists_would_you_like_to_continue">Floor name already exists in this site,would you like to continue?</string>
+    <string name="to_string">to</string>
+    <string name="floor_text">Floor\t </string>
+    <string name="added_text">\t added</string>
+    <string name="floor_cannot_be_empty">Floor cannot be empty</string>
+    <string name="floor_handled_server_is_down">Floor cannot be handled when server is down</string>
+    <string name="floor_cannot_be_handled">Floor cannot be handled when CCU is offline. Please connect to network.</string>
+    <string name="zone_already_exists">Zone already exists : </string>
+    <string name="zone_name_should_have_less_chars">Zone name should have less than 25 characters</string>
+    <string name="room_cannot_be_empty">Room cannot be empty</string>
+    <string name="room_text">Room\t</string>
+    <string name="zone_following_zone_schedule_not_available">Zone following zone-schedule as default shared schedule is not available</string>
+    <string name="no_modules_can_be_paired_because_of_modbus">No module can be paired as modbus with sub equips is paired</string>
+    <string name="more_modules_not_allowed">More than 3 modules are not allowed</string>
+    <string name="pi_loop_already_paired">Pi Loop Module is already paired in this zone</string>
+    <string name="energy_meter_module_already_paired">Energy Meter Module is already paired in this zone</string>
+    <string name="ccu_zone_already_paired">CCU as Zone is already paired in this zone</string>
+    <string name="hyperstat_monitoring_already_paired">HyperStat Monitoring is already paired in this zone</string>
+    <string name="otn_already_paired">OTN is already paired in this zone</string>
+    <string name="connect_node_already_paired">Connect Node is already paired in this zone</string>
+    <string name="zone_profile_empty">Zone profile is empty, recheck your DB</string>
+
+
 
     <!-- Activate Session Passcode -->
     <string name="title_activate_session">Activate Device Session</string>
@@ -1595,6 +1812,9 @@
     <string name="dr_enrollment_description">Enroll to demand response to optimize energy consumption and \nreduce peak demand.</string>
     <string name="demand_response_active">Demand Response Active</string>
     <string name="temperature_mode_description">Temperature Mode</string>
+    <string name="set_schedule">Set Schedule</string>
+    <string name="to">TO</string>
+    <string name="applies_to">Applies To</string>
 
     <!-- Shared Schedule-->
     <string name="monday">MONDAY</string>
@@ -1643,11 +1863,15 @@
     <string name="label_analog2_min_reheat">Analog2-Out at\nMin Reheat</string>
     <string name="label_analog2_max_reheat">Analog2-Out at\nMax Reheat</string>
     <string name="label_min_reheat_damper_pos">Min Reheat \nDamper Pos</string>
+    <string name="min_cfm_iaq">Min CFM For\n    IAQ</string>
+    <string name="header_max_damper_pos_cooling">Max Damper Pos\n    Cooling"</string>
+    <string name="header_min_damper_pos_cooling">Min Damper Pos\n    Cooling</string>
     <!-- Scheduler Revamp -->
     <string name="building_limits">Building Limits</string>
     <string name="user_limits">User Limits</string>
     <string name="deadbands">Deadbands</string>
     <string name="save_schedule">Save Schedule</string>
+    <string name="save">SAVE</string>
     <string name="follow_building_user_limits">Follow Building\'s User Limits and Deadbands</string>
     <string name="unoccupied_zone_setback">Unoccupied Zone Setback</string>
     <string name="building_to_zone_diff">Building to Zone Differential</string>
@@ -1717,6 +1941,7 @@
     <string name="heating_userlimit_Title">Heating User Limit Scale</string>
     <string name="cooling_userlimit_Title">Cooling User Limit Scale</string>
     <string name="txt_zoneSearch">Search for Zones</string>
+    <string name="search">Search</string>
     <string name="txt_zoneName">Zone Name</string>
     <string name="heating_desired">Heating Desired Temperature</string>
     <string name="cooling_desired">Cooling Desired Temperature</string>
@@ -1843,6 +2068,15 @@
     <string name="weekday">WEEKDAY</string>
 
     <string name="weekend">WEEKEND</string>
+    <string name="special_schedule">Special Schedule</string>
+    <string name="title">Title</string>
+    <string name="start_date">Start Date</string>
+    <string name="end_date">End Date</string>
+    <string name="action">Action</string>
+    <string name="vacations_text">Vacations</string>
+    <string name="add_vacation">Add Vacation</string>
+    <string name="vacation_title">Vacation Title</string>
+    <string name="add_special_schedule">Add Special Schedule</string>
     <string name="special_schedule_confirmation">Are you sure you want to delete the Special Schedule: %1$s? </string>
     <string name="delete_vacation_confirmation">Are you sure you want to delete the vacation: %1$s?</string>
     <string name="default_schedule_title">Default - %1$s</string>

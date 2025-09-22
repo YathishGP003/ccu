@@ -264,7 +264,7 @@ public class CreateNewSite extends Fragment {
         mSiteInstallerEmailId.setHint(getHTMLCodeForHints(R.string.input_installer_email));
 
         if (CCUHsApi.getInstance().isCCURegistered()) {
-            btnUnregisterSite.setText("Unregister");
+            btnUnregisterSite.setText(requireContext().getString(R.string.unregister_lowercase));
             btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
@@ -273,7 +273,7 @@ public class CreateNewSite extends Fragment {
             btnEditSite.setEnabled(true);
         } else {
             btnEditSite.setEnabled(false);
-            btnUnregisterSite.setText("Register");
+            btnUnregisterSite.setText(requireContext().getString(R.string.register_lowercase));
             btnUnregisterSite.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
             imgUnregisterSite.setColorFilter(CCUUiUtil.getPrimaryThemeColor(getContext()));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -340,7 +340,7 @@ public class CreateNewSite extends Fragment {
                     && CCUUiUtil.isValidOrgName(mSiteOrg.getText().toString())
             ) {
                 CcuLog.i("UI_PROFILING","Add Site Begin");
-                ProgressDialogUtils.showProgressDialog(getActivity(),"Adding New Site...");
+                ProgressDialogUtils.showProgressDialog(getActivity(),requireContext().getString(R.string.adding_new_site_progress_dialog));
                 String siteName = mSiteName.getText().toString().trim();
                 String siteCity = mSiteCity.getText().toString().trim();
 
@@ -382,13 +382,13 @@ public class CreateNewSite extends Fragment {
                                     siteRegistered.set(false);
                                     if (siteResponse.getErrorResponse() != null && siteResponse.getErrorResponse().getMessage() != null) {
                                         SnackbarUtil.showConfirmationMessage(this.getView(),
-                                                "Registration Failed !!",
+                                                requireContext().getString(R.string.registration_failed),
                                                 siteResponse.getErrorResponse().getMessage(),
                                                 ProgressDialogUtils::hideProgressDialog);
                                     } else {
                                         SnackbarUtil.showConfirmationMessage(this.getView(),
-                                                "Registration Failed !!",
-                                                "Error registering site. please try again",
+                                                requireContext().getString(R.string.registration_failed),
+                                                requireContext().getString(R.string.error_registering_site),
                                                 ProgressDialogUtils::hideProgressDialog);
                                         CcuLog.w(L.TAG_REGISTRATION, "Error registering site." + siteResponse);
                                     }
@@ -396,8 +396,8 @@ public class CreateNewSite extends Fragment {
                             } catch (Exception e) {
                                 siteRegistered.set(false);
                                 SnackbarUtil.showConfirmationMessage(this.getView(),
-                                        "Site Registration Failed",
-                                        "Unable to register site. Please try again later.",
+                                        requireContext().getString(R.string.site_registration_failed_dialog_title),
+                                        requireContext().getString(R.string.unable_to_register_site),
                                         () -> {});
                                 CcuLog.e(L.TAG_REGISTRATION, "Error in registering site: " + e.getMessage());
                             }
@@ -485,13 +485,13 @@ public class CreateNewSite extends Fragment {
                     }
                     L.saveCCUState();
                     CCUHsApi.getInstance().syncEntityTree();
-                    Toast.makeText(getActivity(), "Edited details saved successfully", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), requireContext().getString(R.string.edited_details_saved_successfully_toast), Toast.LENGTH_LONG).show();
                     enableViews(false);
                     btnEditSite.setText(getResources().getString(R.string.title_edit));
                     ControlMote.updateOnSiteNameChange();
                     updateBacnetConfig(siteName, ccuName);
                 } else {
-                    Toast.makeText(getActivity(), "Please fill proper details", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), requireContext().getString(R.string.please_fill_proper_details), Toast.LENGTH_LONG).show();
                 }
             }
         };
@@ -545,7 +545,7 @@ public class CreateNewSite extends Fragment {
             } else {
                 HDict diagEquip = Domain.readEquipDict(DomainName.diagEquip);
                 if (diagEquip.isEmpty()) {
-                    Toast.makeText(getActivity(), "Can't register CCU now !", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), requireContext().getString(R.string.cant_register_ccu_now), Toast.LENGTH_LONG).show();
                     return;
                 }
                 btnEditSite.setEnabled(true);
@@ -630,7 +630,7 @@ public class CreateNewSite extends Fragment {
     private void handleRegistrationAsync(String installerEmail) {
         CcuLog.d(TAG, "Register Button Clicked");
         ExecutorTask.executeAsync(
-                () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU..."),
+                () -> ProgressDialogUtils.showProgressDialog(getActivity(), requireContext().getString(R.string.registering_ccu)),
                 () -> {
                     CcuLog.d(TAG, "Registration operation started.");
                     CCUUtils.updateCcuSpecificEntitiesWithCcuRef(CCUHsApi.getInstance(), true);
@@ -641,14 +641,14 @@ public class CreateNewSite extends Fragment {
                 },
                 () -> {
                     if (!CCUHsApi.getInstance().isCCURegistered()) {
-                        Toast.makeText(getActivity(), "CCU Registration Failed ", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), requireContext().getString(R.string.ccu_registration_failed), Toast.LENGTH_LONG).show();
                     } else {
-                        btnUnregisterSite.setText("Unregister");
+                        btnUnregisterSite.setText(requireContext().getString(R.string.unregister_lowercase));
                         btnUnregisterSite.setEnabled(true);
                         btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
                         imgUnregisterSite.setColorFilter(getResources().getColor(R.color.black_listviewtext), PorterDuff.Mode.SRC_IN);
                         setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
-                        Toast.makeText(getActivity(), "CCU Registered Successfully ", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), requireContext().getString(R.string.ccu_registered_successfully), Toast.LENGTH_LONG).show();
                     }
                     ProgressDialogUtils.hideProgressDialog();
                 });
@@ -692,10 +692,10 @@ public class CreateNewSite extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         CcuLog.d(TAG, "Unregister Button Clicked");
         builder.setIcon(R.drawable.ic_warning);
-        builder.setTitle("Unregister CCU");
-        builder.setMessage("\n"+"Are you sure you want to unregister ccu?");
+        builder.setTitle(requireContext().getString(R.string.unregister_ccu));
+        builder.setMessage(requireContext().getString(R.string.are_you_sure_you_want_to_unregister));
         builder.setCancelable(false);
-        builder.setPositiveButton("YES", (dialog, which) -> {
+        builder.setPositiveButton(requireContext().getString(R.string.yes), (dialog, which) -> {
             CcuLog.d(TAG, "Unregister Button Clicked and Confirmed");
             String ccuUID = Domain.ccuDevice.getDeviceRef();
             String ahuRef = Domain.ccuDevice.getAhuRef();
@@ -710,7 +710,7 @@ public class CreateNewSite extends Fragment {
                     ahuRef);
             L.ccu().setCCUName(ccuName);
 
-            ProgressDialogUtils.showProgressDialog(getActivity(), "UnRegistering CCU...");
+            ProgressDialogUtils.showProgressDialog(getActivity(), requireContext().getString(R.string.unregister_ccu));
 
             //Not sure why we have the 10 seconds delay here.
             //Probably protects against running into issues if register/unregister are done too quickly.
@@ -745,18 +745,18 @@ public class CreateNewSite extends Fragment {
                         String removedCCUId = row.get("removeCCUId").toString();
                         if (removedCCUId != null && !removedCCUId.isEmpty())
                         {
-                            btnUnregisterSite.setText("Register");
+                            btnUnregisterSite.setText(requireContext().getString(R.string.register_lowercase));
                             btnUnregisterSite.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                             btnEditSite.setEnabled(false);
                             imgUnregisterSite.setColorFilter(CCUUiUtil.getPrimaryThemeColor(getContext()));
                             CCUHsApi.getInstance().setJwt("");
-                            Toast.makeText(getActivity(), "CCU unregistered successfully " +removedCCUId, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), requireContext().getString(R.string.ccu_registered_successfully) +removedCCUId, Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(getActivity(), "Failed to unregistered the CCU", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), requireContext().getString(R.string.failed_to_unregister_the_ccu), Toast.LENGTH_LONG).show();
                         }
                     }
                 } else {
-                    Toast.makeText(getActivity(), "Failed to remove CCU", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), requireContext().getString(R.string.failed_to_remove_ccu), Toast.LENGTH_LONG).show();
                     CCUHsApi.getInstance().setCcuRegistered();
                 }
             }
@@ -894,9 +894,9 @@ public class CreateNewSite extends Fragment {
                         if(mSiteOrg.getText().toString().startsWith("_") ||
                                 mSiteOrg.getText().toString().startsWith("-")  ||
                                 mSiteOrg.getText().toString().startsWith(" ") )
-                            mSiteOrg.setError("Cannot start with Special characters");
+                            mSiteOrg.setError(requireContext().getString(R.string.cannot_start_with_special_char_error));
                         else
-                            mSiteOrg.setError("Special characters are not allowed");
+                            mSiteOrg.setError(requireContext().getString(R.string.special_chars_not_allowed_error));
                     }
 
                 case R.id.editFacilityEmail:
@@ -906,7 +906,7 @@ public class CreateNewSite extends Fragment {
                         mSiteEmailId.setError(null);
                         String emailID = mSiteEmailId.getText().toString();
                         if (!Patterns.EMAIL_ADDRESS.matcher(emailID).matches()) {
-                            mSiteEmailId.setError("Invalid Email Address");
+                            mSiteEmailId.setError(requireContext().getText(R.string.invalid_email_address));
                         }
                     } else {
                         mTextInputEmail.setError("");
@@ -920,7 +920,7 @@ public class CreateNewSite extends Fragment {
                         mSiteInstallerEmailId.setError(null);
                         String emailID = mSiteInstallerEmailId.getText().toString();
                         if (!Patterns.EMAIL_ADDRESS.matcher(emailID).matches()) {
-                            mSiteInstallerEmailId.setError("Invalid Email Address");
+                            mSiteInstallerEmailId.setError(requireContext().getString(R.string.invalid_email_address));
                         }
                     } else {
                         mTextInputInstallerEmail.setError("");
@@ -939,7 +939,7 @@ public class CreateNewSite extends Fragment {
             EditText et = getView().findViewById(id);
 
             if (TextUtils.isEmpty(et.getText().toString().trim())) {
-                et.setError("Must enter Value");
+                et.setError(requireContext().getString(R.string.must_enter_value));
                 isEmpty = true;
             }
         }

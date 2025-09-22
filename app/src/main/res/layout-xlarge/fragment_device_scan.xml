@@ -18,7 +18,7 @@
             android:layout_height="match_parent"
             android:layout_marginTop="40dp"
             android:fontFamily="@font/lato_bold"
-            android:text="Available Devices"
+            android:text="@string/available_devices"
             android:textColor="#212121"
             android:textSize="26dp" />
 
@@ -32,7 +32,7 @@
             android:id="@+id/pairManuallyText1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Please have smart devices in advertisement mode\nand be within range. \n\nNot finding the devices you looking for?"
+            android:text="@string/smart_device_advertisement_mode_not_finding_device"
             android:textColor="#333333"
             android:layout_marginBottom="30dp"
             android:visibility="gone"
@@ -44,7 +44,7 @@
             android:layout_height="match_parent"
             android:layout_marginStart="262dp"
             android:layout_marginBottom="40dp"
-            android:text="CONNECT MANUALLY"
+            android:text="@string/connect_manually"
             android:textColor="?orange_75f"
             android:textSize="22dp"
             android:visibility="gone"/>
@@ -64,7 +64,7 @@
             android:layout_height="match_parent"
             android:layout_marginTop="40dp"
             android:fontFamily="@font/lato_bold"
-            android:text="No devices found"
+            android:text="@string/no_devices_found"
             android:textColor="#212121"
             android:textSize="26dp" />
 
@@ -73,7 +73,7 @@
             android:layout_height="match_parent"
             android:layout_marginTop="16dp"
             android:fontFamily="@font/lato_regular"
-            android:text="Please have smart devices in advertisement \nmode and be within range."
+            android:text="@string/have_smart_device_in_advertisement_mode"
             android:textColor="#333333"
             android:layout_marginBottom="30dp"
             android:textSize="22sp" />
@@ -85,7 +85,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="40dp"
             android:fontFamily="@font/lato_regular"
-            android:text="Do you want to Pair to Device Manually?"
+            android:text="@string/want_to_pair_device_manually"
             android:textColor="#333333"
             android:textSize="22dp"
             android:visibility="gone"
@@ -97,7 +97,7 @@
             android:layout_height="match_parent"
             android:layout_marginStart="370dp"
             android:layout_marginBottom="40dp"
-            android:text="CONNECT"
+            android:text="@string/connect"
             android:textColor="?orange_75f"
             android:visibility="gone"
             android:textSize="22dp" />

@@ -71,6 +71,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -100,7 +101,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
         val valuesPickerState = rememberPickerState()
         Column(modifier = modifier.padding(start = 400.dp, end = 400.dp)) {
             val temperatureOffsetsList = viewModel.getListByDomainName(DomainName.temperatureOffset, viewModel.equipModel)
-            TempOffsetPicker(header = "Temperature Offset", state = valuesPickerState, items = temperatureOffsetsList, onChanged = { it: String -> viewModel.viewState.value.temperatureOffset = it.toDouble() }, startIndex = temperatureOffsetsList.indexOf(viewModel.viewState.value.temperatureOffset.toString()), visibleItemsCount = 3, textModifier = Modifier.padding(8.dp), textStyle = TextStyle(fontSize = 18.sp))
+            TempOffsetPicker(header = stringResource(R.string.temperature_offset), state = valuesPickerState, items = temperatureOffsetsList, onChanged = { it: String -> viewModel.viewState.value.temperatureOffset = it.toDouble() }, startIndex = temperatureOffsetsList.indexOf(viewModel.viewState.value.temperatureOffset.toString()), visibleItemsCount = 3, textModifier = Modifier.padding(8.dp), textStyle = TextStyle(fontSize = 18.sp))
         }
     }
 
@@ -110,14 +111,14 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
         Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxSize()) {
             Row(modifier = Modifier.padding(20.dp)) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(top = 10.dp, end = 40.dp)) {
-                    StyledTextView(text = "Auto Force Occupied", fontSize = 20, textAlignment = TextAlign.Start)
+                    StyledTextView(text = stringResource(R.string.auto_force_occupy), fontSize = 20, textAlignment = TextAlign.Start)
                 }
                 ToggleButtonStateful(defaultSelection = viewModel.viewState.value.isEnableAutoForceOccupied, onEnabled = { viewModel.viewState.value.isEnableAutoForceOccupied = it })
 
                 Box(modifier = Modifier.padding(start = 50.dp, end = 50.dp , top = 20.dp, bottom = 20.dp))
 
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(top = 10.dp, end = 40.dp)) {
-                    StyledTextView(text = "Auto Away", fontSize = 20, textAlignment = TextAlign.Start)
+                    StyledTextView(text = stringResource(R.string.auto_away), fontSize = 20, textAlignment = TextAlign.Start)
                 }
                 ToggleButtonStateful(defaultSelection = viewModel.viewState.value.isEnableAutoAway, onEnabled = { viewModel.viewState.value.isEnableAutoAway = it })
             }
@@ -269,7 +270,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
                     Box(modifier = Modifier
                             .weight(1f)
                             .padding(top = 10.dp)) {
-                        StyledTextView("PM 2.5 Target", fontSize = 20, textAlignment = TextAlign.Left)
+                        StyledTextView(stringResource(R.string.zonepmTarget), fontSize = 20, textAlignment = TextAlign.Left)
                     }
                     Box(modifier = Modifier
                             .weight(1f)
@@ -287,7 +288,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
                         Box(modifier = Modifier
                                 .weight(1f)
                                 .padding(top = 10.dp)) {
-                            StyledTextView("CO2 Damper Opening Rate", fontSize = 20, textAlignment = TextAlign.Left)
+                            StyledTextView(stringResource(R.string.co2_damper_opening_rate), fontSize = 20, textAlignment = TextAlign.Left)
                         }
                         Box(modifier = Modifier
                                 .weight(1f)
@@ -312,7 +313,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
         fun canSelectMore(currentSelections: List<Boolean>): Boolean {
             val selectedCount = currentSelections.count { it }
             if (selectedCount >= 2) {
-                Toast.makeText(context, "Only two items can be displayed on the home screen", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.only_two_items_can_be_displayed), Toast.LENGTH_SHORT).show()
                 return false
             }
             return true
@@ -320,7 +321,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
 
         val colors = SwitchDefaults.colors(checkedThumbColor = Color.White, uncheckedThumbColor = Color.White, uncheckedIconColor = greyColor, uncheckedTrackColor = greyColor, checkedIconColor = primaryColor, checkedTrackColor = primaryColor, uncheckedBorderColor = greyColor, checkedBorderColor = primaryColor)
         Column(modifier = modifier.padding(start = 25.dp, top = 25.dp)) {
-            BoldStyledTextView("Display in device home screen", fontSize = 20)
+            BoldStyledTextView(stringResource(R.string.display_in_device_home_screen), fontSize = 20)
             Spacer(modifier = Modifier.height(10.dp))
 
             Row(modifier = Modifier
@@ -329,7 +330,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
                 Box(modifier = Modifier
                         .weight(4f)
                         .padding(top = 10.dp)) {
-                    StyledTextView(text = "Humidity", fontSize = 20)
+                    StyledTextView(text = stringResource(R.string.humidity_small), fontSize = 20)
                 }
                 Box(modifier = Modifier.weight(1f)) {
                     Switch(checked = humidityDisplay, colors = colors, onCheckedChange = {
@@ -347,7 +348,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
                 Box(modifier = Modifier
                         .weight(4f)
                         .padding(top = 10.dp)) {
-                    StyledTextView(text = "CO2", fontSize = 20)
+                    StyledTextView(text = stringResource(R.string.co2_title), fontSize = 20)
                 }
                 Box(modifier = Modifier.weight(1f)) {
                     Switch(checked = co2Display, colors = colors, onCheckedChange = {
@@ -369,7 +370,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
                 Box(modifier = Modifier
                         .weight(4f)
                         .padding(top = 10.dp)) {
-                    StyledTextView(text = "PM 2.5", fontSize = 20)
+                    StyledTextView(text = stringResource(R.string.pm_2_5), fontSize = 20)
                 }
                 Box(modifier = Modifier.weight(1f)) {
                     Switch(checked = pm25Display, colors = colors, onCheckedChange = {
@@ -410,7 +411,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
         )
 
         Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {
-            BoldStyledTextView("Misc Settings", fontSize = 20)
+            BoldStyledTextView(stringResource(R.string.misc_settings), fontSize = 20)
             Spacer(modifier = Modifier.height(10.dp))
 
             Row(
@@ -423,7 +424,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
                         .weight(4f)
                         .padding(top = 10.dp)
                 ) {
-                    StyledTextView(text = "Disable Touch", fontSize = 20)
+                    StyledTextView(text = stringResource(R.string.disable_touch), fontSize = 20)
                 }
                 Box(modifier = Modifier.weight(1f)) {
                     Switch(checked = disableTouch, colors = colors, onCheckedChange = {
@@ -446,7 +447,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
                         .weight(4f)
                         .padding(top = 10.dp)
                 ) {
-                    StyledTextView(text = "Enable Brightness", fontSize = 20)
+                    StyledTextView(text = stringResource(R.string.enable_brightness), fontSize = 20)
                 }
                 Box(modifier = Modifier.weight(1f)) {
                     Switch(checked = enableBrightness, colors = colors, onCheckedChange = {
@@ -540,7 +541,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
             CircularProgressIndicator(color = primaryColor)
             Spacer(modifier = Modifier.height(10.dp))
-            Text(text = "Loading Profile Configuration")
+            Text(text = stringResource(R.string.loading_profile_configuration))
         }
     }
 

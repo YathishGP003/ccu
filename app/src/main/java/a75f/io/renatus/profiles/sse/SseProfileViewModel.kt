@@ -40,6 +40,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -139,7 +140,7 @@ open class SseProfileViewModel : ViewModel() {
     fun sendTestCommand(relayName: String, isOn: Boolean, viewModel: SseProfileViewModel) {
         //if the user try to test the test signal before paring the devices
         if (getDeviceRef() == null) {
-            showToast("Please pair equip to send test command", context)
+            showToast(context.getString(R.string.please_pair_equip), context)
             CcuLog.d(Domain.LOG_TAG, "Please pair equip to send test command")
             return
 
@@ -200,14 +201,14 @@ open class SseProfileViewModel : ViewModel() {
 
     fun saveConfiguration() {
         if (saveJob == null) {
-            ProgressDialogUtils.showProgressDialog(context, "Saving SSE Configuration")
+            ProgressDialogUtils.showProgressDialog(context, context.getString(R.string.saving_sse_configuration))
             saveJob = viewModelScope.launch(highPriorityDispatcher) {
                 CCUHsApi.getInstance().resetCcuReady()
                 setUpSseProfile()
                 CcuLog.i(Domain.LOG_TAG, "SSE Profile Setup complete")
                 withContext(Dispatchers.Main) {
                     context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                    showToast("SSE Configuration saved successfully", context)
+                    showToast(context.getString(R.string.sse_config_saved_successfully), context)
                     CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
                     ProgressDialogUtils.hideProgressDialog()
                     pairingCompleteListener.onPairingComplete()

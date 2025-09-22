@@ -96,6 +96,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -125,10 +126,10 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     fun Title(viewModel: HyperStatSplitViewModel,modifier: Modifier = Modifier) {
         Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             when (viewModel.profileType) {
-                ProfileType.HYPERSTATSPLIT_CPU -> TitleTextView("CPU & ECONOMIZER")
-                ProfileType.HYPERSTATSPLIT_4PIPE_UV -> TitleTextView("4 Pipe & Economizer")
-                ProfileType.HYPERSTATSPLIT_2PIPE_UV -> TitleTextView("2 Pipe & Economizer")
-                else -> TitleTextView("CPU & ECONOMIZER")
+                ProfileType.HYPERSTATSPLIT_CPU -> TitleTextView(stringResource(R.string.title_cpu_and_economizer))
+                ProfileType.HYPERSTATSPLIT_4PIPE_UV -> TitleTextView(stringResource(R.string.title_4_pipe_and_economizer))
+                ProfileType.HYPERSTATSPLIT_2PIPE_UV -> TitleTextView(stringResource(R.string.title_2_pipe_and_economizer))
+                else -> TitleTextView(stringResource(R.string.title_cpu_and_economizer))
             }
         }
     }
@@ -142,7 +143,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             CircularProgressIndicator(color = primaryColor)
             Spacer(modifier = Modifier.height(10.dp))
-            Text(text = "Loading Profile Configuration")
+            Text(text = stringResource(R.string.loading_profile_configuration))
         }
     }
 
@@ -153,7 +154,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         val valuesPickerState = rememberPickerState()
         Column(modifier = modifier.padding(start = 400.dp, end = 400.dp)) {
             TempOffsetPicker(
-                header = "TEMPERATURE OFFSET",
+                header = stringResource(R.string.temperature_offset_caps),
                 state = valuesPickerState,
                 items = viewModel.temperatureOffsetsList,
                 onChanged = { it: String -> viewModel.viewState.value.temperatureOffset = it.toDouble() },
@@ -210,9 +211,9 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = viewModel.viewState.value.enableOutsideAirOptimization,
                         onEnabled = {
                             if (!it && viewModel.isAnyAnalogMappedToControl(viewModel.getProfileBasedEnumValueAnalog(HyperStatSplitControlType.OAO_DAMPER.name))) {
-                                showToast("To disable Outside Air Optimization, disable all OAO Damper analog outputs first.", requireContext())
+                                showToast(getString(R.string.to_disable_oao), requireContext())
                             } else if (!it && viewModel.isPrePurgeEnabled()) {
-                                showToast("To disable Outside Air Optimization, disable Pre-Purge first.", requireContext())
+                                showToast(getString(R.string.to_disable_oao_prepurge), requireContext())
                             } else {
                                 viewModel.viewState.value.enableOutsideAirOptimization = it
                             }
@@ -233,7 +234,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                             if (viewModel.viewState.value.enableOutsideAirOptimization) {
                                 viewModel.viewState.value.prePurge = it
                             } else {
-                                showToast("To enable Pre-Purge, enable Outside Air Optimization first.", requireContext())
+                                showToast(getString(R.string.toEnable_pre_purge_oao), requireContext())
                             }
                         }
                     )
@@ -267,7 +268,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         .weight(4f)
                         .padding(top = 10.dp)) {
                         StyledTextView(
-                            "Supply Air Tempering",
+                            stringResource(R.string.supply_air_tempering),
                             fontSize = 20,
                             textAlignment = TextAlign.Start
                         )
@@ -296,20 +297,20 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             Spacer(modifier=Modifier.width(300.dp))
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                 SubTitle(
-                    "ENABLE"
+                    stringResource(R.string.title_enable)
                 )
             }
             Spacer(modifier=Modifier.width(0.dp))
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                 SubTitle(
-                    "MAPPING"
+                    stringResource(R.string.title_mapping)
                 )
             }
             Box(modifier = Modifier
                 .weight(1f)
                 .padding(end = 5.dp), contentAlignment = Alignment.CenterEnd) {
                 SubTitle(
-                    "TEST SIGNAL"
+                    stringResource(R.string.title_testsignal)
                 )
             }
         }
@@ -321,10 +322,10 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         val humidityEnums = viewModel.getAllowedValues(DomainName.humiditySensorBusAdd0, viewModel.equipModel)
         val pressureEnum = viewModel.getAllowedValues(DomainName.pressureSensorBusAdd0, viewModel.equipModel)
 
-        SubTitle("SENSOR BUS",modifier)
+        SubTitle(stringResource(R.string.sensorbus),modifier)
         Row(modifier = modifier.padding(vertical = 10.dp)) {
             Column {
-                EnableCompose("Address 0", viewModel.viewState.value.sensorAddress0.enabled) {
+                EnableCompose(stringResource(R.string.sensorbus), viewModel.viewState.value.sensorAddress0.enabled) {
                     viewModel.viewState.value.sensorAddress0.enabled = it
                 }
                 Spacer(modifier = Modifier.height(80.dp))
@@ -334,7 +335,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             }
             Column {
                 ConfigCompose(
-                    "Temperature",
+                    stringResource(R.string.title_temperature),
                     temperatureEnums[viewModel.viewState.value.sensorAddress0.association],
                     temperatureEnums,
                     "",
@@ -343,12 +344,12 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     viewModel.viewState.value.sensorAddress0.association = it.index
                 }
                 HumidityCompose(
-                    "Humidity",
+                    stringResource(R.string.title_humidity),
                     humidityEnums[viewModel.viewState.value.sensorAddress0.association].dis ?: humidityEnums[viewModel.viewState.value.sensorAddress0.association].value
                 )
                 Spacer(modifier = Modifier.height(17.dp))
                 ConfigCompose(
-                    "Pressure",
+                    stringResource(id=R.string.title_pressure),
                     pressureEnum[viewModel.viewState.value.pressureSensorAddress0.association],
                     pressureEnum,
                     "",
@@ -360,12 +361,12 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         }
 
         Row(modifier = modifier.padding(vertical = 25.dp)) {
-            EnableCompose("Address 1", viewModel.viewState.value.sensorAddress1.enabled) {
+            EnableCompose(stringResource(R.string.sensorbusaddress1), viewModel.viewState.value.sensorAddress1.enabled) {
                 viewModel.viewState.value.sensorAddress1.enabled = it
             }
             Column {
                 ConfigCompose(
-                    "Temperature",
+                    stringResource(R.string.title_temperature),
                     temperatureEnums[viewModel.viewState.value.sensorAddress1.association],
                     temperatureEnums,
                     "",
@@ -374,18 +375,18 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     viewModel.viewState.value.sensorAddress1.association = it.index
                 }
                 HumidityCompose(
-                    "Humidity",
+                    stringResource(R.string.title_humidity),
                     humidityEnums[viewModel.viewState.value.sensorAddress1.association].dis ?: humidityEnums[viewModel.viewState.value.sensorAddress1.association].value
                 )
             }
         }
         Row(modifier = modifier.padding(vertical = 10.dp)) {
-            EnableCompose("Address 2", viewModel.viewState.value.sensorAddress2.enabled) {
+            EnableCompose(stringResource(R.string.sensorbusaddress3), viewModel.viewState.value.sensorAddress2.enabled) {
                 viewModel.viewState.value.sensorAddress2.enabled = it
             }
             Column {
                 ConfigCompose(
-                    "Temperature",
+                    stringResource(R.string.title_temperature),
                     temperatureEnums[viewModel.viewState.value.sensorAddress2.association],
                     temperatureEnums,
                     "",
@@ -394,7 +395,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     viewModel.viewState.value.sensorAddress2.association = it.index
                 }
                 HumidityCompose(
-                    "Humidity",
+                    stringResource(R.string.title_humidity),
                     humidityEnums[viewModel.viewState.value.sensorAddress2.association].dis ?: humidityEnums[viewModel.viewState.value.sensorAddress2.association].value
                 )
             }
@@ -537,7 +538,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         }
 
 
-        SubTitle("HS CONNECT", modifier)
+        SubTitle(stringResource(R.string.hs_connect), modifier)
         Row(
             modifier = modifier.fillMaxWidth()
         ) {
@@ -591,7 +592,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                                 )
                             } else {
                                 showToast(
-                                    "Please pair equip to send test command",
+                                    getString(R.string.please_pair_equip),
                                     viewModel.context
                                 )
 
@@ -796,7 +797,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                             }
                             else {
                                 showToast(
-                                    "Please pair equip to send test command",
+                                    getString(R.string.please_pair_equip),
                                     viewModel.context
                                 )
                             }
@@ -843,7 +844,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     ) {
                         onEnabledChanged(it)
                     } else {
-                        showToast("To enable Analog Out, enable Outside Air Optimization first.", requireContext())
+                        showToast(getString(R.string.to_enable_analog_out), requireContext())
                     }
                 }
             }
@@ -1322,7 +1323,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                                 value = searchText,
                                 onValueChange = { searchText = it },
                                 placeholder = {
-                                    Text(fontSize = 20.sp, text = "Search")
+                                    Text(fontSize = 20.sp, text = stringResource(R.string.search))
                                 },
                                 singleLine = true,
                                 colors = TextFieldDefaults.textFieldColors(
@@ -2692,7 +2693,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = viewModel.viewState.value.displayHumidity,
                         onEnabled = {
                             if (it && viewModel.getDeviceDisplayCount() > 1) {
-                                showToast("Max of 2 parameters can be displayed at once", requireContext())
+                                showToast(getString(R.string.max_2_params), requireContext())
                             } else {
                                 viewModel.viewState.value.displayHumidity = it
                             }
@@ -2710,11 +2711,11 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = viewModel.viewState.value.spaceTemp,
                         onEnabled = {
                             if ( it && viewModel.viewState.value.desiredTemp) {
-                                showToast("Max of 1 temperature can be displayed at once", requireContext())
+                                showToast(getString(R.string.max_1_temp), requireContext())
                             } else {
                                 viewModel.viewState.value.desiredTemp = true
                                 viewModel.viewState.value.spaceTemp = it
-                                showToast("Min of 1 temperature should be displayed", requireContext())
+                                showToast(getString(R.string.min_1_temp), requireContext())
                             }
                         })
                 }
@@ -2735,7 +2736,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = viewModel.viewState.value.displayCO2,
                         onEnabled = {
                             if (it && viewModel.getDeviceDisplayCount() > 1) {
-                                showToast("Max of 2 parameters can be displayed at once", requireContext())
+                                showToast(getString(R.string.max_2_params), requireContext())
                             } else {
                                 viewModel.viewState.value.displayCO2 = it
                             }
@@ -2751,11 +2752,11 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)){
                     ToggleButton(defaultSelection = viewModel.viewState.value.desiredTemp, onEnabled = {
                         if (it && viewModel.viewState.value.spaceTemp) {
-                            showToast("Max of 1 temperature can be displayed at once", requireContext())
+                            showToast(getString(R.string.max_1_temp), requireContext())
                         } else {
                             viewModel.viewState.value.spaceTemp = true
                             viewModel.viewState.value.desiredTemp = it
-                            showToast("Min of 1 temperature should be displayed", requireContext())
+                            showToast(getString(R.string.min_1_temp), requireContext())
                         }
                     })
                 }
@@ -2776,7 +2777,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = viewModel.viewState.value.displayPM2p5,
                         onEnabled = {
                             if (it && viewModel.getDeviceDisplayCount() > 1) {
-                                showToast("Max of 2 parameters can be displayed at once", requireContext())
+                                showToast(getString(R.string.max_2_params), requireContext())
                             } else {
                                 viewModel.viewState.value.displayPM2p5 = it
                             }
@@ -2795,7 +2796,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     @Composable
     fun MiscSettingConfig(viewModel: HyperStatSplitViewModel) {
         Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {
-            BoldStyledTextView("Misc Settings", fontSize = 20)
+            BoldStyledTextView(getString(R.string.misc_settings), fontSize = 20)
             Spacer(modifier = Modifier.height(10.dp))
 
             Row(
@@ -2854,7 +2855,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         .padding(top = 10.dp)
                 ) {
                     StyledTextView(
-                        text = "Enable backlight",
+                        text = getString(R.string.enable_backlight),
                         fontSize = 20
                     )
                 }
@@ -3032,7 +3033,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             modifier = Modifier
                 .padding(start = 25.dp, top = 25.dp, bottom = 25.dp)
         ) {
-            BoldStyledTextView("PIN Lock", fontSize = 20)
+            BoldStyledTextView(getString(R.string.pin_lock), fontSize = 20)
             Spacer(modifier = Modifier.height(10.dp))
 
             Row(
@@ -3134,7 +3135,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     .padding(20.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text("PIN Lock: $selectedPinTitle", fontSize = 23.sp, color = Color.Black, fontWeight = FontWeight.Bold,fontFamily = myFontFamily , modifier = Modifier.padding(start = 10.dp) )
+                Text(getString(R.string.pin_lock)+":"+" $selectedPinTitle", fontSize = 23.sp, color = Color.Black, fontWeight = FontWeight.Bold,fontFamily = myFontFamily , modifier = Modifier.padding(start = 10.dp) )
                 Box(modifier = Modifier.padding(start = 20.dp)) {
                     PinSection(
                         onSaveState = { saveState = it },
@@ -3150,7 +3151,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 ) {
 
                     TextButton(onClick = onDismiss,modifier = Modifier.align(alignment = Alignment.CenterVertically)) {
-                        Text("CANCEL", color = primaryColor, fontSize = 22.sp, fontFamily = myFontFamily)
+                        Text(getString(R.string.button_cancel), color = primaryColor, fontSize = 22.sp, fontFamily = myFontFamily)
                     }
 
                     Divider(
@@ -3164,7 +3165,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     TextButton(onClick = { onSave() }, enabled = saveState, modifier = Modifier.align(alignment = Alignment.CenterVertically))
                     {
                         Text(
-                            "SAVE",
+                            getString(R.string.button_save),
                             color = if (saveState) primaryColor else Color.Gray,
                             fontSize = 22.sp, fontFamily = myFontFamily
                         )

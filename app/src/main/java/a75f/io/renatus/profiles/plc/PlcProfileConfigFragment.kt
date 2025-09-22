@@ -5,6 +5,7 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
+import a75f.io.renatus.R
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.compose.HeaderTextView
@@ -42,6 +43,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -110,7 +112,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
         ) {
             CircularProgressIndicator(color = ComposeUtil.primaryColor)
             Spacer(modifier = Modifier.height(10.dp))
-            Text(text = "Loading Profile Configuration")
+            Text(text = stringResource(id= R.string.loading_profile_configuration))
         }
     }
     //@Preview
@@ -132,7 +134,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
             item {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        TitleTextView("PI LOOP CONTROLLER")
+                        TitleTextView(stringResource(R.string.pi_loop_controller))
                     }
                     Spacer(modifier = Modifier.height(30.dp))
 
@@ -180,7 +182,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             viewModel.viewState.nativeSensorType
                         ) {
                             DropDownWithLabel(
-                                label = "Analog-in 1 Input Sensor",
+                                label = stringResource(R.string.analogin_1_input_sensor),
                                 list = viewModel.analog1InputType,
                                 previewWidth = 195,
                                 expandedWidth = 195,
@@ -215,7 +217,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             viewModel.viewState.nativeSensorType
                         ) {
                             DropDownWithLabel(
-                                label = "Target Value",
+                                label = stringResource(R.string.target_value),
                                 list = viewModel.pidTargetValue,
                                 previewWidth = 130,
                                 expandedWidth = 150,
@@ -247,7 +249,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             viewModel.viewState.nativeSensorType
                         ) {
                             DropDownWithLabel(
-                                label = "TH-in1 Input Sensor",
+                                label = stringResource(id=R.string.label_thin1),
                                 list = viewModel.thermistor1InputType,
                                 previewWidth = 195,
                                 expandedWidth = 195,
@@ -283,7 +285,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             viewModel.viewState.nativeSensorType
                         ) {
                             DropDownWithLabel(
-                                label = "Expected Error Range",
+                                label = stringResource(R.string.label_expectedError),
                                 list = viewModel.pidProportionalRange,
                                 previewWidth = 130,
                                 expandedWidth = 150,
@@ -314,7 +316,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             viewModel.viewState.thermistor1InputType
                         ) {
                             DropDownWithLabel(
-                                label = "Native Sensor Input",
+                                label = stringResource(R.string.label_native_sensor),
                                 list = viewModel.nativeSensorType,
                                 previewWidth = 195,
                                 expandedWidth = 195,
@@ -346,7 +348,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     Spacer(modifier = Modifier.height(30.dp))
                     Row {
                         Spacer(modifier = Modifier.width(50.dp))
-                        HeaderTextView(text = "Expected Zero Error at Midpoint", padding = 10)
+                        HeaderTextView(text = stringResource(R.string.label_zeroerrormp), padding = 10)
                         Spacer(modifier = Modifier.width(100.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.expectZeroErrorAtMidpoint,
@@ -357,7 +359,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     Spacer(modifier = Modifier.height(30.dp))
                     Row {
                         Spacer(modifier = Modifier.width(50.dp))
-                        HeaderTextView(text = "Invert Control Loop Output", padding = 10)
+                        HeaderTextView(text = stringResource(R.string.label_invertloop), padding = 10)
                         Spacer(modifier = Modifier.width(155.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.invertControlLoopoutput,
@@ -368,7 +370,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     Spacer(modifier = Modifier.height(30.dp))
                     Row {
                         Spacer(modifier = Modifier.width(50.dp))
-                        HeaderTextView(text = "Use Analog-in2 for dynamic setpoint", padding = 10)
+                        HeaderTextView(text = stringResource(R.string.label_useanalogin2), padding = 10)
                         Spacer(modifier = Modifier.width(55.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.useAnalogIn2ForSetpoint,
@@ -384,7 +386,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     ) {
                         Spacer(modifier = Modifier.width(50.dp))
                         DropDownWithLabel(
-                            label = "Analog-in2 Input Sensor",
+                            label = stringResource(R.string.label_analogin2),
                             list = viewModel.analog2InputType,
                             previewWidth = 195,
                             expandedWidth = 195,
@@ -398,7 +400,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         )
                         Spacer(modifier = Modifier.width(95.dp))
                         DropDownWithLabel(
-                            label = "Setpoint Sensor Offset",
+                            label = stringResource(R.string.label_setpointsensor),
                             list = viewModel.setpointSensorOffset,
                             previewWidth = 130,
                             expandedWidth = 150,
@@ -420,7 +422,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     ) {
                         Spacer(modifier = Modifier.width(50.dp))
                         DropDownWithLabel(
-                            label = "Analog-Out1 at Min Output",
+                            label = stringResource(R.string.label_analogout1min),
                             list = viewModel.analog1MinOutput,
                             previewWidth = 165,
                             expandedWidth = 185,
@@ -440,7 +442,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     ) {
                         Spacer(modifier = Modifier.width(50.dp))
                         DropDownWithLabel(
-                            label = "Analog-Out1 at Max Output",
+                            label = stringResource(R.string.label_analogout1max),
                             list = viewModel.analog1MaxOutput,
                             previewWidth = 165,
                             expandedWidth = 185,
@@ -460,7 +462,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         horizontalArrangement = Arrangement.Start
                     ) {
                         Spacer(modifier = Modifier.width(50.dp))
-                        HeaderTextView(text = "Relay 1", padding = 10)
+                        HeaderTextView(text = stringResource(R.string.label_relay_1), padding = 10)
                         Spacer(modifier = Modifier.width(100.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.relay1OutputEnable,
@@ -468,7 +470,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         )
 
                         Spacer(modifier = Modifier.width(375.dp))
-                        HeaderTextView(text = "Relay 2", padding = 10)
+                        HeaderTextView(text = stringResource(R.string.label_relay_2), padding = 10)
                         Spacer(modifier = Modifier.width(100.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.relay2OutputEnable,
@@ -483,7 +485,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     ) {
                         Spacer(modifier = Modifier.width(50.dp))
                         DropDownWithLabel(
-                            label = "Turn ON Relay 1",
+                            label = stringResource(R.string.label_threshold_relay1_on),
                             list = viewModel.relay1OnThreshold,
                             previewWidth = 165,
                             expandedWidth = 185,
@@ -497,7 +499,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         )
                         Spacer(modifier = Modifier.width(85.dp))
                         DropDownWithLabel(
-                            label = "Turn ON Relay 2",
+                            label = stringResource(R.string.label_threshold_relay2_on),
                             list = viewModel.relay2OnThreshold,
                             previewWidth = 130,
                             expandedWidth = 150,
@@ -519,7 +521,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     ) {
                         Spacer(modifier = Modifier.width(50.dp))
                         DropDownWithLabel(
-                            label = "Turn OFF Relay 1",
+                            label = stringResource(R.string.label_threshold_relay1_off),
                             list = viewModel.relay1OffThreshold,
                             previewWidth = 165,
                             expandedWidth = 185,
@@ -533,7 +535,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         )
                         Spacer(modifier = Modifier.width(85.dp))
                         DropDownWithLabel(
-                            label = "Turn OFF Relay 2",
+                            label = stringResource(R.string.label_threshold_relay2_off),
                             list = viewModel.relay2OffThreshold,
                             previewWidth = 130,
                             expandedWidth = 150,

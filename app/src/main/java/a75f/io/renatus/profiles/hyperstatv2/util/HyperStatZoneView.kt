@@ -59,6 +59,7 @@ import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.compose.ui.res.stringResource
 import java.util.Locale
 
 
@@ -292,7 +293,7 @@ fun loadHyperStatPipe2Profile(
 
 
     showDischargeConfigIfRequired(viewDischarge,equipPoints,linearLayout)
-    showHSStatSupplyTemp(supplyView, equipPoints, linearLayout, nodeAddress)
+    showHSStatSupplyTemp(supplyView, equipPoints, linearLayout, nodeAddress,context)
 }
 
 fun getHyperStatPipe2EquipPoints(equipDetails: Equip): HashMap<String, Any> {
@@ -337,8 +338,8 @@ private fun setUpConditionFanConfig(
     profileType: ProfileType, equip: HyperStatEquip,
     configuration: HyperStatConfiguration
 ) {
-    showTextView(R.id.text_point1label, viewPointRow1, "Conditioning Mode : ")
-    showTextView(R.id.text_point2label, viewPointRow1, "Fan Mode : ")
+    showTextView(R.id.text_point1label, viewPointRow1, context.getString(R.string.conditioning_mode))
+    showTextView(R.id.text_point2label, viewPointRow1, context.getString(R.string.fan_mode))
 
     val conditioningModeSpinner = viewPointRow1.findViewById<Spinner>(R.id.spinnerValue1)
     val fanModeSpinner = viewPointRow1.findViewById<Spinner>(R.id.spinnerValue2)
@@ -425,7 +426,7 @@ private fun setUpHumidifierDeHumidifier(
     )
     humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
     if (equipPoints.containsKey(StatZoneStatus.TARGET_HUMIDITY.name)) {
-        textViewLabel3.text = "Target Min Humidity :"
+        textViewLabel3.text = context.getString(R.string.target_min_humidity)
         humiditySpinner.adapter = humidityTargetAdapter
         val targetHumidity = equipPoints[StatZoneStatus.TARGET_HUMIDITY.name] as Double
         humiditySpinner.setSelection(targetHumidity.toInt() - 1, false)
@@ -441,7 +442,7 @@ private fun setUpHumidifierDeHumidifier(
         viewPointRow2.findViewById<View>(R.id.lt_column1).visibility = View.GONE
     }
     if (equipPoints.containsKey(StatZoneStatus.TARGET_DEHUMIDIFY.name)) {
-        textViewLabel4.text = "Target Max Humidity :"
+        textViewLabel4.text = context.getString(R.string.target_max_humidity)
         dehumidifySpinner.adapter = humidityTargetAdapter
         val targetDeHumidity = equipPoints[StatZoneStatus.TARGET_DEHUMIDIFY.name] as Double
         dehumidifySpinner.setSelection(targetDeHumidity.toInt() - 1, false)
@@ -693,15 +694,18 @@ fun showHSStatSupplyTemp(
     dischargeView: View,
     pointsList: HashMap<String, Any>,
     rootView: LinearLayout,
-    nodeAddress: String
+    nodeAddress: String,
+    context: Context
 ) {
 
     val profile = L.getProfile(nodeAddress.toLong())
 
     if (profile is HyperStatPipe2Profile) {
 
+
+
         val textView = dischargeView.findViewById<TextView>(R.id.text_discharge_airflow)
-        textView.text = "Supply Water Temperature: "
+        textView.text = context.getString(R.string.supply_water_temperature)
         var supplyTemp = pointsList[StatZoneStatus.SUPPLY_TEMP.name].toString() + " ℉"
         if (UnitUtils.isCelsiusTunerAvailableStatus()) {
             val converted =

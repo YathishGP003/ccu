@@ -30,11 +30,14 @@ import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
 import a75f.io.logic.util.modifyConditioningMode
 import a75f.io.logic.util.modifyFanMode
+import a75f.io.renatus.R
 import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlinx.coroutines.Dispatchers
@@ -78,7 +81,7 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
 
     override fun saveConfiguration() {
         if (saveJob == null && isValidConfiguration(viewState.value.isDcvMapped())) {
-            ProgressDialogUtils.showProgressDialog(context, "Saving Configuration")
+            ProgressDialogUtils.showProgressDialog(context, context.getString(R.string.saving_configuration))
             saveJob = viewModelScope.launch(highPriorityDispatcher) {
                 CCUHsApi.getInstance().resetCcuReady()
                 setUpCpuProfile()
@@ -89,7 +92,7 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
                 DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
                 withContext(Dispatchers.Main) {
                     context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                    showToast("MyStat Cpu Configuration saved successfully", context)
+                    showToast(context.getString(R.string.mystat_cpu_config_saved), context)
                     ProgressDialogUtils.hideProgressDialog()
                     pairingCompleteListener.onPairingComplete()
                 }

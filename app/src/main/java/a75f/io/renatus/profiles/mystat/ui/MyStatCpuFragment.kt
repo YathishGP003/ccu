@@ -6,6 +6,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
+import a75f.io.renatus.R
 import a75f.io.renatus.composables.MinMaxConfiguration
 import a75f.io.renatus.compose.StagedFanConfiguration
 import a75f.io.renatus.compose.Title
@@ -29,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -121,7 +123,7 @@ class MyStatCpuFragment : MyStatFragment() {
                 }
                 item {
                     Column(modifier = Modifier.padding(50.dp, 25.dp)) {
-                        Title("CONVENTIONAL PACKAGE UNIT")
+                        Title(stringResource(R.string.conventional_package_unit))
                         TempOffset()
                         AutoForcedOccupiedAutoAwayConfig()
                         Label()
@@ -215,15 +217,15 @@ class MyStatCpuFragment : MyStatFragment() {
                 val cooling2Enabled = viewModel.isAnyRelayMappedToState(a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping.COOLING_STAGE_2)
                 val heating1Enabled = viewModel.isAnyRelayMappedToState(a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping.HEATING_STAGE_1)
                 val heating2Enabled = viewModel.isAnyRelayMappedToState(a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping.HEATING_STAGE_2)
-                singleOptionConfiguration(minLabel = "Analog-out at \nFan Recirculate",
+                singleOptionConfiguration(minLabel = stringResource(R.string.analog_out_fan_recirculate),
                     itemList = minMaxVoltage,
                     unit = "V",
                     minDefault = recirculateFanConfig.toString(),
                     onMinSelected = { recirculateFanConfig = it.value.toInt() })
 
                 StagedFanConfiguration(
-                    label1 = "Fan-Out during\nCooling Stage1",
-                    label2 = "Fan-Out during\nCooling Stage2",
+                    label1 = stringResource(R.string.fan_out_cooling_stage1),
+                    label2 = stringResource(R.string.fan_out_cooling_stage2),
                     itemList = minMaxVoltage,
                     unit = "V",
                     minDefault = coolingStageFanConfig.stage1.toString(),
@@ -234,8 +236,8 @@ class MyStatCpuFragment : MyStatFragment() {
                     stage2Enabled = cooling2Enabled)
 
                 StagedFanConfiguration(
-                    label1 = "Fan-Out during\nHeating Stage1",
-                    label2 = "Fan-Out during\nHeating Stage2",
+                    label1 = stringResource(R.string.fan_out_heating_stage1),
+                    label2 = stringResource(R.string.fan_out_heating_stage2),
                     itemList = minMaxVoltage,
                     unit = "V",
                     minDefault = heatingStageFanConfig.stage1.toString(),
@@ -248,8 +250,8 @@ class MyStatCpuFragment : MyStatFragment() {
 
             if (analogOut1Enabled && (analogOut1Association == a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal ||
                         analogOut1Association == a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
-                MinMaxConfiguration(minLabel = "Analog-out at \nFan Low",
-                    maxLabel = "Analog-out at \nFan High",
+                MinMaxConfiguration(minLabel = stringResource(R.string.analog_out_fan_low),
+                    maxLabel = stringResource(R.string.analog_out_fan_high),
                     itemList = testVoltage,
                     unit = "%",
                     minDefault = analogOut1FanConfig.low.toString(),

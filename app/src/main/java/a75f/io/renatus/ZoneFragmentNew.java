@@ -3817,8 +3817,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
         TextView textViewUpdatedText = viewStatus.findViewById(R.id.last_updated);
         textViewUpdatedText.setVisibility(View.GONE);
         textViewStatus.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
-        textViewStatus.setText(Html.fromHtml("<b>No device currently Paired</b> <br>Please go to the Floor Layout on " +
-                "settings page to pair a new device</br>"));
+        textViewStatus.setText(Html.fromHtml(getString(R.string.no_device_currently_paired)));
         viewStatus.setPadding(0, 0, 0, 40);
         try {
             linearLayoutZonePoints.addView(viewStatus);
@@ -4340,20 +4339,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
 
 
-        textViewLabel1.setText("Humidity: ");
+        textViewLabel1.setText(getString(R.string.humidity_text));
         textViewValue1.setText(point.get("humidity").toString() + "%");
 
 
         double occupied = (double) point.get("forceoccupied");
         if(occupied == (double)Occupancy.FORCEDOCCUPIED.ordinal()){
-            textViewLabel2.setText("Temporary Hold: ");
-            textViewValue2.setText("Yes");
+            textViewLabel2.setText(getString(R.string.temporary_hold));
+            textViewValue2.setText(getString(R.string.yes_text));
         }else if(occupied == (double)Occupancy.AUTOFORCEOCCUPIED.ordinal()){
-            textViewLabel2.setText("Temporary Hold(AUTO): ");
-            textViewValue2.setText("Yes");
+            textViewLabel2.setText(getString(R.string.temporary_hold_auto));
+            textViewValue2.setText(getString(R.string.yes_text));
         }else{
-            textViewLabel2.setText("Temporary Hold: ");
-            textViewValue2.setText("No");
+            textViewLabel2.setText(getString(R.string.temporary_hold));
+            textViewValue2.setText(getString(R.string.no_text));
         }
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
@@ -4364,9 +4363,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
     /* If schedule revamp migration is still pending show migration pending alert*/
     private void showMigrationPendingDialog(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Data Migration Pending")
+        builder.setTitle(getString(R.string.data_migration_pending))
                 .setIcon(R.drawable.ic_alert)
-                .setMessage("Data Migration is in progress, please wait for some time")
+                .setMessage(getString(R.string.data_migration_is_in_progress))
                 .setCancelable(false);
         final AlertDialog dialog = builder.create();
         dialog.show();
@@ -4518,16 +4517,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
         new AlertDialogAdapter(
                 requireContext(),
                 new AlertDialogData(
-                        "Zone Schedule is outside Building Occupancy",
+                        getString(R.string.zone_schedule_outside_building_occupancy),
                         message,
                         commonTimeSlotFinder.getSpilledZones(zoneSchedule, uncommonIntervals),
-                        "Force-Trim & Save",
+                        getString(R.string.force_trim_and_save),
                         v -> {
                             ScheduleUtil.trimScheduleTowardCommonTimeSlot(zoneSchedule, commonTimeSlot, commonTimeSlotFinder,
                                     CCUHsApi.getInstance());
                             listener.onDialogClick(true);
-                        },
-                        "Cancel",
+                        }, getString(R.string.cancel),
                         v -> listener.onDialogClick(false),
                         false,
                         false,

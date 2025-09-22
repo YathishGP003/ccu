@@ -41,6 +41,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
@@ -131,7 +132,7 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
     @Composable
     fun List() {
         list = listOf(
-            Title(title = "CONVENTIONAL PACKAGE UNIT",Modifier.padding(50.dp,25.dp)),
+            Title(title = stringResource(R.string.title_cpu),Modifier.padding(50.dp,25.dp)),
             TempOffset(Modifier.padding(50.dp,0.dp)),
             AutoForcedOccupiedAutoAwayConfig(Modifier.padding(50.dp,0.dp)),
             Label(Modifier.padding(50.dp,0.dp)),
@@ -240,7 +241,7 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
                     .padding(top = 10.dp)
                 if (viewModel.isAnyRelayMappedToStage(HsCpuRelayMapping.COOLING_STAGE_1)) {
                     Box(modifier = rowModifier) {
-                        StyledTextView("Fan-Out during\nCooling Stage1", fontSize = 20, textAlignment = TextAlign.Left)
+                        StyledTextView(stringResource(R.string.fan_out_cooling_stage1), fontSize = 20, textAlignment = TextAlign.Left)
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = stagedConfig.stage1.toString(),
@@ -251,7 +252,7 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
                 }
                 if (viewModel.isAnyRelayMappedToStage(HsCpuRelayMapping.COOLING_STAGE_2)) {
                     Box(modifier = rowModifier) {
-                        StyledTextView("Fan-Out during\nCooling Stage2", fontSize = 20, textAlignment = TextAlign.Left)
+                        StyledTextView(stringResource(R.string.fan_out_cooling_stage2), fontSize = 20, textAlignment = TextAlign.Left)
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = stagedConfig.stage2.toString(),
@@ -262,7 +263,7 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
                 }
                 if (viewModel.isAnyRelayMappedToStage(HsCpuRelayMapping.COOLING_STAGE_3)) {
                     Box(modifier = rowModifier) {
-                        StyledTextView("Fan-Out during\nCooling Stage3", fontSize = 20, textAlignment = TextAlign.Left)
+                        StyledTextView(stringResource(R.string.fan_out_cooling_stage3), fontSize = 20, textAlignment = TextAlign.Left)
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = stagedConfig.stage3.toString(),
@@ -285,7 +286,7 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
                     .padding(top = 10.dp)
                 if (viewModel.isAnyRelayMappedToStage(HsCpuRelayMapping.HEATING_STAGE_1)) {
                     Box(modifier = rowModifier) {
-                        StyledTextView("Fan-Out during\nHeating Stage1", fontSize = 20, textAlignment = TextAlign.Left)
+                        StyledTextView(stringResource(R.string.fan_out_heating_stage1), fontSize = 20, textAlignment = TextAlign.Left)
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = stagedConfig.stage1.toString(),
@@ -296,7 +297,7 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
                 }
                 if (viewModel.isAnyRelayMappedToStage(HsCpuRelayMapping.HEATING_STAGE_2)) {
                     Box(modifier = rowModifier) {
-                        StyledTextView("Fan-Out during\nHeating Stage2", fontSize = 20, textAlignment = TextAlign.Left)
+                        StyledTextView(stringResource(R.string.fan_out_heating_stage2), fontSize = 20, textAlignment = TextAlign.Left)
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = stagedConfig.stage2.toString(),
@@ -307,7 +308,7 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
                 }
                 if (viewModel.isAnyRelayMappedToStage(HsCpuRelayMapping.HEATING_STAGE_3)) {
                     Box(modifier = rowModifier) {
-                        StyledTextView("Fan-Out during\nHeating Stage3", fontSize = 20, textAlignment = TextAlign.Left)
+                        StyledTextView(stringResource(R.string.fan_out_heating_stage3), fontSize = 20, textAlignment = TextAlign.Left)
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = stagedConfig.stage3.toString(),
@@ -338,7 +339,7 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
                     .padding(top = 10.dp)
                 if (analogOut1Enabled && analogOut1Association == HsCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal) {
                     Box(modifier = rowModifier) {
-                        StyledTextView("Analog-Out1 at\nFan Recirculate", fontSize = 20, textAlignment = TextAlign.Left)
+                        StyledTextView(stringResource(R.string.analog_out1_fan_recirculate), fontSize = 20, textAlignment = TextAlign.Left)
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = recirculateFanConfig.analogOut1.toString(),
@@ -349,7 +350,7 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
                 }
                 if (analogOut2Enabled && analogOut2Association == HsCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal) {
                     Box(modifier = rowModifier) {
-                        StyledTextView("Analog-Out2 at\nFan Recirculate", fontSize = 20, textAlignment = TextAlign.Left)
+                        StyledTextView(stringResource(R.string.analog_out2_fan_recirculate), fontSize = 20, textAlignment = TextAlign.Left)
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = recirculateFanConfig.analogOut2.toString(),
@@ -360,7 +361,7 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
                 }
                 if (analogOut3Enabled && analogOut3Association == HsCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal) {
                     Box(modifier = rowModifier) {
-                        StyledTextView("Analog-Out3 at\nFan Recirculate", fontSize = 20, textAlignment = TextAlign.Left)
+                        StyledTextView(stringResource(R.string.analog_out3_fan_recirculate), fontSize = 20, textAlignment = TextAlign.Left)
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = recirculateFanConfig.analogOut3.toString(),

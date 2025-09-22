@@ -217,10 +217,10 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
 
                     if(!tunerSyncStatus) {
                         AlertDialog.Builder AlertBuilder = new AlertDialog.Builder(getActivity());
-                        AlertBuilder.setTitle("Sync Failed");
+                        AlertBuilder.setTitle(requireContext().getString(R.string.sync_failed));
                         AlertBuilder.setIcon(R.drawable.ic_alert);
-                        AlertBuilder.setPositiveButton("RETRY", (dialog, which) -> dialog.dismiss());
-                        AlertBuilder.setMessage("Failed to sync data to cloud.Please check your internet connection and retry.");
+                        AlertBuilder.setPositiveButton(requireContext().getString(R.string.retry), (dialog, which) -> dialog.dismiss());
+                        AlertBuilder.setMessage(requireContext().getString(R.string.failed_to_sync_data_to_cloud));
                         alertDialog = AlertBuilder.create();
                         alertDialog.show();
                     }

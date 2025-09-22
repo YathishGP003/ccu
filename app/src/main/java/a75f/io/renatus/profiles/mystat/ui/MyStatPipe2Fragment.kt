@@ -35,6 +35,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -127,7 +128,7 @@ class MyStatPipe2Fragment : MyStatFragment() {
                 }
                 item {
                     Column(modifier = Modifier.padding(50.dp, 25.dp)) {
-                        Title("2 PIPE FCU")
+                        Title(stringResource(R.string.two_pipe_fcu_caps))
                         TempOffset()
                         AutoForcedOccupiedAutoAwayConfig()
                         Label()
@@ -227,8 +228,8 @@ class MyStatPipe2Fragment : MyStatFragment() {
     fun FanConfiguration() {
         (viewModel.viewState.value as MyStatPipe2ViewState).apply {
             if (analogOut1Enabled && analogOut1Association == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
-                MinMaxConfiguration(minLabel = "Analog-out at \nFan Low",
-                    maxLabel = "Analog-out at \nFan High",
+                MinMaxConfiguration(minLabel = stringResource(R.string.analog_out_fan_low),
+                    maxLabel = stringResource(R.string.analog_out_fan_high),
                     itemList = testVoltage,
                     unit = "%",
                     minDefault = analogOut1FanConfig.low.toString(),

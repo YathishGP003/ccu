@@ -48,6 +48,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -109,7 +110,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
             val temperatureOffsetsList =
                 getListByDomainName(DomainName.temperatureOffset, viewModel.equipModel)
             TempOffsetPicker(
-                header = "Temperature Offset",
+                header = stringResource(R.string.temperature_offset),
                 state = valuesPickerState,
                 items = temperatureOffsetsList,
                 onChanged = { it: String ->
@@ -133,7 +134,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                     modifier = Modifier.padding(top = 10.dp, end = 40.dp)
                 ) {
                     StyledTextView(
-                        text = "Auto Force Occupied", fontSize = 20, textAlignment = TextAlign.Start
+                        text = stringResource(R.string.auto_force_occupy), fontSize = 20, textAlignment = TextAlign.Start
                     )
                 }
                 ToggleButtonStateful(defaultSelection = viewModel.viewState.value.isEnableAutoForceOccupied,
@@ -150,7 +151,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                     modifier = Modifier.padding(top = 10.dp, end = 40.dp)
                 ) {
                     StyledTextView(
-                        text = "Auto Away", fontSize = 20, textAlignment = TextAlign.Start
+                        text = stringResource(R.string.auto_away), fontSize = 20, textAlignment = TextAlign.Start
                     )
                 }
                 ToggleButtonStateful(defaultSelection = viewModel.viewState.value.isEnableAutoAway,
@@ -276,7 +277,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
             Box(
                 modifier = Modifier
                     .padding(top = 10.dp, bottom = 10.dp, start = 15.dp)
-            ) { StyledTextView("CO2 Control", fontSize = 20) }
+            ) { StyledTextView(stringResource(R.string.co2_control), fontSize = 20) }
 
             Spacer(modifier = Modifier.weight(1f)) // Pushes the toggle to the end
 
@@ -310,7 +311,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                     Box(modifier = Modifier
                         .weight(1f)
                         .padding(top = 10.dp)) {
-                        StyledTextView("CO2 Damper Opening Rate", fontSize = 20, textAlignment = TextAlign.Left)
+                        StyledTextView(stringResource(R.string.co2_damper_opening_rate), fontSize = 20, textAlignment = TextAlign.Left)
                     }
                     Box(modifier = Modifier
                         .weight(1f)
@@ -347,7 +348,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                     }
 
                     Box(modifier = Modifier.weight(1.2f).padding(start = 10.dp, top = 20.dp)) {
-                        StyledTextView("Universal-In", fontSize = 20)
+                        StyledTextView(stringResource(R.string.universal_in), fontSize = 20)
                     }
                     Box(modifier = Modifier.weight(4f).padding(end = 5.dp, top = 10.dp)) {
                         SearchSpinnerElement(
@@ -389,7 +390,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
         ) {
             CircularProgressIndicator(color = primaryColor)
             Spacer(modifier = Modifier.height(10.dp))
-            Text(text = "Loading Profile Configuration")
+            Text(text = stringResource(R.string.loading_profile_configuration))
         }
     }
 }

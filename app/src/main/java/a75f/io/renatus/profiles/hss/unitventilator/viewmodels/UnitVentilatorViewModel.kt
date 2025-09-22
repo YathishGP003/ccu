@@ -16,6 +16,7 @@ import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventil
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UvAnalogOutControls
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.SUPPLY_WATER_TEMPERATURE
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
+import a75f.io.renatus.R
 import a75f.io.renatus.composables.NO_MAT_SENSOR
 import a75f.io.renatus.profiles.hss.ConfigState
 import a75f.io.renatus.profiles.hss.HyperStatSplitState
@@ -25,12 +26,13 @@ import android.os.Bundle
 import android.text.Html
 import android.text.Spanned
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.res.stringResource
 
 
 open class UnitVentilatorViewModel : HyperStatSplitViewModel() {
 
-     private val oaoError = "The profile must have one <b>Mixed Air Temperature Sensor, Outside Air Temperature Sensor & OAO Damper </b>mapped. Please map the Temperature Sensors on either the Sensor Bus or Universal Inputs and OAO Damper on any one of the Analog-Outs"
-    private val duplicateSensor = "The profile can have only one <b> Discharge Air Temperature Sensor, Mixed Air Temperature Sensor, Outside Air Temperature Sensor, Current TX Sensor, Filter Clogged, Condensate Overflow, Generic Alarm Sensor</b> mapped. Please check the Sensor Bus or Universal Inputs."
+     private val oaoError = context.getString(R.string.profile_must_have_mixed_air_temp)
+    private val duplicateSensor = context.getString(R.string.profile_can_have_discharge_air_temperature)
     lateinit var controlViaList : List<String>
 
     override fun init(bundle: Bundle, context: Context, hayStack: CCUHsApi) {
@@ -213,18 +215,18 @@ open class UnitVentilatorViewModel : HyperStatSplitViewModel() {
         }
 
         if(viewState.value.pressureSensorAddress0.enabled && viewState.value.sensorAddress0.enabled){
-            return Pair(true, Html.fromHtml("The profile must not have <b>Pressure Sensor or Sensor Address 0</b> mapped. Please remove the mapping from the Sensor Bus or Pressure Sensor.", Html.FROM_HTML_MODE_LEGACY))
+            return Pair(true, Html.fromHtml(context.getString(R.string.profile_must_not_have_pressure_sensor), Html.FROM_HTML_MODE_LEGACY))
         }
         if(isAnyRelayMappedToControlForUnitVentilator(HyperStatSplitControlType.FAN_LOW_SPEED_VENTILATION.name) &&
             isAnyRelayMappedToControlForUnitVentilator(HyperStatSplitControlType.FAN_LOW_SPEED.name)
         ) {
-            return Pair(true, Html.fromHtml("The profile must not have <b>Fan Low Speed - Ventilation and Fan Low Speed</b> mapped. Please remove any one  mapping from the Relay port.", Html.FROM_HTML_MODE_LEGACY))
+            return Pair(true, Html.fromHtml(context.getString(R.string.profile_must_not_have_fan_low_speed), Html.FROM_HTML_MODE_LEGACY))
         }
 
         if(profileType == ProfileType.HYPERSTATSPLIT_2PIPE_UV){
             if(!isAnySupplyWaterTemperatureMappedUniversal())
             {
-                return Pair(true, Html.fromHtml("The profile must  have <b>Supply water temperature </b> mapped. Please map <b> Supply water temperature option in any of the Universal Input ports </b> .", Html.FROM_HTML_MODE_LEGACY))
+                return Pair(true, Html.fromHtml(context.getString(R.string.profile_must_have_supply_water_temp), Html.FROM_HTML_MODE_LEGACY))
 
             }
         }

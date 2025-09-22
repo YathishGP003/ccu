@@ -47,6 +47,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -144,8 +145,8 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             contentAlignment = Alignment.Center
                         ) {
                             when (BuildConfig.BUILD_TYPE) {
-                                CARRIER_PROD -> TitleTextView("VVT-C")
-                                else -> TitleTextView("DAB")
+                                CARRIER_PROD -> TitleTextView(stringResource(R.string.vvt_c))
+                                else -> TitleTextView(stringResource(R.string.title_dab_single_duct))
                             }
                         }
 
@@ -161,7 +162,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             ) {
                                 Picker(
                                     modifier = Modifier.width(120.dp),
-                                    header = "Temperature\n    Offset",
+                                    header = stringResource(R.string.temperature_next_line_offset),
                                     state = valuesPickerState,
                                     items = viewModel.temperatureOffsetsList,
                                     onChanged = { it: String ->
@@ -186,7 +187,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         ) {
                             Spacer(modifier = Modifier.width(78.dp))
                             DropDownWithLabel(
-                                label = "Damper1 Type",
+                                label = stringResource(R.string.label_damper1type),
                                 list = viewModel.damper1TypesList,
                                 previewWidth = 233,
                                 expandedWidth = 253,
@@ -203,7 +204,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                 horizontalArrangement = Arrangement.Start
                             ) {
                                 DropDownWithLabel(
-                                    label = "Size",
+                                    label = stringResource(R.string.label_damper1size),
                                     list = viewModel.damper1SizesList,
                                     previewWidth = 60,
                                     expandedWidth = 80,
@@ -218,7 +219,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                 Spacer(modifier = Modifier.width(47.dp))
 
                                 DropDownWithLabel(
-                                    label = "Shape",
+                                    label = stringResource(R.string.label_damper1shape),
                                     list = viewModel.damper1ShapesList,
                                     previewWidth = 150,
                                     expandedWidth = 170,
@@ -238,7 +239,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         ) {
                             Spacer(modifier = Modifier.width(78.dp))
                             DropDownWithLabel(
-                                label = "Damper2 Type",
+                                label = stringResource(R.string.label_damper2type),
                                 list = viewModel.damper2TypesList,
                                 previewWidth = 233,
                                 expandedWidth = 253,
@@ -265,7 +266,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                 horizontalArrangement = Arrangement.Start
                             ) {
                                 DropDownWithLabel(
-                                    label = "Size",
+                                    label = stringResource(R.string.label_damper1size),
                                     list = viewModel.damper2SizesList,
                                     previewWidth = 60,
                                     expandedWidth = 80,
@@ -280,7 +281,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                 Spacer(modifier = Modifier.width(47.dp))
 
                                 DropDownWithLabel(
-                                    label = "Shape",
+                                    label = stringResource(R.string.label_damper1shape),
                                     list = viewModel.damper2ShapesList,
                                     previewWidth = 150,
                                     expandedWidth = 170,
@@ -301,7 +302,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         ) {
                             Spacer(modifier = Modifier.width(78.dp))
                             DropDownWithLabel(
-                                label = "Use Reheat",
+                                label = stringResource(R.string.label_usereheat),
                                 list = viewModel.reheatTypesList,
                                 previewWidth = 165,
                                 expandedWidth = 185,
@@ -319,7 +320,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             )
                             Spacer(modifier = Modifier.width(81.dp))
                             DropDownWithLabel(
-                                label = "Zone Priority",
+                                label = stringResource(R.string.label_zonepriority),
                                 list = viewModel.zonePrioritiesList,
                                 previewWidth = 150,
                                 expandedWidth = 170,
@@ -338,7 +339,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         ) {
                             Spacer(modifier = Modifier.width(78.dp))
                             Row {
-                                HeaderTextView(text = "Enable CO2 Control", padding = 10)
+                                HeaderTextView(text = stringResource(R.string.label_enableCO2), padding = 10)
                                 Spacer(modifier = Modifier.width(240.dp))
                                 ToggleButtonStateful(
                                     defaultSelection = viewModel.viewState.enableCo2Control,
@@ -354,7 +355,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         ) {
                             Spacer(modifier = Modifier.width(78.dp))
                             Row {
-                                HeaderTextView(text = "Auto Force Occupied", padding = 10)
+                                HeaderTextView(text = stringResource(R.string.auto_force_occupy), padding = 10)
                                 Spacer(modifier = Modifier.width(230.dp))
                                 ToggleButtonStateful(
                                     defaultSelection = viewModel.viewState.autoForceOccupied,
@@ -363,7 +364,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             }
                             Spacer(modifier = Modifier.width(83.dp))
                             Row {
-                                HeaderTextView(text = "Auto Away", padding = 10)
+                                HeaderTextView(text = stringResource(R.string.auto_away), padding = 10)
                                 Spacer(modifier = Modifier.width(275.dp))
                                 ToggleButtonStateful(
                                     defaultSelection = viewModel.viewState.autoAway,
@@ -378,7 +379,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         ) {
                             Spacer(modifier = Modifier.width(78.dp))
                             Row {
-                                HeaderTextView(text = "Enable CFM", padding = 10)
+                                HeaderTextView(text = stringResource(R.string.label_enable_cfm), padding = 10)
                                 Spacer(modifier = Modifier.width(330.dp))
                                 ToggleButtonStateful(
                                     defaultSelection = viewModel.viewState.enableCFMControl,
@@ -389,7 +390,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             Row {
                                 if (viewModel.viewState.enableCFMControl) {
                                     DropDownWithLabel(
-                                        label = "K-Factor",
+                                        label = stringResource(R.string.k_factor),
                                         list = viewModel.kFactorsList,
                                         previewWidth = 150,
                                         expandedWidth = 170,
@@ -420,7 +421,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             if (viewModel.viewState.reheatType.toInt() != 0) {
                                 Spacer(modifier = Modifier.width(60.dp))
                                 Picker(
-                                    header = "Min Reheat \nDamper Pos",
+                                    header = stringResource(R.string.label_min_reheat_damper_pos),
                                     state = valuesPickerState,
                                     items = viewModel.minReheatDamperPosList,
                                     onChanged = { it: String ->
@@ -442,7 +443,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             if (viewModel.viewState.enableCFMControl) {
                                 Spacer(modifier = Modifier.width(60.dp))
                                 Picker(
-                                    header = "Min CFM For\n    IAQ",
+                                    header = stringResource(R.string.min_cfm_iaq),
                                     state = valuesPickerState,
                                     items = viewModel.minCfmIaqList,
                                     onChanged = { it: String ->
@@ -463,7 +464,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
 
                             Spacer(modifier = Modifier.width(60.dp))
                             Picker(
-                                header = "Max Damper Pos\n    Cooling",
+                                header = stringResource(R.string.header_max_damper_pos_cooling),
                                 state = valuesPickerState,
                                 items = viewModel.maxCoolingDamperPosList,
                                 onChanged = { it: String ->
@@ -483,7 +484,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
 
                             Spacer(modifier = Modifier.width(60.dp))
                             Picker(
-                                header = "Min Damper Pos\n    Cooling",
+                                header = stringResource(R.string.header_min_damper_pos_cooling),
                                 state = valuesPickerState,
                                 items = viewModel.minCoolingDamperPosList,
                                 onChanged = { it: String ->
@@ -503,7 +504,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
 
                             Spacer(modifier = Modifier.width(60.dp))
                             Picker(
-                                header = "Max Damper Pos Heating",
+                                header = stringResource(R.string.max_damper_pos_heating),
                                 state = valuesPickerState,
                                 items = viewModel.maxHeatingDamperPosList,
                                 onChanged = { it: String ->
@@ -523,7 +524,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
 
                             Spacer(modifier = Modifier.width(60.dp))
                             Picker(
-                                header = "Min Damper Pos\n    Heating",
+                                header = stringResource(R.string.min_damper_pos_header_heating),
                                 state = valuesPickerState,
                                 items = viewModel.minHeatingDamperPosList,
                                 onChanged = { it: String ->
@@ -571,7 +572,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
         ) {
             CircularProgressIndicator(color = ComposeUtil.primaryColor)
             Spacer(modifier = Modifier.height(10.dp))
-            Text(text = "Loading Profile Configuration")
+            Text(text = stringResource(R.string.loading_profile_configuration))
         }
     }
 

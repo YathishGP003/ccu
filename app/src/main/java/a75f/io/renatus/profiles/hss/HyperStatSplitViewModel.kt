@@ -42,6 +42,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -161,7 +162,7 @@ open class HyperStatSplitViewModel : ViewModel() {
             }
             sendTestSignalControlMessage()
             CcuLog.d(L.TAG_CCU_HSHST, "R1 ${device.relay1.readPointValue()} R2 ${device.relay2.readPointValue()} R3 ${device.relay3.readPointValue()} R4 ${device.relay4.readPointValue()} A1 ${device.relay5.readPointValue()}, R6 ${device.relay6.readPointValue()} r7 ${device.relay7.readPointValue()} R8 ${device.relay8.readPointValue()} , A1 ${device.analog1Out.readPointValue()} A2 ${device.analog2Out.readPointValue()} A3 ${device.analog3Out.readPointValue()} A4 ${device.analog4Out.readPointValue()}")
-        } else { showToast("Please pair equip to send test command", context)
+        } else { showToast(context.getString(R.string.please_pair_equip),context)
             CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "Please pair equip to send test command")
             return
         }
@@ -181,7 +182,7 @@ open class HyperStatSplitViewModel : ViewModel() {
             sendTestSignalControlMessage()
             CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "R1 ${device.relay1.readPointValue()} R2 ${device.relay2.readPointValue()} R3 ${device.relay3.readPointValue()} R4 ${device.relay4.readPointValue()} A1 ${device.relay5.readPointValue()}, R6 ${device.relay6.readPointValue()} r7 ${device.relay7.readPointValue()} R8 ${device.relay8.readPointValue()} , A1 ${device.analog1Out.readPointValue()} A2 ${device.analog2Out.readPointValue()} A3 ${device.analog3Out.readPointValue()} A4 ${device.analog4Out.readPointValue()}")
         } else {
-            showToast("Please pair equip to send test command", context)
+            showToast(context.getString(R.string.please_pair_equip), context)
             CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "Please pair equip to send test command")
             return
         }

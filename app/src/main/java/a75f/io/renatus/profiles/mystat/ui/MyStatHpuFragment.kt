@@ -37,6 +37,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -129,7 +130,7 @@ class MyStatHpuFragment : MyStatFragment() {
                 }
                 item {
                     Column(modifier = Modifier.padding(50.dp, 25.dp)) {
-                        Title("HEAT PUMP UNIT")
+                        Title(stringResource(R.string.heat_pump_unit_caps))
                         TempOffset()
                         AutoForcedOccupiedAutoAwayConfig()
                         Label()
@@ -266,8 +267,8 @@ class MyStatHpuFragment : MyStatFragment() {
     fun FanConfiguration() {
         (viewModel.viewState.value as MyStatHpuViewState).apply {
             if (analogOut1Enabled && analogOut1Association == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal) {
-                MinMaxConfiguration(minLabel = "Analog-out at \nFan Low",
-                    maxLabel = "Analog-out at \nFan High",
+                MinMaxConfiguration(minLabel = stringResource(R.string.analog_out_fan_low),
+                    maxLabel = stringResource(R.string.analog_out_fan_high),
                     itemList = testVoltage,
                     unit = "%",
                     minDefault = analogOut1FanConfig.low.toString(),

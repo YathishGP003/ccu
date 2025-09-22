@@ -36,6 +36,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class UserIntentDialog(val pointId: String, private val spinnerView: View? = null,
@@ -114,7 +118,8 @@ class UserIntentDialog(val pointId: String, private val spinnerView: View? = nul
 
     @Composable
     private fun DialogView() {
-        Column(Modifier.clip(RoundedCornerShape(4.dp))
+        Column(Modifier
+            .clip(RoundedCornerShape(4.dp))
             .widthIn(max = 500.dp)) {
             Column(modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)) {
                 TitleView()
@@ -131,8 +136,12 @@ class UserIntentDialog(val pointId: String, private val spinnerView: View? = nul
                         dismiss()
                     },
                     SAVE to Pair(viewModel.isDurationValid.value) {
-                        viewModel.saveUserIntent()
-                        dismiss()
+                        viewModel.viewModelScope.launch {
+                            withContext(Dispatchers.IO) {
+                                viewModel.saveUserIntent()
+                            }
+                            dismiss()
+                        }
                     },
                 )
             )
@@ -219,7 +228,9 @@ class UserIntentDialog(val pointId: String, private val spinnerView: View? = nul
         if(viewModel.isSaveButtonClicked.value) {
             CcuLog.d("CCU_USER_INTENT", "UserIntentDialog.onDismiss() - Programmatically selecting spinner value for index: ${viewModel.currentSelectedIndex.intValue}")
             onFinishedListener.onFinished(viewModel.currentSelectedIndex.intValue)
-            (spinnerView as AppCompatSpinner).setSelection(viewModel.currentSelectedIndex.intValue)
+            if(spinnerView != null && spinnerView is AppCompatSpinner) {
+                spinnerView.setSelection(viewModel.currentSelectedIndex.intValue, true)
+            }
         }
     }
 }

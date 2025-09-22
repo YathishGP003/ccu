@@ -1349,6 +1349,12 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
         } else {
             CcuLog.i(L.TAG_REGISTRATION, "Site already registered.");
+            CcuLog.i(L.TAG_REGISTRATION, "creating CCU .....");
+            registerCcuInBackground();
+            //Delaying the schedule download a bit to make sure it is created.
+            updateDefaultSchedule(CCUHsApi.getInstance());
+            launchLandingActivity();
+            ProgressDialogUtils.hideProgressDialog();
         }
     }
 

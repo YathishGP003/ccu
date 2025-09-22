@@ -99,8 +99,6 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
                 ProgressDialogUtils.hideProgressDialog()
             }
 
-
-            DesiredTempDisplayMode.setSystemModeForVav(hayStack)
             updateSystemMode()
             systemEquipId?.let {
                 L.ccu().systemProfile.updateAhuRef(it)
@@ -108,6 +106,7 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
             updateOaoPoints()
             val modulatingRtu = L.ccu().systemProfile as VavFullyModulatingRtu
             modulatingRtu.refreshDomainEquip()
+            DesiredTempDisplayMode.setSystemModeForVav(hayStack)
             hayStack.syncEntityTree()
             hayStack.setCcuReady()
             initialPortValues = HashMap(profileConfiguration.unusedPorts)

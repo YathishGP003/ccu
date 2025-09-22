@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.system.vav.config
 
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.Point
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ProfileConfiguration
@@ -233,171 +234,277 @@ open class ModulatingRtuProfileConfig(open val model: SeventyFiveFProfileDirecti
         return this
     }
 
-    private fun updateAnalogActiveConfig(vavModulatingRtuSystemEquip : VavModulatingRtuSystemEquip) {
+    private fun updateAnalogActiveConfig(vavModulatingRtuSystemEquip: VavModulatingRtuSystemEquip) {
+
         analog1OutMinMaxConfig.apply {
-            when (analog1OutputAssociation.associationVal) {
-                0 -> {
-                    fanSignalConfig.min =
-                        vavModulatingRtuSystemEquip.analog1MinFan.readDefaultVal().toInt()
-                    fanSignalConfig.max =
-                        vavModulatingRtuSystemEquip.analog1MaxFan.readDefaultVal().toInt()
-                }
+            fanSignalConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog1MinFan,
+                    vavModulatingRtuSystemEquip,
+                    fanSignalConfig.min
+                )
+            fanSignalConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog1MaxFan,
+                    vavModulatingRtuSystemEquip,
+                    fanSignalConfig.max
+                )
 
-                1 -> {
-                    compressorSpeedConfig.min =
-                        vavModulatingRtuSystemEquip.analog1MinCompressorSpeed.readDefaultVal()
-                            .toInt()
-                    compressorSpeedConfig.max =
-                        vavModulatingRtuSystemEquip.analog1MaxCompressorSpeed.readDefaultVal()
-                            .toInt()
-                }
+            compressorSpeedConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog1MinCompressorSpeed,
+                    vavModulatingRtuSystemEquip,
+                    compressorSpeedConfig.min
+                )
+            compressorSpeedConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog1MaxCompressorSpeed,
+                    vavModulatingRtuSystemEquip,
+                    compressorSpeedConfig.max
+                )
 
-                2 -> {
-                    outsideAirDamperConfig.min =
-                        vavModulatingRtuSystemEquip.analog1MinOutsideDamper.readDefaultVal().toInt()
-                    outsideAirDamperConfig.max =
-                        vavModulatingRtuSystemEquip.analog1MaxOutsideDamper.readDefaultVal().toInt()
-                }
+            outsideAirDamperConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog1MinOutsideDamper,
+                    vavModulatingRtuSystemEquip,
+                    outsideAirDamperConfig.min
+                )
+            outsideAirDamperConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog1MaxOutsideDamper,
+                    vavModulatingRtuSystemEquip,
+                    outsideAirDamperConfig.max
+                )
 
-                3 -> {
-                    coolingSignalConfig.min =
-                        vavModulatingRtuSystemEquip.analog1MinCooling.readDefaultVal().toInt()
-                    coolingSignalConfig.max =
-                        vavModulatingRtuSystemEquip.analog1MaxCooling.readDefaultVal().toInt()
-                }
+            coolingSignalConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog1MinCooling,
+                    vavModulatingRtuSystemEquip,
+                    coolingSignalConfig.min
+                )
+            coolingSignalConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog1MaxCooling,
+                    vavModulatingRtuSystemEquip,
+                    coolingSignalConfig.max
+                )
 
-                4 -> {
-                    heatingSignalConfig.min =
-                        vavModulatingRtuSystemEquip.analog1MinHeating.readDefaultVal().toInt()
-                    heatingSignalConfig.max =
-                        vavModulatingRtuSystemEquip.analog1MaxHeating.readDefaultVal().toInt()
-                }
-            }
+            heatingSignalConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog1MinHeating,
+                    vavModulatingRtuSystemEquip,
+                    heatingSignalConfig.min
+                )
+            heatingSignalConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog1MaxHeating,
+                    vavModulatingRtuSystemEquip,
+                    heatingSignalConfig.max
+                )
         }
 
         analog2OutMinMaxConfig.apply {
-            when (analog2OutputAssociation.associationVal) {
-                0 -> {
-                    fanSignalConfig.min =
-                        vavModulatingRtuSystemEquip.analog2MinFan.readDefaultVal().toInt()
-                    fanSignalConfig.max =
-                        vavModulatingRtuSystemEquip.analog2MaxFan.readDefaultVal().toInt()
-                }
+            fanSignalConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog2MinFan,
+                    vavModulatingRtuSystemEquip,
+                    fanSignalConfig.min
+                )
+            fanSignalConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog2MaxFan,
+                    vavModulatingRtuSystemEquip,
+                    fanSignalConfig.max
+                )
 
-                1 -> {
-                    compressorSpeedConfig.min =
-                        vavModulatingRtuSystemEquip.analog2MinCompressorSpeed.readDefaultVal()
-                            .toInt()
-                    compressorSpeedConfig.max =
-                        vavModulatingRtuSystemEquip.analog2MaxCompressorSpeed.readDefaultVal()
-                            .toInt()
-                }
+            compressorSpeedConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog2MinCompressorSpeed,
+                    vavModulatingRtuSystemEquip,
+                    compressorSpeedConfig.min
+                )
+            compressorSpeedConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog2MaxCompressorSpeed,
+                    vavModulatingRtuSystemEquip,
+                    compressorSpeedConfig.max
+                )
 
-                2 -> {
-                    outsideAirDamperConfig.min =
-                        vavModulatingRtuSystemEquip.analog2MinOutsideDamper.readDefaultVal().toInt()
-                    outsideAirDamperConfig.max =
-                        vavModulatingRtuSystemEquip.analog2MaxOutsideDamper.readDefaultVal().toInt()
-                }
+            outsideAirDamperConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog2MinOutsideDamper,
+                    vavModulatingRtuSystemEquip,
+                    outsideAirDamperConfig.min
+                )
+            outsideAirDamperConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog2MaxOutsideDamper,
+                    vavModulatingRtuSystemEquip,
+                    outsideAirDamperConfig.max
+                )
 
-                3 -> {
-                    coolingSignalConfig.min =
-                        vavModulatingRtuSystemEquip.analog2MinCooling.readDefaultVal().toInt()
-                    coolingSignalConfig.max =
-                        vavModulatingRtuSystemEquip.analog2MaxCooling.readDefaultVal().toInt()
-                }
+            coolingSignalConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog2MinCooling,
+                    vavModulatingRtuSystemEquip,
+                    coolingSignalConfig.min
+                )
+            coolingSignalConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog2MaxCooling,
+                    vavModulatingRtuSystemEquip,
+                    coolingSignalConfig.max
+                )
 
-                4 -> {
-                    heatingSignalConfig.min =
-                        vavModulatingRtuSystemEquip.analog2MinHeating.readDefaultVal().toInt()
-                    heatingSignalConfig.max =
-                        vavModulatingRtuSystemEquip.analog2MaxHeating.readDefaultVal().toInt()
-                }
-            }
+            heatingSignalConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog2MinHeating,
+                    vavModulatingRtuSystemEquip,
+                    heatingSignalConfig.min
+                )
+            heatingSignalConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog2MaxHeating,
+                    vavModulatingRtuSystemEquip,
+                    heatingSignalConfig.max
+                )
         }
 
         analog3OutMinMaxConfig.apply {
-            when (analog3OutputAssociation.associationVal) {
-                0 -> {
-                    fanSignalConfig.min =
-                        vavModulatingRtuSystemEquip.analog3MinFan.readDefaultVal().toInt()
-                    fanSignalConfig.max =
-                        vavModulatingRtuSystemEquip.analog3MaxFan.readDefaultVal().toInt()
-                }
+            fanSignalConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog3MinFan,
+                    vavModulatingRtuSystemEquip,
+                    fanSignalConfig.min
+                )
+            fanSignalConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog3MaxFan,
+                    vavModulatingRtuSystemEquip,
+                    fanSignalConfig.max
+                )
 
-                1 -> {
-                    compressorSpeedConfig.min =
-                        vavModulatingRtuSystemEquip.analog3MinCompressorSpeed.readDefaultVal()
-                            .toInt()
-                    compressorSpeedConfig.max =
-                        vavModulatingRtuSystemEquip.analog3MaxCompressorSpeed.readDefaultVal()
-                            .toInt()
-                }
+            compressorSpeedConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog3MinCompressorSpeed,
+                    vavModulatingRtuSystemEquip,
+                    compressorSpeedConfig.min
+                )
+            compressorSpeedConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog3MaxCompressorSpeed,
+                    vavModulatingRtuSystemEquip,
+                    compressorSpeedConfig.max
+                )
 
-                2 -> {
-                    outsideAirDamperConfig.min =
-                        vavModulatingRtuSystemEquip.analog3MinOutsideDamper.readDefaultVal().toInt()
-                    outsideAirDamperConfig.max =
-                        vavModulatingRtuSystemEquip.analog3MaxOutsideDamper.readDefaultVal().toInt()
-                }
+            outsideAirDamperConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog3MinOutsideDamper,
+                    vavModulatingRtuSystemEquip,
+                    outsideAirDamperConfig.min
+                )
+            outsideAirDamperConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog3MaxOutsideDamper,
+                    vavModulatingRtuSystemEquip,
+                    outsideAirDamperConfig.max
+                )
 
-                3 -> {
-                    coolingSignalConfig.min =
-                        vavModulatingRtuSystemEquip.analog3MinCooling.readDefaultVal().toInt()
-                    coolingSignalConfig.max =
-                        vavModulatingRtuSystemEquip.analog3MaxCooling.readDefaultVal().toInt()
-                }
+            coolingSignalConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog3MinCooling,
+                    vavModulatingRtuSystemEquip,
+                    coolingSignalConfig.min
+                )
+            coolingSignalConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog3MaxCooling,
+                    vavModulatingRtuSystemEquip,
+                    coolingSignalConfig.max
+                )
 
-                4 -> {
-                    heatingSignalConfig.min =
-                        vavModulatingRtuSystemEquip.analog3MinHeating.readDefaultVal().toInt()
-                    heatingSignalConfig.max =
-                        vavModulatingRtuSystemEquip.analog3MaxHeating.readDefaultVal().toInt()
-                }
-            }
+            heatingSignalConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog3MinHeating,
+                    vavModulatingRtuSystemEquip,
+                    heatingSignalConfig.min
+                )
+            heatingSignalConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog3MaxHeating,
+                    vavModulatingRtuSystemEquip,
+                    heatingSignalConfig.max
+                )
         }
 
         analog4OutMinMaxConfig.apply {
-            when (analog4OutputAssociation.associationVal) {
-                0 -> {
-                    fanSignalConfig.min =
-                        vavModulatingRtuSystemEquip.analog4MinFan.readDefaultVal().toInt()
-                    fanSignalConfig.max =
-                        vavModulatingRtuSystemEquip.analog4MaxFan.readDefaultVal().toInt()
-                }
+            fanSignalConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog4MinFan,
+                    vavModulatingRtuSystemEquip,
+                    fanSignalConfig.min
+                )
+            fanSignalConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog4MaxFan,
+                    vavModulatingRtuSystemEquip,
+                    fanSignalConfig.max
+                )
 
-                1 -> {
-                    compressorSpeedConfig.min =
-                        vavModulatingRtuSystemEquip.analog4MinCompressorSpeed.readDefaultVal()
-                            .toInt()
-                    compressorSpeedConfig.max =
-                        vavModulatingRtuSystemEquip.analog4MaxCompressorSpeed.readDefaultVal()
-                            .toInt()
-                }
+            compressorSpeedConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog4MinCompressorSpeed,
+                    vavModulatingRtuSystemEquip,
+                    compressorSpeedConfig.min
+                )
+            compressorSpeedConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog4MaxCompressorSpeed,
+                    vavModulatingRtuSystemEquip,
+                    compressorSpeedConfig.max
+                )
 
-                2 -> {
-                    outsideAirDamperConfig.min =
-                        vavModulatingRtuSystemEquip.analog4MinOutsideDamper.readDefaultVal().toInt()
-                    outsideAirDamperConfig.max =
-                        vavModulatingRtuSystemEquip.analog4MaxOutsideDamper.readDefaultVal().toInt()
-                }
+            outsideAirDamperConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog4MinOutsideDamper,
+                    vavModulatingRtuSystemEquip,
+                    outsideAirDamperConfig.min
+                )
+            outsideAirDamperConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog4MaxOutsideDamper,
+                    vavModulatingRtuSystemEquip,
+                    outsideAirDamperConfig.max
+                )
 
-                3 -> {
-                    coolingSignalConfig.min =
-                        vavModulatingRtuSystemEquip.analog4MinCooling.readDefaultVal().toInt()
-                    coolingSignalConfig.max =
-                        vavModulatingRtuSystemEquip.analog4MaxCooling.readDefaultVal().toInt()
-                }
+            coolingSignalConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog4MinCooling,
+                    vavModulatingRtuSystemEquip,
+                    coolingSignalConfig.min
+                )
+            coolingSignalConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog4MaxCooling,
+                    vavModulatingRtuSystemEquip,
+                    coolingSignalConfig.max
+                )
 
-                4 -> {
-                    heatingSignalConfig.min =
-                        vavModulatingRtuSystemEquip.analog4MinHeating.readDefaultVal().toInt()
-                    heatingSignalConfig.max =
-                        vavModulatingRtuSystemEquip.analog4MaxHeating.readDefaultVal().toInt()
-                }
-            }
+            heatingSignalConfig.min =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog4MinHeating,
+                    vavModulatingRtuSystemEquip,
+                    heatingSignalConfig.min
+                )
+            heatingSignalConfig.max =
+                getDefault(
+                    vavModulatingRtuSystemEquip.analog4MaxHeating,
+                    vavModulatingRtuSystemEquip,
+                    heatingSignalConfig.max
+                )
         }
     }
+
 
 
     override fun getAssociationConfigs(): List<AssociationConfig> {
@@ -576,6 +683,12 @@ open class ModulatingRtuProfileConfig(open val model: SeventyFiveFProfileDirecti
                                 == ModulatingProfileAnalogMapping.CompressorSpeed.ordinal)
                 || (analog4OutputEnable.enabled && analog4OutputAssociation.associationVal
                                 == ModulatingProfileAnalogMapping.CompressorSpeed.ordinal)
+    }
+    fun getDefault(point: Point, equip: VavModulatingRtuSystemEquip, valueConfig: Int): Int {
+        return if (Domain.readPointForEquip(point.domainName, equip.equipRef).isEmpty())
+            valueConfig
+        else
+            point.readDefaultVal().toInt()
     }
 
     override fun toString(): String {

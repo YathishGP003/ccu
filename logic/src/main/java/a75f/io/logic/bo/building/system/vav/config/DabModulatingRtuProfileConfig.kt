@@ -2,15 +2,11 @@ package a75f.io.logic.bo.building.system.vav.config
 
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
-import a75f.io.domain.config.AssociationConfig
+import a75f.io.domain.api.Point
 import a75f.io.domain.config.EnableConfig
-import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.DabModulatingRtuSystemEquip
-import a75f.io.domain.equips.VavModulatingRtuSystemEquip
 import a75f.io.domain.util.CommonQueries
-import a75f.io.logic.bo.haystack.device.ControlMote
-import a75f.io.logic.bo.haystack.device.ControlMote.getAllUnusedPorts
 import a75f.io.logic.bo.haystack.device.ControlMote.getCMUnusedPorts
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
@@ -158,200 +154,329 @@ open class DabModulatingRtuProfileConfig(override val model: SeventyFiveFProfile
         }
     }
 
-    private fun updateAnalogActiveConfig(dabModulatingRtuSystemEquip : DabModulatingRtuSystemEquip) {
+    private fun updateAnalogActiveConfig(dabModulatingRtuSystemEquip: DabModulatingRtuSystemEquip) {
         analog1OutMinMaxConfig.apply {
-            when (analog1OutputAssociation.associationVal) {
-                0 -> {
-                    fanSignalConfig.min =
-                        dabModulatingRtuSystemEquip.analog1MinFan.readDefaultVal().toInt()
-                    fanSignalConfig.max =
-                        dabModulatingRtuSystemEquip.analog1MaxFan.readDefaultVal().toInt()
-                }
+            fanSignalConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog1MinFan,
+                    dabModulatingRtuSystemEquip,
+                    fanSignalConfig.min
+                )
+            fanSignalConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog1MaxFan,
+                    dabModulatingRtuSystemEquip,
+                    fanSignalConfig.max
+                )
 
-                1 -> {
-                    compressorSpeedConfig.min =
-                        dabModulatingRtuSystemEquip.analog1MinCompressorSpeed.readDefaultVal()
-                            .toInt()
-                    compressorSpeedConfig.max =
-                        dabModulatingRtuSystemEquip.analog1MaxCompressorSpeed.readDefaultVal()
-                            .toInt()
-                }
+            compressorSpeedConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog1MinCompressorSpeed,
+                    dabModulatingRtuSystemEquip,
+                    compressorSpeedConfig.min
+                )
+            compressorSpeedConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog1MaxCompressorSpeed,
+                    dabModulatingRtuSystemEquip,
+                    compressorSpeedConfig.max
+                )
 
-                2 -> {
-                    outsideAirDamperConfig.min =
-                        dabModulatingRtuSystemEquip.analog1MinOutsideDamper.readDefaultVal().toInt()
-                    outsideAirDamperConfig.max =
-                        dabModulatingRtuSystemEquip.analog1MaxOutsideDamper.readDefaultVal().toInt()
-                }
+            outsideAirDamperConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog1MinOutsideDamper,
+                    dabModulatingRtuSystemEquip,
+                    outsideAirDamperConfig.min
+                )
 
-                3 -> {
-                    coolingSignalConfig.min =
-                        dabModulatingRtuSystemEquip.analog1MinCooling.readDefaultVal().toInt()
-                    coolingSignalConfig.max =
-                        dabModulatingRtuSystemEquip.analog1MaxCooling.readDefaultVal().toInt()
-                }
+            outsideAirDamperConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog1MaxOutsideDamper,
+                    dabModulatingRtuSystemEquip,
+                    outsideAirDamperConfig.max
+                )
 
-                4 -> {
-                    heatingSignalConfig.min =
-                        dabModulatingRtuSystemEquip.analog1MinHeating.readDefaultVal().toInt()
-                    heatingSignalConfig.max =
-                        dabModulatingRtuSystemEquip.analog1MaxHeating.readDefaultVal().toInt()
-                }
+            coolingSignalConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog1MinCooling,
+                    dabModulatingRtuSystemEquip,
+                    coolingSignalConfig.min
+                )
+            coolingSignalConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog1MaxCooling,
+                    dabModulatingRtuSystemEquip,
+                    coolingSignalConfig.max
+                )
 
-                5 -> {
-                    chilledWaterValveConfig.min =
-                        dabModulatingRtuSystemEquip.analog1MinCHWValve.readDefaultVal()
-                            .toInt()
-                    chilledWaterValveConfig.max =
-                        dabModulatingRtuSystemEquip.analog1MaxCHWValve.readDefaultVal()
-                            .toInt()
-                }
-            }
+            heatingSignalConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog1MinHeating,
+                    dabModulatingRtuSystemEquip,
+                    heatingSignalConfig.min
+                )
+            heatingSignalConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog1MaxHeating,
+                    dabModulatingRtuSystemEquip,
+                    heatingSignalConfig.max
+                )
+
+            chilledWaterValveConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog1MinCHWValve,
+                    dabModulatingRtuSystemEquip,
+                    chilledWaterValveConfig.min
+                )
+            chilledWaterValveConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog1MaxCHWValve,
+                    dabModulatingRtuSystemEquip,
+                    chilledWaterValveConfig.max
+                )
+
         }
-
         analog2OutMinMaxConfig.apply {
-            when (analog2OutputAssociation.associationVal) {
-                0 -> {
-                    fanSignalConfig.min =
-                        dabModulatingRtuSystemEquip.analog2MinFan.readDefaultVal().toInt()
-                    fanSignalConfig.max =
-                        dabModulatingRtuSystemEquip.analog2MaxFan.readDefaultVal().toInt()
-                }
+            fanSignalConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog2MinFan,
+                    dabModulatingRtuSystemEquip,
+                    fanSignalConfig.min
+                )
+            fanSignalConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog2MaxFan,
+                    dabModulatingRtuSystemEquip,
+                    fanSignalConfig.max
+                )
 
-                1 -> {
-                    compressorSpeedConfig.min =
-                        dabModulatingRtuSystemEquip.analog2MinCompressorSpeed.readDefaultVal()
-                            .toInt()
-                    compressorSpeedConfig.max =
-                        dabModulatingRtuSystemEquip.analog2MaxCompressorSpeed.readDefaultVal()
-                            .toInt()
-                }
+            compressorSpeedConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog2MinCompressorSpeed,
+                    dabModulatingRtuSystemEquip,
+                    compressorSpeedConfig.min
+                )
+            compressorSpeedConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog2MaxCompressorSpeed,
+                    dabModulatingRtuSystemEquip,
+                    compressorSpeedConfig.max
+                )
 
-                2 -> {
-                    outsideAirDamperConfig.min =
-                        dabModulatingRtuSystemEquip.analog2MinOutsideDamper.readDefaultVal().toInt()
-                    outsideAirDamperConfig.max =
-                        dabModulatingRtuSystemEquip.analog2MaxOutsideDamper.readDefaultVal().toInt()
-                }
+            outsideAirDamperConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog2MinOutsideDamper,
+                    dabModulatingRtuSystemEquip,
+                    outsideAirDamperConfig.min
+                )
+            outsideAirDamperConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog2MaxOutsideDamper,
+                    dabModulatingRtuSystemEquip,
+                    outsideAirDamperConfig.max
+                )
 
-                3 -> {
-                    coolingSignalConfig.min =
-                        dabModulatingRtuSystemEquip.analog2MinCooling.readDefaultVal().toInt()
-                    coolingSignalConfig.max =
-                        dabModulatingRtuSystemEquip.analog2MaxCooling.readDefaultVal().toInt()
-                }
+            coolingSignalConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog2MinCooling,
+                    dabModulatingRtuSystemEquip,
+                    coolingSignalConfig.min
+                )
+            coolingSignalConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog2MaxCooling,
+                    dabModulatingRtuSystemEquip,
+                    coolingSignalConfig.max
+                )
 
-                4 -> {
-                    heatingSignalConfig.min =
-                        dabModulatingRtuSystemEquip.analog2MinHeating.readDefaultVal().toInt()
-                    heatingSignalConfig.max =
-                        dabModulatingRtuSystemEquip.analog2MaxHeating.readDefaultVal().toInt()
-                }
+            heatingSignalConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog2MinHeating,
+                    dabModulatingRtuSystemEquip,
+                    heatingSignalConfig.min
+                )
+            heatingSignalConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog2MaxHeating,
+                    dabModulatingRtuSystemEquip,
+                    heatingSignalConfig.max
+                )
 
-                5 ->  {
-                    chilledWaterValveConfig.min =
-                        dabModulatingRtuSystemEquip.analog2MinCHWValve.readDefaultVal().toInt()
-                    chilledWaterValveConfig.max =
-                        dabModulatingRtuSystemEquip.analog2MaxCHWValve.readDefaultVal().toInt()
-                }
-            }
+            chilledWaterValveConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog2MinCHWValve,
+                    dabModulatingRtuSystemEquip,
+                    chilledWaterValveConfig.min
+                )
+            chilledWaterValveConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog2MaxCHWValve,
+                    dabModulatingRtuSystemEquip,
+                    chilledWaterValveConfig.max
+                )
         }
 
         analog3OutMinMaxConfig.apply {
-            when (analog3OutputAssociation.associationVal) {
-                0 -> {
-                    fanSignalConfig.min =
-                        dabModulatingRtuSystemEquip.analog3MinFan.readDefaultVal().toInt()
-                    fanSignalConfig.max =
-                        dabModulatingRtuSystemEquip.analog3MaxFan.readDefaultVal().toInt()
-                }
+            fanSignalConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog3MinFan,
+                    dabModulatingRtuSystemEquip,
+                    fanSignalConfig.min
+                )
+            fanSignalConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog3MaxFan,
+                    dabModulatingRtuSystemEquip,
+                    fanSignalConfig.max
+                )
 
-                1 -> {
-                    compressorSpeedConfig.min =
-                        dabModulatingRtuSystemEquip.analog3MinCompressorSpeed.readDefaultVal()
-                            .toInt()
-                    compressorSpeedConfig.max =
-                        dabModulatingRtuSystemEquip.analog3MaxCompressorSpeed.readDefaultVal()
-                            .toInt()
-                }
+            compressorSpeedConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog3MinCompressorSpeed,
+                    dabModulatingRtuSystemEquip,
+                    compressorSpeedConfig.min
+                )
+            compressorSpeedConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog3MaxCompressorSpeed,
+                    dabModulatingRtuSystemEquip,
+                    compressorSpeedConfig.max
+                )
 
-                2 -> {
-                    outsideAirDamperConfig.min =
-                        dabModulatingRtuSystemEquip.analog3MinOutsideDamper.readDefaultVal().toInt()
-                    outsideAirDamperConfig.max =
-                        dabModulatingRtuSystemEquip.analog3MaxOutsideDamper.readDefaultVal().toInt()
-                }
+            outsideAirDamperConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog3MinOutsideDamper,
+                    dabModulatingRtuSystemEquip,
+                    outsideAirDamperConfig.min
+                )
+            outsideAirDamperConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog3MaxOutsideDamper,
+                    dabModulatingRtuSystemEquip,
+                    outsideAirDamperConfig.max
+                )
 
-                3 -> {
-                    coolingSignalConfig.min =
-                        dabModulatingRtuSystemEquip.analog3MinCooling.readDefaultVal().toInt()
-                    coolingSignalConfig.max =
-                        dabModulatingRtuSystemEquip.analog3MaxCooling.readDefaultVal().toInt()
-                }
+            coolingSignalConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog3MinCooling,
+                    dabModulatingRtuSystemEquip,
+                    coolingSignalConfig.min
+                )
+            coolingSignalConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog3MaxCooling,
+                    dabModulatingRtuSystemEquip,
+                    coolingSignalConfig.max
+                )
 
-                4 -> {
-                    heatingSignalConfig.min =
-                        dabModulatingRtuSystemEquip.analog3MinHeating.readDefaultVal().toInt()
-                    heatingSignalConfig.max =
-                        dabModulatingRtuSystemEquip.analog3MaxHeating.readDefaultVal().toInt()
-                }
+            heatingSignalConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog3MinHeating,
+                    dabModulatingRtuSystemEquip,
+                    heatingSignalConfig.min
+                )
+            heatingSignalConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog3MaxHeating,
+                    dabModulatingRtuSystemEquip,
+                    heatingSignalConfig.max
+                )
 
-                5 -> {
-                    chilledWaterValveConfig.min =
-                        dabModulatingRtuSystemEquip.analog3MinCHWValve.readDefaultVal().toInt()
-                    chilledWaterValveConfig.max =
-                        dabModulatingRtuSystemEquip.analog3MaxCHWValve.readDefaultVal().toInt()
-                }
-            }
+            chilledWaterValveConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog3MinCHWValve,
+                    dabModulatingRtuSystemEquip,
+                    chilledWaterValveConfig.min
+                )
+            chilledWaterValveConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog3MaxCHWValve,
+                    dabModulatingRtuSystemEquip,
+                    chilledWaterValveConfig.max
+                )
         }
+
 
         analog4OutMinMaxConfig.apply {
-            when (analog4OutputAssociation.associationVal) {
-                0 -> {
-                    fanSignalConfig.min =
-                        dabModulatingRtuSystemEquip.analog4MinFan.readDefaultVal().toInt()
-                    fanSignalConfig.max =
-                        dabModulatingRtuSystemEquip.analog4MaxFan.readDefaultVal().toInt()
-                }
+            fanSignalConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog4MinFan,
+                    dabModulatingRtuSystemEquip,
+                    fanSignalConfig.min
+                )
+            fanSignalConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog4MaxFan,
+                    dabModulatingRtuSystemEquip,
+                    fanSignalConfig.max
+                )
 
-                1 -> {
-                    compressorSpeedConfig.min =
-                        dabModulatingRtuSystemEquip.analog4MinCompressorSpeed.readDefaultVal()
-                            .toInt()
-                    compressorSpeedConfig.max =
-                        dabModulatingRtuSystemEquip.analog4MaxCompressorSpeed.readDefaultVal()
-                            .toInt()
-                }
+            compressorSpeedConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog4MinCompressorSpeed,
+                    dabModulatingRtuSystemEquip,
+                    compressorSpeedConfig.min
+                )
+            compressorSpeedConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog4MaxCompressorSpeed,
+                    dabModulatingRtuSystemEquip,
+                    compressorSpeedConfig.max
+                )
 
-                2 -> {
-                    outsideAirDamperConfig.min =
-                        dabModulatingRtuSystemEquip.analog4MinOutsideDamper.readDefaultVal().toInt()
-                    outsideAirDamperConfig.max =
-                        dabModulatingRtuSystemEquip.analog4MaxOutsideDamper.readDefaultVal().toInt()
-                }
+            outsideAirDamperConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog4MinOutsideDamper,
+                    dabModulatingRtuSystemEquip,
+                    outsideAirDamperConfig.min
+                )
+            outsideAirDamperConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog4MaxOutsideDamper,
+                    dabModulatingRtuSystemEquip,
+                    outsideAirDamperConfig.max
+                )
 
-                3 -> {
-                    coolingSignalConfig.min =
-                        dabModulatingRtuSystemEquip.analog4MinCooling.readDefaultVal().toInt()
-                    coolingSignalConfig.max =
-                        dabModulatingRtuSystemEquip.analog4MaxCooling.readDefaultVal().toInt()
-                }
+            coolingSignalConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog4MinCooling,
+                    dabModulatingRtuSystemEquip,
+                    coolingSignalConfig.min
+                )
+            coolingSignalConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog4MaxCooling,
+                    dabModulatingRtuSystemEquip,
+                    coolingSignalConfig.max
+                )
 
-                4 -> {
-                    heatingSignalConfig.min =
-                        dabModulatingRtuSystemEquip.analog4MinHeating.readDefaultVal().toInt()
-                    heatingSignalConfig.max =
-                        dabModulatingRtuSystemEquip.analog4MaxHeating.readDefaultVal().toInt()
-                }
+            heatingSignalConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog4MinHeating,
+                    dabModulatingRtuSystemEquip,
+                    heatingSignalConfig.min
+                )
+            heatingSignalConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog4MaxHeating,
+                    dabModulatingRtuSystemEquip,
+                    heatingSignalConfig.max
+                )
 
-                5 -> {
-                    chilledWaterValveConfig.min =
-                        dabModulatingRtuSystemEquip.analog4MinCHWValve.readDefaultVal().toInt()
-                    chilledWaterValveConfig.max =
-                        dabModulatingRtuSystemEquip.analog4MaxCHWValve.readDefaultVal().toInt()
-                }
-            }
+            chilledWaterValveConfig.min =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog4MinCHWValve,
+                    dabModulatingRtuSystemEquip,
+                    chilledWaterValveConfig.min
+                )
+            chilledWaterValveConfig.max =
+                getDefault(
+                    dabModulatingRtuSystemEquip.analog4MaxCHWValve,
+                    dabModulatingRtuSystemEquip,
+                    chilledWaterValveConfig.max
+                )
         }
+
     }
 
     override fun getValueConfigs(): List<ValueConfig> {
@@ -362,6 +487,12 @@ open class DabModulatingRtuProfileConfig(override val model: SeventyFiveFProfile
             add(analog1ValveClosedPosition)
             add(analog1ValveFullPosition)
         }
+    }
+    fun getDefault(point: Point, equip: DabModulatingRtuSystemEquip, valueConfig: Int): Int {
+        return if (Domain.readPointForEquip(point.domainName, equip.equipRef).isEmpty())
+            valueConfig
+        else
+            point.readDefaultVal().toInt()
     }
 
     override fun toString(): String {

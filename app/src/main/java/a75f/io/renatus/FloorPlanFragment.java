@@ -435,37 +435,15 @@ public class FloorPlanFragment extends Fragment {
             try {
                 HGrid zonePoint = hClient.call("read", HGridBuilder.dictToGrid(zDict));
                 if (zonePoint != null) {
-                    String printer = "";
                     Iterator zit = zonePoint.iterator();
-                    CcuLog.i("HANDLE_ROOM_CHANGE","Get Building Floor Zones(before clearing the list)"+"Site Room List "+siteRoomList);
                     siteRoomList.clear();
-                    CcuLog.i("HANDLE_ROOM_CHANGE","Get Building Floor Zones(after clearing the list)"+"Site Room List "+siteRoomList);
                     while (zit.hasNext()) {
                         HRow zr = (HRow) zit.next();
                         if (zr.getStr("dis") != null) {
-                            CcuLog.i("HANDLE_ROOM_CHANGE","Get Building Floor Zones(before adding)"+"HGrid "+zr.getStr("dis")+"Site Room List "+siteRoomList);
                             siteRoomList.add(zr.getStr("dis"));
-                            printer = printer + zr.getStr("dis") + "\t";
-                            CcuLog.i("HANDLE_ROOM_CHANGE","Get Building Floor Zones(after adding)"+"HGrid "+zr.getStr("dis")+"Site Room List "+siteRoomList);
                         }
                     }
-                    // Fetch all the room entites from CCUHSApi with query: room and not oao
-                    // Add a loop and access the dis tag and if its value is not present in siteRoomList, add it there
-                    HDict zLocalDict = new HDictBuilder().add("filter", "room and not oao and siteRef == "+siteUID).toDict();
-                    HGrid zoneLocalPoint=hsClientLocal.call("read",HGridBuilder.dictToGrid(zLocalDict));
-                    Iterator zitlocal = zoneLocalPoint.iterator();
 
-                    while(zitlocal.hasNext()){
-                        HRow zrLocal = (HRow) zitlocal.next();
-                        if(!siteRoomList.contains(zrLocal.getStr("dis"))){
-                            siteRoomList.add(zrLocal.getStr("dis"));
-                        }
-                        else{
-                            return;
-                        }
-
-                    }
-                    CcuLog.d("HANDLE_ROOM_CHANGE", "Remotely fetched zone names: " + printer);
                 }
             } catch (CallException e) {
                 CcuLog.d(L.TAG_CCU_UI, "Failed to fetch room data " + e.getMessage());
@@ -477,18 +455,14 @@ public class FloorPlanFragment extends Fragment {
 
     private void loadExistingZones() {
         siteFloorList.clear();
-        CcuLog.i("HANDLE_ROOM_CHANGE","Loading Existing zones(before clearing the zones)"+"Site Room List "+siteRoomList);
         siteRoomList.clear();
-        CcuLog.i("HANDLE_ROOM_CHANGE","Loading Existing zones(after clearing the zones)"+"Site Room List "+siteRoomList);
         ArrayList<Floor> floorList = HSUtil.getFloors();
         siteFloorList.addAll(floorList);
         for (Floor f : floorList) {
             ArrayList<Zone> zoneList = HSUtil.getZones(f.getId());
             for (Zone zone : zoneList) {
                 if(zone.getDisplayName() != null) {
-                    CcuLog.i("HANDLE_ROOM_CHANGE","Loading Existing zones(before adding zones)"+"Site Room List "+siteRoomList);
                     siteRoomList.add(zone.getDisplayName());
-                    CcuLog.i("HANDLE_ROOM_CHANGE","Loading Existing zones(after adding zones)"+"Site Room List "+siteRoomList);
                 }else {
                     CcuLog.d(L.TAG_CCU_UI, "Zone name is null. Floor: " + f + ", Zone: "+zone.getHDict());
                 }

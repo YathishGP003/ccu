@@ -137,6 +137,7 @@ public class PreferenceUtil {
     private static final String MIGRATION_BACNET_EQUIP = "migrationBacnetEquips";
     private static final String MIGRATION_ZONE_STATUS = "migrationZoneStatus";
     private static final String MIGRATION_CLEAR_INVALID_HIS_DATA = "migrationClearInvalidHisData";
+    private static final String MIGRATE_PCN_TARGET_ERROR = "migratePcnTargetError";
 
     private static final String MIGRATE_SYSTEM_TUNER_SYNC = "migrateMissingSystemTunerValues";
     public static void setContext(Context c) {
@@ -1060,5 +1061,13 @@ public class PreferenceUtil {
 
     public static void setMigrationClearInvalidHisData() {
         setBooleanPreference(MIGRATION_CLEAR_INVALID_HIS_DATA, true);
+    }
+
+    public static boolean getPLCTargetAndErrorRangeMigrationStatus() {
+        return getBooleanPreference(MIGRATE_PCN_TARGET_ERROR);
+    }
+
+    public static void setPLCTargetAndErrorRangeMigrationStatus() {
+        setBooleanPreference(MIGRATE_PCN_TARGET_ERROR, true);
     }
 }

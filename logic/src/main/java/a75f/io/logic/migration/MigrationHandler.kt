@@ -528,6 +528,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             removeNullableHistorizedData()
             PreferenceUtil.setMigrationClearInvalidHisData()
         }
+        if (!PreferenceUtil.getPLCTargetAndErrorRangeMigrationStatus()) {
+            migratePLCTargetAndErrorRange()
+            PreferenceUtil.setPLCTargetAndErrorRangeMigrationStatus()
+        }
 
         hayStack.scheduleSync()
     }
@@ -4320,5 +4324,32 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         HisItemCache.getInstance().delete("@Null")
         HisItemCache.getInstance().delete("@NULL")
         CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Nullable historized data removed")
+    }
+
+    private fun migratePLCTargetAndErrorRange() {
+        val plcEquips = hayStack.readAllEntities("pid and equip and domainName")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Re updating PLC Config: ")
+        plcEquips.forEach { plcEquip ->
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Migrating PLC Equip: ${plcEquip[Tags.DIS]}")
+
+            val address = plcEquip[Tags.GROUP].toString()
+            val isHelioNode = plcEquip.containsKey(Tags.HELIO_NODE)
+
+            val model =
+                if (isHelioNode) ModelLoader.getHelioNodePidModel() as SeventyFiveFProfileDirective
+                else ModelLoader.getSmartNodePidModel() as SeventyFiveFProfileDirective
+
+            val config = PlcProfileConfig(
+                Integer.parseInt(address),
+                if (isHelioNode) NodeType.HELIO_NODE.name else NodeType.SMART_NODE.name,
+                0,
+                plcEquip[Tags.ROOMREF].toString(),
+                plcEquip[Tags.FLOORREF].toString(),
+                ProfileType.PLC,
+                model
+            ).getActiveConfiguration()
+
+            config.updateMinMaxValues(config, model)
+        }
     }
 }

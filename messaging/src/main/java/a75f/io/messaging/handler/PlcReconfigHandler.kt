@@ -133,6 +133,24 @@ fun updateConfigPoint(msgObject: JsonObject, configPoint: Point) {
 
     writePointFromJson(configPoint, msgObject, CCUHsApi.getInstance())
     profile.init()
+    val updatedConf = profile.domainProfileConfiguration as PlcProfileConfig
+    when (configPoint.domainName) {
+        DomainName.analog1InputType -> {
+            val index = config.analog1InputType.currentVal.toInt()
+            updatedConf.updateMinMax(DomainName.analog1InputType, model, index, equip.id)
+        }
+
+        DomainName.thermistor1InputType -> {
+            val index = config.thermistor1InputType.currentVal.toInt()
+            updatedConf.updateMinMax(DomainName.thermistor1InputType, model, index, equip.id)
+        }
+
+        DomainName.nativeSensorType -> {
+            val index = config.nativeSensorType.currentVal.toInt()
+            updatedConf.updateMinMax(DomainName.nativeSensorType, model, index, equip.id)
+        }
+    }
+
 }
 
 private fun profileReconfigurationRequired(configPoint: Point): Boolean {

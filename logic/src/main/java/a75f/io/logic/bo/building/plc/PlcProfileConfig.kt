@@ -277,4 +277,60 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
 
         return targetVal
     }
+
+    fun updateMinMaxValues(config: PlcProfileConfig, model: SeventyFiveFProfileDirective) {
+        val equipRef =
+            hayStack.readEntity("equip and group == \"${config.nodeAddress}\"")["id"].toString()
+        if (config.analog1InputType.currentVal > 0) {
+            updateMinMax(
+                DomainName.analog1InputType,
+                model,
+                config.analog1InputType.currentVal.toInt(),
+                equipRef
+            )
+        } else if (config.nativeSensorType.currentVal > 0) {
+            updateMinMax(
+                DomainName.nativeSensorType,
+                model,
+                config.nativeSensorType.currentVal.toInt(),
+                equipRef
+            )
+        } else if (config.thermistor1InputType.currentVal > 0) {
+            updateMinMax(
+                DomainName.thermistor1InputType,
+                model,
+                config.thermistor1InputType.currentVal.toInt(),
+                equipRef
+            )
+        }
+    }
+
+    fun updateMinMax(
+        sensorType: String,
+        model: SeventyFiveFProfileDirective,
+        selectedIndex: Int,
+        equipRef: String
+    ) {
+        val minMaxInc: Triple<Double, Double, Double>
+        val sensorTypeEntity =
+            (model.points.find { it.domainName == sensorType }?.valueConstraint as MultiStateConstraint)
+                .allowedValues[selectedIndex].value
+        minMaxInc = Domain.getMinMaxIncValuesByDomainName(sensorTypeEntity, model)
+        updatePoint(DomainName.pidTargetValue, minMaxInc, equipRef)
+        updatePoint(DomainName.pidProportionalRange, minMaxInc, equipRef)
+    }
+
+    private fun updatePoint(
+        domainName: String,
+        minMaxInc: Triple<Double, Double, Double>,
+        equipRef: String
+    ) {
+        val pointDict =
+            hayStack.readHDict("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
+        val point = a75f.io.api.haystack.Point.Builder().setHDict(pointDict)
+            .setMinVal(minMaxInc.first.toString())
+            .setMaxVal(minMaxInc.second.toString()).setIncrementVal(minMaxInc.third.toString())
+            .build()
+        hayStack.updatePoint(point, point.id)
+    }
 }

@@ -399,6 +399,7 @@ class PlcProfileViewModel : ViewModel() {
             DeviceBuilder(hayStack, EntityMapper(model)),
             deviceModel
         )
+        profileConfiguration.updateMinMaxValues(profileConfiguration, model)
     }
 
     private fun resetRelays(equipRef: String) {

@@ -12,6 +12,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.system.setFanTypeToStages
 import a75f.io.logic.bo.building.system.util.deleteCurrentSystemProfile
+import a75f.io.logic.bo.building.system.util.deleteSystemConnectModule
 import a75f.io.logic.bo.building.system.util.getCurrentSystemEquip
 import a75f.io.logic.bo.building.system.util.getVavConnectEquip
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
@@ -135,6 +136,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         deleteJob.join()
         val newEquipJob = viewModelScope.launch(Dispatchers.IO) {
             launch {
+                deleteSystemConnectModule()
                 addConnectModule()
             }
             val newEquipId = addAdvanceAHUEquip()

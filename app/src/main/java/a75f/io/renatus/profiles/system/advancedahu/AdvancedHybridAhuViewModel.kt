@@ -193,7 +193,6 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
 
 
     fun addAdvanceAHUEquip(): String {
-        deleteSystemConnectModule()
         val ahuEquipId = cmEquipBuilder.buildEquipAndPoints(
                 configuration = profileConfiguration.cmConfiguration,
                 modelDef = cmModel,

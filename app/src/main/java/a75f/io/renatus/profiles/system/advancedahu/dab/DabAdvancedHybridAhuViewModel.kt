@@ -15,6 +15,7 @@ import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.dab.config.DabAdvancedHybridAhuConfig
 import a75f.io.logic.bo.building.system.setFanTypeToStages
 import a75f.io.logic.bo.building.system.util.deleteCurrentSystemProfile
+import a75f.io.logic.bo.building.system.util.deleteSystemConnectModule
 import a75f.io.logic.bo.building.system.util.getCurrentSystemEquip
 import a75f.io.logic.bo.building.system.util.getDabConnectEquip
 import a75f.io.renatus.BackgroundServiceInitiator
@@ -139,6 +140,7 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         deleteJob.join()
         val newEquipJob = viewModelScope.launch(Dispatchers.IO) {
             launch {
+                deleteSystemConnectModule()
                 addConnectModule()
             }
             val newEquipId = addAdvanceAHUEquip()

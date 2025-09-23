@@ -56,7 +56,8 @@ data class BacnetPoint(
     @SerializedName("defaultWriteLevel") var defaultWriteLevel: String = "8",
     @SerializedName("isSystem") var isSystem : Boolean = false,
     var isSchedulable: Boolean = false,
-    @SerializedName("bacnetObjectId") var bacnetObjectId: Int? = 0
+    @SerializedName("bacnetObjectId") var bacnetObjectId: Int? = 0,
+    @SerializedName("tagValues") var equipTagValues: Map<String, String>? = null,
 ){
     fun initailizeSchedulableForFreshPairing() {
         isSchedulable = equipTagNames.contains(Tags.WRITABLE) && equipTagNames.contains(Tags.SCHEDULABLE)

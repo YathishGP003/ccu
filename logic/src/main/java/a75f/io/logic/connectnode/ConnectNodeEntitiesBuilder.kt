@@ -361,6 +361,21 @@ class ConnectNodeEntitiesBuilder {
                             )
                         }
 
+                        pointObject.equipTagValues?.forEach { (key, value) ->
+                            userIntentPointTags.add(
+                                UserIntentPointTags().apply {
+                                    tagName = key
+                                    tagValue = value
+                                }
+                            )
+                        }
+                        userIntentPointTags.add(
+                            UserIntentPointTags().apply {
+                                tagName = Tags.HIS_INTERPOLATE
+                                tagValue = pointObject.hisInterpolate
+                            }
+                        )
+
                     }
 
                 })

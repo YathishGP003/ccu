@@ -5,6 +5,7 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.Tags
+import a75f.io.api.haystack.Zone
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.EntityConfig
@@ -96,8 +97,29 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             hayStack.writeDefaultValById(scheduleTypePoint["id"].toString(), existingScheduleTypeVal)
             hayStack.writeHisValById(scheduleTypePoint["id"].toString(), existingScheduleTypeVal)
         }
-
         CcuLog.i(Domain.LOG_TAG, "ScheduleType point values updated for equip $equipId")
+
+        //Apply default schedule to the room if this is the first equip in the room.
+        val equipCount =
+            hayStack.readAllEntities("equip and roomRef == \"${hayStackEquip.roomRef}\"").size
+        if (equipCount > 1) {
+            CcuLog.i(Domain.LOG_TAG, "Equip count in room ${hayStackEquip.roomRef} is $equipCount")
+            return
+        }
+        val roomMap = hayStack.readMapById(hayStackEquip.roomRef)
+        val defaultScheduleType = hayStack.defaultNamedSchedule.id
+        if (defaultScheduleType != null) {
+            val zone = Zone.Builder().setHashMap(roomMap).setScheduleRef(defaultScheduleType).build()
+            hayStack.updateZone(zone, roomMap["id"].toString())
+
+            CcuLog.i(
+                Domain.LOG_TAG,
+                "Default schedule applied to room ${roomMap["dis"].toString()}"
+            )
+        } else {
+            CcuLog.i(Domain.LOG_TAG, "Default schedule id is null")
+        }
+
     }
 
 

@@ -8,6 +8,7 @@ import a75f.io.api.haystack.modbus.Parameter
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.logger.CcuLog
+import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.renatus.R
@@ -331,5 +332,9 @@ fun getNodeType(device: HashMap<Any, Any>): NodeType? {
         domainName.contains("otn",true) -> NodeType.OTN
         else -> null
     }
+}
+
+fun getAppResourceString(resId: Int): String {
+    return Globals.getInstance().applicationContext.getString(resId)
 }
 

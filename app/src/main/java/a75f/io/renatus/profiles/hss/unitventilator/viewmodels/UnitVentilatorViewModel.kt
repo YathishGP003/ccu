@@ -18,6 +18,7 @@ import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventil
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.NO_MAT_SENSOR
+import a75f.io.renatus.modbus.util.getAppResourceString
 import a75f.io.renatus.profiles.hss.ConfigState
 import a75f.io.renatus.profiles.hss.HyperStatSplitState
 import a75f.io.renatus.profiles.hss.HyperStatSplitViewModel
@@ -26,13 +27,12 @@ import android.os.Bundle
 import android.text.Html
 import android.text.Spanned
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.res.stringResource
 
 
 open class UnitVentilatorViewModel : HyperStatSplitViewModel() {
 
-     private val oaoError = context.getString(R.string.profile_must_have_mixed_air_temp)
-    private val duplicateSensor = context.getString(R.string.profile_can_have_discharge_air_temperature)
+    private val oaoError = getAppResourceString(R.string.profile_must_have_mixed_air_temp)
+    private val duplicateSensor = getAppResourceString(R.string.profile_can_have_discharge_air_temperature)
     lateinit var controlViaList : List<String>
 
     override fun init(bundle: Bundle, context: Context, hayStack: CCUHsApi) {

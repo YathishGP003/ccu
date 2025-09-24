@@ -32,6 +32,7 @@ import a75f.io.logic.util.bacnet.isValidMstpMacAddress
 import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants
 import a75f.io.renatus.modbus.util.getParametersList
 import a75f.io.renatus.ui.model.HeaderViewItem
+import a75f.io.renatus.ui.nontempprofiles.model.ExternalPointItem
 import a75f.io.renatus.ui.nontempprofiles.viewmodel.NonTempProfileViewModel
 import a75f.io.renatus.util.HeartBeatUtil
 import android.util.Pair
@@ -662,6 +663,16 @@ fun stopObservingAllEquipHealth(nonTempProfileViewModels: List<NonTempProfileVie
 fun cleanUpObservableList(nonTempProfileViewModels: List<NonTempProfileViewModel>) {
     for (nonTempProfileViewModel in nonTempProfileViewModels) {
         nonTempProfileViewModel.cleanUp()
+    }
+}
+
+fun getDropDownPosition(value: String, index: Int, pointItem: ExternalPointItem): Int{
+    return if (pointItem.dropdownValues.isNotEmpty()) {
+        if (pointItem.dropdownValues.indexOf(value) == -1) index else pointItem.dropdownValues.indexOf(
+            value
+        )
+    } else {
+        index
     }
 }
 

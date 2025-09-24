@@ -10,6 +10,7 @@ data class ExternalPointItem(
     var selectedIndex: Int = 0,
     var usesDropdown: Boolean = false,
     var dropdownOptions: List<String> = emptyList(),
+    var dropdownValues: List<String> = emptyList(),
     var point: Any? = null,
     var canOverride: Boolean = false,
     var profileType: String? = null,

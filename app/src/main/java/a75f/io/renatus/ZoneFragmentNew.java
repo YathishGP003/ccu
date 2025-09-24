@@ -3943,19 +3943,23 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
 
     @Override
     public void updateCustomScheduleView() {
+        CcuLog.d("CCU_UI", "called updateCustomScheduleView");
         getActivity().runOnUiThread(() -> {
             if (zoneDataForUi != null && zoneDataForUi.isZoneExpanded()) {
-                CcuLog.d("CCU_UI", " Show Custom Schedule View ");
+                hideCustomScheduleView(zoneDataForUi);
                 showCustomScheduleView(zoneDataForUi);
-                 // run afrer 10 seconds so that points will be updated with schedule/event refs
                 new Handler(Looper.getMainLooper()).postDelayed(() -> {
                     if (zoneDataForUi != null) {
-                        displaySchedulablePointWithoutSchedulesOrEvents(
-                                zoneDataForUi.getEquip(),
-                                zoneDataForUi.getZoneDetails()
-                        );
+                        if(CustomScheduleUtilKt.isZoneUsingCustomSchedulesOrEvents(zoneDataForUi.getEquip().getRoomRef())){
+                            hideCustomScheduleView(zoneDataForUi);
+                            showCustomScheduleView(zoneDataForUi);
+                            CcuLog.d("CCU_UI", " Show Custom Schedule View ");
+                        } else {
+                            hideCustomScheduleView(zoneDataForUi);
+                            CcuLog.d("CCU_UI", " Hide Custom Schedule View ");
+                        }
                     }
-                }, 10_000);
+                }, 45_000);
             }
         });
 

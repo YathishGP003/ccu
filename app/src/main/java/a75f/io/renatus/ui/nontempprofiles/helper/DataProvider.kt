@@ -72,6 +72,9 @@ fun getModbusDetailedViewPoints(
                             viewItem.dropdownOptions = commands
                                 .map { it.name }
                                 .toMutableList()
+                            viewItem.dropdownValues = commands
+                                .map { it.bitValues.toDouble().toString() }
+                                .toMutableList()
                             viewItem.usesDropdown = true
 
                             for (i in parameter.getCommands().indices) {
@@ -95,6 +98,8 @@ fun getModbusDetailedViewPoints(
                                 viewItem.usesDropdown = true
                                 viewItem.dropdownOptions =
                                     doubleArrayList.map { it.toString() }.toMutableList()
+                                viewItem.dropdownValues =
+                                    doubleArrayList.map { it.toString().toDouble().toString() }.toMutableList()
                                 viewItem.currentValue =
                                     doubleArrayList.indexOf(readVal(pointObject?.id)).toString()
                                 viewItem.selectedIndex =

@@ -21,6 +21,7 @@ import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.renatus.ui.model.HeaderViewItem
 import a75f.io.renatus.ui.nontempprofiles.model.ExternalPointItem
+import a75f.io.renatus.ui.nontempprofiles.utilities.getDropDownPosition
 import a75f.io.renatus.ui.nontempprofiles.utilities.getIndexOf
 import a75f.io.renatus.ui.nontempprofiles.utilities.getLastUpdatedViewItem
 import a75f.io.renatus.ui.nontempprofiles.utilities.heartBeatStatus
@@ -520,8 +521,8 @@ class NonTempProfileViewModel : ViewModel(), PointSubscriber {
             val point = detailedViewPoints[index]
             val value = data.toString()
 
-            val newIndex = getIndexOf(value, point.dropdownOptions)
-
+            var newIndex = getIndexOf(value, point.dropdownOptions)
+            newIndex = getDropDownPosition(value, newIndex, point)
             if (point.currentValue != value || point.selectedIndex != newIndex) {
                 detailedViewPoints[index] = point.copy(
                     currentValue = value,

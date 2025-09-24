@@ -26,6 +26,8 @@ class CmBoardDevice (deviceRef : String) : DomainDevice (deviceRef) {
     val analog2In = PhysicalPoint(DomainName.analog2In ,deviceRef)
     val currentTemp = PhysicalPoint(DomainName.currentTemp ,deviceRef)
     val humiditySensor = PhysicalPoint(DomainName.humiditySensor ,deviceRef)
+    val rssi = PhysicalPoint(DomainName.rssi ,deviceRef)
+
 
     fun getPortsDomainNameWithPhysicalPoint() : HashMap<String, RawPoint> {
         val portsList = HashMap<String, RawPoint>()

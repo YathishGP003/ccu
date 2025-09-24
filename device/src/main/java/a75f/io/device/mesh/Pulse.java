@@ -1011,7 +1011,7 @@ public class Pulse
         }
 
 		CCUHsApi hayStack = CCUHsApi.getInstance();
-		HashMap device = hayStack.read("device and cm");
+		HashMap device = hayStack.readEntity("device and cm");
 		if (!device.isEmpty()) {
 			String deviceId = device.get("id").toString();
 			if (device.containsKey("domainName")) {
@@ -1019,29 +1019,34 @@ public class Pulse
 				return;
 			}
 
-			HashMap analog1In = hayStack.read("point and analog1 and in and deviceRef == \""+deviceId+"\"");
+			HashMap analog1In = hayStack.readEntity("point and analog1 and in and deviceRef == \""+deviceId+"\"");
 			if (!analog1In.isEmpty()) {
 				hayStack.writeHisValById(analog1In.get("id").toString(),
 				                         (double) cmRegularUpdateMessage_t.analogSense1.get());
 			}
 
-			HashMap analog2In = hayStack.read("point and analog2 and in and deviceRef == \""+deviceId+"\"");
+			HashMap analog2In = hayStack.readEntity("point and analog2 and in and deviceRef == \""+deviceId+"\"");
 			if (!analog1In.isEmpty()) {
 				hayStack.writeHisValById(analog2In.get("id").toString(),
 				                         (double) cmRegularUpdateMessage_t.analogSense2.get());
 			}
 
-			HashMap th1In = hayStack.read("point and th1 and in and deviceRef == \""+deviceId+"\"");
+			HashMap th1In = hayStack.readEntity("point and th1 and in and deviceRef == \""+deviceId+"\"");
 			if (!th1In.isEmpty()) {
 				hayStack.writeHisValById(th1In.get("id").toString(),
 				                         (double) cmRegularUpdateMessage_t.thermistor1.get());
 			}
 
-			HashMap th2In = hayStack.read("point and th2 and in and deviceRef == \""+deviceId+"\"");
+			HashMap th2In = hayStack.readEntity("point and th2 and in and deviceRef == \""+deviceId+"\"");
 			if (!th2In.isEmpty()) {
 				hayStack.writeHisValById(th2In.get("id").toString(),
 				                         (double) cmRegularUpdateMessage_t.thermistor2.get());
 			}
+			HashMap rssi = hayStack.readEntity("point and rssi and deviceRef == \""+deviceId+"\"");
+			if (!rssi.isEmpty()) {
+				hayStack.writeHisValById(rssi.get("id").toString(), 1.0);
+			}
+
 		}
 	}
 
@@ -1054,6 +1059,7 @@ public class Pulse
 		cmBoardDevice.getTh2In().writeHisVal(msg.thermistor2.get());
 		cmBoardDevice.getCurrentTemp().writeHisVal(msg.roomTemperature.get());
 		cmBoardDevice.getHumiditySensor().writeHisVal(msg.humidity.get());
+		cmBoardDevice.getRssi().writeHisVal(1.0);
 
 		/**Logical point update*/
 		updateCmThermistors(getLogicalPointDomainName(cmBoardDevice.getTh1In()), cmBoardDevice.getTh1In().readPoint().getPointRef(), msg.thermistor1.get());

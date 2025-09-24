@@ -8,9 +8,9 @@ import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.devices.CmBoardDevice
 import a75f.io.domain.equips.AdvancedHybridSystemEquip
 import a75f.io.logger.CcuLog
-import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
 import a75f.io.logic.bo.building.system.AdvancedAhuRelayMappings
@@ -54,7 +54,7 @@ fun handleAdvancedAhuCmUpdate(messageT: CmToCcuOverUsbCmRegularUpdateMessage_t) 
             val th2RawValue = messageT.thermistor2.get().toDouble()
             val analog1InRawValue = messageT.analogSense1.get().toDouble()
             val analog2InRawValue = messageT.analogSense2.get().toDouble()
-            val humidity = CCUUtils.roundToOneDecimal(messageT.humidity.get().toDouble())
+            val humidity = messageT.humidity.get().toDouble()
             val roomTemperature = messageT.roomTemperature.get().toDouble()
 
             CcuLog.d(L.TAG_CCU_DEVICE, "Cm Regular Update : th1 : $th1RawValue th2 : $th2RawValue"
@@ -65,7 +65,7 @@ fun handleAdvancedAhuCmUpdate(messageT: CmToCcuOverUsbCmRegularUpdateMessage_t) 
             cmDevice.th1In.writeHisVal(th1RawValue / 100)
 
             updateThermistorInput(cmDevice.th2In.domainName, th2RawValue)
-            cmDevice.th1In.writeHisVal(th2RawValue / 100)
+            cmDevice.th2In.writeHisVal(th2RawValue / 100)
 
             updateAnalogInput(cmDevice.analog1In.domainName, analog1InRawValue / 1000)
             cmDevice.analog1In.writeHisVal(analog1InRawValue / 100)
@@ -74,8 +74,9 @@ fun handleAdvancedAhuCmUpdate(messageT: CmToCcuOverUsbCmRegularUpdateMessage_t) 
             cmDevice.analog2In.writeHisVal(analog2InRawValue / 100)
 
             val equip = getAdvancedAhuSystemEquip()
-            updateCurrentTemp(roomTemperature, equip)
-            updateHumidity(humidity, equip)
+            updateCurrentTemp(roomTemperature, equip,cmDevice)
+            updateHumidity(humidity, equip,cmDevice)
+            cmDevice.rssi.writeHisVal(1.0)
 
         } else {
             CcuLog.e(L.TAG_CCU_DEVICE, "handleAdvancedAhuCmUpdate : cmDevice.deviceRef is empty")
@@ -85,20 +86,23 @@ fun handleAdvancedAhuCmUpdate(messageT: CmToCcuOverUsbCmRegularUpdateMessage_t) 
     }
 }
 
-private fun updateCurrentTemp(roomTemperature: Double, equip: AdvancedHybridSystemEquip) {
+private fun updateCurrentTemp(roomTemperature: Double, equip: AdvancedHybridSystemEquip, cmDevice: CmBoardDevice) {
     if (equip.cmCurrentTemp.pointExists()) {
+        cmDevice.currentTemp.writeHisVal(roomTemperature)
         val currentTemp = Pulse.getCMRoomTempConversion(roomTemperature, 0.0)
-        CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Cm Current temp $currentTemp")
         equip.cmCurrentTemp.writeHisVal(currentTemp)
+        CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Cm Current temp $currentTemp")
     } else {
         CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : cmCurrentTemp point not found")
     }
 }
 
-private fun updateHumidity(humidity: Double, equip: AdvancedHybridSystemEquip) {
+private fun updateHumidity(humidity: Double, equip: AdvancedHybridSystemEquip, cmDevice: CmBoardDevice) {
     if (equip.outsideHumidity.pointExists()) {
-        CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Humidity $humidity")
+        cmDevice.humiditySensor.writeHisVal(humidity)
+        val humidity = CCUUtils.roundToTwoDecimal(humidity / 100)
         equip.cmHumidity.writeHisVal(humidity)
+        CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Humidity $humidity")
     } else {
         CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : outsideHumidity point not found")
     }

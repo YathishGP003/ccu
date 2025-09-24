@@ -1,5 +1,8 @@
 package a75f.io.logic.util;
+import static a75f.io.logic.L.TAG_CCU_PROXY;
 import static a75f.io.logic.util.backupfiles.FileConstants.ADB_COMMANDS_PATH;
+import static a75f.io.logic.util.backupfiles.FileConstants.START_UP_COMMAND;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -10,11 +13,12 @@ import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
 import a75f.io.logger.CcuLog;
+
 public class CCUProxySettings {
     public static void setUpProxySettingsIfExists(){
-        File proxySettings = new File(ADB_COMMANDS_PATH+"startUpAdbCommands.txt");
+        File proxySettings = new File(ADB_COMMANDS_PATH + START_UP_COMMAND);
         boolean isProxySettings = proxySettings.exists();
-        CcuLog.i("CCU_PROXY","Is proxySettings exists ? "+proxySettings.exists());
+        CcuLog.i(TAG_CCU_PROXY,"Is proxySettings exists ? "+proxySettings.exists());
         if(isProxySettings) {
             Timer timer = new Timer();
             timer.schedule(new TimerTask() {
@@ -29,7 +33,7 @@ public class CCUProxySettings {
                 }
             }, 60000);
         } else{
-            CcuLog.i("CCU_PROXY","IP settings does not exist ");
+            CcuLog.i(TAG_CCU_PROXY,"IP settings does not exist ");
         }
     }
     private static void setStaticIpIfExists(File proxySettings) throws FileNotFoundException {
@@ -41,7 +45,7 @@ public class CCUProxySettings {
         reader.close();
     }
     public static void runRootCommand(String command) {
-        CcuLog.i("CCU_PROXY","Command Executed: "+command);
+        CcuLog.i(TAG_CCU_PROXY,"Command Executed: "+command);
         try {
             Process process = Runtime.getRuntime().exec("su");
             DataOutputStream os = new DataOutputStream(process.getOutputStream());
@@ -71,7 +75,7 @@ public class CCUProxySettings {
     }
 
     public static boolean CheckEthernet() {
-        CcuLog.i("CCU_PROXY","CheckEthernet : ");
+        CcuLog.i(TAG_CCU_PROXY,"CheckEthernet : ");
         boolean isEthernetConnected = false;
         String checkEthernetConnected = ShellExecute("cat /sys/class/net/eth0/operstate");
         if (checkEthernetConnected.contains("up")) {

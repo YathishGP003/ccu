@@ -373,14 +373,13 @@ class OtaStatusDiagPoint {
                 .readEntity("equip and diag or domainName == \"${DomainName.diagEquip}\"")
             if(daigEquip.isEmpty()) return
 
-            if (daigEquip["domainName"] != null && daigEquip["domainName"].toString() == DomainName.diagEquip) {
-                Domain.isDiagEquipInitialised();
+            if (daigEquip["domainName"] != null && daigEquip["domainName"].toString() == DomainName.diagEquip && Domain.isDiagEquipInitialised()) {
                 CcuLog.e(L.TAG_CCU_DOWNLOAD, "updateCCUOtaStatus: DM DiagEquip")
                 Domain.diagEquip.otaStatusCCU.writeHisVal(status.ordinal.toDouble())
             } else {
                 CcuLog.e(L.TAG_CCU_DOWNLOAD, "updateCCUOtaStatus: Non DM DiagEquip")
                 hayStack.writeHisValByQuery(
-                    "ota and status and equipRef ==\"${daigEquip.get("id")}\"",
+                    "ota and status and equipRef ==\"${daigEquip["id"]}\"",
                     status.ordinal.toDouble()
                 )
             }

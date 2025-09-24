@@ -1,9 +1,8 @@
 package a75f.io.renatus.util.remotecommand.bundle
 
+import a75f.io.logger.CcuLog
 import a75f.io.renatus.RenatusApp
 import android.content.pm.ApplicationInfo
-import android.util.Log
-import okhttp3.internal.wait
 import java.io.DataOutputStream
 import java.io.File
 import java.io.IOException
@@ -30,7 +29,7 @@ open class BaseBundleApp(val fileName: String) {
         try {
             // Do the magic
             val appInfo = RenatusApp.getAppContext().applicationInfo
-            Log.d(TAG, "ExecuteAsRoot===>rooted=" + RenatusApp.isRooted() + ", system flag=" + (appInfo.flags and ApplicationInfo.FLAG_SYSTEM))
+            CcuLog.d(TAG, "ExecuteAsRoot===>rooted=" + RenatusApp.isRooted() + ", system flag=" + (appInfo.flags and ApplicationInfo.FLAG_SYSTEM))
 
             if (RenatusApp.isRooted()) {
                 for (instruction in instructions) {
@@ -40,7 +39,7 @@ open class BaseBundleApp(val fileName: String) {
                     val es = p.errorStream
                     val os =
                         DataOutputStream(p.outputStream)
-                    Log.d(TAG, "Executing command: '${instruction.command}'")
+                    CcuLog.d(TAG, "Executing command: '${instruction.command}'")
 
                     os.writeBytes(instruction.command + "\n")
                     os.writeBytes("exit $?\n")
@@ -64,39 +63,38 @@ open class BaseBundleApp(val fileName: String) {
                     stdOutput = stdOutput.trim { it <= ' ' }
                     p.waitFor()
 
-                    Log.d(TAG, "     command status: ${p.exitValue()} ${if (p.exitValue() == 0) "Success" else "*** FAILURE ***"}")
+                    CcuLog.d(TAG, "     command status: ${p.exitValue()} ${if (p.exitValue() == 0) "Success" else "*** FAILURE ***"}")
 
                     if (stdOutput.isNotEmpty()) {
-                        Log.d(TAG, "     stdout: $stdOutput")
+                        CcuLog.d(TAG, "     stdout: $stdOutput")
                     }
                     if (errorOutput.isNotEmpty()) {
-                        Log.d(TAG, "     stderr: $errorOutput")
+                        CcuLog.d(TAG, "     stderr: $errorOutput")
                     }
 
                     if (p.exitValue() != instruction.successStatus) {
                         if (instruction.fatal) {
                             val msg = "     command failed with status ${p.exitValue()} (FATAL ERROR)"
-                            Log.e(TAG, msg)
-                            Log.e(TAG, "     *** FATAL ERROR detected, aborting further commands ***")
+                            CcuLog.e(TAG, msg)
+                            CcuLog.e(TAG, "     *** FATAL ERROR detected, aborting further commands ***")
                             throw Exception(msg)
                         } else {
                             val msg = "     command failed with status ${p.exitValue()} (Ignoring NON-FATAL ERROR)"
-                            Log.e(TAG, msg)
+                            CcuLog.e(TAG, msg)
                         }
                     }
                 }
-                val appInfo2 = RenatusApp.getAppContext().applicationInfo
-                Log.d(TAG, "RenatusAPP ExecuteAsRoot END")
+                CcuLog.d(TAG, "RenatusAPP ExecuteAsRoot END")
             } else {
                 // Two semicolons in case one of the commands is actually multiple commands separated by a semicolon
-                Log.e(TAG, "Tablet is NOT rooted, unable to execute remote commands:" +
+                CcuLog.e(TAG, "Tablet is NOT rooted, unable to execute remote commands:" +
                          java.lang.String.join(";; ", instructions.map { it.command })
                 )
             }
         } catch (e: IOException) {
-            Log.e(TAG, e.toString())
+            CcuLog.e(TAG, e.toString())
         } catch (e: InterruptedException) {
-            Log.e(TAG, e.toString())
+            CcuLog.e(TAG, e.toString())
         }
     }
 

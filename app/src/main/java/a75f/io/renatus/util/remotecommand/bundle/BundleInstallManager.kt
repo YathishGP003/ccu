@@ -21,6 +21,7 @@ import a75f.io.renatus.util.remotecommand.bundle.models.ArtifactDTO
 import a75f.io.renatus.util.remotecommand.bundle.models.BundleDTO
 import a75f.io.renatus.util.remotecommand.bundle.models.UpgradeBundle
 import a75f.io.renatus.util.remotecommand.bundle.service.VersionManagementService
+import a75f.io.renatus.util.remotecommand.bundle.util.PrivAppUpdater
 import android.app.Activity
 import android.app.DownloadManager
 import android.content.Context
@@ -1147,7 +1148,7 @@ class BundleInstallManager: BundleInstallListener {
 
                                 CcuLog.i(
                                     L.TAG_CCU_REPLACE,
-                                    " Downloaded: ${downloadedMB} MB / ${downloadSizeMB} MB ($progressPercent%) for $fileName (ID: $downloadId)"
+                                    " Downloaded: $downloadedMB MB / $downloadSizeMB MB ($progressPercent%) for $fileName (ID: $downloadId)"
                                 )
 
                                 if (progressPercent > 0 || downloadSizeMB > 0.0) {
@@ -1225,7 +1226,7 @@ class BundleInstallManager: BundleInstallListener {
             GlobalScope.launch(Dispatchers.Main) {
                 if(isHomeAppPresent && isCCUAppPresent){
                     CcuLog.i(L.TAG_CCU_REPLACE, "Both Home and CCU apps are present, setting reboot flag")
-                   PreferenceUtil.setIsRebootRequiredAfterReplaceFlag(true);
+                   PreferenceUtil.setIsRebootRequiredAfterReplaceFlag(true)
                 }
                 if (isHomeAppPresent) {
                     CcuLog.i(L.TAG_CCU_REPLACE, "Installing.... $homeAppName")
@@ -1233,7 +1234,15 @@ class BundleInstallManager: BundleInstallListener {
                 }
                 if (isCCUAppPresent) {
                     CcuLog.i(L.TAG_CCU_REPLACE, "Installing.... $ccuAppName")
-                    CCUApp(ccuAppName).installApp()
+                    val versionsListFromPrivAppToRemove = PrivAppUpdater.getVersionsToRemoveFromPrivApp(context, ccuAppName)
+                    if (versionsListFromPrivAppToRemove.isNotEmpty()) {
+                        if (PrivAppUpdater.isDBDeleteRequired(ccuAppName)) {
+                            PrivAppUpdater.deleteRoomDb()
+                        }
+                        CCUApp(ccuAppName, versionsListFromPrivAppToRemove).installApp()
+                    } else {
+                        CCUApp(ccuAppName).installApp()
+                    }
                 }
                 delay(3000)
                 if (isHomeAppPresent) {

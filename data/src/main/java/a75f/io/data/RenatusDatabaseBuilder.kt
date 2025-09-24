@@ -38,5 +38,6 @@ object RenatusDatabaseBuilder {
             .addMigrations(RenatusDatabase.MIGRATION_7_10)
             .addMigrations(RenatusDatabase.MIGRATION_8_10)
             .addMigrations(RenatusDatabase.MIGRATION_9_10)
+            .fallbackToDestructiveMigrationOnDowngrade()
             .build()
 }

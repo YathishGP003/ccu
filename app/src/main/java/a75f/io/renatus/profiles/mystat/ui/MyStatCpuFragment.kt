@@ -5,12 +5,14 @@ import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.MinMaxConfiguration
+import a75f.io.renatus.compose.SingleOptionConfiguration
 import a75f.io.renatus.compose.StagedFanConfiguration
 import a75f.io.renatus.compose.Title
-import a75f.io.renatus.compose.singleOptionConfiguration
 import a75f.io.renatus.profiles.mystat.minMaxVoltage
 import a75f.io.renatus.profiles.mystat.testVoltage
 import a75f.io.renatus.profiles.mystat.viewmodels.MyStatCpuViewModel
@@ -22,7 +24,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
@@ -127,10 +131,12 @@ class MyStatCpuFragment : MyStatFragment() {
                         TempOffset()
                         AutoForcedOccupiedAutoAwayConfig()
                         Label()
-                        Configurations()
+                        MyStatConfiguration()
                         Co2Control()
                         AnalogMinMaxConfigurations()
                         ThresholdTargetConfig()
+                        PinPasswordView(viewModel)
+                        DisplayInDeviceConfig(viewModel)
                         SaveConfig(viewModel)
                     }
                 }
@@ -138,16 +144,6 @@ class MyStatCpuFragment : MyStatFragment() {
         }
     }
 
-    /**
-     * This function is used to display the Relay configurations
-     * overriden because analog out has some staged configuration specific to 2Pipe profile
-     */
-    @Composable
-    fun Configurations() {
-        MyStatDrawRelays()
-        DrawAnalogOutput()
-        UniversalInput()
-    }
 
     @Composable
     fun AnalogMinMaxConfigurations() {
@@ -163,11 +159,17 @@ class MyStatCpuFragment : MyStatFragment() {
     @Composable
     fun CoolingSpeedMinMax() {
         (viewModel.viewState.value as MyStatCpuViewState).apply {
-            if (analogOut1Enabled) ConfigMinMax(
-                analogOut1Association,
+            if (universalOut1.enabled) ConfigMinMax(
+                universalOut1.association,
                 analogOut1MinMax.coolingConfig,
-                a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.COOLING.displayName,
-                a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.COOLING.ordinal
+                MyStatCpuAnalogOutMapping.COOLING.displayName,
+                MyStatCpuAnalogOutMapping.COOLING.ordinal, 1
+            )
+            if (universalOut2.enabled) ConfigMinMax(
+                universalOut2.association,
+                analogOut2MinMax.coolingConfig,
+                MyStatCpuAnalogOutMapping.COOLING.displayName,
+                MyStatCpuAnalogOutMapping.COOLING.ordinal, 2
             )
         }
     }
@@ -175,11 +177,17 @@ class MyStatCpuFragment : MyStatFragment() {
     @Composable
     fun HeatingSpeedMinMax() {
         (viewModel.viewState.value as MyStatCpuViewState).apply {
-            if (analogOut1Enabled) ConfigMinMax(
-                analogOut1Association,
+            if (universalOut1.enabled) ConfigMinMax(
+                universalOut1.association,
                 analogOut1MinMax.heatingConfig,
-                a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.HEATING.displayName,
-                a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.HEATING.ordinal
+                MyStatCpuAnalogOutMapping.HEATING.displayName,
+                MyStatCpuAnalogOutMapping.HEATING.ordinal,1
+            )
+            if (universalOut2.enabled) ConfigMinMax(
+                universalOut2.association,
+                analogOut2MinMax.heatingConfig,
+                MyStatCpuAnalogOutMapping.HEATING.displayName,
+                MyStatCpuAnalogOutMapping.HEATING.ordinal,2
             )
         }
     }
@@ -188,11 +196,17 @@ class MyStatCpuFragment : MyStatFragment() {
     @Composable
     fun DcvDamperMinMax() {
         (viewModel.viewState.value as MyStatCpuViewState).apply {
-            if (analogOut1Enabled) ConfigMinMax(
-                analogOut1Association,
+            if (universalOut1.enabled) ConfigMinMax(
+                universalOut1.association,
                 analogOut1MinMax.dcvDamperConfig,
-                a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.DCV_DAMPER.displayName,
-                a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.DCV_DAMPER.ordinal
+                MyStatCpuAnalogOutMapping.DCV_DAMPER_MODULATION.displayName,
+                MyStatCpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal,1
+            )
+            if (universalOut2.enabled) ConfigMinMax(
+                universalOut2.association,
+                analogOut2MinMax.dcvDamperConfig,
+                MyStatCpuAnalogOutMapping.DCV_DAMPER_MODULATION.displayName,
+                MyStatCpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal,2
             )
         }
     }
@@ -200,11 +214,17 @@ class MyStatCpuFragment : MyStatFragment() {
     @Composable
     fun LinearFanMinMax() {
         (viewModel.viewState.value as MyStatCpuViewState).apply {
-            if (analogOut1Enabled) ConfigMinMax(
-                analogOut1Association,
+            if (universalOut1.enabled) ConfigMinMax(
+                universalOut1.association,
                 analogOut1MinMax.linearFanSpeedConfig,
-                a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.displayName,
-                a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal
+                MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.displayName,
+                MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal,1
+            )
+            if (universalOut2.enabled) ConfigMinMax(
+                universalOut2.association,
+                analogOut2MinMax.linearFanSpeedConfig,
+                MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.displayName,
+                MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal,2
             )
         }
     }
@@ -212,17 +232,15 @@ class MyStatCpuFragment : MyStatFragment() {
     @Composable
     fun FanConfiguration() {
         (viewModel.viewState.value as MyStatCpuViewState).apply {
-            if (analogOut1Association == a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal) {
-                val cooling1Enabled = viewModel.isAnyRelayMappedToState(a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping.COOLING_STAGE_1)
-                val cooling2Enabled = viewModel.isAnyRelayMappedToState(a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping.COOLING_STAGE_2)
-                val heating1Enabled = viewModel.isAnyRelayMappedToState(a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping.HEATING_STAGE_1)
-                val heating2Enabled = viewModel.isAnyRelayMappedToState(a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping.HEATING_STAGE_2)
-                singleOptionConfiguration(minLabel = stringResource(R.string.analog_out_fan_recirculate),
-                    itemList = minMaxVoltage,
-                    unit = "V",
-                    minDefault = recirculateFanConfig.toString(),
-                    onMinSelected = { recirculateFanConfig = it.value.toInt() })
 
+            val universalOut1Mapped = (universalOut1.enabled && universalOut1.association == MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)
+            val universalOut2Mapped = (universalOut2.enabled && universalOut2.association == MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)
+
+            if (universalOut1Mapped || universalOut2Mapped) {
+                val cooling1Enabled = viewModel.isAnyRelayMappedToState(MyStatCpuRelayMapping.COOLING_STAGE_1)
+                val cooling2Enabled = viewModel.isAnyRelayMappedToState(MyStatCpuRelayMapping.COOLING_STAGE_2)
+                val heating1Enabled = viewModel.isAnyRelayMappedToState(MyStatCpuRelayMapping.HEATING_STAGE_1)
+                val heating2Enabled = viewModel.isAnyRelayMappedToState(MyStatCpuRelayMapping.HEATING_STAGE_2)
                 StagedFanConfiguration(
                     label1 = stringResource(R.string.fan_out_cooling_stage1),
                     label2 = stringResource(R.string.fan_out_cooling_stage2),
@@ -247,11 +265,32 @@ class MyStatCpuFragment : MyStatFragment() {
                     stage1Enabled = heating1Enabled,
                     stage2Enabled = heating2Enabled)
             }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp)
+            ) {
+                if (universalOut1Mapped) {
+                    SingleOptionConfiguration(minLabel = "Universal-Out 1 \nFan Recirculate",
+                        itemList = minMaxVoltage,
+                        unit = "V",
+                        minDefault = universalOut1recirculateFanConfig.toString(),
+                        onMinSelected = { universalOut1recirculateFanConfig = it.value.toInt() })
+                }
+                if (universalOut2Mapped) {
+                    SingleOptionConfiguration(minLabel = "Universal-Out 2 \nFan Recirculate",
+                        itemList = minMaxVoltage,
+                        unit = "V",
+                        minDefault = universalOut2recirculateFanConfig.toString(),
+                        onMinSelected = { universalOut2recirculateFanConfig = it.value.toInt() })
+                }
+            }
 
-            if (analogOut1Enabled && (analogOut1Association == a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal ||
-                        analogOut1Association == a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
-                MinMaxConfiguration(minLabel = stringResource(R.string.analog_out_fan_low),
-                    maxLabel = stringResource(R.string.analog_out_fan_high),
+
+            if (universalOut1.enabled && (universalOut1.association == MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal ||
+                        universalOut1.association == MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
+                MinMaxConfiguration(minLabel = "Universal-Out 1\n at Fan Low",
+                    maxLabel = "Universal-Out 1\n at Fan High",
                     itemList = testVoltage,
                     unit = "%",
                     minDefault = analogOut1FanConfig.low.toString(),
@@ -259,6 +298,18 @@ class MyStatCpuFragment : MyStatFragment() {
                     onMinSelected = { analogOut1FanConfig.low = it.value.toInt() },
                     onMaxSelected = { analogOut1FanConfig.high = it.value.toInt() })
             }
+            if (universalOut2.enabled && (universalOut2.association == MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal ||
+                        universalOut2.association == MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
+                MinMaxConfiguration(minLabel = "Universal-Out 2\n at Fan Low",
+                    maxLabel = "Universal-Out 2\n at Fan High",
+                    itemList = testVoltage,
+                    unit = "%",
+                    minDefault = analogOut2FanConfig.low.toString(),
+                    maxDefault = analogOut2FanConfig.high.toString(),
+                    onMinSelected = { analogOut2FanConfig.low = it.value.toInt() },
+                    onMaxSelected = { analogOut2FanConfig.high = it.value.toInt() })
+            }
+
         }
     }
 

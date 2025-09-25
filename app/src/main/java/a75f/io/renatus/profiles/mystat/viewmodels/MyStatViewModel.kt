@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2RelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatProfile
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
@@ -103,6 +104,7 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     open fun saveConfiguration() {}
+    open fun getAnalogStatIndex() = 0
 
     fun disablePasteConfiguration() {
         viewModelScope.launch(Dispatchers.Main) {
@@ -203,23 +205,25 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
                 1 -> device.relay1.readPointValue() > 0
                 2 -> device.relay2.readPointValue() > 0
                 3 -> device.relay3.readPointValue() > 0
-                4 -> device.relay4.readPointValue() > 0
+                4 -> device.universalOut1.readPointValue() > 0
+                5 -> device.universalOut2.readPointValue() > 0
                 else -> false
             }
         }
         return false
     }
 
-    fun getAnalogValue(): Double {
+    fun getAnalogValue(index: Int): Double {
         if (equipRef != null) {
             // Device ref is not required here so passing empty string
             val device = getMyStatDomainDevice("", equipRef!!)
-            return device.analog1Out.readPointValue()
+            if (index == 4) return device.universalOut1.readPointValue()
+            if (index == 5) return device.universalOut2.readPointValue()
         }
         return 0.0
     }
 
-    fun sendTestSignal(relayIndex: Int, relayStatus: Double, analogValue: Double? = null) {
+    fun sendTestSignal(relayIndex: Int = 0, relayStatus: Double = 0.0, universalOut1: Double? = null, universalOut2: Double? = null) {
 
         if (equipRef != null) {
             // Device ref is not required here so passing empty string
@@ -228,10 +232,14 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
                 1 -> device.relay1.writePointValue(relayStatus)
                 2 -> device.relay2.writePointValue(relayStatus)
                 3 -> device.relay3.writePointValue(relayStatus)
-                4 -> device.relay4.writePointValue(relayStatus)
+                4 -> device.universalOut1.writePointValue(relayStatus)
+                5 -> device.universalOut2.writePointValue(relayStatus)
             }
-            if (analogValue != null) device.analog1Out.writePointValue(analogValue)
-            CcuLog.d(L.TAG_CCU_MSHST, "R1 ${device.relay1.readPointValue()} R2 ${device.relay2.readPointValue()} R3 ${device.relay3.readPointValue()} R4 ${device.relay4.readPointValue()} A1 ${device.analog1Out.readPointValue()}")
+            if (universalOut1 != null) device.universalOut1.writePointValue(universalOut1)
+            if (universalOut2 != null) device.universalOut2.writePointValue(universalOut2)
+
+            CcuLog.d(L.TAG_CCU_MSHST, "R1 ${device.relay1.readPointValue()} R2 ${device.relay2.readPointValue()} R3 ${device.relay3.readPointValue()} \n" +
+                    "U1 ${device.universalOut1.readPointValue()} U2 ${device.universalOut2.readPointValue()}")
         } else {
             showToast("Please pair equip to send test command",context)
             CcuLog.d(L.TAG_CCU_MSHST, "Please pair equip to send test command")
@@ -293,6 +301,21 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
                 isValidConfig =  false
             }
         }
+
+        if (this is MyStatPipe2ViewModel) {
+            if (viewState.value.isAnyRelayEnabledAndMapped(MyStatPipe2RelayMapping.FAN_LOW_VENTILATION.ordinal)
+                && viewState.value.isAnyRelayEnabledAndMapped(MyStatPipe2RelayMapping.FAN_LOW_SPEED.ordinal)) {
+                showErrorDialog(
+                    context,
+                    Html.fromHtml(
+                        "The profile must not have <b>Fan Low Speed - Ventilation and Fan Low Speed</b> mapped. Please remove any one  mapping from the mapping.",
+                        Html.FROM_HTML_MODE_LEGACY
+                    )
+                )
+                isValidConfig = false
+            }
+        }
+
         return isValidConfig
     }
 

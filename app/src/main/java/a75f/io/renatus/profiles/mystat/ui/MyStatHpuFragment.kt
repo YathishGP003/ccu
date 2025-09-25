@@ -2,19 +2,14 @@ package a75f.io.renatus.profiles.mystat.ui
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
-import a75f.io.domain.api.DomainName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuAnalogOutMapping
-import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuRelayMapping
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.MinMaxConfiguration
-import a75f.io.renatus.composables.RelayConfiguration
 import a75f.io.renatus.compose.Title
-import a75f.io.renatus.profiles.hyperstatv2.util.ConfigState
-import a75f.io.renatus.profiles.mystat.getAllowedValues
 import a75f.io.renatus.profiles.mystat.testVoltage
 import a75f.io.renatus.profiles.mystat.viewmodels.MyStatHpuViewModel
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatHpuViewState
@@ -24,11 +19,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
@@ -36,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
@@ -134,83 +125,13 @@ class MyStatHpuFragment : MyStatFragment() {
                         TempOffset()
                         AutoForcedOccupiedAutoAwayConfig()
                         Label()
-                        Configurations()
+                        MyStatConfiguration()
                         Co2Control()
                         AnalogMinMaxConfigurations()
                         ThresholdTargetConfig()
+                        PinPasswordView(viewModel)
+                        DisplayInDeviceConfig(viewModel)
                         SaveConfig(viewModel)
-                    }
-                }
-            }
-        }
-    }
-
-
-    @Composable
-    fun Configurations() {
-        MyStatDrawRelays()
-        DrawAnalogOutput()
-        UniversalInput()
-    }
-
-
-    @Composable
-    override fun MyStatDrawRelays() {
-        fun getDisabledIndices(config: ConfigState): List<Int> {
-            return if (viewModel.viewState.value.isAnyRelayMapped(
-                    MyStatHpuRelayMapping.CHANGE_OVER_B_HEATING.ordinal,
-                    config)) {
-                listOf(MyStatHpuRelayMapping.CHANGE_OVER_O_COOLING.ordinal)
-            } else if (viewModel.viewState.value.isAnyRelayMapped(
-                    MyStatHpuRelayMapping.CHANGE_OVER_O_COOLING.ordinal,
-                    config)) {
-                listOf(MyStatHpuRelayMapping.CHANGE_OVER_B_HEATING.ordinal)
-            } else { emptyList() }
-        }
-
-        Row {
-            Image(
-                painter = painterResource(id = R.drawable.ms_relays),
-                contentDescription = "Relays",
-                modifier = Modifier
-                    .weight(1.5f)
-                    .padding(top = 8.dp)
-                    .height(240.dp)
-            )
-
-            val relayEnums =
-                getAllowedValues(DomainName.relay1OutputAssociation, viewModel.equipModel)
-
-            Column(modifier = Modifier.weight(4f)) {
-
-                viewModel.viewState.value.apply {
-                    repeat(4) { index ->
-                        val relayConfig = when (index) {
-                            0 -> relay1Config
-                            1 -> relay2Config
-                            2 -> relay3Config
-                            3 -> relay4Config
-                            else -> throw IllegalArgumentException("Invalid relay index: $index")
-                        }
-                        val padding = (index + 1 ) + 2
-                        RelayConfiguration(
-                            relayName = "Relay ${index + 1}",
-                            enabled = relayConfig.enabled,
-                            onEnabledChanged = { relayConfig.enabled = it },
-                            association = relayEnums[relayConfig.association],
-                            unit = "",
-                            relayEnums = relayEnums,
-                            onAssociationChanged = { associationIndex ->
-                                relayConfig.association = associationIndex.index
-                            },
-                            isEnabled = relayConfig.enabled,
-                            testState = viewModel.getRelayStatus(index + 1),
-                            onTestActivated = {
-                                viewModel.sendTestSignal(index + 1, if (it) 1.0 else 0.0)
-                            },
-                            padding = (4 + padding),
-                            disabledIndices = getDisabledIndices(relayConfig)
-                        )
                     }
                 }
             }
@@ -230,11 +151,17 @@ class MyStatHpuFragment : MyStatFragment() {
     @Composable
     fun CompressorSpeedMinMax() {
         (viewModel.viewState.value as MyStatHpuViewState).apply {
-            if (analogOut1Enabled) ConfigMinMax(
-                analogOut1Association,
+            if (universalOut1.enabled) ConfigMinMax(
+                universalOut1.association,
                 analogOut1MinMax.compressorConfig,
                 MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.displayName,
-                MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal
+                MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal,1
+            )
+            if (universalOut2.enabled) ConfigMinMax(
+                universalOut2.association,
+                analogOut2MinMax.compressorConfig,
+                MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.displayName,
+                MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal,2
             )
         }
     }
@@ -242,11 +169,17 @@ class MyStatHpuFragment : MyStatFragment() {
     @Composable
     fun DcvDamperMinMax() {
         (viewModel.viewState.value as MyStatHpuViewState).apply {
-            if (analogOut1Enabled) ConfigMinMax(
-                analogOut1Association,
+            if (universalOut1.enabled) ConfigMinMax(
+                universalOut1.association,
                 analogOut1MinMax.dcvDamperConfig,
                 MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.displayName,
-                MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal
+                MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal,1
+            )
+            if (universalOut2.enabled) ConfigMinMax(
+                universalOut2.association,
+                analogOut2MinMax.dcvDamperConfig,
+                MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.displayName,
+                MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal,2
             )
         }
     }
@@ -254,11 +187,17 @@ class MyStatHpuFragment : MyStatFragment() {
     @Composable
     fun FanSpeedMinMax() {
         (viewModel.viewState.value as MyStatHpuViewState).apply {
-            if (analogOut1Enabled) ConfigMinMax(
-                analogOut1Association,
+            if (universalOut1.enabled) ConfigMinMax(
+                universalOut1.association,
                 analogOut1MinMax.fanSpeedConfig,
                 MyStatHpuAnalogOutMapping.FAN_SPEED.displayName,
-                MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal
+                MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal,1
+            )
+            if (universalOut2.enabled) ConfigMinMax(
+                universalOut2.association,
+                analogOut2MinMax.fanSpeedConfig,
+                MyStatHpuAnalogOutMapping.FAN_SPEED.displayName,
+                MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal,2
             )
         }
     }
@@ -266,15 +205,25 @@ class MyStatHpuFragment : MyStatFragment() {
     @Composable
     fun FanConfiguration() {
         (viewModel.viewState.value as MyStatHpuViewState).apply {
-            if (analogOut1Enabled && analogOut1Association == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal) {
-                MinMaxConfiguration(minLabel = stringResource(R.string.analog_out_fan_low),
-                    maxLabel = stringResource(R.string.analog_out_fan_high),
+            if (universalOut1.enabled && universalOut1.association == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal) {
+                MinMaxConfiguration(minLabel = "Universal-Out 1\n at Fan Low",
+                    maxLabel = "Universal-Out 1\n at Fan High",
                     itemList = testVoltage,
                     unit = "%",
                     minDefault = analogOut1FanConfig.low.toString(),
                     maxDefault = analogOut1FanConfig.high.toString(),
                     onMinSelected = { analogOut1FanConfig.low = it.value.toInt() },
                     onMaxSelected = { analogOut1FanConfig.high = it.value.toInt() })
+            }
+            if (universalOut2.enabled && universalOut2.association == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal) {
+                MinMaxConfiguration(minLabel = "Universal-Out 2\n at Fan Low",
+                    maxLabel = "Universal-Out 2\n at Fan High",
+                    itemList = testVoltage,
+                    unit = "%",
+                    minDefault = analogOut2FanConfig.low.toString(),
+                    maxDefault = analogOut2FanConfig.high.toString(),
+                    onMinSelected = { analogOut2FanConfig.low = it.value.toInt() },
+                    onMaxSelected = { analogOut2FanConfig.high = it.value.toInt() })
             }
         }
     }

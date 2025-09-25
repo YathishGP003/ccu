@@ -153,24 +153,10 @@ fun fetchUserIntents(equip: DomainEquip): UserIntents {
     }
 }
 
-fun getInCalibratedPointPoint(data: Int): CalibratedPoint {
-    return CalibratedPoint(
-        "InCalibratedPoint", // dummy name
-        "", data.toDouble()
-    )
-}
-
 
 data class StagesCounts(
     var coolingStages: CalibratedPoint = CalibratedPoint("coolingStages", "", 0.0),
     var heatingStages: CalibratedPoint = CalibratedPoint("heatingStages", "", 0.0),
     var fanStages: CalibratedPoint = CalibratedPoint("fanStages", "", 0.0),
     var compressorStages: CalibratedPoint = CalibratedPoint("compressorStages", "", 0.0),
-) {
-    fun resetCounts() {
-        coolingStages.data = 0.0
-        heatingStages.data = 0.0
-        fanStages.data = 0.0
-        compressorStages.data = 0.0
-    }
-}
+)

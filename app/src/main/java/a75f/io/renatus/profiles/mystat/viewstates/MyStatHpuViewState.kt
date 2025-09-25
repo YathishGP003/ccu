@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
  */
 
 class MyStatHpuViewState : MyStatViewState() {
+
     var analogOut1MinMax by mutableStateOf(
         HpuAnalogOutMinMaxConfig(
             MinMaxConfig(2, 10),
@@ -20,10 +21,20 @@ class MyStatHpuViewState : MyStatViewState() {
             MinMaxConfig(2, 10)
         )
     )
+    var analogOut2MinMax by mutableStateOf(
+        HpuAnalogOutMinMaxConfig(
+            MinMaxConfig(2, 10),
+            MinMaxConfig(2, 10),
+            MinMaxConfig(2, 10)
+        )
+    )
+
     var analogOut1FanConfig by mutableStateOf(FanSpeedConfig(70, 100))
+    var analogOut2FanConfig by mutableStateOf(FanSpeedConfig(70, 100))
 
     override fun isDcvMapped(): Boolean {
         return (isAnyRelayEnabledAndMapped(MyStatHpuRelayMapping.DCV_DAMPER.ordinal)
-                || (analogOut1Enabled && analogOut1Association == MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal))
+                || (universalOut1.enabled && universalOut1.association == MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal)
+                || (universalOut2.enabled && universalOut2.association == MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal))
     }
 }

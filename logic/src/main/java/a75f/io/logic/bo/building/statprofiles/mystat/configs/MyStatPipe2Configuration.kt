@@ -22,6 +22,8 @@ class MyStatPipe2Configuration(nodeAddress: Int, nodeType: String, priority: Int
 
     lateinit var analogOut1MinMaxConfig: MyStatPipe2MinMaxConfig
     lateinit var analogOut1FanSpeedConfig: MyStatFanConfig
+    lateinit var analogOut2MinMaxConfig: MyStatPipe2MinMaxConfig
+    lateinit var analogOut2FanSpeedConfig: MyStatFanConfig
 
     override fun getActiveConfiguration(): MyStatConfiguration {
         val pipe2RawEquip =
@@ -37,14 +39,37 @@ class MyStatPipe2Configuration(nodeAddress: Int, nodeType: String, priority: Int
         return this
     }
 
+    override fun getAnalogStartIndex() = MyStatPipe2RelayMapping.values().size
+
     private fun readPipe2ActiveConfig(equip: MyStatPipe2Equip) {
         analogOut1MinMaxConfig.apply {
-            waterModulatingValue.min.currentVal = getActivePointValue(equip.analog1MinWaterValve, waterModulatingValue.min)
-            waterModulatingValue.max.currentVal = getActivePointValue(equip.analog1MaxWaterValve, waterModulatingValue.max)
-            fanSpeedConfig.min.currentVal = getActivePointValue(equip.analog1MinFanSpeed, fanSpeedConfig.min)
-            fanSpeedConfig.max.currentVal = getActivePointValue(equip.analog1MaxFanSpeed, fanSpeedConfig.max)
-            dcvDamperConfig.min.currentVal = getActivePointValue(equip.analog1MinDCVDamper, dcvDamperConfig.min)
-            dcvDamperConfig.max.currentVal = getActivePointValue(equip.analog1MaxDCVDamper, dcvDamperConfig.max)
+            waterModulatingValue.min.currentVal =
+                getActivePointValue(equip.analog1MinWaterValve, waterModulatingValue.min)
+            waterModulatingValue.max.currentVal =
+                getActivePointValue(equip.analog1MaxWaterValve, waterModulatingValue.max)
+            fanSpeedConfig.min.currentVal =
+                getActivePointValue(equip.analog1MinFanSpeed, fanSpeedConfig.min)
+            fanSpeedConfig.max.currentVal =
+                getActivePointValue(equip.analog1MaxFanSpeed, fanSpeedConfig.max)
+            dcvDamperConfig.min.currentVal =
+                getActivePointValue(equip.analog1MinDCVDamper, dcvDamperConfig.min)
+            dcvDamperConfig.max.currentVal =
+                getActivePointValue(equip.analog1MaxDCVDamper, dcvDamperConfig.max)
+        }
+
+        analogOut2MinMaxConfig.apply {
+            waterModulatingValue.min.currentVal =
+                getActivePointValue(equip.analog2MinWaterValve, waterModulatingValue.min)
+            waterModulatingValue.max.currentVal =
+                getActivePointValue(equip.analog2MaxWaterValve, waterModulatingValue.max)
+            fanSpeedConfig.min.currentVal =
+                getActivePointValue(equip.analog2MinFanSpeed, fanSpeedConfig.min)
+            fanSpeedConfig.max.currentVal =
+                getActivePointValue(equip.analog2MaxFanSpeed, fanSpeedConfig.max)
+            dcvDamperConfig.min.currentVal =
+                getActivePointValue(equip.analog2MinDCVDamper, dcvDamperConfig.min)
+            dcvDamperConfig.max.currentVal =
+                getActivePointValue(equip.analog2MaxDCVDamper, dcvDamperConfig.max)
         }
 
         analogOut1FanSpeedConfig.apply {
@@ -52,6 +77,10 @@ class MyStatPipe2Configuration(nodeAddress: Int, nodeType: String, priority: Int
             high.currentVal = getActivePointValue(equip.analog1FanHigh, high)
         }
 
+        analogOut2FanSpeedConfig.apply {
+            low.currentVal = getActivePointValue(equip.analog2FanLow, low)
+            high.currentVal = getActivePointValue(equip.analog2FanHigh, high)
+        }
     }
 
     override fun getDependencies(): List<ValueConfig> {
@@ -64,8 +93,20 @@ class MyStatPipe2Configuration(nodeAddress: Int, nodeType: String, priority: Int
                 add(dcvDamperConfig.min)
                 add(dcvDamperConfig.max)
             }
+            analogOut2MinMaxConfig.apply {
+                add(waterModulatingValue.min)
+                add(waterModulatingValue.max)
+                add(fanSpeedConfig.min)
+                add(fanSpeedConfig.max)
+                add(dcvDamperConfig.min)
+                add(dcvDamperConfig.max)
+            }
 
             analogOut1FanSpeedConfig.apply {
+                add(low)
+                add(high)
+            }
+            analogOut2FanSpeedConfig.apply {
                 add(low)
                 add(high)
             }
@@ -83,8 +124,20 @@ class MyStatPipe2Configuration(nodeAddress: Int, nodeType: String, priority: Int
                 add(dcvDamperConfig.min)
                 add(dcvDamperConfig.max)
             }
+            analogOut2MinMaxConfig.apply {
+                add(waterModulatingValue.min)
+                add(waterModulatingValue.max)
+                add(fanSpeedConfig.min)
+                add(fanSpeedConfig.max)
+                add(dcvDamperConfig.min)
+                add(dcvDamperConfig.max)
+            }
 
             analogOut1FanSpeedConfig.apply {
+                add(low)
+                add(high)
+            }
+            analogOut2FanSpeedConfig.apply {
                 add(low)
                 add(high)
             }
@@ -103,32 +156,63 @@ class MyStatPipe2Configuration(nodeAddress: Int, nodeType: String, priority: Int
                 getDefaultValConfig(DomainName.analog1FanLow, model),
                 getDefaultValConfig(DomainName.analog1FanHigh, model)
             )
+            analogOut2MinMaxConfig = MyStatPipe2MinMaxConfig(
+                MinMaxConfig(getDefaultValConfig(DomainName.analog2MinWaterValve, model), getDefaultValConfig(DomainName.analog2MaxWaterValve, model)),
+                MinMaxConfig(getDefaultValConfig(DomainName.analog2MinFanSpeed, model), getDefaultValConfig(DomainName.analog2MaxFanSpeed, model)),
+                MinMaxConfig(getDefaultValConfig(DomainName.analog2MinDCVDamper, model), getDefaultValConfig(DomainName.analog2MaxDCVDamper, model))
+            )
+            analogOut2FanSpeedConfig = MyStatFanConfig(
+                getDefaultValConfig(DomainName.analog2FanLow, model),
+                getDefaultValConfig(DomainName.analog2FanHigh, model)
+            )
         }
         return configuration
     }
 
     private fun isRelayExternalMapped(enabled: EnableConfig, association: AssociationConfig) = (enabled.enabled && association.associationVal == MyStatPipe2RelayMapping.EXTERNALLY_MAPPED.ordinal)
 
-    private fun isAnalogExternalMapped(enabled: EnableConfig, association: AssociationConfig) = (enabled.enabled && association.associationVal == MyStatPipe2AnalogOutMapping.EXTERNALLY_MAPPED.ordinal)
+    private fun isUniversalExternalMapped(
+        enabled: EnableConfig, association: AssociationConfig
+    ): Boolean {
+        return (enabled.enabled && association.associationVal == MyStatPipe2AnalogOutMapping.ANALOG_EXTERNALLY_MAPPED.ordinal
+                || association.associationVal == MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal)
+    }
 
     override fun getRelayMap(): Map<String, Boolean> {
         val relays = mutableMapOf<String, Boolean>()
         relays[DomainName.relay1] = isRelayExternalMapped(relay1Enabled, relay1Association)
         relays[DomainName.relay2] = isRelayExternalMapped(relay2Enabled, relay2Association)
         relays[DomainName.relay3] = isRelayExternalMapped(relay3Enabled, relay3Association)
-        relays[DomainName.relay4] = isRelayExternalMapped(relay4Enabled, relay4Association)
+        if (isRelayConfig(universalOut1Association.associationVal)) {
+            relays[DomainName.universal1Out] =
+                isRelayExternalMapped(universalOut1, universalOut1Association)
+        }
+        if (isRelayConfig(universalOut2Association.associationVal)) {
+            relays[DomainName.universal2Out] =
+                isRelayExternalMapped(universalOut2, universalOut2Association)
+        }
         return relays
     }
 
     override fun getAnalogMap(): Map<String, Pair<Boolean, String>> {
         val analogOuts = mutableMapOf<String, Pair<Boolean, String>>()
-        analogOuts[DomainName.analog1Out] = Pair(isAnalogExternalMapped(analogOut1Enabled, analogOut1Association), analogType(analogOut1Enabled))
+        if (isRelayConfig(universalOut1Association.associationVal).not()) {
+            analogOuts[DomainName.universal1Out] = Pair(
+                isUniversalExternalMapped(universalOut1, universalOut1Association), analogType(universalOut1)
+            )
+        }
+        if (isRelayConfig(universalOut2Association.associationVal).not()) {
+            analogOuts[DomainName.universal2Out] = Pair(
+                isUniversalExternalMapped(universalOut2, universalOut2Association), analogType(universalOut2)
+            )
+        }
         return analogOuts
     }
 
     private fun analogType(analogOutPort: EnableConfig): String {
         return when (analogOutPort) {
-            analogOut1Enabled -> getPortType(analogOut1Association, analogOut1MinMaxConfig)
+            universalOut1 -> getPortType(universalOut1Association, analogOut1MinMaxConfig)
+            universalOut2 -> getPortType(universalOut2Association, analogOut2MinMaxConfig)
             else -> "0-10v"
         }
     }
@@ -156,23 +240,42 @@ class MyStatPipe2Configuration(nodeAddress: Int, nodeType: String, priority: Int
         return portType
     }
 
-    fun getLowestFanSelected(): MyStatPipe2RelayMapping? {
-        val lowestSelected = getLowestStage(MyStatPipe2RelayMapping.FAN_LOW_SPEED.ordinal,  MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal)
-        if (lowestSelected == -1) {
-            return null
+    fun getLowestFanSelected(lowVentilationAvailable: Boolean): MyStatPipe2RelayMapping? {
+        if (lowVentilationAvailable) {
+            val lowestSelected = getLowestStage(MyStatPipe2RelayMapping.FAN_LOW_VENTILATION.ordinal,  MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal)
+            if (lowestSelected != -1) {
+                return MyStatPipe2RelayMapping.values()[lowestSelected]
+            }
+        } else {
+            val lowestSelected = getLowestStage(MyStatPipe2RelayMapping.FAN_LOW_SPEED.ordinal,  MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal)
+            if (lowestSelected != -1) {
+                return MyStatPipe2RelayMapping.values()[lowestSelected]
+            }
         }
-        return MyStatPipe2RelayMapping.values()[lowestSelected]
+        return null
     }
 
     override fun getHighestFanStageCount(): Int {
-        val highestSelected = getHighestStage(
-            MyStatPipe2RelayMapping.FAN_LOW_SPEED.ordinal,
-            MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal
-        )
-        return when(highestSelected) {
-            MyStatPipe2RelayMapping.FAN_LOW_SPEED.ordinal -> 1
-            MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal -> 2
-            else -> 0
+        if (isAnyRelayEnabledAssociated(association = MyStatPipe2RelayMapping.FAN_LOW_VENTILATION.ordinal)) {
+            val highestSelected = getHighestStage(
+                MyStatPipe2RelayMapping.FAN_LOW_VENTILATION.ordinal,
+                MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal
+            )
+            return when(highestSelected) {
+                MyStatPipe2RelayMapping.FAN_LOW_VENTILATION.ordinal -> 1
+                MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal -> 2
+                else -> 0
+            }
+        } else {
+            val highestSelected = getHighestStage(
+                MyStatPipe2RelayMapping.FAN_LOW_SPEED.ordinal,
+                MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal
+            )
+            return when(highestSelected) {
+                MyStatPipe2RelayMapping.FAN_LOW_SPEED.ordinal -> 1
+                MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal -> 2
+                else -> 0
+            }
         }
     }
 }
@@ -189,12 +292,24 @@ enum class MyStatPipe2RelayMapping(val displayName: String) {
     DEHUMIDIFIER("Dehumidifier"),
     EXTERNALLY_MAPPED("Externally Mapped"),
     DCV_DAMPER("Dcv Damper"),
+    FAN_LOW_VENTILATION("Fan Low Ventilation")
 }
 
 
 enum class MyStatPipe2AnalogOutMapping(val displayName: String) {
+    FAN_LOW_SPEED("Fan Low Speed"),
+    FAN_HIGH_SPEED("Fan High Speed"),
+    AUX_HEATING_STAGE1("Aux Heating"),
+    WATER_VALVE("Water Valve"),
+    FAN_ENABLED("Fan Enabled"),
+    OCCUPIED_ENABLED("Occupied Enabled"),
+    HUMIDIFIER("Humidifier"),
+    DEHUMIDIFIER("Dehumidifier"),
+    EXTERNALLY_MAPPED("Externally Mapped"),
+    DCV_DAMPER("Dcv Damper"),
+    FAN_LOW_VENTILATION("Fan Low Ventilation"),
     WATER_MODULATING_VALUE("Water modulating valve"),
     FAN_SPEED("Fan Speed"),
-    EXTERNALLY_MAPPED("Externally Mapped"),
+    ANALOG_EXTERNALLY_MAPPED("Externally Mapped"),
     DCV_DAMPER_MODULATION("DCV Damper")
 }

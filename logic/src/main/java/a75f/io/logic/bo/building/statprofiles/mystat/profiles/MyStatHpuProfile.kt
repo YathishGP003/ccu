@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.statprofiles.mystat.profiles
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
@@ -20,7 +21,6 @@ import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping
-import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatFanConfig
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuAnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuRelayMapping
@@ -148,7 +148,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
             operateRelays(config,  basicSettings, equip, controllerFactory)
             operateAnalogOutputs(config, equip, basicSettings, equip.analogOutStages, relayLogicalPoints)
             if (basicSettings.fanMode == MyStatFanStages.AUTO) {
-                runFanOperationBasedOnAuxStages(equip.relayStages, equip.analogOutStages, config, relayLogicalPoints, analogLogicalPoints)
+                runFanOperationBasedOnAuxStages(equip, config)
             }
         } else {
             resetLogicalPoints()
@@ -203,7 +203,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
         config: MyStatHpuConfiguration, basicSettings: MyStatBasicSettings,
         equip: MyStatHpuEquip, controllerFactory: MyStatControlFactory
     ) {
-        controllerFactory.addHpuControllers(config)
+        controllerFactory.addHpuControllers(config, fanLowVentilationAvailable)
         runControllers(equip, basicSettings, config)
     }
 
@@ -340,8 +340,6 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
         }
     }
 
-
-
     private fun isAuxAvailableAndActive(relayOutputPoints: HashMap<Int, String>): Boolean {
         return (relayOutputPoints.containsKey(MyStatHpuRelayMapping.AUX_HEATING_STAGE1.ordinal) && getCurrentLogicalPointStatus(
             relayOutputPoints[MyStatHpuRelayMapping.AUX_HEATING_STAGE1.ordinal]!!
@@ -368,179 +366,102 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
         relayOutputPoints: HashMap<Int, String>
     ) {
         config.apply {
-            if (analogOut1Enabled.enabled) {
+            listOf(
+                Triple(Pair(config.universalOut1, config.universalOut1Association), config.analogOut1FanSpeedConfig, Port.UNIVERSAL_OUT_ONE),
+                Triple(Pair(config.universalOut2, config.universalOut2Association), config.analogOut2FanSpeedConfig, Port.UNIVERSAL_OUT_TWO)
+            ).forEach { (universalOut, fanConfig, port) ->
+                if (universalOut.first.enabled && isRelayConfig(universalOut.second.associationVal).not()) {
+                    val analogMapping = MyStatHpuAnalogOutMapping.values().find { it.ordinal == universalOut.second.associationVal }
+                    when (analogMapping) {
+                        MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED -> {
+                            doAnalogCompressorSpeed(
+                                port, basicSettings.conditioningMode,
+                                analogOutStages, compressorLoopOutput,
+                                getZoneMode()
+                            )
+                        }
 
-                val analogMapping = MyStatHpuAnalogOutMapping.values().find { it.ordinal == analogOut1Association.associationVal }
-                when (analogMapping) {
-                    MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED -> {
-                        doAnalogCompressorSpeed(
-                            Port.ANALOG_OUT_ONE,
-                            basicSettings.conditioningMode,
-                            analogOutStages,
-                            compressorLoopOutput,
-                            getZoneMode()
-                        )
+                        MyStatHpuAnalogOutMapping.FAN_SPEED -> {
+                            if (isAuxAvailableAndActive(relayOutputPoints) && basicSettings.fanMode.name == MyStatFanStages.AUTO.name ) return
+                            doAnalogFanAction(
+                                port,
+                                fanConfig.low.currentVal.toInt(),
+                                fanConfig.high.currentVal.toInt(),
+                                basicSettings.fanMode, basicSettings.conditioningMode,
+                                fanLoopOutput, analogOutStages
+                            )
+                        }
+
+                        MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION -> {
+                            doAnalogDCVAction(
+                                port, analogOutStages, config.co2Threshold.currentVal,
+                                co2DamperOpeningRate.currentVal, equip
+                            )
+                        }
+                        else -> {}
                     }
-
-                    MyStatHpuAnalogOutMapping.FAN_SPEED -> {
-                        if (isAuxAvailableAndActive(relayOutputPoints) && basicSettings.fanMode.name == MyStatFanStages.AUTO.name ) return
-                        doAnalogFanAction(
-                            Port.ANALOG_OUT_ONE,
-                            analogOut1FanSpeedConfig.low.currentVal.toInt(),
-                            analogOut1FanSpeedConfig.high.currentVal.toInt(),
-                            basicSettings.fanMode,
-                            basicSettings.conditioningMode,
-                            fanLoopOutput,
-                            analogOutStages
-                        )
-                    }
-
-                    MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION -> {
-                        doAnalogDCVAction(
-                            Port.ANALOG_OUT_ONE, analogOutStages, config.co2Threshold.currentVal,
-                            co2DamperOpeningRate.currentVal,
-                            equip
-                        )
-                    }
-
-                    else -> {}
                 }
             }
         }
     }
 
     private fun runFanOperationBasedOnAuxStages(
-        relayStages: HashMap<String, Int>,
-        analogOutStages: HashMap<String, Int>,
-        config: MyStatHpuConfiguration,
-        relayOutputPoints: HashMap<Int, String>,
-        analogOutputPoints: HashMap<Int, String>
+        equip: MyStatHpuEquip, config: MyStatHpuConfiguration,
     ) {
-        val aux1AvailableAndActive = isAuxAvailableAndActive(relayOutputPoints)
-        val isAnalogFanAvailable = analogOutputPoints.containsKey(MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal)
-
-        logIt(
-            "Aux Based fan : aux1AvailableAndActive $aux1AvailableAndActive isAnalogFanAvailable $isAnalogFanAvailable"
-        )
-        if (aux1AvailableAndActive) operateAuxBasedOnFan(relayStages, relayOutputPoints, isAnalogFanAvailable)
-
-        // Run the fan speed control if either aux1 or aux2 is available and active
-        if ((aux1AvailableAndActive)) {
-            runSpecificAnalogFanSpeed(
-                config,
-                analogOutStages,
-                relayOutputPoints,
-                analogOutputPoints,
-            )
+        val aux1AvailableAndActive = isAuxAvailableAndActive(relayLogicalPoints)
+        if (aux1AvailableAndActive) {
+            val isRelayFanActive = operateAuxBasedOnFan(equip)
+            val isAnalogFanAvailable = runSpecificAnalogFanSpeed(config, equip.analogOutStages)
+            if (isRelayFanActive.not() && isAnalogFanAvailable.not()) {
+                logIt("Fan is not available so resetting aux")
+                resetAux(equip.relayStages, relayLogicalPoints)
+            }
         }
     }
 
     private fun runSpecificAnalogFanSpeed(
-        config: MyStatHpuConfiguration, analogOutStages: HashMap<String, Int>,
-        relayOutputPoints: HashMap<Int, String>, analogOutputPoints: HashMap<Int, String>
-    ) {
-
-        fun getPercent(fanConfig: MyStatFanConfig, fanSpeed: MyStatFanSpeed): Double {
-            return when (fanSpeed) {
-                MyStatFanSpeed.HIGH -> fanConfig.high.currentVal
-                MyStatFanSpeed.LOW -> fanConfig.low.currentVal
-                else -> 0.0
-            }
+        config: MyStatHpuConfiguration,
+        analogOutStages: HashMap<String, Int>
+    ): Boolean {
+        var isAnalogAvailable = false
+        if (config.universalOut1.enabled && config.universalOut1Association.associationVal == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal) {
+            val fanSpeedValue = config.analogOut1FanSpeedConfig.high.currentVal
+            updateLogicalPoint(logicalPointsList[Port.UNIVERSAL_OUT_ONE]!!, fanSpeedValue)
+            analogOutStages[StatusMsgKeys.FAN_SPEED.name] = 1
+            isAnalogAvailable = true
         }
-
-        var fanSpeed = MyStatFanSpeed.OFF
-
-        if (isAuxAvailableAndActive(relayOutputPoints)) {
-            fanSpeed = MyStatFanSpeed.HIGH
+        if (config.universalOut2.enabled && config.universalOut2Association.associationVal == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal) {
+            val fanSpeedValue = config.analogOut2FanSpeedConfig.high.currentVal
+            updateLogicalPoint(logicalPointsList[Port.UNIVERSAL_OUT_TWO]!!, fanSpeedValue)
+            analogOutStages[StatusMsgKeys.FAN_SPEED.name] = 1
+            isAnalogAvailable = true
         }
-        config.apply {
-            if (analogOut1Enabled.enabled
-                && analogOut1Association.associationVal == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal && fanSpeed != MyStatFanSpeed.OFF
-            ) {
-                val percentage = getPercent(analogOut1FanSpeedConfig, fanSpeed)
-                logIt(  "Fan Speed : $percentage")
-                updateLogicalPoint(
-                    analogOutputPoints[MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal]!!, percentage
-                )
-                analogOutStages[StatusMsgKeys.FAN_SPEED.name] = 1
-            }
-        }
+        return isAnalogAvailable
     }
 
-
-    // New requirement for aux and fan operations If we do not have fan then no aux
-    private fun operateAuxBasedOnFan(
-        relayStages: HashMap<String, Int>, relayOutputPoints: HashMap<Int, String>, isAnalogFanAvailable: Boolean
-    ) {
-
-        fun getFanStage(mapping: MyStatHpuRelayMapping): Stage? {
-            return when (mapping) {
-                MyStatHpuRelayMapping.FAN_LOW_SPEED -> Stage.FAN_1
-                MyStatHpuRelayMapping.FAN_HIGH_SPEED -> Stage.FAN_2
-                else -> null
-            }
-        }
-
-        fun getAvailableFanSpeed(relayOutputPoints: HashMap<Int, String>) = Triple(
-            relayOutputPoints.containsKey(MyStatHpuRelayMapping.FAN_LOW_SPEED.ordinal),
-            relayOutputPoints.containsKey(MyStatHpuRelayMapping.FAN_HIGH_SPEED.ordinal),
-            relayOutputPoints.containsKey(MyStatHpuRelayMapping.FAN_ENABLED.ordinal)
+    private fun operateAuxBasedOnFan(equip: MyStatHpuEquip): Boolean {
+        val sequenceMap = mutableMapOf(
+            equip.fanHighSpeed to Stage.FAN_2.displayName,
+            equip.fanLowSpeed to Stage.FAN_1.displayName,
+            equip.fanEnable to StatusMsgKeys.FAN_ENABLED.name,
+            equip.occupiedEnable to StatusMsgKeys.EQUIP_ON.name
         )
-
-        val (lowAvailable, highAvailable, fanEnable) = getAvailableFanSpeed(relayOutputPoints)
-
-        fun deriveFanStage(): MyStatHpuRelayMapping {
-            return when {
-                highAvailable -> MyStatHpuRelayMapping.FAN_HIGH_SPEED
-                lowAvailable -> MyStatHpuRelayMapping.FAN_LOW_SPEED
-                fanEnable -> MyStatHpuRelayMapping.FAN_ENABLED
-                else -> MyStatHpuRelayMapping.OCCUPIED_ENABLED
+        // Before operating AUX based fan reset all points except fanEnable and occupiedEnable
+        sequenceMap.forEach { (point, statusMsg) ->
+            if ((point.domainName != DomainName.fanEnable && point.domainName != DomainName.occupiedEnable) && point.pointExists()) {
+                point.writeHisVal(0.0)
+            }
+            equip.relayStages.remove(statusMsg)
+        }
+        sequenceMap.forEach { (point, statusMsg) ->
+            if (point.pointExists()) {
+                point.writeHisVal(1.0)
+                equip.relayStages[statusMsg] = 1
+                logIt("Operating AUX based fan: ${point.domainName}")
+                return true
             }
         }
-
-        if (!lowAvailable && !highAvailable && !isAnalogFanAvailable && !fanEnable) {
-            resetAux(relayStages, relayOutputPoints) // non of the fans are available
-        }
-
-        val stage = deriveFanStage()
-        val fanStatusMessage = getFanStage(stage)
-        logIt( "operateAuxBasedOnFan: derived mode is $stage")
-        // operate specific fan  (low, medium, high) based on derived stage order
-        if (fanStatusMessage != null) {
-            updateLogicalPoint(relayOutputPoints[stage.ordinal]!!, 1.0)
-            relayStages[fanStatusMessage.displayName] = 1
-        }
-
-        when (stage) {
-            MyStatHpuRelayMapping.FAN_HIGH_SPEED -> {
-                relayOutputPoints[MyStatHpuRelayMapping.FAN_HIGH_SPEED.ordinal]?.let { point ->
-                    updateLogicalPoint(point, 1.0)
-                    relayStages[Stage.FAN_2.displayName] = 1
-                }
-
-                relayOutputPoints[MyStatHpuRelayMapping.FAN_LOW_SPEED.ordinal]?.let { point ->
-                    updateLogicalPoint(point, 1.0)
-                    relayStages[Stage.FAN_1.displayName] = 1
-                }
-            }
-
-            MyStatHpuRelayMapping.FAN_LOW_SPEED -> {
-                relayOutputPoints[MyStatHpuRelayMapping.FAN_LOW_SPEED.ordinal]?.let { point ->
-                    updateLogicalPoint(point, 1.0)
-                    relayStages[Stage.FAN_1.displayName] = 1
-                }
-            }
-            MyStatHpuRelayMapping.FAN_ENABLED -> {
-                relayOutputPoints[MyStatHpuRelayMapping.FAN_ENABLED.ordinal]?.let { point ->
-                    updateLogicalPoint(point, 1.0)
-                    relayStages[StatusMsgKeys.FAN_ENABLED.name] = 1
-                }
-            }
-
-            else -> {
-                logIt( "operateAuxBasedOnFan: Relay fan mapping is not available")
-            }
-        }
+        return false
     }
 
     private fun resetAux(

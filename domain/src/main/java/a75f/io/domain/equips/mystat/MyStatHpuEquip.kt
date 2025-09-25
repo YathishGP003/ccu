@@ -18,9 +18,15 @@ class MyStatHpuEquip(equipRef: String) : MyStatEquip(equipRef) {
     val changeOverCooling = Point(DomainName.changeOverCooling, equipRef)
     val changeOverHeating = Point(DomainName.changeOverHeating, equipRef)
     val mystatAuxHeating1Activate = Point(DomainName.mystatAuxHeating1Activate, equipRef)
+
     val analog1MinCompressorSpeed = Point(DomainName.analog1MinCompressorSpeed, equipRef)
     val analog1MaxCompressorSpeed = Point(DomainName.analog1MaxCompressorSpeed, equipRef)
     val analog1MinFanSpeed = Point(DomainName.analog1MinFanSpeed, equipRef)
     val analog1MaxFanSpeed = Point(DomainName.analog1MaxFanSpeed, equipRef)
+
+    val analog2MinCompressorSpeed = Point(DomainName.analog2MinCompressorSpeed, equipRef)
+    val analog2MaxCompressorSpeed = Point(DomainName.analog2MaxCompressorSpeed, equipRef)
+    val analog2MinFanSpeed = Point(DomainName.analog2MinFanSpeed, equipRef)
+    val analog2MaxFanSpeed = Point(DomainName.analog2MaxFanSpeed, equipRef)
 
 }

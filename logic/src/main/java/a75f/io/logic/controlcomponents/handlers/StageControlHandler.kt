@@ -60,7 +60,7 @@ class StageControlHandler(
         }
         logIt(
             logTag,
-            "Stage OFF $stageNumber , economizingAvailable: ${economizingAvailable.readHisVal()} " +
+            "Stage OFF $stageNumber , fanLowVentilation ${fanLowVentilation.readHisVal()} economizingAvailable: ${economizingAvailable.readHisVal()} " +
                     "loopOutput: ${loopOutput.readHisVal()} , Threshold : ${getThreshold()},  hysteresis: ${hysteresis.readPriorityVal()}"
         )
         return if (stageNumber == 0) {

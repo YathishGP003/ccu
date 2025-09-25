@@ -2,7 +2,6 @@ package a75f.io.domain.migration
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
-import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.util.ModelCache
 import a75f.io.domain.util.ResourceHelper
@@ -70,7 +69,7 @@ class DiffManger(var context: Context?) {
         updateEquipModels(newModelMetaList, oldModelMetaList, migrationHandler, siteRef, sharedPref, modelsPath)
     }
 
-    fun updateEquipModels(
+    private fun updateEquipModels(
         newModelMetaList: List<ModelMeta>,  // directly from library
         oldModelMetaList: List<ModelMeta>,  // Read from shared preference
         handler: MigrationHandler,

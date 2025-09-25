@@ -125,13 +125,18 @@ fun getMyStatPipe2FanLevel(config: MyStatPipe2Configuration): Int {
     var fanLevel = 0
     var fanEnabledStages: Pair<Boolean, Boolean> = Pair(first = false, second = false)
 
-    if (config.analogOut1Enabled.enabled && config.analogOut1Association.associationVal == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
+    if ((config.universalOut1.enabled && config.universalOut1Association.associationVal == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal)
+        || (config.universalOut2.enabled && config.universalOut2Association.associationVal == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal)
+    ) {
         return MsFanConstants.LOW_HIGH // All options are enabled due to analog fan speed
     }
 
     val relays = config.getRelayEnabledAssociations()
     for ((enabled, association) in relays) {
         if (enabled && association == MyStatPipe2RelayMapping.FAN_LOW_SPEED.ordinal) {
+            fanEnabledStages = fanEnabledStages.copy(first = true)
+        }
+        if (enabled && association == MyStatPipe2RelayMapping.FAN_LOW_VENTILATION.ordinal) {
             fanEnabledStages = fanEnabledStages.copy(first = true)
         }
         if (enabled && association == MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal) {
@@ -141,7 +146,8 @@ fun getMyStatPipe2FanLevel(config: MyStatPipe2Configuration): Int {
 
     if (fanEnabledStages.first) fanLevel += MsFanConstants.LOW
     if (fanEnabledStages.second) fanLevel += MsFanConstants.HIGH
-    if (fanLevel == 0 && config.isAnyRelayEnabledAssociated(association = MyStatPipe2RelayMapping.FAN_ENABLED.ordinal)) {
+    if (fanLevel == 0 && (config.isAnyRelayEnabledAssociated(association = MyStatPipe2RelayMapping.FAN_ENABLED.ordinal)
+                || config.isAnyRelayEnabledAssociated(association = MyStatPipe2RelayMapping.OCCUPIED_ENABLED.ordinal))) {
         fanLevel = MsFanConstants.AUTO
     }
 
@@ -152,12 +158,9 @@ fun getMyStatHpuFanLevel(config: MyStatHpuConfiguration): Int {
     var fanLevel = 0
     var fanEnabledStages: Pair<Boolean, Boolean> = Pair(first = false, second = false)
 
-    if (config.analogOut1Enabled.enabled && config.analogOut1Association.associationVal == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal) {
+    if ((config.universalOut1.enabled && config.universalOut1Association.associationVal == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal)
+        || (config.universalOut2.enabled && config.universalOut2Association.associationVal == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal)) {
         return MsFanConstants.LOW_HIGH // All options are enabled due to analog fan speed
-    }
-
-    if (config.isAnyRelayEnabledAssociated(association = MyStatHpuRelayMapping.FAN_ENABLED.ordinal)) {
-        return MsFanConstants.AUTO
     }
 
     val relays = config.getRelayEnabledAssociations()
@@ -172,7 +175,42 @@ fun getMyStatHpuFanLevel(config: MyStatHpuConfiguration): Int {
 
     if (fanEnabledStages.first) fanLevel += MsFanConstants.LOW
     if (fanEnabledStages.second) fanLevel += MsFanConstants.HIGH
-    if (fanLevel == 0 && config.isAnyRelayEnabledAssociated(association = MyStatHpuRelayMapping.FAN_ENABLED.ordinal)) {
+    if (fanLevel == 0 && (config.isAnyRelayEnabledAssociated(association = MyStatHpuRelayMapping.FAN_ENABLED.ordinal)
+                || config.isAnyRelayEnabledAssociated(association = MyStatHpuRelayMapping.OCCUPIED_ENABLED.ordinal))) {
+        fanLevel = MsFanConstants.AUTO
+    }
+
+    return fanLevel
+}
+
+fun getMyStatCpuFanLevel(config: MyStatCpuConfiguration): Int {
+    var fanLevel = 0
+    var fanEnabledStages: Pair<Boolean, Boolean> = Pair(first = false, second = false)
+
+    if ((config.universalOut1.enabled && (config.universalOut1Association.associationVal == MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal
+                || config.universalOut1Association.associationVal == MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal))
+        || (config.universalOut2.enabled && (config.universalOut2Association.associationVal == MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal
+                || config.universalOut2Association.associationVal == MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal))
+    ) {
+        return MsFanConstants.LOW_HIGH // All options are enabled due to analog fan speed
+    }
+
+    val relays = config.getRelayEnabledAssociations()
+    for ((enabled, association) in relays) {
+
+        if (enabled && association == MyStatCpuRelayMapping.FAN_LOW_SPEED.ordinal) {
+            fanEnabledStages = fanEnabledStages.copy(first = true)
+        }
+        if (enabled && association == MyStatCpuRelayMapping.FAN_HIGH_SPEED.ordinal) {
+            fanEnabledStages = fanEnabledStages.copy(second = true)
+        }
+    }
+
+    if (fanEnabledStages.first) fanLevel += MsFanConstants.LOW
+    if (fanEnabledStages.second) fanLevel += MsFanConstants.HIGH
+
+    if (fanLevel == 0 && (config.isAnyRelayEnabledAssociated(association = MyStatCpuRelayMapping.FAN_ENABLED.ordinal)
+                || config.isAnyRelayEnabledAssociated(association = MyStatCpuRelayMapping.OCCUPIED_ENABLED.ordinal))) {
         fanLevel = MsFanConstants.AUTO
     }
 
@@ -218,34 +256,6 @@ fun updateConditioningMode(config: MyStatCpuConfiguration, equip: MyStatEquip) {
     }
 }
 
-fun getMyStatCpuFanLevel(config: MyStatCpuConfiguration): Int {
-    var fanLevel = 0
-    var fanEnabledStages: Pair<Boolean, Boolean> = Pair(first = false, second = false)
-
-    if (config.analogOut1Enabled.enabled && (config.analogOut1Association.associationVal == MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal || config.analogOut1Association.associationVal == MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
-        return MsFanConstants.LOW_HIGH // All options are enabled due to analog fan speed
-    }
-
-    val relays = config.getRelayEnabledAssociations()
-    for ((enabled, association) in relays) {
-
-        if (enabled && association == MyStatCpuRelayMapping.FAN_LOW_SPEED.ordinal) {
-            fanEnabledStages = fanEnabledStages.copy(first = true)
-        }
-        if (enabled && association == MyStatCpuRelayMapping.FAN_HIGH_SPEED.ordinal) {
-            fanEnabledStages = fanEnabledStages.copy(second = true)
-        }
-    }
-
-    if (fanEnabledStages.first) fanLevel += MsFanConstants.LOW
-    if (fanEnabledStages.second) fanLevel += MsFanConstants.HIGH
-
-    if (fanLevel == 0 && config.isAnyRelayEnabledAssociated(association = MyStatCpuRelayMapping.FAN_ENABLED.ordinal)) {
-        fanLevel = MsFanConstants.AUTO
-    }
-
-    return fanLevel
-}
 
 fun getMyStatSelectedFanMode(fanLevel: Int, selectedFan: Int): Int {
     try {
@@ -371,48 +381,62 @@ fun isMyStatHighUserIntentFanMode(fanOpMode: Point): Boolean {
             || fanMode == MyStatFanStages.HIGH_ALL_TIME.ordinal
 }
 
-
-
 fun logMsResults(config: MyStatConfiguration, tag: String, logicalPointsList: HashMap<Port, String>) {
+
     val haystack = CCUHsApi.getInstance()
     listOf(
         Triple(config.relay1Enabled.enabled, config.relay1Association.associationVal, Port.RELAY_ONE),
         Triple(config.relay2Enabled.enabled, config.relay2Association.associationVal, Port.RELAY_TWO),
         Triple(config.relay3Enabled.enabled, config.relay3Association.associationVal, Port.RELAY_THREE),
-        Triple(config.relay4Enabled.enabled, config.relay4Association.associationVal, Port.RELAY_FOUR)
+        Triple(config.universalOut1.enabled, config.universalOut1Association.associationVal, Port.UNIVERSAL_OUT_ONE), // just for printing purpose
+        Triple(config.universalOut2.enabled, config.universalOut2Association.associationVal, Port.UNIVERSAL_OUT_TWO)  // just for printing purpose
     ).forEach { (enabled, association, port) ->
-        if (enabled && logicalPointsList[port] != null) {
-                val logicalPointValue = haystack.readHisValById(logicalPointsList[port])
+        if (enabled) {
+            if(config.isRelayConfig(association)) {
                 when (config) {
                     is MyStatCpuConfiguration -> CcuLog.d(
                         tag,
-                        "$port = ${MyStatCpuRelayMapping.values()[association]} : $logicalPointValue"
+                        "$port = ${MyStatCpuRelayMapping.values()[association]} : ${
+                            haystack.readHisValById(
+                                logicalPointsList[port]!!
+                            )
+                        }"
                     )
 
                     is MyStatPipe2Configuration -> CcuLog.d(
                         tag,
-                        "$port = ${MyStatPipe2RelayMapping.values()[association]} : $logicalPointValue"
+                        "$port = ${MyStatPipe2RelayMapping.values()[association]} : ${
+                            haystack.readHisValById(
+                                logicalPointsList[port]!!
+                            )
+                        }"
                     )
 
                     is MyStatHpuConfiguration -> CcuLog.d(
                         tag,
-                        "$port = ${MyStatHpuRelayMapping.values()[association]} : $logicalPointValue"
+                        "$port = ${MyStatHpuRelayMapping.values()[association]} : ${
+                            haystack.readHisValById(
+                                logicalPointsList[port]!!
+                            )
+                        }"
                     )
                 }
+            } else {
+                val mapping = when (config) {
+                    is MyStatCpuConfiguration -> MyStatCpuAnalogOutMapping.values()[association]
+                    is MyStatHpuConfiguration -> MyStatHpuAnalogOutMapping.values()[association]
+                    is MyStatPipe2Configuration -> MyStatPipe2AnalogOutMapping.values()[association]
+                    else -> null
+                }
+                var analogOutValue = 0.0
+                if (logicalPointsList.containsKey(port)) {
+                    analogOutValue = haystack.readHisValById(logicalPointsList[port]!!)
+                }
+                mapping?.let {
+                    CcuLog.d(tag, "$port = $it : $analogOutValue")
+                }
+            }
         }
-    }
-    if(!config.analogOut1Enabled.enabled || logicalPointsList[Port.ANALOG_OUT_ONE] == null) return
-    val analogOutValue = haystack.readHisValById(logicalPointsList[Port.ANALOG_OUT_ONE])
-
-    val mapping = when (config) {
-        is MyStatCpuConfiguration -> MyStatCpuAnalogOutMapping.values()[config.analogOut1Association.associationVal]
-        is MyStatHpuConfiguration -> MyStatHpuAnalogOutMapping.values()[config.analogOut1Association.associationVal]
-        is MyStatPipe2Configuration -> MyStatPipe2AnalogOutMapping.values()[config.analogOut1Association.associationVal]
-        else -> null
-    }
-
-    mapping?.let {
-        CcuLog.d(tag, "${Port.ANALOG_OUT_ONE} = $it : $analogOutValue")
     }
 
 }

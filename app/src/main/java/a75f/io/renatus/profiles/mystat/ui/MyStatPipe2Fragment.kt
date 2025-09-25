@@ -8,25 +8,19 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2AnalogOutMapping
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
-import a75f.io.renatus.composables.DependentPointMappingView
 import a75f.io.renatus.composables.MinMaxConfiguration
 import a75f.io.renatus.compose.Title
 import a75f.io.renatus.profiles.mystat.testVoltage
 import a75f.io.renatus.profiles.mystat.viewmodels.MyStatPipe2ViewModel
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatPipe2ViewState
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
-import a75f.io.renatus.profiles.system.SUPPLY_WATER_TEMPERATURE
-import a75f.io.renatus.profiles.system.UNIVERSAL_IN
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
@@ -34,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
@@ -132,51 +125,18 @@ class MyStatPipe2Fragment : MyStatFragment() {
                         TempOffset()
                         AutoForcedOccupiedAutoAwayConfig()
                         Label()
-                        Configurations()
+                        MyStatConfiguration()
                         Co2Control()
                         AnalogMinMaxConfigurations()
                         ThresholdTargetConfig()
+                        PinPasswordView(viewModel)
+                        DisplayInDeviceConfig(viewModel)
                         SaveConfig(viewModel)
                     }
                 }
             }
         }
     }
-
-    /**
-     * This function is used to display the Relay configurations
-     * overriden because analog out has some staged configuration specific to 2Pipe profile
-     */
-    @Composable
-    fun Configurations() {
-        MyStatDrawRelays()
-        DrawAnalogOutput()
-        UniversalInput()
-    }
-
-    @Composable
-    override fun UniversalInput() {
-        Row {
-            Image(
-                painter = painterResource(id = R.drawable.universal),
-                contentDescription = "UniversalInput",
-                modifier = Modifier
-                    .weight(1.5f)
-                    .padding(top = 15.dp)
-                    .height(34.dp)
-            )
-            Column(modifier = Modifier.weight(4f)) {
-                DependentPointMappingView(
-                    toggleName = UNIVERSAL_IN,
-                    toggleState = true,
-                    toggleEnabled = { viewModel.viewState.value.universalIn1.enabled = true },
-                    mappingText = SUPPLY_WATER_TEMPERATURE,
-                    false
-                )
-            }
-        }
-    }
-
 
     @Composable
     fun AnalogMinMaxConfigurations() {
@@ -191,11 +151,17 @@ class MyStatPipe2Fragment : MyStatFragment() {
     @Composable
     fun WaterModulatingMinMax() {
         (viewModel.viewState.value as MyStatPipe2ViewState).apply {
-            if (analogOut1Enabled) ConfigMinMax(
-                analogOut1Association,
+            if (universalOut1.enabled) ConfigMinMax(
+                universalOut1.association,
                 analogOut1MinMax.waterModulatingValue,
                 MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.displayName,
-                MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal
+                MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal, 1
+            )
+            if (universalOut2.enabled) ConfigMinMax(
+                universalOut2.association,
+                analogOut2MinMax.waterModulatingValue,
+                MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.displayName,
+                MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal, 2
             )
         }
     }
@@ -203,11 +169,17 @@ class MyStatPipe2Fragment : MyStatFragment() {
     @Composable
     fun DcvDamperMinMax() {
         (viewModel.viewState.value as MyStatPipe2ViewState).apply {
-            if (analogOut1Enabled) ConfigMinMax(
-                analogOut1Association,
+            if (universalOut1.enabled) ConfigMinMax(
+                universalOut1.association,
                 analogOut1MinMax.dcvDamperConfig,
                 MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.displayName,
-                MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal
+                MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal, 1
+            )
+            if (universalOut2.enabled) ConfigMinMax(
+                universalOut2.association,
+                analogOut2MinMax.dcvDamperConfig,
+                MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.displayName,
+                MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal, 2
             )
         }
     }
@@ -215,11 +187,17 @@ class MyStatPipe2Fragment : MyStatFragment() {
     @Composable
     fun FanSpeedMinMax() {
         (viewModel.viewState.value as MyStatPipe2ViewState).apply {
-            if (analogOut1Enabled) ConfigMinMax(
-                analogOut1Association,
+            if (universalOut1.enabled) ConfigMinMax(
+                universalOut1.association,
                 analogOut1MinMax.fanSpeedConfig,
                 MyStatPipe2AnalogOutMapping.FAN_SPEED.displayName,
-                MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal
+                MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal, 1
+            )
+            if (universalOut2.enabled) ConfigMinMax(
+                universalOut2.association,
+                analogOut2MinMax.fanSpeedConfig,
+                MyStatPipe2AnalogOutMapping.FAN_SPEED.displayName,
+                MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal, 2
             )
         }
     }
@@ -227,15 +205,25 @@ class MyStatPipe2Fragment : MyStatFragment() {
     @Composable
     fun FanConfiguration() {
         (viewModel.viewState.value as MyStatPipe2ViewState).apply {
-            if (analogOut1Enabled && analogOut1Association == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
-                MinMaxConfiguration(minLabel = stringResource(R.string.analog_out_fan_low),
-                    maxLabel = stringResource(R.string.analog_out_fan_high),
+            if (universalOut1.enabled && universalOut1.association == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
+                MinMaxConfiguration(minLabel = "Universal-Out 1\n at Fan Low",
+                    maxLabel = "Universal-Out 1\n at Fan High",
                     itemList = testVoltage,
                     unit = "%",
                     minDefault = analogOut1FanConfig.low.toString(),
                     maxDefault = analogOut1FanConfig.high.toString(),
                     onMinSelected = { analogOut1FanConfig.low = it.value.toInt() },
                     onMaxSelected = { analogOut1FanConfig.high = it.value.toInt() })
+            }
+            if (universalOut2.enabled && universalOut2.association == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
+                MinMaxConfiguration(minLabel = "Universal-Out 2\n at Fan Low",
+                    maxLabel = "Universal-Out 2\n at Fan High",
+                    itemList = testVoltage,
+                    unit = "%",
+                    minDefault = analogOut2FanConfig.low.toString(),
+                    maxDefault = analogOut2FanConfig.high.toString(),
+                    onMinSelected = { analogOut2FanConfig.low = it.value.toInt() },
+                    onMaxSelected = { analogOut2FanConfig.high = it.value.toInt() })
             }
         }
     }

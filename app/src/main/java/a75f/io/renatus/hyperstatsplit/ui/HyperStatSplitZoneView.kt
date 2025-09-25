@@ -93,7 +93,7 @@ fun loadHyperStatSplitProfile(
                     .replace("[^0-9.]".toRegex(), "").toFloat().toString().toDouble()
             ).toString() + " \u00B0C"
         } else {
-            textAirflowValue.text = equipPoints[StatZoneStatus.DISCHARGE_AIRFLOW.name].toString()
+            textAirflowValue.text = equipPoints[StatZoneStatus.DISCHARGE_AIRFLOW.name].toString() + "°F"
         }
         textAirflowValue.visibility = View.VISIBLE
     } else {

@@ -23,6 +23,8 @@ import a75f.io.logic.bo.building.definitions.Port.RELAY_ONE
 import a75f.io.logic.bo.building.definitions.Port.RELAY_SIX
 import a75f.io.logic.bo.building.definitions.Port.RELAY_THREE
 import a75f.io.logic.bo.building.definitions.Port.RELAY_TWO
+import a75f.io.logic.bo.building.definitions.Port.UNIVERSAL_OUT_ONE
+import a75f.io.logic.bo.building.definitions.Port.UNIVERSAL_OUT_TWO
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsHpuAnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsHpuRelayMapping
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2AnalogOutMapping
@@ -173,12 +175,8 @@ fun getMyStatLogicalPointList(
         Triple(RELAY_ONE, device.relay1.readPoint().pointRef, config.relay1Enabled.enabled),
         Triple(RELAY_TWO, device.relay2.readPoint().pointRef, config.relay2Enabled.enabled),
         Triple(RELAY_THREE, device.relay3.readPoint().pointRef, config.relay3Enabled.enabled),
-        Triple(RELAY_FOUR, device.relay4.readPoint().pointRef, config.relay4Enabled.enabled),
-        Triple(
-            ANALOG_OUT_ONE,
-            device.analog1Out.readPoint().pointRef,
-            config.analogOut1Enabled.enabled
-        )
+        Triple(UNIVERSAL_OUT_ONE, device.universalOut1.readPoint().pointRef, config.universalOut1.enabled),
+        Triple(UNIVERSAL_OUT_TWO, device.universalOut2.readPoint().pointRef, config.universalOut2.enabled)
     )
 
     for ((port, pointRef, isEnabled) in points) {
@@ -202,6 +200,7 @@ fun getMyStatRelayOutputPoints(equip: MyStatPipe2Equip): HashMap<Int, String> {
     putPointToMap(equip.waterValve, relayStatus, MyStatPipe2RelayMapping.WATER_VALVE.ordinal)
     putPointToMap(equip.auxHeatingStage1, relayStatus, MyStatPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal)
     putPointToMap(equip.dcvDamper, relayStatus, MyStatPipe2RelayMapping.DCV_DAMPER.ordinal)
+    putPointToMap(equip.fanLowSpeedVentilation, relayStatus, MyStatPipe2RelayMapping.FAN_LOW_VENTILATION.ordinal)
     return relayStatus
 }
 

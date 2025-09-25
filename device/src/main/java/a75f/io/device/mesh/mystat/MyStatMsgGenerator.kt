@@ -10,6 +10,7 @@ import a75f.io.device.mesh.getCoolingDeadBand
 import a75f.io.device.mesh.getCoolingUserLimit
 import a75f.io.device.mesh.getHeatingDeadBand
 import a75f.io.device.mesh.getHeatingUserLimit
+import a75f.io.device.mesh.getPin
 import a75f.io.device.util.DeviceConfigurationUtil.Companion.getUserConfiguration
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.readValAtLevelByDomain
@@ -26,6 +27,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuAnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuRelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2AnalogOutMapping
@@ -33,6 +35,7 @@ import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2RelayMap
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.tuners.TunerUtil
+import android.util.Log
 import com.google.protobuf.ByteString
 
 /**
@@ -48,15 +51,18 @@ fun getMyStatSeedMessage(zone: String, address: Int, equipRef: String): MyStat.M
     val myStatSettingsMessage = getMyStatSettingsMessage(equipRef, zone)
     val myStatControlsMessage = getMyStatControlMessage(address).build()
     val myStatSettingsMessage2 = getMyStatSettings2Message(equipRef)
+    val myStatSettingsMessage3 = getMyStatSetting3Message(equipRef)
     CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + myStatSettingsMessage.toByteString().toString())
     CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t$myStatControlsMessage")
     CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t$myStatSettingsMessage2")
+    CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t$myStatSettingsMessage3")
 
     return MyStat.MyStatCcuDatabaseSeedMessage_t.newBuilder()
         .setEncryptionKey(ByteString.copyFrom(L.getEncryptionKey()))
         .setSerializedSettingsData(myStatSettingsMessage.toByteString())
         .setSerializedControlsData(myStatControlsMessage.toByteString())
         .setSerializedSettings2Data(myStatSettingsMessage2.toByteString())
+        .setSerializedSettings3Data(myStatSettingsMessage3.toByteString())
         .build()
 }
 
@@ -95,7 +101,7 @@ private fun fillMyStatControls(
         return MyStat.MyStatAnalogOutputControl_t.newBuilder().setPercent(value.toInt()).build()
     }
 
-    fun getPortValue(port: PhysicalPoint): Double {
+    fun getPortValue(port: PhysicalPoint, isRelay: Boolean, isWritable: Boolean): Double {
         val logicalPointRef = port.readPoint().pointRef
 
         if (!Globals.getInstance().isTestMode) {  // Skip logical point ref update when test mode is on
@@ -103,17 +109,18 @@ private fun fillMyStatControls(
                 CcuLog.e(L.TAG_CCU_DEVICE, "Logical point ref is missing for ${port.domainName}")
                 port.writePointValue(0.0)
             } else {
-                if (port.domainName.contentEquals(DomainName.analog1Out)) {
+                // For Relay we have Relay N/O and for analog we have 0-10V (configured)
+                if (isRelay.not()) {
                     val logicalValue = CCUHsApi.getInstance().readHisValById(logicalPointRef).toInt().toShort()
-                    val voltage = mapAnalogOut(device.analog1Out.readPoint().type, logicalValue)
+                    val voltage = mapAnalogOut(port.readPoint().type, logicalValue)
                     port.writePointValue(voltage.toDouble())
                 } else {
+                    // it is relay
                     port.writePointValue(CCUHsApi.getInstance().readHisValById(logicalPointRef))
                 }
             }
         }
 
-        val isWritable = port.isWritable()
         var mappedVal = port.readHisVal()
 
         if (isWritable) {
@@ -128,16 +135,23 @@ private fun fillMyStatControls(
 
     try {
         var relayBitmap = 0
-        device.getRelays().forEachIndexed { index, relay ->
-            if (getPortValue(relay) > 0) {
-                relayBitmap = relayBitmap or (1 shl index)
+        device.getAllPorts().forEachIndexed { index, port ->
+            val (isRelay, isWritable) = device.getTypeAndIsWritable(port)
+            val portStatus = getPortValue(port, isRelay, isWritable)
+            Log.i("CCU_MST", "fillMyStatControls: portStatus$portStatus  index $index Port: ${port.domainName}, isRelay: $isRelay, isWritable: $isWritable")
+            if (isRelay) {
+                if (portStatus > 0) {
+                    relayBitmap = relayBitmap or (1 shl index)
+                }
+            } else {
+                // it is analog
+                when (index) {
+                    4 -> buildr.setAnalogOut1(getAnalogOutValue(portStatus)) // universalOut2
+                    3 -> buildr.setAnalogOut2(getAnalogOutValue(portStatus)) // universalOut1
+                }
             }
         }
-
         buildr.setRelayBitmap(relayBitmap)
-
-        val mappedVal = getPortValue(device.analog1Out)
-        buildr.setAnalogOut1(getAnalogOutValue(mappedVal))
     } catch (e: NullPointerException) {
         CcuLog.e(L.TAG_CCU_DEVICE, "Exception fillMyStatControls: ", e)
     }
@@ -165,14 +179,13 @@ fun getMyStatSettings2Message(equipRef: String): MyStat.MyStatSettingsMessage2_t
         zoneCO2Target = myStatEquip.co2Target.readDefaultVal().toInt()
         zoneCO2Threshold = myStatEquip.co2Threshold.readDefaultVal().toInt()
         getRelayConfigs(myStatEquip,this)
-        getAnalogOutConfigs(myStatEquip,this)
-
-        if (myStatEquip is MyStatPipe2Equip) {
-            mystatUniversalInConfig = 1 // 2 pipe it is always mapped    
+        setMyStatAnalogOutConfig(getAnalogOutConfigs(myStatEquip, myStatEquip.universalOut1Enable, myStatEquip.universalOut1Association))
+        mystatUniversalInConfig = if (myStatEquip is MyStatPipe2Equip) {
+            1 // 2 pipe it is always mapped
         } else if (myStatEquip.universalIn1Enable.readDefaultVal() == 1.0) {
-            mystatUniversalInConfig = myStatEquip.universalIn1Association.readDefaultVal().toInt() + 1
+            myStatEquip.universalIn1Association.readDefaultVal().toInt() + 1
         } else {
-            mystatUniversalInConfig = 0 // NA
+            0 // NA
         }
         genericTuners = getCommonTuners(equipRef)
         when (myStatEquip) {
@@ -183,6 +196,18 @@ fun getMyStatSettings2Message(equipRef: String): MyStat.MyStatSettingsMessage2_t
         }
     }
     return settings2.build()
+}
+
+fun getMyStatSetting3Message(equipRef: String): MyStat.MyStatSettingsMessage3_t {
+    val equip = Domain.getDomainEquip(equipRef) as MyStatEquip
+    val settings3 = MyStat.MyStatSettingsMessage3_t.newBuilder()
+    settings3.apply {
+        mystatRelay5Config = getRelayConfig(equip.universalOut2Enable, equip.universalOut2Association, equip)
+        myStatAnalogOut2Config = getAnalogOutConfigs(equip, equip.universalOut2Enable, equip.universalOut2Association)
+        stageUpTimer = equip.mystatStageUpTimerCounter.readPriorityVal().toInt()
+        stageDownTimer = equip.mystatStageDownTimerCounter.readPriorityVal().toInt()
+    }
+    return settings3.build()
 }
 
 private fun getStagedFanDetails(equip: MyStatCpuEquip): MyStat.MyStatConfigsCpu_t {
@@ -250,10 +275,12 @@ fun getMyStatSettingsMessage(equipRef: String, zone: String): MyStat.MyStatSetti
         .setMystatStagedFanSpeeds(setStagedFanSpeedDetails(myStatEquip))
         .setTemperatureMode(getTempMode())
         .setMiscSettings1(0) //  Sending value 4 because firmware expects it to be 4
-        //sending MiscSettings1 always 001
-        // bit 0: enableExternal10kTemperatureSensor
-        // bit 1: disableTouch
-        // bit 2: brightnessVariationEnable
+            //sending MiscSettings1 always 001
+            // bit 0: enableExternal10kTemperatureSensor
+            // bit 1: disableTouch
+            // bit 2: brightnessVariationEnable
+        .setInstallerLockPin(getPin(myStatEquip.pinLockInstallerAccess))
+        .setUserLockPin(getPin(myStatEquip.pinLockConditioningModeFanAccess))
         .build()
 }
 
@@ -261,14 +288,23 @@ fun getMyStatSettingsMessage(equipRef: String, zone: String): MyStat.MyStatSetti
 private fun setLinearFanSpeedDetails(equip: MyStatEquip): MyStat.MyStatLinearFanSpeeds_t {
     val linearFanSpeedBuilder = MyStat.MyStatLinearFanSpeeds_t.newBuilder()
     equip.apply {
-        if (analog1OutputEnable.readDefaultVal() == 1.0) {
-            val association = analog1OutputAssociation.readDefaultVal().toInt()
-
+        if (universalOut1Enable.readDefaultVal() == 1.0) {
+            val association = universalOut1Association.readDefaultVal().toInt()
             if (this is MyStatCpuEquip && association == MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal ||
                 this is MyStatHpuEquip && association == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal ||
                 this is MyStatPipe2Equip && association == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
                 linearFanSpeedBuilder.linearFanLowSpeedLevel = analog1FanLow.readPriorityVal().toInt()
                 linearFanSpeedBuilder.linearFanHighSpeedLevel = analog1FanHigh.readPriorityVal().toInt()
+
+            }
+        }
+        if (universalOut2Enable.readDefaultVal() == 1.0) {
+            val association = universalOut2Association.readDefaultVal().toInt()
+            if (this is MyStatCpuEquip && association == MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal ||
+                this is MyStatHpuEquip && association == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal ||
+                this is MyStatPipe2Equip && association == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
+                linearFanSpeedBuilder.linearFanLowSpeedLevel = analog2FanLow.readPriorityVal().toInt()
+                linearFanSpeedBuilder.linearFanHighSpeedLevel = analog2FanHigh.readPriorityVal().toInt()
 
             }
         }
@@ -280,103 +316,118 @@ private fun setStagedFanSpeedDetails(equip: MyStatEquip): MyStat.MyStatStagedFan
     val stagedFanSpeedBuilder = MyStat.MyStatStagedFanSpeeds_t.newBuilder()
     equip.apply {
         if (this is MyStatCpuEquip) {
-            if (analog1OutputEnable.readDefaultVal() == 1.0
-                && analog1OutputAssociation.readDefaultVal()
-                    .toInt() == MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal
-            ) {
-                stagedFanSpeedBuilder.stagedFanLowSpeedLevel =
-                    analog1FanLow.readPriorityVal().toInt()
-                stagedFanSpeedBuilder.stagedFanHighSpeedLevel =
-                    analog1FanHigh.readPriorityVal().toInt()
+            if (universalOut1Enable.readDefaultVal() == 1.0 && universalOut1Association.readDefaultVal().toInt() == MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal) {
+                stagedFanSpeedBuilder.stagedFanLowSpeedLevel = analog1FanLow.readPriorityVal().toInt()
+                stagedFanSpeedBuilder.stagedFanHighSpeedLevel = analog1FanHigh.readPriorityVal().toInt()
+            }
+            if (universalOut2Enable.readDefaultVal() == 1.0 && universalOut2Association.readDefaultVal().toInt() == MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal) {
+                stagedFanSpeedBuilder.stagedFanLowSpeedLevel = analog2FanLow.readPriorityVal().toInt()
+                stagedFanSpeedBuilder.stagedFanHighSpeedLevel = analog2FanHigh.readPriorityVal().toInt()
             }
         }
     }
     return stagedFanSpeedBuilder.build()
 }
 
+fun getRelayConfig(enable: Point, association: Point, equip: MyStatEquip): MyStat.MyStatRelay_t {
+    val relayConfig = MyStat.MyStatRelay_t.newBuilder()
 
-private fun getRelayConfigs(
-    equip: MyStatEquip,
-    settings2: MyStat.MyStatSettingsMessage2_t.Builder
-) {
-    fun getRelayConfig(enable: Point, association: Point): MyStat.MyStatRelay_t {
-        val relayConfig = MyStat.MyStatRelay_t.newBuilder()
-        relayConfig.relayEnable = enable.readDefaultVal() == 1.0
-        val associationVal = association.readDefaultVal().toInt()
 
-        when (equip) {
-            is MyStatCpuEquip -> {
-                relayConfig.cpuRelay =  when (associationVal) {
-                    a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.CpuRelayMappings_e.CPU_NONE
-                    a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping.DCV_DAMPER.ordinal -> MyStat.CpuRelayMappings_e.CPU_DCV_DAMPER
+    val associationVal = association.readDefaultVal().toInt()
+    when (equip) {
+        is MyStatCpuEquip -> {
+            if (associationVal < MyStatCpuRelayMapping.values().size) {
+                relayConfig.cpuRelay = when (associationVal) {
+                    MyStatCpuRelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.CpuRelayMappings_e.CPU_NONE
+                    MyStatCpuRelayMapping.DCV_DAMPER.ordinal -> MyStat.CpuRelayMappings_e.CPU_DCV_DAMPER
                     else -> MyStat.CpuRelayMappings_e.values()[associationVal + 1]
                 }
+                relayConfig.relayEnable = enable.readDefaultVal() == 1.0
             }
+        }
 
-            is MyStatHpuEquip -> {
-                relayConfig.hpuRelay =  when (associationVal) {
-                    MyStatHpuRelayMapping.EXTERNALLY_MAPPED.ordinal ->  MyStat.HpuRelayMappings_e.HPU_NONE
+        is MyStatHpuEquip -> {
+            if (associationVal < MyStatHpuRelayMapping.values().size) {
+                relayConfig.hpuRelay = when (associationVal) {
+                    MyStatHpuRelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.HpuRelayMappings_e.HPU_NONE
                     MyStatHpuRelayMapping.DCV_DAMPER.ordinal -> MyStat.HpuRelayMappings_e.HPU_DCV_DAMPER
                     else -> MyStat.HpuRelayMappings_e.values()[associationVal + 1]
                 }
+                relayConfig.relayEnable = enable.readDefaultVal() == 1.0
             }
+        }
 
-            is MyStatPipe2Equip -> {
+        is MyStatPipe2Equip -> {
+            if (associationVal < MyStatPipe2RelayMapping.values().size) {
                 relayConfig.twoPipeRelay = when (associationVal) {
                     MyStatPipe2RelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.TwoPipeRelayMappings_e.P2_NONE
                     MyStatPipe2RelayMapping.DCV_DAMPER.ordinal -> MyStat.TwoPipeRelayMappings_e.P2_DCV_DAMPER
                     else -> MyStat.TwoPipeRelayMappings_e.values()[associationVal + 1]
                 }
+                relayConfig.relayEnable = enable.readDefaultVal() == 1.0
             }
         }
-
-        return relayConfig.build()
     }
-    settings2.addMystatRelayConfig(getRelayConfig(equip.relay1OutputEnable, equip.relay1OutputAssociation))
-    settings2.addMystatRelayConfig(getRelayConfig(equip.relay2OutputEnable, equip.relay2OutputAssociation))
-    settings2.addMystatRelayConfig(getRelayConfig(equip.relay3OutputEnable, equip.relay3OutputAssociation))
-    settings2.addMystatRelayConfig(getRelayConfig(equip.relay4OutputEnable, equip.relay4OutputAssociation))
-
+    return relayConfig.build()
 }
 
-private fun getAnalogOutConfigs(equip: MyStatEquip, settings2: MyStat.MyStatSettingsMessage2_t.Builder) {
+private fun getRelayConfigs(
+    equip: MyStatEquip,
+    settings2: MyStat.MyStatSettingsMessage2_t.Builder
+) {
+    settings2.addMystatRelayConfig(getRelayConfig(equip.relay1OutputEnable, equip.relay1OutputAssociation, equip))
+    settings2.addMystatRelayConfig(getRelayConfig(equip.relay2OutputEnable, equip.relay2OutputAssociation, equip))
+    settings2.addMystatRelayConfig(getRelayConfig(equip.relay3OutputEnable, equip.relay3OutputAssociation, equip))
+    settings2.addMystatRelayConfig(getRelayConfig(equip.universalOut1Enable, equip.universalOut1Association, equip))
+
+}
+private fun getAnalogOutConfigs(equip: MyStatEquip, enable: Point, association: Point): MyStat.MyStatAnalogOut_t  {
     val analogOutConfigs = MyStat.MyStatAnalogOut_t.newBuilder()
     val hsApi = CCUHsApi.getInstance()
     analogOutConfigs.apply {
-        setAnalogOutEnable(equip.analog1OutputEnable.readDefaultVal() == 1.0)
-        val analogOutMappingValue = equip.analog1OutputAssociation.readDefaultVal().toInt()
+
+        val analogOutMappingValue = association.readDefaultVal().toInt()
         when(equip) {
             is MyStatCpuEquip -> {
-                cpuAoutMapping = when(analogOutMappingValue) {
-                    MyStatCpuAnalogOutMapping.COOLING.ordinal -> MyStat.CpuAoutMappings_e.CPU_AOUT_COOLING
-                    MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal -> MyStat.CpuAoutMappings_e.CPU_AOUT_FANSPEED
-                    MyStatCpuAnalogOutMapping.HEATING.ordinal -> MyStat.CpuAoutMappings_e.CPU_AOUT_HEATING
-                    MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal -> MyStat.CpuAoutMappings_e.CPU_AOUT_FANSPEEDSTAGED
-                    MyStatCpuAnalogOutMapping.DCV_DAMPER.ordinal -> MyStat.CpuAoutMappings_e.CPU_AOUT_DCVDAMPER
-                    else -> MyStat.CpuAoutMappings_e.CPU_AOUT_NONE
+                if (analogOutMappingValue >= MyStatCpuRelayMapping.values().size) {
+                    cpuAoutMapping = when (analogOutMappingValue) {
+                        MyStatCpuAnalogOutMapping.COOLING.ordinal -> MyStat.CpuAoutMappings_e.CPU_AOUT_COOLING
+                        MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal -> MyStat.CpuAoutMappings_e.CPU_AOUT_FANSPEED
+                        MyStatCpuAnalogOutMapping.HEATING.ordinal -> MyStat.CpuAoutMappings_e.CPU_AOUT_HEATING
+                        MyStatCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal -> MyStat.CpuAoutMappings_e.CPU_AOUT_FANSPEEDSTAGED
+                        MyStatCpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal -> MyStat.CpuAoutMappings_e.CPU_AOUT_DCVDAMPER
+                        else -> MyStat.CpuAoutMappings_e.CPU_AOUT_NONE
+                    }
+                    setAnalogOutEnable(enable.readDefaultVal() == 1.0)
                 }
             }
             is MyStatHpuEquip -> {
-                hpuAoutMapping = when(analogOutMappingValue) {
-                    MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal -> MyStat.HpuAoutMappings_e.HPU_AOUT_COMPSPEED
-                    MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal -> MyStat.HpuAoutMappings_e.HPU_AOUT_FANSPEED
-                    MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal -> MyStat.HpuAoutMappings_e.HPU_AOUT_DCVDAMPER
-                    else -> MyStat.HpuAoutMappings_e.HPU_AOUT_NONE
+                if (analogOutMappingValue >= MyStatHpuRelayMapping.values().size) {
+                    hpuAoutMapping = when (analogOutMappingValue) {
+                        MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal -> MyStat.HpuAoutMappings_e.HPU_AOUT_COMPSPEED
+                        MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal -> MyStat.HpuAoutMappings_e.HPU_AOUT_FANSPEED
+                        MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal -> MyStat.HpuAoutMappings_e.HPU_AOUT_DCVDAMPER
+                        else -> MyStat.HpuAoutMappings_e.HPU_AOUT_NONE
+                    }
+                    setAnalogOutEnable(enable.readDefaultVal() == 1.0)
                 }
             }
             is MyStatPipe2Equip -> {
-                twoPipeAoutMapping = when(analogOutMappingValue) {
-                    MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal -> MyStat.TwoPipeAoutMappings_e.P2_AOUT_WATER_VALVE
-                    MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal -> MyStat.TwoPipeAoutMappings_e.P2_FAN_SPEED
-                    MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal -> MyStat.TwoPipeAoutMappings_e.P2_AOUT_DCV_DAMPER
-                    else -> MyStat.TwoPipeAoutMappings_e.P2_AOUT_NONE
+                if (analogOutMappingValue >= MyStatPipe2AnalogOutMapping.values().size) {
+                    twoPipeAoutMapping = when (analogOutMappingValue) {
+                        MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal -> MyStat.TwoPipeAoutMappings_e.P2_AOUT_WATER_VALVE
+                        MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal -> MyStat.TwoPipeAoutMappings_e.P2_FAN_SPEED
+                        MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal -> MyStat.TwoPipeAoutMappings_e.P2_AOUT_DCV_DAMPER
+                        else -> MyStat.TwoPipeAoutMappings_e.P2_AOUT_NONE
+                    }
+                    setAnalogOutEnable(enable.readDefaultVal() == 1.0)
                 }
             }
         }
         setAnalogOutAtMinSetting(hsApi.readDefaultVal("min and analog == 1 and equipRef == \"${equip.equipRef}\"").toInt() * 10)
         setAnalogOutAtMaxSetting(hsApi.readDefaultVal("max and analog == 1 and equipRef == \"${equip.equipRef}\"").toInt() * 10)
     }
-    settings2.setMyStatAnalogOutConfig(analogOutConfigs.build())
+    return analogOutConfigs.build()
 }
 
 

@@ -6,7 +6,6 @@ import a75f.io.api.haystack.HSUtil
 import a75f.io.device.HyperSplit
 import a75f.io.device.HyperSplit.HyperSplitAnalogOutConfig_t
 import a75f.io.device.HyperSplit.HyperSplitSettingsMessage4_t
-import a75f.io.device.mesh.Base64Util
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
@@ -14,7 +13,6 @@ import a75f.io.domain.equips.HyperStatSplitEquip
 import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
 import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
-import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.CpuSensorBusType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.UniversalInputs
@@ -951,13 +949,6 @@ class HyperSplitSettingsUtil {
             ).toInt()
         }
 
-        fun getPin(point: Point): Int {
-            return try {
-                Base64Util.decode(point.readDefaultStrVal()).toInt()
-            } catch (e: Exception) {
-                0
-            }
-        }
     }
     
 }

@@ -37,6 +37,8 @@ class MyStatHpuConfiguration(
 
     lateinit var analogOut1MinMaxConfig: MyStatHpuMinMaxConfig
     lateinit var analogOut1FanSpeedConfig: MyStatFanConfig
+    lateinit var analogOut2MinMaxConfig: MyStatHpuMinMaxConfig
+    lateinit var analogOut2FanSpeedConfig: MyStatFanConfig
 
     override fun getActiveConfiguration(): MyStatConfiguration {
         val hpuEquip =
@@ -51,6 +53,8 @@ class MyStatHpuConfiguration(
         readHpuActiveConfig(myStatHpuEquip)
         return this
     }
+
+    override fun getAnalogStartIndex() = MyStatHpuRelayMapping.values().size
 
     private fun readHpuActiveConfig(equip: MyStatHpuEquip) {
         analogOut1MinMaxConfig.apply {
@@ -67,14 +71,30 @@ class MyStatHpuConfiguration(
             dcvDamperConfig.max.currentVal =
                 getActivePointValue(equip.analog1MaxDCVDamper, dcvDamperConfig.max)
         }
+        analogOut2MinMaxConfig.apply {
+            compressorSpeed.min.currentVal =
+                getActivePointValue(equip.analog2MinCompressorSpeed, compressorSpeed.min)
+            compressorSpeed.max.currentVal =
+                getActivePointValue(equip.analog2MaxCompressorSpeed, compressorSpeed.max)
+            fanSpeedConfig.min.currentVal =
+                getActivePointValue(equip.analog2MinFanSpeed, fanSpeedConfig.min)
+            fanSpeedConfig.max.currentVal =
+                getActivePointValue(equip.analog2MaxFanSpeed, fanSpeedConfig.max)
+            dcvDamperConfig.min.currentVal =
+                getActivePointValue(equip.analog2MinDCVDamper, dcvDamperConfig.min)
+            dcvDamperConfig.max.currentVal =
+                getActivePointValue(equip.analog2MaxDCVDamper, dcvDamperConfig.max)
+        }
 
         analogOut1FanSpeedConfig.apply {
             low.currentVal = getActivePointValue(equip.analog1FanLow, low)
             high.currentVal = getActivePointValue(equip.analog1FanHigh, high)
         }
-
+        analogOut2FanSpeedConfig.apply {
+            low.currentVal = getActivePointValue(equip.analog2FanLow, low)
+            high.currentVal = getActivePointValue(equip.analog2FanHigh, high)
+        }
     }
-
 
     override fun getDependencies(): List<ValueConfig> {
         return mutableListOf<ValueConfig>().apply {
@@ -86,8 +106,20 @@ class MyStatHpuConfiguration(
                 add(dcvDamperConfig.min)
                 add(dcvDamperConfig.max)
             }
+            analogOut2MinMaxConfig.apply {
+                add(compressorSpeed.min)
+                add(compressorSpeed.max)
+                add(fanSpeedConfig.min)
+                add(fanSpeedConfig.max)
+                add(dcvDamperConfig.min)
+                add(dcvDamperConfig.max)
+            }
 
             analogOut1FanSpeedConfig.apply {
+                add(low)
+                add(high)
+            }
+            analogOut2FanSpeedConfig.apply {
                 add(low)
                 add(high)
             }
@@ -105,8 +137,20 @@ class MyStatHpuConfiguration(
                 add(dcvDamperConfig.min)
                 add(dcvDamperConfig.max)
             }
+            analogOut2MinMaxConfig.apply {
+                add(compressorSpeed.min)
+                add(compressorSpeed.max)
+                add(fanSpeedConfig.min)
+                add(fanSpeedConfig.max)
+                add(dcvDamperConfig.min)
+                add(dcvDamperConfig.max)
+            }
 
             analogOut1FanSpeedConfig.apply {
+                add(low)
+                add(high)
+            }
+            analogOut2FanSpeedConfig.apply {
                 add(low)
                 add(high)
             }
@@ -121,10 +165,20 @@ class MyStatHpuConfiguration(
                 MinMaxConfig(getDefaultValConfig(DomainName.analog1MinFanSpeed, model), getDefaultValConfig(DomainName.analog1MaxFanSpeed, model)),
                 MinMaxConfig(getDefaultValConfig(DomainName.analog1MinDCVDamper, model), getDefaultValConfig(DomainName.analog1MaxDCVDamper, model))
             )
+            analogOut2MinMaxConfig = MyStatHpuMinMaxConfig(
+                MinMaxConfig(getDefaultValConfig(DomainName.analog2MinCompressorSpeed, model), getDefaultValConfig(DomainName.analog2MaxCompressorSpeed, model)),
+                MinMaxConfig(getDefaultValConfig(DomainName.analog2MinFanSpeed, model), getDefaultValConfig(DomainName.analog2MaxFanSpeed, model)),
+                MinMaxConfig(getDefaultValConfig(DomainName.analog2MinDCVDamper, model), getDefaultValConfig(DomainName.analog2MaxDCVDamper, model))
+            )
             analogOut1FanSpeedConfig = MyStatFanConfig(
                 getDefaultValConfig(DomainName.analog1FanLow, model),
                 getDefaultValConfig(DomainName.analog1FanHigh, model)
             )
+            analogOut2FanSpeedConfig = MyStatFanConfig(
+                getDefaultValConfig(DomainName.analog2FanLow, model),
+                getDefaultValConfig(DomainName.analog2FanHigh, model)
+            )
+
         }
         return configuration
     }
@@ -132,10 +186,16 @@ class MyStatHpuConfiguration(
 
     override fun getAnalogMap(): Map<String, Pair<Boolean, String>> {
         val analogOuts = mutableMapOf<String, Pair<Boolean, String>>()
-        analogOuts[DomainName.analog1Out] = Pair(
-            isAnalogExternalMapped(analogOut1Enabled, analogOut1Association),
-            analogType(analogOut1Enabled)
-        )
+        if (isRelayConfig(universalOut1Association.associationVal).not()) {
+            analogOuts[DomainName.universal1Out] = Pair(
+                isUniversalExternalMapped(universalOut1, universalOut1Association), analogType(universalOut1)
+            )
+        }
+        if (isRelayConfig(universalOut2Association.associationVal).not()) {
+            analogOuts[DomainName.universal2Out] = Pair(
+                isUniversalExternalMapped(universalOut2, universalOut2Association), analogType(universalOut2)
+            )
+        }
         return analogOuts
     }
 
@@ -144,13 +204,21 @@ class MyStatHpuConfiguration(
         relays[DomainName.relay1] = isRelayExternalMapped(relay1Enabled, relay1Association)
         relays[DomainName.relay2] = isRelayExternalMapped(relay2Enabled, relay2Association)
         relays[DomainName.relay3] = isRelayExternalMapped(relay3Enabled, relay3Association)
-        relays[DomainName.relay4] = isRelayExternalMapped(relay4Enabled, relay4Association)
+        if (isRelayConfig(universalOut1Association.associationVal)) {
+            relays[DomainName.universal1Out] =
+                isRelayExternalMapped(universalOut1, universalOut1Association)
+        }
+        if (isRelayConfig(universalOut2Association.associationVal)) {
+            relays[DomainName.universal2Out] =
+                isRelayExternalMapped(universalOut2, universalOut2Association)
+        }
         return relays
     }
 
     private fun analogType(analogOutPort: EnableConfig): String {
         return when (analogOutPort) {
-            analogOut1Enabled -> getPortType(analogOut1Association, analogOut1MinMaxConfig)
+            universalOut1 -> getPortType(universalOut1Association, analogOut1MinMaxConfig)
+            universalOut2 -> getPortType(universalOut2Association, analogOut2MinMaxConfig)
             else -> "0-10v"
         }
     }
@@ -186,8 +254,8 @@ class MyStatHpuConfiguration(
     private fun isRelayExternalMapped(enabled: EnableConfig, association: AssociationConfig) =
         (enabled.enabled && association.associationVal == MyStatHpuRelayMapping.EXTERNALLY_MAPPED.ordinal)
 
-    private fun isAnalogExternalMapped(enabled: EnableConfig, association: AssociationConfig) =
-        (enabled.enabled && association.associationVal == MyStatHpuAnalogOutMapping.EXTERNALLY_MAPPED.ordinal)
+    private fun isUniversalExternalMapped(enabled: EnableConfig, association: AssociationConfig) =
+        (enabled.enabled && association.associationVal == MyStatHpuAnalogOutMapping.ANALOG_EXTERNALLY_MAPPED.ordinal)
 
     fun getLowestFanSelected(): MyStatHpuRelayMapping? {
         val lowestSelected = getLowestStage(MyStatHpuRelayMapping.FAN_LOW_SPEED.ordinal,  MyStatHpuRelayMapping.FAN_HIGH_SPEED.ordinal)
@@ -240,8 +308,21 @@ enum class MyStatHpuRelayMapping(val displayName: String) {
 }
 
 enum class MyStatHpuAnalogOutMapping(val displayName: String) {
+    COMPRESSOR_STAGE1("Compressor Stage 1"),
+    COMPRESSOR_STAGE2("Compressor Stage 2"),
+    AUX_HEATING_STAGE1("Aux Heating Stage"),
+    FAN_LOW_SPEED("Fan Low Speed"),
+    FAN_HIGH_SPEED("Fan High Speed"),
+    FAN_ENABLED("Fan Enabled"),
+    OCCUPIED_ENABLED("Occupied Enabled"),
+    HUMIDIFIER("Humidifier"),
+    DEHUMIDIFIER("Dehumidifier"),
+    CHANGE_OVER_O_COOLING("Change Over O Cooling"),
+    CHANGE_OVER_B_HEATING("Change Over B Heating"),
+    EXTERNALLY_MAPPED("Externally Mapped"),
+    DCV_DAMPER("Dcv Damper"),
     COMPRESSOR_SPEED("Compressor Speed"),
     FAN_SPEED("Fan Speed"),
-    EXTERNALLY_MAPPED("Externally Mapped"),
+    ANALOG_EXTERNALLY_MAPPED("Externally Mapped"),
     DCV_DAMPER_MODULATION("Dcv Damper")
 }

@@ -313,6 +313,7 @@ public class Globals {
                 } else {
                     CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Analog Mappings for System Profile migration already done");
                 }
+                migrationHandler.cacheMyStatV1Data();
                 modelMigration(migrationHandler);
                 migrationHandler.doPostModelMigrationTasks();
 
@@ -327,10 +328,6 @@ public class Globals {
                 }
                 /*Below migration scripts should be handled after model migration*/
                 migrationHandler.temperatureModeMigration();
-                /*checkBacnetIdMigrationRequired migration script will update source model version
-                 of system Equip, This will affect DM TO DM migration*/
-                //This was released in 2.18. No longer required.
-                //migrationHandler.checkBacnetIdMigrationRequired();
                 migrationHandler.removeRedundantDevicePoints();
 
                 CcuLog.i(L.TAG_CCU_INIT, "Init Watchdog");
@@ -429,7 +426,6 @@ public class Globals {
 
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
-            //BuildingTuners.getInstance().addBuildingTunerEquip();
             Equip eq = new Equip.Builder().setHashMap(equip).build();
             CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
             if (eq.getProfile().equals("vavStagedRtu")) {

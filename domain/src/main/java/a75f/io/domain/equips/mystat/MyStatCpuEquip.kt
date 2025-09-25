@@ -28,6 +28,14 @@ class MyStatCpuEquip(equipRef: String) : MyStatEquip(equipRef) {
     val analog1MaxHeating = Point(DomainName.analog1MaxHeating, equipRef)
     val analog1MaxLinearFanSpeed = Point(DomainName.analog1MaxLinearFanSpeed, equipRef)
 
+    val analog2MinCooling = Point(DomainName.analog2MinCooling, equipRef)
+    val analog2MinHeating = Point(DomainName.analog2MinHeating, equipRef)
+    val analog2MinLinearFanSpeed = Point(DomainName.analog2MinLinearFanSpeed, equipRef)
+
+    val analog2MaxCooling = Point(DomainName.analog2MaxCooling, equipRef)
+    val analog2MaxHeating = Point(DomainName.analog2MaxHeating, equipRef)
+    val analog2MaxLinearFanSpeed = Point(DomainName.analog2MaxLinearFanSpeed, equipRef)
+
     val fanOutCoolingStage1 = Point(DomainName.fanOutCoolingStage1, equipRef)
     val fanOutCoolingStage2 = Point(DomainName.fanOutCoolingStage2, equipRef)
     val fanOutHeatingStage1 = Point(DomainName.fanOutHeatingStage1, equipRef)

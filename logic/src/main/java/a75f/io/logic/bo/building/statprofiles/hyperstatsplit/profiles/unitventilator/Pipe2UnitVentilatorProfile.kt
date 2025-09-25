@@ -94,7 +94,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         val config = getSplitConfiguration(equipRef) as Pipe2UVConfiguration
         resetEquip(hssEquip)
         supplyWaterTemp = hssEquip.leavingWaterTemperature.readHisVal()
-        val pipe4Tuners = getUnitVentilatorTuners(hssEquip)
+        val pipe2Tuners = getUnitVentilatorTuners(hssEquip)
         val userIntents = fetchUserIntents(hssEquip)
         val averageDesiredTemp = getAverageTemp(userIntents)
         val outsideDamperMinOpen = getEffectiveOutsideDamperMinOpen(hssEquip, isHeatingActive(), isCoolingActive())
@@ -109,19 +109,19 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         val basicSettings = fetchBasicSettings(hssEquip)
         val updatedFanMode = fallBackFanMode(hssEquip, fanModeSaved, basicSettings)
         basicSettings.fanMode = updatedFanMode
-        heatingThreshold = pipe4Tuners.heatingThreshold
-        coolingThreshold = pipe4Tuners.coolingThreshold
-        loopController.initialise(tuners = pipe4Tuners)
+        heatingThreshold = pipe2Tuners.heatingThreshold
+        coolingThreshold = pipe2Tuners.coolingThreshold
+        loopController.initialise(tuners = pipe2Tuners)
         loopController.dumpLogs()
         handleChangeOfDirection(userIntents, controllerFactory, hssEquip)
-        calculateSaTemperingLoop(pipe4Tuners, hssEquip, basicSettings)
+        calculateSaTemperingLoop(pipe2Tuners, hssEquip, basicSettings)
         doorWindowIsOpen(hssEquip)
         keyCardIsInSlot(hssEquip)
         prePurgeEnabled = hssEquip.prePurgeEnable.readDefaultVal() > 0.0
         prePurgeOpeningValue = hssEquip.standalonePrePurgeFanSpeedTuner.readPriorityVal()
 
         resetLoopOutputs()
-        evaluateLoopOutputs(userIntents, basicSettings, pipe4Tuners, hssEquip)
+        evaluateLoopOutputs(userIntents, basicSettings, pipe2Tuners, hssEquip)
         waterValveLoop.data = getWaterValveLoop(userIntents).toDouble()
         doDcv(hssEquip, outsideDamperMinOpen)
         evaluateOAOLoop(
@@ -133,7 +133,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
             hssEquip.oaoDamper.pointExists(),
             hssEquip
         )
-        updateTitle24LoopCounter(pipe4Tuners, basicSettings)
+        updateTitle24LoopCounter(pipe2Tuners, basicSettings)
         updateOccupancyDetection(hssEquip)
         updateLoopOutputs(hssEquip)
 
@@ -144,13 +144,13 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
 
         if (isEmergencyShutoffActive(hssEquip).not() && (isDoorOpen.not()) && isCondensateTripped.not()) {
             if (canWeRunFan(basicSettings)) {
-                runRelayOperations(config, basicSettings, pipe4Tuners)
-                runAnalogOutOperations(config, basicSettings, pipe4Tuners, hssEquip.analogOutStages)
+                runRelayOperations(config, basicSettings, pipe2Tuners)
+                runAnalogOutOperations(config, basicSettings, pipe2Tuners, hssEquip.analogOutStages)
                 runAlgorithm(hssEquip, basicSettings, config)
-                processForWaterSampling(hssEquip, pipe4Tuners, basicSettings)
+                processForWaterSampling(hssEquip, pipe2Tuners, basicSettings)
                 runSpecifiedAnalogFanSpeed(operateAuxBasedFan(hssEquip, basicSettings), config)
                 if (supplyWaterTemp > heatingThreshold) {
-                    operateSaTempering(hssEquip, pipe4Tuners, basicSettings)
+                    operateSaTempering(hssEquip, pipe2Tuners, basicSettings)
                 }
             } else {
                 resetAllLogicalPointValues()
@@ -275,19 +275,6 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
 
     private fun runningAtHeatingDirection() = (heatingLoopOutput > 0 && supplyWaterTemp > coolingThreshold)
     private fun runningAtCoolingDirection() = (coolingLoopOutput > 0 && supplyWaterTemp < coolingThreshold)
-
-    private fun isFanGoodRun(isDoorWindowOpen: Boolean, equip: Pipe2UVEquip): Boolean {
-        return if (isDoorWindowOpen || runningAtHeatingDirection()) {
-            // If current direction is heating then check allow only when valve or heating is available
-            (isPointExist(equip.waterValve) || isPointExist(equip.waterModulatingValve)
-                    || isPointExist(equip.auxHeatingStage1) || isPointExist(equip.auxHeatingStage2))
-        } else if (isDoorWindowOpen || runningAtCoolingDirection()) {
-            isPointExist(equip.waterModulatingValve) || isPointExist(equip.waterValve)
-        } else {
-            false
-        }
-    }
-
 
     private fun updateRelayStatus(
         controllerName: String,

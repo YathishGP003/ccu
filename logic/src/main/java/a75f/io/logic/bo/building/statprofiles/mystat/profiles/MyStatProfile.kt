@@ -51,7 +51,7 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
     var runFanLowDuringDoorWindow = false
     val derivedFanLoopOutput = CalibratedPoint(DomainName.fanLoopOutput ,"",0.0)
     var zoneOccupancyState = CalibratedPoint(DomainName.zoneOccupancy, "", 0.0)
-
+    val fanLowVentilationAvailable: CalibratedPoint = CalibratedPoint("fanLowVentilation", "", 0.0)
     var coolingLoopOutput = 0
     var heatingLoopOutput = 0
     var fanLoopOutput = 0

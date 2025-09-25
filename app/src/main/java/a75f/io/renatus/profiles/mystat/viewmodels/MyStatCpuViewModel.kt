@@ -13,6 +13,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatCpuProfile
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatCpuFanLevel
@@ -21,6 +22,8 @@ import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSetti
 import a75f.io.logic.bo.building.statprofiles.util.setConditioningMode
 import a75f.io.logic.bo.building.statprofiles.util.updateConditioningMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.logic.util.modifyConditioningMode
+import a75f.io.logic.util.modifyFanMode
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatCpuViewState
@@ -78,7 +81,7 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
             MyStatCpuViewState()
         )
     }
-
+    override fun getAnalogStatIndex() = MyStatCpuRelayMapping.values().size
     override fun saveConfiguration() {
         if (saveJob == null && isValidConfiguration(viewState.value.isDcvMapped())) {
             ProgressDialogUtils.showProgressDialog(context, context.getString(R.string.saving_configuration))
@@ -121,9 +124,9 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
             (myStatProfile as MyStatCpuProfile).addEquip(equipId)
             L.ccu().zoneProfiles.add(myStatProfile)
             val equip = MyStatCpuEquip(equipId)
-            setConditioningMode(profileConfiguration as a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration, equip)
+            setConditioningMode(profileConfiguration as MyStatCpuConfiguration, equip)
             updateFanMode(
-                false, equip, getMyStatCpuFanLevel(profileConfiguration as a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration)
+                false, equip, getMyStatCpuFanLevel(profileConfiguration as MyStatCpuConfiguration)
             )
             CcuLog.i(Domain.LOG_TAG, "MyStatCpu profile added")
         } else {
@@ -135,9 +138,9 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
                 profileConfiguration, deviceModel, equipId, hayStack.site!!.id, getDeviceDis()
             )
             val equip = MyStatCpuEquip(equipId)
-            updateConditioningMode(profileConfiguration as a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration, equip)
+            updateConditioningMode(profileConfiguration as MyStatCpuConfiguration, equip)
             updateFanMode(
-                true, equip, getMyStatCpuFanLevel(profileConfiguration as a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration)
+                true, equip, getMyStatCpuFanLevel(profileConfiguration as MyStatCpuConfiguration)
             )
             universalInUnit(profileConfiguration, deviceRef)
         }
@@ -153,10 +156,14 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
         }
     }
 
-    fun isAnyRelayMappedToState(mapping: a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping): Boolean {
-        fun enabledAndMapped(enabled: Boolean, association: Int, mapping: a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping) = enabled && association == mapping.ordinal
+    fun isAnyRelayMappedToState(mapping: MyStatCpuRelayMapping): Boolean {
+        fun enabledAndMapped(enabled: Boolean, association: Int, mapping: MyStatCpuRelayMapping) = enabled && association == mapping.ordinal
         (viewState.value as MyStatCpuViewState).apply {
-            return enabledAndMapped(relay1Config.enabled, relay1Config.association, mapping) || enabledAndMapped(relay2Config.enabled, relay2Config.association, mapping) || enabledAndMapped(relay3Config.enabled, relay3Config.association, mapping) || enabledAndMapped(relay4Config.enabled, relay4Config.association, mapping)
+            return enabledAndMapped(relay1Config.enabled, relay1Config.association, mapping)
+                    || enabledAndMapped(relay2Config.enabled, relay2Config.association, mapping)
+                    || enabledAndMapped(relay3Config.enabled, relay3Config.association, mapping)
+                    || enabledAndMapped(universalOut1.enabled, universalOut1.association, mapping)
+                    || enabledAndMapped(universalOut2.enabled, universalOut2.association, mapping)
         }
     }
 

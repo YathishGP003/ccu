@@ -175,7 +175,7 @@ fun Title(title: String,modifier: Modifier = Modifier) {
 
 
 @Composable
-fun singleOptionConfiguration(
+fun SingleOptionConfiguration(
     minLabel: String,
     itemList: List<Option>,
     unit: String,

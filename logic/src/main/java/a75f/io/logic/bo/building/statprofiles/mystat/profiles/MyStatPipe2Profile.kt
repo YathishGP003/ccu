@@ -71,6 +71,8 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
     private var analogLogicalPoints: HashMap<Int, String> = HashMap()
     private var relayLogicalPoints: HashMap<Int, String> = HashMap()
 
+
+
     override fun getProfileType() = ProfileType.MYSTAT_PIPE2
 
     override fun updateZonePoints() {
@@ -150,6 +152,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         supplyWaterTempTh2 = equip.leavingWaterTemperature.readHisVal()
         isWaterValveActiveDueToLoop = false
         if (occupancyStatus == Occupancy.WINDOW_OPEN) resetLoopOutputs()
+        fanLowVentilationAvailable.data = if (equip.fanLowSpeedVentilation.pointExists()) 1.0 else 0.0
         updateLoopOutputs(
             coolingLoopOutput, equip.coolingLoopOutput,
             heatingLoopOutput, equip.heatingLoopOutput,
@@ -257,7 +260,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         equip: MyStatPipe2Equip, userIntents: UserIntents,
         controllerFactory: MyStatControlFactory
     ) {
-        controllerFactory.addPipe2Controllers(config, waterValveLoop)
+        controllerFactory.addPipe2Controllers(config, waterValveLoop, fanLowVentilationAvailable)
         runControllers(equip, basicSettings, config, userIntents)
     }
 
@@ -348,9 +351,10 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
                     updateStatus(equip.fanHighSpeed, isHighActive, Stage.FAN_2.displayName)
                 }
 
-                if (equip.fanLowSpeed.pointExists() && lowExist != null) {
+                if ((equip.fanLowSpeed.pointExists() || equip.fanLowSpeedVentilation.pointExists()) && lowExist != null) {
                     val isLowActive = if (isHighExist && isHighActive) false else isStageActive(lowExist.first, lowExist.second, lowestStageFanLow)
-                    updateStatus(equip.fanLowSpeed, isLowActive, Stage.FAN_1.displayName)
+                    updateStatus(if (fanLowVentilationAvailable.readHisVal() > 0) equip.fanLowSpeedVentilation else equip.fanLowSpeed,
+                        isLowActive, Stage.FAN_1.displayName)
                 }
             }
             ControllerNames.AUX_HEATING_STAGE1 -> {
@@ -373,7 +377,8 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
     }
 
     private fun isFanGoodRun(isDoorWindowOpen: Boolean, equip: MyStatPipe2Equip): Boolean {
-        return if (isDoorWindowOpen || heatingLoopOutput > 0 && supplyWaterTempTh2 > coolingThreshold) {
+        return if (fanLowVentilationAvailable.readHisVal() > 0) true
+        else if (isDoorWindowOpen || heatingLoopOutput > 0 && supplyWaterTempTh2 > coolingThreshold) {
             // If current direction is heating then check allow only when valve or heating is available
             (isConfigPresent(MyStatPipe2RelayMapping.WATER_VALVE) || equip.modulatingWaterValve.pointExists()
                     || isConfigPresent(MyStatPipe2RelayMapping.AUX_HEATING_STAGE1))
@@ -388,9 +393,9 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         resetFanLowestFanStatus()
         fanEnabledStatus =
             config.isAnyRelayEnabledAssociated(association = MyStatCpuRelayMapping.FAN_ENABLED.ordinal)
-        val lowestStage = config.getLowestFanSelected()
+        val lowestStage = config.getLowestFanSelected(fanLowVentilationAvailable.readHisVal() > 0)
         when (lowestStage) {
-            MyStatPipe2RelayMapping.FAN_LOW_SPEED -> lowestStageFanLow = true
+            MyStatPipe2RelayMapping.FAN_LOW_SPEED, MyStatPipe2RelayMapping.FAN_LOW_VENTILATION -> lowestStageFanLow = true
             MyStatPipe2RelayMapping.FAN_HIGH_SPEED -> lowestStageFanHigh = true
             else -> {}
         }
@@ -428,50 +433,65 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         analogOutStages: HashMap<String, Int>,
         userIntents: UserIntents
     ) {
-        if (config.analogOut1Enabled.enabled) {
-            val analogMapping = MyStatPipe2AnalogOutMapping.values()
-                .find { it.ordinal == config.analogOut1Association.associationVal }
-            when (analogMapping) {
-                MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE -> {
-                    if (waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
-                        waterValveLoop.data = waterValveLoop(userIntents).toDouble()
-                        if (basicSettings.fanMode != MyStatFanStages.OFF) {
-                            updateLogicalPoint(
-                                logicalPointsList[Port.ANALOG_OUT_ONE]!!,
-                                waterValveLoop.data
-                            )
-                            if (waterValveLoop.data > 0) {
-                                analogOutStages[StatusMsgKeys.WATER_VALVE.name] = 1
-                                isWaterValveActiveDueToLoop = true
-                                lastWaterValveTurnedOnTime = System.currentTimeMillis()
+        config.apply {
+            listOf(
+                Triple(
+                    Pair(config.universalOut1, config.universalOut1Association),
+                    config.analogOut1FanSpeedConfig,
+                    Port.UNIVERSAL_OUT_ONE
+                ),
+                Triple(
+                    Pair(config.universalOut2, config.universalOut2Association),
+                    config.analogOut2FanSpeedConfig,
+                    Port.UNIVERSAL_OUT_TWO
+                )
+            ).forEach { (universalOut, fanConfig, port) ->
+                val analogMapping = MyStatPipe2AnalogOutMapping.values()
+                    .find { it.ordinal == universalOut.second.associationVal }
+                when (analogMapping) {
+                    MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE -> {
+                        if (waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
+                            waterValveLoop.data = waterValveLoop(userIntents).toDouble()
+                            if (basicSettings.fanMode != MyStatFanStages.OFF) {
+                                updateLogicalPoint(
+                                    logicalPointsList[port]!!,
+                                    waterValveLoop.data
+                                )
+                                if (waterValveLoop.data > 0) {
+                                    analogOutStages[StatusMsgKeys.WATER_VALVE.name] = 1
+                                    isWaterValveActiveDueToLoop = true
+                                    lastWaterValveTurnedOnTime = System.currentTimeMillis()
+                                }
+                            } else {
+                                updateLogicalPoint(logicalPointsList[port]!!, 0.0)
                             }
-                        } else {
-                            updateLogicalPoint(logicalPointsList[Port.ANALOG_OUT_ONE]!!, 0.0)
                         }
                     }
-                }
 
-                MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION -> {
-                    doAnalogDCVAction(
-                        Port.ANALOG_OUT_ONE, analogOutStages, config.co2Threshold.currentVal,
-                        config.co2DamperOpeningRate.currentVal,
-                        equip
-                    )
-                }
+                    MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION -> {
+                        doAnalogDCVAction(
+                            port, analogOutStages, config.co2Threshold.currentVal,
+                            config.co2DamperOpeningRate.currentVal, equip
+                        )
+                    }
 
-                MyStatPipe2AnalogOutMapping.FAN_SPEED -> {
-                    doAnalogFanAction(
-                        Port.ANALOG_OUT_ONE, config.analogOut1FanSpeedConfig.low.currentVal.toInt(),
-                        config.analogOut1FanSpeedConfig.high.currentVal.toInt(),
-                        basicSettings.fanMode, basicSettings.conditioningMode,
-                        fanLoopOutput, analogOutStages, isFanGoodRun(doorWindowSensorOpenStatus, equip)
-                    )
-                }
+                    MyStatPipe2AnalogOutMapping.FAN_SPEED -> {
+                        doAnalogFanAction(
+                            port,
+                            fanConfig.low.currentVal.toInt(),
+                            fanConfig.high.currentVal.toInt(),
+                            basicSettings.fanMode,
+                            basicSettings.conditioningMode,
+                            fanLoopOutput,
+                            analogOutStages,
+                            isFanGoodRun(doorWindowSensorOpenStatus, equip)
+                        )
+                    }
 
-                else -> {}
+                    else -> {}
+                }
             }
         }
-
     }
 
 
@@ -543,13 +563,15 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         equip: MyStatPipe2Equip
     ) {
         if (basicSettings.fanMode == MyStatFanStages.AUTO) {
-
             resetFanIfRequired(equip, basicSettings)
-
             if (isAux1Exists() && aux1Active(equip)) {
                 resetFan(equip.relayStages, equip.analogOutStages, basicSettings)
-                operateAuxBasedOnFan(equip.relayStages)
-                runSpecificAnalogFanSpeed(configuration, MyStatFanSpeed.HIGH, equip.analogOutStages)
+                val isRelayActive = operateAuxBasedOnFan(equip)
+                val isAnalogAvailable = runSpecificAnalogFanSpeed(configuration, equip.analogOutStages)
+                if (isAnalogAvailable.not() && isRelayActive.not()) {
+                    logIt("No Fan mapping available for Aux1 operation")
+                    resetAux(equip.relayStages)
+                }
             }
         }
     }
@@ -566,21 +588,23 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
 
     private fun runSpecificAnalogFanSpeed(
         config: MyStatPipe2Configuration,
-        fanSpeed: MyStatFanSpeed,
         analogOutStages: HashMap<String, Int>
-    ) {
-        if (config.analogOut1Enabled.enabled && config.analogOut1Association.associationVal == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
-
-            val fanSpeedValue = when (fanSpeed) {
-                MyStatFanSpeed.HIGH -> config.analogOut1FanSpeedConfig.high.currentVal
-                MyStatFanSpeed.LOW -> config.analogOut1FanSpeedConfig.low.currentVal
-                else -> 0.0
-            }
-            updateLogicalPoint(logicalPointsList[Port.ANALOG_OUT_ONE]!!, fanSpeedValue)
+    ): Boolean {
+        var isAnalogAvailable = false
+        if (config.universalOut1.enabled && config.universalOut1Association.associationVal == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
+            val fanSpeedValue = config.analogOut1FanSpeedConfig.high.currentVal
+            updateLogicalPoint(logicalPointsList[Port.UNIVERSAL_OUT_ONE]!!, fanSpeedValue)
             analogOutStages[StatusMsgKeys.FAN_SPEED.name] = 1
+            isAnalogAvailable = true
         }
+        if (config.universalOut2.enabled && config.universalOut2Association.associationVal == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
+            val fanSpeedValue = config.analogOut2FanSpeedConfig.high.currentVal
+            updateLogicalPoint(logicalPointsList[Port.UNIVERSAL_OUT_TWO]!!, fanSpeedValue)
+            analogOutStages[StatusMsgKeys.FAN_SPEED.name] = 1
+            isAnalogAvailable = true
+        }
+        return isAnalogAvailable
     }
-
 
     private fun processForWaterSampling(
         equip: MyStatPipe2Equip, tuner: MyStatTuners,
@@ -683,6 +707,10 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
                 resetLogicalPoint(relayLogicalPoints[MyStatPipe2RelayMapping.FAN_LOW_SPEED.ordinal]!!)
                 relayStages.remove(Stage.FAN_1.displayName)
             }
+            if (isConfigPresent(MyStatPipe2RelayMapping.FAN_LOW_VENTILATION)) {
+                resetLogicalPoint(relayLogicalPoints[MyStatPipe2RelayMapping.FAN_LOW_VENTILATION.ordinal]!!)
+                relayStages.remove(Stage.FAN_1.displayName)
+            }
             if (isConfigPresent(MyStatPipe2RelayMapping.FAN_HIGH_SPEED)) {
                 resetLogicalPoint(relayLogicalPoints[MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal]!!)
                 relayStages.remove(Stage.FAN_2.displayName)
@@ -717,33 +745,30 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         relayStages.remove(MyStatPipe2RelayMapping.AUX_HEATING_STAGE1.name)
     }
 
-    // New requirement for aux and fan operations If we do not have fan then no aux
-    private fun operateAuxBasedOnFan(relayStages: HashMap<String, Int>) {
-        var stage = MyStatPipe2RelayMapping.AUX_HEATING_STAGE1
-        var state = 0
-        var fanStatusMessage: Stage? = null
-        if (isConfigPresent(MyStatPipe2RelayMapping.FAN_HIGH_SPEED)) {
-            stage = MyStatPipe2RelayMapping.FAN_HIGH_SPEED
-            state = 1
-            fanStatusMessage = Stage.FAN_2
-        } else if (isConfigPresent(MyStatPipe2RelayMapping.FAN_LOW_SPEED)) {
-            stage = MyStatPipe2RelayMapping.FAN_LOW_SPEED
-            state = 1
-            fanStatusMessage = Stage.FAN_1
-        } else if (analogLogicalPoints.containsKey(MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal)
-            || isConfigPresent(MyStatPipe2RelayMapping.FAN_ENABLED)) {
-            stage = MyStatPipe2RelayMapping.FAN_ENABLED
-            state = 1
+    private fun operateAuxBasedOnFan(equip: MyStatPipe2Equip): Boolean {
+        val sequenceMap = mutableMapOf(
+            equip.fanHighSpeed to Stage.FAN_2.displayName,
+            equip.fanLowSpeed to Stage.FAN_1.displayName,
+            equip.fanLowSpeedVentilation to Stage.FAN_1.displayName,
+            equip.fanEnable to StatusMsgKeys.FAN_ENABLED.name,
+            equip.occupiedEnable to StatusMsgKeys.EQUIP_ON.name
+        )
+        // Before operating AUX based fan reset all points except fanEnable and occupiedEnable
+        sequenceMap.forEach { (point, statusMsg) ->
+            if ((point.domainName != DomainName.fanEnable && point.domainName != DomainName.occupiedEnable) && point.pointExists()) {
+                point.writeHisVal(0.0)
+            }
+            equip.relayStages.remove(statusMsg)
         }
-        if (state == 0) {
-            resetAux(relayStages)
-        } else {
-            if (stage != MyStatPipe2RelayMapping.FAN_ENABLED) {
-                updateLogicalPoint(relayLogicalPoints[stage.ordinal]!!, 1.0)
-                relayStages[fanStatusMessage!!.displayName] = 1
+        sequenceMap.forEach { (point, statusMsg) ->
+            if (point.pointExists()) {
+                point.writeHisVal(1.0)
+                equip.relayStages[statusMsg] = 1
+                logIt("Operating AUX based fan: ${point.domainName}")
+                return true
             }
         }
-
+        return false
     }
 
     private fun doFanOperationTitle24(
@@ -752,11 +777,11 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         configuration: MyStatPipe2Configuration
     ) {
         if (basicSettings.fanMode == MyStatFanStages.AUTO && runFanLowDuringDoorWindow) {
-            val lowestStage = configuration.getLowestFanSelected()
+            val lowestStage = configuration.getLowestFanSelected(fanLowVentilationAvailable.readHisVal() > 0)
             if (lowestStage == null) resetFan(equip.relayStages, equip.analogOutStages, basicSettings)
             resetFanLowestFanStatus()
             when (lowestStage) {
-                MyStatPipe2RelayMapping.FAN_LOW_SPEED -> lowestStageFanLow = true
+                MyStatPipe2RelayMapping.FAN_LOW_SPEED, MyStatPipe2RelayMapping.FAN_LOW_VENTILATION -> lowestStageFanLow = true
                 MyStatPipe2RelayMapping.FAN_HIGH_SPEED -> lowestStageFanHigh = true
                 else -> {
                     // Do nothing

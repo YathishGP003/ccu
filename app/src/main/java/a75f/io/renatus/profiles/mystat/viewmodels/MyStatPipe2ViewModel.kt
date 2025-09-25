@@ -14,12 +14,15 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2RelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe2Profile
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe2FanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.logic.util.modifyConditioningMode
+import a75f.io.logic.util.modifyFanMode
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatPipe2ViewState
@@ -48,7 +51,6 @@ import kotlinx.coroutines.withContext
 
 class MyStatPipe2ViewModel(application: Application) : MyStatViewModel(application) {
     override var viewState = mutableStateOf(MyStatPipe2ViewState() as MyStatViewState)
-
     override fun init(bundle: Bundle, context: Context, hayStack: CCUHsApi) {
         super.init(bundle, context, hayStack)
 
@@ -69,7 +71,7 @@ class MyStatPipe2ViewModel(application: Application) : MyStatViewModel(applicati
         viewState.value =  MyStatViewStateUtil.pipe2ConfigToState(profileConfiguration as MyStatPipe2Configuration, MyStatPipe2ViewState())
     }
 
-
+    override fun getAnalogStatIndex() = MyStatPipe2RelayMapping.values().size
 
     override fun saveConfiguration() {
         if (saveJob == null && isValidConfiguration(viewState.value.isDcvMapped())) {

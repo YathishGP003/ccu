@@ -515,6 +515,9 @@ object DomainName {
     const val analog2In = "analog2In"
     const val th1In = "th1In"
     const val th2In = "th2In"
+    const val universal1Out = "universal1Out"
+    const val universal2Out = "universal2Out"
+
 
     const val smartnodeVAVReheatNoFan = "smartnodeVAVReheatNoFan"
     const val smartnodeVAVReheatParallelFan = "smartnodeVAVReheatParallelFan"
@@ -797,6 +800,8 @@ object DomainName {
     const val analog2OutputAssociation = "analog2OutputAssociation"
     const val analog3OutputAssociation = "analog3OutputAssociation"
     const val analog4OutputAssociation = "analog4OutputAssociation"
+    const val universal1OutputAssociation = "universal1OutputAssociation"
+    const val universal2OutputAssociation = "universal2OutputAssociation"
 
     const val pressureBasedFanControl = "pressureBasedFanControl"
     const val satBasedCoolingControl = "satBasedCoolingControl"
@@ -1517,6 +1522,8 @@ object DomainName {
     const val doorWindowSensorNC = "doorWindowSensorNC"
     const val doorWindowSensor = "doorWindowSensor"
     const val fanOutSaTempering = "fanOutSaTempering"
+    const val universal1OutputEnable = "universal1OutputEnable"
+    const val universal2OutputEnable = "universal2OutputEnable"
 
 
 }

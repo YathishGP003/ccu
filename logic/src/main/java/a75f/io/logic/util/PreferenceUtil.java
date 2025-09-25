@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import java.util.Date;
 
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.migration.mystatv2migration.MyStatV2Migration;
 
 public class PreferenceUtil {
     private static Context context;
@@ -1061,6 +1062,14 @@ public class PreferenceUtil {
 
     public static void setMigrationClearInvalidHisData() {
         setBooleanPreference(MIGRATION_CLEAR_INVALID_HIS_DATA, true);
+    }
+
+    public static boolean getMyStatV2Migration() {
+        return getBooleanPreference(MyStatV2Migration.MYSTAT_V2_MIGRATION);
+    }
+
+    public static void setMyStatV2Migration() {
+        setBooleanPreference(MyStatV2Migration.MYSTAT_V2_MIGRATION, true);
     }
 
     public static boolean getPLCTargetAndErrorRangeMigrationStatus() {

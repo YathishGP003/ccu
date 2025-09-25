@@ -228,18 +228,29 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
         equip: MyStatCpuEquip
     ) {
         config.apply {
-
-            if (analogOut1Enabled.enabled) {
+            if (universalOut1.enabled && config.isRelayConfig(universalOut1Association.associationVal).not()) {
                 handleAnalogOutState(
                     MyStatCpuAnalogOutConfigs(
                         true,
-                        analogOut1Association.associationVal,
+                        universalOut1Association.associationVal,
                         analogOut1MinMaxConfig,
                         analogOut1FanSpeedConfig,
-                        recirculateFanConfig.currentVal
-                    ), config, basicSettings, analogOutStages, equip
+                        universalOut1recircFanConfig.currentVal
+                    ), config, basicSettings, analogOutStages, equip, Port.UNIVERSAL_OUT_ONE
                 )
             }
+            if (universalOut2.enabled && config.isRelayConfig(universalOut2Association.associationVal).not()) {
+                handleAnalogOutState(
+                    MyStatCpuAnalogOutConfigs(
+                        true,
+                        universalOut2Association.associationVal,
+                        analogOut2MinMaxConfig,
+                        analogOut2FanSpeedConfig,
+                        universalOut2recircFanConfig.currentVal
+                    ), config, basicSettings, analogOutStages, equip,Port.UNIVERSAL_OUT_TWO
+                )
+            }
+
         }
     }
     private fun handleAnalogOutState(
@@ -247,14 +258,15 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
         config: MyStatCpuConfiguration,
         basicSettings: MyStatBasicSettings,
         analogOutStages: HashMap<String, Int>,
-        equip: MyStatCpuEquip
+        equip: MyStatCpuEquip,
+        port: Port
     ) {
         val analogMapping =
             MyStatCpuAnalogOutMapping.values().find { it.ordinal == analogOutState.association }
         when (analogMapping) {
             MyStatCpuAnalogOutMapping.COOLING -> {
                 doAnalogCooling(
-                    Port.ANALOG_OUT_ONE,
+                    port,
                     basicSettings.conditioningMode,
                     analogOutStages,
                     coolingLoopOutput
@@ -271,13 +283,13 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
                     analogOutStages,
                     previousFanLoopVal,
                     fanLoopCounter,
-                    equip
+                    equip, port
                 )
             }
 
             MyStatCpuAnalogOutMapping.HEATING -> {
                 doAnalogHeating(
-                    Port.ANALOG_OUT_ONE,
+                    port,
                     basicSettings.conditioningMode,
                     analogOutStages,
                     heatingLoopOutput
@@ -294,13 +306,13 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
                     fanLoopOutput,
                     analogOutStages,
                     fanLoopCounter,
-                    equip
+                    equip, port
                 )
             }
 
-            MyStatCpuAnalogOutMapping.DCV_DAMPER -> {
+            MyStatCpuAnalogOutMapping.DCV_DAMPER_MODULATION -> {
                 doAnalogDCVAction(
-                    Port.ANALOG_OUT_ONE, analogOutStages, config.co2Threshold.currentVal,
+                    port, analogOutStages, config.co2Threshold.currentVal,
                     config.co2DamperOpeningRate.currentVal,
                     equip
                 )
@@ -314,7 +326,7 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
         fanLowPercent: Int, fanHighPercent: Int, fanMode: MyStatFanStages,
         fanEnabledMapped: Boolean, conditioningMode: StandaloneConditioningMode,
         fanLoopOutput: Int, analogOutStages: HashMap<String, Int>,
-        fanProtectionCounter: Int, equip: MyStatCpuEquip
+        fanProtectionCounter: Int, equip: MyStatCpuEquip, port: Port
     ) {
         if (fanMode == MyStatFanStages.OFF) return
 
@@ -324,7 +336,7 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
         if (fanMode == MyStatFanStages.AUTO) {
 
             if (conditioningMode == StandaloneConditioningMode.OFF) {
-                updateLogicalPoint(logicalPointsList[Port.ANALOG_OUT_ONE]!!, 0.0)
+                updateLogicalPoint(logicalPointsList[port]!!, 0.0)
                 return
             }
 
@@ -379,8 +391,8 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
         }
 
         if (fanLoopForAnalog > 0) analogOutStages[StatusMsgKeys.FAN_SPEED.name] = fanLoopForAnalog
-        updateLogicalPoint(logicalPointsList[Port.ANALOG_OUT_ONE]!!, fanLoopForAnalog.toDouble())
-        logIt("${Port.ANALOG_OUT_ONE} = Staged Fan Speed($logMsg) $fanLoopForAnalog")
+        updateLogicalPoint(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
+        logIt("$port = Staged Fan Speed($logMsg) $fanLoopForAnalog")
     }
 
     private fun getHeatingActivatedAnalogVoltage(
@@ -488,13 +500,14 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
         analogOutStages: HashMap<String, Int>,
         previousFanLoopVal: Int,
         fanProtectionCounter: Int,
-        equip: MyStatCpuEquip
+        equip: MyStatCpuEquip,
+        port: Port
     ) {
         if (fanMode != MyStatFanStages.OFF) {
             var fanLoopForAnalog = 0
             if (fanMode == MyStatFanStages.AUTO) {
                 if (conditioningMode == StandaloneConditioningMode.OFF) {
-                    updateLogicalPoint(logicalPointsList[Port.ANALOG_OUT_ONE]!!, 0.0)
+                    updateLogicalPoint(logicalPointsList[port]!!, 0.0)
                     return
                 }
                 fanLoopForAnalog = fanLoopOutput
@@ -513,7 +526,7 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
             if (fanLoopForAnalog > 0) analogOutStages[StatusMsgKeys.FAN_SPEED.name] =
                 fanLoopForAnalog
             updateLogicalPoint(
-                logicalPointsList[Port.ANALOG_OUT_ONE]!!,
+                logicalPointsList[port]!!,
                 fanLoopForAnalog.toDouble()
             )
         }
@@ -523,7 +536,7 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
         config: MyStatCpuConfiguration, basicSettings: MyStatBasicSettings,
         equip: MyStatCpuEquip, controllerFactory: MyStatControlFactory
     ) {
-        controllerFactory.addCpuControllers(config)
+        controllerFactory.addCpuControllers(config, fanLowVentilationAvailable)
         runControllers(equip, basicSettings, config)
     }
 

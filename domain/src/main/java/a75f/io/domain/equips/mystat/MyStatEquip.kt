@@ -34,22 +34,25 @@ open class MyStatEquip(equipRef: String) : DomainEquip(equipRef) {
     val autoForceOccupied = Point(DomainName.autoForceOccupied, equipRef)
     val enableCo2Display = Point(DomainName.enableCo2Display, equipRef)
 
+    val enableConditioningModeFanAccess = Point(DomainName.enableConditioningModeFanAccess, equipRef)
+    val pinLockConditioningModeFanAccess = Point(DomainName.pinLockConditioningModeFanAccess, equipRef)
+    val pinLockInstallerAccess = Point(DomainName.pinLockInstallerAccess, equipRef)
+    val installerPinEnable = Point(DomainName.enableInstallerAccess, equipRef)
+    val enableSpaceTempDisplay = Point(DomainName.enableSpaceTempDisplay, equipRef)
+    val enableDesiredTempDisplay = Point(DomainName.enableDesiredTempDisplay, equipRef)
+
     val relay1OutputEnable = Point(DomainName.relay1OutputEnable, equipRef)
     val relay2OutputEnable = Point(DomainName.relay2OutputEnable, equipRef)
     val relay3OutputEnable = Point(DomainName.relay3OutputEnable, equipRef)
-    val relay4OutputEnable = Point(DomainName.relay4OutputEnable, equipRef)
+    val universalOut1Enable = Point(DomainName.universal1OutputEnable, equipRef)
+    val universalOut2Enable = Point(DomainName.universal2OutputEnable, equipRef)
+
     val relay1OutputAssociation = Point(DomainName.relay1OutputAssociation, equipRef)
     val relay2OutputAssociation = Point(DomainName.relay2OutputAssociation, equipRef)
     val relay3OutputAssociation = Point(DomainName.relay3OutputAssociation, equipRef)
-    val relay4OutputAssociation = Point(DomainName.relay4OutputAssociation, equipRef)
 
-    val analog1OutputEnable = Point(DomainName.analog1OutputEnable, equipRef)
-    val analog1OutputAssociation = Point(DomainName.analog1OutputAssociation, equipRef)
-
-    val analog1InputEnable = Point(DomainName.analog1InputEnable, equipRef)
-    val analog2InputEnable = Point(DomainName.analog2InputEnable, equipRef)
-    val analog1InputAssociation = Point(DomainName.analog1InputAssociation, equipRef)
-    val analog2InputAssociation = Point(DomainName.analog2InputAssociation, equipRef)
+    val universalOut1Association = Point(DomainName.universal1OutputAssociation, equipRef)
+    val universalOut2Association = Point(DomainName.universal2OutputAssociation, equipRef)
 
     val universalIn1Enable = Point(DomainName.universalIn1Enable, equipRef)
     val universalIn1Association = Point(DomainName.universalIn1Association, equipRef)
@@ -137,6 +140,12 @@ open class MyStatEquip(equipRef: String) : DomainEquip(equipRef) {
     val analog1FanHigh = Point(DomainName.analog1FanHigh, equipRef)
     val analog1MinDCVDamper = Point(DomainName.analog1MinDCVDamper, equipRef)
     val analog1MaxDCVDamper = Point(DomainName.analog1MaxDCVDamper, equipRef)
+
+    val analog2FanLow = Point(DomainName.analog2FanLow, equipRef)
+    val analog2FanHigh = Point(DomainName.analog2FanHigh, equipRef)
+    val analog2MinDCVDamper = Point(DomainName.analog2MinDCVDamper, equipRef)
+    val analog2MaxDCVDamper = Point(DomainName.analog2MaxDCVDamper, equipRef)
+
     val mystatStageUpTimerCounter = Point(DomainName.mystatStageUpTimerCounter, equipRef)
     val mystatStageDownTimerCounter = Point(DomainName.mystatStageDownTimerCounter, equipRef)
 

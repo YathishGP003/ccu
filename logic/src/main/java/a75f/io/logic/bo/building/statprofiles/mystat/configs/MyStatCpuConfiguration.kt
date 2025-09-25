@@ -20,25 +20,65 @@ import io.seventyfivef.ph.core.Tags
 class MyStatCpuConfiguration(nodeAddress: Int, nodeType: String, priority: Int, roomRef: String, floorRef: String, profileType: ProfileType, model: SeventyFiveFProfileDirective): MyStatConfiguration(nodeAddress = nodeAddress, nodeType = nodeType, priority = priority, roomRef = roomRef, floorRef = floorRef, profileType = profileType, model = model) {
 
     lateinit var analogOut1MinMaxConfig: MyStatCpuMinMaxConfig
+    lateinit var analogOut2MinMaxConfig: MyStatCpuMinMaxConfig
     lateinit var analogOut1FanSpeedConfig: MyStatFanConfig
+    lateinit var analogOut2FanSpeedConfig: MyStatFanConfig
     lateinit var coolingStageFanConfig: MyStatCpuStagedConfig
     lateinit var heatingStageFanConfig: MyStatCpuStagedConfig
-    lateinit var recirculateFanConfig: ValueConfig
+    lateinit var universalOut1recircFanConfig: ValueConfig
+    lateinit var universalOut2recircFanConfig: ValueConfig
 
     override fun getDefaultConfiguration(): MyStatConfiguration {
         val configuration = super.getDefaultConfiguration()
         configuration.apply {
             analogOut1MinMaxConfig = MyStatCpuMinMaxConfig(
-                MinMaxConfig(getDefaultValConfig(DomainName.analog1MinCooling, model), getDefaultValConfig(DomainName.analog1MaxCooling, model)),
-                MinMaxConfig(getDefaultValConfig(DomainName.analog1MinLinearFanSpeed, model), getDefaultValConfig(DomainName.analog1MaxLinearFanSpeed, model)),
-                MinMaxConfig(getDefaultValConfig(DomainName.analog1MinHeating, model), getDefaultValConfig(DomainName.analog1MaxHeating, model)),
-                MinMaxConfig(getDefaultValConfig(DomainName.analog1MinDCVDamper, model), getDefaultValConfig(DomainName.analog1MaxDCVDamper, model))
+                MinMaxConfig(
+                    getDefaultValConfig(DomainName.analog1MinCooling, model),
+                    getDefaultValConfig(DomainName.analog1MaxCooling, model)
+                ),
+                MinMaxConfig(
+                    getDefaultValConfig(DomainName.analog1MinLinearFanSpeed, model),
+                    getDefaultValConfig(DomainName.analog1MaxLinearFanSpeed, model)
+                ),
+                MinMaxConfig(
+                    getDefaultValConfig(DomainName.analog1MinHeating, model),
+                    getDefaultValConfig(DomainName.analog1MaxHeating, model)
+                ),
+                MinMaxConfig(
+                    getDefaultValConfig(DomainName.analog1MinDCVDamper, model),
+                    getDefaultValConfig(DomainName.analog1MaxDCVDamper, model)
+                )
             )
+            analogOut2MinMaxConfig = MyStatCpuMinMaxConfig(
+                MinMaxConfig(
+                    getDefaultValConfig(DomainName.analog2MinCooling, model),
+                    getDefaultValConfig(DomainName.analog2MaxCooling, model)
+                ),
+                MinMaxConfig(
+                    getDefaultValConfig(DomainName.analog2MinLinearFanSpeed, model),
+                    getDefaultValConfig(DomainName.analog2MaxLinearFanSpeed, model)
+                ),
+                MinMaxConfig(
+                    getDefaultValConfig(DomainName.analog2MinHeating, model),
+                    getDefaultValConfig(DomainName.analog2MaxHeating, model)
+                ),
+                MinMaxConfig(
+                    getDefaultValConfig(DomainName.analog2MinDCVDamper, model),
+                    getDefaultValConfig(DomainName.analog2MaxDCVDamper, model)
+                )
+            )
+
             analogOut1FanSpeedConfig =
                 MyStatFanConfig(
                     getDefaultValConfig(DomainName.analog1FanLow, model),
                     getDefaultValConfig(DomainName.analog1FanHigh, model)
                 )
+            analogOut2FanSpeedConfig =
+                MyStatFanConfig(
+                    getDefaultValConfig(DomainName.analog2FanLow, model),
+                    getDefaultValConfig(DomainName.analog2FanHigh, model)
+                )
+
             coolingStageFanConfig =
                 MyStatCpuStagedConfig(
                     getDefaultValConfig(DomainName.fanOutCoolingStage1, model),
@@ -49,7 +89,10 @@ class MyStatCpuConfiguration(nodeAddress: Int, nodeType: String, priority: Int, 
                     getDefaultValConfig(DomainName.fanOutHeatingStage1, model),
                     getDefaultValConfig(DomainName.fanOutHeatingStage2, model),
                 )
-            recirculateFanConfig = getDefaultValConfig(DomainName.analog1FanRecirculate, model)
+            universalOut1recircFanConfig =
+                getDefaultValConfig(DomainName.analog1FanRecirculate, model)
+            universalOut2recircFanConfig =
+                getDefaultValConfig(DomainName.analog2FanRecirculate, model)
         }
         return configuration
     }
@@ -70,10 +113,29 @@ class MyStatCpuConfiguration(nodeAddress: Int, nodeType: String, priority: Int, 
                 add(coolingStageFanConfig.stage2)
                 add(heatingStageFanConfig.stage1)
                 add(heatingStageFanConfig.stage2)
-                add(recirculateFanConfig)
+                add(universalOut1recircFanConfig)
+            }
+            analogOut2MinMaxConfig.apply {
+                add(cooling.min)
+                add(cooling.max)
+                add(linearFanSpeed.min)
+                add(linearFanSpeed.max)
+                add(heating.min)
+                add(heating.max)
+                add(dcvDamperConfig.min)
+                add(dcvDamperConfig.max)
+                add(coolingStageFanConfig.stage1)
+                add(coolingStageFanConfig.stage2)
+                add(heatingStageFanConfig.stage1)
+                add(heatingStageFanConfig.stage2)
+                add(universalOut2recircFanConfig)
             }
 
             analogOut1FanSpeedConfig.apply {
+                add(low)
+                add(high)
+            }
+            analogOut2FanSpeedConfig.apply {
                 add(low)
                 add(high)
             }
@@ -94,6 +156,8 @@ class MyStatCpuConfiguration(nodeAddress: Int, nodeType: String, priority: Int, 
         return this
     }
 
+    override fun getAnalogStartIndex() = MyStatCpuRelayMapping.values().size
+
     private fun readCpuActiveConfig(equip: MyStatCpuEquip) {
         analogOut1MinMaxConfig.apply {
             cooling.min.currentVal =
@@ -113,10 +177,32 @@ class MyStatCpuConfiguration(nodeAddress: Int, nodeType: String, priority: Int, 
             dcvDamperConfig.max.currentVal =
                 getActivePointValue(equip.analog1MaxDCVDamper, dcvDamperConfig.max)
         }
+        analogOut2MinMaxConfig.apply {
+            cooling.min.currentVal =
+                getActivePointValue(equip.analog2MinCooling, cooling.min)
+            cooling.max.currentVal =
+                getActivePointValue(equip.analog2MaxCooling, cooling.max)
+            linearFanSpeed.min.currentVal =
+                getActivePointValue(equip.analog2MinLinearFanSpeed, linearFanSpeed.min)
+            linearFanSpeed.max.currentVal =
+                getActivePointValue(equip.analog2MaxLinearFanSpeed, linearFanSpeed.max)
+            heating.min.currentVal =
+                getActivePointValue(equip.analog2MinHeating, heating.min)
+            heating.max.currentVal =
+                getActivePointValue(equip.analog2MaxHeating, heating.max)
+            dcvDamperConfig.min.currentVal =
+                getActivePointValue(equip.analog2MinDCVDamper, dcvDamperConfig.min)
+            dcvDamperConfig.max.currentVal =
+                getActivePointValue(equip.analog2MaxDCVDamper, dcvDamperConfig.max)
+        }
 
         analogOut1FanSpeedConfig.apply {
             low.currentVal = getActivePointValue(equip.analog1FanLow, low)
             high.currentVal = getActivePointValue(equip.analog1FanHigh, high)
+        }
+        analogOut2FanSpeedConfig.apply {
+            low.currentVal = getActivePointValue(equip.analog2FanLow, low)
+            high.currentVal = getActivePointValue(equip.analog2FanHigh, high)
         }
         coolingStageFanConfig.apply {
             stage1.currentVal = getActivePointValue(equip.fanOutCoolingStage1, stage1)
@@ -127,8 +213,11 @@ class MyStatCpuConfiguration(nodeAddress: Int, nodeType: String, priority: Int, 
             stage2.currentVal = getActivePointValue(equip.fanOutHeatingStage2, stage2)
         }
 
-        recirculateFanConfig.apply {
-            recirculateFanConfig.currentVal = getActivePointValue(equip.analog1FanRecirculate, recirculateFanConfig)
+        universalOut1recircFanConfig.apply {
+            universalOut1recircFanConfig.currentVal = getActivePointValue(equip.analog1FanRecirculate, universalOut1recircFanConfig)
+        }
+        universalOut2recircFanConfig.apply {
+            universalOut2recircFanConfig.currentVal = getActivePointValue(equip.analog2FanRecirculate, universalOut2recircFanConfig)
         }
     }
 
@@ -137,26 +226,37 @@ class MyStatCpuConfiguration(nodeAddress: Int, nodeType: String, priority: Int, 
         relays[DomainName.relay1] = isRelayExternalMapped(relay1Enabled, relay1Association)
         relays[DomainName.relay2] = isRelayExternalMapped(relay2Enabled, relay2Association)
         relays[DomainName.relay3] = isRelayExternalMapped(relay3Enabled, relay3Association)
-        relays[DomainName.relay4] = isRelayExternalMapped(relay4Enabled, relay4Association)
+        if (isRelayConfig(universalOut1Association.associationVal)) {
+            relays[DomainName.universal1Out] =
+                isRelayExternalMapped(universalOut1, universalOut1Association)
+        }
+        if (isRelayConfig(universalOut2Association.associationVal)) {
+            relays[DomainName.universal2Out] =
+                isRelayExternalMapped(universalOut2, universalOut2Association)
+        }
         return relays
     }
 
     override fun getAnalogMap(): Map<String, Pair<Boolean, String>> {
         val analogOuts = mutableMapOf<String, Pair<Boolean, String>>()
-        analogOuts[DomainName.analog1Out] = Pair(
-            isAnalogExternalMapped(
-                analogOut1Enabled,
-                analogOut1Association
-            ),
-            analogType(analogOut1Enabled)
-        )
+        if (isRelayConfig(universalOut1Association.associationVal).not()) {
+            analogOuts[DomainName.universal1Out] = Pair(
+                isUniversalExternalMapped(universalOut1, universalOut1Association), analogType(universalOut1)
+            )
+        }
+        if (isRelayConfig(universalOut2Association.associationVal).not()) {
+            analogOuts[DomainName.universal2Out] = Pair(
+                isUniversalExternalMapped(universalOut2, universalOut2Association), analogType(universalOut2)
+            )
+        }
         return analogOuts
     }
 
 
     private fun analogType(analogOutPort: EnableConfig): String {
         return when (analogOutPort) {
-            analogOut1Enabled -> getPortType(analogOut1Association, analogOut1MinMaxConfig)
+            universalOut1 -> getPortType(universalOut1Association, analogOut1MinMaxConfig)
+            universalOut2 -> getPortType(universalOut2Association, analogOut2MinMaxConfig)
             else -> "0-10v"
         }
     }
@@ -182,7 +282,7 @@ class MyStatCpuConfiguration(nodeAddress: Int, nodeType: String, priority: Int, 
                     "${minMaxConfig.heating.min.currentVal.toInt()}-${minMaxConfig.heating.max.currentVal.toInt()}v"
             }
 
-            MyStatCpuAnalogOutMapping.DCV_DAMPER.ordinal -> {
+            MyStatCpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal -> {
                 portType =
                     "${minMaxConfig.dcvDamperConfig.min.currentVal.toInt()}-${minMaxConfig.dcvDamperConfig.max.currentVal.toInt()}v"
             }
@@ -210,10 +310,29 @@ class MyStatCpuConfiguration(nodeAddress: Int, nodeType: String, priority: Int, 
                 add(coolingStageFanConfig.stage2)
                 add(heatingStageFanConfig.stage1)
                 add(heatingStageFanConfig.stage2)
-                add(recirculateFanConfig)
+                add(universalOut1recircFanConfig)
+            }
+            analogOut2MinMaxConfig.apply {
+                add(cooling.min)
+                add(cooling.max)
+                add(linearFanSpeed.min)
+                add(linearFanSpeed.max)
+                add(heating.min)
+                add(heating.max)
+                add(dcvDamperConfig.min)
+                add(dcvDamperConfig.max)
+                add(coolingStageFanConfig.stage1)
+                add(coolingStageFanConfig.stage2)
+                add(heatingStageFanConfig.stage1)
+                add(heatingStageFanConfig.stage2)
+                add(universalOut2recircFanConfig)
             }
 
             analogOut1FanSpeedConfig.apply {
+                add(low)
+                add(high)
+            }
+            analogOut2FanSpeedConfig.apply {
                 add(low)
                 add(high)
             }
@@ -284,9 +403,8 @@ class MyStatCpuConfiguration(nodeAddress: Int, nodeType: String, priority: Int, 
 private fun isRelayExternalMapped(enabled: EnableConfig, association: AssociationConfig) =
     (enabled.enabled && association.associationVal == MyStatCpuRelayMapping.EXTERNALLY_MAPPED.ordinal)
 
-private fun isAnalogExternalMapped(enabled: EnableConfig, association: AssociationConfig) =
-    (enabled.enabled && association.associationVal == MyStatCpuAnalogOutMapping.EXTERNALLY_MAPPED.ordinal)
-
+private fun isUniversalExternalMapped(enabled: EnableConfig, association: AssociationConfig) =
+    (enabled.enabled && association.associationVal == MyStatCpuAnalogOutMapping.ANALOG_EXTERNALLY_MAPPED.ordinal)
 
 enum class MyStatCpuRelayMapping(val displayName: String) {
     COOLING_STAGE_1("Cooling Stage 1"),
@@ -304,12 +422,24 @@ enum class MyStatCpuRelayMapping(val displayName: String) {
 }
 
 enum class MyStatCpuAnalogOutMapping(val displayName: String) {
+    COOLING_STAGE_1("Cooling Stage 1"),
+    COOLING_STAGE_2("Cooling Stage 2"),
+    HEATING_STAGE_1("Heating Stage 1"),
+    HEATING_STAGE_2("Heating Stage 2"),
+    FAN_LOW_SPEED("Fan Low Speed"),
+    FAN_HIGH_SPEED("Fan High Speed"),
+    FAN_ENABLED("Fan Enabled"),
+    OCCUPIED_ENABLED("Occupied Enabled"),
+    HUMIDIFIER("Humidifier"),
+    DEHUMIDIFIER("Dehumidifier"),
+    EXTERNALLY_MAPPED("Externally Mapped"),
+    DCV_DAMPER("Dcv Damper"),
     COOLING("Cooling"),
     LINEAR_FAN_SPEED("Linear Fan"),
     HEATING("Heating"),
     STAGED_FAN_SPEED("Staged Fan"),
-    EXTERNALLY_MAPPED("Externally Mapped"),
-    DCV_DAMPER("Dcv Damper")
+    ANALOG_EXTERNALLY_MAPPED("Externally Mapped"),
+    DCV_DAMPER_MODULATION("Dcv Damper")
 }
 
 data class MyStatCpuAnalogOutConfigs(

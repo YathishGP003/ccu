@@ -31,7 +31,7 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
 
     val hayStack = CCUHsApi.getInstance()
 
-    val hyperStatEquip = hayStack.readEntity("equip and id == "+configPoint.equipRef)
+    val mystatEquip = hayStack.readEntity("equip and id == "+configPoint.equipRef)
     val model = getMyStatModelByEquipRef(configPoint.equipRef)
 
     if (model == null) {
@@ -52,11 +52,11 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
         CcuLog.e(L.TAG_CCU_PUBNUB, "point is null $config")
     } else {
         updateConfiguration(configPoint.domainName, pointNewValue.asDouble, config)
-        equipBuilder.updateEquipAndPoints(config, model , hayStack.getSite()!!.id, hyperStatEquip["dis"].toString(), true)
+        equipBuilder.updateEquipAndPoints(config, model , hayStack.getSite()!!.id, mystatEquip["dis"].toString(), true)
         if (configPoint.domainName == DomainName.fanOpMode) {
             myStatupdateFanMode(configPoint.equipRef, pointNewValue.asInt)
         }
-        deviceBuilder.updateDeviceAndPoints(config, deviceModel, hyperStatEquip["id"].toString(), hayStack.site!!.id, deviceDis)
+        deviceBuilder.updateDeviceAndPoints(config, deviceModel, mystatEquip["id"].toString(), hayStack.site!!.id, deviceDis)
         val equip = MyStatEquip(configPoint.equipRef)
         if (configPoint.domainName != DomainName.fanOpMode) {
             updateMyStatFanMode(equip, getMyStatFanLevel(config))

@@ -3,6 +3,7 @@ package a75f.io.renatus.composables
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.renatus.R
+import a75f.io.renatus.compose.CombinationSpinner
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.compose.SaveTextView
 import a75f.io.renatus.compose.SearchSpinnerElement
@@ -217,7 +218,7 @@ fun RelayConfiguration(
             ToggleButtonStateful(defaultSelection = enabled) { onEnabledChanged(it) }
         }
         Box(modifier = Modifier
-                .weight(1.5f)
+                .weight(1.7f)
                 .padding(start = 10.dp, top = 10.dp)) {
             StyledTextView(relayName, fontSize = 20)
         }
@@ -281,6 +282,125 @@ fun RelayConfiguration(
                         modifier = Modifier.wrapContentSize(Alignment.Center)
                     )
                 }
+            }
+        }
+    }
+}
+
+
+
+@Composable
+fun UniversalOutConfiguration(
+    portName: String,
+    enabled: Boolean,
+    onEnabledChanged: (Boolean) -> Unit,
+    association: Option,
+    enumOptions: List<Option>,
+    unit: String,
+    isEnabled: Boolean,
+    onAssociationChanged: (Option) -> Unit,
+    testState: Boolean = false,
+    onTestActivated: (Boolean) -> Unit,
+    testSingles: List<Option>,
+    testVal: Double,
+    onTestSignalSelected: (Double) -> Unit = {},
+    padding: Int = 10,
+    disabledIndices: List<Int> = emptyList(),
+    analogStartPosition: Int
+) {
+    val selectedItem = remember { mutableStateOf(association) }
+
+    Row(
+        modifier = Modifier
+            .wrapContentWidth()
+            .padding(padding.dp)
+    ) {
+        Box(modifier = Modifier.wrapContentWidth()) {
+            ToggleButtonStateful(defaultSelection = enabled) { onEnabledChanged(it) }
+        }
+        Box(modifier = Modifier
+            .weight(1.7f)
+            .padding(start = 10.dp, top = 10.dp)) {
+            StyledTextView(portName, fontSize = 20)
+        }
+        Box(modifier = Modifier
+            .weight(4f)
+            .padding(top = 5.dp)) {
+            CombinationSpinner(
+                default = association,
+                allItems = enumOptions,
+                unit = unit,
+                onSelect = {
+                    onAssociationChanged(it)
+                    selectedItem.value = it
+                },
+                width = 400,
+                isEnabled = isEnabled,
+                disabledIndices = disabledIndices,
+                analogStartPosition = analogStartPosition
+            )
+        }
+        if(selectedItem.value.index < analogStartPosition) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 5.dp)
+            ) {
+                var buttonState by remember { mutableStateOf(testState) }
+                var text by remember { mutableStateOf("OFF") }
+                Button(
+                    onClick = {
+                        buttonState = !buttonState
+                        text = when (buttonState) {
+                            true -> "ON"
+                            false -> "OFF"
+                        }
+                        onTestActivated(buttonState)
+                    },
+                    shape = RoundedCornerShape(5.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = when (buttonState) {
+                            true -> ComposeUtil.primaryColor
+                            false -> ComposeUtil.greyColor
+                        }, containerColor = Color.Transparent
+                    ),
+                    border = BorderStroke(
+                        1.dp, color = when (buttonState) {
+                            true -> ComposeUtil.primaryColor
+                            false -> ComposeUtil.greyColor
+                        }
+                    ),
+                    modifier = Modifier
+                        .width(72.dp)
+                        .height(44.dp),
+                    contentPadding = PaddingValues(0.dp),
+                ) {
+                    Text(
+                        text = when (buttonState) {
+                            true -> "ON"
+                            false -> "OFF"
+                        },
+                        fontSize = 20.sp,
+                        fontFamily = ComposeUtil.myFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        textAlign = TextAlign.Left,
+                        modifier = Modifier.wrapContentSize(Alignment.Center)
+                    )
+                }
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 5.dp)
+            ) {
+                SpinnerElementOption(
+                    defaultSelection = testVal.toString(),
+                    items = testSingles,
+                    unit = unit,
+                    itemSelected = { onTestSignalSelected(it.value.toDouble()) },
+                    previewWidth = 60
+                )
             }
         }
     }

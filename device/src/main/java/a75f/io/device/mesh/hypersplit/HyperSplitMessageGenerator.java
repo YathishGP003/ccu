@@ -1,5 +1,6 @@
 package a75f.io.device.mesh.hypersplit;
 
+import static a75f.io.device.mesh.StatUtilKt.getPin;
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
 import static a75f.io.logic.bo.building.schedules.Occupancy.UNOCCUPIED;
 
@@ -103,8 +104,8 @@ public class HyperSplitMessageGenerator {
                 .setHyperstatLinearFanSpeeds(HyperSplitSettingsUtil.Companion.getLinearFanSpeedDetails(equip))
                 .setHyperstatStagedFanSpeeds(HyperSplitSettingsUtil.Companion.getStagedFanSpeedDetails(equip))
                 .setMiscSettings1(HyperSplitSettingsUtil.Companion.getMisSettings(equipRef))
-                .setInstallerLockPin(HyperSplitSettingsUtil.Companion.getPin(equip.getPinLockInstallerAccess()))
-                .setUserLockPin(HyperSplitSettingsUtil.Companion.getPin(equip.getPinLockConditioningModeFanAccess()));
+                .setInstallerLockPin(getPin(equip.getPinLockInstallerAccess()))
+                .setUserLockPin(getPin(equip.getPinLockConditioningModeFanAccess()));
         return msg.build();
 
     }

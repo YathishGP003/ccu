@@ -27,10 +27,10 @@ class MyStatControlFactory(
 ) {
     private val controllerFactory = ControllerFactory()
 
-    fun addCpuControllers(config: MyStatCpuConfiguration) {
+    fun addCpuControllers(config: MyStatCpuConfiguration, fanLowVentilation: CalibratedPoint) {
         addCoolingController(config)
         addHeatingControllers(config)
-        addFanSpeedControllers(config, L.TAG_CCU_MSCPU,derivedFanLoopOutput)
+        addFanSpeedControllers(config, L.TAG_CCU_MSCPU,derivedFanLoopOutput, fanLowVentilation)
         addFanEnableIfRequired(L.TAG_CCU_MSCPU)
         addOccupiedEnabledIfRequired(L.TAG_CCU_MSCPU)
         addHumidifierIfRequired(L.TAG_CCU_MSCPU)
@@ -38,10 +38,10 @@ class MyStatControlFactory(
         addDcvDamperIfRequired(L.TAG_CCU_MSCPU)
     }
 
-    fun addHpuControllers(config: MyStatHpuConfiguration) {
+    fun addHpuControllers(config: MyStatHpuConfiguration, fanLowVentilation: CalibratedPoint) {
         val hpuEquip = equip as MyStatHpuEquip
         addCompressorControllers(config)
-        addFanSpeedControllers(config, L.TAG_CCU_MSHPU, hpuEquip.fanLoopOutput)
+        addFanSpeedControllers(config, L.TAG_CCU_MSHPU, hpuEquip.fanLoopOutput, fanLowVentilation)
         addAuxStage1Controller(L.TAG_CCU_MSHPU, hpuEquip.auxHeatingStage1, hpuEquip.mystatAuxHeating1Activate)
         addChangeOverCoolingIfRequired()
         addChangeOverHeatingIfRequired()
@@ -52,9 +52,9 @@ class MyStatControlFactory(
         addDcvDamperIfRequired(L.TAG_CCU_MSHPU)
     }
 
-    fun addPipe2Controllers(config: MyStatPipe2Configuration, waterValveLoop: CalibratedPoint) {
+    fun addPipe2Controllers(config: MyStatPipe2Configuration, waterValveLoop: CalibratedPoint, fanLowVentilation: CalibratedPoint) {
         val pipe2Equip = equip as MyStatPipe2Equip
-        addFanSpeedControllers(config, L.TAG_CCU_MSPIPE2, pipe2Equip.fanLoopOutput)
+        addFanSpeedControllers(config, L.TAG_CCU_MSPIPE2, pipe2Equip.fanLoopOutput, fanLowVentilation)
         addAuxStage1Controller(L.TAG_CCU_MSPIPE2, pipe2Equip.auxHeatingStage1, pipe2Equip.auxHeating1Activate)
         addWaterValveControllerIfRequired(waterValveLoop)
         addFanEnableIfRequired(L.TAG_CCU_MSPIPE2)
@@ -100,7 +100,7 @@ class MyStatControlFactory(
         }
     }
 
-    private fun addFanSpeedControllers(config: MyStatConfiguration, tag: String, loopOutput: Point) {
+    private fun addFanSpeedControllers(config: MyStatConfiguration, tag: String, loopOutput: Point, fanLowVentilation: CalibratedPoint) {
         counts.fanStages.data = config.getHighestFanStageCount().toDouble()
         if (counts.fanStages.data > 0) {
             controllerFactory.addStageController(
@@ -111,7 +111,9 @@ class MyStatControlFactory(
                 equip.standaloneRelayActivationHysteresis,
                 stageDownTimer = equip.mystatStageDownTimerCounter,
                 stageUpTimer = equip.mystatStageUpTimerCounter,
-                logTag = tag
+                logTag = tag,
+                fanLowVentilation = fanLowVentilation,
+                occupancyPoint = zoneOccupancyState
             )
         } else {
             removeController(ControllerNames.FAN_SPEED_CONTROLLER)

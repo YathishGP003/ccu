@@ -11,6 +11,7 @@ enum MyStatRequestType_e {
   MYSTAT_REQUEST_TYPE_IDU_CONTROLS = 3; // special request for Daikin-P1P2-variant controls
   MYSTAT_REQUEST_TYPE_IDU_FIELD_SETTINGS = 4; // special request for Daikin-P1P2-variant field settings
   MYSTAT_REQUEST_TYPE_SETTINGS_2 = 5; // standard device settings 2
+  MYSTAT_REQUEST_TYPE_SETTINGS_3 = 6; // standard device settings 3
 }
 
 message MyStatRequestMessage_t {
@@ -81,7 +82,8 @@ enum TwoPipeRelayMappings_e {
   P2_HUMIDIFIER          = 7;
   P2_DEHUMIDIFIER        = 8;
   P2_DCV_DAMPER          = 9;
-  P2_RELAY_NUM_OF        = 10;
+  P2_FAN_LOW_VENTILATION = 10;
+  P2_RELAY_NUM_OF        = 11;
 }
 
 
@@ -97,7 +99,8 @@ enum FourPipeRelayMappings_e {
   P4_HUMIDIFIER         = 8;
   P4_DEHUMIDIFIER       = 9;
   P4_DCV_DAMPER         = 10;
-  P4_RELAY_NUM_OF       = 11;
+  P4_FAN_LOW_VENTILATION = 11;
+  P4_RELAY_NUM_OF       = 12;
 }
 
 
@@ -230,6 +233,8 @@ message MyStatSettingsMessage_t {
   MyStatLinearFanSpeeds_t mystatLinearFanSpeeds = 19; // When linear fan is enabled these voltages provide user intent
   MyStatStagedFanSpeeds_t mystatStagedFanSpeeds = 20;   // When staged fan is enabled these voltages provide user intent
   optional uint32 myStatUsp1UniversalInputModeBitmap  = 21; // For each Uinversal input of four USP1 address
+  optional uint32 installerLockPin = 22; // 4 digits - (No LOCK = 0000)
+  optional uint32 userLockPin = 23; // 4 digits - (No LOCK = 0000)
 }
 
 message MyStatSettingsMessage2_t {
@@ -251,6 +256,13 @@ message MyStatSettingsMessage2_t {
   	 MyStatTunersFcu_t  fcuTuners = 15;
   	 MyStatConfigsCpu_t myStatConfigsCpu = 16; // When staged fan is enabled in CPU profile these voltages provide the fan speed control
     }
+}
+
+message MyStatSettingsMessage3_t {
+  optional MyStatRelay_t mystatRelay5Config = 1;  //Mystat 2.0 5th relay
+  optional MyStatAnalogOut_t MyStatAnalogOut2Config = 2; //Mystat 2.0 2nd analog out
+  optional uint32 stageUpTimer = 3; // min
+  optional uint32 stageDownTimer = 4;  // min
 }
 
 enum MyStatFanSpeed_e {
@@ -298,6 +310,7 @@ message MyStatControlsMessage_t {
   optional bool reset = 8; // Force a reset of the device remotely when set to 1
   optional MyStatAnalogOutputControl_t analogOut1 = 9; // output for PWM channel 1
   optional bool unoccupiedMode = 10; // CCU in scheduled unoccupied mode
+  optional MyStatAnalogOutputControl_t analogOut2 = 11; // Mystat 2.0 output for PWM channel 2
 }
 
 message MyStatRegularUpdateCommon_t {
@@ -321,6 +334,7 @@ message MyStatCcuDatabaseSeedMessage_t {
   bytes serializedSettingsData = 2;  //[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type MYSTAT_SETTINGS_MESSAGE
   bytes serializedControlsData = 3;  //[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type MYSTAT_CONTROLS_MESSAGE
   bytes serializedSettings2Data = 4; // [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type MYSTAT_SETTINGS2_MESSAGE
+  optional bytes serializedSettings3Data = 5; // [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type MYSTAT_SETTINGS3_MESSAGE
 }
 
 message MyStatSensorReadingPb_t {
@@ -334,33 +348,3 @@ message MyStatRegularUpdateMessage_t {
   optional uint32 universalInput1Value = 2; // 16 bits of data where bit[15] = mode, bits[14..0] = value. If mode = 0 (Voltage), in units of millivolts, If mode = 1 (Thermistor), in units of tens of ohms
   optional uint32 doorWindowSensor = 3; // 16 bits of data where bit[15] = mode, bits[14..0] = value. If mode = 0 (Voltage), in units of millivolts, If mode = 1 (Thermistor), in units of tens of ohms
 }
-
-message MyStatIduControlsMessage_t {
-  int32 operationMode = 1;
-  int32 fanSpeed = 2;
-  int32 airflowDirection = 3;
-  sint32 heatingSetTemperature = 4;
-  sint32 coolingSetTemperature = 5;
-  int32 masterController = 6;
-}
-
-message MyStatIduStatusMessage_t {
-  int32 indoorUnitState = 1; // Reflects the state of an indoor unit connected to the MyStat
-  int32 responseType = 2; // Indicates if IDU status message is being sent in response to an IDU controls message or periodically
-  int32 supportBitfield = 3;
-  int32 supportFanSpeedControlLevels = 4;
-  int32 operationMode = 5;
-  int32 setOperationMode = 6;
-  int32 masterOperationMode = 7;
-  int32 fanSpeed = 8;
-  int32 airflowDirection = 9;
-  int32 coolHeatRight = 10;
-  sint32 setTemperature = 11;
-  int32 filterStatus = 12;
-  int32 groupAddress = 13;
-  int32 errorStatus = 14;
-  int32 diagnosticStatus = 15;
-  int32 iduTemperature = 16;
-  repeated int32 thData = 17; //[(nanopb).max_count = 6]; //Temp reading from 6 thermistors.
-}
-

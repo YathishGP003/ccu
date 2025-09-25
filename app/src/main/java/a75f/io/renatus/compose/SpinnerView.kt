@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -493,4 +495,226 @@ fun getDefaultSelectionIndex(items: List<Option>, defaultSelection: String):Int 
         }
     }
     return selectedIndex
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CombinationSpinner(
+    default: Option,
+    allItems: List<Option>,
+    unit: String,
+    onSelect: (Option) -> Unit,
+    width: Int,
+    isEnabled: Boolean = true,
+    disabledIndices: List<Int> = emptyList(),
+    analogStartPosition: Int
+) {
+    val selectedItem = remember { mutableStateOf(default) }
+    val expanded = remember { mutableStateOf(false) }
+    var searchedOption by rememberSaveable { mutableStateOf("") }
+    val lazyListState = rememberLazyListState()
+    var selectedIndex by remember { mutableStateOf(default.index) }
+
+    Box(
+        modifier = Modifier
+            .wrapContentSize()
+            .padding(top = 5.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .width(width.dp)
+                .clickable(onClick = { expanded.value = true }, enabled = isEnabled)
+        ) {
+            Row {
+                Text(
+                    fontSize = 20.sp,
+                    fontFamily = ComposeUtil.myFontFamily,
+                    modifier = Modifier.width((width - 50).dp),
+                    fontWeight = FontWeight.Normal,
+                    text = "${selectedItem.value.dis ?: selectedItem.value.dis} $unit",
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
+
+                Image(
+                    painter = painterResource(id = R.drawable.angle_down_solid),
+                    contentDescription = "Custom Icon",
+                    modifier = Modifier
+                        .size(30.dp)
+                        .padding(top = 8.dp),
+                    colorFilter = ColorFilter.tint(if (isEnabled) primaryColor else greyDropDownColor)
+                )
+            }
+            Divider(
+                modifier = Modifier.width((width - 20).dp),
+                color = if (expanded.value) Color.Black else greyDropDownUnderlineColor
+            )
+        }
+
+        DropdownMenu(
+            modifier = Modifier
+                .background(Color.White)
+                .width(width.dp),
+            expanded = expanded.value,
+            onDismissRequest = { expanded.value = false }
+        ) {
+            Column(verticalArrangement = Arrangement.Bottom) {
+                var searchText by remember { mutableStateOf("") }
+                val filteredItems = if (searchText.isEmpty()) {
+                    allItems
+                } else {
+                    allItems.filter {
+                        it.value.contains(searchText.replace(" ", ""), ignoreCase = true)
+                    }
+                }
+
+                if (allItems.size > 16) {
+                    Row {
+                        TextField(
+                            value = searchText,
+                            onValueChange = { searchText = it },
+                            placeholder = { Text(fontSize = 20.sp, text = "Search") },
+                            singleLine = true,
+                            colors = TextFieldDefaults.textFieldColors(
+                                focusedIndicatorColor = primaryColor,
+                                unfocusedIndicatorColor = ComposeUtil.greyColor,
+                                containerColor = Color.White
+                            ),
+                            modifier = Modifier
+                                .padding(10.dp)
+                                .width((width - 30).dp),
+                            textStyle = TextStyle(
+                                fontSize = 20.sp,
+                                fontFamily = ComposeUtil.myFontFamily
+                            ),
+                            leadingIcon = {
+                                Image(
+                                    painter = painterResource(id = R.drawable.ic_search),
+                                    contentDescription = "Search Icon",
+                                    modifier = Modifier.size(24.dp),
+                                    colorFilter = ColorFilter.tint(greySearchIcon)
+                                )
+                            },
+                            trailingIcon = {
+                                if (searchText.isNotEmpty()) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.font_awesome_close),
+                                        contentDescription = "Clear Icon",
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clickable { searchText = "" },
+                                        colorFilter = ColorFilter.tint(primaryColor)
+                                    )
+                                }
+                            },
+                        )
+                    }
+                }
+
+                val customHeight = getDropdownCustomHeight(
+                    filteredItems,
+                    noOfItemsDisplayInDropDown,
+                    dropDownHeight
+                )
+
+                Divider()
+
+                LazyColumn(
+                    state = lazyListState,
+                    modifier = Modifier
+                        .height(customHeight.dp)
+                        .width(width.dp)
+                        .simpleVerticalScrollbar(lazyListState)
+                ) {
+                    itemsIndexed(filteredItems) { index, option ->
+                        if (index == 0) {
+                            // 🔹 Header for Relay
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = "Relay",
+                                    fontSize = 20.sp,
+                                    fontFamily = ComposeUtil.myFontFamily,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black,
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Divider(
+                                    modifier = Modifier.weight(1f),
+                                    color = Color.LightGray,
+                                    thickness = 1.dp
+                                )
+                            }
+                        }
+                        if (index == analogStartPosition) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = "Analog Out",
+                                    fontSize = 20.sp,
+                                    fontFamily = ComposeUtil.myFontFamily,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Divider(
+                                    modifier = Modifier.weight(1f),
+                                    color = Color.LightGray,
+                                    thickness = 1.dp
+                                )
+                            }
+                        }
+
+                            // 🔹 Normal selectable row
+                            DropdownMenuItem(
+                                modifier = Modifier.background(
+                                    if (option.value == selectedItem.value.value) secondaryColor else Color.White
+                                ),
+                                contentPadding = PaddingValues(10.dp),
+                                text = {
+                                    Row {
+                                        Text(
+                                            fontSize = 20.sp,
+                                            fontFamily = ComposeUtil.myFontFamily,
+                                            modifier = Modifier.padding(end = 10.dp, start = 10.dp),
+                                            fontWeight = FontWeight.Normal,
+                                            text = option.dis ?: option.value
+                                        )
+                                        Text(
+                                            fontSize = 20.sp,
+                                            fontFamily = ComposeUtil.myFontFamily,
+                                            fontWeight = FontWeight.Normal,
+                                            text = unit
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    selectedItem.value = option
+                                    expanded.value = false
+                                    selectedIndex = allItems.indexOf(option)
+                                    searchedOption = ""
+                                    onSelect(option)
+                                },
+                                enabled = !disabledIndices.contains(option.index)
+                            )
+
+                    }
+                }
+
+                LaunchedEffect(expanded) {
+                    lazyListState.scrollToItem(selectedIndex)
+                }
+            }
+        }
+    }
 }

@@ -21,6 +21,8 @@ import a75f.io.logic.bo.building.statprofiles.util.getMyStatHpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.logic.util.modifyConditioningMode
+import a75f.io.logic.util.modifyFanMode
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatHpuViewState
@@ -49,7 +51,6 @@ import kotlinx.coroutines.withContext
 /**
  * Created by Manjunath K on 15-01-2025.
  */
-
 class MyStatHpuViewModel(application: Application) : MyStatViewModel(application) {
 
     override var viewState = mutableStateOf(MyStatHpuViewState() as MyStatViewState)
@@ -82,6 +83,7 @@ class MyStatHpuViewModel(application: Application) : MyStatViewModel(application
             MyStatHpuViewState()
         )
     }
+    override fun getAnalogStatIndex() = MyStatHpuRelayMapping.values().size
 
     private fun changeOverValidation(): Boolean {
         var isValidConfig = true

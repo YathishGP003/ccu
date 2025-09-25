@@ -5,6 +5,7 @@ import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain.hayStack
 import a75f.io.domain.api.PhysicalPoint
+import a75f.io.domain.api.Point
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.util.CCUUtils
@@ -33,7 +34,7 @@ fun updateTemp(currentTemp: PhysicalPoint, temp: Double, address: Int, refresh: 
         updateLogicalPoint(currentTemp, Pulse.getRoomTempConversion(temp))
         refresh?.updateTemperature(temp, address.toShort())
     } else {
-        CcuLog.d(L.TAG_CCU_DEVICE, "Invalid Current Temp : $temp");
+        CcuLog.d(L.TAG_CCU_DEVICE, "Invalid Current Temp : $temp")
     }
 
 }
@@ -72,7 +73,7 @@ fun updateLogicalPoint(point: PhysicalPoint, value: Double) {
 }
 
 fun updateSensorData(domainName: String, equipRef: String, value: Double) {
-    val map = hayStack.read("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
+    val map = hayStack.readEntity("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
     hayStack.writePointValue(map, value)
 }
 
@@ -124,4 +125,12 @@ fun getCoolingUserLimit(type: String, roomRef: String): Int {
         pointValue = hsApi.readPointPriorityValByQuery("point and schedulable and default and cooling and user and limit and min")
     }
     return pointValue.toInt()
+}
+
+fun getPin(point: Point): Int {
+    return try {
+        Base64Util.decode(point.readDefaultStrVal()).toInt()
+    } catch (e: Exception) {
+        0
+    }
 }

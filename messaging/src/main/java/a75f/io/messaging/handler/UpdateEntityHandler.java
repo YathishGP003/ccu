@@ -36,6 +36,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.observer.HisWriteObservable;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -66,6 +67,7 @@ public class UpdateEntityHandler implements MessageHandler {
             }
             else if(entity.get("room") != null){
                 updateNamedSchedule(entity, uid, ccuHsApi);
+                HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
             }
             else if (entity.get("floor") != null) {
                 HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));

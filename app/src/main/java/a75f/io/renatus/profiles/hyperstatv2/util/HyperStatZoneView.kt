@@ -501,7 +501,7 @@ private fun setSpinnerListenerForHyperstat(
     view.onItemSelectedListener = onItemSelectedListener
 }
 
-private fun handleConditionMode(
+fun handleConditionMode(
         selectedPosition: Int, equipId: String, profileType: ProfileType,
         userClickCheck: Boolean, equip: HyperStatEquip,
         configuration: HyperStatConfiguration
@@ -527,7 +527,7 @@ private fun handleConditionMode(
 }
 
 // Save the fan mode in cache
-private fun handleFanMode(
+fun handleFanMode(
     equipId: String,
     selectedPosition: Int,
     profileType: ProfileType,
@@ -588,11 +588,11 @@ private fun handleFanMode(
     }
 }
 
-private fun handleHumidityMode(selectedPosition: Int, equip: HyperStatEquip) {
+fun handleHumidityMode(selectedPosition: Int, equip: HyperStatEquip) {
     equip.targetHumidifier.writePointValue((selectedPosition + 1).toDouble())
 }
 
-private fun handleDeHumidityMode(selectedPosition: Int, equip: HyperStatEquip) {
+fun handleDeHumidityMode(selectedPosition: Int, equip: HyperStatEquip) {
     equip.targetDehumidifier.writePointValue((selectedPosition + 1).toDouble())
 }
 

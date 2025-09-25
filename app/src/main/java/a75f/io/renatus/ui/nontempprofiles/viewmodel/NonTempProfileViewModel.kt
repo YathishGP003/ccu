@@ -265,7 +265,6 @@ class NonTempProfileViewModel : ViewModel(), PointSubscriber {
     fun getPlcUiItems(
         equipID: String
     ): List<HeaderViewItem> {
-        CcuLog.d("kumar_debug", "calling plc header points")
         val headerViewItems = mutableListOf<HeaderViewItem>()
         val plcEquip = getDomainEquip(equipID) as PlcEquip?
         val plcPoints = HashMap<String, Any>()

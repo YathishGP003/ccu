@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.observer.HisWriteObservable;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.messaging.MessageHandler;
@@ -44,6 +45,7 @@ public class RemoveEntityHandler implements MessageHandler
                     if (!removedEntity.isEmpty() && removedEntity.containsKey("schedule")){
                         UpdateScheduleHandler.refreshSchedulesScreen();
                         UpdateScheduleHandler.refreshIntrinsicSchedulesScreen();
+                        HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
                     }
                     CCUHsApi.getInstance().removeEntity(uuid);
                 } else if(CCUHsApi.getInstance().isEntityDeleted(uuid)) {

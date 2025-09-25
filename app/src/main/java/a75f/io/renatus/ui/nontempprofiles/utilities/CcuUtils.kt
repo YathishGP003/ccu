@@ -34,6 +34,7 @@ import a75f.io.renatus.modbus.util.getParametersList
 import a75f.io.renatus.ui.model.HeaderViewItem
 import a75f.io.renatus.ui.nontempprofiles.model.ExternalPointItem
 import a75f.io.renatus.ui.nontempprofiles.viewmodel.NonTempProfileViewModel
+import a75f.io.renatus.ui.tempprofiles.viewmodel.TempProfileViewModel
 import a75f.io.renatus.util.HeartBeatUtil
 import android.util.Pair
 import java.util.Date
@@ -660,9 +661,15 @@ fun stopObservingAllEquipHealth(nonTempProfileViewModels: List<NonTempProfileVie
     }
 }
 
-fun cleanUpObservableList(nonTempProfileViewModels: List<NonTempProfileViewModel>) {
+fun cleanUpNonTempViewModel(nonTempProfileViewModels: List<NonTempProfileViewModel>) {
     for (nonTempProfileViewModel in nonTempProfileViewModels) {
         nonTempProfileViewModel.cleanUp()
+    }
+}
+
+fun cleanUpTempViewModel(tempProfileViewModels: List<TempProfileViewModel>) {
+    for (tempProfileViewModel in tempProfileViewModels) {
+        tempProfileViewModel.cleanUp()
     }
 }
 

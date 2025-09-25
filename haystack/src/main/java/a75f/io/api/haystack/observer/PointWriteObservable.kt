@@ -24,4 +24,8 @@ object PointWriteObservable {
             it.onWritablePointChanged(pointId, value)
         }
     }
+
+    fun clear() {
+        listenersMap.clear()
+    }
 }

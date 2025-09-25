@@ -2,7 +2,6 @@ package a75f.io.renatus.composables
 
 import a75f.io.api.haystack.bacnet.parser.BacnetZoneViewItem
 import a75f.io.api.haystack.modbus.Parameter
-import a75f.io.logger.CcuLog
 import a75f.io.renatus.R
 import a75f.io.renatus.UtilityApplication.context
 import a75f.io.renatus.compose.ComposeUtil.Companion.greyDropDownColor
@@ -13,6 +12,7 @@ import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.secondaryColor
 import a75f.io.renatus.compose.HeaderTextView
 import a75f.io.renatus.compose.LabelTextView
+import a75f.io.renatus.ui.model.DetailedViewItem
 import a75f.io.renatus.ui.model.HeaderViewItem
 import a75f.io.renatus.ui.nontempprofiles.model.ExternalPointItem
 import a75f.io.renatus.views.userintent.UserIntentDialog
@@ -502,7 +502,6 @@ fun OpenUserIntent(
     externalPoint: ExternalPointItem? = null,
     onFinishedListener: UserIntentDialogListener,
 ) {
-    CcuLog.d("kumar_debug", "OpenUserIntent called with externalPoint: $externalPoint")
     val context = LocalContext.current
     val fragmentManager = (context as FragmentActivity).supportFragmentManager
     if (externalPoint?.point is Parameter) {
@@ -580,6 +579,7 @@ fun DetailedViewDropDownHeaderView(
     isEnabled: Boolean = true,
     disabledIndices: List<Int> = emptyList(),
     externalPoint: HeaderViewItem? = null,
+    showCap: Boolean = true,
     onLabelClick: (label: String) -> Unit,
 
     ) {
@@ -649,6 +649,155 @@ fun DetailedViewDropDownHeaderView(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
+                    if (showCap) {
+                        Image(
+                            painter = painterResource(id = R.drawable.angle_down_solid),
+                            contentDescription = "Custom Icon",
+                            modifier = Modifier
+                                .size(30.dp)
+                                .padding(PaddingValues(top = 4.dp))
+                                .clickable(onClick = {
+                                    if (isEnabled) expanded = true
+                                }),
+                            colorFilter = ColorFilter.tint(
+                                if (isEnabled) primaryColor else greyDropDownColor
+                            )
+                        )
+                    }
+                }
+
+                Divider(color = greyDropDownUnderlineColor)
+            }
+            if (showCap) {
+                val customHeight =
+                    getDropdownCustomHeight(list, noOfItemsDisplayInDropDown, dropDownHeight)
+
+                Spacer(modifier = Modifier.height(5.dp))
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier
+                        .width(expandedWidthDp) // expanded width = longest item
+                        .height(customHeight.dp)
+                        .background(Color.White)
+                        .border(0.5.dp, Color.LightGray)
+                        .shadow(1.dp, shape = RoundedCornerShape(2.dp))
+                        .simpleVerticalScrollbar(lazyListState)
+                ) {
+                    LazyColumn(
+                        state = lazyListState,
+                        modifier = Modifier
+                            .width(expandedWidthDp)
+                            .height(customHeight.dp)
+                    ) {
+                        itemsIndexed(list) { index, item ->
+                            DropdownMenuItem(
+                                onClick = {
+                                    externalPoint?.currentValue = index.toString()
+                                    externalPoint?.selectedIndex = index
+                                    expanded = false
+                                    onSelected(index)
+                                },
+                                text = { Text(item, style = TextStyle(fontSize = 20.sp)) },
+                                modifier = Modifier.background(
+                                    if (index == selectedIndex) secondaryColor else Color.White
+                                ),
+                                contentPadding = PaddingValues(10.dp),
+                                enabled = !disabledIndices.contains(index)
+                            )
+                        }
+                    }
+
+                    LaunchedEffect(expanded) {
+                        lazyListState.scrollToItem(selectedIndex)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalTextApi::class)
+@Composable
+fun TemperatureProfileDetailedViewDropDown(
+    label: String,
+    list: List<String>,
+    onSelected: (Int) -> Unit,
+    defaultSelection: Int = 0,
+    paddingLimit: Int = 0,
+    isHeader: Boolean = true,
+    isEnabled: Boolean = true,
+    disabledIndices: List<Int> = emptyList(),
+    detailedViewItem: DetailedViewItem? = null,
+    onLabelClick: (label: String) -> Unit,
+    ) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(modifier = Modifier.wrapContentWidth(), contentAlignment = Alignment.Center) {
+            if (isHeader) {
+                HeaderLabelView(label, paddingLimit, onLabelClick)
+            } else {
+                LabelView(label) {}
+            }
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        var expanded by remember { mutableStateOf(false) }
+        val lazyListState = rememberLazyListState()
+        val noOfItemsDisplayInDropDown = 8
+        val dropDownHeight = 435
+
+        val selectedIndex = detailedViewItem?.selectedIndex ?: defaultSelection
+        val selectedText = list.getOrElse(selectedIndex) { "" }
+
+        val textMeasurer = rememberTextMeasurer()
+
+        // width for collapsed (based on selected item only)
+        val selectedWidth = remember(selectedText) {
+            textMeasurer.measure(
+                text = selectedText,
+                style = TextStyle(fontSize = 22.sp)
+            ).size.width
+        }
+
+        // width for expanded (based on longest item in the list)
+        val maxItemWidth = remember(list) {
+            list.maxOfOrNull { item ->
+                textMeasurer.measure(
+                    text = item,
+                    style = TextStyle(fontSize = 22.sp)
+                ).size.width
+            } ?: 0
+        }
+
+        val collapsedWidthDp = with(LocalDensity.current) {
+            selectedWidth.toDp() + 40.dp
+        }.coerceIn(80.dp, 400.dp)
+
+        val expandedWidthDp = with(LocalDensity.current) {
+            maxItemWidth.toDp() + 40.dp
+        }.coerceIn(80.dp, 400.dp)
+
+        Box(
+            modifier = Modifier
+                .width(collapsedWidthDp)
+        ) {
+            Column {
+                Row {
+                    Text(
+                        selectedText,
+                        modifier = Modifier
+                            .width(collapsedWidthDp - 30.dp) // minus icon width
+                            .clickable(onClick = {
+                                if (isEnabled) expanded = true
+                            }, enabled = isEnabled),
+                        fontSize = 22.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Clip
+                    )
 
                     Image(
                         painter = painterResource(id = R.drawable.angle_down_solid),
@@ -693,8 +842,8 @@ fun DetailedViewDropDownHeaderView(
                     itemsIndexed(list) { index, item ->
                         DropdownMenuItem(
                             onClick = {
-                                externalPoint?.currentValue = index.toString()
-                                externalPoint?.selectedIndex = index
+                                detailedViewItem?.currentValue = index.toString()
+                                detailedViewItem?.selectedIndex = index
                                 expanded = false
                                 onSelected(index)
                             },

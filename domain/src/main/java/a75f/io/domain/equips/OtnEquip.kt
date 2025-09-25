@@ -22,4 +22,5 @@ class OtnEquip(equipRef : String) : DomainEquip(equipRef){
 
     val dischargeAirTempSetpoint = Point(DomainName.dischargeAirTempSetpoint, equipRef)
     val otaStatus = Point(DomainName.otaStatus, equipRef)
+    val scheduleType = Point(DomainName.scheduleType, equipRef)
 }

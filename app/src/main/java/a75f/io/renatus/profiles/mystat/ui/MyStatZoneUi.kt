@@ -182,7 +182,7 @@ private fun setSpinnerListenerForMyStat(
 }
 
 
-private fun handleMyStatConditionMode(
+fun handleMyStatConditionMode(
     selectedPosition: Int,
     equipId: String,
     profileType: ProfileType,
@@ -212,7 +212,7 @@ private fun handleMyStatConditionMode(
 }
 
 // Save the fan mode in cache
-private fun handleMyStatFanMode(
+fun handleMyStatFanMode(
     equipId: String,
     selectedPosition: Int,
     profileType: ProfileType,
@@ -278,7 +278,7 @@ private fun handleMyStatFanMode(
     }
 }
 
-private fun handleMyStatHumidityMode(
+fun handleMyStatHumidityMode(
     selectedPosition: Int, equipId: String, equip: MyStatEquip
 ) {
     updateUserIntentPoints(
@@ -288,7 +288,7 @@ private fun handleMyStatHumidityMode(
     )
 }
 
-private fun handleMyStatDeHumidityMode(
+fun handleMyStatDeHumidityMode(
     selectedPosition: Int, equipId: String, equip: MyStatEquip
 ) {
     updateUserIntentPoints(

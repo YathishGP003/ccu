@@ -5,7 +5,7 @@ package a75f.io.logic.bo.building.statprofiles.util
  * Updated for CPU with Economiser by Nick P on 07-24-2023.
  */
 
-const val HYPERSTATSPLIT: String = "hyperstatsplit"
+const val HYPERSTATSPLIT: String = "Hyperstatsplit"
 const val HSSPLIT_CPUECON: String = "cpu"
 const val HSSPLIT_FULL: String = "HyperStat Split"
 const val CPUECON_FULL: String = "CPU & Economiser"

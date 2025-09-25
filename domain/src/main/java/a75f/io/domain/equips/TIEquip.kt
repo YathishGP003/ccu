@@ -20,4 +20,5 @@ class TIEquip(equipRef: String) : DomainEquip(equipRef) {
     val equipScheduleStatus = Point(DomainName.equipScheduleStatus, equipRef)
     val dischargeAirTempSetpoint = Point(DomainName.dischargeAirTempSetpoint, equipRef)
     val otaStatus = Point(DomainName.otaStatus, equipRef)
+    val scheduleType = Point(DomainName.scheduleType, equipRef)
 }

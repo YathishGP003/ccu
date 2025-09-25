@@ -31,4 +31,6 @@ open class SseEquip (equipRef : String) : DomainEquip(equipRef){
     val standaloneStage1Hysteresis = Point(DomainName.standaloneStage1Hysteresis, equipRef)
     val dischargeAirTemperature = Point(DomainName.dischargeAirTemperature, equipRef)
     val demandResponseSetback = Point(DomainName.demandResponseSetback, equipRef)
+    val equipScheduleStatus = Point(DomainName.equipScheduleStatus, equipRef)
+    val scheduleType = Point(DomainName.scheduleType, equipRef)
 }

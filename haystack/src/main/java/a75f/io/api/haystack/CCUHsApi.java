@@ -2256,6 +2256,7 @@ public class CCUHsApi
     {
         tagsDb.addHDict(localId, scheduleDict);
         syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(localId, "@"));
+        HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
     }
 
     public void updateSchedule(String localId, HDict scheduleDict)
@@ -2264,6 +2265,7 @@ public class CCUHsApi
 
         CcuLog.i("CCH_HS", "updateScheduleDict: " + scheduleDict.toZinc());
         syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(localId, "@"));
+        HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
     }
 
     public void updateSchedule(Schedule schedule)
@@ -2277,6 +2279,7 @@ public class CCUHsApi
 
         CcuLog.i("CCH_HS", "updateSchedule: " + schedule.getScheduleHDict().toZinc());
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(schedule.getId(), "@"));
+        HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
     }
 
     public void updateBuildingOccupancy(BuildingOccupancy buildingOccupancy)
@@ -2293,16 +2296,19 @@ public class CCUHsApi
         tagsDb.addHDict(schedule.getId(), schedule.getZoneScheduleHDict(zoneId));
         CcuLog.i(TAG_CCU_HS, "updateZoneSchedule: " + schedule.getZoneScheduleHDict(zoneId).toZinc());
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(schedule.getId(), "@"));
+        HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
     }
 
     public void updateZoneScheduleWithoutUpdatingLastModifiedTime(Schedule schedule, String zoneId) {
         tagsDb.addHDict(schedule.getId(), schedule.getZoneScheduleHDict(zoneId));
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(schedule.getId(), "@"));
+        HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
     }
 
     public void updateScheduleNoSync(Schedule schedule, String zoneId) {
         tagsDb.addHDict(schedule.getId(), (zoneId == null ? schedule.getScheduleHDict() : schedule.getZoneScheduleHDict(zoneId)));
         CcuLog.i(TAG_CCU_HS, "updateScheduleNoSync: "+schedule.getId()+" " + (zoneId == null ? schedule.getScheduleHDict().toZinc(): schedule.getZoneScheduleHDict(zoneId).toZinc()));
+        HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
     }
 
     public void updateHDictNoSync(String entityId, HDict scheduleDict){
@@ -2311,6 +2317,7 @@ public class CCUHsApi
 
     public void updateSpecialScheduleNoSync(String entityId, HDict scheduleDict){
         tagsDb.addHDict(entityId, scheduleDict);
+        HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
     }
 
     public Schedule getScheduleById(String scheduleRef)
@@ -3002,6 +3009,7 @@ public class CCUHsApi
 
     public void updateNamedSchedule(String scheduleId, HDict scheduleDict){
         tagsDb.addHDict(scheduleId,scheduleDict);
+        HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
     }
 
     public List<HashMap<Object, Object>> getAllNamedSchedules(){

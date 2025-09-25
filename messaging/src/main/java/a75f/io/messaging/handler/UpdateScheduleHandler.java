@@ -26,6 +26,7 @@ import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.observer.HisWriteObservable;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -95,6 +96,7 @@ public class UpdateScheduleHandler implements MessageHandler
                 }
                 if(scheduleDict.has(Tags.SPECIAL)){
                     ccuHsApi.updateHDictNoSync(uid, scheduleDict);
+                    HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
                     break;
                 }
                 final Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
@@ -191,6 +193,7 @@ public class UpdateScheduleHandler implements MessageHandler
     public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
         if (jsonObject.get("command").getAsString().equals(DELETE_SCHEDULE) && jsonObject.get("id") != null) {
             CCUHsApi.getInstance().removeEntity(jsonObject.get("id").getAsString());
+            HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
             return;
         }
         handleMessage(jsonObject);

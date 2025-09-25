@@ -157,6 +157,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/vc_schedule"
         android:layout_alignLeft="@+id/vc_schedule"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="35dp"
         android:orientation="vertical">
 
     </LinearLayout>

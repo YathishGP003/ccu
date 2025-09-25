@@ -22,6 +22,8 @@ import a75f.io.logic.schedule.SpecialSchedule
 import a75f.io.logic.util.CommonTimeSlotFinder
 import a75f.io.logic.util.isOfflineMode
 import a75f.io.renatus.R
+import a75f.io.renatus.ui.tempprofiles.refreshSchedules
+import a75f.io.renatus.ui.tempprofiles.viewmodel.TempProfileViewModel
 import a75f.io.renatus.util.FontManager
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.views.AlertDialogAdapter
@@ -30,6 +32,7 @@ import a75f.io.renatus.views.MasterControl.MasterControlUtil.validateDesiredTemp
 import a75f.io.renatus.views.RangeBar
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.DialogInterface
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -167,6 +170,7 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
     private lateinit var weekDayWeekendRadioButton: RadioButton
     private lateinit var weekDaySaturdaySundayRadioButton: RadioButton
     private lateinit var sevenDayRadioButton: RadioButton
+    private var tempViewModels: ArrayList<TempProfileViewModel>  = arrayListOf()
 
     var pointScheduleUiClicked: ((Map<String, String>) -> Unit)? = null
 
@@ -386,6 +390,7 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
                 null
             ).getScheduleGroupById(radioGroup.checkedRadioButtonId).ordinal
             validateSchedule(scheduleGroupModel.mSchedule, this, null, null)
+            refreshSchedules(tempViewModels)
         }
 
         cancelZoneSchedule.setOnClickListener {
@@ -1199,6 +1204,7 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
     }
     private fun closeFragment(scheduleGroupFragment: ScheduleGroupFragment) {
         scheduleGroupFragment.dismiss()
+        refreshSchedules(tempViewModels)
     }
     override fun onClickSave(
         position: Int,
@@ -1695,5 +1701,14 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
                 )
             }
         }
+    }
+
+    fun setTempProfileViewModels(tempProfileViewModels: ArrayList<TempProfileViewModel>){
+        tempViewModels = tempProfileViewModels
+    }
+
+    override fun onCancel(dialog: DialogInterface) {
+        super.onCancel(dialog)
+        refreshSchedules(tempViewModels)
     }
 }

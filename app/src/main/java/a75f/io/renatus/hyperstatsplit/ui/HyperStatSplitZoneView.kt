@@ -332,7 +332,7 @@ private fun setSpinnerListenerForHyperStatSplit(
     view.onItemSelectedListener = onItemSelectedListener
 }
 
-private fun handleConditionMode(
+fun handleConditionMode(
     selectedPosition: Int,
     equip: HyperStatSplitEquip,
     userClickCheck: Boolean
@@ -355,7 +355,7 @@ private fun handleConditionMode(
 
 
 // Save the fan mode in cache
-private fun handleFanMode(
+fun handleFanMode(
     equip: HyperStatSplitEquip, selectedPosition: Int, userClickCheck: Boolean
 
 ) {
@@ -376,13 +376,14 @@ private fun handleFanMode(
 private fun isFanModeCurrentOccupied(basicSettings: StandaloneFanStage): Boolean {
     return (basicSettings == StandaloneFanStage.LOW_CUR_OCC || basicSettings == StandaloneFanStage.MEDIUM_CUR_OCC || basicSettings == StandaloneFanStage.HIGH_CUR_OCC)
 }
-private fun handleHumidityMode(equip: HyperStatSplitEquip, selectedPosition: Int) {
+
+fun handleHumidityMode(equip: HyperStatSplitEquip, selectedPosition: Int) {
     updateUserIntentPoints(
             equip.equipRef, equip.targetHumidifier, (selectedPosition + 1).toDouble(), CCUHsApi.getInstance().ccuUserName
     )
 }
 
-private fun handleDeHumidityMode(equip: HyperStatSplitEquip, selectedPosition: Int) {
+fun handleDeHumidityMode(equip: HyperStatSplitEquip, selectedPosition: Int) {
     updateUserIntentPoints(
         equip.equipRef, equip.targetDehumidifier, (selectedPosition + 1).toDouble(), CCUHsApi.getInstance().ccuUserName
     )

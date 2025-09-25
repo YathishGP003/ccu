@@ -21,4 +21,8 @@ object HisWriteObservable {
     fun notifyChange(pointId: String, value: Double) {
         listenersMap[pointId]?.forEach { it.onHisPointChanged(pointId, value) }
     }
+
+    fun clear() {
+        listenersMap.clear()
+    }
 }

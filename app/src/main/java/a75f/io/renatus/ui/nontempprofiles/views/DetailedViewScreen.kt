@@ -1,14 +1,22 @@
 package a75f.io.renatus.ui.nontempprofiles.views
 
-import a75f.io.api.haystack.Tags.CONNECTMODULE
-import a75f.io.api.haystack.Tags.MONITORING
+import a75f.io.renatus.R
 import a75f.io.renatus.composables.DetailedViewDropDown
 import a75f.io.renatus.composables.HeaderLabelView
 import a75f.io.renatus.composables.LabelView
+import a75f.io.renatus.composables.TemperatureProfileDetailedViewDropDown
+import a75f.io.renatus.ui.EDIT_SCHEDULE
+import a75f.io.renatus.ui.EDIT_SPECIAL_SCHEDULE
+import a75f.io.renatus.ui.EDIT_VACATION_SCHEDULE
+import a75f.io.renatus.ui.VIEW_SCHEDULE
+import a75f.io.renatus.ui.model.DetailedViewItem
+import a75f.io.renatus.ui.model.HeaderViewItem
 import a75f.io.renatus.ui.nontempprofiles.model.ExternalPointItem
 import a75f.io.renatus.ui.nontempprofiles.viewmodel.NonTempProfileViewModel
 import a75f.io.renatus.ui.screens.HeaderRow
 import a75f.io.renatus.ui.screens.HeartBeatCompose
+import a75f.io.renatus.ui.screens.TextAppearance
+import a75f.io.renatus.ui.tempprofiles.viewmodel.TempProfileViewModel
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -24,8 +32,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -313,6 +324,209 @@ private fun ShowToolTip(
     }
 }
 
+fun ComposeView.showTemperatureProfileDetailedView(
+    tempProfileViewModel: TempProfileViewModel,
+    onValueChange: (selectedIndex: Int, point: Any) -> Unit
+) {
+    setContent {
+        TempDetailedViewCompose(
+            tempProfileViewModel,
+            onValueChange = { selectedIndex, point ->
+                onValueChange(selectedIndex, point)
+            })
+    }
+}
+
+
+
+@Composable
+fun TempDetailedViewCompose(
+    tempProfileViewModel: TempProfileViewModel,
+    onValueChange: (
+        selectedIndex: Int,
+        point: Any
+    ) -> Unit,
+) {
+
+    val lastUpdatedTime = tempProfileViewModel.lastUpdated.value
+    val equipStatus = tempProfileViewModel.equipStatusMessage.value
+    val orderedPoints = tempProfileViewModel.detailedViewPoints.values
+        .sortedBy { it.displayOrder }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+
+    ) {
+        // show schedule only for 1st equip; if multiple equips in a room
+        if(tempProfileViewModel.showSchedule) ScheduleComposable(tempProfileViewModel, onValueChange)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            val style = TextAppearance(R.attr.action_text_appearance)
+            Text(
+                text = tempProfileViewModel.equipName,
+                style = style
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+
+            Box(modifier = Modifier.wrapContentSize()) {
+                HeartBeatCompose(
+                    isActive = tempProfileViewModel.externalEquipHeartBeat,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                )
+            }
+        }
+        Box(modifier = Modifier.padding(start = 12.dp, top = 12.dp)) {
+            HeaderRow(
+                lastUpdatedTime,
+                onValueChange = { _, _ -> }
+            )
+        }
+        Box(modifier = Modifier.padding(start = 12.dp, top = 12.dp)) {
+            HeaderRow(
+                equipStatus,
+                onValueChange = { _, _ -> }
+            )
+        }
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier
+                .fillMaxSize()
+                .heightIn(max = 800.dp),
+            contentPadding = PaddingValues(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            items(orderedPoints, key = { it.id ?: it.hashCode().toString() },
+                    span = { point ->
+                if (point.shouldTakeFullRow) {
+                    GridItemSpan(2)
+                } else {
+                    GridItemSpan(1)
+                }
+            }) { point ->
+                DetailedViewGridItem(point = point, onValueChange = onValueChange)
+            }
+        }
+    }
+}
+
+
+@Composable
+fun DetailedViewGridItem(
+    point: DetailedViewItem,
+    onValueChange: (selectedIndex: Int, point: DetailedViewItem) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        if (point.usesDropdown) {
+            point.disName?.let {
+                TemperatureProfileDetailedViewDropDown(
+                    label = it,
+                    list = point.dropdownOptions,
+                    onSelected = { selectedIndex ->
+                        onValueChange(selectedIndex, point)
+                    },
+                    defaultSelection = point.selectedIndex,
+                    detailedViewItem = point,
+                    onLabelClick = { }
+                )
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                point.disName?.let { dis ->
+                    HeaderLabelView(dis, 0) {                   }
+                }
+                LabelView(point.currentValue.toString()) {}
+            }
+        }
+    }
+}
+
+@Composable
+fun ScheduleComposable(
+    tempProfileViewModel: TempProfileViewModel,
+    onValueChange: (selectedIndex: Int, point: HeaderViewItem) -> Unit
+) {
+    val equipScheduleStatus = tempProfileViewModel.equipScheduleStatus.value
+    val schedule = tempProfileViewModel.schedule.value
+    val specialSchedule = tempProfileViewModel.specialSchedule.value
+    val vacation = tempProfileViewModel.vacation.value
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        EquipStatusView(equipScheduleStatus)
+    }
+
+    Spacer(modifier = Modifier.width(4.dp))
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ScheduleView(
+                schedule,
+                modifier = Modifier.wrapContentWidth(),
+                onValueChange = onValueChange
+            )
+            if (schedule.selectedIndex >= 2) {
+                UpdateScheduleButton(false) {
+                    onValueChange(schedule.selectedIndex, HeaderViewItem(
+                        disName = VIEW_SCHEDULE,
+                    ))
+                }
+            } else {
+                UpdateScheduleButton(true) {
+                    onValueChange(schedule.selectedIndex, HeaderViewItem(
+                        disName = EDIT_SCHEDULE,
+                    ))
+                }
+            }
+
+        }
+
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            SpecialScheduleView(
+                specialSchedule,
+                modifier = Modifier.wrapContentWidth()
+            ) { _, _ ->
+            }
+            UpdateScheduleButton(true) {
+                onValueChange(schedule.selectedIndex, HeaderViewItem(
+                    disName = EDIT_SPECIAL_SCHEDULE,
+                ))
+            }
+        }
+    }
+
+    Spacer(modifier = Modifier.width(4.dp))
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        VacationView(vacation, modifier = Modifier.wrapContentWidth()) { _, _ -> }
+        UpdateScheduleButton(true) {
+            onValueChange(schedule.selectedIndex, HeaderViewItem(
+                disName = EDIT_VACATION_SCHEDULE,
+            ))
+        }
+    }
+}
 
 
 

@@ -271,7 +271,6 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         }
     }
 
-
     private fun runningAtHeatingDirection() = (heatingLoopOutput > 0 && supplyWaterTemp > coolingThreshold)
     private fun runningAtCoolingDirection() = (coolingLoopOutput > 0 && supplyWaterTemp < coolingThreshold)
 
@@ -310,7 +309,6 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
                         else -> false
                     }
                 }
-               // val isFanGoodToRun = isFanGoodRun(isDoorOpen, equip)
 
                 fun isStageActive(
                     stage: Int, currentState: Boolean

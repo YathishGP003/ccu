@@ -392,7 +392,7 @@ fun logMsResults(config: MyStatConfiguration, tag: String, logicalPointsList: Ha
         Triple(config.universalOut2.enabled, config.universalOut2Association.associationVal, Port.UNIVERSAL_OUT_TWO)  // just for printing purpose
     ).forEach { (enabled, association, port) ->
         if (enabled) {
-            if(config.isRelayConfig(association)) {
+            if(config.isRelayConfig(association) && logicalPointsList.containsKey(port)) {
                 when (config) {
                     is MyStatCpuConfiguration -> CcuLog.d(
                         tag,
@@ -422,18 +422,20 @@ fun logMsResults(config: MyStatConfiguration, tag: String, logicalPointsList: Ha
                     )
                 }
             } else {
-                val mapping = when (config) {
-                    is MyStatCpuConfiguration -> MyStatCpuAnalogOutMapping.values()[association]
-                    is MyStatHpuConfiguration -> MyStatHpuAnalogOutMapping.values()[association]
-                    is MyStatPipe2Configuration -> MyStatPipe2AnalogOutMapping.values()[association]
-                    else -> null
-                }
-                var analogOutValue = 0.0
                 if (logicalPointsList.containsKey(port)) {
-                    analogOutValue = haystack.readHisValById(logicalPointsList[port]!!)
-                }
-                mapping?.let {
-                    CcuLog.d(tag, "$port = $it : $analogOutValue")
+                    val mapping = when (config) {
+                        is MyStatCpuConfiguration -> MyStatCpuAnalogOutMapping.values()[association]
+                        is MyStatHpuConfiguration -> MyStatHpuAnalogOutMapping.values()[association]
+                        is MyStatPipe2Configuration -> MyStatPipe2AnalogOutMapping.values()[association]
+                        else -> null
+                    }
+                    var analogOutValue = 0.0
+                    if (logicalPointsList.containsKey(port)) {
+                        analogOutValue = haystack.readHisValById(logicalPointsList[port]!!)
+                    }
+                    mapping?.let {
+                        CcuLog.d(tag, "$port = $it : $analogOutValue")
+                    }
                 }
             }
         }

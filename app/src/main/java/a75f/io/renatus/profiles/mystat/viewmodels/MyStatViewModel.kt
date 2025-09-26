@@ -331,13 +331,24 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
                 else -> "kΩ"
             }
         }
-        val equip = MyStatDevice(deviceRef)
-        if (equip.universal1In.readPoint().unit == unit) return
-        val rawPoint = RawPoint.Builder().setHDict(
-            Domain.hayStack.readHDictById(equip.universal1In.readPoint().id)
-        ).setUnit(unit).build()
-        Domain.hayStack.updatePoint(rawPoint, rawPoint.id)
-        CcuLog.d(L.TAG_CCU_MSHST, "universal in unit updated to $unit")
+        val device = MyStatDevice(deviceRef)
+        if (device.universal1In.readPoint().unit != unit) {
+            val rawPoint = RawPoint.Builder().setHDict(
+                Domain.hayStack.readHDictById(device.universal1In.readPoint().id)
+            ).setUnit(unit).build()
+            Domain.hayStack.updatePoint(rawPoint, rawPoint.id)
+            CcuLog.d(L.TAG_CCU_MSHST, "universal in unit updated to $unit")
+        }
+        mapOf(device.universalOut1 to config.universalOut1Association, device.universalOut2 to config.universalOut2Association)
+            .map { port ->
+                RawPoint.Builder()
+                    .setHDict(Domain.hayStack.readHDictById(port.key.readPoint().id))
+                    .setUnit(if (config.isRelayConfig(port.value.associationVal).not()) "dV" else "")
+                    .build()
+            }
+            .forEach { point ->
+                Domain.hayStack.updatePoint(point, point.id)
+            }
     }
 }
 

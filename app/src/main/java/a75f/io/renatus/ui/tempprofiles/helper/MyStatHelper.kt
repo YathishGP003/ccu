@@ -271,7 +271,7 @@ class MyStatHelper(
         return DetailedViewItem(
             id = equip.conditioningMode.id,
             disName = CONDITIONING_MODE,
-            currentValue = equip.analog1OutputAssociation.readDefaultStrVal(),
+            currentValue = equip.conditioningMode.readDefaultStrVal(),
             selectedIndex = if (conditionMode in 0 until conditioningModeDropDownSize) conditionMode else 0,
             dropdownOptions = dropDownOptions,
             usesDropdown = true,

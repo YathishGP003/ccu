@@ -304,7 +304,7 @@ enum class MyStatHpuRelayMapping(val displayName: String) {
     CHANGE_OVER_O_COOLING("Change Over O Cooling"),
     CHANGE_OVER_B_HEATING("Change Over B Heating"),
     EXTERNALLY_MAPPED("Externally Mapped"),
-    DCV_DAMPER("Dcv Damper")
+    DCV_DAMPER("DCV Damper")
 }
 
 enum class MyStatHpuAnalogOutMapping(val displayName: String) {
@@ -320,9 +320,9 @@ enum class MyStatHpuAnalogOutMapping(val displayName: String) {
     CHANGE_OVER_O_COOLING("Change Over O Cooling"),
     CHANGE_OVER_B_HEATING("Change Over B Heating"),
     EXTERNALLY_MAPPED("Externally Mapped"),
-    DCV_DAMPER("Dcv Damper"),
+    DCV_DAMPER("DCV Damper"),
     COMPRESSOR_SPEED("Compressor Speed"),
     FAN_SPEED("Fan Speed"),
     ANALOG_EXTERNALLY_MAPPED("Externally Mapped"),
-    DCV_DAMPER_MODULATION("Dcv Damper")
+    DCV_DAMPER_MODULATION("DCV Damper")
 }

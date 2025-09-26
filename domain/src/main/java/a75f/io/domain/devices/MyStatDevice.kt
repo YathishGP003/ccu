@@ -28,7 +28,7 @@ class MyStatDevice(deviceRef : String) : DomainDevice (deviceRef)  {
     val co2Sensor = PhysicalPoint(DomainName.co2Sensor ,deviceRef)
     val pressureSensor = PhysicalPoint(DomainName.pressureSensor ,deviceRef)
 
-    fun getAllPorts() : List<PhysicalPoint> = listOf(relay1, relay2, relay3, universalOut1, universalOut2)
+    fun getAllPorts() : List<PhysicalPoint> = listOf(relay1, relay2, relay3, universalOut2, universalOut1)
 
     fun getTypeAndIsWritable(point: PhysicalPoint): Pair<Boolean, Boolean> {
         val raw = point.domainName.readPhysicalPoint(deviceRef)

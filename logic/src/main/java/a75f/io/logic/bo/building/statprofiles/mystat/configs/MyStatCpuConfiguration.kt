@@ -433,13 +433,13 @@ enum class MyStatCpuAnalogOutMapping(val displayName: String) {
     HUMIDIFIER("Humidifier"),
     DEHUMIDIFIER("Dehumidifier"),
     EXTERNALLY_MAPPED("Externally Mapped"),
-    DCV_DAMPER("Dcv Damper"),
+    DCV_DAMPER("DCV Damper"),
     COOLING("Cooling"),
     LINEAR_FAN_SPEED("Linear Fan"),
     HEATING("Heating"),
     STAGED_FAN_SPEED("Staged Fan"),
     ANALOG_EXTERNALLY_MAPPED("Externally Mapped"),
-    DCV_DAMPER_MODULATION("Dcv Damper")
+    DCV_DAMPER_MODULATION("DCV Damper")
 }
 
 data class MyStatCpuAnalogOutConfigs(

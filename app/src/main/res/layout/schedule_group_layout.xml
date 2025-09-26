@@ -805,7 +805,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
                         android:id="@+id/cancelZoneSchedule"
-                        android:text="@string/cancel"
+                        android:text="@string/button_cancel"
                         android:layout_marginRight="19dp"
                         android:textSize="19.5sp"
                         android:textColor="?orange_75f"/>

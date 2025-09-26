@@ -24,7 +24,7 @@ abstract class UnitVentilatorProfile(equipRef: String, nodeAddress: Short, tag: 
     HyperStatSplitProfile(equipRef, nodeAddress, tag) {
     private val saTemperingLoopControl = ControlLoop()
     var controlVia = ControlVia.FACE_AND_BYPASS_DAMPER
-    var saTemperingLoopOutput = 0
+
     var isAuxStage1Active = false
     var isAuxStage2Active = false
     var lastWaterValveTurnedOnTime: Long = System.currentTimeMillis()

@@ -1524,6 +1524,7 @@ object DomainName {
     const val fanOutSaTempering = "fanOutSaTempering"
     const val universal1OutputEnable = "universal1OutputEnable"
     const val universal2OutputEnable = "universal2OutputEnable"
+    const val saTemperingLoopOutput = "saTemperingLoopOutput"
 
 
 }

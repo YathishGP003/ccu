@@ -6,14 +6,12 @@ import a75f.io.api.haystack.HSUtil
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.HyperStatSplitEquip
-import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.bo.building.EpidemicState
 import a75f.io.logic.bo.building.ZoneProfile
 import a75f.io.logic.bo.building.ZoneState
-import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
@@ -34,7 +32,6 @@ import a75f.io.logic.bo.building.statprofiles.util.getAirEnthalpy
 import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
-import a75f.io.logic.bo.building.statprofiles.util.updateLogicalPoint
 import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.controlcomponents.util.ControllerNames
 import a75f.io.logic.controlcomponents.util.isSoftOccupied
@@ -68,7 +65,7 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
     var previousFanLoopVal = 0
     var previousFanLoopValStaged = 0
     var fanLoopCounter = 0
-
+    var saTemperingLoopOutput = 0
     var economizingAvailable = false
     private var dcvAvailable = false
     private var matThrottle = false
@@ -335,6 +332,7 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
         hssEquip.dcvLoopOutput.writePointValue(dcvLoopOutput.toDouble())
         hssEquip.outsideAirLoopOutput.writePointValue(outsideAirLoopOutput.toDouble())
         hssEquip.outsideAirFinalLoopOutput.writePointValue(outsideAirFinalLoopOutput.toDouble())
+        hssEquip.saTempLoopOutput.writePointValue(saTemperingLoopOutput.toDouble())
 
         coolingLoopOutput = hssEquip.coolingLoopOutput.readHisVal().toInt()
         heatingLoopOutput = hssEquip.heatingLoopOutput.readHisVal().toInt()
@@ -344,6 +342,7 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
         dcvLoopOutput = hssEquip.dcvLoopOutput.readHisVal().toInt()
         outsideAirLoopOutput = hssEquip.outsideAirLoopOutput.readHisVal().toInt()
         outsideAirFinalLoopOutput = hssEquip.outsideAirFinalLoopOutput.readHisVal().toInt()
+        saTemperingLoopOutput = hssEquip.saTempLoopOutput.readHisVal().toInt()
     }
 
     override fun getNodeAddresses() : HashSet<Short> {

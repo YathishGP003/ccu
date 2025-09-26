@@ -325,7 +325,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         SubTitle(stringResource(R.string.sensorbus),modifier)
         Row(modifier = modifier.padding(vertical = 10.dp)) {
             Column {
-                EnableCompose(stringResource(R.string.sensorbus), viewModel.viewState.value.sensorAddress0.enabled) {
+                EnableCompose(stringResource(R.string.sensorbusaddress0), viewModel.viewState.value.sensorAddress0.enabled) {
                     viewModel.viewState.value.sensorAddress0.enabled = it
                 }
                 Spacer(modifier = Modifier.height(80.dp))

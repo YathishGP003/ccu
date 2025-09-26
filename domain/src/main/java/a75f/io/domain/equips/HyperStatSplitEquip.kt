@@ -235,6 +235,7 @@ open class HyperStatSplitEquip (equipRef : String) : DomainEquip(equipRef) {
     val economizingLoopOutput = Point(DomainName.economizingLoopOutput, equipRef)
     val dcvLoopOutput = Point(DomainName.dcvLoopOutput, equipRef)
     val fanLoopOutput = Point(DomainName.fanLoopOutput, equipRef)
+    val saTempLoopOutput = Point(DomainName.saTemperingLoopOutput, equipRef)
     val outsideAirCalculatedMinDamper = Point(DomainName.outsideAirCalculatedMinDamper, equipRef)
     val outsideAirLoopOutput = Point(DomainName.outsideAirLoopOutput, equipRef)
     val outsideAirFinalLoopOutput = Point(DomainName.outsideAirFinalLoopOutput, equipRef)

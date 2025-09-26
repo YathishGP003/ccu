@@ -42,7 +42,6 @@ import a75f.io.logic.bo.building.statprofiles.util.milliToMin
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.handlers.doAnalogOperation
 import a75f.io.logic.controlcomponents.util.ControllerNames
-import a75f.io.logic.controlcomponents.util.isSoftOccupied
 import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler
 
 /**
@@ -400,9 +399,9 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
             ControllerNames.FACE_BYPASS_CONTROLLER -> {
                 var status = result as Boolean
 
-                if (runningAtCoolingDirection().not() || ( coolingLoopOutput > 0 && (canWeDoCooling(basicSettings.conditioningMode).not()
+                if ((coolingLoopOutput > 0 && (canWeDoCooling(basicSettings.conditioningMode).not() || runningAtCoolingDirection().not()
                             || (economizingAvailable && coolingLoopOutput <= tuners.economizingToMainCoolingLoopMap)))
-                    || (runningAtHeatingDirection().not() || (heatingLoopOutput > 0 && canWeDoHeating(basicSettings.conditioningMode).not()))
+                    || (heatingLoopOutput > 0 &&( runningAtHeatingDirection().not() || canWeDoHeating(basicSettings.conditioningMode).not()))
                 ) {
                     status = false
                 }

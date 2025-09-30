@@ -327,10 +327,13 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
     ) {
         val pointDict =
             hayStack.readHDict("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
-        val point = a75f.io.api.haystack.Point.Builder().setHDict(pointDict)
-            .setMinVal(minMaxInc.first.toString())
-            .setMaxVal(minMaxInc.second.toString()).setIncrementVal(minMaxInc.third.toString())
-            .build()
-        hayStack.updatePoint(point, point.id)
+
+        if (pointDict != null && !pointDict.isEmpty) {
+            val point = a75f.io.api.haystack.Point.Builder().setHDict(pointDict)
+                .setMinVal(minMaxInc.first.toString())
+                .setMaxVal(minMaxInc.second.toString()).setIncrementVal(minMaxInc.third.toString())
+                .build()
+            hayStack.updatePoint(point, point.id)
+        }
     }
 }

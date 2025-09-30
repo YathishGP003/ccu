@@ -90,15 +90,15 @@ class MyStatHelper(
     fun profileName(): String {
         return when (profileType) {
             ProfileType.MYSTAT_CPU -> {
-                MYSTAT + "-" + CPU.uppercase() + "( " + equipMap.group + " )"
+                MYSTAT + "-" + CPU + "( " + equipMap.group + " )"
             }
 
             ProfileType.MYSTAT_HPU -> {
-                MYSTAT + "-" + HPU.uppercase() + "( " + equipMap.group + " )"
+                MYSTAT + "-" + HPU + "( " + equipMap.group + " )"
             }
 
             ProfileType.MYSTAT_PIPE2 -> {
-                MYSTAT + "-" + PIPE2.uppercase() + "( " + equipMap.group + " )"
+                MYSTAT + "-" + PIPE2 + "( " + equipMap.group + " )"
             }
 
             else -> {

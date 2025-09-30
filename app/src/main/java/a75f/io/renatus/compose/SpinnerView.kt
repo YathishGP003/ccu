@@ -466,7 +466,7 @@ fun Modifier.simpleVerticalScrollbar(
 }
 // TODO: This method calculate the height of the dropdown based on the number of items in the list
 // If the number of items in the list is less than the noOfItemsDisplayInDropDown, then the height of the dropdown is calculated based on the number of items in the list
-private fun getDropdownCustomHeight(list: List<Any>, noOfItemsDisplayInDropDown: Int, heightValue: Int): Int {
+fun getDropdownCustomHeight(list: List<Any>, noOfItemsDisplayInDropDown: Int, heightValue: Int): Int {
     var customHeight = heightValue
     if(list.isNotEmpty()) {
         if(list.size <= noOfItemsDisplayInDropDown) {

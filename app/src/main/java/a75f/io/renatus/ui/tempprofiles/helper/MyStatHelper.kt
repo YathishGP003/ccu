@@ -181,8 +181,12 @@ class MyStatHelper(
             val supplyWaterTemp = getSupplyWaterTempView()
             detailViewItems[supplyWaterTemp.id.toString()] = supplyWaterTemp
         } else {
-            val dischargeAirFloe = getDischargeAirTempView()
-            detailViewItems[dischargeAirFloe.id.toString()] = dischargeAirFloe
+            if (configuration.universalIn1Enabled.enabled &&
+                configuration.universalIn1Association.associationVal.toDouble() == 0.0
+            ) {
+                val dischargeAirFloe = getDischargeAirTempView()
+                detailViewItems[dischargeAirFloe.id.toString()] = dischargeAirFloe
+            }
         }
 
         tempProfileViewModel.initializeDetailedViewPoints(detailViewItems)

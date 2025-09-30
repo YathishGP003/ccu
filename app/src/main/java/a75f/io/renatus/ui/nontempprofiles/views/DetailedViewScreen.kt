@@ -410,6 +410,7 @@ fun TempDetailedViewCompose(
                 DetailedViewGridItem(point = point, onValueChange = onValueChange)
             }
         }
+        Spacer(modifier = Modifier.heightIn(8.dp))
     }
 }
 

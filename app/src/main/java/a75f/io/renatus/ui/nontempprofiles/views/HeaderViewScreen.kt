@@ -400,8 +400,11 @@ fun ScheduleDropDownView(
                 Divider(color = greyDropDownUnderlineColor)
             }
             if (showCap) {
-                val customHeight =
-                    getDropdownCustomHeight(list, noOfItemsDisplayInDropDown, dropDownHeight)
+                val customHeight = a75f.io.renatus.compose.getDropdownCustomHeight(
+                    list,
+                    noOfItemsDisplayInDropDown,
+                    dropDownHeight
+                )
 
                 Spacer(modifier = Modifier.height(5.dp))
 

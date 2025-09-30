@@ -817,8 +817,11 @@ fun TemperatureProfileDetailedViewDropDown(
                 Divider(color = greyDropDownUnderlineColor)
             }
 
-            val customHeight =
-                getDropdownCustomHeight(list, noOfItemsDisplayInDropDown, dropDownHeight)
+            val customHeight = a75f.io.renatus.compose.getDropdownCustomHeight(
+                list,
+                noOfItemsDisplayInDropDown,
+                dropDownHeight
+            )
 
             Spacer(modifier = Modifier.height(5.dp))
 

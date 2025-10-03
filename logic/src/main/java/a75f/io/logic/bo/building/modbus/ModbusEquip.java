@@ -394,9 +394,10 @@ public class ModbusEquip {
             Point logicalPoint = logicalParamPoint.build();
             String logicalParamId = CCUHsApi.getInstance().addPoint(logicalPoint);
             RawPoint physicalPoint = physicalParamPoint.setPointRef(logicalParamId).build();
-            String physicalParamId = CCUHsApi.getInstance().addPoint(physicalPoint);
             // Do not create physical point if it is connect node
+            String physicalParamId = null;
             if (!isConnectNode) {
+                 physicalParamId = CCUHsApi.getInstance().addPoint(physicalPoint);
                 if(defaultValue != null){
                     CCUHsApi.getInstance().writeHisValById(physicalParamId,defaultValue);
                     if (physicalPoint.getMarkers().contains("writable")) {

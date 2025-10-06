@@ -219,7 +219,7 @@ fun RelayConfiguration(
         }
         Box(modifier = Modifier
                 .weight(1.7f)
-                .padding(start = 10.dp, top = 10.dp)) {
+                .padding(start = 15.dp, top = 10.dp)) {
             StyledTextView(relayName, fontSize = 20)
         }
         Box(modifier = Modifier

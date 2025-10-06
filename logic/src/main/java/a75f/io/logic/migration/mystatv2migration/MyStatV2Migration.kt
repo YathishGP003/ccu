@@ -170,13 +170,14 @@ class MyStatV2Migration {
                 data.first["dis"].toString(),
                 true
             )
-            deviceBuilder.updateDeviceAndPoints(
+            val deviceRef = deviceBuilder.updateDeviceAndPoints(
                 config,
                 deviceModel,
                 equipId,
                 hsApi.site!!.id,
                 deviceDis
             )
+            config.universalInUnit(deviceRef)
             config.apply { setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap()) }
         }
         CcuLog.d(

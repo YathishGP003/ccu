@@ -274,7 +274,7 @@ fun getMyStatSettingsMessage(equipRef: String, zone: String): MyStat.MyStatSetti
         .setMystatLinearFanSpeeds(setLinearFanSpeedDetails(myStatEquip))
         .setMystatStagedFanSpeeds(setStagedFanSpeedDetails(myStatEquip))
         .setTemperatureMode(getTempMode())
-        .setMiscSettings1(0) //  Sending value 4 because firmware expects it to be 4
+        .setMiscSettings1(if (myStatEquip.enableDesiredTempDisplay.isEnabled()) (1 shl 3) else 0)
             //sending MiscSettings1 always 001
             // bit 0: enableExternal10kTemperatureSensor
             // bit 1: disableTouch
@@ -362,6 +362,7 @@ fun getRelayConfig(enable: Point, association: Point, equip: MyStatEquip): MySta
                 relayConfig.twoPipeRelay = when (associationVal) {
                     MyStatPipe2RelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.TwoPipeRelayMappings_e.P2_NONE
                     MyStatPipe2RelayMapping.DCV_DAMPER.ordinal -> MyStat.TwoPipeRelayMappings_e.P2_DCV_DAMPER
+                    MyStatPipe2RelayMapping.FAN_LOW_VENTILATION.ordinal -> MyStat.TwoPipeRelayMappings_e.P2_FAN_LOW_VENTILATION
                     else -> MyStat.TwoPipeRelayMappings_e.values()[associationVal + 1]
                 }
                 relayConfig.relayEnable = enable.readDefaultVal() == 1.0
@@ -413,7 +414,7 @@ private fun getAnalogOutConfigs(equip: MyStatEquip, enable: Point, association: 
                 }
             }
             is MyStatPipe2Equip -> {
-                if (analogOutMappingValue >= MyStatPipe2AnalogOutMapping.values().size) {
+                if (analogOutMappingValue >= MyStatPipe2RelayMapping.values().size) {
                     twoPipeAoutMapping = when (analogOutMappingValue) {
                         MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal -> MyStat.TwoPipeAoutMappings_e.P2_AOUT_WATER_VALVE
                         MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal -> MyStat.TwoPipeAoutMappings_e.P2_FAN_SPEED
@@ -424,8 +425,9 @@ private fun getAnalogOutConfigs(equip: MyStatEquip, enable: Point, association: 
                 }
             }
         }
-        setAnalogOutAtMinSetting(hsApi.readDefaultVal("min and analog == 1 and equipRef == \"${equip.equipRef}\"").toInt() * 10)
-        setAnalogOutAtMaxSetting(hsApi.readDefaultVal("max and analog == 1 and equipRef == \"${equip.equipRef}\"").toInt() * 10)
+        val index = if (enable.domainName == DomainName.universal1OutputEnable) 1 else 2
+        setAnalogOutAtMinSetting(hsApi.readDefaultVal("min and analog == $index and equipRef == \"${equip.equipRef}\"").toInt() * 10)
+        setAnalogOutAtMaxSetting(hsApi.readDefaultVal("max and analog == $index and equipRef == \"${equip.equipRef}\"").toInt() * 10)
     }
     return analogOutConfigs.build()
 }

@@ -224,7 +224,8 @@ message MyStatSettingsMessage_t {
   /* miscSettings
        bit 0: enableExternal10kTemperatureSensor(1 if external sensor is enabled 
        bit 1: disableTouch(1 will disable touch)
-       bit 2: brightnessVariationEnable (1 will enable automatic brightness control) */
+       bit 2: brightnessVariationEnable (1 will enable automatic brightness control)
+       bit 3: desiredTempDisplay (will be 1 when desired temp is selected)*/
   uint32 miscSettings1 =14;
   bool beaconingEnabled = 15; // 0 if beaconing disabled, 1 if beaconing enabled
   uint32 humidityMinSetpoint = 16; // Minimum humidity setpont 0-100% in which MyStat will set system to Humidify if humidity level is less than

@@ -1,13 +1,10 @@
 package a75f.io.renatus.profiles.mystat.viewmodels
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.RawPoint
 import a75f.io.device.mesh.mystat.MyStatMsgSender
 import a75f.io.device.mesh.mystat.getMyStatControlMessage
 import a75f.io.device.mesh.mystat.getMyStatDomainDevice
 import a75f.io.device.serial.MessageType
-import a75f.io.domain.api.Domain
-import a75f.io.domain.devices.MyStatDevice
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
@@ -162,7 +159,7 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
         val equipId = equipBuilder.buildEquipAndPoints(config, equipModel, hayStack.site!!.id, getEquipDis())
         val deviceRef = deviceBuilder.buildDeviceAndPoints(config, deviceModel, equipId, hayStack.site!!.id, getDeviceDis())
-        universalInUnit(config, deviceRef)
+        config.universalInUnit(deviceRef)
         return equipId
     }
 
@@ -319,36 +316,5 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         return isValidConfig
     }
 
-    fun universalInUnit(config: MyStatConfiguration, deviceRef: String) {
-        val unit: String
-        if (config is MyStatPipe2Configuration) {
-            unit = "kΩ"
-        } else {
-            val association = config.universalIn1Association.associationVal
-            unit = when (MyStatConfiguration.UniversalMapping.values()[association]) {
-                MyStatConfiguration.UniversalMapping.KEY_CARD_SENSOR -> "mV"
-                MyStatConfiguration.UniversalMapping.DOOR_WINDOW_SENSOR_TITLE24 -> "mV"
-                else -> "kΩ"
-            }
-        }
-        val device = MyStatDevice(deviceRef)
-        if (device.universal1In.readPoint().unit != unit) {
-            val rawPoint = RawPoint.Builder().setHDict(
-                Domain.hayStack.readHDictById(device.universal1In.readPoint().id)
-            ).setUnit(unit).build()
-            Domain.hayStack.updatePoint(rawPoint, rawPoint.id)
-            CcuLog.d(L.TAG_CCU_MSHST, "universal in unit updated to $unit")
-        }
-        mapOf(device.universalOut1 to config.universalOut1Association, device.universalOut2 to config.universalOut2Association)
-            .map { port ->
-                RawPoint.Builder()
-                    .setHDict(Domain.hayStack.readHDictById(port.key.readPoint().id))
-                    .setUnit(if (config.isRelayConfig(port.value.associationVal).not()) "dV" else "")
-                    .build()
-            }
-            .forEach { point ->
-                Domain.hayStack.updatePoint(point, point.id)
-            }
-    }
 }
 

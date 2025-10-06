@@ -686,7 +686,7 @@ fun CombinationSpinner(
                                         Text(
                                             fontSize = 20.sp,
                                             fontFamily = ComposeUtil.myFontFamily,
-                                            modifier = Modifier.padding(end = 10.dp, start = 10.dp),
+                                            modifier = Modifier.padding(end = 10.dp, start = 20.dp),
                                             fontWeight = FontWeight.Normal,
                                             text = option.dis ?: option.value
                                         )

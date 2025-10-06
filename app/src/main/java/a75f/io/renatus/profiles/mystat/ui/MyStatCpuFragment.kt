@@ -133,10 +133,10 @@ class MyStatCpuFragment : MyStatFragment() {
                         Label()
                         MyStatConfiguration()
                         Co2Control()
-                        AnalogMinMaxConfigurations()
                         ThresholdTargetConfig()
-                        PinPasswordView(viewModel)
+                        AnalogMinMaxConfigurations()
                         DisplayInDeviceConfig(viewModel)
+                        PinPasswordView(viewModel)
                         SaveConfig(viewModel)
                     }
                 }
@@ -271,14 +271,14 @@ class MyStatCpuFragment : MyStatFragment() {
                     .padding(bottom = 10.dp)
             ) {
                 if (universalOut1Mapped) {
-                    SingleOptionConfiguration(minLabel = "Universal-Out 1 \nFan Recirculate",
+                    SingleOptionConfiguration(minLabel = "Universal-Out 1 at  \nFan Recirculate",
                         itemList = minMaxVoltage,
                         unit = "V",
                         minDefault = universalOut1recirculateFanConfig.toString(),
                         onMinSelected = { universalOut1recirculateFanConfig = it.value.toInt() })
                 }
                 if (universalOut2Mapped) {
-                    SingleOptionConfiguration(minLabel = "Universal-Out 2 \nFan Recirculate",
+                    SingleOptionConfiguration(minLabel = "Universal-Out 2 at \nFan Recirculate",
                         itemList = minMaxVoltage,
                         unit = "V",
                         minDefault = universalOut2recirculateFanConfig.toString(),

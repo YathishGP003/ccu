@@ -162,7 +162,7 @@ class MyStatHpuViewModel(application: Application) : MyStatViewModel(application
             updateFanMode(
                 true, equip, getMyStatHpuFanLevel(profileConfiguration as MyStatHpuConfiguration)
             )
-            universalInUnit(profileConfiguration, deviceRef)
+            profileConfiguration.universalInUnit(deviceRef)
         }
 
         profileConfiguration.apply {

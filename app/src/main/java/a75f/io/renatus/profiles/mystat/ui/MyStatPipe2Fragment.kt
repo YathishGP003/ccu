@@ -127,10 +127,10 @@ class MyStatPipe2Fragment : MyStatFragment() {
                         Label()
                         MyStatConfiguration()
                         Co2Control()
-                        AnalogMinMaxConfigurations()
                         ThresholdTargetConfig()
-                        PinPasswordView(viewModel)
+                        AnalogMinMaxConfigurations()
                         DisplayInDeviceConfig(viewModel)
+                        PinPasswordView(viewModel)
                         SaveConfig(viewModel)
                     }
                 }

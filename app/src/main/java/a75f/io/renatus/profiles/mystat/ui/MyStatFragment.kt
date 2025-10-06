@@ -171,11 +171,11 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
     @Composable
     fun AutoForcedOccupiedAutoAwayConfig() {
 
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize()) {
             Row(modifier = Modifier.padding(20.dp)) {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.padding(top = 10.dp, end = 40.dp)
+                    modifier = Modifier.padding(top = 10.dp).weight(1.7f)
                 ) {
                     StyledTextView(
                         text = stringResource(R.string.auto_force_occupy), fontSize = 20, textAlignment = TextAlign.Start
@@ -186,20 +186,24 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
 
                 Box(
                     modifier = Modifier.padding(
-                        start = 50.dp, end = 50.dp, top = 20.dp, bottom = 20.dp
-                    )
+                        start = 50.dp, top = 20.dp, bottom = 20.dp
+                    ).weight(2f)
                 )
 
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.padding(top = 10.dp, end = 40.dp)
+                    modifier = Modifier.padding(top = 10.dp).weight(1.8f)
                 ) {
                     StyledTextView(
-                        text = stringResource(R.string.auto_away), fontSize = 20, textAlignment = TextAlign.Start
+                        text = stringResource(R.string.auto_away),
+                        fontSize = 20,
+                        textAlignment = TextAlign.Start
                     )
                 }
-                ToggleButtonStateful(defaultSelection = viewModel.viewState.value.isEnableAutoAway,
-                    onEnabled = { viewModel.viewState.value.isEnableAutoAway = it })
+                    ToggleButtonStateful(
+                        defaultSelection = viewModel.viewState.value.isEnableAutoAway,
+                        onEnabled = { viewModel.viewState.value.isEnableAutoAway = it })
+                Spacer(Modifier.width(45.dp))
             }
         }
     }
@@ -220,10 +224,10 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
             ) {
                 SubTitle(ENABLE)
             }
-            Box(modifier = Modifier.weight(2f), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.weight(3.0f), contentAlignment = Alignment.Center) {
                 SubTitle(MAPPING)
             }
-            Box(modifier = Modifier.weight(1.5f), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.weight(1.0f), contentAlignment = Alignment.Center) {
                 SubTitle(TEST_SIGNAL)
             }
         }
@@ -236,7 +240,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                 painter = painterResource(id = R.drawable.ms),
                 contentDescription = "Relays",
                 modifier = Modifier
-                    .width(350.dp)
+                    .width(300.dp)
                     .height(350.dp)
                     .padding(start = 10.dp, top = 10.dp, bottom = 10.dp)
             )
@@ -274,6 +278,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                         DomainName.universal1OutputAssociation,
                         viewModel.equipModel
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
                     UniversalOutConfiguration(
                         portName = "Universal-Out 1",
                         enabled = universalOut1.enabled,
@@ -293,7 +298,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                         },
                         testSingles = testVoltage,
                         testVal = viewModel.getAnalogValue(4),
-                        padding = 5,
+                        padding = 6,
                         analogStartPosition = viewModel.getAnalogStatIndex(),
                         onTestSignalSelected = { viewModel.sendTestSignal(universalOut1 =  it) },
                         disabledIndices = if (viewModel is MyStatHpuViewModel) getHpuDisabledIndices(universalOut1) else emptyList()
@@ -317,7 +322,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                         },
                         testSingles = testVoltage,
                         testVal = viewModel.getAnalogValue(5),
-                        padding = 5,
+                        padding = 6,
                         onTestSignalSelected = { viewModel.sendTestSignal(universalOut2 =  it) },
                         analogStartPosition = viewModel.getAnalogStatIndex(),
                         disabledIndices = if (viewModel is MyStatHpuViewModel) getHpuDisabledIndices(universalOut2) else emptyList()
@@ -356,7 +361,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                         }
                         Box(modifier = Modifier
                             .weight(4f)
-                            .padding(end = 5.dp, top = 10.dp)) {
+                            .padding(start = 12.dp, end = 5.dp, top = 10.dp)) {
                             SearchSpinnerElement(
                                 default = universalOptions[viewModel.viewState.value.universalIn1.association],
                                 allItems = universalOptions,
@@ -373,12 +378,12 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
             }
         }
         Row(
-            modifier = Modifier.fillMaxWidth().padding(start = 50.dp, top = 30.dp, end = 20.dp)
+            modifier = Modifier.fillMaxWidth().padding(start = 30.dp, top = 30.dp, end = 20.dp)
         ) {
             Box(
                 modifier = Modifier.background(
                     primaryColor.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
-                    .padding(all = 20.dp)
+                    .padding(all = 10.dp)
             ) {
                 StyledTextView(
                     text = "Please check Universal-Out 1, Universal-Out 2 and CO2 is supported/configured correctly via jumpers on the MyStat device.",
@@ -452,8 +457,8 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
     fun ConfigMinMax(association: Int, minMax: MinMaxConfig, displayName: String, mapping: Int, index: Int) {
         if (association == mapping) {
             MinMaxConfiguration(
-                minLabel = "Universal-Out $index Min \n${displayName}",
-                maxLabel = "Universal-Out $index Max \n${displayName}",
+                minLabel = "${getString(R.string.universal_Out)} $index at  ${getString(R.string.min)} \n${displayName}",
+                maxLabel = "${getString(R.string.universal_Out)} $index at ${getString(R.string.max)} \n${displayName}",
                 itemList = minMaxVoltage,
                 unit = "V",
                 minDefault = minMax.min.toString(),
@@ -503,16 +508,11 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                     ToggleButton(defaultSelection = viewModel.viewState.value.spaceTemp,
                         onEnabled = {
                             if (it && viewModel.viewState.value.desiredTemp) {
-                                showToast(
-                                    "Max of 1 temperature can be displayed at once",
-                                    requireContext()
-                                )
+                                viewModel.viewState.value.desiredTemp = false
+                                viewModel.viewState.value.spaceTemp = true
                             } else {
                                 viewModel.viewState.value.desiredTemp = true
                                 viewModel.viewState.value.spaceTemp = it
-                                showToast(
-                                    "Min of 1 temperature should be displayed", requireContext()
-                                )
                             }
                         })
                 }
@@ -529,16 +529,11 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                     ToggleButton(defaultSelection = viewModel.viewState.value.desiredTemp,
                         onEnabled = {
                             if (it && viewModel.viewState.value.spaceTemp) {
-                                showToast(
-                                    "Max of 1 temperature can be displayed at once",
-                                    requireContext()
-                                )
+                                viewModel.viewState.value.desiredTemp = true
+                                viewModel.viewState.value.spaceTemp = false
                             } else {
                                 viewModel.viewState.value.spaceTemp = true
                                 viewModel.viewState.value.desiredTemp = it
-                                showToast(
-                                    "Min of 1 temperature should be displayed", requireContext()
-                                )
                             }
                         })
                 }
@@ -726,7 +721,6 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                 }
             }
         }
-        DividerRow()
     }
 
     @Composable

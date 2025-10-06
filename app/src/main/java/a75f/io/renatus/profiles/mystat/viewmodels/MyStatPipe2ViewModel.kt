@@ -147,7 +147,7 @@ class MyStatPipe2ViewModel(application: Application) : MyStatViewModel(applicati
             )
             val equip = MyStatPipe2Equip(equipId)
             updateFanMode(true, equip, getMyStatPipe2FanLevel(profileConfiguration as MyStatPipe2Configuration))
-            universalInUnit(profileConfiguration, deviceRef)
+            profileConfiguration.universalInUnit(deviceRef)
         }
 
         profileConfiguration.apply {

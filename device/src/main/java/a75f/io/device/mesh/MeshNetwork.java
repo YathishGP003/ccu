@@ -189,6 +189,7 @@ public class MeshNetwork extends DeviceNetwork
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING MyStat Settings ===================== " + nodeAddress);
                                     MyStatMsgSender.INSTANCE.sendSettingMessage(nodeAddress, d.getEquipRef(), zone.getDisplayName());
                                     MyStatMsgSender.INSTANCE.sendSetting2Message(nodeAddress, d.getEquipRef());
+                                    MyStatMsgSender.INSTANCE.sendSetting3Message(nodeAddress, d.getEquipRef());
 
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING MyStat Controls ===================== " + d.getAddr());
                                     MyStat.MyStatControlsMessage_t controls = getMyStatControlMessage(nodeAddress).build();

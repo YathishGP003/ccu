@@ -2711,11 +2711,11 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         defaultSelection = viewModel.viewState.value.spaceTemp,
                         onEnabled = {
                             if ( it && viewModel.viewState.value.desiredTemp) {
-                                showToast(getString(R.string.max_1_temp), requireContext())
+                               viewModel.viewState.value.desiredTemp = false
+                                viewModel.viewState.value.spaceTemp = true
                             } else {
                                 viewModel.viewState.value.desiredTemp = true
                                 viewModel.viewState.value.spaceTemp = it
-                                showToast(getString(R.string.min_1_temp), requireContext())
                             }
                         })
                 }
@@ -2752,11 +2752,11 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)){
                     ToggleButton(defaultSelection = viewModel.viewState.value.desiredTemp, onEnabled = {
                         if (it && viewModel.viewState.value.spaceTemp) {
-                            showToast(getString(R.string.max_1_temp), requireContext())
+                            viewModel.viewState.value.spaceTemp = false
+                            viewModel.viewState.value.desiredTemp = true
                         } else {
                             viewModel.viewState.value.spaceTemp = true
                             viewModel.viewState.value.desiredTemp = it
-                            showToast(getString(R.string.min_1_temp), requireContext())
                         }
                     })
                 }

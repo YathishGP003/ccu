@@ -3,13 +3,17 @@ package a75f.io.logic.bo.building.statprofiles.mystat.configs
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.RawPoint
 import a75f.io.api.haystack.Tags
+import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.StringValueConfig
 import a75f.io.domain.config.ValueConfig
+import a75f.io.domain.devices.MyStatDevice
 import a75f.io.domain.equips.mystat.MyStatEquip
+import a75f.io.logger.CcuLog
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatDevice
@@ -219,6 +223,39 @@ abstract class MyStatConfiguration(
 
         isDefault = true
         return this
+    }
+
+
+    fun universalInUnit(deviceRef: String) {
+        val unit: String
+        if (this is MyStatPipe2Configuration) {
+            unit = "kΩ"
+        } else {
+            val association = this.universalIn1Association.associationVal
+            unit = when (UniversalMapping.values()[association]) {
+                UniversalMapping.KEY_CARD_SENSOR -> "mV"
+                UniversalMapping.DOOR_WINDOW_SENSOR_TITLE24 -> "mV"
+                else -> "kΩ"
+            }
+        }
+        val device = MyStatDevice(deviceRef)
+        if (device.universal1In.readPoint().unit != unit) {
+            val rawPoint = RawPoint.Builder().setHDict(
+                Domain.hayStack.readHDictById(device.universal1In.readPoint().id)
+            ).setUnit(unit).build()
+            Domain.hayStack.updatePoint(rawPoint, rawPoint.id)
+            CcuLog.d(L.TAG_CCU_MSHST, "universal in unit updated to $unit")
+        }
+        mapOf(device.universalOut1 to this.universalOut1Association, device.universalOut2 to this.universalOut2Association)
+            .map { port ->
+                RawPoint.Builder()
+                    .setHDict(Domain.hayStack.readHDictById(port.key.readPoint().id))
+                    .setUnit(if (this.isRelayConfig(port.value.associationVal).not()) "dV" else "")
+                    .build()
+            }
+            .forEach { point ->
+                Domain.hayStack.updatePoint(point, point.id)
+            }
     }
 
     fun setPortConfiguration(

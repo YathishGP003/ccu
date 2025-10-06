@@ -142,7 +142,7 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
             updateFanMode(
                 true, equip, getMyStatCpuFanLevel(profileConfiguration as MyStatCpuConfiguration)
             )
-            universalInUnit(profileConfiguration, deviceRef)
+            profileConfiguration.universalInUnit(deviceRef)
         }
 
         profileConfiguration.apply {

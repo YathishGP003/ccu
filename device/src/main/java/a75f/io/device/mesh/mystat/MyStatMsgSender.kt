@@ -126,6 +126,13 @@ object MyStatMsgSender {
         }
         writeSetting2Message(settings, address, MessageType.MYSTAT_SETTINGS2_MESSAGE, true)
     }
+    fun sendSetting3Message(address: Int, equipRef: String) {
+        val settings = getMyStatSetting3Message(equipRef)
+        if (DLog.isLoggingEnabled()) {
+            CcuLog.i(L.TAG_CCU_SERIAL, settings.toString())
+        }
+        writeSetting3Message(settings, address, MessageType.MYSTAT_SETTINGS3_MESSAGE, true)
+    }
 
     fun writeControlMessage(
         message: MyStatControlsMessage_t, address: Int,
@@ -195,6 +202,28 @@ object MyStatMsgSender {
             ) {
                 CcuLog.d(
                     L.TAG_CCU_SERIAL, MyStatSettingsMessage2_t::class.java.simpleName +
+                            " was already sent, returning , type " + msgType
+                )
+                return
+            }
+        }
+        writeMessageBytesToUsb(address, msgType, message.toByteArray())
+    }
+
+    private fun writeSetting3Message(
+        message: MyStat.MyStatSettingsMessage3_t, address: Int,
+        msgType: MessageType, checkDuplicate: Boolean
+    ) {
+        CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message $msgType")
+        if (checkDuplicate) {
+            val messageHash = message.toByteArray().contentHashCode()
+            if (MyStatMsgCache.checkAndInsert(
+                    address, MyStat.MyStatSettingsMessage3_t::class.java.simpleName,
+                    messageHash
+                )
+            ) {
+                CcuLog.d(
+                    L.TAG_CCU_SERIAL, MyStat.MyStatSettingsMessage3_t::class.java.simpleName +
                             " was already sent, returning , type " + msgType
                 )
                 return

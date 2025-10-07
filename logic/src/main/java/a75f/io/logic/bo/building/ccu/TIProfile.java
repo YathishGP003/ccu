@@ -90,6 +90,9 @@ public class TIProfile extends ZoneProfile {
             CcuLog.d(TAG, "Schedule slot Not  exists for room:  Ti Equip: " + tiEquip.getId() + "node address : " + mNodeAddr);
             setTempCooling = DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
             setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+            tiEquip.getDesiredTempHeating().writePointValue(setTempHeating);
+            tiEquip.getDesiredTempCooling().writePointValue(setTempCooling);
+            tiEquip.getDesiredTemp().writePointValue((setTempCooling + setTempHeating) / 2);
         } else {
             setTempCooling = tiEquip.getDesiredTempCooling().readPriorityVal();
             setTempHeating = tiEquip.getDesiredTempHeating().readPriorityVal();

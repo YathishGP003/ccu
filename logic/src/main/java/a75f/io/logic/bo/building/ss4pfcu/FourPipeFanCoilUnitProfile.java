@@ -98,6 +98,9 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                 CcuLog.d(TAG, "Schedule slot Not  exists for room:  SmartStat four Pipe : " + fourPfcuEquip.getId() + "node address : " + node);
                 setTempCooling = DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
                 setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+                fourPfcuDevice.setDesiredTempCooling(setTempCooling);
+                fourPfcuDevice.setDesiredTempHeating(setTempHeating);
+                fourPfcuDevice.setDesiredTemp((setTempCooling + setTempHeating) / 2.0);
             } else {
                 setTempCooling = fourPfcuDevice.getDesiredTempCooling();
                 setTempHeating = fourPfcuDevice.getDesiredTempHeating();

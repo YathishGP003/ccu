@@ -141,6 +141,9 @@ public class SingleStageProfile extends ZoneProfile
             CcuLog.d(TAG, "Schedule slot Not  exists for room:  sseEquip: " + sseEquip.getId() + "node address : " + nodeAddr);
             setTempCooling = DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
             setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+            sseEquip.getDesiredTempHeating().writePointValue(setTempHeating);
+            sseEquip.getDesiredTempCooling().writePointValue(setTempCooling);
+            sseEquip.getDesiredTemp().writePointValue((setTempHeating + setTempCooling) / 2);
         } else {
             setTempCooling = sseEquip.getDesiredTempCooling().readPriorityVal();
             setTempHeating = sseEquip.getDesiredTempHeating().readPriorityVal();

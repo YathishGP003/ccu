@@ -14,6 +14,7 @@ class TIEquip(equipRef: String) : DomainEquip(equipRef) {
     val currentTemp = Point(DomainName.currentTemp, equipRef)
     val desiredTempCooling = Point(DomainName.desiredTempCooling, equipRef)
     val desiredTempHeating = Point(DomainName.desiredTempHeating, equipRef)
+    val desiredTemp = Point(DomainName.desiredTemp, equipRef)
 
     val equipStatus = Point(DomainName.equipStatus, equipRef)
     val equipStatusMessage = Point(DomainName.equipStatusMessage, equipRef)

@@ -109,6 +109,9 @@ public class DualDuctProfile extends ZoneProfile {
             CcuLog.d(TAG, "Schedule slot Not  exists for room:   Dual Duct Equip : " + dualDuctEquip.getId() + "node address : " + getNodeAddresses());
             setTempCooling = DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
             setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+            TemperatureProfileUtil.setDesiredTempCooling(dualDuctEquip.nodeAddr, setTempCooling);
+            TemperatureProfileUtil.setDesiredTempHeating(dualDuctEquip.nodeAddr, setTempHeating);
+            TemperatureProfileUtil.setDesiredTemp(dualDuctEquip.nodeAddr, (setTempCooling + setTempHeating) / 2);
         } else {
             setTempCooling = TemperatureProfileUtil.getDesiredTempCooling(dualDuctEquip.nodeAddr);
             setTempHeating = TemperatureProfileUtil.getDesiredTempHeating(dualDuctEquip.nodeAddr);

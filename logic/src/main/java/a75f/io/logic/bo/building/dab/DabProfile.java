@@ -178,6 +178,9 @@ public class DabProfile extends ZoneProfile
             CcuLog.d(TAG, "Schedule slot Not  exists for room:  DabEquip: " + dabEquip.getId() + "node address : " + nodeAddr);
             setTempCooling = DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
             setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+            dabEquip.getDesiredTempHeating().writePointValue(setTempHeating);
+            dabEquip.getDesiredTempCooling().writePointValue(setTempCooling);
+            dabEquip.getDesiredTemp().writePointValue((setTempCooling + setTempHeating) / 2);
         } else {
             setTempCooling = dabEquip.getDesiredTempCooling().readPriorityVal();
             setTempHeating = dabEquip.getDesiredTempHeating().readPriorityVal();

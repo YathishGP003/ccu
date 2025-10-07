@@ -102,6 +102,9 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 CcuLog.d(TAG, "Schedule slot Not  exists for room:  SmartStat: " + hpuEquip.getId() + "node address : " + node);
                 setTempCooling = DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
                 setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+                hpuDevice.setDesiredTempCooling(setTempCooling);
+                hpuDevice.setDesiredTempHeating(setTempHeating);
+                hpuDevice.setDesiredTemp((setTempCooling+setTempHeating)/2);
             } else {
                 setTempCooling = hpuDevice.getDesiredTempCooling();
                 setTempHeating = hpuDevice.getDesiredTempHeating();

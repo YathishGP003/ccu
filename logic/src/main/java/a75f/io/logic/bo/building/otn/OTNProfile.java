@@ -58,6 +58,9 @@ public class OTNProfile extends ZoneProfile {
             CcuLog.d(TAG, "Schedule slot Not  exists for room:  OtnEquip: " + otnEquip.getId() + "node address : " + mNodeAddr);
             setTempCooling = DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
             setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+            otnEquip.getDesiredTempCooling().writePointValue(setTempCooling);
+            otnEquip.getDesiredTempHeating().writePointValue(setTempHeating);
+            otnEquip.getDesiredTemp().writePointValue((setTempCooling + setTempHeating) / 2);
         } else {
             setTempCooling = otnEquip.getDesiredTempCooling().readPriorityVal();
             setTempHeating = otnEquip.getDesiredTempHeating().readPriorityVal();

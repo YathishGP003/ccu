@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.statprofiles.util
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.equips.HyperStatSplitEquip
@@ -12,6 +13,7 @@ import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.util.CCUUtils
+import a75f.io.logic.ccu.restore.CCU
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -109,13 +111,74 @@ fun getAirEnthalpy(temp: Double, humidity: Double): Double {
 }
 
 fun fetchUserIntents(equip: DomainEquip): UserIntents {
+    var haystack = CCUHsApi.getInstance()
+    var coolingDesiredTemp = 0.0
+    var heatingDesiredTemp = 0.0
+    var desiredTemp: Double
+
+    val isScheduleSlotsAvailable = haystack.isScheduleSlotExitsForRoom(equip.equipRef)
+    if (isScheduleSlotsAvailable) {
+        val unoccupiedSetback = haystack.getUnoccupiedSetback(equip.equipRef)
+        coolingDesiredTemp = CCUUtils.DEFAULT_COOLING_DESIRED.toDouble() + unoccupiedSetback
+        heatingDesiredTemp = CCUUtils.DEFAULT_HEATING_DESIRED.toDouble() - unoccupiedSetback
+        desiredTemp = (coolingDesiredTemp + heatingDesiredTemp) / 2.0
+        CcuLog.d(
+            L.TAG_CCU_HSSPLIT_CPUECON,
+            "Schedule Slots found for ${equip.equipRef}, using schedule setpoints with setback $unoccupiedSetback"
+        )
+        when (equip) {
+            is HyperStatEquip -> {
+                equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
+                equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
+                equip.desiredTemp.writePointValue(desiredTemp)
+            }
+
+            is HyperStatSplitEquip -> {
+                equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
+                equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
+                equip.desiredTemp.writePointValue(desiredTemp)
+            }
+
+            is MyStatEquip -> {
+                equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
+                equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
+                equip.desiredTemp.writePointValue(desiredTemp)
+            }
+
+            else -> {}
+        }
+        CcuLog.d(
+            L.TAG_CCU_HSSPLIT_CPUECON,
+            "No Schedule Slots found for ${equip.equipRef}, using default setpoints with setback $unoccupiedSetback"
+        )
+    } else {
+        when (equip) {
+            is HyperStatEquip -> {
+                coolingDesiredTemp = equip.desiredTempCooling.readPriorityVal()
+                heatingDesiredTemp = equip.desiredTempHeating.readPriorityVal()
+            }
+
+            is HyperStatSplitEquip -> {
+
+                coolingDesiredTemp = equip.desiredTempCooling.readPriorityVal()
+                heatingDesiredTemp = equip.desiredTempHeating.readPriorityVal()
+            }
+
+            is MyStatEquip -> {
+                coolingDesiredTemp = equip.desiredTempCooling.readPriorityVal()
+                heatingDesiredTemp = equip.desiredTempHeating.readPriorityVal()
+            }
+
+            else -> {}
+        }
+    }
 
     return when (equip) {
         is HyperStatEquip -> {
             UserIntents(
                 currentTemp = equip.currentTemp.readHisVal(),
-                coolingDesiredTemp = equip.desiredTempCooling.readPriorityVal(),
-                heatingDesiredTemp = equip.desiredTempHeating.readPriorityVal(),
+                coolingDesiredTemp = coolingDesiredTemp,
+                heatingDesiredTemp = heatingDesiredTemp,
                 targetMinHumidity = equip.targetHumidifier.readPriorityVal(),
                 targetMaxHumidity = equip.targetDehumidifier.readPriorityVal()
             )
@@ -124,8 +187,8 @@ fun fetchUserIntents(equip: DomainEquip): UserIntents {
         is HyperStatSplitEquip -> {
             UserIntents(
                 currentTemp = equip.currentTemp.readHisVal(),
-                coolingDesiredTemp = equip.desiredTempCooling.readPriorityVal(),
-                heatingDesiredTemp = equip.desiredTempHeating.readPriorityVal(),
+                coolingDesiredTemp = coolingDesiredTemp,
+                heatingDesiredTemp = heatingDesiredTemp,
                 targetMinHumidity = equip.targetHumidifier.readPriorityVal(),
                 targetMaxHumidity = equip.targetDehumidifier.readPriorityVal()
             )
@@ -134,8 +197,8 @@ fun fetchUserIntents(equip: DomainEquip): UserIntents {
         is MyStatEquip -> {
             UserIntents(
                 currentTemp = equip.currentTemp.readHisVal(),
-                coolingDesiredTemp = equip.desiredTempCooling.readPriorityVal(),
-                heatingDesiredTemp = equip.desiredTempHeating.readPriorityVal(),
+                coolingDesiredTemp = coolingDesiredTemp,
+                heatingDesiredTemp = heatingDesiredTemp,
                 targetMinHumidity = equip.targetHumidifier.readPriorityVal(),
                 targetMaxHumidity = equip.targetDehumidifier.readPriorityVal()
             )

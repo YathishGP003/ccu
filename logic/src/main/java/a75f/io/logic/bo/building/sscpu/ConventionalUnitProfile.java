@@ -110,6 +110,9 @@ public class ConventionalUnitProfile extends ZoneProfile {
                 CcuLog.d(TAG, "Schedule slot Not  exists for room:  SmartStat: " + cpuEquip.getId() + "node address : " + node);
                 setTempCooling = DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
                 setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+                cpuDevice.setDesiredTempCooling(setTempCooling);
+                cpuDevice.setDesiredTempHeating(setTempHeating);
+                cpuDevice.setDesiredTemp((setTempHeating + setTempCooling) / 2);
             } else {
                 setTempCooling = cpuDevice.getDesiredTempCooling();
                 setTempHeating = cpuDevice.getDesiredTempHeating();

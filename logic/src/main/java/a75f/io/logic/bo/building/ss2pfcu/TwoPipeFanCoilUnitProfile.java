@@ -102,6 +102,9 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                 CcuLog.d(TAG, "Schedule slot Not  exists for room:  SmartStat two pipe : " + twoPfcuEquip.getId() + "node address : " + node);
                 setTempCooling = DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
                 setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+                twoPfcuDevice.setDesiredTempCooling(setTempCooling);
+                twoPfcuDevice.setDesiredTempHeating(setTempHeating);
+                twoPfcuDevice.setDesiredTemp((setTempHeating + setTempCooling) / 2);
             } else {
                 setTempCooling = twoPfcuDevice.getDesiredTempCooling();
                 setTempHeating = twoPfcuDevice.getDesiredTempHeating();

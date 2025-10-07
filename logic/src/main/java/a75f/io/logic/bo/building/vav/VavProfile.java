@@ -256,6 +256,9 @@ public abstract class VavProfile extends ZoneProfile {
             CcuLog.d(TAG, "Schedule slot Not  exists for room:  VavEquip: " + vavEquip.getId() + "node address : "+ nodeAddr);
             setTempCooling =  DEFAULT_COOLING_DESIRED + unoccupiedSetBack;
             setTempHeating = DEFAULT_HEATING_DESIRED - unoccupiedSetBack;
+            vavEquip.getDesiredTempCooling().writePointValue(setTempCooling);
+            vavEquip.getDesiredTempHeating().writePointValue(setTempHeating);
+            vavEquip.getDesiredTemp().writePointValue((setTempCooling + setTempHeating) / 2.0);
         } else {
             setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
             setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();

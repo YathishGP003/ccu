@@ -1,6 +1,7 @@
 package a75f.io.renatus;
 
 import static a75f.io.logic.bo.building.NodeType.CONNECTNODE;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.addBacnetTags;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.generateBacnetIdForRoom;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.updateBacnetMstpLinearAndCovSubscription;
 
@@ -47,8 +48,6 @@ import org.projecthaystack.client.CallException;
 import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -443,7 +442,13 @@ public class FloorPlanFragment extends Fragment {
                             siteRoomList.add(zr.getStr("dis"));
                         }
                     }
-
+                    ArrayList<HashMap<Object, Object>> zones =
+                            CCUHsApi.getInstance().readAllEntities(Tags.ROOM);
+                    for (HashMap<Object, Object> zone : zones) {
+                        if (!siteRoomList.contains(zone.get(Tags.DIS).toString())){
+                            siteRoomList.add(zone.get(Tags.DIS).toString());
+                        }
+                    }
                 }
             } catch (CallException e) {
                 CcuLog.d(L.TAG_CCU_UI, "Failed to fetch room data " + e.getMessage());
@@ -989,7 +994,6 @@ public class FloorPlanFragment extends Fragment {
                 roomList.sort(new ZoneComparator());
                 updateRooms(roomList);
                 selectRoom(roomList.indexOf(hsZone));
-
                 hideKeyboard();
                 siteRoomList.add(addRoomEdit.getText().toString().trim());
                 BacnetUtilKt.addBacnetTags(getActivity().getApplicationContext(), hsZone.getFloorRef(), hsZone.getId());

@@ -130,7 +130,7 @@ public class UsbModbusService extends Service {
                 if (UsbSerialUtil.isModbusDevice(detachedDevice, context)) {
                     usbPortScanTimer.cancel();
                     CcuLog.d(TAG,"Modbus Serial device disconnected "+detachedDevice.toString());
-                    if (serialPortConnected) {
+                    if (serialPortConnected && serialPort != null) {
                         serialPort.close();
                         serialPort = null;
                     }

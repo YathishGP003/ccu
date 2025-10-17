@@ -507,7 +507,8 @@ fun CombinationSpinner(
     width: Int,
     isEnabled: Boolean = true,
     disabledIndices: List<Int> = emptyList(),
-    analogStartPosition: Int
+    analogStartPosition: Int,
+    myStatV1device: Boolean = false
 ) {
     val selectedItem = remember { mutableStateOf(default) }
     val expanded = remember { mutableStateOf(false) }
@@ -616,8 +617,7 @@ fun CombinationSpinner(
                     noOfItemsDisplayInDropDown,
                     dropDownHeight
                 )
-
-                Divider()
+                
 
                 LazyColumn(
                     state = lazyListState,
@@ -627,51 +627,53 @@ fun CombinationSpinner(
                         .simpleVerticalScrollbar(lazyListState)
                 ) {
                     itemsIndexed(filteredItems) { index, option ->
-                        if (index == 0) {
-                            // 🔹 Header for Relay
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Text(
-                                    text = "Relay",
-                                    fontSize = 20.sp,
-                                    fontFamily = ComposeUtil.myFontFamily,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.Black,
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Divider(
-                                    modifier = Modifier.weight(1f),
-                                    color = Color.LightGray,
-                                    thickness = 1.dp
-                                )
+                        if(!myStatV1device) {
+                            if (index == 0) {
+                                // 🔹 Header for Relay
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(
+                                        text = "Relay",
+                                        fontSize = 20.sp,
+                                        fontFamily = ComposeUtil.myFontFamily,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Black,
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Divider(
+                                        modifier = Modifier.weight(1f),
+                                        color = Color.LightGray,
+                                        thickness = 1.dp
+                                    )
+                                }
                             }
-                        }
-                        if (index == analogStartPosition) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Text(
-                                    text = "Analog Out",
-                                    fontSize = 20.sp,
-                                    fontFamily = ComposeUtil.myFontFamily,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.Black
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Divider(
-                                    modifier = Modifier.weight(1f),
-                                    color = Color.LightGray,
-                                    thickness = 1.dp
-                                )
+                            if (index == analogStartPosition) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(
+                                        text = "Analog Out",
+                                        fontSize = 20.sp,
+                                        fontFamily = ComposeUtil.myFontFamily,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Black
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Divider(
+                                        modifier = Modifier.weight(1f),
+                                        color = Color.LightGray,
+                                        thickness = 1.dp
+                                    )
+                                }
                             }
                         }
 

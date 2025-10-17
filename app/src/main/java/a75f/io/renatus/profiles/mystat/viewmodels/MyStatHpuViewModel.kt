@@ -30,10 +30,7 @@ import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewStateUtil
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
-import a75f.io.logic.util.modifyConditioningMode
-import a75f.io.logic.util.modifyFanMode
 import a75f.io.renatus.R
-import a75f.io.renatus.composables.RelayConfiguration
 import a75f.io.renatus.util.showErrorDialog
 import android.app.Application
 import android.content.Context
@@ -41,12 +38,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Html
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.projecthaystack.io.HaystackToken.eq
 
 /**
  * Created by Manjunath K on 15-01-2025.
@@ -77,11 +74,12 @@ class MyStatHpuViewModel(application: Application) : MyStatViewModel(application
                 model = equipModel
             ).getDefaultConfiguration()
         }
-
+        updateDeviceType(equipRef.toString())
         viewState.value = MyStatViewStateUtil.hpuConfigToState(
             profileConfiguration as MyStatHpuConfiguration,
             MyStatHpuViewState()
         )
+        getAnalogOutDefaultValueForMyStatV1(profileConfiguration)
     }
     override fun getAnalogStatIndex() = MyStatHpuRelayMapping.values().size
 
@@ -138,7 +136,7 @@ class MyStatHpuViewModel(application: Application) : MyStatViewModel(application
         val equipBuilder = ProfileEquipBuilder(hayStack)
         val equipId: String
         if (profileConfiguration.isDefault) {
-            equipId = addEquipment(profileConfiguration as MyStatHpuConfiguration, equipModel, deviceModel)
+           equipId = addEquipment(profileConfiguration as MyStatHpuConfiguration, equipModel, deviceModel)
             myStatProfile = MyStatHpuProfile()
             (myStatProfile as MyStatHpuProfile).addEquip(equipId)
             L.ccu().zoneProfiles.add(myStatProfile)
@@ -147,6 +145,7 @@ class MyStatHpuViewModel(application: Application) : MyStatViewModel(application
             updateFanMode(
                 false, equip, getMyStatHpuFanLevel(profileConfiguration as MyStatHpuConfiguration)
             )
+            updateDeviceVersionTypePointVal(equipId)
             CcuLog.i(Domain.LOG_TAG, "MyStatHpu profile added")
         } else {
             equipId = equipBuilder.updateEquipAndPoints(

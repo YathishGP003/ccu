@@ -15,6 +15,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -335,6 +336,12 @@ public class CCUUiUtil {
                 .edit()
                 .putString("app_restart_cause", cause).commit();
         CcuLog.i("USER_TEST", "App restart cause updated to: " + cause);
+    }
+
+    public static void updateBackgroundWaterMaker(View view){
+        if(view!=null && !BuildConfig.BUILD_TYPE.equals("carrier_prod")){
+            view.setBackgroundResource(R.drawable.bg_logoscreen);
+        }
     }
 
 }

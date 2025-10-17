@@ -24,6 +24,8 @@ class MyStatProfileSelectionFragment : BaseDialogFragment() {
         get() = requireArguments().getString(FragmentCommonBundleArgs.ARG_NAME)!!
     private val mFloorName: String
         get() = requireArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
+    private val deviceVersion : String
+        get() = requireArguments().getString(FragmentCommonBundleArgs.DEVICE_VERSION)!!
 
     companion object {
 
@@ -31,12 +33,13 @@ class MyStatProfileSelectionFragment : BaseDialogFragment() {
 
         @JvmStatic
         fun newInstance(
-            meshAddress: Short, roomName: String, floorName: String
+            meshAddress: Short, roomName: String, floorName: String , deviceVersion: String
         ): MyStatProfileSelectionFragment {
             val args = Bundle()
             args.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, meshAddress)
             args.putString(FragmentCommonBundleArgs.ARG_NAME, roomName)
             args.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName)
+            args.putString(FragmentCommonBundleArgs.DEVICE_VERSION,deviceVersion)
 
             val fragment = MyStatProfileSelectionFragment()
             fragment.arguments = args
@@ -74,8 +77,7 @@ class MyStatProfileSelectionFragment : BaseDialogFragment() {
     private fun showFragment(profileType: ProfileType) {
         showDialogFragment(
             FragmentBLEInstructionScreen.getInstance(
-                mNodeAddress, mRoomName, mFloorName, profileType, NodeType.MYSTAT
-            ), FragmentBLEInstructionScreen.ID
+                mNodeAddress, mRoomName, mFloorName, profileType, NodeType.MYSTAT,deviceVersion), FragmentBLEInstructionScreen.ID
         )
     }
 

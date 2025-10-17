@@ -13,7 +13,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
 
-import a75f.io.device.serial.SmartNodeSettings2_t;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
@@ -24,17 +23,17 @@ import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe2UVFragment;
 import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe4UVFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2Pipe2Fragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatCpuFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatHpuFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatPipe2Fragment;
-import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
-import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.oao.OAOProfileFragment;
+import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
-import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
-import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
+import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
@@ -47,6 +46,7 @@ public class AlternatePairingFragment extends BaseDialogFragment {
     private static Short mPairingAddress;
     private static String mRoomName;
     private static String mFloorName;
+    private static String deviceVersion;
     private final ProfileType mProfileType;
     @BindView(R.id.imageGoback)
     ImageView imageGoback;
@@ -68,6 +68,16 @@ public class AlternatePairingFragment extends BaseDialogFragment {
         mRoomName = roomName;
         mFloorName = floorName;
         mProfileType = profileType;
+    }
+
+    public AlternatePairingFragment(NodeType nodeType, Short pairingAddress, String roomName,
+                                    String floorName, ProfileType profileType,String deviceVersionType) {
+        mNodeType = nodeType;
+        mPairingAddress = pairingAddress;
+        mRoomName = roomName;
+        mFloorName = floorName;
+        mProfileType = profileType;
+        deviceVersion = deviceVersionType;
     }
 
     @SuppressLint("StaticFieldLeak") @Override
@@ -300,15 +310,15 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                 break;
             case MYSTAT_CPU:
                 showDialogFragment(MyStatCpuFragment.Companion.newInstance(mPairingAddress, mRoomName,
-                        mFloorName, mNodeType, mProfileType) , BypassConfigFragment.Companion.getID());
+                        mFloorName, mNodeType, mProfileType,deviceVersion) , MyStatCpuFragment.Companion.getID());
                 break;
             case MYSTAT_PIPE2:
                 showDialogFragment(MyStatPipe2Fragment.Companion.newInstance(mPairingAddress, mRoomName,
-                        mFloorName, mNodeType, mProfileType) , BypassConfigFragment.Companion.getID());
+                        mFloorName, mNodeType, mProfileType,deviceVersion) , MyStatPipe2Fragment.Companion.getID());
                 break;
             case MYSTAT_HPU:
                 showDialogFragment(MyStatHpuFragment.Companion.newInstance(mPairingAddress, mRoomName,
-                        mFloorName, mNodeType, mProfileType) , BypassConfigFragment.Companion.getID());
+                        mFloorName, mNodeType, mProfileType,deviceVersion) , MyStatHpuFragment.Companion.getID());
                 break;
             case CONNECTNODE:
                 showDialogFragment(ConnectNodeFragment.Companion.newInstance(mPairingAddress, mRoomName,
@@ -320,7 +330,7 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                 break;
             case HYPERSTATSPLIT_2PIPE_UV:
                 showDialogFragment(Pipe2UVFragment.Companion.newInstance(mPairingAddress,mRoomName,mFloorName,
-                        mNodeType,ProfileType.HYPERSTATSPLIT_2PIPE_UV), Pipe4UVFragment.Companion.getID());
+                        mNodeType,ProfileType.HYPERSTATSPLIT_2PIPE_UV), Pipe2UVFragment.Companion.getID());
                 break;
         }
     }

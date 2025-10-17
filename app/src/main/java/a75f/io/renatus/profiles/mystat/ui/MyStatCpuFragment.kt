@@ -64,7 +64,8 @@ class MyStatCpuFragment : MyStatFragment() {
             roomName: String,
             floorName: String,
             nodeType: NodeType,
-            profileType: ProfileType
+            profileType: ProfileType,
+            deviceVersion : String
         ): MyStatCpuFragment {
             val fragment = MyStatCpuFragment()
             val bundle = Bundle()
@@ -73,6 +74,7 @@ class MyStatCpuFragment : MyStatFragment() {
             bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName)
             bundle.putInt(FragmentCommonBundleArgs.PROFILE_TYPE, profileType.ordinal)
             bundle.putInt(FragmentCommonBundleArgs.NODE_TYPE, nodeType.ordinal)
+            bundle.putString(FragmentCommonBundleArgs.DEVICE_VERSION, deviceVersion)
             fragment.arguments = bundle
             return fragment
         }

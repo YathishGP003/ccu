@@ -2,6 +2,7 @@ package a75f.io.renatus.BLE;
 
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_NAME;
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.DEVICE_VERSION;
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.FLOOR_NAME;
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.NODE_TYPE;
 
@@ -67,6 +68,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
     String              mFloorName;
     Short               mPairingAddress;
     ProfileType         mProfileType;
+    String             deviceVersion;
     LeDeviceListAdapter mLeDeviceListAdapter;
     BluetoothAdapter    mBluetoothAdapter;
     private boolean isBluetoothListenerRegistered = false;
@@ -179,6 +181,22 @@ public class FragmentDeviceScan extends BaseDialogFragment
         return fds;
     }
 
+    public static FragmentDeviceScan getInstance(short pairingAddress, String name,
+                                                 String floorName, NodeType nodeType,
+                                                 ProfileType profileType,String deviceVersion)
+    {
+        FragmentDeviceScan fds = new FragmentDeviceScan();
+        Bundle args = new Bundle();
+        args.putShort(ARG_PAIRING_ADDR, pairingAddress);
+        args.putString(ARG_NAME, name);
+        args.putString(FLOOR_NAME, floorName);
+        args.putString(PROFILE_TYPE, profileType.name());
+        args.putString(NODE_TYPE, nodeType.toString());
+        args.putString(DEVICE_VERSION, deviceVersion);
+        fds.setArguments(args);
+        return fds;
+    }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -207,6 +225,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
         mFloorName = getArguments().getString(FLOOR_NAME);
         mProfileType = ProfileType.valueOf(getArguments().getString(PROFILE_TYPE));
         mNodeType = NodeType.valueOf(getArguments().getString(NODE_TYPE));
+        deviceVersion = getArguments().getString(DEVICE_VERSION);
         View retVal = inflater.inflate(R.layout.fragment_device_scan, container, false);
         ButterKnife.bind(this, retVal);
         setTitle(getString(R.string.scan_dialog_title));
@@ -281,8 +300,15 @@ public class FragmentDeviceScan extends BaseDialogFragment
         });
     }
     View.OnClickListener connectManuallyListener = view -> {
-        AlternatePairingFragment alternatePairingFragment = new AlternatePairingFragment(
-                mNodeType, mPairingAddress, mName, mFloorName, mProfileType);
+        AlternatePairingFragment alternatePairingFragment;
+        if(mNodeType.equals(NodeType.MYSTAT)) {
+            alternatePairingFragment = new AlternatePairingFragment(
+                    mNodeType, mPairingAddress, mName, mFloorName, mProfileType, deviceVersion);
+        }
+        else {
+            alternatePairingFragment = new AlternatePairingFragment(
+                    mNodeType, mPairingAddress, mName, mFloorName, mProfileType);
+        }
         showDialogFragment(alternatePairingFragment, AlternatePairingFragment.ID);
     };
 
@@ -327,8 +353,15 @@ public class FragmentDeviceScan extends BaseDialogFragment
 
     private void finish(BluetoothDevice device)
     {
-        DialogFragment newFragment = FragmentBLEDevicePin
-                                             .getInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType, device);
+        DialogFragment newFragment ;
+        if(mNodeType.equals(NodeType.MYSTAT)){
+             newFragment = FragmentBLEDevicePin
+                    .getInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType, device,deviceVersion);
+        }
+        else {
+             newFragment = FragmentBLEDevicePin
+                    .getInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType, device);
+        }
         showDialogFragment(newFragment, FragmentBLEDevicePin.ID);
     }
     

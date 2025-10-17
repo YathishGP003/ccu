@@ -26,8 +26,7 @@ import a75f.io.renatus.compose.StyledTextView
 import a75f.io.renatus.compose.SubTitle
 import a75f.io.renatus.compose.ToggleButton
 import a75f.io.renatus.compose.ToggleButtonStateful
-import a75f.io.renatus.modbus.util.SAVE
-import a75f.io.renatus.modbus.util.showToast
+import a75f.io.renatus.modbus.util.MYSTAT_V1_DEVICE
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hss.HyperStatSplitFragment.Companion.CONDITIONING_ACCESS
 import a75f.io.renatus.profiles.hss.HyperStatSplitFragment.Companion.INSTALLER_ACCESS
@@ -40,12 +39,8 @@ import a75f.io.renatus.profiles.mystat.viewmodels.MyStatHpuViewModel
 import a75f.io.renatus.profiles.mystat.viewmodels.MyStatPipe2ViewModel
 import a75f.io.renatus.profiles.mystat.viewmodels.MyStatViewModel
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment.Companion.DividerRow
-import a75f.io.renatus.profiles.system.ENABLE
-import a75f.io.renatus.profiles.system.MAPPING
-import a75f.io.renatus.profiles.system.SUPPLY_WATER_TEMPERATURE
-import a75f.io.renatus.profiles.system.TEST_SIGNAL
-import a75f.io.renatus.profiles.system.UNIVERSAL_IN
 import android.annotation.SuppressLint
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -61,6 +56,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
@@ -76,15 +72,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.fragment.app.viewModels
 import org.projecthaystack.util.Base64
+import androidx.core.net.toUri
 
 /**
  * Created by Manjunath K on 15-01-2025.
@@ -100,6 +100,8 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
             Globals.getInstance().isTestMode = false
         }
     }
+
+    private fun isMyStatV1DeviceType(): Boolean = viewModel.devicesVersion.equals(MYSTAT_V1_DEVICE, ignoreCase = true)
 
     private fun getHpuDisabledIndices(config: ConfigState): List<Int> {
         return if (viewModel.viewState.value.isAnyRelayMapped(
@@ -129,7 +131,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                     .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                SaveTextView(SAVE) {
+                SaveTextView(getString(R.string.save)) {
                     CcuLog.i(L.TAG_CCU_SYSTEM, viewModel.viewState.toString())
                     viewModel.saveConfiguration()
                 }
@@ -175,7 +177,9 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
             Row(modifier = Modifier.padding(20.dp)) {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.padding(top = 10.dp).weight(1.7f)
+                    modifier = Modifier
+                        .padding(top = 10.dp)
+                        .weight(1.7f)
                 ) {
                     StyledTextView(
                         text = stringResource(R.string.auto_force_occupy), fontSize = 20, textAlignment = TextAlign.Start
@@ -185,14 +189,18 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                     onEnabled = { viewModel.viewState.value.isEnableAutoForceOccupied = it })
 
                 Box(
-                    modifier = Modifier.padding(
-                        start = 50.dp, top = 20.dp, bottom = 20.dp
-                    ).weight(2f)
+                    modifier = Modifier
+                        .padding(
+                            start = 50.dp, top = 20.dp, bottom = 20.dp
+                        )
+                        .weight(2f)
                 )
 
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.padding(top = 10.dp).weight(1.8f)
+                    modifier = Modifier
+                        .padding(top = 10.dp)
+                        .weight(1.8f)
                 ) {
                     StyledTextView(
                         text = stringResource(R.string.auto_away),
@@ -222,13 +230,13 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                     .padding(start = 10.dp),
                 contentAlignment = Alignment.Center
             ) {
-                SubTitle(ENABLE)
+                SubTitle(getString(R.string.enable))
             }
             Box(modifier = Modifier.weight(3.0f), contentAlignment = Alignment.Center) {
-                SubTitle(MAPPING)
+                SubTitle(getString(R.string.enable))
             }
-            Box(modifier = Modifier.weight(1.0f), contentAlignment = Alignment.Center) {
-                SubTitle(TEST_SIGNAL)
+            Box(modifier = Modifier.weight(1.4f), contentAlignment = Alignment.Center) {
+                SubTitle(getString(R.string.test_signal))
             }
         }
     }
@@ -236,16 +244,32 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
     @Composable
     open fun MyStatConfiguration() {
         Row {
-            Image(
-                painter = painterResource(id = R.drawable.ms),
-                contentDescription = "Relays",
-                modifier = Modifier
-                    .width(300.dp)
-                    .height(350.dp)
-                    .padding(start = 10.dp, top = 10.dp, bottom = 10.dp)
-            )
+            if(!isMyStatV1DeviceType()) {
+
+                Image(
+                    painter = painterResource(id = R.drawable.ms),
+                    contentDescription = "Relays",
+                    modifier = Modifier
+                        .width(300.dp)
+                        .height(350.dp)
+                        .padding(start = 10.dp, top = 10.dp, bottom = 10.dp)
+                )
+
+            }
+            else
+            {
+                Image(
+                    painter = painterResource(id = R.drawable.ms_v1),
+                    contentDescription = "Relays",
+                    modifier = Modifier
+                        .width(300.dp)
+                        .height(350.dp)
+                        .padding(start = 10.dp, top = 10.dp, bottom = 10.dp)
+                )
+            }
+
             Column {
-                val relayEnums = getAllowedValues(DomainName.relay1OutputAssociation, viewModel.equipModel)
+                val originalRelayEnums = getAllowedValues(DomainName.relay1OutputAssociation, viewModel.equipModel)
                 viewModel.viewState.value.apply {
                     repeat(3) { index ->
                         val relayConfig = when (index) {
@@ -255,12 +279,12 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                             else -> throw IllegalArgumentException("Invalid relay index: $index")
                         }
                         RelayConfiguration(
-                            relayName = "Relay ${index + 1}",
+                            relayName = "${getString(R.string.relay)} ${index + 1}",
                             enabled = relayConfig.enabled,
                             onEnabledChanged = { relayConfig.enabled = it },
-                            association = relayEnums[relayConfig.association],
+                            association = originalRelayEnums[relayConfig.association],
                             unit = "",
-                            relayEnums = relayEnums,
+                            relayEnums = originalRelayEnums,
                             onAssociationChanged = { associationIndex ->
                                 relayConfig.association = associationIndex.index
                             },
@@ -278,68 +302,124 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                         DomainName.universal1OutputAssociation,
                         viewModel.equipModel
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    UniversalOutConfiguration(
-                        portName = "Universal-Out 1",
-                        enabled = universalOut1.enabled,
-                        onEnabledChanged = {
-                            universalOut1.enabled = it
-                        },
-                        association = universalEnums[universalOut1.association],
-                        enumOptions = universalEnums,
-                        unit = "",
-                        isEnabled = universalOut1.enabled,
-                        onAssociationChanged = { associationIndex ->
-                            universalOut1.association = associationIndex.index
-                        },
-                        testState = viewModel.getRelayStatus(4),
-                        onTestActivated = {
-                            viewModel.sendTestSignal(4, if (it) 1.0 else 0.0)
-                        },
-                        testSingles = testVoltage,
-                        testVal = viewModel.getAnalogValue(4),
-                        padding = 6,
-                        analogStartPosition = viewModel.getAnalogStatIndex(),
-                        onTestSignalSelected = { viewModel.sendTestSignal(universalOut1 =  it) },
-                        disabledIndices = if (viewModel is MyStatHpuViewModel) getHpuDisabledIndices(universalOut1) else emptyList()
-                    )
-                    UniversalOutConfiguration(
-                        portName = "Universal-Out 2",
-                        enabled = universalOut2.enabled,
-                        onEnabledChanged = {
-                            universalOut2.enabled = it
-                        },
-                        association = universalEnums[universalOut2.association],
-                        enumOptions = universalEnums,
-                        unit = "",
-                        isEnabled = universalOut2.enabled,
-                        onAssociationChanged = { associationIndex ->
-                            universalOut2.association = associationIndex.index
-                        },
-                        testState = viewModel.getRelayStatus(5),
-                        onTestActivated = {
-                            viewModel.sendTestSignal(5, if (it) 1.0 else 0.0)
-                        },
-                        testSingles = testVoltage,
-                        testVal = viewModel.getAnalogValue(5),
-                        padding = 6,
-                        onTestSignalSelected = { viewModel.sendTestSignal(universalOut2 =  it) },
-                        analogStartPosition = viewModel.getAnalogStatIndex(),
-                        disabledIndices = if (viewModel is MyStatHpuViewModel) getHpuDisabledIndices(universalOut2) else emptyList()
-                    )
+                   val relayEnums = universalEnums.filter { it.index < viewModel.getAnalogStatIndex() }
+                    if (isMyStatV1DeviceType()) {
+                        UniversalOutConfiguration(
+                            portName = getString(R.string.relay4),
+                            enabled = universalOut2.enabled,
+                            onEnabledChanged = {
+                                universalOut2.enabled = it
+                            },
+                            association = universalEnums[universalOut2.association],
+                            enumOptions = relayEnums,
+                            unit = "",
+                            isEnabled = universalOut2.enabled,
+                            onAssociationChanged = { associationIndex ->
+                                universalOut2.association = associationIndex.index
+                            },
+                            testState = viewModel.getRelayStatus(4),
+                            onTestActivated = {
+                                viewModel.sendTestSignal(4, if (it) 1.0 else 0.0)
+                            },
+                            testSingles = testVoltage,
+                            testVal = viewModel.getAnalogValue(4),
+                            padding = 6,
+                            onTestSignalSelected = { viewModel.sendTestSignal(universalOut2 =  it) },
+                            analogStartPosition = viewModel.getAnalogStatIndex(),
+                            disabledIndices = if (viewModel is MyStatHpuViewModel) getHpuDisabledIndices(universalOut2) else emptyList(),
+                            myStatV1Device = isMyStatV1DeviceType()
+                        )
+                        val analogEnums = universalEnums.filter { it.index >= viewModel.getAnalogStatIndex() }
+                        UniversalOutConfiguration(
+                            portName = getString(R.string.vav_label_analog_out_1),
+                            enabled = universalOut1.enabled,
+                            onEnabledChanged = {
+                                universalOut1.enabled = it
+                            },
+                            association = analogEnums[(universalOut1.association - viewModel.getAnalogStatIndex())],
+                            enumOptions = analogEnums,
+                            unit = "",
+                            isEnabled = universalOut1.enabled,
+                            onAssociationChanged = { associationIndex ->
+                                universalOut1.association = associationIndex.index
+                            },
+                            testState = viewModel.getRelayStatus(5),
+                            onTestActivated = {
+                                viewModel.sendTestSignal(5, if (it) 1.0 else 0.0)
+                            },
+                            testSingles = testVoltage,
+                            testVal = viewModel.getAnalogValue(5),
+                            padding = 6,
+                            analogStartPosition = viewModel.getAnalogStatIndex(),
+                            onTestSignalSelected = { viewModel.sendTestSignal(universalOut1 =  it) },
+                            disabledIndices = if (viewModel is MyStatHpuViewModel) getHpuDisabledIndices(universalOut1) else emptyList(),
+                            isAnalogType = true,
+                            myStatV1Device = isMyStatV1DeviceType(),
+                        )
 
+                    } else {
+                        UniversalOutConfiguration(
+                            portName = getString(R.string.universal_Out1),
+                            enabled = universalOut1.enabled,
+                            onEnabledChanged = {
+                                universalOut1.enabled = it
+                            },
+                            association = universalEnums[universalOut1.association],
+                            enumOptions = universalEnums,
+                            unit = "",
+                            isEnabled = universalOut1.enabled,
+                            onAssociationChanged = { associationIndex ->
+                                universalOut1.association = associationIndex.index
+                            },
+                            testState = viewModel.getRelayStatus(5),
+                            onTestActivated = {
+                                viewModel.sendTestSignal(5, if (it) 1.0 else 0.0)
+                            },
+                            testSingles = testVoltage,
+                            testVal = viewModel.getAnalogValue(4),
+                            padding = 6,
+                            analogStartPosition = viewModel.getAnalogStatIndex(),
+                            onTestSignalSelected = { viewModel.sendTestSignal(universalOut1 =  it) },
+                            disabledIndices = if (viewModel is MyStatHpuViewModel) getHpuDisabledIndices(universalOut1) else emptyList()
+                        )
+                        UniversalOutConfiguration(
+                            portName = getString(R.string.universal_Out2),
+                            enabled = universalOut2.enabled,
+                            onEnabledChanged = {
+                                universalOut2.enabled = it
+                            },
+                            association = universalEnums[universalOut2.association],
+                            enumOptions = universalEnums,
+                            unit = "",
+                            isEnabled = universalOut2.enabled,
+                            onAssociationChanged = { associationIndex ->
+                                universalOut2.association = associationIndex.index
+                            },
+                            testState = viewModel.getRelayStatus(4),
+                            onTestActivated = {
+                                viewModel.sendTestSignal(4, if (it) 1.0 else 0.0)
+                            },
+                            testSingles = testVoltage,
+                            testVal = viewModel.getAnalogValue(5),
+                            padding = 6,
+                            onTestSignalSelected = { viewModel.sendTestSignal(universalOut2 = it) },
+                            analogStartPosition = viewModel.getAnalogStatIndex(),
+                            disabledIndices = if (viewModel is MyStatHpuViewModel) getHpuDisabledIndices(universalOut2) else emptyList()
+                        )
+
+                    }
                 }
                 if (viewModel is MyStatPipe2ViewModel) {
                     Row(modifier = Modifier.wrapContentWidth()) {
                         Box(modifier = Modifier
                             .weight(4f)
-                            .padding(end = 5.dp, top = 10.dp)) {
+                            .padding(end = 5.dp)) {
                             DependentPointMappingView(
-                                toggleName = UNIVERSAL_IN,
+                                toggleName = getString(R.string.universal_in),
                                 toggleState = true,
                                 toggleEnabled = {  },
-                                mappingText = SUPPLY_WATER_TEMPERATURE,
-                                false
+                                mappingText = getString(R.string.supply_water_temperature),
+                                false,
                             )
                         }
                     }
@@ -356,8 +436,8 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
 
                         Box(modifier = Modifier
                             .weight(1.2f)
-                            .padding(start = 10.dp, top = 20.dp)) {
-                            StyledTextView("Universal-In", fontSize = 20)
+                            .padding(start = 12.dp, top = 20.dp)) {
+                            StyledTextView(getString(R.string.universal_in), fontSize = 20)
                         }
                         Box(modifier = Modifier
                             .weight(4f)
@@ -377,20 +457,53 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
 
             }
         }
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(start = 30.dp, top = 30.dp, end = 20.dp)
-        ) {
-            Box(
-                modifier = Modifier.background(
-                    primaryColor.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
-                    .padding(all = 10.dp)
+        if(!isMyStatV1DeviceType()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 30.dp, top = 30.dp, end = 20.dp)
             ) {
-                StyledTextView(
-                    text = "Please check Universal-Out 1, Universal-Out 2 and CO2 is supported/configured correctly via jumpers on the MyStat device.",
-                    fontSize = 24,
-                    textAlignment = TextAlign.Left
+                Box(
+                    modifier = Modifier
+                        .background(
+                            primaryColor.copy(alpha = 0.1f), RoundedCornerShape(8.dp)
+                        )
+                        .padding(all = 10.dp)
+                ) {
+                    val universalErrorString = buildAnnotatedString {
+                        append(stringResource(R.string.universal_out_error_msg))
+                        pushStringAnnotation(tag = "jumper_action", annotation = "jumper_action")
+                        pushStyle(
+                            SpanStyle(
+                                textDecoration = TextDecoration.Underline,
+                                color = Color.Blue
+                            )
+                        )
+                        append(stringResource(R.string.learn_more))
 
-                )
+                    }
+                    ClickableText(
+                        text = universalErrorString,
+                        style = TextStyle(
+                            fontSize = 24.sp,
+                            color = Color.Black,
+                            fontFamily = myFontFamily,
+                            fontWeight = FontWeight.Normal,
+                        ),
+                        modifier = Modifier.padding(10.dp),
+                        onClick = { offset ->
+                            universalErrorString.getStringAnnotations(
+                                tag = "jumper_action",
+                                start = offset,
+                                end = offset
+                            ).firstOrNull()?.let {
+                                val url = "https://support.75f.io/hc/en-us/articles/45629558568339-Mystat-Jumper-Settings"
+                                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                                context?.startActivity(intent)
+                            }
+
+                        })
+                }
             }
         }
     }
@@ -425,7 +538,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
             val co2Unit = viewModel.getUnit(DomainName.co2Threshold, viewModel.equipModel)
             Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {
                 MinMaxConfiguration(
-                    "CO2 Threshold", "CO2 Target",
+                    getString(R.string.cO2_Threshold), getString(R.string.cO2_Target),
                     itemList = co2ThresholdOptions, co2Unit, minDefault = viewModel.viewState.value.co2Threshold.toInt().toString(),
                     maxDefault = viewModel.viewState.value.co2Target.toInt().toString(),
                     onMinSelected = { viewModel.viewState.value.co2Threshold = it.value.toDouble() },
@@ -457,8 +570,8 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
     fun ConfigMinMax(association: Int, minMax: MinMaxConfig, displayName: String, mapping: Int, index: Int) {
         if (association == mapping) {
             MinMaxConfiguration(
-                minLabel = "${getString(R.string.universal_Out)} $index at  ${getString(R.string.min)} \n${displayName}",
-                maxLabel = "${getString(R.string.universal_Out)} $index at ${getString(R.string.max)} \n${displayName}",
+                minLabel = "${getString(R.string.universal_Out)} $index ${getString(R.string.at)}  ${getString(R.string.min)} \n${displayName}",
+                maxLabel = "${getString(R.string.universal_Out)} $index ${getString(R.string.at)} ${getString(R.string.max)} \n${displayName}",
                 itemList = minMaxVoltage,
                 unit = "V",
                 minDefault = minMax.min.toString(),
@@ -486,9 +599,8 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
     @Composable
     fun DisplayInDeviceConfig(viewModel: MyStatViewModel, modifier: Modifier = Modifier) {
         Column(modifier = modifier.padding(start = 25.dp, top = 25.dp)) {
-            BoldStyledTextView("Display in Device Home Screen (Select only 1)", fontSize = 20)
+            BoldStyledTextView(getString(R.string.display_home_screen), fontSize = 20)
             Spacer(modifier = Modifier.height(10.dp))
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -613,7 +725,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                     viewModel.viewState.value.conditioningModePinEnable = isEnabled
                     if (!isEnabled) resetConditioningPin()
                 }
-                else -> CcuLog.i("USER_TEST", "No valid PIN selected")
+                else -> CcuLog.i(L.TAG_CCU_DOMAIN, "No valid PIN selected")
             }
         }
 
@@ -636,7 +748,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                     }
                 }
 
-                else -> CcuLog.i("USER_TEST", "No valid PIN selected")
+                else -> CcuLog.i(L.TAG_CCU_DOMAIN, "No valid PIN selected")
             }
         }
 
@@ -645,7 +757,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
             modifier = Modifier
                 .padding(start = 25.dp, top = 25.dp, bottom = 25.dp)
         ) {
-            BoldStyledTextView("PIN Lock", fontSize = 20)
+            BoldStyledTextView(getString(R.string.pin_lock), fontSize = 20)
             Spacer(modifier = Modifier.height(10.dp))
 
             Row(
@@ -715,7 +827,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                                 Base64.STANDARD.encode(conditioningPin.joinToString(separator = "") { it.toString() })
                         }
 
-                        else -> CcuLog.i("USER_TEST", "No valid PIN selected")
+                        else -> CcuLog.i(L.TAG_CCU_DOMAIN, "No valid PIN selected")
                     }
                     isDialogVisible = false
                 }
@@ -731,7 +843,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
         onSave: () -> Unit
     ) {
         var saveState by remember { mutableStateOf(false) }
-        CcuLog.i("USER_TEST", "ShowPinDialog called with title: $selectedPinTitle and pinDigits: ${pinDigits.toList()}")
+        CcuLog.i(L.TAG_CCU_DOMAIN, "ShowPinDialog called with title: $selectedPinTitle and pinDigits: ${pinDigits.toList()}")
 
 
         Dialog(
@@ -746,7 +858,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                     .padding(20.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text("PIN Lock: $selectedPinTitle", fontSize = 23.sp, color = Color.Black, fontWeight = FontWeight.Bold,fontFamily = myFontFamily , modifier = Modifier.padding(start = 10.dp) )
+                Text("${getString(R.string.pin_lock)} $selectedPinTitle", fontSize = 23.sp, color = Color.Black, fontWeight = FontWeight.Bold,fontFamily = myFontFamily , modifier = Modifier.padding(start = 10.dp) )
                 Box(modifier = Modifier.padding(start = 20.dp)) {
                     PinSection(
                         onSaveState = { saveState = it },
@@ -762,7 +874,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                 ) {
 
                     TextButton(onClick = onDismiss,modifier = Modifier.align(alignment = Alignment.CenterVertically)) {
-                        Text("CANCEL", color = primaryColor, fontSize = 22.sp, fontFamily = myFontFamily)
+                        Text(getString(R.string.button_cancel), color = primaryColor, fontSize = 22.sp, fontFamily = myFontFamily)
                     }
 
                     Divider(
@@ -776,7 +888,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                     TextButton(onClick = { onSave() }, enabled = saveState, modifier = Modifier.align(alignment = Alignment.CenterVertically))
                     {
                         Text(
-                            "SAVE",
+                            getString(R.string.button_save),
                             color = if (saveState) primaryColor else Color.Gray,
                             fontSize = 22.sp, fontFamily = myFontFamily
                         )

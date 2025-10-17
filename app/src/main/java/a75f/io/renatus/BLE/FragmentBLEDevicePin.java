@@ -96,6 +96,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
     String mName;
     String mFloorName;
     short  mPairingAddress;
+    String deviceVersion;
     boolean mPinEntered = false;
     ProfileType mProfileType;
     BluetoothDevice     mDevice;
@@ -154,6 +155,23 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
         bleProvisionDialogFragment.setArguments(b);
         return bleProvisionDialogFragment;
     }
+
+    public static FragmentBLEDevicePin getInstance(short pairingAddress, String name,
+                                                   String mFloorName, NodeType nodeType, ProfileType profileType,
+                                                   BluetoothDevice device , String deviceVersion)
+    {
+        FragmentBLEDevicePin bleProvisionDialogFragment = new FragmentBLEDevicePin();
+        Bundle b = new Bundle();
+        b.putParcelable(BUNDLE_KEY_BLUETOOTH_DEVICE, device);
+        b.putShort(ARG_PAIRING_ADDR, pairingAddress);
+        b.putString(ARG_NAME, name);
+        b.putString(FragmentCommonBundleArgs.FLOOR_NAME, mFloorName);
+        b.putString(FragmentCommonBundleArgs.NODE_TYPE, nodeType.toString());
+        b.putString(FragmentCommonBundleArgs.PROFILE_TYPE, profileType.toString());
+        b.putString(FragmentCommonBundleArgs.DEVICE_VERSION, deviceVersion);
+        bleProvisionDialogFragment.setArguments(b);
+        return bleProvisionDialogFragment;
+    }
     
     
     @Override
@@ -168,6 +186,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
             mFloorName = getArguments().getString(FLOOR_NAME);
             mNodeType = NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
             mProfileType = ProfileType.valueOf(getArguments().getString(FragmentCommonBundleArgs.PROFILE_TYPE));
+            deviceVersion = getArguments().getString(FragmentCommonBundleArgs.DEVICE_VERSION);
             
         }
         Intent gattServiceIntent = new Intent(getActivity(), BLEProvisionService.class);
@@ -499,13 +518,13 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                                 Pipe2UVFragment.Companion.getID());
                         break;
                     case MYSTAT_CPU:
-                        showDialogFragment(MyStatCpuFragment.Companion.newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType), MyStatCpuFragment.Companion.getID());
+                        showDialogFragment(MyStatCpuFragment.Companion.newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType , deviceVersion), MyStatCpuFragment.Companion.getID());
                         break;
                     case MYSTAT_PIPE2:
-                        showDialogFragment(MyStatPipe2Fragment.Companion.newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType), MyStatPipe2Fragment.Companion.getID());
+                        showDialogFragment(MyStatPipe2Fragment.Companion.newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType ,deviceVersion), MyStatPipe2Fragment.Companion.getID());
                         break;
                     case MYSTAT_HPU:
-                        showDialogFragment(MyStatHpuFragment.Companion.newInstance(mPairingAddress, mName, mFloorName, mNodeType, ProfileType.MYSTAT_HPU), MyStatHpuFragment.Companion.getID());
+                        showDialogFragment(MyStatHpuFragment.Companion.newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType,deviceVersion), MyStatHpuFragment.Companion.getID());
                         break;
                     case CONNECTNODE:
                         showDialogFragment(ConnectNodeFragment.Companion.newInstance(mPairingAddress, mName,

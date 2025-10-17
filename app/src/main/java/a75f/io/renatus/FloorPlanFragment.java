@@ -1246,17 +1246,17 @@ public class FloorPlanFragment extends Fragment {
                     break;
                 case MYSTAT_PIPE2:
                     showDialogFragment(MyStatPipe2Fragment.Companion.newInstance(Short.parseShort(nodeAddress)
-                                    , zone.getId(), floor.getId(),NodeType.MYSTAT, profile.getProfileType()),
+                                    , zone.getId(), floor.getId(),NodeType.MYSTAT, profile.getProfileType(),""),
                             MyStatPipe2Fragment.Companion.getID());
                     break;
                 case MYSTAT_CPU:
                     showDialogFragment(MyStatCpuFragment.Companion.newInstance(Short.parseShort(nodeAddress)
-                                    , zone.getId(), floor.getId(),NodeType.MYSTAT, profile.getProfileType()),
+                                    , zone.getId(), floor.getId(),NodeType.MYSTAT, profile.getProfileType(),""),
                             MyStatCpuFragment.Companion.getID());
                     break;
                 case MYSTAT_HPU:
                     showDialogFragment(MyStatHpuFragment.Companion.newInstance(Short.parseShort(nodeAddress)
-                                    , zone.getId(), floor.getId(),NodeType.MYSTAT, profile.getProfileType()),
+                                    , zone.getId(), floor.getId(),NodeType.MYSTAT, profile.getProfileType(),""),
                             MyStatHpuFragment.Companion.getID());
                     break;
                 case HYPERSTATSPLIT_4PIPE_UV:

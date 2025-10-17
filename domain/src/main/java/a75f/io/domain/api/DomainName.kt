@@ -1525,6 +1525,7 @@ object DomainName {
     const val universal1OutputEnable = "universal1OutputEnable"
     const val universal2OutputEnable = "universal2OutputEnable"
     const val saTemperingLoopOutput = "saTemperingLoopOutput"
+    const val mystatDeviceVersion = "mystatDeviceVersion"
 
 
 }

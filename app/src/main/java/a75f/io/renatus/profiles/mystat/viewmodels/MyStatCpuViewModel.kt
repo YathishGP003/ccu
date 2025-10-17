@@ -31,16 +31,12 @@ import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewStateUtil
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
-import a75f.io.logic.util.modifyConditioningMode
-import a75f.io.logic.util.modifyFanMode
 import a75f.io.renatus.R
 import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlinx.coroutines.Dispatchers
@@ -75,11 +71,12 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
                 model = equipModel
             ).getDefaultConfiguration()
         }
-
+        updateDeviceType(equipRef.toString())
         viewState.value = MyStatViewStateUtil.cpuConfigToState(
             profileConfiguration as MyStatCpuConfiguration,
             MyStatCpuViewState()
         )
+        getAnalogOutDefaultValueForMyStatV1(profileConfiguration)
     }
     override fun getAnalogStatIndex() = MyStatCpuRelayMapping.values().size
     override fun saveConfiguration() {
@@ -128,6 +125,7 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
             updateFanMode(
                 false, equip, getMyStatCpuFanLevel(profileConfiguration as MyStatCpuConfiguration)
             )
+            updateDeviceVersionTypePointVal(equipId)
             CcuLog.i(Domain.LOG_TAG, "MyStatCpu profile added")
         } else {
             equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, getEquipDis(), true)

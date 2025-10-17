@@ -202,7 +202,7 @@ fun getMyStatSetting3Message(equipRef: String): MyStat.MyStatSettingsMessage3_t 
     val equip = Domain.getDomainEquip(equipRef) as MyStatEquip
     val settings3 = MyStat.MyStatSettingsMessage3_t.newBuilder()
     settings3.apply {
-        mystatRelay5Config = getRelayConfig(equip.universalOut2Enable, equip.universalOut2Association, equip)
+        mystatRelay5Config = getRelayConfig(equip.universalOut1Enable, equip.universalOut1Association, equip)
         myStatAnalogOut2Config = getAnalogOutConfigs(equip, equip.universalOut2Enable, equip.universalOut2Association)
         stageUpTimer = equip.mystatStageUpTimerCounter.readPriorityVal().toInt()
         stageDownTimer = equip.mystatStageDownTimerCounter.readPriorityVal().toInt()
@@ -379,7 +379,7 @@ private fun getRelayConfigs(
     settings2.addMystatRelayConfig(getRelayConfig(equip.relay1OutputEnable, equip.relay1OutputAssociation, equip))
     settings2.addMystatRelayConfig(getRelayConfig(equip.relay2OutputEnable, equip.relay2OutputAssociation, equip))
     settings2.addMystatRelayConfig(getRelayConfig(equip.relay3OutputEnable, equip.relay3OutputAssociation, equip))
-    settings2.addMystatRelayConfig(getRelayConfig(equip.universalOut1Enable, equip.universalOut1Association, equip))
+    settings2.addMystatRelayConfig(getRelayConfig(equip.universalOut2Enable, equip.universalOut2Association, equip))
 
 }
 private fun getAnalogOutConfigs(equip: MyStatEquip, enable: Point, association: Point): MyStat.MyStatAnalogOut_t  {

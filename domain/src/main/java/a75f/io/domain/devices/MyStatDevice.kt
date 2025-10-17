@@ -27,6 +27,7 @@ class MyStatDevice(deviceRef : String) : DomainDevice (deviceRef)  {
     val humiditySensor = PhysicalPoint(DomainName.humiditySensor ,deviceRef)
     val co2Sensor = PhysicalPoint(DomainName.co2Sensor ,deviceRef)
     val pressureSensor = PhysicalPoint(DomainName.pressureSensor ,deviceRef)
+    val mystatDeviceVersion = PhysicalPoint(DomainName.mystatDeviceVersion ,deviceRef)
 
     fun getAllPorts() : List<PhysicalPoint> = listOf(relay1, relay2, relay3, universalOut2, universalOut1)
 

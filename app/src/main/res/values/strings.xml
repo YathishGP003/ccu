@@ -833,7 +833,7 @@
     <string name="max_1_temp">Max of 1 temperature can be displayed at once</string>
     <string name="min_1_temp">Min of 1 temperature should be displayed</string>
     <string name="enable_backlight">Enable backlight</string>
-    <string name="pin_lock">PIN Lock</string>
+    <string name="pin_lock">PIN Lock:</string>
     <!---DCWB Profile-->
     <string name="label_dcwb_enable">DCWB Enable</string>
     <string name="label_dcwb_enabled">DCWB Enabled</string>
@@ -938,9 +938,6 @@
     <string name="analog_out_fan_recirculate">Analog-out at\nFan Recirculate</string>
     <string name="analog_out_fan_low">Analog-out at\nFan Low</string>
     <string name="analog_out_fan_high">Analog-out at\nFan High</string>
-    <string name="heat_pump_unit_caps">Heat Pump Unit</string>
-    <string name="two_pipe_fcu_caps">2 Pipe FCU</string>
-    <string name="four_pipe_fcu_caps">4 Pipe FCU</string>
     <string name="hpu_message"><![CDATA[
         <br>HPU Profile can only have either \'O-Energize in Cooling\' or \'B-Energize in Heating\' relays configured.
         ]]></string>
@@ -2091,6 +2088,14 @@
     <string name="txt_global">Global</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="myStat_device_tittle">Pick MyStat Versions</string>
+    <string name="myStat_device_text">Please tap to select a version based on your use case</string>
+    <string name="myStat_device_v1">MyStat v1</string>
+    <string name="myStat_device_v2">MyStat v2</string>
+    <string name="myStat_device_v1_ports">4 relays, 1 analog out, 1 universal input</string>
+    <string name="myStat_device_v2_ports">3 relays, 2 universal out, 1 universal input</string>
+    <string name="MyStat_device_error_msg">please select any one version to pair the MyStat module </string>
+
     <string name="txt_mstp_device_id">Device Id</string>
     <string name="txt_mstp_device_id_hint">In between 1 to 4194303</string>
     <string name="txt_mstp_port_address">PortAddress</string>
@@ -2102,6 +2107,7 @@
     <string name="equip_schedule_status">Equip Schedule Status: </string>
     <string name="universal_Out1">Universal-Out 1</string>
     <string name="universal_Out2">Universal-Out 2</string>
+    <string name="analog_Out"> Analog-Out</string>
     <string name="universal_Out">Universal-Out</string>
     <string name="min">Min</string>
     <string name="max">Max</string>
@@ -2111,4 +2117,19 @@
     <string name="enable">ENABLE</string>
     <string name="mapping">MAPPING</string>
     <string name="test_signal">TEST SIGNAL</string>
+    <string name="documentation_link">"Documentation Link :</string>
+    <string name="jumper_setting">MyStat Jumper Settings</string>
+    <string name="heat_pump_unit_caps">Heat Pump Unit</string>
+    <string name="two_pipe_fcu_caps">2 Pipe FCU</string>
+    <string name="four_pipe_fcu_caps">4 Pipe FCU</string>
+    <string name="cO2_Threshold">CO2 Threshold</string>
+    <string name="cO2_Target">CO2 Target</string>
+    <string name="at">at</string>
+    <string name="error_msg_device">"Please select a device type"</string>
+    <string name="universal_out1_Fan_Low">Universal-Out 1 \n at Fan Low</string>
+    <string name="universal_out2_Fan_Low">Universal-Out 2 \n at Fan Low</string>
+    <string name="universal_out1_Fan_high">Universal-Out 1 \n at Fan High</string>
+    <string name="universal_out2_Fan_high">Universal-Out 1 \n at Fan High</string>
+    <string name="learn_more">\u00A0Learn\u00A0More</string>
+    <string name="universal_out_error_msg">Please check Universal-Out 1, Universal-Out 2 and CO2 is supported/configured correctly via jumpers on the MyStat device.</string>
 </resources>

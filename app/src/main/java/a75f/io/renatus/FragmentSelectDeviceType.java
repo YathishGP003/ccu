@@ -26,17 +26,14 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.domain.util.ModelLoader;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
-import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.hyperstat.HyperStatProfileSelectionFragment;
 import a75f.io.renatus.hyperstatsplit.HyperStatSplitProfileSelectionFragment;
-import a75f.io.renatus.profiles.mystat.ui.MyStatProfileSelectionFragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatDeviceSelectionFragment;
 import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -161,8 +158,8 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         if (isModbusPaired()) {
             return;
         }
-        MyStatProfileSelectionFragment mystatProfile = MyStatProfileSelectionFragment.newInstance(mNodeAddress, mRoomName, mFloorName);
-        showDialogFragment(mystatProfile, MyStatProfileSelectionFragment.MYSTAT_SELECTION_ID);
+        MyStatDeviceSelectionFragment myStatDeviceVersion = MyStatDeviceSelectionFragment.newInstance(mNodeAddress, mRoomName, mFloorName);
+        showDialogFragment(myStatDeviceVersion, MyStatDeviceSelectionFragment.Companion.getMYSTAT_DEVICES_SELCETION() );
     }
 
     @OnClick(R.id.rl_hyperstatsplit) void onHyperStatSplitClick() {

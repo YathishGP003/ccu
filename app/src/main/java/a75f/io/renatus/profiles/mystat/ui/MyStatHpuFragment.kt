@@ -58,7 +58,8 @@ class MyStatHpuFragment : MyStatFragment() {
             roomName: String,
             floorName: String,
             nodeType: NodeType,
-            profileType: ProfileType
+            profileType: ProfileType,
+            deviceVersion: String
         ): MyStatHpuFragment {
             val fragment = MyStatHpuFragment()
             val bundle = Bundle()
@@ -67,6 +68,7 @@ class MyStatHpuFragment : MyStatFragment() {
             bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName)
             bundle.putInt(FragmentCommonBundleArgs.PROFILE_TYPE, profileType.ordinal)
             bundle.putInt(FragmentCommonBundleArgs.NODE_TYPE, nodeType.ordinal)
+            bundle.putString(FragmentCommonBundleArgs.DEVICE_VERSION, deviceVersion)
             fragment.arguments = bundle
             return fragment
         }

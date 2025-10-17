@@ -11,6 +11,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
+import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.R
 import a75f.io.renatus.bacnet.models.BacnetPointState
 import a75f.io.renatus.modbus.models.EquipModel
@@ -271,6 +272,10 @@ const val DEVICE_VALUE_CAPITALIZED = "Device Value"
 
 const val MAC_ADDRESS = "Mac Address"
 
+//MyStat device type
+const val MYSTAT_V2_DEVICE = "MyStatV2"
+const val MYSTAT_V1_DEVICE = "MyStatV1"
+
 
 fun getSlaveIds(isParent: Boolean): List<String> {
     val slaveAddress: ArrayList<String> = ArrayList()
@@ -336,5 +341,10 @@ fun getNodeType(device: HashMap<Any, Any>): NodeType? {
 
 fun getAppResourceString(resId: Int): String {
     return Globals.getInstance().applicationContext.getString(resId)
+}
+fun isMyStatEquip(equip:HashMap<Any,Any>):Boolean{
+    return equip["profile"].toString().equals(ProfileType.MYSTAT_PIPE2.name,true)||
+            equip["profile"].toString().equals(ProfileType.MYSTAT_HPU.name,true)||
+            equip["profile"].toString().equals(ProfileType.MYSTAT_CPU.name,true)
 }
 

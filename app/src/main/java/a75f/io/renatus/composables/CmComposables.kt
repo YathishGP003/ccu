@@ -306,7 +306,10 @@ fun UniversalOutConfiguration(
     onTestSignalSelected: (Double) -> Unit = {},
     padding: Int = 10,
     disabledIndices: List<Int> = emptyList(),
-    analogStartPosition: Int
+    analogStartPosition: Int,
+    myStatV1Device : Boolean = false,
+    isAnalogType:Boolean = false
+
 ) {
     val selectedItem = remember { mutableStateOf(association) }
 
@@ -320,7 +323,7 @@ fun UniversalOutConfiguration(
         }
         Box(modifier = Modifier
             .weight(1.7f)
-            .padding(start = 10.dp, top = 10.dp)) {
+            .padding(start = 12.dp, top = 10.dp)) {
             StyledTextView(portName, fontSize = 20)
         }
         Box(modifier = Modifier
@@ -337,10 +340,11 @@ fun UniversalOutConfiguration(
                 width = 400,
                 isEnabled = isEnabled,
                 disabledIndices = disabledIndices,
-                analogStartPosition = analogStartPosition
+                analogStartPosition = analogStartPosition,
+                myStatV1Device
             )
         }
-        if(selectedItem.value.index < analogStartPosition) {
+        if (selectedItem.value.index < analogStartPosition || (myStatV1Device && !isAnalogType)) {
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -564,12 +568,12 @@ fun DependentPointMappingView(toggleName : String, toggleState :Boolean = false,
                               toggleEnabled: (Boolean) -> Unit, mappingText : String, isEnabled: Boolean) {
     Row (modifier = Modifier
         .fillMaxWidth()
-        .padding(start = 8.dp, top = 10.dp), horizontalArrangement = Arrangement.Start){
+        .padding(start = 6.dp, top = 10.dp), horizontalArrangement = Arrangement.Start){
         Row {
             ToggleButtonStateful(defaultSelection = toggleState, onEnabled = toggleEnabled, isDisabled = isEnabled)
             Spacer(modifier = Modifier.width(10.dp))
-            Column {
-                Spacer(modifier = Modifier.height(4.dp))
+            Column (modifier = Modifier.padding(top = 3.dp, start = 2.dp)){
+                Spacer(modifier = Modifier.height(5.dp))
                 Text(text = toggleName, fontSize = 20.sp)
             }
         }

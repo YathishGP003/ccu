@@ -37,7 +37,6 @@ import a75f.io.renatus.profiles.connectnode.ConnectNodeFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe2UVFragment;
-import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe4UVFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
@@ -70,6 +69,8 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
     ProfileType mProfileType;
     short       mNodeAddress;
 
+    String deviceVersion;
+
     String mRoomName;
     String mFloorName;
 
@@ -91,6 +92,23 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         args.putString(FLOOR_NAME, floorName);
         args.putString(PROFILE_TYPE, profileType.name());
         args.putString(FragmentCommonBundleArgs.NODE_TYPE, nodeType.name());
+        fds.setArguments(args);
+        return fds;
+    }
+
+    public static FragmentBLEInstructionScreen getInstance(short nodeAddress, String roomName,
+                                                           String floorName,
+                                                           ProfileType profileType,
+                                                           NodeType nodeType ,String deviceVersion)
+    {
+        FragmentBLEInstructionScreen fds = new FragmentBLEInstructionScreen();
+        Bundle args = new Bundle();
+        args.putShort(ARG_PAIRING_ADDR, nodeAddress);
+        args.putString(ARG_NAME, roomName);
+        args.putString(FLOOR_NAME, floorName);
+        args.putString(PROFILE_TYPE, profileType.name());
+        args.putString(FragmentCommonBundleArgs.NODE_TYPE, nodeType.name());
+        args.putString(FragmentCommonBundleArgs.DEVICE_VERSION, deviceVersion);
         fds.setArguments(args);
         return fds;
     }
@@ -425,26 +443,26 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         else if (mProfileType == ProfileType.MYSTAT_PIPE2) {
             if (L.isSimulation()) {
                 showDialogFragment(
-                        MyStatPipe2Fragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType),MyStatPipe2Fragment.Companion.getID());
+                        MyStatPipe2Fragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType,deviceVersion),MyStatPipe2Fragment.Companion.getID());
             } else {
-                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType,deviceVersion);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         } else if (mProfileType == ProfileType.MYSTAT_CPU) {
             if (L.isSimulation()) {
                 showDialogFragment(
-                        MyStatCpuFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType),MyStatCpuFragment.Companion.getID());
+                        MyStatCpuFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType,deviceVersion),MyStatCpuFragment.Companion.getID());
             } else {
-                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType,deviceVersion);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
 
         } else if (mProfileType == ProfileType.MYSTAT_HPU) {
             if (L.isSimulation()) {
                 showDialogFragment(
-                        MyStatHpuFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType),MyStatHpuFragment.Companion.getID());
+                        MyStatHpuFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType,deviceVersion),MyStatHpuFragment.Companion.getID());
             } else {
-                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType,deviceVersion);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
 
@@ -515,6 +533,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         mZone = L.findZoneByName(mFloorName, mRoomName);
         mProfileType = ProfileType.valueOf(getArguments().getString(PROFILE_TYPE));
         mNodeType = NodeType.valueOf(getArguments().getString(NODE_TYPE));
+        deviceVersion = getArguments().getString(FragmentCommonBundleArgs.DEVICE_VERSION);
         return view;
     }
 

@@ -5,6 +5,8 @@ import a75f.io.device.mesh.mystat.MyStatMsgSender
 import a75f.io.device.mesh.mystat.getMyStatControlMessage
 import a75f.io.device.mesh.mystat.getMyStatDomainDevice
 import a75f.io.device.serial.MessageType
+import a75f.io.domain.api.Domain
+import a75f.io.domain.devices.MyStatDevice
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
@@ -17,8 +19,11 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuAnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2AnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2RelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatProfile
@@ -28,6 +33,8 @@ import a75f.io.logic.bo.building.statprofiles.util.MyStatPossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
+import a75f.io.renatus.modbus.util.MYSTAT_V1_DEVICE
+import a75f.io.renatus.modbus.util.MYSTAT_V2_DEVICE
 import a75f.io.renatus.modbus.util.formattedToastMessage
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.CopyConfiguration
@@ -77,6 +84,7 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
     lateinit var deviceModel: SeventyFiveFDeviceDirective
     lateinit var temperatureOffsetsList: List<String>
     lateinit var pairingCompleteListener: OnPairingCompleteListener
+    lateinit var devicesVersion: String
 
     var damperOpeningRate = (10..100 step 10).toList().map { Option(it, it.toString()) }
     private val _isDisabled = MutableLiveData(false)
@@ -96,8 +104,8 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         floorRef = bundle.getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
         profileType = ProfileType.values()[bundle.getInt(FragmentCommonBundleArgs.PROFILE_TYPE)]
         nodeType = NodeType.values()[bundle.getInt(FragmentCommonBundleArgs.NODE_TYPE)]
+        devicesVersion = bundle.getString(FragmentCommonBundleArgs.DEVICE_VERSION) ?: "MyStatV1"
         deviceModel = ModelLoader.getMyStatDeviceModel() as SeventyFiveFDeviceDirective
-        isCopiedConfigurationAvailable()
     }
 
     open fun saveConfiguration() {}
@@ -109,31 +117,50 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    fun updateDeviceType(equipRef: String) {
+        if (equipRef.equals("null", true).not()) {
+            val myStatDevice = Domain.getEquipDevices()[equipRef] as MyStatDevice?
+            if (myStatDevice != null) {
+                devicesVersion = if (myStatDevice.mystatDeviceVersion.readPointValue()
+                        .toInt() == 2
+                ) MYSTAT_V2_DEVICE else MYSTAT_V1_DEVICE
+            }
+        }
+        isCopiedConfigurationAvailable()
+
+    }
+
     fun isCopiedConfigurationAvailable() {
         val selectedProfileType = CopyConfiguration.getSelectedProfileType()
-        if (selectedProfileType != null && selectedProfileType == profileType) {
+        if (selectedProfileType != null && selectedProfileType == profileType && CopyConfiguration.getMyStatDeviceType()
+                .equals(devicesVersion, true)
+        ) {
             disablePasteConfiguration()
         }
     }
 
 
     fun applyCopiedConfiguration(updatedViewState: MyStatViewState) {
+
+        val config = CopyConfiguration.getCopiedConfiguration()
         if (CopyConfiguration.getSelectedProfileType() == ProfileType.MYSTAT_CPU) {
             viewState.value = MyStatViewStateUtil.cpuConfigToState(
-                CopyConfiguration.getCopiedConfiguration() as MyStatCpuConfiguration,
+                config as MyStatCpuConfiguration,
                 updatedViewState as MyStatCpuViewState
             )
         } else if (CopyConfiguration.getSelectedProfileType() == ProfileType.MYSTAT_HPU) {
             viewState.value = MyStatViewStateUtil.hpuConfigToState(
-                CopyConfiguration.getCopiedConfiguration() as MyStatHpuConfiguration,
+                config as MyStatHpuConfiguration,
                 updatedViewState as MyStatHpuViewState
             )
         } else if (CopyConfiguration.getSelectedProfileType() == ProfileType.MYSTAT_PIPE2) {
             viewState.value = MyStatViewStateUtil.pipe2ConfigToState(
-                CopyConfiguration.getCopiedConfiguration() as MyStatPipe2Configuration,
+                config as MyStatPipe2Configuration,
                 updatedViewState as MyStatPipe2ViewState
             )
         }
+
+        getAnalogOutDefaultValueForMyStatV1(config as MyStatConfiguration)
         reloadUiRequired()
         disablePasteConfiguration()
         formattedToastMessage(
@@ -142,7 +169,7 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         )
     }
 
-    private  fun reloadUiRequired(){
+    private fun reloadUiRequired() {
         _isReloadRequired.value = !_isReloadRequired.value!!
     }
 
@@ -153,7 +180,7 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
     fun getEquipDis() = "${hayStack.siteName}-${equipModel.name}-${profileConfiguration.nodeAddress}"
     fun getDeviceDis() = "${hayStack.siteName}-${deviceModel.name}-${profileConfiguration.nodeAddress}"
 
-    fun addEquipment(config: MyStatConfiguration, equipModel: SeventyFiveFProfileDirective, deviceModel: SeventyFiveFDeviceDirective): String {
+    fun addEquipment(config: MyStatConfiguration, equipModel: SeventyFiveFProfileDirective, deviceModel: SeventyFiveFDeviceDirective): String  {
         val equipBuilder = ProfileEquipBuilder(hayStack)
         val entityMapper = EntityMapper(equipModel)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
@@ -202,8 +229,8 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
                 1 -> device.relay1.readPointValue() > 0
                 2 -> device.relay2.readPointValue() > 0
                 3 -> device.relay3.readPointValue() > 0
-                4 -> device.universalOut1.readPointValue() > 0
-                5 -> device.universalOut2.readPointValue() > 0
+                4 -> device.universalOut2.readPointValue() > 0
+                5 -> device.universalOut1.readPointValue() > 0
                 else -> false
             }
         }
@@ -214,8 +241,8 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         if (equipRef != null) {
             // Device ref is not required here so passing empty string
             val device = getMyStatDomainDevice("", equipRef!!)
-            if (index == 4) return device.universalOut1.readPointValue()
-            if (index == 5) return device.universalOut2.readPointValue()
+            if (index == 4) return device.universalOut2.readPointValue()
+            if (index == 5) return device.universalOut1.readPointValue()
         }
         return 0.0
     }
@@ -229,8 +256,8 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
                 1 -> device.relay1.writePointValue(relayStatus)
                 2 -> device.relay2.writePointValue(relayStatus)
                 3 -> device.relay3.writePointValue(relayStatus)
-                4 -> device.universalOut1.writePointValue(relayStatus)
-                5 -> device.universalOut2.writePointValue(relayStatus)
+                4 -> device.universalOut2.writePointValue(relayStatus)
+                5 -> device.universalOut1.writePointValue(relayStatus)
             }
             if (universalOut1 != null) device.universalOut1.writePointValue(universalOut1)
             if (universalOut2 != null) device.universalOut2.writePointValue(universalOut2)
@@ -316,5 +343,36 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         return isValidConfig
     }
 
+    fun updateDeviceVersionTypePointVal(myStatEquipId: String) {
+        val device = Domain.getEquipDevices()[myStatEquipId] as MyStatDevice
+        device.mystatDeviceVersion.writePointValue(if (devicesVersion == "MyStatV2") 2.0 else 1.0)
+        CcuLog.d(
+            L.TAG_CCU_DOMAIN,
+            "Device version updated to ${device.mystatDeviceVersion.readPointValue()} for equip $myStatEquipId"
+        )
+
+    }
+
+    fun getAnalogOutDefaultValueForMyStatV1(config: MyStatConfiguration) {
+        if(devicesVersion == MYSTAT_V2_DEVICE)return
+
+        if (!config.universalOut1.enabled) {
+            viewState.value.universalOut1.association = when (config) {
+                is MyStatCpuConfiguration -> {
+                    MyStatCpuAnalogOutMapping.COOLING.ordinal
+                }
+
+                is MyStatHpuConfiguration -> {
+                    MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal
+                }
+
+                is MyStatPipe2Configuration -> {
+                    MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal
+                }
+
+                else -> 0
+            }
+        }
+    }
 }
 

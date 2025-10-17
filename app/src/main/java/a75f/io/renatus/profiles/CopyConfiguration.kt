@@ -3,7 +3,9 @@ package a75f.io.renatus.profiles
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.device.modbus.buildModbusModel
+import a75f.io.domain.api.Domain
 import a75f.io.domain.config.ProfileConfiguration
+import a75f.io.domain.devices.MyStatDevice
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
@@ -40,11 +42,14 @@ import a75f.io.logic.util.bacnet.buildBacnetModel
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.bacnet.models.BacnetModel
 import a75f.io.renatus.modbus.models.EquipModel
+import a75f.io.renatus.modbus.util.MYSTAT_V1_DEVICE
+import a75f.io.renatus.modbus.util.MYSTAT_V2_DEVICE
 import a75f.io.renatus.modbus.util.getBacnetPoints
 import a75f.io.renatus.modbus.util.getNodeType
 import a75f.io.renatus.modbus.util.getParameters
 import a75f.io.renatus.modbus.util.isAllParamsSelected
 import a75f.io.renatus.modbus.util.isAllParamsSelectedBacNet
+import a75f.io.renatus.modbus.util.isMyStatEquip
 import android.annotation.SuppressLint
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -75,6 +80,7 @@ class CopyConfiguration {
         private var selectedBacNetModel: String? = null
 
         private var equipmentDeviceList: List<EquipmentDevice>? = null
+        private lateinit var MyStatDeviceType :String
 
 
         fun getCopiedConfiguration(): ProfileConfiguration {
@@ -109,6 +115,9 @@ class CopyConfiguration {
         fun getModuleName(): String? {
             return moduleName
         }
+        fun getMyStatDeviceType(): String {
+            return MyStatDeviceType
+        }
 
 
         fun setSelectedConfiguration(
@@ -116,10 +125,17 @@ class CopyConfiguration {
             moduleType: String,
             floorPlanFragment: FloorPlanFragment
         ) {
-            val equip =
-                ccuHsApiInstance.readEntity("zone and equip and not equipRef and group == \"$address\"")
-            moduleName = moduleType
+            val equip = ccuHsApiInstance.readEntity("zone and equip and not equipRef and group == \"$address\"")
 
+            if (isMyStatEquip(equip)) {
+                val equipID = Domain.getEquipDevices()[equip["id"].toString()] as MyStatDevice
+                val devicesType = equipID.mystatDeviceVersion.readPointValue()
+                moduleName = moduleType.replace("Mystat -",if (devicesType == 2.0)  "MyStat V2 -" else "MyStat V1 -")
+                MyStatDeviceType = if (devicesType == 2.0) MYSTAT_V2_DEVICE else MYSTAT_V1_DEVICE
+            }
+            else {
+                moduleName = moduleType
+            }
             modbusModel = equip["modbus"]?.let { equip["model"].toString() }
             selectedBacNetModel = equip["bacnet"]?.let {
                 equip["modelConfig"]
@@ -163,7 +179,7 @@ class CopyConfiguration {
                     L.TAG_CCU_COPY_CONFIGURATION,
                     " Copy Configuration completed : Address $address ,  Profile Type: $profileType ,  Node Type: $nodeType , ModbusModel $modbusModel "
                 )
-                floorPlanFragment.enhancedToastMessage(moduleType)
+                floorPlanFragment.enhancedToastMessage(moduleName)
 
             } catch (e: Exception) {
                 CcuLog.e(

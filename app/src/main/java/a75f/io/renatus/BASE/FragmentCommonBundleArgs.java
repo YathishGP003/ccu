@@ -17,4 +17,5 @@ public class FragmentCommonBundleArgs
 	public static final String MODBUS_LEVEL     =  "MODBUS_LEVEL";
 	public static final String MODBUS_FILTER    =  "MODBUS_FILTER";
 	public static final String ALREADY_PAIRED   =  "ALREADY_PAIRED";
+	public static final String DEVICE_VERSION  = "DEVICE_VERSION";
 }

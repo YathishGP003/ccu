@@ -30,15 +30,12 @@ import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewStateUtil
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
-import a75f.io.logic.util.modifyConditioningMode
-import a75f.io.logic.util.modifyFanMode
 import a75f.io.renatus.R
 import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlinx.coroutines.Dispatchers
@@ -67,8 +64,9 @@ class MyStatPipe2ViewModel(application: Application) : MyStatViewModel(applicati
                 roomRef = zoneRef, floorRef = floorRef, profileType = profileType, model = equipModel
             ).getDefaultConfiguration()
         }
-
+        updateDeviceType(equipRef.toString())
         viewState.value =  MyStatViewStateUtil.pipe2ConfigToState(profileConfiguration as MyStatPipe2Configuration, MyStatPipe2ViewState())
+        getAnalogOutDefaultValueForMyStatV1(profileConfiguration)
     }
 
     override fun getAnalogStatIndex() = MyStatPipe2RelayMapping.values().size
@@ -126,6 +124,7 @@ class MyStatPipe2ViewModel(application: Application) : MyStatViewModel(applicati
                 equip,
                 getMyStatPipe2FanLevel(profileConfiguration as MyStatPipe2Configuration)
             )
+            updateDeviceVersionTypePointVal(equipId)
             CcuLog.i(Domain.LOG_TAG, "Pipe2 profile added")
         } else {
             equipId = equipBuilder.updateEquipAndPoints(

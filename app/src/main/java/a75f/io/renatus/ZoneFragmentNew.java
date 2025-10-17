@@ -4235,7 +4235,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
     public void removeCustomScheduleView() {
         getActivity().runOnUiThread(() -> {
             CcuLog.d("CCU_UI", " Hide Custom Schedule View ");
-            hideCustomScheduleView(zoneDataForUi);
+            if (zoneDataForUi != null) {
+                hideCustomScheduleView(zoneDataForUi);
+            }
         });
 
     }

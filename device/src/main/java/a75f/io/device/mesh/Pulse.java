@@ -89,9 +89,10 @@ public class Pulse
 	private static ZoneDataInterface currentTempInterface = null;
 	private static int mTimeSinceCMDead = 0;
 	private static boolean mDataReceived = false;
-	private static HashMap mDeviceLowSignalCount = new HashMap();
-	private static HashMap mDeviceLowSignalAlert = new HashMap();
+	private static final HashMap<Object, Object> mDeviceLowSignalCount = new HashMap<>();
+	private static final HashMap<Object, Object> mDeviceLowSignalAlert = new HashMap<>();
 	public static HashMap<Short, Long> mDeviceUpdate = new HashMap();
+	private static final int LEAST_RSSI_FOR_OPERATION = -80; // in dBm
 
 	public static void setCMDeadTimerIncrement(boolean isReboot){
 		if(isReboot)mTimeSinceCMDead = 0;
@@ -122,7 +123,9 @@ public class Pulse
 			Device deviceInfo = new Device.Builder().setHashMap(device).build();
 			//update last updated time
 			mDeviceUpdate.put(nodeAddr,Calendar.getInstance().getTimeInMillis());
-			if((rssi - 128) < 40) {
+			if(rssi < LEAST_RSSI_FOR_OPERATION) {
+				CcuLog.d(L.TAG_CCU_DEVICE, "RSSI for " + deviceInfo.getDisplayName() +" is : " +
+						rssi + " which is below the least operation level" + LEAST_RSSI_FOR_OPERATION);
 				if (!mDeviceLowSignalCount.containsKey(nodeAddr)) {
 					mDeviceLowSignalCount.put(nodeAddr, 1);
 				}
@@ -1172,7 +1175,9 @@ public class Pulse
 		{
 			Device deviceInfo = new Device.Builder().setHashMap(device).build();
 			mDeviceUpdate.put(nodeAddr,Calendar.getInstance().getTimeInMillis());
-			if((rssi - 128) < 40) {
+			if(rssi < LEAST_RSSI_FOR_OPERATION) {
+				CcuLog.d(L.TAG_CCU_DEVICE, "RSSI for " + deviceInfo.getDisplayName() + " is : "
+						+ rssi + " which is below the least operation level" + LEAST_RSSI_FOR_OPERATION);
 				if (!mDeviceLowSignalCount.containsKey(nodeAddr)) {
 					mDeviceLowSignalCount.put(nodeAddr, 1);
 				}

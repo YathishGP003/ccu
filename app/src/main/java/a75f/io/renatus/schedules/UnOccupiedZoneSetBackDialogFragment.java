@@ -2,6 +2,7 @@ package a75f.io.renatus.schedules;
 
 
 
+import static a75f.io.domain.util.CommonQueries.UNOCCUPIED_SET_BACK_ZONE;
 import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueCtoF;
 import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
@@ -9,9 +10,6 @@ import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.os.Bundle;
-import androidx.fragment.app.DialogFragment;
-import androidx.appcompat.app.AlertDialog;
-
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +17,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -152,7 +153,7 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
                 unoccupiedZoneVal =(int) Math.round(convertingRelativeValueFtoC(unoccupiedZoneVal));
             unOccupiedZoneSetBack.setSelection(unoccupiedZoneVal);
         } else{
-            HashMap<Object, Object> unoccupiedZoneObj = CCUHsApi.getInstance().readEntity("unoccupied and zone and setback and schedulable and roomRef == \"" + mSchedule.getRoomRef() + "\"");
+            HashMap<Object, Object> unoccupiedZoneObj = CCUHsApi.getInstance().readEntity(UNOCCUPIED_SET_BACK_ZONE +" and roomRef == \"" + mSchedule.getRoomRef() + "\"");
             int unoccupiedZoneVal = (int) (CCUHsApi.getInstance().readPointPriorityVal(unoccupiedZoneObj.get("id").toString()));
             if(isCelsiusTunerAvailableStatus())
                 unoccupiedZoneVal =(int) Math.round(convertingRelativeValueFtoC(unoccupiedZoneVal));

@@ -8,6 +8,7 @@ import a75f.io.api.haystack.Schedule
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.api.Domain
+import a75f.io.domain.util.CommonQueries.UNOCCUPIED_SET_BACK_ZONE
 import a75f.io.logger.CcuLog
 import a75f.io.logic.DefaultSchedules
 import a75f.io.logic.L
@@ -391,6 +392,19 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
             ).getScheduleGroupById(radioGroup.checkedRadioButtonId).ordinal
             validateSchedule(scheduleGroupModel.mSchedule, this, null, null)
             refreshSchedules(tempViewModels)
+            // Update the unoccupied setback value for zone schedule if it is not following building setback
+            mSchedule?.let {
+                if (it.isZoneSchedule && !it.isZoneFollowBuilding) {
+                    val unoccupiedSetBack = it.unoccupiedZoneSetback
+                    val unoccupiedPoint = hayStack.readEntity(UNOCCUPIED_SET_BACK_ZONE + " and roomRef == \"" + it.roomRef.toString() + "\"")
+                    val prevUnoccupiedSetbackValue = hayStack.readDefaultValById(unoccupiedPoint["id"].toString())
+                    if (prevUnoccupiedSetbackValue != unoccupiedSetBack) {
+                        hayStack.writeDefaultValById(unoccupiedPoint["id"].toString(), unoccupiedSetBack)
+                        CcuLog.d(L.TAG_CCU_SCHEDULER ," updated unoccupiedSetBack to $unoccupiedSetBack for room ${it.roomRef}")
+                    }
+                }
+            }
+
         }
 
         cancelZoneSchedule.setOnClickListener {

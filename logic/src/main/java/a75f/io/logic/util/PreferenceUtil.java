@@ -108,7 +108,7 @@ public class PreferenceUtil {
     private static final String REMOVE_BUILDING_AND_SYSTEM_EQUIP_POINTS = "removeBuildingAndSystemEquipPoints";
     private static final String  DUAL_DUCT_SENSOR_POINT_REMOVE = "dualDuctSensorPointRemove";
 
-    private static final String CONNECT_MODULE_OAO_POINTS = "connectModuleOaoPoints";
+    private static final String CONNECT_MODULE_OAO_POINTS = "connectModuleOaoPoint";
     private static final String EQUIP_SCHEDULESTATUS_FOR_ZONE_EXTERNAL_EQUIP = "equipScheduleStatusForZoneExternalEquip";
 
     private static final String NON_DM_POINTS_REMOVE_STATUS = "nonDmPointsRemoveStatus";

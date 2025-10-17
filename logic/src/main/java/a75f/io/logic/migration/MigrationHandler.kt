@@ -1,5 +1,6 @@
 package a75f.io.logic.migration
 
+import a75f.io.api.haystack.Alert_.equipId
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.Equip
@@ -40,11 +41,13 @@ import a75f.io.domain.cutover.VavStagedRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
 import a75f.io.domain.cutover.getDomainNameForMonitoringProfile
+import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.DabEquip
 import a75f.io.domain.equips.HyperStatSplitEquip
 import a75f.io.domain.equips.OtnEquip
 import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.TIEquip
+import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.equips.hyperstat.CpuV2Equip
 import a75f.io.domain.equips.hyperstat.HpuV2Equip
@@ -69,9 +72,11 @@ import a75f.io.domain.util.MODEL_SN_OAO
 import a75f.io.domain.util.ModelCache
 import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.ModelLoader.getCMDeviceModel
+import a75f.io.domain.util.ModelLoader.getDabAdvancedAhuCmModelV2
 import a75f.io.domain.util.ModelLoader.getDabModulatingRtuModelDef
 import a75f.io.domain.util.ModelLoader.getDabStagedVfdRtuModelDef
 import a75f.io.domain.util.ModelLoader.getModelForDomainName
+import a75f.io.domain.util.ModelLoader.getVavAdvancedAhuCmModelV2
 import a75f.io.domain.util.ModelLoader.getVavModulatingRtuModelDef
 import a75f.io.domain.util.ModelLoader.getVavStagedVfdRtuModelDef
 import a75f.io.domain.util.allStandaloneProfileConditions
@@ -121,10 +126,15 @@ import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSetti
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleFanMode
 import a75f.io.logic.bo.building.system.DefaultSystemConfig
+import a75f.io.logic.bo.building.system.dab.config.DabAdvancedHybridAhuConfig
+import a75f.io.logic.bo.building.system.util.AdvancedHybridAhuConfig
+import a75f.io.logic.bo.building.system.util.getAdvancedAhuSystemEquip
+import a75f.io.logic.bo.building.system.util.getConnectEquip
 import a75f.io.logic.bo.building.system.vav.config.DabModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
+import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
 import a75f.io.logic.bo.building.vav.AcbProfileConfiguration
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.bo.haystack.device.DeviceUtil
@@ -3626,33 +3636,97 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun deleteConnectModuleOaoPoint() {
-        val connectModuleEquip =
-            hayStack.readEntity("equip and system and (domainName==\"" + DomainName.dabAdvancedHybridAhuV2_connectModule + "\" or domainName==\"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\")")
-        val domainNames = listOf(
 
-            DomainName.returnDamperMinOpen,
-            DomainName.exhaustFanStage1Threshold,
-            DomainName.exhaustFanStage2Threshold,
-            DomainName.currentTransformerType,
-            DomainName.exhaustFanHysteresis,
-            DomainName.systemPurgeOutsideDamperMinPos,
-            DomainName.enhancedVentilationOutsideDamperMinOpen,
-            DomainName.enableOutsideAirOptimization
-        )
-        if (connectModuleEquip.isNotEmpty()) {
-            val domainQuery = domainNames.joinToString(" or ") { "domainName==\"$it\"" }
-            val oaoPoints = hayStack.readAllEntities(
-                "equipRef==\"${connectModuleEquip["id"]}\" and ($domainQuery)"
+        val systemEquip = hayStack.readEntity("equip and system and (domainName==\"" + DomainName.dabAdvancedHybridAhuV2 + "\" or domainName==\"" + DomainName.vavAdvancedHybridAhuV2 + "\")")
+
+        if (systemEquip.isEmpty()) return
+
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Processing equip: $systemEquip")
+
+        val systemDomainName = systemEquip["domainName"].toString()
+        val connectModuleEquip = hayStack.readEntity("equip and system and (domainName==\"" + DomainName.dabAdvancedHybridAhuV2_connectModule + "\" or domainName==\"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\")")
+
+       if (systemDomainName == DomainName.vavAdvancedHybridAhuV2 ) {
+           Domain.systemEquip =  VavAdvancedHybridSystemEquip(systemEquip["id"].toString(),connectModuleEquip["id"].toString())
+        } else if (systemDomainName == DomainName.dabAdvancedHybridAhuV2) {
+           Domain.systemEquip =  DabAdvancedHybridSystemEquip(systemEquip["id"].toString(),connectModuleEquip["id"].toString())
+        }
+
+         val advancedHybridSystemEquip = getAdvancedAhuSystemEquip()
+
+        // Check if co2BasedDamperControl point exists
+        val co2basedDamper = advancedHybridSystemEquip.co2DamperOpeningRate.pointExists()
+
+        val (model, profileConfig) = if (systemDomainName == DomainName.vavAdvancedHybridAhuV2) {
+            val model = getVavAdvancedAhuCmModelV2() as SeventyFiveFProfileDirective
+            val config = VavAdvancedHybridAhuConfig(
+                getVavAdvancedAhuCmModelV2() as SeventyFiveFProfileDirective,
+                model
             )
-            oaoPoints.forEach {
-                hayStack.deleteEntity(it["id"].toString())
-                CcuLog.d(
-                    TAG_CCU_MIGRATION_UTIL,
-                    "connect Module OAO Point deleted  : ${it["dis"].toString()} ,  id :  ${it["id"].toString()}"
+            model to config.getActiveConfiguration()
+        } else {
+            val model = getDabAdvancedAhuCmModelV2() as SeventyFiveFProfileDirective
+            val config = DabAdvancedHybridAhuConfig(
+                getDabAdvancedAhuCmModelV2() as SeventyFiveFProfileDirective,
+                model
+            )
+            model to config.getActiveConfiguration()
+        }
+
+        //co2damperOpeningRate point
+        if (!co2basedDamper) {
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "------- Creating co2BasedDamperControl point -------------")
+            createDomainPoint(
+                model = model,
+                profileConfiguration = profileConfig.cmConfiguration,
+                equipRef = advancedHybridSystemEquip.getId(),
+                siteRef = hayStack.site?.id ?: return,
+                tz = hayStack.site?.tz ?: return,
+                domainName = DomainName.co2DamperOpeningRate,
+                equipDis = systemEquip["dis"].toString()
+            )
+
+        }
+
+        //connectModuleEquip based code for enableOutsideAirOptimization point
+        if(connectModuleEquip.isEmpty()) return
+        val connectModuleDomainEquip = getConnectEquip()
+        val appVersion = hayStack.readDefaultStrVal("domainName==\"${DomainName.appVersion}\"")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "App version:[$appVersion]")
+
+        // For version 3.0.8, directly reset the point to 0
+        connectModuleDomainEquip?.let {
+
+            if (appVersion.equals("3.0.8", ignoreCase = true)) {
+                it.enableOutsideAirOptimization.writePointValue(0.0)
+                return
+            }
+
+            // --- Migration logic for 3.1.X and above ---
+
+            val oaoDamper = it.oaoDamper.pointExists()
+            val enableOao = it.enableOutsideAirOptimization.pointExists()
+
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "----- [oaoDamperPoint]: $oaoDamper [enableOaoPoint] : $enableOao ------");
+
+            if (!enableOao) {
+                createDomainPoint(
+                    model = model,
+                    profileConfiguration = profileConfig.connectConfiguration,
+                    equipRef = it.getId(),
+                    siteRef = hayStack.site?.id ?: return,
+                    tz = hayStack.site?.tz ?: return,
+                    domainName = DomainName.enableOutsideAirOptimization,
+                    equipDis = connectModuleEquip["dis"].toString()
                 )
+                // Set default based on damper pairing
+                val defaultVal = if (oaoDamper) 1.0 else 0.0
+                it.enableOutsideAirOptimization.writePointValue(defaultVal)
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Created enableOutsideAirOptimization point with default value: $defaultVal")
             }
         }
     }
+
 
     private fun removingDuplicateDualDuctSensorPoints() {
         val dualDuctEquip = hayStack.readAllEntities("equip and dualDuct and zone")

@@ -397,9 +397,9 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
                 if (it.isZoneSchedule && !it.isZoneFollowBuilding) {
                     val unoccupiedSetBack = it.unoccupiedZoneSetback
                     val unoccupiedPoint = hayStack.readEntity(UNOCCUPIED_SET_BACK_ZONE + " and roomRef == \"" + it.roomRef.toString() + "\"")
-                    val prevUnoccupiedSetbackValue = hayStack.readDefaultValById(unoccupiedPoint["id"].toString())
+                    val prevUnoccupiedSetbackValue = hayStack.readDefaultValByLevel(unoccupiedPoint["id"].toString(),10)
                     if (prevUnoccupiedSetbackValue != unoccupiedSetBack) {
-                        hayStack.writeDefaultValById(unoccupiedPoint["id"].toString(), unoccupiedSetBack)
+                        hayStack.writePoint(unoccupiedPoint["id"].toString(),10, hayStack.ccuUserName, unoccupiedSetBack,0)
                         CcuLog.d(L.TAG_CCU_SCHEDULER ," updated unoccupiedSetBack to $unoccupiedSetBack for room ${it.roomRef}")
                     }
                 }

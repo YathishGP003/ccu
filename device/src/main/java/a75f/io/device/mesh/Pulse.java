@@ -150,31 +150,32 @@ public class Pulse
 				updateRssiPointIfAvailable(hayStack, device.get("id").toString(), rssi, 1, nodeAddr);
 				return;
 			}
-			HashMap equipMap = hayStack.read("equip and id == " + device.get("equipRef"));
+			HashMap<Object, Object> equipMap = hayStack.readEntity("equip and id == " + device.get("equipRef"));
 			Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-			boolean isDomainEquip = equipMap.containsKey("domainName") ? !equip.getDomainName().equals(null) : false;
-			boolean isAcb = isDomainEquip ? (equip.getDomainName().equals(DomainName.smartnodeActiveChilledBeam) || equip.getDomainName().equals(DomainName.helionodeActiveChilledBeam)) : false;
+			boolean isDomainEquip = equipMap.containsKey("domainName") && equip.getDomainName() != null;
+			boolean isAcb = isDomainEquip && (equip.getDomainName().equals(DomainName.smartnodeActiveChilledBeam) || equip.getDomainName().equals(DomainName.helionodeActiveChilledBeam));
 
-			boolean isCondensateNc = false;
-			if (hayStack.readPointPriorityValByQuery("point and equipRef == \"" + device.get("equipRef") + "\" and domainName == \"" + DomainName.thermistor2Type + "\"") != null) {
-				if (hayStack.readPointPriorityValByQuery("point and equipRef == \"" + device.get("equipRef") + "\" and domainName == \"" + DomainName.thermistor2Type + "\"") > 0.0) { isCondensateNc = true; }
-			}
+			boolean isCondensateNc = hayStack.readPointPriorityValByQuery(
+                    "point and equipRef == \"" + device.get("equipRef") +
+                            "\" and domainName == \"" + DomainName.thermistor2Type + "\""
+            ) > 0.0;
+
 			boolean isBypassDamper = isDomainEquip && equip.getDomainName().equals(DomainName.smartnodeBypassDamper);
 
-			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
+			ArrayList<HashMap<Object, Object>> phyPoints = hayStack.readAllEntities("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
 			boolean isSse = false;
 			String logicalCurTempPoint = "";
 			double curTempVal = 0.0;
 			double th2TempVal = 0.0;
 			boolean isTh2Enabled = false;
             HashMap<Object, Object> phyCurTempPoint = new HashMap<>();
-			for(HashMap phyPoint : phyPoints) {
+			for(HashMap<Object, Object> phyPoint : phyPoints) {
 				CcuLog.d(L.TAG_CCU_DEVICE, "Physical point "+phyPoint);
 				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
 					CcuLog.d(L.TAG_CCU_DEVICE, "No logical point for "+phyPoint.get("dis"));
 					continue;
 				}
-				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
+				HashMap<Object, Object> logPoint = hayStack.readEntity("point and id=="+phyPoint.get("pointRef"));
 				if (logPoint.isEmpty()) {
 					CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+phyPoint.get("dis"));
 					continue;
@@ -1058,8 +1059,8 @@ public class Pulse
 		/**Physical point update */
 		cmBoardDevice.getAnalog1In().writeHisVal(msg.analogSense1.get());
 		cmBoardDevice.getAnalog2In().writeHisVal(msg.analogSense2.get());
-		cmBoardDevice.getTh1In().writeHisVal(msg.thermistor1.get());
-		cmBoardDevice.getTh2In().writeHisVal(msg.thermistor2.get());
+		cmBoardDevice.getTh1In().writeHisVal((double) msg.thermistor1.get() / 100);
+		cmBoardDevice.getTh2In().writeHisVal((double) msg.thermistor2.get() / 100);
 		cmBoardDevice.getCurrentTemp().writeHisVal(msg.roomTemperature.get());
 		cmBoardDevice.getHumiditySensor().writeHisVal(msg.humidity.get());
 		cmBoardDevice.getRssi().writeHisVal(1.0);
@@ -1087,10 +1088,24 @@ public class Pulse
 			double logicalValue;
 			switch (domainName) {
 				case DomainName.thermistorInput:
-					logicalValue = rawValue;
+					logicalValue = rawValue / 100;
 					break;
 				case DomainName.dischargeAirTemperature:
 					logicalValue = ThermistorUtil.getThermistorValueToTemp(rawValue * 10);
+					break;
+				case DomainName.fanRunSensorNC:
+					if ((rawValue * 10) >= 10000) {
+						logicalValue = 1.0;
+					} else {
+						logicalValue = 0.0;
+					}
+					break;
+				case DomainName.fanRunSensorNO:
+					if ((rawValue * 10) <= 10000) {
+						logicalValue = 1.0;
+					} else {
+						logicalValue = 0.0;
+					}
 					break;
 				default:
 					logicalValue = rawValue;
@@ -1105,44 +1120,41 @@ public class Pulse
 		if (domainName != null) {
 			double logicalValue;
 			switch (domainName) {
+				// for cooling and heating position feedback points, unit is Volt, so just divide 1000 to convert mv to v
 				case DomainName.voltageInput:
-					logicalValue = rawValue;
+				case DomainName.coolingValvePositionFeedback:
+				case DomainName.heatingValvePositionFeedback:
+					logicalValue = rawValue / 1000;
 					break;
 				case DomainName.fanRunSensor:
 					logicalValue = ((rawValue * 10) >= 10000) ? 1.0 : 0.0;
 					break;
-				case DomainName.coolingValvePositionFeedback:
-					logicalValue = getLinearValue(rawValue);
-					break;
-				case DomainName.heatingValvePositionFeedback:
-					logicalValue = getLinearValue(rawValue);
-					break;
-				case DomainName.currentTx10:
-					logicalValue = currentTxValue(rawValue, 10.0);
+                case DomainName.currentTx10:
+					logicalValue = currentTxValue(rawValue / 1000, 10.0);
 					break;
 				case DomainName.currentTx20:
-					logicalValue = currentTxValue(rawValue, 20.0);
+					logicalValue = currentTxValue(rawValue / 1000, 20.0);
 					break;
 				case DomainName.currentTx30:
-					logicalValue = currentTxValue(rawValue, 30.0);
+					logicalValue = currentTxValue(rawValue / 1000, 30.0);
 					break;
 				case DomainName.currentTx50:
-					logicalValue = currentTxValue(rawValue, 50.0);
+					logicalValue = currentTxValue(rawValue / 1000, 50.0);
 					break;
 				case DomainName.currentTx60:
-					logicalValue = currentTxValue(rawValue, 60.0);
+					logicalValue = currentTxValue(rawValue / 1000, 60.0);
 					break;
 				case DomainName.currentTx100:
-					logicalValue = currentTxValue(rawValue, 100.0);
+					logicalValue = currentTxValue(rawValue / 1000, 100.0);
 					break;
 				case DomainName.currentTx120:
-					logicalValue = currentTxValue(rawValue, 120.0);
+					logicalValue = currentTxValue(rawValue / 1000, 120.0);
 					break;
 				case DomainName.currentTx150:
-					logicalValue = currentTxValue(rawValue, 150.0);
+					logicalValue = currentTxValue(rawValue / 1000, 150.0);
 					break;
 				case DomainName.currentTx200:
-					logicalValue = currentTxValue(rawValue, 200.0);
+					logicalValue = currentTxValue(rawValue / 1000, 200.0);
 					break;
 				default:
 					logicalValue = rawValue;

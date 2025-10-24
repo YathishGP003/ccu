@@ -139,6 +139,17 @@ open class DabModulatingRtuProfileConfig(override val model: SeventyFiveFProfile
             getDefaultValConfig(DomainName.analog1ValveFullPosition, model).currentVal
         }
 
+        thermistor1InAssociation.associationVal = if (thermistor1Enabled.enabled) {
+            dabModulatingRtuSystemEquip.thermistor1InputAssociation.readDefaultVal().toInt()
+        } else {
+            getDefaultAssociationConfig(DomainName.thermistor1InputAssociation, model).associationVal
+        }
+
+        thermistor2InAssociation.associationVal = if (thermistor2Enabled.enabled) {
+            dabModulatingRtuSystemEquip.thermistor2InputAssociation.readDefaultVal().toInt()
+        } else {
+            getDefaultAssociationConfig(DomainName.thermistor2InputAssociation, model).associationVal
+        }
         updateAnalogActiveConfig(dabModulatingRtuSystemEquip)
 
         unusedPorts = getCMUnusedPorts(Domain.hayStack)

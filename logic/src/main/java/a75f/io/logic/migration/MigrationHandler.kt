@@ -3389,6 +3389,19 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
     }
 
+    fun checkBacnetIdMigrationRequired() {
+        if(!PreferenceUtil.isBacnetIdMigrationDone()) {
+            try {
+                updateBacnetProperties(CCUHsApi.getInstance())
+                PreferenceUtil.setBacnetIdMigrationDone()
+            } catch (e : Exception) {
+                //For now, we make sure it does not stop other migrations even if this fails.
+                e.printStackTrace()
+                CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Error in migrateBacnetIdForVavDevices $e")
+            }
+        }
+    }
+
     private fun remigrateCpuPoint() {
         val hayStack = CCUHsApi.getInstance()
         val nonMigratedPoints: List<java.util.HashMap<Any, Any>> =

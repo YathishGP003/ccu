@@ -183,18 +183,23 @@ open class DefaultEquipBuilder : EquipBuilder {
                     if (tag.name.lowercase() == "bacnetid") {
                         tag.defaultValue?.let {
                             if (pointConfig.configuration?.roomRef != null) {
-                                if (pointConfig.configuration.roomRef.lowercase() == "system") {
+                                CcuLog.d(Domain.LOG_TAG, "Generating BacnetId for point ${pointConfig.modelDef.domainName} with roomRef ${pointConfig.configuration.roomRef}")
+                                if (pointConfig.configuration.roomRef.lowercase() == "system" || pointConfig.configuration.roomRef.lowercase() == "@system") {
+                                  CcuLog.d(Domain.LOG_TAG," Generating BacnetId for System roomRef")
                                     val nodeAdd = pointConfig.configuration.nodeAddress
                                     val bacnetId = "$nodeAdd${tag.defaultValue.toString().toInt()}"
                                     pointBuilder.setBacnetId(abs(bacnetId.toInt()))
                                 } else {
+                                    CcuLog.d(Domain.LOG_TAG," Generating BacnetId for Non-System roomRef")
                                     val smartNodeAddressBand = getSmartNodeBand()?.toInt()
+                                    CcuLog.d(Domain.LOG_TAG, "Smart Node Address Band $smartNodeAddressBand")
                                     if (smartNodeAddressBand != null && pointConfig.configuration.nodeAddress != null) {
                                         val nodeAdd =
                                             pointConfig.configuration.nodeAddress - smartNodeAddressBand + 1000
                                         val bacnetId =
                                             "$nodeAdd${tag.defaultValue.toString().toInt()}"
                                         pointBuilder.setBacnetId(abs(bacnetId.toInt()))
+                                        CcuLog.d(Domain.LOG_TAG," Generated BacnetId $bacnetId for point ${pointConfig.modelDef.domainName} with roomRef ${pointConfig.configuration.roomRef}")
                                     }
                                 }
                             }

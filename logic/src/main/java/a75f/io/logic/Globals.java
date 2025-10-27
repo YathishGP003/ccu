@@ -330,6 +330,7 @@ public class Globals {
                 /*Below migration scripts should be handled after model migration*/
                 migrationHandler.temperatureModeMigration();
                 migrationHandler.removeRedundantDevicePoints();
+                migrationHandler.checkBacnetIdMigrationRequired();
 
                 CcuLog.i(L.TAG_CCU_INIT, "Init Watchdog");
                 Watchdog.getInstance().addMonitor(mProcessJob);

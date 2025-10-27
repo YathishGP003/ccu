@@ -443,6 +443,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         }
         existingPoint["ccuRef"]?.let { hayStackPoint.ccuRef = existingPoint["ccuRef"].toString() }
         hayStackPoint.lastModifiedBy = hayStack.getCCUUserName()
+        extractAndAppendExternalEdits(pointConfig.modelDef, hayStackPoint, existingPoint)
         hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
 
         //TODO- Not changing the value during migration as it might change user configurations

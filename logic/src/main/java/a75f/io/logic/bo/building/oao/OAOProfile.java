@@ -162,13 +162,15 @@ public class OAOProfile
         }
 
         outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100);
+
+        oaoEquip.getOutsideAirFinalLoopOutput().writePointValue(outsideAirFinalLoopOutput);
+        outsideAirFinalLoopOutput = oaoEquip.getOutsideAirFinalLoopOutput().readHisVal();
         
         returnAirFinalOutput = Math.max(returnDamperMinOpen ,(100 - outsideAirFinalLoopOutput));
     
         CcuLog.d(L.TAG_CCU_OAO," economizingLoopOutput "+economizingLoopOutput+" outsideAirCalculatedMinDamper "+outsideAirCalculatedMinDamper
                                             +" outsideAirFinalLoopOutput "+outsideAirFinalLoopOutput+","+returnAirFinalOutput);
 
-        oaoEquip.getOutsideAirFinalLoopOutput().writeHisVal(outsideAirFinalLoopOutput);
         oaoEquip.getOutsideDamperCmd().writeHisVal(outsideAirFinalLoopOutput);
         oaoEquip.getReturnDamperCmd().writeHisVal(returnAirFinalOutput);
 
@@ -502,7 +504,8 @@ public class OAOProfile
             economizingLoopOutput = 0;
         }
         oaoEquip.getEconomizingAvailable().writeHisVal(isEconomizingAvailable() ? 1 : 0);
-        oaoEquip.getEconomizingLoopOutput().writeHisVal(economizingLoopOutput);
+        oaoEquip.getEconomizingLoopOutput().writePointValue(economizingLoopOutput);
+        economizingLoopOutput = oaoEquip.getEconomizingLoopOutput().readHisVal();
     }
     
     /**

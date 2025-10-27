@@ -92,6 +92,10 @@ class BypassDamperProfile(equipRef: String, addr: Short): ZoneProfile() {
                 CcuLog.i(TAG_CCU_BYPASS, "systemFanLoop is zero, bypass damper set to minimum")
                 bypassLoop.reset()
             }
+
+            bdEquip.bypassDamperLoopOutput.writePointValue(bypassLoopOp)
+            bypassLoopOp = bdEquip.bypassDamperLoopOutput.readHisVal()
+
             bypassDamper.currentPosition = (bypassDamper.minPosition + (bypassLoopOp/100) * (bypassDamper.maxPosition - bypassDamper.minPosition)).toInt()
 
 
@@ -99,7 +103,6 @@ class BypassDamperProfile(equipRef: String, addr: Short): ZoneProfile() {
             bypassLoop.dumpWithTag("CCU_BYPASS")
         }
 
-        bdEquip.bypassDamperLoopOutput.writePointValue(bypassLoopOp)
         bdEquip.bypassDamperPos.writeHisVal(bypassDamper.currentPosition.toDouble())
 
     }

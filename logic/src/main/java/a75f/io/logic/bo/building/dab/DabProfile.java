@@ -296,8 +296,8 @@ public class DabProfile extends ZoneProfile
             }
             dabEquip.getDamper1Cmd().writeHisVal(damperPos);
             dabEquip.getDamper2Cmd().writeHisVal(damperPos);
-            dabEquip.getNormalizedDamper1Cmd().writeHisVal(damperPos);
-            dabEquip.getNormalizedDamper2Cmd().writeHisVal(damperPos);
+            dabEquip.getNormalizedDamper1Cmd().writePointValue(damperPos);
+            dabEquip.getNormalizedDamper2Cmd().writePointValue(damperPos);
             dabEquip.getReheatCmd().writeHisVal(0.0);
             dabEquip.getEquipStatus().writeHisVal(TEMPDEAD.ordinal());
         }

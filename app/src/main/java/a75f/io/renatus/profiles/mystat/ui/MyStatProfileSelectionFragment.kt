@@ -66,11 +66,13 @@ class MyStatProfileSelectionFragment : BaseDialogFragment() {
         val cpuCell = view.findViewById<View>(R.id.cpuCell)
         val hpuCell = view.findViewById<View>(R.id.hpuCell)
         val twoPipeCell = view.findViewById<View>(R.id.twoPipeCell)
+        val fourPipeCell = view.findViewById<View>(R.id.fourPipeCell)
 
         goBack.setOnClickListener { removeDialogFragment(MYSTAT_SELECTION_ID) }
         cpuCell.setOnClickListener { showFragment(ProfileType.MYSTAT_CPU) }
         hpuCell.setOnClickListener { showFragment(ProfileType.MYSTAT_HPU) }
         twoPipeCell.setOnClickListener { showFragment(ProfileType.MYSTAT_PIPE2) }
+        fourPipeCell.setOnClickListener { showFragment(ProfileType.MYSTAT_PIPE4) }
     }
 
 

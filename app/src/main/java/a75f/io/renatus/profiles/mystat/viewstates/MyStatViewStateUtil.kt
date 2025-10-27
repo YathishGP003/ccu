@@ -3,6 +3,7 @@ package a75f.io.renatus.profiles.mystat.viewstates
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4Configuration
 import a75f.io.renatus.profiles.hyperstatv2.util.ConfigState
 
 /**
@@ -331,6 +332,106 @@ class MyStatViewStateUtil {
             configuration.universalOut2recircFanConfig.currentVal = state.universalOut2recirculateFanConfig.toDouble()
         }
 
-    }
+        fun pipe4StateToConfig(state: MyStatPipe4ViewState, configuration: MyStatPipe4Configuration
+        ) {
+            stateToConfig(state, configuration)
 
+            configuration.analogOut1MinMaxConfig.apply {
+                hotWaterValve.min.currentVal = state.analogOut1MinMax.hotWaterValve.min.toDouble()
+                hotWaterValve.max.currentVal = state.analogOut1MinMax.hotWaterValve.max.toDouble()
+                chilledWaterValve.min.currentVal =
+                    state.analogOut1MinMax.chilledWaterValve.min.toDouble()
+                chilledWaterValve.max.currentVal =
+                    state.analogOut1MinMax.chilledWaterValve.max.toDouble()
+                fanSpeedConfig.min.currentVal = state.analogOut1MinMax.fanSpeedConfig.min.toDouble()
+                fanSpeedConfig.max.currentVal = state.analogOut1MinMax.fanSpeedConfig.max.toDouble()
+                dcvDamperConfig.min.currentVal =
+                    state.analogOut1MinMax.dcvDamperConfig.min.toDouble()
+                dcvDamperConfig.max.currentVal =
+                    state.analogOut1MinMax.dcvDamperConfig.max.toDouble()
+            }
+
+            configuration.analogOut2MinMaxConfig.apply {
+                hotWaterValve.min.currentVal = state.analogOut2MinMax.hotWaterValve.min.toDouble()
+                hotWaterValve.max.currentVal = state.analogOut2MinMax.hotWaterValve.max.toDouble()
+                chilledWaterValve.min.currentVal =
+                    state.analogOut2MinMax.chilledWaterValve.min.toDouble()
+                chilledWaterValve.max.currentVal =
+                    state.analogOut2MinMax.chilledWaterValve.max.toDouble()
+                fanSpeedConfig.min.currentVal = state.analogOut2MinMax.fanSpeedConfig.min.toDouble()
+                fanSpeedConfig.max.currentVal = state.analogOut2MinMax.fanSpeedConfig.max.toDouble()
+                dcvDamperConfig.min.currentVal =
+                    state.analogOut2MinMax.dcvDamperConfig.min.toDouble()
+                dcvDamperConfig.max.currentVal =
+                    state.analogOut2MinMax.dcvDamperConfig.max.toDouble()
+
+            }
+
+            configuration.analogOut1FanSpeedConfig.apply {
+                low.currentVal = state.analogOut1FanConfig.low.toDouble()
+                high.currentVal = state.analogOut1FanConfig.high.toDouble()
+            }
+            configuration.analogOut2FanSpeedConfig.apply {
+                low.currentVal = state.analogOut2FanConfig.low.toDouble()
+                high.currentVal = state.analogOut2FanConfig.high.toDouble()
+            }
+
+        }
+
+        fun pipe4ConfigToState(config: MyStatPipe4Configuration, viewState: MyStatPipe4ViewState): MyStatPipe4ViewState {
+            configToState(config, viewState) as MyStatPipe4ViewState
+
+            viewState.analogOut1MinMax.apply {
+                hotWaterValve.min =
+                    config.analogOut1MinMaxConfig.hotWaterValve.min.currentVal.toInt()
+                hotWaterValve.max =
+                    config.analogOut1MinMaxConfig.hotWaterValve.max.currentVal.toInt()
+                chilledWaterValve.min =
+                    config.analogOut1MinMaxConfig.chilledWaterValve.min.currentVal.toInt()
+                chilledWaterValve.max =
+                    config.analogOut1MinMaxConfig.chilledWaterValve.max.currentVal.toInt()
+                fanSpeedConfig.min =
+                    config.analogOut1MinMaxConfig.fanSpeedConfig.min.currentVal.toInt()
+                fanSpeedConfig.max =
+                    config.analogOut1MinMaxConfig.fanSpeedConfig.max.currentVal.toInt()
+                dcvDamperConfig.min =
+                    config.analogOut1MinMaxConfig.dcvDamperConfig.min.currentVal.toInt()
+                dcvDamperConfig.max =
+                    config.analogOut1MinMaxConfig.dcvDamperConfig.max.currentVal.toInt()
+            }
+
+            viewState.analogOut2MinMax.apply {
+                hotWaterValve.min =
+                    config.analogOut2MinMaxConfig.hotWaterValve.min.currentVal.toInt()
+                hotWaterValve.max =
+                    config.analogOut2MinMaxConfig.hotWaterValve.max.currentVal.toInt()
+                chilledWaterValve.min =
+                    config.analogOut2MinMaxConfig.chilledWaterValve.min.currentVal.toInt()
+                chilledWaterValve.max =
+                    config.analogOut2MinMaxConfig.chilledWaterValve.max.currentVal.toInt()
+                fanSpeedConfig.min =
+                    config.analogOut2MinMaxConfig.fanSpeedConfig.min.currentVal.toInt()
+                fanSpeedConfig.max =
+                    config.analogOut2MinMaxConfig.fanSpeedConfig.max.currentVal.toInt()
+                dcvDamperConfig.min =
+                    config.analogOut2MinMaxConfig.dcvDamperConfig.min.currentVal.toInt()
+                dcvDamperConfig.max =
+                    config.analogOut2MinMaxConfig.dcvDamperConfig.max.currentVal.toInt()
+            }
+
+            viewState.analogOut1FanConfig.apply {
+                low = config.analogOut1FanSpeedConfig.low.currentVal.toInt()
+                high = config.analogOut1FanSpeedConfig.high.currentVal.toInt()
+            }
+
+            viewState.analogOut2FanConfig.apply {
+                low = config.analogOut2FanSpeedConfig.low.currentVal.toInt()
+                high = config.analogOut2FanSpeedConfig.high.currentVal.toInt()
+            }
+            return viewState
+
+        }
+
+
+    }
 }

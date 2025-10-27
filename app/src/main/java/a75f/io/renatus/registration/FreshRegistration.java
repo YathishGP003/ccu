@@ -42,19 +42,15 @@ import androidx.fragment.app.FragmentTransaction;
 
 import org.projecthaystack.client.HClient;
 
+import java.util.HashMap;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Site;
-import a75f.io.api.haystack.sync.CareTakerResponse;
-
-import java.util.HashMap;
-import java.util.List;
-
 import a75f.io.api.haystack.Zone;
-
+import a75f.io.api.haystack.sync.CareTakerResponse;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.ccu.restore.RestoreCCU;

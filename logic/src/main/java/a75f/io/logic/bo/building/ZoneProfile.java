@@ -1,12 +1,8 @@
 package a75f.io.logic.bo.building;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.controlcomponents.util.ControllerNames.COOLING_STAGE_CONTROLLER;
-import static a75f.io.logic.controlcomponents.util.ControllerNames.FAN_SPEED_CONTROLLER;
-import static a75f.io.logic.controlcomponents.util.ControllerNames.HEATING_STAGE_CONTROLLER;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -14,15 +10,12 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.domain.config.ProfileConfiguration;
-import a75f.io.domain.equips.DomainEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
 import a75f.io.logic.bo.building.schedules.EquipOccupancyHandler;
 import a75f.io.logic.bo.building.schedules.EquipScheduleHandler;
-import a75f.io.logic.bo.building.statprofiles.statcontrollers.SplitControllerFactory;
-import a75f.io.logic.controlcomponents.handlers.StageControlHandler;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -38,6 +31,8 @@ public abstract class ZoneProfile
     private EquipScheduleHandler equipScheduleHandler = null;
     public String RFDead = "RF Signal Dead";
     public String ZoneTempDead = "Zone Temp Dead";
+
+    public boolean isDesiredTempUpdateDone = false;
     public ZoneProfile()
     {
     }

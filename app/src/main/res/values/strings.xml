@@ -938,6 +938,16 @@
     <string name="analog_out_fan_recirculate">Analog-out at\nFan Recirculate</string>
     <string name="analog_out_fan_low">Analog-out at\nFan Low</string>
     <string name="analog_out_fan_high">Analog-out at\nFan High</string>
+    <string name="heat_pump_unit_caps">Heat Pump Unit</string>
+    <string name="two_pipe_fcu_caps">2 Pipe FCU</string>
+    <string name="four_pipe_fcu_caps">4 Pipe FCU</string>
+    <string name="cO2_Threshold">CO2 Threshold</string>
+    <string name="cO2_Target">CO2 Target</string>
+    <string name="universal_out1_Fan_Low">Universal-Out 1 \n at Fan Low</string>
+    <string name="universal_out2_Fan_Low">Universal-Out 2 \n at Fan Low</string>
+    <string name="universal_out1_Fan_high">Universal-Out 1 \n at Fan High</string>
+    <string name="universal_out2_Fan_high">Universal-Out 1 \n at Fan High</string>
+    <string name="universal_out_error_msg">Please check Universal-Out 1, Universal-Out 2 and CO2 is supported/configured correctly via jumpers on the MyStat device.</string>
     <string name="hpu_message"><![CDATA[
         <br>HPU Profile can only have either \'O-Energize in Cooling\' or \'B-Energize in Heating\' relays configured.
         ]]></string>
@@ -2119,17 +2129,7 @@
     <string name="test_signal">TEST SIGNAL</string>
     <string name="documentation_link">"Documentation Link :</string>
     <string name="jumper_setting">MyStat Jumper Settings</string>
-    <string name="heat_pump_unit_caps">Heat Pump Unit</string>
-    <string name="two_pipe_fcu_caps">2 Pipe FCU</string>
-    <string name="four_pipe_fcu_caps">4 Pipe FCU</string>
-    <string name="cO2_Threshold">CO2 Threshold</string>
-    <string name="cO2_Target">CO2 Target</string>
     <string name="at">at</string>
     <string name="error_msg_device">"Please select a device type"</string>
-    <string name="universal_out1_Fan_Low">Universal-Out 1 \n at Fan Low</string>
-    <string name="universal_out2_Fan_Low">Universal-Out 2 \n at Fan Low</string>
-    <string name="universal_out1_Fan_high">Universal-Out 1 \n at Fan High</string>
-    <string name="universal_out2_Fan_high">Universal-Out 1 \n at Fan High</string>
     <string name="learn_more">\u00A0Learn\u00A0More</string>
-    <string name="universal_out_error_msg">Please check Universal-Out 1, Universal-Out 2 and CO2 is supported/configured correctly via jumpers on the MyStat device.</string>
 </resources>

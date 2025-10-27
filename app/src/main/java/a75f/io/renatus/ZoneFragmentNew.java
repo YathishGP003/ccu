@@ -17,6 +17,10 @@ import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleSta
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.logic.bo.util.CCUUtils.getTruncatedString;
 import static a75f.io.logic.bo.util.CustomScheduleUtilKt.isPointFollowingScheduleOrEvent;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_COOLING_DESIRED;
+import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_HEATING_DESIRED;
+import static a75f.io.logic.bo.util.CCUUtils.getTruncatedString;
+import static a75f.io.logic.bo.util.CustomScheduleUtilKt.isPointFollowingScheduleOrEvent;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
@@ -935,7 +939,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                             profileType.contains(ProfileType.MYSTAT_HPU.name())||
                             profileType.contains(ProfileType.MYSTAT_PIPE2.name())||
                             profileType.contains(ProfileType.HYPERSTATSPLIT_2PIPE_UV.name()) ||
-                            profileType.contains(ProfileType.HYPERSTATSPLIT_4PIPE_UV.name()))
+                            profileType.contains(ProfileType.HYPERSTATSPLIT_4PIPE_UV.name()) ||
+                           profileType.contains(ProfileType.MYSTAT_PIPE4.name()))
                     {
                         tempModule = true;
                     }
@@ -2043,6 +2048,26 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                                                 }
                                         );
                             }
+
+                            if (p.getProfile().startsWith(ProfileType.MYSTAT_PIPE4.name())) {
+                                disableVisibiltyForZoneScheduleUI(zoneDetails);
+                                MyStatHelper.Companion.create(p,
+                                                ProfileType.MYSTAT_PIPE4,
+                                                getContext())
+                                        .loadDetailedView(
+                                                inflater,
+                                                tempProfileViewModels,
+                                                linearLayoutZonePoints,
+                                                showSchedule,
+                                                (position, point) -> {
+                                                    doCallBack(point, position, scheduleChangeListener,
+                                                            scheduleViewClickListener, scheduleEditClickListener,
+                                                            specialScheduleEditClickListener, vacationScheduleEditClickListener);
+                                                    return Unit.INSTANCE;
+                                                }
+                                        );
+                            }
+
                             if (p.getProfile().startsWith(ProfileType.HYPERSTATSPLIT_4PIPE_UV.name())) {
                                 disableVisibiltyForZoneScheduleUI(zoneDetails);
                                 HyperStatSplitHelper.Companion.create(p,

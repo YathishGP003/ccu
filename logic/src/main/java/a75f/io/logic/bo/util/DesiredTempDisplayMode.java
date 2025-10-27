@@ -43,6 +43,7 @@ import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.Hy
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorConfiguration;
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration;
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4Configuration;
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode;
 import a75f.io.logic.bo.building.system.dab.DABSystemProfileRelayAssociationUtil;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfileRelayAssociationUtil;
@@ -182,8 +183,10 @@ public class DesiredTempDisplayMode {
             } else if (mEquip.getProfile().equalsIgnoreCase(HYPERSTATSPLIT_4PIPE_UV.name())) {
                 TemperatureMode temperatureMode = getTempModeForUnitVentilatorProfile(mEquip);
                 temperatureModes.add(temperatureMode);
-            }
-            else {
+            } else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.MYSTAT_PIPE4.name())) {
+                TemperatureMode temperatureMode = getTemperatureModeForMSPipe4(mEquip);
+                temperatureModes.add(temperatureMode);
+            } else {
                 CcuLog.w(L.TAG_CCU, "Unknown profile for equip: " + mEquip.getId() + ", profile: " + mEquip.getProfile());
             }
         }
@@ -339,6 +342,11 @@ public class DesiredTempDisplayMode {
     private static TemperatureMode getTemperatureModeForMSCPU(Equip mEquip) {
         MyStatCpuConfiguration cpuConfiguration = (MyStatCpuConfiguration) getMyStatConfiguration(mEquip.getId());
         return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(cpuConfiguration.isHeatingAvailable(), cpuConfiguration.isCoolingAvailable()), mEquip);
+    }
+
+    private static TemperatureMode getTemperatureModeForMSPipe4(Equip mEquip) {
+        MyStatPipe4Configuration pipe4Configuration = (MyStatPipe4Configuration) getMyStatConfiguration(mEquip.getId());
+        return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(pipe4Configuration.isHeatingAvailable(), pipe4Configuration.isCoolingAvailable()), mEquip);
     }
 
     private static TemperatureMode getTemperatureForStandaloneBasedOnConditioningMode(TemperatureMode temperatureMode, Equip equip) {

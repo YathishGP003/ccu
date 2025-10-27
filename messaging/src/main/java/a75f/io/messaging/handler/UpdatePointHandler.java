@@ -153,7 +153,8 @@ public class UpdatePointHandler implements MessageHandler
 
         if ((HSUtil.isMyStatCpuEquip(pointUid, CCUHsApi.getInstance())
         || HSUtil.isMyStatHpuEquip(pointUid, CCUHsApi.getInstance())
-        || HSUtil.isMyStatPipe2Equip(pointUid, CCUHsApi.getInstance()))
+        || HSUtil.isMyStatPipe2Equip(pointUid, CCUHsApi.getInstance())
+        || HSUtil.isMyStatPipe4Equip(pointUid, CCUHsApi.getInstance()))
         && !isReconfigurationPoint(localPoint)){
             reconfigureMyStat(msgObject, localPoint);
             updatePoints(localPoint);

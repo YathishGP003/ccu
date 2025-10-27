@@ -89,7 +89,6 @@ abstract class MyStatConfiguration(
             add(universalOut2)
             add(universalIn1Enabled)
             add(enableCo2Display)
-            add(enableCo2Display)
             add(installerPinEnable)
             add(conditioningModePinEnable)
 

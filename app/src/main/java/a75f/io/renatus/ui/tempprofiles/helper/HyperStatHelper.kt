@@ -556,7 +556,7 @@ class HyperStatHelper(
 
     private fun getVacationSchedule(): HeaderViewItem {
         val zoneId = Schedule.getZoneIdByEquipId(equip.getId())
-        val specialScheduleStatus = ScheduleManager.getInstance().getVacationStateString(zoneId);
+        val specialScheduleStatus = ScheduleManager.getInstance().getVacationStateString(zoneId)
 
         return HeaderViewItem(
             id = "vacationSchedule",

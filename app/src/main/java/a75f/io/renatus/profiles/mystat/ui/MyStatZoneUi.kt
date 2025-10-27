@@ -8,6 +8,7 @@ import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
+import a75f.io.domain.equips.mystat.MyStatPipe4Equip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -16,6 +17,7 @@ import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4Configuration
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe2Profile
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
@@ -26,6 +28,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatCpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatHpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe2FanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe4FanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatSelectedConditioningMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatSelectedFanMode
@@ -193,8 +196,8 @@ fun handleMyStatConditionMode(
     if (userClickCheck) {
         var actualConditioningMode = -1
 
-        // CPU Profile has combination of conditioning modes
-        if (profileType == ProfileType.MYSTAT_CPU) {
+        // [CPU && Pipe 4] Profile has combination of conditioning modes
+        if (profileType == ProfileType.MYSTAT_CPU || profileType == ProfileType.MYSTAT_PIPE4) {
             actualConditioningMode =
                 getMyStatActualConditioningMode(configuration, selectedPosition)
         } else if (profileType == ProfileType.MYSTAT_PIPE2 || profileType == ProfileType.MYSTAT_HPU) {
@@ -255,6 +258,15 @@ fun handleMyStatFanMode(
             ProfileType.MYSTAT_PIPE2 -> {
                 val selectedFanMode = getMyStatSelectedFanMode(
                     getMyStatPipe2FanLevel(configuration as MyStatPipe2Configuration),
+                    selectedPosition
+                )
+                updateFanModeCache(selectedFanMode)
+                selectedFanMode
+            }
+
+            ProfileType.MYSTAT_PIPE4 -> {
+                val selectedFanMode = getMyStatSelectedFanMode(
+                    getMyStatPipe4FanLevel(configuration as MyStatPipe4Configuration),
                     selectedPosition
                 )
                 updateFanModeCache(selectedFanMode)
@@ -381,6 +393,15 @@ fun getMyStatEquipPoints(equipMap: Equip, profileType: ProfileType): HashMap<Str
             equipPoints[StatZoneStatus.PROFILE_NAME.name] = HPU.uppercase(Locale.ROOT)
             equipPoints[StatZoneStatus.PROFILE_TYPE.name] = ProfileType.MYSTAT_HPU
             fanLevel = getMyStatHpuFanLevel(config)
+        }
+
+        ProfileType.MYSTAT_PIPE4 -> {
+            equipPoints[StatZoneStatus.EQUIP.name] = equip as MyStatPipe4Equip
+            equipPoints[StatZoneStatus.CONFIG.name] = config as MyStatPipe4Configuration
+            equipPoints[StatZoneStatus.PROFILE_NAME.name] = "PIPE4"
+            equipPoints[StatZoneStatus.PROFILE_TYPE.name] = ProfileType.MYSTAT_PIPE4
+//            equipPoints[StatZoneStatus.SUPPLY_TEMP.name] = equip.leavingWaterTemperature.readHisVal()
+            fanLevel = getMyStatPipe4FanLevel(config)
         }
 
         else -> {}

@@ -148,7 +148,11 @@ open class MyStatEquip(equipRef: String) : DomainEquip(equipRef) {
 
     val mystatStageUpTimerCounter = Point(DomainName.mystatStageUpTimerCounter, equipRef)
     val mystatStageDownTimerCounter = Point(DomainName.mystatStageDownTimerCounter, equipRef)
+    val condensateStatusNO = Point(DomainName.condensateStatusNO, equipRef)
+    val condensateStatusNC = Point(DomainName.condensateStatusNC, equipRef)
 
     val relayStages = HashMap<String, Int>()
     val analogOutStages = HashMap<String, Int>()
+
+    fun isCondensateTripped(): Boolean = condensateStatusNC.readHisVal() > 0.0 || condensateStatusNO.readHisVal() > 0.0
 }

@@ -4,6 +4,7 @@ import a75f.io.domain.api.Point
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
+import a75f.io.domain.equips.mystat.MyStatPipe4Equip
 import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZoneProfile
@@ -11,7 +12,9 @@ import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4Configuration
 import a75f.io.logic.bo.building.statprofiles.util.StagesCounts
+import a75f.io.logic.controlcomponents.controls.Constraint
 import a75f.io.logic.controlcomponents.controls.ControllerFactory
 import a75f.io.logic.controlcomponents.handlers.StageControlHandler
 import a75f.io.logic.controlcomponents.util.ControllerNames
@@ -62,6 +65,18 @@ class MyStatControlFactory(
         addHumidifierIfRequired(L.TAG_CCU_MSPIPE2)
         addDehumidifierIfRequired(L.TAG_CCU_MSPIPE2)
         addDcvDamperIfRequired(L.TAG_CCU_MSPIPE2)
+    }
+    fun addPipe4Controllers(config: MyStatPipe4Configuration, fanLowVentilation: CalibratedPoint) {
+        val pipe4Equip = equip as MyStatPipe4Equip
+        addFanSpeedControllers(config, L.TAG_CCU_MSPIPE4, pipe4Equip.fanLoopOutput, fanLowVentilation)
+        addAuxStage1Controller(L.TAG_CCU_MSPIPE4, pipe4Equip.auxHeatingStage1, pipe4Equip.auxHeating1Activate)
+        addCoolingValveController()
+        addHeatingValveController()
+        addFanEnableIfRequired(L.TAG_CCU_MSPIPE4)
+        addOccupiedEnabledIfRequired(L.TAG_CCU_MSPIPE4)
+        addHumidifierIfRequired(L.TAG_CCU_MSPIPE4)
+        addDehumidifierIfRequired(L.TAG_CCU_MSPIPE4)
+        addDcvDamperIfRequired(L.TAG_CCU_MSPIPE4)
     }
 
     private fun addCoolingController(config: MyStatCpuConfiguration) {
@@ -260,6 +275,32 @@ class MyStatControlFactory(
 
     private fun removeController(controllerName: String) {
         if (controllers.containsKey(controllerName)) controllers.remove(controllerName)
+    }
+
+    private fun addCoolingValveController() {
+        if ((equip as MyStatPipe4Equip).chilledWaterCoolValve.pointExists()) {
+            controllerFactory.addCoolingValveController(
+                controllers,
+                equip.coolingLoopOutput,
+                offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
+                logTag = L.TAG_CCU_MSPIPE4
+            )
+        } else {
+            removeController(ControllerNames.COOLING_VALVE_CONTROLLER)
+        }
+    }
+
+    private fun addHeatingValveController() {
+        if ((equip as MyStatPipe4Equip).hotWaterHeatValve.pointExists()) {
+            controllerFactory.addHeatingValveController(
+                controllers,
+                equip.heatingLoopOutput,
+                offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
+                logTag = L.TAG_CCU_MSPIPE4
+            )
+        } else {
+            removeController(ControllerNames.HEATING_VALVE_CONTROLLER)
+        }
     }
 
 

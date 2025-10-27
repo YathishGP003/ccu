@@ -119,6 +119,9 @@ public class L
     public static final String TAG_REGISTRATION = "REGISTRATION";
     public static final String TAG_CCU_POINT_SCHEDULE = "CCU_POINT_SCHEDULE";
     public static final String TAG_CCU_PROXY = "CCU_PROXY";
+    public static final String TAG_CCU_MSPIPE4 = "CCU_MSPIPE4";
+
+
 
     public static Context app()
     {

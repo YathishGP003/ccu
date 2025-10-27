@@ -26,6 +26,7 @@ import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 const val MYSTAT: String = "MyStat"
 const val CPU: String = "Conventional Package Unit"
 const val PIPE2: String = "2 Pipe FCU"
+const val PIPE4: String = "4 Pipe FCU"
 const val HPU: String = "Heat Pump Unit"
 
 var minMaxVoltage = List(11) { Option(it, it.toString()) }

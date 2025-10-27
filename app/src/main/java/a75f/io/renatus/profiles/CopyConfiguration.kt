@@ -18,20 +18,10 @@ import a75f.io.logic.bo.building.modbus.ModbusProfile
 import a75f.io.logic.bo.building.otn.OtnProfileConfiguration
 import a75f.io.logic.bo.building.plc.PlcProfileConfig
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration
-import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.cpu.HyperStatCpuProfile
-import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.hpu.HyperStatHpuProfile
-import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.monitoring.HyperStatV2MonitoringProfile
-import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.pipe2.HyperStatPipe2Profile
-import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfiguration
-import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
-import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.MonitoringConfiguration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HyperStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorConfiguration
-import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
-import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
-import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatCpuProfile
-import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatHpuProfile
-import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe2Profile
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getSplitConfiguration
@@ -60,7 +50,7 @@ import kotlin.properties.Delegates
 
 class CopyConfiguration {
     companion object {
-        //
+
         private lateinit var config: ProfileConfiguration
         @SuppressLint("StaticFieldLeak")
         private val ccuHsApiInstance = CCUHsApi.getInstance()
@@ -130,8 +120,8 @@ class CopyConfiguration {
             if (isMyStatEquip(equip)) {
                 val equipID = Domain.getEquipDevices()[equip["id"].toString()] as MyStatDevice
                 val devicesType = equipID.mystatDeviceVersion.readPointValue()
-                moduleName = moduleType.replace("Mystat -",if (devicesType == 2.0)  "MyStat V2 -" else "MyStat V1 -")
-                MyStatDeviceType = if (devicesType == 2.0) MYSTAT_V2_DEVICE else MYSTAT_V1_DEVICE
+                moduleName = moduleType.replace("Mystat -",if (devicesType == 1.0)  "MyStat V2 -" else "MyStat V1 -")
+                MyStatDeviceType = if (devicesType == 1.0) MYSTAT_V2_DEVICE else MYSTAT_V1_DEVICE
             }
             else {
                 moduleName = moduleType
@@ -157,7 +147,7 @@ class CopyConfiguration {
                 if (nodeType == null && !isConnectNodePaired) {
                     CcuLog.e(
                         L.TAG_CCU_COPY_CONFIGURATION,
-                        " Copy Configuration failed : Address $address ,  Profile Type: $profileType ,  Node Type: $nodeType , ModbusModel $modbusModel "
+                        " Copy Configuration failed : Address $address ,  Profile Type: $profileType ,  Node Type: null , ModbusModel $modbusModel "
                     )
                     return
                 }
@@ -169,7 +159,7 @@ class CopyConfiguration {
             if (profileType == null) {
                 CcuLog.e(
                     L.TAG_CCU_COPY_CONFIGURATION,
-                    " Copy Configuration failed : Address $address ,  Profile Type: $profileType ! ,  Node Type: $nodeType ! , ModbusModel $modbusModel "
+                    " Copy Configuration failed : Address $address ,  Profile Type: null  ,  Node Type: $nodeType ! , ModbusModel $modbusModel "
                 )
                 return
             }
@@ -222,7 +212,8 @@ class CopyConfiguration {
 
                 ProfileType.MYSTAT_HPU,
                 ProfileType.MYSTAT_CPU,
-                ProfileType.MYSTAT_PIPE2 -> loadActiveMStatProfilesConfiguration(address, equip)
+                ProfileType.MYSTAT_PIPE2,
+                ProfileType.MYSTAT_PIPE4 -> loadActiveMStatProfilesConfiguration(address, equip)
 
                 ProfileType.CONNECTNODE -> loadConnectNodeConfiguration(address)
 
@@ -338,34 +329,11 @@ class CopyConfiguration {
         }
 
         private fun loadActiveHyperStatProfilesConfiguration(address: Int, equip: HashMap<Any, Any>) {
-            when (L.getProfile(address.toShort())) {
-                is HyperStatCpuProfile -> {
-                    config = getHsConfiguration(equip["id"].toString()) as CpuConfiguration
-                }
-                is HyperStatHpuProfile -> {
-                    config = getHsConfiguration(equip["id"].toString()) as HpuConfiguration
-                }
-                is HyperStatPipe2Profile -> {
-                    config = getHsConfiguration(equip["id"].toString()) as a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
-                }
-                is HyperStatV2MonitoringProfile -> {
-                    config = getHsConfiguration(equip["id"].toString()) as MonitoringConfiguration
-                }
-            }
+            config = getHsConfiguration(equip["id"].toString()) as HyperStatConfiguration
         }
 
         private fun loadActiveMStatProfilesConfiguration(address: Int, equip: HashMap<Any, Any>) {
-            when (L.getProfile(address.toShort())) {
-                is MyStatCpuProfile -> {
-                    config = getMyStatConfiguration(equip["id"].toString()) as a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
-                }
-                is MyStatHpuProfile -> {
-                    config = getMyStatConfiguration(equip["id"].toString()) as MyStatHpuConfiguration
-                }
-                is MyStatPipe2Profile -> {
-                    config = getMyStatConfiguration(equip["id"].toString()) as MyStatPipe2Configuration
-                }
-            }
+            config = getMyStatConfiguration(equip["id"].toString()) as MyStatConfiguration
         }
 
         private fun loadActiveModbusOrEmrConfiguration(address: Short) {

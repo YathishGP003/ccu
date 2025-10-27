@@ -434,5 +434,22 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
         equip.relayStages.clear()
         equip.analogOutStages.clear()
     }
+
+    fun runForDoorWindowSensor(
+        config: MyStatConfiguration, equip: MyStatEquip,
+        analogOutStages: HashMap<String, Int>, relayStages: HashMap<String, Int>
+    ): Boolean {
+
+        val isDoorOpen = isDoorOpenState(config, equip)
+        logIt(
+            " is Door Open ? $isDoorOpen")
+        if (isDoorOpen) {
+            resetLoopOutputs()
+            resetLogicalPoints()
+            analogOutStages.clear()
+            relayStages.clear()
+        }
+        return isDoorOpen
+    }
 }
 

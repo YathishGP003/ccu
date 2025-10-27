@@ -21,6 +21,7 @@ import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
+import a75f.io.domain.equips.mystat.MyStatPipe4Equip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
@@ -32,6 +33,8 @@ import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuAnalogOutM
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuRelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2AnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2RelayMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4AnalogOutMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4RelayMapping
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.tuners.TunerUtil
@@ -167,6 +170,7 @@ fun getMyStatSettings2Message(equipRef: String): MyStat.MyStatSettingsMessage2_t
             is MyStatCpuEquip -> settings2.profile = MyStat.MyStatProfiles_t.MYSTAT_PROFILE_CONVENTIONAL_PACKAGE_UNIT
             is MyStatHpuEquip -> settings2.profile = MyStat.MyStatProfiles_t.MYSTAT_PROFILE_HEAT_PUMP_UNIT
             is MyStatPipe2Equip -> settings2.profile = MyStat.MyStatProfiles_t.MYSTAT_PROFILE_2_PIPE_FANCOIL_UNIT
+            is MyStatPipe4Equip -> settings2.profile = MyStat.MyStatProfiles_t.MYSTAT_PROFILE_4_PIPE_FANCOIL_UNIT
         }
 
         enableForceOccupied = myStatEquip.autoForceOccupied.readDefaultVal() == 1.0
@@ -191,7 +195,7 @@ fun getMyStatSettings2Message(equipRef: String): MyStat.MyStatSettingsMessage2_t
         when (myStatEquip) {
             is MyStatCpuEquip -> myStatConfigsCpu = getStagedFanDetails(myStatEquip)
             is MyStatHpuEquip -> fcuTuners = getHpuTunerDetails(equipRef)
-            is MyStatPipe2Equip -> fcuTuners = getFcuTunerDetails(equipRef)
+            is MyStatPipe2Equip, is MyStatPipe4Equip -> fcuTuners = getFcuTunerDetails(equipRef)
 
         }
     }
@@ -368,6 +372,21 @@ fun getRelayConfig(enable: Point, association: Point, equip: MyStatEquip): MySta
                 relayConfig.relayEnable = enable.readDefaultVal() == 1.0
             }
         }
+
+        is MyStatPipe4Equip -> {
+            if (associationVal < MyStatPipe4RelayMapping.values().size) {
+                relayConfig.fourPipeRelay = when (associationVal) {
+                    MyStatPipe4RelayMapping.HOT_WATER_VALVE.ordinal -> MyStat.FourPipeRelayMappings_e.P4_WATER_VALVE_HEAT
+                    MyStatPipe4RelayMapping.CHILLED_WATER_VALVE.ordinal -> MyStat.FourPipeRelayMappings_e.P4_WATER_VALVE_COOL
+                    MyStatPipe4RelayMapping.AUX_HEATING_STAGE1.ordinal-> MyStat.FourPipeRelayMappings_e.P4_AUX_HEAT_1
+                    MyStatPipe4RelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.FourPipeRelayMappings_e.P4_NONE
+                    MyStatPipe4RelayMapping.DCV_DAMPER.ordinal -> MyStat.FourPipeRelayMappings_e.P4_DCV_DAMPER
+                    MyStatPipe4RelayMapping.FAN_LOW_VENTILATION.ordinal -> MyStat.FourPipeRelayMappings_e.P4_FAN_LOW_VENTILATION
+                    else -> MyStat.FourPipeRelayMappings_e.values()[associationVal + 1]
+                }
+                relayConfig.relayEnable = enable.readDefaultVal() == 1.0
+            }
+        }
     }
     return relayConfig.build()
 }
@@ -420,6 +439,19 @@ private fun getAnalogOutConfigs(equip: MyStatEquip, enable: Point, association: 
                         MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal -> MyStat.TwoPipeAoutMappings_e.P2_FAN_SPEED
                         MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal -> MyStat.TwoPipeAoutMappings_e.P2_AOUT_DCV_DAMPER
                         else -> MyStat.TwoPipeAoutMappings_e.P2_AOUT_NONE
+                    }
+                    setAnalogOutEnable(enable.readDefaultVal() == 1.0)
+                }
+            }
+
+            is MyStatPipe4Equip -> {
+                if (analogOutMappingValue >= MyStatPipe4RelayMapping.values().size) {
+                    fourPipeAoutMapping = when (analogOutMappingValue) {
+                        MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.ordinal -> MyStat.FourPipeAoutMappings_e.P4_AOUT_WATER_VALVE_COOL
+                        MyStatPipe4AnalogOutMapping.HOT_MODULATING_VALUE.ordinal -> MyStat.FourPipeAoutMappings_e.P4_AOUT_WATER_VALVE_HEAT
+                        MyStatPipe4AnalogOutMapping.FAN_SPEED.ordinal -> MyStat.FourPipeAoutMappings_e.P4_FAN_SPEED
+                        MyStatPipe4AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal -> MyStat.FourPipeAoutMappings_e.P4_AOUT_DCV_DAMPER
+                        else -> MyStat.FourPipeAoutMappings_e.P4_AOUT_NONE
                     }
                     setAnalogOutEnable(enable.readDefaultVal() == 1.0)
                 }

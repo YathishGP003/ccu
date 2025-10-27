@@ -10,6 +10,7 @@ import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
+import a75f.io.domain.equips.mystat.MyStatPipe4Equip
 import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
 import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
 import a75f.io.logic.tuners.TunerUtil
@@ -112,6 +113,10 @@ fun fetchMyStatTuners(equip: MyStatEquip): BaseStatTuners {
             tuners.waterValveSamplingDuringLoopDeadbandWaitTime = getTuner(
                 DomainName.mystatWaterValveSamplingLoopDeadbandWaitTime, equip.equipRef
             ).toInt()
+        }
+
+        is MyStatPipe4Equip ->{
+
         }
     }
     return tuners

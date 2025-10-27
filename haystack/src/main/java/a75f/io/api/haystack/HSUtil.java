@@ -431,6 +431,11 @@ public class HSUtil {
         return isMyStatEquip(equipMap.get(EQUIPREF).toString(), hayStack) && equipMap.containsKey(Tags.PIPE2);
     }
 
+    public static boolean isMyStatPipe4Equip(String id, CCUHsApi hayStack) {
+        HashMap<Object, Object> equipMap = hayStack.readMapById(id);
+        return isMyStatEquip(equipMap.get(EQUIPREF).toString(), hayStack) && equipMap.containsKey(Tags.PIPE4);
+    }
+
     public static boolean isMyStatHpuEquip(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> equipMap = hayStack.readMapById(id);
         return isMyStatEquip(equipMap.get(EQUIPREF).toString(), hayStack) && equipMap.containsKey(Tags.HPU);

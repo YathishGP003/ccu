@@ -426,13 +426,13 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                         break;
                     case HMP:
                         showDialogFragment(FragmentHMPConfiguration
-                                                   .newInstance(mPairingAddress, mName, mNodeType, mFloorName), FragmentHMPConfiguration.ID);
+                                .newInstance(mPairingAddress, mName, mNodeType, mFloorName), FragmentHMPConfiguration.ID);
                         break;
                     case VAV_REHEAT:
                     case VAV_SERIES_FAN:
                     case VAV_PARALLEL_FAN:
                         showDialogFragment(VavProfileConfigFragment.Companion
-                                                   .newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType), VavProfileConfigFragment.Companion.getID());
+                                .newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType), VavProfileConfigFragment.Companion.getID());
                         break;
                     case VAV_ACB:
                         showDialogFragment(AcbProfileConfigFragment.Companion
@@ -444,22 +444,22 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                         break;
                     case DUAL_DUCT:
                         showDialogFragment(FragmentDABDualDuctConfiguration
-                                               .newInstance(mPairingAddress, mName, mNodeType, mFloorName,
-                                                            mProfileType), FragmentDABDualDuctConfiguration.ID);
+                                .newInstance(mPairingAddress, mName, mNodeType, mFloorName,
+                                        mProfileType), FragmentDABDualDuctConfiguration.ID);
                         break;
                     case OAO:
                         showDialogFragment(
-                                OAOProfileFragment.Companion.newInstance(mPairingAddress, mName, mFloorName,mNodeType, mProfileType),
+                                OAOProfileFragment.Companion.newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType),
                                 OAOProfileFragment.Companion.getID());
                         break;
                     case BYPASS_DAMPER:
                         showDialogFragment(
-                                BypassConfigFragment.Companion.newInstance(mPairingAddress, mName, mFloorName,mNodeType, mProfileType),
+                                BypassConfigFragment.Companion.newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType),
                                 BypassConfigFragment.Companion.getID());
                         break;
                     case PLC:
                         showDialogFragment(PlcProfileConfigFragment.Companion
-                                .newInstance(mPairingAddress, mName, mFloorName, mNodeType, ProfileType.PLC),
+                                        .newInstance(mPairingAddress, mName, mFloorName, mNodeType, ProfileType.PLC),
                                 PlcProfileConfigFragment.Companion.getID());
                         break;
                     case EMR:
@@ -467,7 +467,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                                 .newInstance(mPairingAddress, mName, mNodeType, mFloorName), FragmentEMRConfiguration.ID);
                         break;
                     case TEMP_INFLUENCE:
-                        showDialogFragment(TIFragment.newInstance(mPairingAddress, mName, mFloorName,mNodeType, ProfileType.TEMP_INFLUENCE), TIFragment.ID);
+                        showDialogFragment(TIFragment.newInstance(mPairingAddress, mName, mFloorName, mNodeType, ProfileType.TEMP_INFLUENCE), TIFragment.ID);
                     case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
                         showDialogFragment(FragmentCPUConfiguration.newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), FragmentCPUConfiguration.ID);
                         break;
@@ -481,40 +481,40 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                         showDialogFragment(Fragment4PipeFanCoilUnitConfig.newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), Fragment4PipeFanCoilUnitConfig.ID);
                         break;
                     case HYPERSTAT_MONITORING:
-                        showDialogFragment(HyperStatMonitoringFragment.Companion.newInstance(mPairingAddress,mName,mFloorName,mNodeType,ProfileType.HYPERSTAT_MONITORING),
+                        showDialogFragment(HyperStatMonitoringFragment.Companion.newInstance(mPairingAddress, mName, mFloorName, mNodeType, ProfileType.HYPERSTAT_MONITORING),
                                 HyperStatMonitoringFragment.Companion.getID());
                         break;
                     case HYPERSTAT_VRV:
                         showDialogFragment(HyperStatVrvFragment.newInstance(mPairingAddress, mName, mFloorName), HyperStatVrvFragment.ID);
                         break;
                     case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
-                        showDialogFragment(HyperStatV2CpuFragment.newInstance(mPairingAddress,mName,mFloorName,
-                                mNodeType,ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT),
+                        showDialogFragment(HyperStatV2CpuFragment.newInstance(mPairingAddress, mName, mFloorName,
+                                        mNodeType, ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT),
                                 HyperStatV2CpuFragment.ID);
                         break;
                     case HYPERSTAT_HEAT_PUMP_UNIT:
-                        showDialogFragment(HyperStatV2HpuFragment.newInstance(mPairingAddress,mName,mFloorName,
-                                        mNodeType,ProfileType.HYPERSTAT_HEAT_PUMP_UNIT),
+                        showDialogFragment(HyperStatV2HpuFragment.newInstance(mPairingAddress, mName, mFloorName,
+                                        mNodeType, ProfileType.HYPERSTAT_HEAT_PUMP_UNIT),
                                 HyperStatV2HpuFragment.ID);
                         break;
                     case HYPERSTAT_TWO_PIPE_FCU:
-                        showDialogFragment(HyperStatV2Pipe2Fragment.newInstance(mPairingAddress, mName, mFloorName, mNodeType,mProfileType), HyperStatV2Pipe2Fragment.ID);
+                        showDialogFragment(HyperStatV2Pipe2Fragment.newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType), HyperStatV2Pipe2Fragment.ID);
 
                         break;
                     case HYPERSTATSPLIT_CPU:
-                        showDialogFragment(HyperStatSplitCpuFragment.Companion.newInstance(mPairingAddress,mName,mFloorName,
-                                        mNodeType,ProfileType.HYPERSTATSPLIT_CPU),
+                        showDialogFragment(HyperStatSplitCpuFragment.Companion.newInstance(mPairingAddress, mName, mFloorName,
+                                        mNodeType, ProfileType.HYPERSTATSPLIT_CPU),
                                 HyperStatSplitCpuFragment.Companion.getID());
                         break;
 
                     case HYPERSTATSPLIT_4PIPE_UV:
-                        showDialogFragment(Pipe4UVFragment.Companion.newInstance(mPairingAddress,mName,mFloorName,
-                                        mNodeType,ProfileType.HYPERSTATSPLIT_4PIPE_UV),
+                        showDialogFragment(Pipe4UVFragment.Companion.newInstance(mPairingAddress, mName, mFloorName,
+                                        mNodeType, ProfileType.HYPERSTATSPLIT_4PIPE_UV),
                                 HyperStatSplitCpuFragment.Companion.getID());
                         break;
                     case HYPERSTATSPLIT_2PIPE_UV:
-                        showDialogFragment(Pipe2UVFragment.Companion.newInstance(mPairingAddress,mName,mFloorName,
-                                        mNodeType,ProfileType.HYPERSTATSPLIT_2PIPE_UV),
+                        showDialogFragment(Pipe2UVFragment.Companion.newInstance(mPairingAddress, mName, mFloorName,
+                                        mNodeType, ProfileType.HYPERSTATSPLIT_2PIPE_UV),
                                 Pipe2UVFragment.Companion.getID());
                         break;
                     case MYSTAT_CPU:
@@ -530,8 +530,10 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                         showDialogFragment(ConnectNodeFragment.Companion.newInstance(mPairingAddress, mName,
                                 mFloorName, mNodeType, mProfileType), ConnectNodeFragment.Companion.getIdString());
                         break;
+                    case MYSTAT_PIPE4:
+                        showDialogFragment(MyStatHpuFragment.Companion.newInstance(mPairingAddress, mName, mFloorName, mNodeType, ProfileType.MYSTAT_PIPE4, deviceVersion), MyStatHpuFragment.Companion.getID());
+                        break;
                 }
-                
             }
         });
     }

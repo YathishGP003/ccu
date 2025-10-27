@@ -41,6 +41,7 @@ import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
+import a75f.io.domain.equips.mystat.MyStatPipe4Equip
 import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
 import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
@@ -135,6 +136,7 @@ object DomainManager {
                     (it.contains("mystat") && it.contains("cpu")) -> Domain.equips[it["id"].toString()] = MyStatCpuEquip(it["id"].toString())
                     (it.contains("mystat") && it.contains("hpu")) -> Domain.equips[it["id"].toString()] = MyStatHpuEquip(it["id"].toString())
                     (it.contains("mystat") && it.contains("pipe2")) -> Domain.equips[it["id"].toString()] = MyStatPipe2Equip(it["id"].toString())
+                    (it.contains("mystat") && it.contains("pipe4")) -> Domain.equips[it["id"].toString()] = MyStatPipe4Equip(it["id"].toString())
                     it.contains("economizer") && it.contains("cpu") -> {
                         CcuLog.i(Domain.LOG_TAG, "Build domain hssplit is added $it")
                         Domain.equips[it["id"].toString()] = HsSplitCpuEquip(it["id"].toString())
@@ -269,7 +271,7 @@ object DomainManager {
                 when {
                     (equip.contains("hyperstat") && (equip.contains("cpu") || equip.contains("hpu") || equip.contains("pipe2") ||
                             equip.contains(a75f.io.api.haystack.Tags.MONITORING))) -> Domain.devices[equip["id"].toString()] = HyperStatDevice(deviceMap["id"].toString())
-                    (equip.contains("mystat") && (equip.contains("cpu") || equip.contains("hpu") || equip.contains("pipe2"))) -> Domain.devices[equip["id"].toString()] = MyStatDevice(deviceMap["id"].toString())
+                    (equip.contains("mystat") && (equip.contains("cpu") || equip.contains("hpu") || equip.contains("pipe2") || equip.contains("pipe4"))) -> Domain.devices[equip["id"].toString()] = MyStatDevice(deviceMap["id"].toString())
                     (deviceMap.contains("domainName") && deviceMap["domainName"].toString() == DomainName.hyperstatSplitDevice) -> {
                         CcuLog.i(Domain.LOG_TAG, "Added HyperStatSplit device to domain")
                         Domain.devices[equip["id"].toString()] = HyperStatSplitDevice(deviceMap["id"].toString())
@@ -321,6 +323,7 @@ object DomainManager {
                     equip.markers.contains("cpu") -> Domain.equips[equip.id] = MyStatCpuEquip(equip.id)
                     equip.markers.contains("hpu") -> Domain.equips[equip.id] = MyStatHpuEquip(equip.id)
                     equip.markers.contains("pipe2") -> Domain.equips[equip.id] = MyStatPipe2Equip(equip.id)
+                    equip.markers.contains("pipe4") -> Domain.equips[equip.id] = MyStatPipe4Equip(equip.id)
                 }
             }
             equip.markers.contains("hyperstatsplit") ->

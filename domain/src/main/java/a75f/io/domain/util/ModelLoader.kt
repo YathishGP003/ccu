@@ -207,6 +207,9 @@ object ModelLoader {
     fun getSplitPipe2Model(): ModelDirective {
         return ModelCache.getModelById(MODEL_HYPERSTAT_SPLIT_PIPE2)
     }
+    fun getMyStatPipe4Model(): ModelDirective {
+        return ModelCache.getModelById(MODEL_MYSTAT_PIPE4)
+    }
 
     fun getModelForDomainName( domainName : String) : ModelDirective {
         return when(domainName) {
@@ -248,6 +251,7 @@ object ModelLoader {
             DomainName.myStatCPU -> getMyStatCpuModel()
             DomainName.myStatHPU -> getMyStatHpuModel()
             DomainName.mystat2PFCU -> getMyStatPipe2Model()
+            DomainName.mystat4PFCU -> getMyStatPipe4Model()
             else -> throw IllegalStateException("Invalid Model Name")
         }
     }

@@ -67,8 +67,6 @@ import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.domain.api.DomainName;
-import a75f.io.domain.api.DomainName;
-import a75f.io.domain.devices.ConnectNodeDevice;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
@@ -80,31 +78,31 @@ import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
-import a75f.io.logic.connectnode.ConnectNodeEntitiesBuilder;
 import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.renatus.bacnet.BacNetSelectModelView;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
+import a75f.io.renatus.modbus.ModbusConfigView;
+import a75f.io.renatus.modbus.util.ModbusLevel;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.connectnode.ConnectNodeFragment;
-import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
+import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe2UVFragment;
 import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe4UVFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2Pipe2Fragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatCpuFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatHpuFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatPipe2Fragment;
-import a75f.io.renatus.profiles.ti.TIFragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatPipe4Fragment;
 import a75f.io.renatus.profiles.otn.OtnProfileConfigFragment;
-import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
-import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
-import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2Pipe2Fragment;
-import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
-import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
 import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
+import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
+import a75f.io.renatus.profiles.ti.TIFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
-import a75f.io.renatus.modbus.ModbusConfigView;
-import a75f.io.renatus.modbus.util.ModbusLevel;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 import a75f.io.renatus.util.NetworkUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
@@ -1268,6 +1266,12 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(Pipe2UVFragment.Companion.newInstance(Short.parseShort(nodeAddress)
                                     , zone.getId(), floor.getId(),NodeType.HYPERSTATSPLIT, profile.getProfileType()),
                             Pipe2UVFragment.Companion.getID());
+                    break;
+
+                case MYSTAT_PIPE4:
+                    showDialogFragment(MyStatPipe4Fragment.Companion.newInstance(Short.parseShort(nodeAddress)
+                                    , zone.getId(), floor.getId(),NodeType.MYSTAT, profile.getProfileType(),""),
+                            MyStatPipe4Fragment.Companion.getID());
                     break;
 
                 case MODBUS_UPS30:

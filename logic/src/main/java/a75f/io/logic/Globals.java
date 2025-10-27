@@ -71,6 +71,7 @@ import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventil
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatCpuProfile;
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatHpuProfile;
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe2Profile;
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe4Profile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
@@ -629,6 +630,11 @@ public class Globals {
                         case HYPERSTATSPLIT_2PIPE_UV:
                             Pipe2UnitVentilatorProfile pipe2UvProfile = new Pipe2UnitVentilatorProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(pipe2UvProfile);
+                            break;
+                        case  MYSTAT_PIPE4:
+                            MyStatPipe4Profile mystatPipe4Profile = new MyStatPipe4Profile();
+                            mystatPipe4Profile.addEquip(eq.getId());
+                            L.ccu().zoneProfiles.add(mystatPipe4Profile);
                             break;
 
                         case MODBUS_PAC:

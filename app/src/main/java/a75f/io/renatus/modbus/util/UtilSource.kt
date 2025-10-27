@@ -345,6 +345,7 @@ fun getAppResourceString(resId: Int): String {
 fun isMyStatEquip(equip:HashMap<Any,Any>):Boolean{
     return equip["profile"].toString().equals(ProfileType.MYSTAT_PIPE2.name,true)||
             equip["profile"].toString().equals(ProfileType.MYSTAT_HPU.name,true)||
-            equip["profile"].toString().equals(ProfileType.MYSTAT_CPU.name,true)
+            equip["profile"].toString().equals(ProfileType.MYSTAT_CPU.name,true) ||
+            equip["profile"].toString().equals(ProfileType.MYSTAT_PIPE4.name,true)
 }
 

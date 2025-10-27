@@ -7,6 +7,7 @@ import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
+import a75f.io.domain.equips.mystat.MyStatPipe4Equip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -16,11 +17,13 @@ import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4Configuration
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatCpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatHpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe2FanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe4FanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatSelectedConditioningMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatSelectedFanMode
@@ -30,6 +33,7 @@ import a75f.io.renatus.profiles.mystat.CPU
 import a75f.io.renatus.profiles.mystat.HPU
 import a75f.io.renatus.profiles.mystat.MYSTAT
 import a75f.io.renatus.profiles.mystat.PIPE2
+import a75f.io.renatus.profiles.mystat.PIPE4
 import a75f.io.renatus.profiles.mystat.ui.getSupplyDirection
 import a75f.io.renatus.ui.AUTO
 import a75f.io.renatus.ui.CONDITIONING_MODE
@@ -100,6 +104,9 @@ class MyStatHelper(
             ProfileType.MYSTAT_PIPE2 -> {
                 MYSTAT + "-" + PIPE2 + "( " + equipMap.group + " )"
             }
+            ProfileType.MYSTAT_PIPE4 -> {
+                MYSTAT + "-" + PIPE4  + "( " + equipMap.group + " )"
+            }
 
             else -> {
                 "No Profile Type Found"
@@ -149,6 +156,9 @@ class MyStatHelper(
             ProfileType.MYSTAT_PIPE2 -> {
                 loadMyStatDefaults(equip as MyStatPipe2Equip)
             }
+            ProfileType.MYSTAT_PIPE4 -> {
+                loadMyStatDefaults(equip as MyStatPipe4Equip)
+            }
 
             else -> {}
         }
@@ -165,6 +175,7 @@ class MyStatHelper(
 
         if ((equip as? MyStatCpuEquip)?.humidifierEnable?.pointExists() == true ||
             (equip as? MyStatPipe2Equip)?.humidifierEnable?.pointExists() == true ||
+            (equip as? MyStatPipe4Equip)?.humidifierEnable?.pointExists() == true ||
             (equip as? MyStatHpuEquip)?.humidifierEnable?.pointExists() == true) {
             val humidifierView = getHumidifierView()
             detailViewItems[humidifierView.id.toString()] = humidifierView
@@ -172,6 +183,7 @@ class MyStatHelper(
 
         if ((equip as? MyStatCpuEquip)?.dehumidifierEnable?.pointExists() == true ||
             (equip as? MyStatPipe2Equip)?.dehumidifierEnable?.pointExists() == true ||
+            (equip as? MyStatPipe4Equip)?.dehumidifierEnable?.pointExists() == true ||
             (equip as? MyStatHpuEquip)?.dehumidifierEnable?.pointExists() == true) {
             val deHumidifierView = getDeHumidifierView()
             detailViewItems[deHumidifierView.id.toString()] = deHumidifierView
@@ -294,17 +306,18 @@ class MyStatHelper(
                 configuration as MyStatPipe2Configuration
                 fanLevel = getMyStatPipe2FanLevel(configuration)
             }
-
             ProfileType.MYSTAT_CPU -> {
                 configuration as MyStatCpuConfiguration
                 fanLevel = getMyStatCpuFanLevel(configuration)
             }
-
             ProfileType.MYSTAT_HPU -> {
                 configuration as MyStatHpuConfiguration
                 fanLevel = getMyStatHpuFanLevel(configuration)
             }
-
+            ProfileType.MYSTAT_PIPE4 -> {
+                configuration as MyStatPipe4Configuration
+                fanLevel = getMyStatPipe4FanLevel(configuration)
+            }
             else -> {}
         }
 
@@ -357,8 +370,11 @@ class MyStatHelper(
     private fun getDischargeAirTempView(): DetailedViewItem {
         if (profileType == ProfileType.MYSTAT_CPU)
             equip as MyStatCpuEquip
-        else
+        else if (profileType == ProfileType.MYSTAT_PIPE4)
+            equip as MyStatPipe4Equip
+        else if (profileType == ProfileType.MYSTAT_HPU)
             equip as MyStatHpuEquip
+
         var dischargeAirTemperature = equip.dischargeAirTemperature.readHisVal().toString()
         if (UnitUtils.isCelsiusTunerAvailableStatus()) {
             val converted =
@@ -483,7 +499,7 @@ class MyStatHelper(
 
     private fun getVacationSchedule(): HeaderViewItem {
         val zoneId = Schedule.getZoneIdByEquipId(equip.getId())
-        val specialScheduleStatus = ScheduleManager.getInstance().getVacationStateString(zoneId);
+        val specialScheduleStatus = ScheduleManager.getInstance().getVacationStateString(zoneId)
 
         return HeaderViewItem(
             id = "vacationSchedule",

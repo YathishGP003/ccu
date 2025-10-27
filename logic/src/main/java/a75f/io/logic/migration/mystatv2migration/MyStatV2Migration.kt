@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.devices.MyStatDevice
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
@@ -179,6 +180,7 @@ class MyStatV2Migration {
             )
             config.universalInUnit(deviceRef)
             config.apply { setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap()) }
+            MyStatDevice(deviceRef).mystatDeviceVersion.writePointValue(0.0)
         }
         CcuLog.d(
             MYSTAT_V2_MIGRATION,

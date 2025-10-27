@@ -8,6 +8,7 @@ import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
+import a75f.io.domain.equips.mystat.MyStatPipe4Equip
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
@@ -25,6 +26,9 @@ import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuRelayMappi
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2AnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2RelayMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4AnalogOutMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4Configuration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4RelayMapping
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 
@@ -86,6 +90,19 @@ fun getMyStatConfiguration(equipRef: String): MyStatConfiguration? {
             ).getActiveConfiguration()
         }
 
+        is MyStatPipe4Equip -> {
+            val pipe4Model = ModelLoader.getMyStatPipe4Model() as SeventyFiveFProfileDirective
+            return MyStatPipe4Configuration(
+                nodeAddress = equip.nodeAddress,
+                nodeType = NodeType.MYSTAT.name,
+                priority = 0,
+                roomRef = equip.roomRef!!,
+                floorRef = equip.floorRef!!,
+                profileType = ProfileType.MYSTAT_PIPE4,
+                model = pipe4Model
+            ).getActiveConfiguration()
+        }
+
         else -> {
             return null
         }
@@ -117,6 +134,7 @@ fun getMyStatFanLevel(config: MyStatConfiguration): Int {
         is MyStatCpuConfiguration -> return getMyStatCpuFanLevel(config)
         is MyStatPipe2Configuration -> return getMyStatPipe2FanLevel(config)
         is MyStatHpuConfiguration -> return getMyStatHpuFanLevel(config)
+        is MyStatPipe4Configuration -> return getMyStatPipe4FanLevel(config)
     }
     return -1
 }
@@ -139,6 +157,9 @@ fun getMyStatPipe2FanLevel(config: MyStatPipe2Configuration): Int {
         if (enabled && association == MyStatPipe2RelayMapping.FAN_LOW_VENTILATION.ordinal) {
             fanEnabledStages = fanEnabledStages.copy(first = true)
         }
+        if (enabled && association == MyStatPipe2RelayMapping.FAN_LOW_VENTILATION.ordinal) {
+            fanEnabledStages = fanEnabledStages.copy(first = true)
+        }
         if (enabled && association == MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal) {
             fanEnabledStages = fanEnabledStages.copy(second = true)
         }
@@ -148,6 +169,40 @@ fun getMyStatPipe2FanLevel(config: MyStatPipe2Configuration): Int {
     if (fanEnabledStages.second) fanLevel += MsFanConstants.HIGH
     if (fanLevel == 0 && (config.isAnyRelayEnabledAssociated(association = MyStatPipe2RelayMapping.FAN_ENABLED.ordinal)
                 || config.isAnyRelayEnabledAssociated(association = MyStatPipe2RelayMapping.OCCUPIED_ENABLED.ordinal))) {
+        fanLevel = MsFanConstants.AUTO
+    }
+
+    return fanLevel
+}
+
+fun getMyStatPipe4FanLevel(config: MyStatPipe4Configuration): Int {
+    var fanLevel = 0
+    var fanEnabledStages: Pair<Boolean, Boolean> = Pair(first = false, second = false)
+
+    if ((config.universalOut1.enabled && config.universalOut1Association.associationVal == MyStatPipe4AnalogOutMapping.FAN_SPEED.ordinal)
+        || (config.universalOut2.enabled && config.universalOut2Association.associationVal == MyStatPipe4AnalogOutMapping.FAN_SPEED.ordinal)
+    ) {
+        return MsFanConstants.LOW_HIGH // All options are enabled due to analog fan speed
+    }
+
+    val relays = config.getRelayEnabledAssociations()
+    for ((enabled, association) in relays) {
+        if (enabled && association == MyStatPipe4RelayMapping.FAN_LOW_SPEED.ordinal) {
+            fanEnabledStages = fanEnabledStages.copy(first = true)
+        }
+        if (enabled && association == MyStatPipe4RelayMapping.FAN_LOW_VENTILATION.ordinal) {
+            fanEnabledStages = fanEnabledStages.copy(first = true)
+        }
+        if (enabled && association == MyStatPipe4RelayMapping.FAN_HIGH_SPEED.ordinal) {
+            fanEnabledStages = fanEnabledStages.copy(second = true)
+        }
+    }
+
+    if (fanEnabledStages.first) fanLevel += MsFanConstants.LOW
+    if (fanEnabledStages.second) fanLevel += MsFanConstants.HIGH
+    if (fanLevel == 0 && (config.isAnyRelayEnabledAssociated(association = MyStatPipe4RelayMapping.FAN_ENABLED.ordinal)
+                || config.isAnyRelayEnabledAssociated(association = MyStatPipe4RelayMapping.OCCUPIED_ENABLED.ordinal))
+    ) {
         fanLevel = MsFanConstants.AUTO
     }
 
@@ -229,7 +284,7 @@ fun setConditioningMode(config: MyStatCpuConfiguration, equip: MyStatEquip) {
     equip.conditioningMode.writePointValue(newMode.ordinal.toDouble())
 }
 
-fun updateConditioningMode(config: MyStatCpuConfiguration, equip: MyStatEquip) {
+fun updateConditioningMode(config: MyStatConfiguration, equip: MyStatEquip) {
 
     val currentMode =
         StandaloneConditioningMode.values()[equip.conditioningMode.readPriorityVal().toInt()]
@@ -343,6 +398,11 @@ fun getMyStatPossibleConditionMode(config: MyStatConfiguration): PossibleConditi
             heating = config.isHeatingAvailable()
         }
 
+        is MyStatPipe4Configuration -> {
+            cooling = config.isCoolingAvailable()
+            heating = config.isHeatingAvailable()
+        }
+
         is MyStatPipe2Configuration, is MyStatHpuConfiguration -> return PossibleConditioningMode.BOTH
     }
 
@@ -363,6 +423,7 @@ fun getMyStatModelByEquipRef(equipRef: String): ModelDirective? {
         is MyStatCpuEquip -> ModelLoader.getMyStatCpuModel()
         is MyStatHpuEquip -> ModelLoader.getMyStatHpuModel()
         is MyStatPipe2Equip -> ModelLoader.getMyStatPipe2Model()
+        is MyStatPipe4Equip -> ModelLoader.getMyStatPipe4Model()
         else -> null
     }
 }
@@ -420,6 +481,14 @@ fun logMsResults(config: MyStatConfiguration, tag: String, logicalPointsList: Ha
                             )
                         }"
                     )
+                    is MyStatPipe4Configuration -> CcuLog.d(
+                        tag,
+                        "$port = ${MyStatPipe4RelayMapping.values()[association]} : ${
+                            haystack.readHisValById(
+                                logicalPointsList[port]!!
+                            )
+                        }"
+                    )
                 }
             } else {
                 if (logicalPointsList.containsKey(port)) {
@@ -427,6 +496,7 @@ fun logMsResults(config: MyStatConfiguration, tag: String, logicalPointsList: Ha
                         is MyStatCpuConfiguration -> MyStatCpuAnalogOutMapping.values()[association]
                         is MyStatHpuConfiguration -> MyStatHpuAnalogOutMapping.values()[association]
                         is MyStatPipe2Configuration -> MyStatPipe2AnalogOutMapping.values()[association]
+                        is MyStatPipe4Configuration -> MyStatPipe4AnalogOutMapping.values()[association]
                         else -> null
                     }
                     var analogOutValue = 0.0

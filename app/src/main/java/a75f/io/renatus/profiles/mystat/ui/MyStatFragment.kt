@@ -82,9 +82,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.net.toUri
 import androidx.fragment.app.viewModels
 import org.projecthaystack.util.Base64
-import androidx.core.net.toUri
 
 /**
  * Created by Manjunath K on 15-01-2025.
@@ -371,9 +371,9 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                             onAssociationChanged = { associationIndex ->
                                 universalOut1.association = associationIndex.index
                             },
-                            testState = viewModel.getRelayStatus(5),
+                            testState = viewModel.getRelayStatus(4),
                             onTestActivated = {
-                                viewModel.sendTestSignal(5, if (it) 1.0 else 0.0)
+                                viewModel.sendTestSignal(4, if (it) 1.0 else 0.0)
                             },
                             testSingles = testVoltage,
                             testVal = viewModel.getAnalogValue(4),
@@ -395,9 +395,9 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                             onAssociationChanged = { associationIndex ->
                                 universalOut2.association = associationIndex.index
                             },
-                            testState = viewModel.getRelayStatus(4),
+                            testState = viewModel.getRelayStatus(5),
                             onTestActivated = {
-                                viewModel.sendTestSignal(4, if (it) 1.0 else 0.0)
+                                viewModel.sendTestSignal(5, if (it) 1.0 else 0.0)
                             },
                             testSingles = testVoltage,
                             testVal = viewModel.getAnalogValue(5),

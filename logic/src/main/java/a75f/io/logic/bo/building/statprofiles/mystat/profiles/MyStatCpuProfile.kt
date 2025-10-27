@@ -723,24 +723,6 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
         )
     }
 
-    private fun runForDoorWindowSensor(
-        config: MyStatConfiguration,
-        equip: MyStatEquip,
-        analogOutStages: HashMap<String, Int>,
-        relayStages: HashMap<String, Int>
-    ): Boolean {
-
-        val isDoorOpen = isDoorOpenState(config, equip)
-        logIt(" is Door Open ? $isDoorOpen")
-        if (isDoorOpen) {
-            resetLoopOutputs()
-            resetLogicalPoints()
-            analogOutStages.clear()
-            relayStages.clear()
-        }
-        return isDoorOpen
-    }
-
 
     fun getProfileDomainEquip(node: Int): MyStatCpuEquip = cpuDeviceMap[node]!!
 

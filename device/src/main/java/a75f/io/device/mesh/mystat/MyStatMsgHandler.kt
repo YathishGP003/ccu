@@ -30,9 +30,11 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4Configuration
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatCpuProfile
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatHpuProfile
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe2Profile
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe4Profile
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
 import a75f.io.logic.bo.building.statprofiles.util.MyStatPossibleFanMode
@@ -41,6 +43,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatCpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatHpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe2FanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe4FanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.logic.bo.util.CCUUtils
@@ -183,6 +186,11 @@ private fun updateModes(
         is MyStatPipe2Profile -> {
             val configs = getMyStatConfiguration(equip.equipRef) as MyStatPipe2Configuration
             possibleFanMode = getMyStatPossibleFanModeSettings(getMyStatPipe2FanLevel(configs))
+            possibleMode = getMyStatPossibleConditionMode(configs)
+        }
+        is MyStatPipe4Profile -> {
+            val configs = getMyStatConfiguration(equip.equipRef) as MyStatPipe4Configuration
+            possibleFanMode = getMyStatPossibleFanModeSettings(getMyStatPipe4FanLevel(configs))
             possibleMode = getMyStatPossibleConditionMode(configs)
         }
     }

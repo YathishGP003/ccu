@@ -20,7 +20,6 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
-import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2AnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2RelayMapping
@@ -237,36 +236,18 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
             else -> 0
         }
     }
-
-    private fun runForDoorWindowSensor(
-        config: MyStatConfiguration, equip: MyStatEquip,
-        analogOutStages: HashMap<String, Int>, relayStages: HashMap<String, Int>
-    ): Boolean {
-
-        val isDoorOpen = isDoorOpenState(config, equip)
-        logIt(
-            " is Door Open ? $isDoorOpen")
-        if (isDoorOpen) {
-            resetLoopOutputs()
-            resetLogicalPoints()
-            analogOutStages.clear()
-            relayStages.clear()
-        }
-        return isDoorOpen
-    }
-
     private fun operateRelays(
         config: MyStatPipe2Configuration, basicSettings: MyStatBasicSettings,
         equip: MyStatPipe2Equip, userIntents: UserIntents,
         controllerFactory: MyStatControlFactory
     ) {
         controllerFactory.addPipe2Controllers(config, waterValveLoop, fanLowVentilationAvailable)
-        runControllers(equip, basicSettings, config, userIntents)
+        runControllers(equip, basicSettings, userIntents)
     }
 
     private fun runControllers(
         equip: MyStatPipe2Equip, basicSettings: MyStatBasicSettings,
-        config: MyStatPipe2Configuration, userIntents: UserIntents
+        userIntents: UserIntents
     ) {
         waterValveLoop.data = waterValveLoop(userIntents).toDouble()
         zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
@@ -274,12 +255,12 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             val result = controller.runController()
-            updateRelayStatus(controllerName, result, equip, basicSettings, config)
+            updateRelayStatus(controllerName, result, equip, basicSettings)
         }
     }
     private fun updateRelayStatus(
         controllerName: String, result: Any, equip: MyStatPipe2Equip,
-        basicSettings: MyStatBasicSettings, config: MyStatPipe2Configuration
+        basicSettings: MyStatBasicSettings
     ) {
 
         fun updateStatus(point: Point, result: Any, status: String? = null) {
@@ -312,8 +293,6 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
             }
 
             ControllerNames.FAN_SPEED_CONTROLLER -> {
-
-                runTitle24Rule(config)
 
                 fun checkUserIntentAction(stage: Int): Boolean {
                     val mode = equip.fanOpMode
@@ -386,18 +365,6 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
             (isConfigPresent(MyStatPipe2RelayMapping.WATER_VALVE) || equip.modulatingWaterValve.pointExists())
         } else {
             false
-        }
-    }
-
-    private fun runTitle24Rule(config: MyStatPipe2Configuration) {
-        resetFanLowestFanStatus()
-        fanEnabledStatus =
-            config.isAnyRelayEnabledAssociated(association = MyStatCpuRelayMapping.FAN_ENABLED.ordinal)
-        val lowestStage = config.getLowestFanSelected(fanLowVentilationAvailable.readHisVal() > 0)
-        when (lowestStage) {
-            MyStatPipe2RelayMapping.FAN_LOW_SPEED, MyStatPipe2RelayMapping.FAN_LOW_VENTILATION -> lowestStageFanLow = true
-            MyStatPipe2RelayMapping.FAN_HIGH_SPEED -> lowestStageFanHigh = true
-            else -> {}
         }
     }
 

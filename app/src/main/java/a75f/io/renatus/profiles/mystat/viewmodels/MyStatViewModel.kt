@@ -26,6 +26,8 @@ import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfigurat
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2AnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2RelayMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4AnalogOutMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4Configuration
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatProfile
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
@@ -122,7 +124,7 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
             val myStatDevice = Domain.getEquipDevices()[equipRef] as MyStatDevice?
             if (myStatDevice != null) {
                 devicesVersion = if (myStatDevice.mystatDeviceVersion.readPointValue()
-                        .toInt() == 2
+                        .toInt() == 1
                 ) MYSTAT_V2_DEVICE else MYSTAT_V1_DEVICE
             }
         }
@@ -225,13 +227,24 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         if (equipRef != null) {
             // Device ref is not required here so passing empty string
             val device = getMyStatDomainDevice("", equipRef!!)
-            return when (relayIndex) {
-                1 -> device.relay1.readPointValue() > 0
-                2 -> device.relay2.readPointValue() > 0
-                3 -> device.relay3.readPointValue() > 0
-                4 -> device.universalOut2.readPointValue() > 0
-                5 -> device.universalOut1.readPointValue() > 0
-                else -> false
+            if (devicesVersion.equals(MYSTAT_V1_DEVICE, true)) {
+                return when (relayIndex) {
+                    1 -> device.relay1.readPointValue() > 0
+                    2 -> device.relay2.readPointValue() > 0
+                    3 -> device.relay3.readPointValue() > 0
+                    4 -> device.universalOut2.readPointValue() > 0
+                    5 -> device.universalOut1.readPointValue() > 0
+                    else -> false
+                }
+            } else {
+                return when (relayIndex) {
+                    1 -> device.relay1.readPointValue() > 0
+                    2 -> device.relay2.readPointValue() > 0
+                    3 -> device.relay3.readPointValue() > 0
+                    4 -> device.universalOut1.readPointValue() > 0
+                    5 -> device.universalOut2.readPointValue() > 0
+                    else -> false
+                }
             }
         }
         return false
@@ -241,8 +254,14 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         if (equipRef != null) {
             // Device ref is not required here so passing empty string
             val device = getMyStatDomainDevice("", equipRef!!)
-            if (index == 4) return device.universalOut2.readPointValue()
-            if (index == 5) return device.universalOut1.readPointValue()
+
+            if (devicesVersion.equals(MYSTAT_V1_DEVICE, true)) {
+                if (index == 4) return device.universalOut2.readPointValue()
+                if (index == 5) return device.universalOut1.readPointValue()
+            } else {
+                if (index == 4) return device.universalOut1.readPointValue()
+                if (index == 5) return device.universalOut2.readPointValue()
+            }
         }
         return 0.0
     }
@@ -252,12 +271,24 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         if (equipRef != null) {
             // Device ref is not required here so passing empty string
             val device = getMyStatDomainDevice("", equipRef!!)
-            when (relayIndex) {
-                1 -> device.relay1.writePointValue(relayStatus)
-                2 -> device.relay2.writePointValue(relayStatus)
-                3 -> device.relay3.writePointValue(relayStatus)
-                4 -> device.universalOut2.writePointValue(relayStatus)
-                5 -> device.universalOut1.writePointValue(relayStatus)
+
+            if(devicesVersion.equals(MYSTAT_V1_DEVICE, true)){
+                when (relayIndex) {
+                    1 -> device.relay1.writePointValue(relayStatus)
+                    2 -> device.relay2.writePointValue(relayStatus)
+                    3 -> device.relay3.writePointValue(relayStatus)
+                    4 -> device.universalOut2.writePointValue(relayStatus)
+                    5 -> device.universalOut1.writePointValue(relayStatus)
+                }
+            }
+            else {
+                when (relayIndex) {
+                    1 -> device.relay1.writePointValue(relayStatus)
+                    2 -> device.relay2.writePointValue(relayStatus)
+                    3 -> device.relay3.writePointValue(relayStatus)
+                    4 -> device.universalOut1.writePointValue(relayStatus)
+                    5 -> device.universalOut2.writePointValue(relayStatus)
+                }
             }
             if (universalOut1 != null) device.universalOut1.writePointValue(universalOut1)
             if (universalOut2 != null) device.universalOut2.writePointValue(universalOut2)
@@ -343,12 +374,12 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         return isValidConfig
     }
 
-    fun updateDeviceVersionTypePointVal(myStatEquipId: String) {
-        val device = Domain.getEquipDevices()[myStatEquipId] as MyStatDevice
-        device.mystatDeviceVersion.writePointValue(if (devicesVersion == "MyStatV2") 2.0 else 1.0)
+    fun updateDeviceVersionTypePointVal(equipId: String) {
+        val device = Domain.getEquipDevices()[equipId] as MyStatDevice
+        device.mystatDeviceVersion.writePointValue(if (devicesVersion == "MyStatV2") 1.0 else 0.0)
         CcuLog.d(
             L.TAG_CCU_DOMAIN,
-            "Device version updated to ${device.mystatDeviceVersion.readPointValue()} for equip $myStatEquipId"
+            "Device version updated to ${device.mystatDeviceVersion.readPointValue()} for equip $equipId"
         )
 
     }
@@ -368,6 +399,9 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
 
                 is MyStatPipe2Configuration -> {
                     MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal
+                }
+                is MyStatPipe4Configuration ->{
+                    MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.ordinal
                 }
 
                 else -> 0

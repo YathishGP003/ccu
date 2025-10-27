@@ -31,6 +31,8 @@ import a75f.io.renatus.profiles.mystat.ui.MyStatCpuFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatHpuFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatPipe2Fragment;
 import a75f.io.renatus.profiles.oao.OAOProfileFragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatPipe4Fragment;
+import a75f.io.renatus.profiles.oao.OAOProfileFragment;
 import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
@@ -331,6 +333,11 @@ public class AlternatePairingFragment extends BaseDialogFragment {
             case HYPERSTATSPLIT_2PIPE_UV:
                 showDialogFragment(Pipe2UVFragment.Companion.newInstance(mPairingAddress,mRoomName,mFloorName,
                         mNodeType,ProfileType.HYPERSTATSPLIT_2PIPE_UV), Pipe2UVFragment.Companion.getID());
+                break;
+
+            case MYSTAT_PIPE4:
+                showDialogFragment(MyStatPipe4Fragment.Companion.newInstance(mPairingAddress, mRoomName, mFloorName,
+                        mNodeType, ProfileType.MYSTAT_PIPE4, deviceVersion), MyStatPipe4Fragment.Companion.getID());
                 break;
         }
     }

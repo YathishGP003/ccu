@@ -60,3 +60,9 @@ data class MyStatCpuMinMaxConfig(
     val heating: MinMaxConfig,
     val dcvDamperConfig: MinMaxConfig
 )
+data class MyStatPipe4MinMaxConfig(
+    val hotWaterValve: MinMaxConfig,
+    val chilledWaterValve: MinMaxConfig,
+    val fanSpeedConfig: MinMaxConfig,
+    val dcvDamperConfig: MinMaxConfig
+)

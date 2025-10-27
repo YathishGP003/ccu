@@ -23,6 +23,8 @@ object DomainName {
     const val ccuTemperatureInfluence = "ccuTemperatureInfluence"
     const val hyperstatSplit4PEcon = "hyperstatSplit4PEcon"
     const val hyperstatSplit2PEcon = "hyperstatSplit2PEcon"
+    const val mystat4PFCU = "mystat4PFCU"
+
 
     //Tuners
     const val userLimitSpread = "userLimitSpread"

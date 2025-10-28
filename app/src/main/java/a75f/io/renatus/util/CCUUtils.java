@@ -6,6 +6,9 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.util.Pair;
 
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.ProcessLifecycleOwner;
+
 import com.google.common.base.Strings;
 
 import java.text.DecimalFormat;
@@ -285,4 +288,7 @@ public class CCUUtils {
 		}
 	}
 
+	public static boolean isAppInForeground() {
+		return ProcessLifecycleOwner.get().getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED);
+	}
 }

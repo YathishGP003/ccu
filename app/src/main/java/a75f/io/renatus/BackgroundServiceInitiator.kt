@@ -8,6 +8,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil
 import a75f.io.logic.util.PreferenceUtil
 import a75f.io.renatus.ota.OTAUpdateHandlerService
+import a75f.io.renatus.util.CCUUtils
 import a75f.io.usbserial.UsbConnectService
 import a75f.io.usbserial.UsbModbusService
 import a75f.io.usbserial.UsbService
@@ -24,6 +25,7 @@ import android.os.IBinder
 import android.widget.Toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class BackgroundServiceInitiator(val context: Context = UtilityApplication.context){
@@ -63,12 +65,14 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
             // I am not sure whether removing this loop will cause any issues, so I am keeping it for now.
             // During QE, please check if this is causing any issues.
             while (!RenatusApp.isRoomDbReady) {
-                try {
-                    CcuLog.d(TAG_CCU_SERVICE_INIT, "CCU DB not ready yet. Waiting for 1 sec")
-                    Thread.sleep(1000)
-                } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                }
+                CcuLog.d(TAG_CCU_SERVICE_INIT, "CCU DB not ready yet. Waiting for 1 sec")
+                delay(1000)
+            }
+
+            // Wait until app is in foreground
+            while (!CCUUtils.isAppInForeground()) {
+                CcuLog.d(TAG_CCU_SERVICE_INIT, "App not in foreground. Waiting for 1 sec")
+                delay(1000)
             }
             setUsbFilters() // Start listening notifications from UsbService
             CcuLog.d(TAG_CCU_SERVICE_INIT, "startService for OTAUpdateHandlerService")

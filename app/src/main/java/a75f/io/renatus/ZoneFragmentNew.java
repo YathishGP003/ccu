@@ -1732,7 +1732,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                     };
 
                     // below code is to observe zone health
-                    if (!zoneMap.isEmpty() && zoneMap.get(0) != null) {
+                    if (!zoneMap.isEmpty() && zoneMap.get(0) != null && zoneMap.contains("domainName")) {
                         zoneViewModel = ZoneViewModel.Companion.create(
                                 zoneMap.get(0).get("roomRef").toString()
                         );
@@ -2825,7 +2825,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                 if (isExpanded) {
                     linearLayoutZonePoints.removeAllViews();
                     // below code is to observe zone health
-                    if (!zoneMap.isEmpty() && zoneMap.get(0) != null) {
+                    if (!zoneMap.isEmpty() && zoneMap.get(0) != null && zoneMap.contains("domainName")) {
                         zoneViewModel = ZoneViewModel.Companion.create(
                                 zoneMap.get(0).get("roomRef").toString()
                         );

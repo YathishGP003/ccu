@@ -60,6 +60,7 @@ import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatCpuFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatHpuFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatPipe2Fragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatPipe4Fragment;
 import a75f.io.renatus.profiles.ti.TIFragment;
 import a75f.io.renatus.profiles.oao.OAOProfileFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
@@ -531,7 +532,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                                 mFloorName, mNodeType, mProfileType), ConnectNodeFragment.Companion.getIdString());
                         break;
                     case MYSTAT_PIPE4:
-                        showDialogFragment(MyStatHpuFragment.Companion.newInstance(mPairingAddress, mName, mFloorName, mNodeType, ProfileType.MYSTAT_PIPE4, deviceVersion), MyStatHpuFragment.Companion.getID());
+                        showDialogFragment(MyStatPipe4Fragment.Companion.newInstance(mPairingAddress, mName, mFloorName, mNodeType, ProfileType.MYSTAT_PIPE4, deviceVersion), MyStatPipe4Fragment.Companion.getID());
                         break;
                 }
             }

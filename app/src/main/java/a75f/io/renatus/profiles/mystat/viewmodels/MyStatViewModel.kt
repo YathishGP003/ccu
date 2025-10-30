@@ -44,6 +44,7 @@ import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatCpuViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatHpuViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatPipe2ViewState
+import a75f.io.renatus.profiles.mystat.viewstates.MyStatPipe4ViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewStateUtil
 import a75f.io.renatus.profiles.system.advancedahu.Option
@@ -159,6 +160,12 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
             viewState.value = MyStatViewStateUtil.pipe2ConfigToState(
                 config as MyStatPipe2Configuration,
                 updatedViewState as MyStatPipe2ViewState
+            )
+        }
+        else if (CopyConfiguration.getSelectedProfileType() == ProfileType.MYSTAT_PIPE4) {
+            viewState.value = MyStatViewStateUtil.pipe4ConfigToState(
+                config as MyStatPipe4Configuration,
+                updatedViewState as MyStatPipe4ViewState
             )
         }
 

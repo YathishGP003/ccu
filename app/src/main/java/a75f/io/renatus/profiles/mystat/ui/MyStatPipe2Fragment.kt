@@ -157,7 +157,8 @@ class MyStatPipe2Fragment : MyStatFragment() {
                 universalOut1.association,
                 analogOut1MinMax.waterModulatingValue,
                 MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.displayName,
-                MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal, 1
+                MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal, 1,
+                isMyStatV1DeviceType()
             )
             if (universalOut2.enabled) ConfigMinMax(
                 universalOut2.association,
@@ -175,7 +176,8 @@ class MyStatPipe2Fragment : MyStatFragment() {
                 universalOut1.association,
                 analogOut1MinMax.dcvDamperConfig,
                 MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.displayName,
-                MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal, 1
+                MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal, 1,
+                isMyStatV1DeviceType()
             )
             if (universalOut2.enabled) ConfigMinMax(
                 universalOut2.association,
@@ -193,13 +195,15 @@ class MyStatPipe2Fragment : MyStatFragment() {
                 universalOut1.association,
                 analogOut1MinMax.fanSpeedConfig,
                 MyStatPipe2AnalogOutMapping.FAN_SPEED.displayName,
-                MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal, 1
+                MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal, 1,
+                isMyStatV1DeviceType()
             )
             if (universalOut2.enabled) ConfigMinMax(
                 universalOut2.association,
                 analogOut2MinMax.fanSpeedConfig,
                 MyStatPipe2AnalogOutMapping.FAN_SPEED.displayName,
-                MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal, 2
+                MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal, 2,
+                isMyStatV1DeviceType()
             )
         }
     }
@@ -208,18 +212,32 @@ class MyStatPipe2Fragment : MyStatFragment() {
     fun FanConfiguration() {
         (viewModel.viewState.value as MyStatPipe2ViewState).apply {
             if (universalOut1.enabled && universalOut1.association == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
-                MinMaxConfiguration(minLabel = "Universal-Out 1\n at Fan Low",
-                    maxLabel = "Universal-Out 1\n at Fan High",
-                    itemList = testVoltage,
-                    unit = "%",
-                    minDefault = analogOut1FanConfig.low.toString(),
-                    maxDefault = analogOut1FanConfig.high.toString(),
-                    onMinSelected = { analogOut1FanConfig.low = it.value.toInt() },
-                    onMaxSelected = { analogOut1FanConfig.high = it.value.toInt() })
+
+                if (isMyStatV1DeviceType()) {
+                    MinMaxConfiguration(
+                        minLabel = getString(R.string.analog_out_fan_low),
+                        maxLabel = getString(R.string.analog_out_fan_high),
+                        itemList = testVoltage,
+                        unit = "%",
+                        minDefault = analogOut1FanConfig.low.toString(),
+                        maxDefault = analogOut1FanConfig.high.toString(),
+                        onMinSelected = { analogOut1FanConfig.low = it.value.toInt() },
+                        onMaxSelected = { analogOut1FanConfig.high = it.value.toInt() })
+                } else {
+                    MinMaxConfiguration(
+                        minLabel = getString(R.string.universal_out1_Fan_low),
+                        maxLabel = getString(R.string.universal_out1_Fan_high),
+                        itemList = testVoltage,
+                        unit = "%",
+                        minDefault = analogOut1FanConfig.low.toString(),
+                        maxDefault = analogOut1FanConfig.high.toString(),
+                        onMinSelected = { analogOut1FanConfig.low = it.value.toInt() },
+                        onMaxSelected = { analogOut1FanConfig.high = it.value.toInt() })
+                }
             }
             if (universalOut2.enabled && universalOut2.association == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
-                MinMaxConfiguration(minLabel = "Universal-Out 2\n at Fan Low",
-                    maxLabel = "Universal-Out 2\n at Fan High",
+                MinMaxConfiguration(minLabel = getString(R.string.universal_out2_Fan_low),
+                    maxLabel = getString(R.string.universal_out2_Fan_high),
                     itemList = testVoltage,
                     unit = "%",
                     minDefault = analogOut2FanConfig.low.toString(),

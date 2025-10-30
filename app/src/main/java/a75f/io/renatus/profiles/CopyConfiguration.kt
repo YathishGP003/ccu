@@ -32,8 +32,6 @@ import a75f.io.logic.util.bacnet.buildBacnetModel
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.bacnet.models.BacnetModel
 import a75f.io.renatus.modbus.models.EquipModel
-import a75f.io.renatus.modbus.util.MYSTAT_V1_DEVICE
-import a75f.io.renatus.modbus.util.MYSTAT_V2_DEVICE
 import a75f.io.renatus.modbus.util.getBacnetPoints
 import a75f.io.renatus.modbus.util.getNodeType
 import a75f.io.renatus.modbus.util.getParameters
@@ -121,7 +119,7 @@ class CopyConfiguration {
                 val equipID = Domain.getEquipDevices()[equip["id"].toString()] as MyStatDevice
                 val devicesType = equipID.mystatDeviceVersion.readPointValue()
                 moduleName = moduleType.replace("Mystat -",if (devicesType == 1.0)  "MyStat V2 -" else "MyStat V1 -")
-                MyStatDeviceType = if (devicesType == 1.0) MYSTAT_V2_DEVICE else MYSTAT_V1_DEVICE
+                MyStatDeviceType = if (devicesType == 1.0) a75f.io.logic.bo.building.statprofiles.util.MyStatDeviceType.MYSTAT_V2.name else a75f.io.logic.bo.building.statprofiles.util.MyStatDeviceType.MYSTAT_V1.name
             }
             else {
                 moduleName = moduleType

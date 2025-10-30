@@ -216,6 +216,10 @@ fun fetchUserIntents(equip: DomainEquip): UserIntents {
     }
 }
 
+enum class MyStatDeviceType {
+    MYSTAT_V1,
+    MYSTAT_V2
+}
 
 data class StagesCounts(
     var coolingStages: CalibratedPoint = CalibratedPoint("coolingStages", "", 0.0),

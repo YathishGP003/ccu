@@ -2131,5 +2131,15 @@
     <string name="jumper_setting">MyStat Jumper Settings</string>
     <string name="at">at</string>
     <string name="error_msg_device">"Please select a device type"</string>
+    <string name="universal_out1_Fan_low">Universal-Out 1 \n at Fan Low</string>
+    <string name="universal_out2_Fan_low">Universal-Out 2 \n at Fan Low</string>
     <string name="learn_more">\u00A0Learn\u00A0More</string>
+    <string name ="analog_fan_low">Analog-Out \n at Fan Low</string>
+    <string name ="analog_fan_high">Analog-Out \n at Fan High</string>
+    <string name="universal_out1_recirculate">Universal-Out 1 at Fan Recirculat</string>
+    <string name="universal_out2_recirculate">Universal-Out 2 at Fan Recirculate</string>
+    <string name="analog_recirculate">Analog-Out at Fan Recirculate</string>
+    <string name="universal_out1_during_economizer">Universal-Out 1 During Economizer</string>
+    <string name="universal_out2_during_economizer">Universal-Out 2 During Economizer</string>
+    <string name="analog_during_economizer">Analog-Out During Economizer</string>
 </resources>

@@ -272,11 +272,6 @@ const val DEVICE_VALUE_CAPITALIZED = "Device Value"
 
 const val MAC_ADDRESS = "Mac Address"
 
-//MyStat device type
-const val MYSTAT_V2_DEVICE = "MyStatV2"
-const val MYSTAT_V1_DEVICE = "MyStatV1"
-
-
 fun getSlaveIds(isParent: Boolean): List<String> {
     val slaveAddress: ArrayList<String> = ArrayList()
     if (!isParent) slaveAddress.add(SAME_AS_PARENT)

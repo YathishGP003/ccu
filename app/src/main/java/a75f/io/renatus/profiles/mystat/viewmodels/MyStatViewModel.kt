@@ -30,13 +30,12 @@ import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4AnalogOu
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4Configuration
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatProfile
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.util.MyStatDeviceType
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
 import a75f.io.logic.bo.building.statprofiles.util.MyStatPossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
-import a75f.io.renatus.modbus.util.MYSTAT_V1_DEVICE
-import a75f.io.renatus.modbus.util.MYSTAT_V2_DEVICE
 import a75f.io.renatus.modbus.util.formattedToastMessage
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.CopyConfiguration
@@ -107,7 +106,7 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         floorRef = bundle.getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
         profileType = ProfileType.values()[bundle.getInt(FragmentCommonBundleArgs.PROFILE_TYPE)]
         nodeType = NodeType.values()[bundle.getInt(FragmentCommonBundleArgs.NODE_TYPE)]
-        devicesVersion = bundle.getString(FragmentCommonBundleArgs.DEVICE_VERSION) ?: "MyStatV1"
+        devicesVersion = bundle.getString(FragmentCommonBundleArgs.DEVICE_VERSION) ?: MyStatDeviceType.MYSTAT_V1.name
         deviceModel = ModelLoader.getMyStatDeviceModel() as SeventyFiveFDeviceDirective
     }
 
@@ -124,13 +123,13 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         if (equipRef.equals("null", true).not()) {
             val myStatDevice = Domain.getEquipDevices()[equipRef] as MyStatDevice?
             if (myStatDevice != null) {
-                devicesVersion = if (myStatDevice.mystatDeviceVersion.readPointValue()
-                        .toInt() == 1
-                ) MYSTAT_V2_DEVICE else MYSTAT_V1_DEVICE
+                devicesVersion =
+                    if (myStatDevice.mystatDeviceVersion.readPointValue().toInt() == 1)
+                        MyStatDeviceType.MYSTAT_V2.name
+                    else MyStatDeviceType.MYSTAT_V1.name
             }
         }
         isCopiedConfigurationAvailable()
-
     }
 
     fun isCopiedConfigurationAvailable() {
@@ -234,7 +233,7 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         if (equipRef != null) {
             // Device ref is not required here so passing empty string
             val device = getMyStatDomainDevice("", equipRef!!)
-            if (devicesVersion.equals(MYSTAT_V1_DEVICE, true)) {
+            if (devicesVersion.equals(MyStatDeviceType.MYSTAT_V1.name, true)) {
                 return when (relayIndex) {
                     1 -> device.relay1.readPointValue() > 0
                     2 -> device.relay2.readPointValue() > 0
@@ -262,7 +261,7 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
             // Device ref is not required here so passing empty string
             val device = getMyStatDomainDevice("", equipRef!!)
 
-            if (devicesVersion.equals(MYSTAT_V1_DEVICE, true)) {
+            if (devicesVersion.equals(MyStatDeviceType.MYSTAT_V1.name, true)) {
                 if (index == 4) return device.universalOut2.readPointValue()
                 if (index == 5) return device.universalOut1.readPointValue()
             } else {
@@ -279,7 +278,7 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
             // Device ref is not required here so passing empty string
             val device = getMyStatDomainDevice("", equipRef!!)
 
-            if(devicesVersion.equals(MYSTAT_V1_DEVICE, true)){
+            if(devicesVersion.equals(MyStatDeviceType.MYSTAT_V1.name, true)){
                 when (relayIndex) {
                     1 -> device.relay1.writePointValue(relayStatus)
                     2 -> device.relay2.writePointValue(relayStatus)
@@ -381,18 +380,18 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         return isValidConfig
     }
 
-    fun updateDeviceVersionTypePointVal(equipId: String) {
-        val device = Domain.getEquipDevices()[equipId] as MyStatDevice
-        device.mystatDeviceVersion.writePointValue(if (devicesVersion == "MyStatV2") 1.0 else 0.0)
+    fun updateDeviceVersionTypePointVal(myStatEquipId: String) {
+        val device = Domain.getEquipDevices()[myStatEquipId] as MyStatDevice
+        device.mystatDeviceVersion.writePointValue(if (devicesVersion == MyStatDeviceType.MYSTAT_V2.name) 1.0 else 0.0)
         CcuLog.d(
             L.TAG_CCU_DOMAIN,
-            "Device version updated to ${device.mystatDeviceVersion.readPointValue()} for equip $equipId"
+            "Device version updated to ${device.mystatDeviceVersion.readPointValue()} for equip $myStatEquipId"
         )
 
     }
 
     fun getAnalogOutDefaultValueForMyStatV1(config: MyStatConfiguration) {
-        if(devicesVersion == MYSTAT_V2_DEVICE)return
+        if(devicesVersion == MyStatDeviceType.MYSTAT_V2.name) return
 
         if (!config.universalOut1.enabled) {
             viewState.value.universalOut1.association = when (config) {

@@ -157,7 +157,8 @@ class MyStatHpuFragment : MyStatFragment() {
                 universalOut1.association,
                 analogOut1MinMax.compressorConfig,
                 MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.displayName,
-                MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal,1
+                MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal,1,
+                isMyStatV1DeviceType()
             )
             if (universalOut2.enabled) ConfigMinMax(
                 universalOut2.association,
@@ -175,7 +176,8 @@ class MyStatHpuFragment : MyStatFragment() {
                 universalOut1.association,
                 analogOut1MinMax.dcvDamperConfig,
                 MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.displayName,
-                MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal,1
+                MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal,1,
+                isAnalogType = isMyStatV1DeviceType()
             )
             if (universalOut2.enabled) ConfigMinMax(
                 universalOut2.association,
@@ -193,7 +195,8 @@ class MyStatHpuFragment : MyStatFragment() {
                 universalOut1.association,
                 analogOut1MinMax.fanSpeedConfig,
                 MyStatHpuAnalogOutMapping.FAN_SPEED.displayName,
-                MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal,1
+                MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal,1,
+                isAnalogType = isMyStatV1DeviceType()
             )
             if (universalOut2.enabled) ConfigMinMax(
                 universalOut2.association,
@@ -208,18 +211,32 @@ class MyStatHpuFragment : MyStatFragment() {
     fun FanConfiguration() {
         (viewModel.viewState.value as MyStatHpuViewState).apply {
             if (universalOut1.enabled && universalOut1.association == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal) {
-                MinMaxConfiguration(minLabel = "Universal-Out 1\n at Fan Low",
-                    maxLabel = "Universal-Out 1\n at Fan High",
-                    itemList = testVoltage,
-                    unit = "%",
-                    minDefault = analogOut1FanConfig.low.toString(),
-                    maxDefault = analogOut1FanConfig.high.toString(),
-                    onMinSelected = { analogOut1FanConfig.low = it.value.toInt() },
-                    onMaxSelected = { analogOut1FanConfig.high = it.value.toInt() })
+                if (isMyStatV1DeviceType()) {
+                    MinMaxConfiguration(
+                        minLabel = getString(R.string.analog_out_fan_low),
+                        maxLabel = getString(R.string.analog_out_fan_high),
+                        itemList = testVoltage,
+                        unit = "%",
+                        minDefault = analogOut1FanConfig.low.toString(),
+                        maxDefault = analogOut1FanConfig.high.toString(),
+                        onMinSelected = { analogOut1FanConfig.low = it.value.toInt() },
+                        onMaxSelected = { analogOut1FanConfig.high = it.value.toInt() })
+                }
+                else {
+                    MinMaxConfiguration(
+                        minLabel = getString(R.string.universal_out1_Fan_low),
+                        maxLabel = getString(R.string.universal_out1_Fan_high),
+                        itemList = testVoltage,
+                        unit = "%",
+                        minDefault = analogOut1FanConfig.low.toString(),
+                        maxDefault = analogOut1FanConfig.high.toString(),
+                        onMinSelected = { analogOut1FanConfig.low = it.value.toInt() },
+                        onMaxSelected = { analogOut1FanConfig.high = it.value.toInt() })
+                }
             }
             if (universalOut2.enabled && universalOut2.association == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal) {
-                MinMaxConfiguration(minLabel = "Universal-Out 2\n at Fan Low",
-                    maxLabel = "Universal-Out 2\n at Fan High",
+                MinMaxConfiguration(minLabel = getString(R.string.universal_out2_Fan_low),
+                    maxLabel = getString(R.string.universal_out2_Fan_high),
                     itemList = testVoltage,
                     unit = "%",
                     minDefault = analogOut2FanConfig.low.toString(),

@@ -6,6 +6,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuRelayMapping
+import a75f.io.logic.bo.building.statprofiles.util.MyStatDeviceType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.DependentPointMappingView
@@ -26,7 +27,6 @@ import a75f.io.renatus.compose.StyledTextView
 import a75f.io.renatus.compose.SubTitle
 import a75f.io.renatus.compose.ToggleButton
 import a75f.io.renatus.compose.ToggleButtonStateful
-import a75f.io.renatus.modbus.util.MYSTAT_V1_DEVICE
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hss.HyperStatSplitFragment.Companion.CONDITIONING_ACCESS
 import a75f.io.renatus.profiles.hss.HyperStatSplitFragment.Companion.INSTALLER_ACCESS
@@ -101,7 +101,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
         }
     }
 
-    private fun isMyStatV1DeviceType(): Boolean = viewModel.devicesVersion.equals(MYSTAT_V1_DEVICE, ignoreCase = true)
+     fun isMyStatV1DeviceType(): Boolean = viewModel.devicesVersion.equals(MyStatDeviceType.MYSTAT_V1.name, ignoreCase = true)
 
     private fun getHpuDisabledIndices(config: ConfigState): List<Int> {
         return if (viewModel.viewState.value.isAnyRelayMapped(
@@ -331,7 +331,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                         )
                         val analogEnums = universalEnums.filter { it.index >= viewModel.getAnalogStatIndex() }
                         UniversalOutConfiguration(
-                            portName = getString(R.string.vav_label_analog_out_1),
+                            portName = getString(R.string.analog_Out),
                             enabled = universalOut1.enabled,
                             onEnabledChanged = {
                                 universalOut1.enabled = it
@@ -371,9 +371,9 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                             onAssociationChanged = { associationIndex ->
                                 universalOut1.association = associationIndex.index
                             },
-                            testState = viewModel.getRelayStatus(4),
+                            testState = viewModel.getRelayStatus(5),
                             onTestActivated = {
-                                viewModel.sendTestSignal(4, if (it) 1.0 else 0.0)
+                                viewModel.sendTestSignal(5, if (it) 1.0 else 0.0)
                             },
                             testSingles = testVoltage,
                             testVal = viewModel.getAnalogValue(4),
@@ -395,9 +395,9 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                             onAssociationChanged = { associationIndex ->
                                 universalOut2.association = associationIndex.index
                             },
-                            testState = viewModel.getRelayStatus(5),
+                            testState = viewModel.getRelayStatus(4),
                             onTestActivated = {
-                                viewModel.sendTestSignal(5, if (it) 1.0 else 0.0)
+                                viewModel.sendTestSignal(4, if (it) 1.0 else 0.0)
                             },
                             testSingles = testVoltage,
                             testVal = viewModel.getAnalogValue(5),
@@ -567,18 +567,34 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
     }
 
     @Composable
-    fun ConfigMinMax(association: Int, minMax: MinMaxConfig, displayName: String, mapping: Int, index: Int) {
+    fun ConfigMinMax(association: Int, minMax: MinMaxConfig, displayName: String, mapping: Int, index: Int,isAnalogType :Boolean = false) {
         if (association == mapping) {
-            MinMaxConfiguration(
-                minLabel = "${getString(R.string.universal_Out)} $index ${getString(R.string.at)}  ${getString(R.string.min)} \n${displayName}",
-                maxLabel = "${getString(R.string.universal_Out)} $index ${getString(R.string.at)} ${getString(R.string.max)} \n${displayName}",
-                itemList = minMaxVoltage,
-                unit = "V",
-                minDefault = minMax.min.toString(),
-                maxDefault = minMax.max.toString(),
-                onMinSelected = { minMax.min = it.value.toInt() },
-                onMaxSelected = { minMax.max = it.value.toInt() }
-            )
+            if (isAnalogType) {
+                MinMaxConfiguration(
+                    minLabel = "${getString(R.string.analog_Out)} ${getString(R.string.at)}  ${getString(R.string.min)} \n${displayName}",
+                    maxLabel = "${getString(R.string.analog_Out)}  ${getString(R.string.at)} ${getString(R.string.max)} \n${displayName}",
+                    itemList = minMaxVoltage,
+                    unit = "V",
+                    minDefault = minMax.min.toString(),
+                    maxDefault = minMax.max.toString(),
+                    onMinSelected = { minMax.min = it.value.toInt() },
+                    onMaxSelected = { minMax.max = it.value.toInt() },
+
+                    )
+
+            } else {
+                MinMaxConfiguration(
+                    minLabel = "${getString(R.string.universal_Out)} $index ${getString(R.string.at)}  ${getString(R.string.min)} \n${displayName}",
+                    maxLabel = "${getString(R.string.universal_Out)} $index ${getString(R.string.at)} ${getString(R.string.max)} \n${displayName}",
+                    itemList = minMaxVoltage,
+                    unit = "V",
+                    minDefault = minMax.min.toString(),
+                    maxDefault = minMax.max.toString(),
+                    onMinSelected = { minMax.min = it.value.toInt() },
+                    onMaxSelected = { minMax.max = it.value.toInt() },
+
+                    )
+            }
         }
     }
 

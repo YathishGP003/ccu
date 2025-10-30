@@ -5,17 +5,22 @@ import a75f.io.api.haystack.RawPoint
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.Point
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.StringValueConfig
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.devices.MyStatDevice
+import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
+import a75f.io.domain.equips.mystat.MyStatHpuEquip
+import a75f.io.domain.equips.mystat.MyStatPipe2Equip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.statprofiles.util.MyStatDeviceType
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatDevice
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.projecthaystack.HDict
@@ -255,6 +260,38 @@ abstract class MyStatConfiguration(
             .forEach { point ->
                 Domain.hayStack.updatePoint(point, point.id)
             }
+    }
+
+    fun updateEnumConfigs(equip: MyStatEquip, deviceType: String) {
+        if (deviceType.equals(MyStatDeviceType.MYSTAT_V2.name, true)) return
+        fun updateEnum(enum: String, point: Point) {
+            val dbPoint = a75f.io.api.haystack.Point.Builder()
+                .setHDict(Domain.hayStack.readHDictById(point.getPoint()["id"].toString()))
+                .setEnums(enum).build()
+            Domain.hayStack.updatePoint(dbPoint, dbPoint.id)
+        }
+        var relayEnum = ""
+        var analogEnum = ""
+        when(equip) {
+            is MyStatCpuEquip -> {
+                relayEnum = "Cooling Stage 1=0,Cooling Stage 2=1,Heating Stage 1=2,Heating Stage 2=3,Fan Low Speed=4,Fan High Speed=5,Fan Enable=6,Occupied Enable=7,Humidifier=8,Dehumidifier=9,Externally Mapped - Relay=10,DCV Damper=11,NA=12,NA=13,NA=14,NA=15,NA=16,NA=17"
+                analogEnum = "NA=0,NA=1,NA=2,NA=3,NA=4,NA=5,NA=6,NA=7,NA=8,NA=9,NA=10,NA=11,Cooling=12,Linear Fan Speed=13,Heating=14,Staged Fan Speed=15,Externally Mapped - Analog=16,DCV Modulating Damper=17"
+            }
+            is MyStatHpuEquip -> {
+                relayEnum = "Compressor Stage 1=0,Compressor Stage 2=1,Aux Heating=2,Fan Low Speed=3,Fan High Speed=4,Fan Enable=5,Occupied Enable=6,Humidifier=7,Dehumidifier=8,O - Energize in Cooling=9,B - Energize in Heating=10,Externally Mapped - Relay=11,DCV Damper=12,NA=13,NA=14,NA=15,NA=16"
+                analogEnum = "NA=0,NA=1,NA=2,NA=3,NA=4,NA=5,NA=6,NA=7,NA=8,NA=9,NA=10,NA=11,NA=12,Compressor Speed=13,Fan Speed=14,Externally Mapped - Analog=15,DCV Modulating Damper=16"
+            }
+            is MyStatPipe2Equip -> {
+                relayEnum = "Fan Low Speed=0,Fan High Speed=1,Aux Heating=2,Water Valve=3,Fan Enable=4,Occupied Enable=5,Humidifier=6,Dehumidifier=7,Externally Mapped - Relay=8,DCV Damper=9,Fan Low Speed - Ventilation=10,NA=11,NA=12,NA=13,NA=14"
+                analogEnum = "NA=0,NA=1,NA=2,NA=3,NA=4,NA=5,NA=6,NA=7,NA=8,NA=9,NA=10,Water Modulating Valve=11,Fan Speed=12,Externally Mapped - Analog=13,DCV Modulating Damper=14"
+            }
+        }
+        if (relayEnum.isNotEmpty()) {
+            updateEnum(relayEnum, equip.universalOut2Association)
+        }
+        if (analogEnum.isNotEmpty()) {
+            updateEnum(analogEnum, equip.universalOut1Association)
+        }
     }
 
     fun setPortConfiguration(

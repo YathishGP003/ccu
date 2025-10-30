@@ -156,6 +156,7 @@ class MyStatPipe2ViewModel(application: Application) : MyStatViewModel(applicati
             modifyFanMode(possibleFanMode, equip.fanOpMode)
             modifyConditioningMode(possibleConditioningMode.ordinal, equip.conditioningMode, allStandaloneProfileConditions)
             setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap())
+            updateEnumConfigs(equip, devicesVersion)
         }
     }
 

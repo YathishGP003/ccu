@@ -1,11 +1,10 @@
 package a75f.io.renatus.profiles.mystat.ui
 
 
+import a75f.io.logic.bo.building.statprofiles.util.MyStatDeviceType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
-import a75f.io.renatus.modbus.util.MYSTAT_V1_DEVICE
-import a75f.io.renatus.modbus.util.MYSTAT_V2_DEVICE
 import a75f.io.renatus.util.CCUUiUtil.updateBackgroundWaterMaker
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -71,19 +70,19 @@ class MyStatDeviceSelectionFragment : BaseDialogFragment() {
         val goBack = view.findViewById<View>(R.id.btnBack)
         val nextButton = view.findViewById<View>(R.id.nextBtn)
         myStatV1Card.setOnClickListener {
-            myStatDevice = MYSTAT_V1_DEVICE
+            myStatDevice = MyStatDeviceType.MYSTAT_V1.name
             linearlayoutCardV1.setBackgroundResource(R.drawable.cardview_border)
             linearlayoutCardV2.setBackgroundResource(R.drawable.card_view_blur_border)
         }
         myStatV2Card.setOnClickListener {
-            myStatDevice = MYSTAT_V2_DEVICE
+            myStatDevice = MyStatDeviceType.MYSTAT_V2.name
             linearlayoutCardV2.setBackgroundResource(R.drawable.cardview_border)
             linearlayoutCardV1.setBackgroundResource(R.drawable.card_view_blur_border)
         }
 
         nextButton.setOnClickListener {
 
-            if (myStatDevice.equals("")) {
+            if (myStatDevice == "") {
                 Toast.makeText(context, getString(R.string.error_msg_device), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }

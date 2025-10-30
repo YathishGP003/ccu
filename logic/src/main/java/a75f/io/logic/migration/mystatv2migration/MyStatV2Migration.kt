@@ -5,6 +5,9 @@ import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.devices.MyStatDevice
+import a75f.io.domain.equips.mystat.MyStatCpuEquip
+import a75f.io.domain.equips.mystat.MyStatHpuEquip
+import a75f.io.domain.equips.mystat.MyStatPipe2Equip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
@@ -17,6 +20,7 @@ import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfigurat
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuRelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2RelayMapping
+import a75f.io.logic.bo.building.statprofiles.util.MyStatDeviceType
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatModelByEquipRef
 import a75f.io.logic.util.PreferenceUtil
@@ -164,7 +168,7 @@ class MyStatV2Migration {
                     updateConfig(config, data.second, MyStatPipe2RelayMapping.values().size)
                 }
             }
-            equipBuilder.updateEquipAndPoints(
+            val equipRef = equipBuilder.updateEquipAndPoints(
                 config,
                 model,
                 hsApi.getSite()!!.id,
@@ -180,8 +184,25 @@ class MyStatV2Migration {
             )
             config.universalInUnit(deviceRef)
             config.apply { setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap()) }
+            when (config) {
+                is MyStatCpuConfiguration -> config.updateEnumConfigs(
+                    MyStatCpuEquip(equipRef),
+                    MyStatDeviceType.MYSTAT_V1.name
+                )
+
+                is MyStatHpuConfiguration -> config.updateEnumConfigs(
+                    MyStatHpuEquip(equipRef),
+                    MyStatDeviceType.MYSTAT_V1.name
+                )
+
+                is MyStatPipe2Configuration -> config.updateEnumConfigs(
+                    MyStatPipe2Equip(equipRef),
+                    MyStatDeviceType.MYSTAT_V1.name
+                )
+            }
             MyStatDevice(deviceRef).mystatDeviceVersion.writePointValue(0.0)
         }
+
         CcuLog.d(
             MYSTAT_V2_MIGRATION,
             "migration is successfully completed"

@@ -151,7 +151,9 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
             modifyConditioningMode(possibleConditioningMode.ordinal, equip.conditioningMode, allStandaloneProfileConditions)
             setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap())
             DesiredTempDisplayMode.setModeTypeOnUserIntentChange(roomRef, CCUHsApi.getInstance())
+            updateEnumConfigs(equip, devicesVersion)
         }
+
     }
 
     fun isAnyRelayMappedToState(mapping: MyStatCpuRelayMapping): Boolean {

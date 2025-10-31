@@ -116,8 +116,8 @@ class CopyConfiguration {
             val equip = ccuHsApiInstance.readEntity("zone and equip and not equipRef and group == \"$address\"")
 
             if (isMyStatEquip(equip)) {
-                val equipID = Domain.getEquipDevices()[equip["id"].toString()] as MyStatDevice
-                val devicesType = equipID.mystatDeviceVersion.readPointValue()
+                val device = Domain.getEquipDevices()[equip["id"].toString()] as MyStatDevice
+                val devicesType = device.mystatDeviceVersion.readPointValue()
                 moduleName = moduleType.replace("Mystat -",if (devicesType == 1.0)  "MyStat V2 -" else "MyStat V1 -")
                 MyStatDeviceType = if (devicesType == 1.0) a75f.io.logic.bo.building.statprofiles.util.MyStatDeviceType.MYSTAT_V2.name else a75f.io.logic.bo.building.statprofiles.util.MyStatDeviceType.MYSTAT_V1.name
             }

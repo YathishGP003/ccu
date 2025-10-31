@@ -39,7 +39,7 @@ class MyStatV2Migration {
     private val hsApi = CCUHsApi.getInstance()
 
     companion object {
-        const val MYSTAT_V2_MIGRATION = "MYSTAT_V2_MIGRATION"
+        const val MYSTAT_V2_MIGRATION = "MYSTAT_V2_MIGRATION_2.0"
         val cpuDynamicValues = listOf(
             DomainName.analog1MinCooling,
             DomainName.analog1MinHeating,
@@ -111,20 +111,37 @@ class MyStatV2Migration {
         }
         equips.forEach { equip ->
             val equipId = equip[Tags.ID].toString()
-            val relay4Enabled = Point(DomainName.relay4OutputEnable, equipId).readDefaultVal() > 0
-            val relay4Association =
-                Point(DomainName.relay4OutputAssociation, equipId).readDefaultVal()
-            val analogOut1Enabled =
-                Point(DomainName.analog1OutputEnable, equipId).readDefaultVal() > 0
-            val analogOut1Association =
-                Point(DomainName.analog1OutputAssociation, equipId).readDefaultVal()
+            val deviceMap = CCUHsApi.getInstance().readEntity("domainName and device and equipRef == \"$equipId\"")
+            val device = MyStatDevice((deviceMap["id"].toString()))
+            val relay4Enabled = Point(DomainName.relay4OutputEnable, equipId)
+            val relay4Association = Point(DomainName.relay4OutputAssociation, equipId)
+
+           // it is already mystat v2 device then ignore the migration
+            if (relay4Enabled.pointExists().not() && relay4Association.pointExists().not()) {
+                CcuLog.d(
+                    MYSTAT_V2_MIGRATION,
+                    "Skipping migration for equipId: $equipId as it is already MyStat V2 device"
+                )
+                if (device.mystatDeviceVersion.readPointValue() > 1) {
+                    device.mystatDeviceVersion.writePointValue(1.0)
+                } else {
+                    device.mystatDeviceVersion.writePointValue(0.0)
+                }
+                return@forEach
+            }
+            device.mystatDeviceVersion.writePointValue(0.0)
+            val analogOut1Enabled = Point(DomainName.analog1OutputEnable, equipId).readDefaultVal() > 0
+            val analogOut1Association = Point(DomainName.analog1OutputAssociation, equipId).readDefaultVal()
             associationCache[equipId] = Pair(
                 equip, AssociationData(
-                    relay4Enabled, relay4Association, analogOut1Enabled,
-                    analogOut1Association, getDynamicValues(equipId)
+                    relay4Enabled.readDefaultVal() > 0, relay4Association.readDefaultVal(),
+                    analogOut1Enabled, analogOut1Association, getDynamicValues(equipId)
                 )
             )
         }
+        CcuLog.d(
+            MYSTAT_V2_MIGRATION, "associationCache: $associationCache "
+        )
     }
 
     fun migratePostModelMigrationData() {

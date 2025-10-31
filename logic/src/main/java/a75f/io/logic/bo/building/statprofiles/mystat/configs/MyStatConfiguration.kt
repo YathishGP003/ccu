@@ -286,10 +286,10 @@ abstract class MyStatConfiguration(
                 analogEnum = "NA=0,NA=1,NA=2,NA=3,NA=4,NA=5,NA=6,NA=7,NA=8,NA=9,NA=10,Water Modulating Valve=11,Fan Speed=12,Externally Mapped - Analog=13,DCV Modulating Damper=14"
             }
         }
-        if (relayEnum.isNotEmpty()) {
+        if (equip.universalOut2Association.pointExists() && relayEnum.isNotEmpty()) {
             updateEnum(relayEnum, equip.universalOut2Association)
         }
-        if (analogEnum.isNotEmpty()) {
+        if (equip.universalOut1Association.pointExists() && analogEnum.isNotEmpty()) {
             updateEnum(analogEnum, equip.universalOut1Association)
         }
     }

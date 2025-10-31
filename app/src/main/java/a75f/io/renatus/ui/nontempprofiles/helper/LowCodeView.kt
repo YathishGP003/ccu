@@ -56,10 +56,9 @@ fun loadLowCodeModule(
     showExternalEquipPointsUI(composeView, viewModel, equipId, headerName, null, rs485Text, address.toInt())
 
     val equipmentDevice = externalEquipDevice as EquipmentDevice
-    val deviceId = equipmentDevice.slaveId.toString()
     // lastUpdate and heartbeat
     if (showLastUpdatedTime) {
-        viewModel.initializeEquipHealth(equipmentDeviceName, true, deviceId)
+        viewModel.initializeEquipHealth(equipmentDeviceName, true, address)
     } else {
         viewModel.equipName = equipmentDeviceName
     }

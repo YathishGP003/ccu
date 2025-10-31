@@ -184,6 +184,54 @@
                 </RelativeLayout>
 
                 <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/rl_pcn_equipment">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="114dp"
+                    android:layout_marginVertical="20dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textpcnEquipment"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:text="@string/title_pcn"
+                        android:textAppearance="@style/title_bold"
+                        />
+
+                    <TextView
+                        android:textAppearance="@style/text_label_secondary"
+                        android:id="@+id/textpcnEquipmentDes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/description_pcn"
+                        />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/nextpcnEq"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/next_arrow_button_enabled" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/listview_divider_color" />
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:id="@+id/rl_mbenergymeter"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

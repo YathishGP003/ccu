@@ -775,5 +775,5 @@ enum class ControlType {
 enum class ConnectControlType {
     LOAD_BASED_COOLING_CONTROL, LOAD_BASED_HEATING_CONTROL, LOAD_BASED_FAN_CONTROL, COMPOSITE, CO2_BASED_DAMPER_CONTROL, OAO_DAMPER, RETURN_DAMPER, COMPRESSOR_SPEED
 }
-
+//
 data class Option(val index: Int, val value: String, val dis: String? = null)

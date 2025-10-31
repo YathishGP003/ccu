@@ -92,7 +92,7 @@ public class HeartBeatUtil {
     }
 
     public static String getLastUpdatedTimeForCn(String deviceRef) {
-        Date updatedTime = CCUUtils.getLastUpdatedTimeForCN(deviceRef);
+        Date updatedTime = CCUUtils.getLastUpdatedTimeForLowCodeDevice(deviceRef);
 
         if (updatedTime == null) {
             return "--";
@@ -185,7 +185,7 @@ public class HeartBeatUtil {
     }
 
     public static void moduleStatusForConnectNode(TextView moduleStatus, String deviceRef){
-        if (CCUUtils.isConnectModuleAlive(deviceRef)) {
+        if (CCUUtils.isLowCodeDeviceAlive(deviceRef)) {
             moduleStatus.setBackgroundResource(R.drawable.module_alive);
         } else {
             moduleStatus.setBackgroundResource(R.drawable.module_dead);

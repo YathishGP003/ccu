@@ -1,7 +1,7 @@
 
 package a75f.io.device.modbus;
 
-import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
+import static a75f.io.logic.bo.building.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
 
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -141,6 +141,11 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
         CcuLog.i(L.TAG_CONNECT_NODE, "Write Connect Modbus register slaveId :" + slaveId
                 + " RegisterAddress :" + registerAddress + " with val :" + value);
         ConnectModbusSerialComm.writeToConnectNode(slaveId, registerAddress, value);
+    }
+
+    @Override
+    public void writeToPCN() {
+        LSerial.getInstance().setWritePcnUpdate(true);
     }
 
     public void writeRegister(String id ) {

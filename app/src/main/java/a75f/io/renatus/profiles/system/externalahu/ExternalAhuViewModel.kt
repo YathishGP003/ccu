@@ -6,7 +6,7 @@ import a75f.io.api.haystack.bacnet.parser.BacnetModelDetailResponse
 import a75f.io.api.haystack.bacnet.parser.BacnetProperty
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.api.haystack.util.hayStack
-import a75f.io.device.modbus.buildModbusModel
+import a75f.io.logic.bo.building.modbus.buildModbusModel
 import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.service.DomainService

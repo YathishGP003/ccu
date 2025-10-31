@@ -303,7 +303,8 @@ public class UpdatePointHandler implements MessageHandler
             }
         }
 
-        if (localPoint.getMarkers().contains("modbus") || localPoint.getMarkers().contains(Tags.CONNECTMODULE)){
+        if (localPoint.getMarkers().contains("modbus") || localPoint.getMarkers().contains(Tags.CONNECTMODULE) ||
+                localPoint.getMarkers().contains(Tags.PCN)){
             ModbusHandler.updatePoint(msgObject,localPoint);
             if (modbusDataInterface != null) {
                 modbusDataInterface.refreshScreen(localPoint.getId());

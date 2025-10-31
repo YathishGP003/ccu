@@ -1,5 +1,6 @@
 package a75f.io.renatus.ui.nontempprofiles.helper
 
+import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.renatus.R
 import a75f.io.renatus.ui.nontempprofiles.utilities.externalEquipsLayoutSetup
@@ -11,7 +12,7 @@ import android.widget.LinearLayout
 import androidx.compose.ui.platform.ComposeView
 
 
-fun loadConnectModuleZone(
+fun loadLowCodeModule(
     nonTempProfileViewModels: MutableList<NonTempProfileViewModel>,
     equipId: String,
     equipmentDeviceName: String,
@@ -19,22 +20,43 @@ fun loadConnectModuleZone(
     externalEquipDevice: Any,
     zoneDetailsView: View,
     linearLayoutZonePoints: LinearLayout,
-    connectNodeDevice: HashMap<Any, Any>
+    lowCodeDevice: HashMap<Any, Any>,
+    equipType : String,
+    rs485Text : String? = null
 ) {
     val composeView = zoneDetailsView.findViewById<ComposeView>(R.id.detailedComposeView)
     externalEquipsLayoutSetup(linearLayoutZonePoints, zoneDetailsView)
 
     val viewModel = NonTempProfileViewModel()
-    nonTempProfileViewModels.add(viewModel)
-    var connectNodeHeaderName: String? = null
-    if (showLastUpdatedTime) {
-        val connectNodeAddr = connectNodeDevice["addr"].toString()
-        connectNodeHeaderName = "Connect Node ($connectNodeAddr)"
-    }
-    showExternalEquipPointsUI(composeView, viewModel, equipId, connectNodeHeaderName)
+    var headerName: String? = null
+    val address = lowCodeDevice["addr"].toString()
 
-    val cnDevice = externalEquipDevice as EquipmentDevice
-    val deviceId = cnDevice.slaveId.toString()
+    if (showLastUpdatedTime) {
+        headerName = when (equipType) {
+            Tags.PCN -> {
+                "Smart Node-Custom Code ($address)"
+            }
+            Tags.CONNECTMODULE -> {
+                "Connect Module ($address)"
+            }
+            Tags.MODBUS -> {
+                "External Equip ($address)"
+            }
+            else -> {
+                ""
+            }
+        }
+    } else {
+        viewModel.lastUpdated.value.id = null
+    }
+    nonTempProfileViewModels.add(viewModel)
+    if (headerName?.contains("External Equip") == true) {
+        viewModel.equipName = equipmentDeviceName
+    }
+    showExternalEquipPointsUI(composeView, viewModel, equipId, headerName, null, rs485Text, address.toInt())
+
+    val equipmentDevice = externalEquipDevice as EquipmentDevice
+    val deviceId = equipmentDevice.slaveId.toString()
     // lastUpdate and heartbeat
     if (showLastUpdatedTime) {
         viewModel.initializeEquipHealth(equipmentDeviceName, true, deviceId)
@@ -45,9 +67,9 @@ fun loadConnectModuleZone(
 
     viewModel.initializeDetailedViewPoints(
         getModbusDetailedViewPoints(
-            cnDevice, "connectModule",
-            cnDevice.deviceEquipRef
+            equipmentDevice, equipType,
+            equipmentDevice.deviceEquipRef
         )
     )
-    viewModel.observeConnectEquipHealthByGroupId(connectNodeDevice["id"].toString())
+    viewModel.observeConnectEquipHealthByGroupId(lowCodeDevice["id"].toString())
 }

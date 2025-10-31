@@ -12,6 +12,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil.Companion.connectNodeEquip
+import a75f.io.logic.bo.building.pcn.PCNUtil
 import a75f.io.logic.bo.building.system.util.getAdvAhuConnectModule
 
 /**
@@ -172,7 +173,12 @@ class OtaStatusDiagPoint {
             val hsApi = CCUHsApi.getInstance()
             if (isCMDevice(node)) {
                 Domain.diagEquip.otaStatusCM.writeHisVal(status.ordinal.toDouble())
+            } else if (PCNUtil.getPcnByNodeAddress(node.toString(), hsApi).size > 0) {
+                // SN PCN device - get deviceRef using node address
+                val deviceRef = PCNUtil.getPcnByNodeAddress(node.toString(), hsApi).get("id").toString()
+                hsApi.writeHisValByQuery("ota and status and domainName ==\"otaStatus\" and deviceRef ==\"$deviceRef\"",status.ordinal.toDouble())
             } else if (ConnectNodeUtil.getConnectNodeByNodeAddress(node.toString(), hsApi).size > 0) {
+                // SN ConnectNode device connected to PCN
                 val deviceRef = ConnectNodeUtil.getConnectNodeByNodeAddress(node.toString(), hsApi).get("id").toString()
                 hsApi.writeHisValByQuery("ota and status and domainName ==\"otaStatus\" and deviceRef ==\"$deviceRef\"",status.ordinal.toDouble())
             } else if (getAdvAhuConnectModule(node.toString(), hsApi).size > 0) {
@@ -232,7 +238,7 @@ class OtaStatusDiagPoint {
             }
         }
 
-        fun updateCcuToCmSeqProgress(totalPackets: Double, currentRunningPacket: Int, nodeAddress: Int) {
+        fun updateCcuToCmSeqProgress(totalPackets: Double, currentRunningPacket: Int, nodeAddress: Int, pcnSetupAddr: Short) {
             val seqProgress = ((currentRunningPacket.toDouble() / totalPackets) * 100).toInt()
             val currentSeqStatus = connectNodeEquip(nodeAddress).sequenceStatus.readHisVal().toInt()
             CcuLog.d(L.TAG_CCU_OTA_PROCESS, "" +
@@ -241,15 +247,15 @@ class OtaStatusDiagPoint {
             )
             when {
                 (seqProgress in (10..49)) -> {
-                    updateIfChangeInSeqValue (currentSeqStatus,SequenceOtaStatus.SEQ_CCU_TO_CM_PERCENT_COMPLETED_10,nodeAddress)
+                    updateIfChangeInSeqValue (currentSeqStatus,SequenceOtaStatus.SEQ_CCU_TO_CM_PERCENT_COMPLETED_10,nodeAddress, pcnSetupAddr)
                     return
                 }
                 (seqProgress in (50..98)) -> {
-                    updateIfChangeInSeqValue (currentSeqStatus,SequenceOtaStatus.SEQ_CCU_TO_CM_PERCENT_COMPLETED_50,nodeAddress)
+                    updateIfChangeInSeqValue (currentSeqStatus,SequenceOtaStatus.SEQ_CCU_TO_CM_PERCENT_COMPLETED_50,nodeAddress, pcnSetupAddr)
                     return
                 }
                 (seqProgress >= 99)  -> {
-                    updateIfChangeInSeqValue (currentSeqStatus,SequenceOtaStatus.SEQ_CCU_TO_CM_PERCENT_COMPLETED_100,nodeAddress)
+                    updateIfChangeInSeqValue (currentSeqStatus,SequenceOtaStatus.SEQ_CCU_TO_CM_PERCENT_COMPLETED_100,nodeAddress, pcnSetupAddr)
                     return
                 }
             }
@@ -260,13 +266,19 @@ class OtaStatusDiagPoint {
                 updateOtaStatusPoint(newState, nodeAddress)
         }
 
-        private fun updateIfChangeInSeqValue(currentState: Int, newState: SequenceOtaStatus, nodeAddress: Int) {
-            if (currentState != newState.ordinal)
-                ConnectNodeUtil.updateOtaSequenceStatus(newState, nodeAddress)
+        private fun updateIfChangeInSeqValue(currentState: Int, newState: SequenceOtaStatus, nodeAddress: Int, pcnSetupAddr: Short) {
+            if (currentState != newState.ordinal) {
+                if(pcnSetupAddr == 100.toShort()) {
+                    PCNUtil.updateOtaSequenceStatus(newState, nodeAddress)
+                } else if (pcnSetupAddr.toInt() != -1 && pcnSetupAddr.toInt() < 100) {
+                    PCNUtil.updateOtaSequenceStatus(newState, pcnSetupAddr.toInt())
+                } else {
+                    ConnectNodeUtil.updateOtaSequenceStatus(newState, nodeAddress)
+                }
+            }
         }
 
         fun updateCmToDeviceOtaProgress(totalPackets: Double, currentRunningPacket: Int, nodeAddress: Int) {
-
             val otaProgress = ((currentRunningPacket.toDouble() / totalPackets) * 100).toInt()
             val currentOtaStatus = getCurrentOtaStatus(nodeAddress).toInt()
 
@@ -323,6 +335,8 @@ class OtaStatusDiagPoint {
          * @param totalPackets The total number of packets expected in the transfer
          * @param currentRunningPacket The current packet number being processed
          * @param nodeAddress The network address of the target device
+         * @param pcnSetupAddr The setup address of the PCN. It could be address of PCN or ConnectNode connected
+         * to PCN
          *
          * This function:
          * 1. Calculates the current progress percentage
@@ -336,8 +350,7 @@ class OtaStatusDiagPoint {
          * - Only updates status when crossing a new threshold (via [updateIfChangeInSeqValue])
          *
          */
-        fun updateCmToDeviceSeqProgress(totalPackets: Double, currentRunningPacket: Int, nodeAddress: Int) {
-
+        fun updateCmToDeviceSeqProgress(totalPackets: Double, currentRunningPacket: Int, nodeAddress: Int, pcnSetupAddr: Short) {
             val otaProgress = ((currentRunningPacket.toDouble() / totalPackets) * 100).toInt()
             val currentSeqStatus = connectNodeEquip(nodeAddress).sequenceStatus.readHisVal().toInt()
 
@@ -359,7 +372,7 @@ class OtaStatusDiagPoint {
                 else -> return  // No status update for progress < 10%
             }
             currentSeqStatus.takeIf { it != progressStatus.ordinal }?.let {
-                updateIfChangeInSeqValue(currentSeqStatus, progressStatus, nodeAddress)
+                updateIfChangeInSeqValue(currentSeqStatus, progressStatus, nodeAddress, pcnSetupAddr)
             } ?: CcuLog.d(L.TAG_CCU_OTA_PROCESS, "No change in sequence status for node $nodeAddress")
         }
 

@@ -11,12 +11,12 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.BackgroundServiceInitiator
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.profiles.OnPairingCompleteListener
-import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,8 +26,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -162,6 +160,6 @@ class ConnectNodeFragment : BaseDialogFragment(), OnPairingCompleteListener {
 
     override fun onStart() {
         super.onStart()
-        dialog?.window?.setLayout(1265, 672)
+        dialog?.window?.setLayout(MATCH_PARENT, MATCH_PARENT)
     }
 }

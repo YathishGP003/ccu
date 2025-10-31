@@ -230,7 +230,7 @@ class NonTempProfileViewModel : ViewModel(), PointSubscriber {
                         usesDropdown = false
                     )
                 )
-                externalEquipHeartBeat = CCUUtils.isConnectModuleAlive(deviceId)
+                externalEquipHeartBeat = CCUUtils.isLowCodeDeviceAlive(deviceId)
                 handler.postDelayed(this, 60_000L)
             }
         }

@@ -7,5 +7,6 @@ class StringConstants {
     companion object{
         public const val COOL_ONLY = "Cool Only"
         public const val HEAT_ONLY = "Heat Only"
+        public const val RS485_bridged_equip = "RS485 Bridged Equip"
     }
 }

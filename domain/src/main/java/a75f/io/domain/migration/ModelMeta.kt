@@ -36,6 +36,7 @@ import a75f.io.domain.util.MODEL_MYSTAT_HPU
 import a75f.io.domain.util.MODEL_MYSTAT_PIPE2
 import a75f.io.domain.util.MODEL_OTN_DEVICE
 import a75f.io.domain.util.MODEL_OTN_TI
+import a75f.io.domain.util.MODEL_PCN_DEVICE
 import a75f.io.domain.util.MODEL_SMARTNODE_PID
 import a75f.io.domain.util.MODEL_SMART_NODE_DAB
 import a75f.io.domain.util.MODEL_SMART_NODE_DEVICE
@@ -121,6 +122,7 @@ fun getRequiredModels(): List<String> {
             MODEL_MYSTAT_PIPE2,
             MODEL_MYSTAT_HPU,
             MODEL_DEFAULT_SYSTEM_PROFILE,
-            MODEL_CONNECT_NODE_DEVICE
+            MODEL_CONNECT_NODE_DEVICE,
+            MODEL_PCN_DEVICE
     )
 }

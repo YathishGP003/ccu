@@ -19,6 +19,8 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.bacnet.BacnetProfile;
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.lowcode.LowCodeUtil;
+import a75f.io.logic.bo.building.pcn.PCNUtil;
 import a75f.io.util.ExecutorTask;
 
 /**
@@ -114,10 +116,12 @@ public class L
     public static final String TAG_SEQUENCER_LOGS = "SEQUENCER_LOGS";
     public static final String TAG_ALERT_LOGS = "ALERT_LOGS";
     public static final String TAG_PRECONFIGURATION = "PRECONFIGURATION";
-    public static final String TAG_CONNECT_NODE = "CONNECT_NODE";
+    public static final String TAG_CONNECT_NODE = "CCU_CONNECT_NODE";
     public static final String TAG_CCU_SEQUENCE_APPLY = "CCU_SEQUENCE_APPLY";
     public static final String TAG_REGISTRATION = "REGISTRATION";
     public static final String TAG_CCU_POINT_SCHEDULE = "CCU_POINT_SCHEDULE";
+    public static final String TAG_PCN = "CCU_PCN";
+
     public static final String TAG_CCU_PROXY = "CCU_PROXY";
     public static final String TAG_CCU_MSPIPE4 = "CCU_MSPIPE4";
 
@@ -152,8 +156,8 @@ public class L
     public static boolean isModbusSlaveIdExists(Short slaveId) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
         ArrayList<HashMap<Object, Object>> nodes = hsApi.readAllEntities("device and modbus");
-        List<Integer> connectNodes = ConnectNodeUtil.Companion.getConnectNodeSlaveIdList(hsApi);
-        if(nodes.isEmpty() && connectNodes.isEmpty()){
+        List<Integer> lowCodeSlaveIdList = LowCodeUtil.Companion.getLowCodeSlaveIdList(hsApi);
+        if(nodes.isEmpty() && lowCodeSlaveIdList.isEmpty()){
             return false;
         }
 
@@ -162,7 +166,7 @@ public class L
                 return true;
             }
         }
-        for (Integer node : connectNodes) {
+        for (Integer node : lowCodeSlaveIdList) {
             if (node == slaveId.intValue()) {
                 return true;
             }
@@ -187,14 +191,14 @@ public class L
      * @return short The next available Connect Module address
      * @throws IllegalStateException if no valid address can be found after reasonable attempts
      */
-    public static short generateConnectAddrSkipZero() {
+    public static short generateLowCodeAddrSkipZero() {
         final short currentBand = L.ccu().getAddressBand();
         final short maxAttempts = 200; // Prevent infinite loops
         short attempts = 0;
 
         // Get all existing devices (excluding BACnet devices)
         final ArrayList<HashMap<Object, Object>> nodes = CCUHsApi.getInstance().
-                readAllEntities("device and (node or connectModule) and not bacnet");
+                readAllEntities("device and (node or connectModule or pcn) and not bacnet");
 
         // Start checking from currentBand + 1 (to avoid 0x00)
         short nextAddr = (short) (currentBand + 1);
@@ -358,6 +362,10 @@ public class L
 
         if(!ConnectNodeUtil.Companion.getConnectNodeByNodeAddress(node.toString(), hsApi).isEmpty()){
            ConnectNodeUtil.Companion.removeConnectNodeEquips(node.toString(), hsApi);
+        }
+
+        if (!PCNUtil.Companion.getPcnByNodeAddress(node.toString(), hsApi).isEmpty()) {
+            PCNUtil.Companion.removePcnDeviceAndEquips(node.toString(), hsApi);
         }
 
         HashMap<Object, Object> device = hsApi.readEntity("device and addr == \""+node+"\"");

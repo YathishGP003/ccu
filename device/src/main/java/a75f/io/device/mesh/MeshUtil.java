@@ -72,6 +72,34 @@ public class MeshUtil
         }
         return retVal;
     }
+
+    /**
+     * Sends a byte array message to one or more smart nodes via the serial interface.
+     *
+     * Steps performed:
+     * 1. Uses `LSerial.getInstance().sendSerialBytesToNodes(...)` to transmit
+     *    the given byte array to the target node(s) identified by address.
+     * 2. If the application is running in **simulation mode**:
+     *    - Introduces a controlled sleep (`SIMULATION_SLEEP_TIME`) after transmission
+     *      to prevent the simulation backend (like FTDI with Biskit) from lagging
+     *      due to rapid message bursts.
+     * 3. Returns a boolean result indicating whether the transmission was successful.
+     *
+     * @param smartNodeAddress The short address of the target smart node(s).
+     * @param bytes            The message payload to be sent as a byte array.
+     * @return `true` if the message was successfully sent, otherwise `false`.
+     */
+    public static boolean sendByteToNodes(short smartNodeAddress, byte[] bytes)
+    {
+        boolean retVal = LSerial.getInstance().sendSerialBytesToNodes(smartNodeAddress, bytes);
+        //If the application is in simualtion mode to work over FTDI with biskit,
+        // sleep between messages, so biskit doesn't fall behind.
+        if (Globals.getInstance().isSimulation())
+        {
+            tSleep(SIMULATION_SLEEP_TIME);
+        }
+        return retVal;
+    }
     
     public static boolean sendStruct(short smartNodeAddress, Struct struct)
     {
@@ -88,6 +116,35 @@ public class MeshUtil
     public static boolean sendStructToCM(Struct struct)
     {
         boolean retVal = LSerial.getInstance().sendSerialToCM(struct);
+
+        //If the application is in simualtion mode to work over FTDI with biskit,
+        // sleep between messages, so biskit doesn't fall behind.
+        if (Globals.getInstance().isSimulation())
+        {
+            tSleep(SIMULATION_SLEEP_TIME);
+        }
+        return retVal;
+    }
+
+    /**
+     * Sends a byte array message to the **Control Module (CM)** over the serial interface.
+     *
+     * Steps performed:
+     * 1. Uses `LSerial.getInstance().sendSerialBytesToCM(...)` to transmit
+     *    the given byte array directly to the CM.
+     * 2. If the application is running in **simulation mode**:
+     *    - Pauses execution for `SIMULATION_SLEEP_TIME` after sending,
+     *      ensuring that the simulation backend (e.g., FTDI with Biskit)
+     *      does not fall behind due to rapid message flow.
+     * 3. Returns a boolean value indicating whether the message
+     *    transmission was successful.
+     *
+     * @param bytes The byte array containing the message payload for the Control Module.
+     * @return `true` if the message was successfully sent, otherwise `false`.
+     */
+    public static boolean sendByteToCM(byte[] bytes)
+    {
+        boolean retVal = LSerial.getInstance().sendSerialBytesToCM(bytes);
 
         //If the application is in simualtion mode to work over FTDI with biskit,
         // sleep between messages, so biskit doesn't fall behind.

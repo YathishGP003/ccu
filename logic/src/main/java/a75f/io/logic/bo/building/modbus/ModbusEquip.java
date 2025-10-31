@@ -1,6 +1,8 @@
 package a75f.io.logic.bo.building.modbus;
 
+import static a75f.io.logic.bo.building.pcn.PCNUtil.MODBUS_SLAVE_ID_LIMIT;
 import static a75f.io.logic.bo.util.CustomScheduleUtilKt.updateWritableDataUponCustomControlChanges;
+import static a75f.io.api.haystack.util.StringUtil.addAtSymbolIfMissing;
 import static a75f.io.logic.util.NonModelPointUtilKt.addEquipScheduleStatusPoint;
 
 import org.projecthaystack.HDict;
@@ -61,9 +63,15 @@ public class ModbusEquip {
 
     public String createEntities(String floorRef, String roomRef, EquipmentDevice equipmentInfo,
                                List<Parameter> configParams, String parentEquipId, boolean isSlaveIdSameAsParent,
-                                 String modbusLevel,String modelVersion, boolean isConnectNode, Map<String,
+                                 String modbusLevel,String modelVersion, boolean isConnectNode, boolean isPCN,boolean isExternalEquip, Map<String,
                     Pair<String, String>> registerAddressMap, boolean isSubEquip, String modelSuffix,
-                                 String connectNodeAddress, String modelId) {
+                                 String nodeAddress, String modelId, String parentDeviceId) {
+        String deviceId;
+        if (parentDeviceId != null) {
+            deviceId = addAtSymbolIfMissing(parentDeviceId);
+        } else {
+            deviceId = "";
+        }
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -88,6 +96,12 @@ public class ModbusEquip {
         String equipDis;
         String equipDisplayName = equipmentInfo.getEquipDisplayName();
         if (isConnectNode) {
+            if (Integer.parseInt(nodeAddress) <= MODBUS_SLAVE_ID_LIMIT) {
+                equipDis = siteDis + "-" + modbusName + modelSuffix;
+            } else {
+                equipDis = siteDis + "-" + modbusName + modelSuffix;
+            }
+        } else if (isPCN) {
             equipDis = siteDis + "-" + modbusName + modelSuffix;
         } else if(equipDisplayName == null || equipDisplayName.isEmpty()){
             equipDis = siteDis + "-"+modbusName+"-"+ equipmentInfo.getSlaveId();
@@ -116,8 +130,19 @@ public class ModbusEquip {
         }
         if (isConnectNode) {
             mbEquip.addMarker(Tags.CONNECTMODULE);
-            mbEquip.addTag("connectAddress", HStr.make(connectNodeAddress));
             mbEquip.addTag("modelId", HStr.make(modelId));
+            if (Integer.parseInt(nodeAddress) <= MODBUS_SLAVE_ID_LIMIT) {
+                mbEquip.addTag("deviceRef", HStr.make(deviceId));
+            } else {
+                mbEquip.addTag("connectAddress", HStr.make(nodeAddress));
+            }
+        } else if (isPCN) {
+            mbEquip.addMarker(Tags.PCN);
+            mbEquip.addTag("deviceRef", HStr.make(deviceId));
+            mbEquip.addTag("modelId", HStr.make(modelId));
+        } else if (isExternalEquip) {
+            mbEquip.addTag("deviceRef", HStr.make(deviceId));
+            mbEquip.addMarker("modbus");
         } else {
             mbEquip.addMarker("modbus");
         }
@@ -165,23 +190,34 @@ public class ModbusEquip {
                 e.printStackTrace();
             }
         }
-        Point equipScheduleType = new Point.Builder()
+
+        Point.Builder equipScheduleType = new Point.Builder()
                     .setDisplayName(siteDis+"-"+modbusEquipType+"-"+equipmentInfo.getSlaveId()+"-scheduleType")
                     .setEquipRef(equipmentRef)
                     .setSiteRef(siteRef)
                     .setRoomRef(roomRef)
                     .setFloorRef(floorRef).setHisInterpolate("cov")
-                    .addMarker(modbusEquipType.toLowerCase()).addMarker("modbus").addMarker("scheduleType").addMarker("writable").addMarker("his")
+                    .addMarker(modbusEquipType.toLowerCase()).addMarker("scheduleType").addMarker("writable").addMarker("his")
                     .addMarker(modbusLevel.toLowerCase().trim())
                     .setGroup(String.valueOf(equipmentInfo.getSlaveId()))
                     .setEnums("building,named")
-                    .setTz(tz).build();
+                    .setTz(tz);
 
-        String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
+        if (isConnectNode) {
+            equipScheduleType.addMarker(Tags.CONNECTMODULE);
+        } else if (isPCN) {
+            equipScheduleType.addMarker(Tags.PCN);
+        } else {
+            equipScheduleType.addMarker(Tags.MODBUS);
+        }
+
+        String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType.build());
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, equipScheduleTypeVal);
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId,equipScheduleTypeVal);
         String deviceRef;
-        if (!isConnectNode) {
+        if (isConnectNode || isPCN) {
+            deviceRef = deviceId;
+        } else {
             Device modbusDevice = new Device.Builder()
                     .setDisplayName(modbusEquipType + "-" + equipmentInfo.getSlaveId())
                     .addMarker("network").addMarker("modbus").addMarker(modbusEquipType.toLowerCase())
@@ -192,8 +228,6 @@ public class ModbusEquip {
                     .setRoomRef(roomRef)
                     .build();
             deviceRef = CCUHsApi.getInstance().addDevice(modbusDevice);
-        } else {
-            deviceRef = ConnectNodeUtil.Companion.getConnectNodeForZone(roomRef, hayStack).get("id").toString();
         }
 
         for(Parameter configParam : configParams){
@@ -231,11 +265,11 @@ public class ModbusEquip {
                     .addTag("bitParamRange", HStr.make(configParam.getBitParamRange()))
                     .addTag("bitParam", HStr.make((configParam.getBitParam() != null) ? configParam.getBitParam().toString() : "0"));
 
-            if (isConnectNode) {
+            if (isConnectNode || isPCN) {
                 if(!registerAddressMap.containsKey(configParam.getName())) {
                     continue;
                 }
-                logicalParamPoint.addMarker(Tags.CONNECTMODULE);
+                logicalParamPoint.addMarker(isConnectNode ? Tags.CONNECTMODULE : Tags.PCN);
                 logicalParamPoint.addTag("registerNumber", HStr.make(registerAddressMap.get(configParam.getName()).getFirst()))
                         .addTag("registerAddress", HStr.make(registerAddressMap.get(configParam.getName()).getSecond()))
                         .addTag("registerType", HStr.make("holdingRegister"))
@@ -394,9 +428,10 @@ public class ModbusEquip {
             Point logicalPoint = logicalParamPoint.build();
             String logicalParamId = CCUHsApi.getInstance().addPoint(logicalPoint);
             RawPoint physicalPoint = physicalParamPoint.setPointRef(logicalParamId).build();
+
             // Do not create physical point if it is connect node
             String physicalParamId = null;
-            if (!isConnectNode) {
+            if (!isConnectNode || isPCN) {
                  physicalParamId = CCUHsApi.getInstance().addPoint(physicalPoint);
                 if(defaultValue != null){
                     CCUHsApi.getInstance().writeHisValById(physicalParamId,defaultValue);

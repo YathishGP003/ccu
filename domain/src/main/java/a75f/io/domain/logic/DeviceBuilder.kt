@@ -50,9 +50,10 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         return deviceId
     }
 
-    fun buildCnDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, siteRef : String, deviceDis: String) : String{
-        CcuLog.i(Domain.LOG_TAG, "build connect node DeviceAndPoints $configuration")
-        val hayStackDevice = buildDevice(modelDef, configuration, null, siteRef, deviceDis)
+    fun buildLowCodeDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective,
+                                    siteRef : String, deviceDis: String, deviceRef: String? = null) : String{
+        CcuLog.i(Domain.LOG_TAG, "build $deviceDis DeviceAndPoints $configuration")
+        val hayStackDevice = buildDevice(modelDef, configuration, null, siteRef, deviceDis, deviceRef)
         val deviceId = hayStack.addDevice(hayStackDevice)
         hayStackDevice.id = deviceId
         DomainManager.addDevice(hayStackDevice)
@@ -104,7 +105,9 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             }.awaitAll()
         }
     }
-    private fun buildDevice(modelDef: SeventyFiveFDeviceDirective, configuration: ProfileConfiguration, equipRef: String?, siteRef: String, deviceDis: String) : Device{
+    private fun buildDevice(
+        modelDef: SeventyFiveFDeviceDirective, configuration: ProfileConfiguration,
+        equipRef: String?, siteRef: String, deviceDis: String, deviceRef: String? = null ) : Device{
         CcuLog.i(Domain.LOG_TAG, "buildDevice ${modelDef.domainName}")
         val deviceBuilder = Device.Builder().setDisplayName(deviceDis)
             .setDomainName(modelDef.domainName)
@@ -127,6 +130,11 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
                         ".${modelDef.version?.minor}.${modelDef.version?.patch}"
             )
         )
+
+        // If connectModule is paired with PCN then add pcnDeviceId to CN as deviceRef
+        deviceRef?.let {
+            deviceBuilder.addTag(Tags.DEVICE_REF, HStr.make(it))
+        }
 
         return deviceBuilder.build()
     }

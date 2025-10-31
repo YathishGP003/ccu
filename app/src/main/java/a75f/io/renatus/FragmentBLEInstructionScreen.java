@@ -32,6 +32,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
+import a75f.io.renatus.profiles.pcn.PCNConfigView;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.connectnode.ConnectNodeFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
@@ -527,6 +528,15 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             }
         }
 
+        else if (mProfileType == ProfileType.PCN) {
+            if (L.isSimulation()) {
+                showDialogFragment(PCNConfigView.Companion.newInstance(mNodeAddress, mRoomName,
+                        mFloorName, mNodeType, mProfileType), PCNConfigView.Companion.getIdString());
+            } else {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
     }
 
 
@@ -552,7 +562,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
     {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
-        if (mNodeType == NodeType.SMART_NODE)
+        if (mNodeType == NodeType.SMART_NODE || mNodeType == NodeType.PCN)
         {
             title.setText(getText(R.string.title_pairsn));
             if(CCUUiUtil.isDaikinEnvironment(requireContext())) {

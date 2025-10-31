@@ -2,8 +2,8 @@ package a75f.io.renatus.profiles
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.modbus.EquipmentDevice
-import a75f.io.device.modbus.buildModbusModel
 import a75f.io.domain.api.Domain
+import a75f.io.logic.bo.building.modbus.buildModbusModel
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.devices.MyStatDevice
 import a75f.io.domain.util.ModelLoader
@@ -16,6 +16,8 @@ import a75f.io.logic.bo.building.dab.DabProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.modbus.ModbusProfile
 import a75f.io.logic.bo.building.otn.OtnProfileConfiguration
+import a75f.io.logic.bo.building.pcn.PCNUtil
+import a75f.io.logic.bo.building.pcn.PcnConfiguration
 import a75f.io.logic.bo.building.plc.PlcProfileConfig
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HyperStatConfiguration
@@ -137,12 +139,13 @@ class CopyConfiguration {
                 address
             )
             val isConnectNodePaired = ConnectNodeUtil.isZoneContainingConnectNodeWithEquips(address.toString(), ccuHsApiInstance)
+            val isPCNPaired = PCNUtil.isZoneContainingPCNWithEquips(address.toString(), ccuHsApiInstance)
             if ((modbusModel == null && selectedBacNetModel == null)) {
                 val device =
                     ccuHsApiInstance.readEntity("device and equipRef ==\"${equip["id"]}\"and addr == \"$address\"")
                 nodeType = getNodeType(device)
 
-                if (nodeType == null && !isConnectNodePaired) {
+                if (nodeType == null && !isConnectNodePaired && !isPCNPaired) {
                     CcuLog.e(
                         L.TAG_CCU_COPY_CONFIGURATION,
                         " Copy Configuration failed : Address $address ,  Profile Type: $profileType ,  Node Type: null , ModbusModel $modbusModel "
@@ -219,8 +222,22 @@ class CopyConfiguration {
                    loadActiveUnitVentilatorConfiguration(equip)
                 }
 
+                ProfileType.PCN -> loadActivePCNConfiguration(address)
+
                 else -> throw IllegalArgumentException("Unsupported Profile Type: $profileType")
             }
+        }
+
+        private fun loadActivePCNConfiguration(address: Int) {
+            val deviceMap = ccuHsApiInstance.readEntity("device and addr == \"$address\"")
+            config = PcnConfiguration(
+                nodeAddress = deviceMap["addr"].toString().toInt(),
+                nodeType = NodeType.PCN.name,
+                priority = 0,
+                roomRef = deviceMap[Tags.ROOM_REF].toString(),
+                floorRef = deviceMap[Tags.FLOOR_REF].toString(),
+                profileType = ProfileType.PCN,
+            ).getActiveConfiguration()
         }
 
         private fun loadConnectNodeConfiguration(address: Int) {

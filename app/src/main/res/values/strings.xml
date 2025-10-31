@@ -1423,8 +1423,8 @@
     <string name="text_rightArrow">f061</string>
 
     <!--Modbus Option-->
-    <string name="title_external">External Equipment</string>
-    <string name="sub_title_modbus">MODBUS/BACnet</string>
+    <string name="title_external">Custom Equipment</string>
+    <string name="sub_title_modbus">MODBUS/BACnet/PCN</string>
     <string name="title_modbus">Modbus</string>
     <!--<string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>-->
     <string name="title_equipment_type">Equipment Type</string>
@@ -1607,13 +1607,15 @@
 
     <string name="usb_permission_priv_app_msg">USB Permission not granted, Renatus App may need to be reinstalled with System Privileges</string>
     <!-- Modbus Module type screen-->
-    <string name="label_modbusselectdevicetype">Modbus/BACNET | Select Module Type</string>
+    <string name="label_modbusselectdevicetype">Modbus/BACNET/PCN | Select Module Type</string>
     <string name="title_modbusequipment">Modbus Equipment</string>
     <string name="description_modbusequipment">Hook up a Modbus equipment to monitor electricity consumption.</string>
     <string name="title_modbusenergymeter">Modbus Energy Meter</string>
     <string name="description_modbusenergymeter">Hook up a Modbus energy meter to monitor electricity consumption.</string>
     <string name="title_bacnet_equipment">BACnet Equipment</string>
     <string name="description_bacnet_equipment">Hook up a BACnet server to monitor the values</string>
+    <string name="title_pcn">Protocol Convertor Node</string>
+    <string name="description_pcn">Hook up a Smart Node to be configured as a Protocol Converter Node.</string>
 
     <string name="label_modbus_energy_meter">MODBUS ENERGY METER</string>
     <string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>
@@ -1640,6 +1642,7 @@
     <string name="title_pair_connectnode">Connect Node | Pairing Steps </string>
 
     <string name="title_pairhssplit">HyperStat Split | Pairing Steps </string>
+    <string name="title_pairPCN">Protocol Convertor Node | Pairing Steps </string>
     <string name="prefs_theme_key">isEnabled</string>
     <string name="prefs_access_local_assests">accessLocalAssetFile</string>
     <string name="txt_CCU_occupancy_status">Occupancy Status on IE Gateway :</string>

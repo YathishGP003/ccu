@@ -20,7 +20,8 @@ fun getModelListFromJson(response: String): List<ModelMetaData> {
                     item.getString(NAME),
                     item.getString(DESCRIPTION),
                     arrayToList(item.getJSONArray(TAG_NAMES)),
-                    "${versionObj.getString(MAJOR)}.${versionObj.getString(MINOR)}.${versionObj.getString(PATCH)}"
+                    "${versionObj.getString(MAJOR)}.${versionObj.getString(MINOR)}.${versionObj.getString(PATCH)}",
+                    if (item.has(NUM_OF_REGISTERS)) item.getInt(NUM_OF_REGISTERS) else 2
                 )
             )
         }

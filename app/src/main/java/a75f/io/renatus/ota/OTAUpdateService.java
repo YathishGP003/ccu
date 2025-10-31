@@ -18,6 +18,7 @@ import static a75f.io.renatus.ota.SeqCache.NODE_ADDRESS;
 import static a75f.io.renatus.ota.OtaCache.RETRY_COUNT;
 import static a75f.io.renatus.ota.SeqCache.REMOVE_LIST;
 import static a75f.io.renatus.ota.SeqCache.SEQ_NAME;
+import static a75f.io.renatus.ota.SeqCache.SEQ_SERVER_ID;
 import static a75f.io.renatus.ota.SeqCache.SEQ_VERSION;
 import static a75f.io.renatus.ota.SeqCache.FIRMWARE_NAME;
 
@@ -29,6 +30,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.common.io.Files;
@@ -61,12 +63,16 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.device.DeviceConstants;
 import a75f.io.device.alerts.AlertGenerateHandler;
 import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwareMetadataMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwarePacketMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbFirmwarePcnMetadataMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbPcnFirmwarePacketMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbPcnSequenceMetaMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSequenceMetadataMessage_t;
 import a75f.io.device.serial.CmToCcuOtaStatus_t;
 import a75f.io.device.serial.CmToCcuOverUsbErrorReportMessage_t;
@@ -76,14 +82,18 @@ import a75f.io.device.serial.FirmwareComponentType_t;
 import a75f.io.device.serial.FirmwareDeviceType_t;
 import a75f.io.device.serial.MessageConstants;
 import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.PcnRebootIndicationMessage_t;
 import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.devices.ConnectNodeDevice;
+import a75f.io.domain.devices.PCNDevice;
+import a75f.io.domain.util.ModelNames;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
+import a75f.io.logic.bo.building.pcn.PCNUtil;
 import a75f.io.logic.bo.building.pointscheduling.model.CustomScheduleManager;
 import a75f.io.logic.bo.util.ByteArrayUtils;
 import a75f.io.logic.diag.otastatus.OtaState;
@@ -122,12 +132,14 @@ public class OTAUpdateService extends IntentService {
     private static ArrayList<byte[]> packets;      //Where the decomposed binary is stored in memory
     private static short mVersionMajor = -1;
     private static short mVersionMinor = -1;
+    private static short mServerIdPcn = -1;
 
     private static int mUpdateLength = -1;         //Binary length (bytes)
     private static byte[] mFirmwareSignature = {};
     private static FirmwareComponentType_t mFirmwareDeviceType;
     private static FirmwareComponentType_t mFirmwareDeviceTypeFromMeta;
 
+    private static int mslaveIdSq = -1;         //Used in case of sequence update for PCN
     private static int mUpdateLengthSq = -1;         //Binary length of sequence (bytes)
     private static byte[] mSequenceSignature = {};
     private static FirmwareComponentType_t mSequenceDeviceTypeFromMeta;
@@ -229,6 +241,10 @@ public class OTAUpdateService extends IntentService {
 
                 case CM_TO_CCU_OVER_USB_SEQUENCE_OTA_STATUS:
                     handleCmToDeviceSequenceProgress(eventBytes);
+                    break;
+
+                case PCN_MODBUS_SERVER_REBOOT:
+                    handlePcnNodeReboot(eventBytes);
                     break;
             }
         }
@@ -338,7 +354,12 @@ public class OTAUpdateService extends IntentService {
             CcuLog.d(TAG, "[UPDATE] CM asks for packet " + msg.sequenceNumber.get() + " of "
                     + (mUpdateLength / MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE));
 
-            sendPacket(msg.lwMeshAddress.get(), msg.sequenceNumber.get());
+            // If PCN update is active, we need to append additional field
+            if(mServerIdPcn != -1){
+                sendPacketPcn(msg.lwMeshAddress.get(), msg.sequenceNumber.get());
+            } else {
+                sendPacket(msg.lwMeshAddress.get(), msg.sequenceNumber.get());
+            }
             OtaStatusDiagPoint.Companion.updateCcuToCmOtaProgress(
                     (mUpdateLength / MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE),
                     msg.sequenceNumber.get(),
@@ -386,7 +407,7 @@ public class OTAUpdateService extends IntentService {
         OtaStatusDiagPoint.Companion.updateCcuToCmSeqProgress(
                 (mUpdateLengthSq / MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE),
                 msg.sequenceNumber.get(),
-                msg.lwMeshAddress.get());
+                msg.lwMeshAddress.get(), mServerIdPcn);
     }
 
 
@@ -540,18 +561,24 @@ public class OTAUpdateService extends IntentService {
         CcuLog.i(L.TAG_CCU_OTA_PROCESS, " CM to Device process : State : "+ SequenceOtaState.values()[msg.currentState.get()].name() + " Data : "+msg.data.get());
         ConnectNodeUtil.Companion.updateOtaSequenceState(msg.currentState.get(), mCurrentLwMeshAddress);
         if ( msg.currentState.get() == SequenceOtaState.SEQUENCE_COPY_AVAILABLE.ordinal()) {
-            ConnectNodeDevice connectNodeEquip = ConnectNodeUtil.Companion.connectNodeEquip(mCurrentLwMeshAddress);
-            connectNodeEquip.updateDeliveryTime(HDateTime.make(System.currentTimeMillis(), HTimeZone.make("UTC")));
+            ConnectNodeDevice connectNodeEquip = getConnectDevice();
+            // Check if the device we are updating is a SN PCN or connect node device
+            if(mServerIdPcn == DeviceConstants.PCN_ADDRESS) {
+                PCNDevice pcnDevice = PCNUtil.Companion.getPcnNodeDevice(mCurrentLwMeshAddress);
+                pcnDevice.updateDeliveryTime(HDateTime.make(System.currentTimeMillis(), HTimeZone.make("UTC")));
+            } else {
+                connectNodeEquip.updateDeliveryTime(HDateTime.make(System.currentTimeMillis(), HTimeZone.make("UTC")));
+            }
         }
         if ( msg.currentState.get() == SequenceOtaState.SEQUENCE_RECEIVED.ordinal()
                 || msg.currentState.get() == SequenceOtaState.SEQUENCE_COPY_AVAILABLE.ordinal()) {
 
-            ConnectNodeUtil.Companion.updateOtaSequenceStatus(SequenceOtaStatus.SEQ_CCU_TO_CM_FIRMWARE_RECEIVED, mCurrentLwMeshAddress);
+            updateOtaSequenceStatus(SequenceOtaStatus.SEQ_CCU_TO_CM_FIRMWARE_RECEIVED, mCurrentLwMeshAddress);
             mUpdateWaitingToComplete = true;
         } else if ( msg.currentState.get() == SequenceOtaState.CM_DEVICE_IN_PROGRESS.ordinal()) {
             OtaStatusDiagPoint.Companion.updateCmToDeviceSeqProgress(
                     mUpdateLengthSq / MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE,
-                    msg.data.get(), mCurrentLwMeshAddress
+                    msg.data.get(), mCurrentLwMeshAddress, mServerIdPcn
             );
         }
         else if ( msg.currentState.get() == SequenceOtaState.CM_DEVICE_TIMEOUT.ordinal()) {
@@ -569,8 +596,9 @@ public class OTAUpdateService extends IntentService {
      * 4. Initiates the update process for the next node in sequence
      */
     private void handleSequenceComplete() {
-        CcuLog.d(TAG, "Sequence OTA update complete");
-        ConnectNodeDevice connectNodeEquip = ConnectNodeUtil.Companion.connectNodeEquip(mCurrentLwMeshAddress);
+        ConnectNodeDevice connectNodeEquip = null;
+        connectNodeEquip = getConnectDevice();
+
         HashMap<Object, Object> deviceMap = CCUHsApi.getInstance().readMapById(connectNodeEquip.getId());
         if(deviceMap.containsKey("roomRef")){
             String roomId = deviceMap.get("roomRef").toString();
@@ -579,10 +607,34 @@ public class OTAUpdateService extends IntentService {
         }
         CcuLog.d(TAG, "Sequence OTA - ReconfiguredRooms:  "+
                 CustomScheduleManager.Companion.getInstance().getReconfiguredRooms());
-        ConnectNodeUtil.Companion.updateOtaSequenceStatus(SequenceOtaStatus.SEQ_SUCCEEDED, mCurrentLwMeshAddress);
+        updateOtaSequenceStatus(SequenceOtaStatus.SEQ_SUCCEEDED, mCurrentLwMeshAddress);
         // Update the delivery time
-        connectNodeEquip.updateConfirmedTime(HDateTime.make(System.currentTimeMillis(), HTimeZone.make("UTC")));
+        if(mServerIdPcn == DeviceConstants.PCN_ADDRESS) {
+            // If it is done for PCN device then, get the pcnEquip first, and then update the confirmed time
+            PCNDevice pcnDevice = PCNUtil.Companion.getPcnNodeDevice(mCurrentLwMeshAddress);
+            pcnDevice.updateConfirmedTime(HDateTime.make(System.currentTimeMillis(), HTimeZone.make("UTC")));
+        } else {
+            connectNodeEquip.updateConfirmedTime(HDateTime.make(System.currentTimeMillis(), HTimeZone.make("UTC")));
+        }
         moveUpdateToNextNode();
+    }
+
+    /**
+     * Retrieves the ConnectNodeDevice instance
+     *
+     * This function gets the connect device depending on whether the current upgrade is on PCN connect node or normal Connect Node.
+     *
+     * @return The ConnectNodeDevice instance associated with the current Mesh address.
+     */
+    private static @NonNull ConnectNodeDevice getConnectDevice() {
+        ConnectNodeDevice connectNodeEquip;
+        if(mServerIdPcn != -1 && mServerIdPcn < DeviceConstants.PCN_ADDRESS) {
+            HashMap<Object, Object> pcnEquip = PCNUtil.Companion.getPcnByNodeAddress(String.valueOf(mCurrentLwMeshAddress), CCUHsApi.getInstance());
+            connectNodeEquip = PCNUtil.Companion.getConnectNodeEquip(pcnEquip, mServerIdPcn);
+        } else {
+            connectNodeEquip = ConnectNodeUtil.Companion.connectNodeEquip(mCurrentLwMeshAddress);
+        }
+        return connectNodeEquip;
     }
 
     /**
@@ -595,9 +647,111 @@ public class OTAUpdateService extends IntentService {
      */
     private void handleSequenceOtaFail() {
         CcuLog.d(TAG, "Sequence OTA update failed");
-        ConnectNodeUtil.Companion.updateOtaSequenceStatus(SequenceOtaStatus.SEQ_UPDATE_FAILED, mCurrentLwMeshAddress);
+        updateOtaSequenceStatus(SequenceOtaStatus.SEQ_UPDATE_FAILED, mCurrentLwMeshAddress);
         moveUpdateToNextNode();
     }
+
+    
+    /**
+     * @brief Handles the reboot indication message for a PCN (Primary Control Node) device.
+     *
+     * This function processes the reboot indication message received from a PCN device after an OTA (Over-The-Air) update attempt.
+     * 
+     *   Parses the given event bytes to populate a {@link PcnRebootIndicationMessage_t} message.
+     *   If the device type is null, returns immediately after logging.
+     *   Retrieves the associated room using the node address and adds it to the reconfigured rooms
+     *       if available, also updating connect node details.
+     *   If the device type is not CONTROL_MOTE and the message's node address doesn't match the current node being updated,
+     *       it logs and returns.
+     *   If the node is being updated and a reboot occurs:
+     *     Sends a broadcast about the reboot event.
+     *     If this was a sequence OTA, determines if the outcome was a success or failure based on OTA flags and calls the respective handlers.
+     *     Otherwise, parses firmware version and reports the result (success or failure) by logging and updating diagnostic status points.
+     *     Updates OTA status point according to the actual node status after reboot if available.
+     *     Calls {@code moveUpdateToNextNode()} to continue the OTA process for other nodes if necessary.
+     *   Catches and logs any exceptions to ensure the handler does not crash due to malformed messages.
+     *
+     * @param eventBytes The raw byte array containing the reboot indication message from a PCN device.
+     */
+    private void handlePcnNodeReboot(byte[] eventBytes) {
+        try {
+            PcnRebootIndicationMessage_t msg = new PcnRebootIndicationMessage_t();
+            msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
+
+            if (msg.smartNodeDeviceType == null) {
+                CcuLog.d(TAG, " SmartNode device type is null");
+                return;
+            }
+            CcuLog.d(TAG, "Node: " + msg.smartNodeAddress.get() + " Device :" + msg.smartNodeDeviceType.get() + " Device Rebooted");
+            HashMap<Object, Object> map = ConnectNodeUtil.Companion.getConnectNodeByNodeAddress(
+                    String.valueOf(msg.smartNodeAddress.get()), CCUHsApi.getInstance());
+
+            if(!map.isEmpty()) {
+                String roomId = map.get("roomRef").toString();
+                CustomScheduleManager.Companion.getInstance().getReconfiguredRooms().add(roomId);
+                ConnectNodeUtil.Companion.rewriteConnectNodeDetails(roomId);
+            }
+            if (msg.smartNodeDeviceType.get() != FirmwareDeviceType_t.FIRMWARE_DEVICE_CONTROL_MOTE
+                    && mCurrentLwMeshAddress != msg.smartNodeAddress.get()) {
+                CcuLog.d(TAG, mCurrentLwMeshAddress + " != " + msg.smartNodeAddress.get());
+                return;
+            }
+            CcuLog.d(TAG, "mUpdateInProgress : " + mUpdateInProgress);
+            if ((msg.smartNodeDeviceType.get() == FirmwareDeviceType_t.FIRMWARE_DEVICE_CONTROL_MOTE ||
+                    (msg.smartNodeAddress.get() == mCurrentLwMeshAddress)) && mUpdateInProgress) {
+                sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT));
+                // Check if the reboot message is after sequence update. This is to ensure that we dont check for any equip ref since this device dont have the equip ref.
+                // We will be returning here for success and failure of sequence update.
+                if ((msg.nodeStatus.get() & 0x07) == SEQ_TYPE) {
+                    // Extract bits 3-7 (last 5 bits) using bitmask 0xF8 (11111000 in binary)
+                    int last5Bits = msg.nodeStatus.get() & NODE_STATUS_FW_OTA_VALUE_MASK;  // Mask keeps only bits 3-7
+                    if (last5Bits == NODE_STATUS_VALUE_SEQ_OTA_SUCCESS) {
+                        CcuLog.d(TAG, "Sequence OTA update completed for Node: " + mCurrentLwMeshAddress);
+                        handleSequenceComplete();
+                    } else {
+                        CcuLog.d(TAG, "Sequence OTA update failed for Node: " + mCurrentLwMeshAddress);
+                        handleSequenceOtaFail();
+                    }
+                    return;
+                }
+
+                short versionMajor = msg.smartNodeMajorFirmwareVersion.get();
+                short versionMinor = msg.smartNodeMinorFirmwareVersion.get();
+                String ccuName = Domain.ccuDevice.getCcuDisName();
+                AlertGenerateHandler.handleDeviceMessage(FIRMWARE_OTA_UPDATE_ENDED, "Firmware OTA update for" + " " + ccuName + " " +
+                        "ended for " + mFirmwareDeviceType.getUpdateFileName() + " " + mCurrentLwMeshAddress + " " + "with version" + " " + versionMajor +
+                        // changed Smart node to Smart Device as it is indicating the general name (US:9387)
+                        "." + versionMinor, getDeviceId(String.valueOf(mFirmwareDeviceType), mCurrentLwMeshAddress));
+                CcuLog.d(TAG, mUpdateWaitingToComplete + " - " + versionMajor + " - " + versionMinor);
+
+                if (mUpdateWaitingToComplete && versionMatches(versionMajor, versionMinor)) {
+                    CcuLog.d(TAG, "[UPDATE] [SUCCESSFUL]"
+                            + " [Node Address:" + mCurrentLwMeshAddress + "]"   // updated to Node address from SN as
+                            // Node address is more generic and mCurrentLwMeshAddress contains generic node address (US:9387)
+                            + " [PACKETS:" + mLastSentPacket
+                            + "] Updated to target: " + versionMajor + "." + versionMinor);
+                    OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_SUCCEEDED, mCurrentLwMeshAddress);
+                } else {
+                    CcuLog.d(TAG, "[UPDATE] [FAILED]"
+                            + " [Node Address:" + mCurrentLwMeshAddress + "]"
+                            + " [PACKETS:" + mLastSentPacket + "]"
+                            + " [TARGET: " + mVersionMajor
+                            + "." + mVersionMinor
+                            + "] [ACTUAL: " + versionMajor + "." + versionMinor + "]");
+                    OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_CM_TO_DEVICE_FAILED, mCurrentLwMeshAddress);
+                }
+                OtaStatus nodeStatus = DeviceUtil.getNodeStatus(msg.nodeStatus.get());
+                if (nodeStatus != OtaStatus.NO_INFO)
+                    OtaStatusDiagPoint.Companion.updateOtaStatusPoint(nodeStatus, mCurrentLwMeshAddress);
+
+                moveUpdateToNextNode();
+            }
+        } catch (Exception e) {
+            //CCU should not crash if an older CM sends incorrectly formatted message.
+            CcuLog.e(TAG, "Error parsing node reboot message: " + e.getMessage());
+        }
+    }
+
 
     private void handleNodeReboot(byte[] eventBytes) {
         try {
@@ -711,7 +865,7 @@ public class OTAUpdateService extends IntentService {
         String id = intent.getStringExtra(ID);
         String firmwareVersion = intent.getStringExtra(FIRMWARE_VERSION);
         String cmdLevel = intent.getStringExtra(CMD_LEVEL);
-        currentOtaRequest = intent.getStringExtra(MESSAGE_ID);
+        currentOtaRequest = intent.getStringExtra(NODE_ADDRESS);
         currentRunningRequestType = intent.getStringExtra(CMD_TYPE);
 
         // If the sequence update is requested, we need to extract the metadata and binary file information and start sequence update
@@ -720,6 +874,7 @@ public class OTAUpdateService extends IntentService {
             mCurrentLwMeshAddress = Integer.parseInt(Objects.requireNonNull(intent.getStringExtra(NODE_ADDRESS)));
             // Extract the metadata and binary file information from the files which are already present in the download directory
             mSequenceMetaFileName = intent.getStringExtra(META_NAME);
+            mServerIdPcn = Short.parseShort(intent.getStringExtra(SEQ_SERVER_ID));
             // Send metadata only if the erase sequence is not requested
 
             if(!eraseSequence) {
@@ -734,6 +889,7 @@ public class OTAUpdateService extends IntentService {
                 otaRequestsQueue.removeIf(intent1 -> Objects.equals(intent1.getStringExtra(MESSAGE_ID), currentOtaRequest));
                 mSequenceEmptyRequest = true;
             }
+
             startSequenceUpdate(id, currentOtaRequest, eraseSequence);
             return;
         }
@@ -901,6 +1057,34 @@ public class OTAUpdateService extends IntentService {
     }
 
     /**
+     * Updates the OTA (Over-The-Air) sequence status based on the device type and addressing scheme.
+     *
+     * This function routes the status update to the appropriate handler based on the device configuration:
+     * - Direct PCN device updates
+     * - Connect modules connected to PCN devices
+     * - Standard connect modules not associated with PCN
+     *
+     * @param status The OTA sequence status to update (SUCCESS, FAILED, IN_PROGRESS, etc.)
+     * @param address The node address or device identifier for the target device
+     *
+     * Note: PCN_ADDRESS is a constant that defines the address range reserved for PCN devices.
+     *       Devices with addresses below this value are considered connect modules.
+     *
+     */
+    void updateOtaSequenceStatus(SequenceOtaStatus status, int address) {
+        if(mServerIdPcn == DeviceConstants.PCN_ADDRESS) {
+            // Update the PCN device status based on node address of SN PCN
+            PCNUtil.Companion.updateOtaSequenceStatus(status, address);
+        } else if (mServerIdPcn != -1 && mServerIdPcn < DeviceConstants.PCN_ADDRESS) {
+            // Update the status of connect module OTA status that is connect to PCN device
+            PCNUtil.Companion.updateOtaSequenceStatus(status, mServerIdPcn);
+        } else {
+            // Update the status of normal sequence OTA that is not related to PCN device
+            ConnectNodeUtil.Companion.updateOtaSequenceStatus(status, address);
+        }
+    }
+
+    /**
      * Initiates a sequence OTA (Over-The-Air) update for a specific device.
      *
      * @param id The identifier of the device
@@ -941,8 +1125,11 @@ public class OTAUpdateService extends IntentService {
         mLwMeshSeqAddresses.clear();
 
         String address = ConnectNodeUtil.Companion.getAddressById(id, CCUHsApi.getInstance());
+        if(mServerIdPcn != -1) {
+            address = String.valueOf(currentRequest);
+        }
         mLwMeshSeqAddresses.add(Integer.parseInt(address));
-        ConnectNodeUtil.Companion.updateOtaSequenceStatus(SequenceOtaStatus.SEQ_REQUEST_RECEIVED, Integer.parseInt(address));
+        updateOtaSequenceStatus(SequenceOtaStatus.SEQ_REQUEST_RECEIVED, Integer.parseInt(address));
 
         if(mLwMeshSeqAddresses == null || mLwMeshSeqAddresses.isEmpty()) {
             CcuLog.d(TAG, "[VALIDATION] Could not find device " + id + " at level " + "sequence");
@@ -964,7 +1151,6 @@ public class OTAUpdateService extends IntentService {
         } else {
             sendSequenceMetadata(FirmwareComponentType_t.CONNECT_MODULE_SEQUENCE_TYPE);
         }
-        // 3. Start the metadata transfer
 
         sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_START));
     }
@@ -987,6 +1173,13 @@ public class OTAUpdateService extends IntentService {
             return true;
         } else if (deviceType.getHsMarkerName().equals(Tags.HYPERSTATSPLIT) && device.getMarkers().contains(Tags.CONNECTMODULE)) {
             // Connect Module is a special case, since it can be used for HyperStat Split, advanced AHU and connect module as a zone
+            return true;
+        } else if (deviceType.getHsMarkerName().equals(Tags.SMART_NODE) && device.getMarkers().contains(Tags.PCN)) {
+            // PCN is nothing but a Smart Node with additional features, so it should be included in Smart Node updates
+            mServerIdPcn = 100; // PCN devices have fixed server ID 100
+            return true;
+        } else if (deviceType.getHsMarkerName().equals(Tags.CONNECTMODULE) && device.getMarkers().contains(Tags.PCN)) {
+            mServerIdPcn = (short) Integer.parseInt(device.getAddr());
             return true;
         }
         return false;
@@ -1358,12 +1551,56 @@ public class OTAUpdateService extends IntentService {
     }
 
     /**
+     * Sends the pcn firmware metadata to the CM
+     *
+     * @param firmware The type of device being updated
+     * @param serverId The server ID for the PCN update
+     */
+    private void sendFirmwareMetadataPcn(FirmwareComponentType_t firmware, Short serverId) {
+        updateOtaStatusToOtaStarted();
+        CcuToCmOverUsbFirmwarePcnMetadataMessage_t message = new CcuToCmOverUsbFirmwarePcnMetadataMessage_t();
+
+        message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_METADATA);
+        message.lwMeshAddress.set(mCurrentLwMeshAddress);
+
+        FirmwareComponentType_t componentType = getFirmwareComponentType(firmware);
+        CcuLog.d(TAG, "index: " + componentType.ordinal() +
+                ", filename: " + componentType.getUpdateFileName() +
+                ", directory: " + componentType.getUpdateUrlDirectory() +
+                ", marker: " + componentType.getHsMarkerName());
+
+        message.metadata.deviceType.set(componentType);
+
+        message.metadata.majorVersion.set(mVersionMajor);
+        message.metadata.minorVersion.set(mVersionMinor);
+        message.metadata.lengthInBytes.set(mUpdateLength);
+
+        message.metadata.setSignature(mFirmwareSignature);
+        message.serverId.set(serverId);
+        if (BuildConfig.DEBUG) {
+            CcuLog.d(TAG,
+                    "[METADATA] [Node Address:" + mCurrentLwMeshAddress + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(message.getByteBuffer().array(), true) + "]");
+        }
+
+        try {
+            MeshUtil.sendStructToCM(message);
+        } catch (Exception e) {
+            CcuLog.e(TAG, "[METADATA] FAILED TO SEND");
+        }
+    }
+
+    /**
      * Sends the firmware metadata to the CM
      *
      * @param firmware The type of device being updated
      */
     private void sendFirmwareMetadata(FirmwareComponentType_t firmware) {
         updateOtaStatusToOtaStarted();
+        // Check if this is a PCN update which has a serverId associated with it
+        if(mServerIdPcn != -1) {
+            sendFirmwareMetadataPcn(firmware, mServerIdPcn);
+            return;
+        }
         CcuToCmOverUsbFirmwareMetadataMessage_t message = new CcuToCmOverUsbFirmwareMetadataMessage_t();
 
         message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_METADATA);
@@ -1400,7 +1637,10 @@ public class OTAUpdateService extends IntentService {
      * @param firmware The type of device being updated
      */
     private void sendSequenceMetadata(FirmwareComponentType_t firmware) {
-
+        if(mServerIdPcn != -1) {
+            sendPcnSequenceMetadata(firmware);
+            return;
+        }
         // Since we are sending the metadata to CM, we need to remove the current mLwMeshAddresses
         OTAUpdateHandlerService.lastOTAUpdateTime = System.currentTimeMillis();
         mCurrentLwMeshAddress = mLwMeshSeqAddresses.get(0);
@@ -1435,6 +1675,115 @@ public class OTAUpdateService extends IntentService {
             MeshUtil.sendStructToCM(message);
         } catch (Exception e) {
             CcuLog.e(TAG, "[METADATA] FAILED TO SEND");
+        }
+    }
+
+    /**
+     * Sends the pcn sequence metadata to the CM
+     *
+     * @param firmware The type of device being updated
+     */
+    private void sendPcnSequenceMetadata(FirmwareComponentType_t firmware) {
+
+        // Since we are sending the metadata to CM, we need to remove the current mLwMeshAddresses
+        OTAUpdateHandlerService.lastOTAUpdateTime = System.currentTimeMillis();
+        mCurrentLwMeshAddress = mLwMeshSeqAddresses.get(0);
+        ConnectNodeDevice connectNodeEquip = ConnectNodeUtil.Companion.connectNodeEquip(mCurrentLwMeshAddress);
+        connectNodeEquip.getSequenceStatus().writePointValue(SequenceOtaStatus.SEQ_UPDATE_STARTED.ordinal());
+
+        mLwMeshSeqAddresses.remove(0);
+
+        // updateOtaStatusToOtaStarted();
+        CcuToCmOverUsbPcnSequenceMetaMessage_t message = new CcuToCmOverUsbPcnSequenceMetaMessage_t();
+
+        message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SEQUENCE_METADATA);
+        message.lwMeshAddress.set(mCurrentLwMeshAddress);
+
+//        FirmwareComponentType_t componentType = getFirmwareComponentType(firmware);
+//        CcuLog.d(TAG, "index: " + componentType.ordinal() +
+//                ", filename: " + componentType.getUpdateFileName() +
+//                ", directory: " + componentType.getUpdateUrlDirectory() +
+//                ", marker: " + componentType.getHsMarkerName());
+
+        message.metadata.lengthInBytes.set(mUpdateLengthSq);
+
+        message.metadata.setSignature(mSequenceSignature);
+        message.metadata.setName(mSequenceName);
+        message.metadata.sequenceId.set(mSequenceVersion);
+        message.metadata.slaveId.set(mServerIdPcn); // PCN sequence update is always for slave 0
+        if (BuildConfig.DEBUG) {
+            CcuLog.d(TAG,
+                    "[METADATA] [Node Address:" + mCurrentLwMeshAddress + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(message.getByteBuffer().array(), true) + "]");
+        }
+
+        try {
+            MeshUtil.sendStructToCM(message);
+        } catch (Exception e) {
+            CcuLog.e(TAG, "[METADATA] FAILED TO SEND");
+        }
+    }
+
+    /**
+     * Sends a PCN firmware packet to the CM (Central Manager) over USB.
+     *
+     * <p>This method validates the packet request parameters (such as node address
+     * and packet number), checks update completion conditions, constructs the
+     * PCN firmware packet message, and transmits it to the CM.
+     *
+     * <p>Key behavior:</p>
+     * <ul>
+     *   <li>Rejects packet requests from invalid node addresses or out-of-range packet numbers.</li>
+     *   <li>Flags the update as waiting-to-complete upon sending the final packet.</li>
+     *   <li>Logs diagnostic details such as node address, packet size, sequence number, and data.</li>
+     *   <li>Attempts to send the packet to the CM using {@code MeshUtil.sendStructToCM}.</li>
+     * </ul>
+     *
+     * @param lwMeshAddress The mesh address of the node requesting the packet.
+     * @param packetNumber  The index of the packet to be sent.
+     */
+    private void sendPacketPcn(int lwMeshAddress, int packetNumber) {
+
+        if (lwMeshAddress != mCurrentLwMeshAddress) {
+            CcuLog.d(TAG, "[UPDATE] Received packet request from address " + lwMeshAddress + ", instead of " + mCurrentLwMeshAddress);
+            return;
+        }
+        if (mUpdateWaitingToComplete && packetNumber == packets.size() /*- 2*/) {
+            CcuLog.d(TAG, "[UPDATE] Received packet request while waiting for the update to complete");
+            return;
+        }
+        if (packetNumber < 0 || packetNumber > packets.size()) {
+            CcuLog.d(TAG, "[UPDATE] Received request for invalid packet: " + packetNumber);
+            return;
+        }
+        if (!mUpdateWaitingToComplete && (packetNumber == (packets.size() - 1))) {
+            CcuLog.d(TAG, "[UPDATE] Received request for final packet");
+            mUpdateWaitingToComplete = true;
+        }
+
+        CcuToCmOverUsbPcnFirmwarePacketMessage_t message = new CcuToCmOverUsbPcnFirmwarePacketMessage_t();
+
+        message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_PACKET);
+        message.lwMeshAddress.set(lwMeshAddress);
+        message.sequenceNumber.set(packetNumber);
+        message.serverId.set(mServerIdPcn); // PCN update can be for any slave, set during request
+
+        message.setPacket(packets.get(packetNumber));
+
+        if (packetNumber > mLastSentPacket) {
+            mLastSentPacket = packetNumber;
+            if (BuildConfig.DEBUG) {
+                if (packetNumber % 100 == 0) {
+                    CcuLog.d(TAG,
+                            "[UPDATE] [Node Address:" + lwMeshAddress + "]" + "PS:"+packets.size()+","+message.packet.length+","+message.sequenceNumber.get()+" [PN:" + mLastSentPacket
+                                    + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(packets.get(packetNumber), true) +  "]");
+                }
+            }
+        }
+
+        try {
+            MeshUtil.sendStructToCM(message);
+        } catch (Exception e) {
+            CcuLog.e(TAG, "[UPDATE] [Node Address:" + lwMeshAddress + "] [PN:" + packetNumber + "] [FAILED]");
         }
     }
 
@@ -1489,7 +1838,24 @@ public class OTAUpdateService extends IntentService {
         }
     }
 
+    public void sendPcnPacketEraseSequence(int lwMeshAddress) {
+        CcuToCmOverUsbPcnFirmwarePacketMessage_t message = new CcuToCmOverUsbPcnFirmwarePacketMessage_t();
+        message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SEQUENCE_ERASE);
+        CcuLog.d(TAG, "[UPDATE] Erase sequence request to address " + lwMeshAddress);
+        message.lwMeshAddress.set(lwMeshAddress);
+        message.serverId.set(mServerIdPcn); // PCN update can be for any slave, set during request
+        try {
+            MeshUtil.sendStructToCM(message);
+        } catch (Exception e) {
+            CcuLog.e(TAG, "[UPDATE] [Erase sequence Node Address:" + lwMeshAddress + "] [FAILED]");
+        }
+    }
+
     private void sendPacketEraseSequence(int lwMeshAddress) {
+        if(mServerIdPcn != -1) {
+            sendPcnPacketEraseSequence(lwMeshAddress);
+            return;
+        }
         CcuToCmOverUsbFirmwarePacketMessage_t message = new CcuToCmOverUsbFirmwarePacketMessage_t();
         message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SEQUENCE_ERASE);
         CcuLog.d(TAG, "[UPDATE] Erase sequence request to address " + lwMeshAddress);
@@ -1501,7 +1867,68 @@ public class OTAUpdateService extends IntentService {
         }
     }
 
+    private void sendPacketPcnSequence(int lwMeshAddress, int packetNumber) {
+
+        if (lwMeshAddress != mCurrentLwMeshAddress) {
+            CcuLog.d(TAG, "[UPDATE] Received pcn packet request from address " + lwMeshAddress + ", instead of " + mCurrentLwMeshAddress);
+            return;
+        }
+        if (mUpdateWaitingToComplete && packetNumber == packets.size() /*- 2*/) {
+            CcuLog.d(TAG, "[UPDATE] Received pcn packet request while waiting for the update to complete");
+            return;
+        }
+        if (packetNumber == 0) {
+            if(mServerIdPcn == DeviceConstants.PCN_ADDRESS) {
+                PCNDevice pcnDevice = PCNUtil.Companion.getPcnNodeDevice(mCurrentLwMeshAddress);
+                pcnDevice.updateDeliveryTime(HDateTime.make(System.currentTimeMillis(), HTimeZone.make("UTC")));
+            } else {
+                HashMap<Object, Object> pcnEquip = PCNUtil.Companion.getPcnByNodeAddress(String.valueOf(mCurrentLwMeshAddress), CCUHsApi.getInstance());
+                ConnectNodeDevice connectNodeEquip = PCNUtil.Companion.getConnectNodeEquip(pcnEquip, mServerIdPcn);
+                connectNodeEquip.updateDeliveryTime(HDateTime.make(System.currentTimeMillis(), HTimeZone.make("UTC")));
+            }
+        }
+        if (packetNumber < 0 || packetNumber > packets.size()) {
+            CcuLog.d(TAG, "[UPDATE] Received pcn request for invalid packet: " + packetNumber);
+            return;
+        }
+        if (!mUpdateWaitingToComplete && (packetNumber == (packets.size() - 1))) {
+            CcuLog.d(TAG, "[UPDATE] Received pcn request for final packet");
+            mUpdateWaitingToComplete = true;
+        }
+
+        CcuToCmOverUsbPcnFirmwarePacketMessage_t message = new CcuToCmOverUsbPcnFirmwarePacketMessage_t();
+
+        message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SEQUENCE_PACKET);
+        message.lwMeshAddress.set(lwMeshAddress);
+        message.sequenceNumber.set(packetNumber);
+
+        message.setPacket(packets.get(packetNumber));
+        message.serverId.set(mServerIdPcn); // PCN update can be for any slave, set during request
+
+        if (packetNumber > mLastSentPacket) {
+            mLastSentPacket = packetNumber;
+            if (BuildConfig.DEBUG) {
+                if (packetNumber % 100 == 0) {
+                    CcuLog.d(TAG,
+                            "[UPDATE] [PCN] [Node Address:" + lwMeshAddress + "]" + "PS:"+packets.size()+","+message.packet.length+","+message.sequenceNumber.get()+" [PN:" + mLastSentPacket
+                                    + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(packets.get(packetNumber), true) +  "]");
+                }
+            }
+        }
+
+        try {
+            MeshUtil.sendStructToCM(message);
+        } catch (Exception e) {
+            CcuLog.e(TAG, "[UPDATE] [Node Address:" + lwMeshAddress + "] [PN:" + packetNumber + "] [FAILED]");
+        }
+
+    }
+
     private void sendPacketSequence(int lwMeshAddress, int packetNumber) {
+        if(mServerIdPcn != -1) {
+            sendPacketPcnSequence(lwMeshAddress, packetNumber);
+            return;
+        }
 
         if (lwMeshAddress != mCurrentLwMeshAddress) {
             CcuLog.d(TAG, "[UPDATE] Received packet request from address " + lwMeshAddress + ", instead of " + mCurrentLwMeshAddress);
@@ -1586,13 +2013,11 @@ public class OTAUpdateService extends IntentService {
     }
     private boolean isConnectDeviceToCm(int nodeAddress) {
         HashMap<Object, Object> connectNodeEquip = ConnectNodeUtil.Companion.getConnectNodeByNodeAddress(String.valueOf(nodeAddress), CCUHsApi.getInstance());
-        boolean connectNodeEquipAvailable = false;
-        if (!connectNodeEquip.isEmpty()) {
-            connectNodeEquipAvailable = true;
-        } else {
-            connectNodeEquipAvailable = false;
-        }
-        return nodeAddress == ( L.ccu().getAddressBand() + 98 ) || connectNodeEquipAvailable;    }
+        // Ensure that the connectNodeEquip exists and is not already linked to a device. Otherwise it is connected to PCN
+        boolean connectNodeEquipAvailable = !connectNodeEquip.isEmpty() && connectNodeEquip.containsKey(Tags.DEVICE_REF);
+
+        return nodeAddress == ( L.ccu().getAddressBand() + 98 ) || connectNodeEquipAvailable;
+    }
 
     private Integer checkSequenceCacheForUpdate() {
         SeqCache seqCache = new SeqCache();
@@ -1612,6 +2037,7 @@ public class OTAUpdateService extends IntentService {
         mSequenceMetaFileName = Objects.requireNonNull(currentRequest.get(META_NAME));
         mSequenceSeqFileName = Objects.requireNonNull(currentRequest.get(FIRMWARE_NAME));
         currentOtaRequest = Objects.requireNonNull(currentRequest.get(MESSAGE_ID));
+        mServerIdPcn = Short.parseShort(currentRequest.get(SEQ_SERVER_ID));
         //
         String eraseSequenceStr = currentRequest.getOrDefault(ERASE_SEQUENCE, "false");
         mSequenceEmptyRequest = eraseSequenceStr.equals("true");
@@ -1676,6 +2102,7 @@ public class OTAUpdateService extends IntentService {
         mLastSentPacket = -1;
 
         mUpdateLength = -1;
+        mServerIdPcn = -1;
 
         mMetadataDownloadId = -1;
         mBinaryDownloadId = -1;
@@ -1701,6 +2128,7 @@ public class OTAUpdateService extends IntentService {
         mVersionMinor = -1;
 
         mUpdateLength = -1;
+        mServerIdPcn = -1;
 
         mMetadataDownloadId = -1;
         mBinaryDownloadId = -1;
@@ -1740,56 +2168,74 @@ public class OTAUpdateService extends IntentService {
         return false;
     }
 
-    void sequenceRequest(Intent seqRequest) {
+    private void sequenceRequest(Intent seqRequest) {
         CcuLog.i(TAG, "sequenceRequest: " + seqRequest);
-        ArrayList<String> deviceListToSendLowCode = seqRequest.getStringArrayListExtra(DEVICE_LIST);
 
-        if (deviceListToSendLowCode != null && !deviceListToSendLowCode.isEmpty()) {
-            for (String device : deviceListToSendLowCode) {
-                // Create a new Intent for each device
-                Intent deviceIntent = new Intent(seqRequest);
+        // Check if we received the addition request and add to queue
+        handleDeviceList(seqRequest, seqRequest.getStringArrayListExtra(DEVICE_LIST), false);
 
-                deviceIntent.putExtra(ID, device);
-                String nodeAddress = ConnectNodeUtil.Companion.getAddressById(device, CCUHsApi.getInstance());
-                deviceIntent.putExtra(NODE_ADDRESS, nodeAddress);
+        // Check if we received the deletion request and add to queue
+        handleDeviceList(seqRequest, seqRequest.getStringArrayListExtra(REMOVE_LIST), true);
+    }
 
-                // Copy the existing fields from seqRequest to deviceIntent
-                deviceIntent.putExtra(MESSAGE_ID, nodeAddress);
-                deviceIntent.putExtra(SEQ_NAME, seqRequest.getStringExtra(SEQ_NAME));
-                deviceIntent.putExtra(CMD_LEVEL, seqRequest.getStringExtra(CMD_LEVEL));
-                deviceIntent.putExtra(CMD_TYPE, seqRequest.getStringExtra(CMD_TYPE));
+    private void handleDeviceList(Intent seqRequest, ArrayList<String> deviceList, boolean isRemove) {
+        if (deviceList == null || deviceList.isEmpty()) return;
+
+        for (String device : deviceList) {
+            Intent deviceIntent = new Intent(seqRequest);
+            HashMap<Object, Object> deviceMap = CCUHsApi.getInstance().readMapById(device);
+            boolean isPCN = deviceMap.containsKey("domainName")
+                    && ModelNames.pcnDevice.equals(deviceMap.get("domainName"));
+            boolean isCNInPcn = PCNUtil.Companion.isConnectNodeInPCN(deviceMap);
+
+            deviceIntent.putExtra(ID, device);
+            String nodeAddress = ConnectNodeUtil.Companion.getAddressById(device, CCUHsApi.getInstance());
+//            deviceIntent.putExtra(NODE_ADDRESS, nodeAddress);
+
+            // Common fields
+//            deviceIntent.putExtra(MESSAGE_ID, nodeAddress);
+            deviceIntent.putExtra(SEQ_NAME, seqRequest.getStringExtra(SEQ_NAME));
+            deviceIntent.putExtra(CMD_LEVEL, seqRequest.getStringExtra(CMD_LEVEL));
+            deviceIntent.putExtra(CMD_TYPE, seqRequest.getStringExtra(CMD_TYPE));
+            deviceIntent.putExtra(SEQ_VERSION, seqRequest.getStringExtra(SEQ_VERSION));
+
+            if (!isRemove) {
+                // Add request
                 deviceIntent.putExtra(META_NAME, seqRequest.getStringExtra(META_NAME));
                 deviceIntent.putExtra(FIRMWARE_NAME, seqRequest.getStringExtra(FIRMWARE_NAME));
-                deviceIntent.putExtra(SEQ_VERSION, seqRequest.getStringExtra(SEQ_VERSION));
                 deviceIntent.putExtra(ERASE_SEQUENCE, ERASE_SEQUENCE_FALSE);
-
-                addSequenceRequest(deviceIntent);
-            }
-        }
-        ArrayList<String> removedDeviceList = seqRequest.getStringArrayListExtra(REMOVE_LIST);
-
-        if (removedDeviceList != null && !removedDeviceList.isEmpty()) {
-            for (String device : removedDeviceList) {
-                // Create a new Intent for each device
-                Intent deviceIntent = new Intent(seqRequest);
-
-                deviceIntent.putExtra(ID, device);
-                String nodeAddress = ConnectNodeUtil.Companion.getAddressById(device, CCUHsApi.getInstance());
-                deviceIntent.putExtra(NODE_ADDRESS, nodeAddress);
-
-                // Copy the existing fields from seqRequest to deviceIntent
-                deviceIntent.putExtra(MESSAGE_ID, nodeAddress);
-                deviceIntent.putExtra(SEQ_NAME, seqRequest.getStringExtra(SEQ_NAME));
-                deviceIntent.putExtra(CMD_LEVEL, seqRequest.getStringExtra(CMD_LEVEL));
-                deviceIntent.putExtra(CMD_TYPE, seqRequest.getStringExtra(CMD_TYPE));
+            } else {
+                // Remove request
                 deviceIntent.putExtra(META_NAME, seqRequest.getStringExtra(EMPTY_META_NAME));
                 deviceIntent.putExtra(FIRMWARE_NAME, seqRequest.getStringExtra(EMPTY_FIRMWARE_NAME));
-                deviceIntent.putExtra(SEQ_VERSION, seqRequest.getStringExtra(SEQ_VERSION));
                 deviceIntent.putExtra(ERASE_SEQUENCE, ERASE_SEQUENCE_TRUE);
-                addSequenceRequest(deviceIntent);
             }
+
+            // Server ID logic
+            if (isPCN) {
+                String slaveAddress = "100"; // PCN sequence update is always for slave 100
+                deviceIntent.putExtra(NODE_ADDRESS, nodeAddress);
+                // In order to maintain the unique message ID for sequence request, we are combining the mesh address and slave address
+                deviceIntent.putExtra(MESSAGE_ID, nodeAddress+slaveAddress);
+                deviceIntent.putExtra(SEQ_SERVER_ID, "100");
+            } else if (isCNInPcn) {
+                String deviceRef = (String) CCUHsApi.getInstance().readMapById(device).get("deviceRef");
+                String meshAddress = CCUHsApi.getInstance().readMapById(deviceRef).get("addr").toString();
+                String slaveAddress = Objects.requireNonNull(deviceMap.get(Tags.ADDR)).toString();
+                deviceIntent.putExtra(NODE_ADDRESS, meshAddress);
+                // In order to maintain the unique message ID for sequence request, we are combining the mesh address and slave address
+                deviceIntent.putExtra(MESSAGE_ID, meshAddress+slaveAddress);
+                deviceIntent.putExtra(SEQ_SERVER_ID, slaveAddress);
+            } else {
+                deviceIntent.putExtra(MESSAGE_ID, nodeAddress);
+                deviceIntent.putExtra(SEQ_SERVER_ID, "-1");
+                deviceIntent.putExtra(NODE_ADDRESS, nodeAddress);
+            }
+
+            addSequenceRequest(deviceIntent);
         }
     }
+
 
     void addSequenceRequest(Intent seqRequest) {
         CcuLog.i(TAG, "addSequenceRequest: "+ otaRequestsQueue);

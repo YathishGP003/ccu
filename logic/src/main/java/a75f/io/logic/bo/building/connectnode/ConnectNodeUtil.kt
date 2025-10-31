@@ -5,12 +5,10 @@ import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.devices.ConnectNodeDevice
-import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.pointscheduling.model.CustomScheduleManager.Companion.modbusWritableDataInterface
-import a75f.io.logic.bo.building.system.util.readEntity
 import a75f.io.logic.connectnode.ModelMetadata
 import a75f.io.logic.connectnode.PointData
 import a75f.io.logic.connectnode.SequenceMetaDataDTO
@@ -23,12 +21,10 @@ import java.io.FileWriter
 
 class ConnectNodeUtil {
     companion object {
-        lateinit var pointSlaveIdRegAddress: List<Triple<String, String, String>>
+        private lateinit var pointSlaveIdRegAddress: List<Triple<String, String, String>>
 
-        private fun getConnectNodeDevice(): HashMap<Any, Any> {
-            return readEntity(ModelNames.connectNodeDevice)
-        }
-        fun isConnectNodeAvailable(): Boolean = getConnectNodeDevice().isNotEmpty()
+
+        fun isConnectNodeAvailable(): Boolean = isConnectModuleAsZonePaired()
 
         fun getPointSlaveIdRegAddressPointList(): List<Pair<String, String>> {
             if (pointSlaveIdRegAddress.isEmpty()) {
@@ -41,9 +37,7 @@ class ConnectNodeUtil {
             roomRef: String,
             ccuHsApi: CCUHsApi
         ): Boolean {
-            val hasConnectNode = ccuHsApi.readEntity(
-                """device and domainName == "${DomainName.connectNodeDevice}" and roomRef == "$roomRef""""
-            ).isNotEmpty()
+            val hasConnectNode = getConnectModuleAsZone(ccuHsApi, roomRef).isNotEmpty()
 
             val hasEquips = ccuHsApi.readEntity(
                 """equip and roomRef == "$roomRef""""
@@ -56,12 +50,14 @@ class ConnectNodeUtil {
             nodeAddress: String,
             ccuHsApi: CCUHsApi
         ): Boolean {
+            val roomRef = getConnectNodeByNodeAddress(nodeAddress, ccuHsApi)["roomRef"].toString()
+
             val hasConnectNode = ccuHsApi.readEntity(
                 "device and domainName == \"" + DomainName.connectNodeDevice + "\" and addr == \"" + nodeAddress + "\""
             ).isNotEmpty()
 
             val hasEquips = ccuHsApi.readEntity(
-                """equip and group == "${getEquipSlaveIdByAddress(nodeAddress)}""""
+                """equip and group == "${getEquipSlaveIdByAddress(nodeAddress)}" and roomRef == "$roomRef""""
             ).isNotEmpty()
 
             return hasConnectNode && hasEquips
@@ -71,21 +67,21 @@ class ConnectNodeUtil {
             nodeAddress: Long,
             ccuHsApi: CCUHsApi
         ): Boolean {
+            val roomRef = getConnectNodeByNodeAddress(nodeAddress.toString(), ccuHsApi)["roomRef"].toString()
+
             val hasConnectNode = ccuHsApi.readEntity(
                 "device and domainName == \"" + DomainName.connectNodeDevice + "\" and addr == \"" + nodeAddress + "\""
             ).isNotEmpty()
 
             val hasEquips = ccuHsApi.readEntity(
-                """equip and group == "${getEquipSlaveIdByAddress(nodeAddress.toString())}""""
+                """equip and group == "${getEquipSlaveIdByAddress(nodeAddress.toString())}" and roomRef == "$roomRef""""
             ).isNotEmpty()
 
             return hasConnectNode && !hasEquips
         }
 
         fun getConnectNodeForZone(roomRef: String, ccuHsApi: CCUHsApi) : HashMap<Any, Any> {
-            return ccuHsApi.readEntity(
-                "device and domainName == \"" + DomainName.connectNodeDevice + "\" and roomRef == \"" + roomRef + "\""
-            )
+            return getConnectModuleAsZone(ccuHsApi, roomRef)
         }
 
         fun getConnectNodeByNodeAddress(nodeAddress: String, ccuHsApi: CCUHsApi) : HashMap<Any, Any> {
@@ -99,7 +95,9 @@ class ConnectNodeUtil {
         }
 
         fun removeConnectNodeEquips(nodeAddress: String, hsApi: CCUHsApi) {
-            val equipList = hsApi.readAllEntities("equip and group == \""+ getEquipSlaveIdByAddress(nodeAddress.takeLast(2))+"\"")
+            val roomRef = getConnectNodeByNodeAddress(nodeAddress, hsApi)["roomRef"].toString()
+
+            val equipList = hsApi.readAllEntities("equip and group == \""+ getEquipSlaveIdByAddress(nodeAddress.takeLast(2))+"\" and roomRef == \"$roomRef\"")
             equipList.forEach { equip ->
                 hsApi.deleteEntityTree(equip["id"].toString())
                 CcuLog.i(L.TAG_CONNECT_NODE,  "Deleted equip: ${equip["id"]} and dis : ${equip["dis"]} from group: ${nodeAddress.takeLast(2)}")
@@ -107,9 +105,7 @@ class ConnectNodeUtil {
         }
 
         fun isConnectNodePaired(roomRef: String): Boolean {
-            return CCUHsApi.getInstance().readEntity(
-                "device and domainName == \"" + DomainName.connectNodeDevice + "\" and roomRef == \"" + roomRef + "\""
-            ).size > 0
+            return getConnectModuleAsZone(CCUHsApi.getInstance(), roomRef). isNotEmpty()
         }
 
         /*If connect node is paired we show it as 1000 (No module paired)
@@ -124,24 +120,10 @@ class ConnectNodeUtil {
             val connectNodeList = ccuHsApi.readAllEntities(
                 "device and domainName == \"" + DomainName.connectNodeDevice + "\""
             )
-            return connectNodeList.map { it["addr"].toString() }
-        }
+            return connectNodeList
+                .filter { it["addr"]?.toString()?.toIntOrNull()?.let { addr -> addr > 1000 } == true }
+                .map { it["addr"].toString() }
 
-
-        /*For CN slave id will be last 2 digits
-        * if address is 1001  slave id will be 1
-        * and if 1000 it will be 49*/
-        fun getConnectNodeSlaveIdList(
-            ccuHsApi: CCUHsApi
-        ): List<Int> {
-            val connectNodeList = ccuHsApi.readAllEntities(
-                "device and domainName == \"" + DomainName.connectNodeDevice + "\""
-            )
-            return connectNodeList.mapNotNull { node ->
-                node["addr"].toString().toInt().let { addr ->
-                    if (addr == 1000) 49 else addr % 100
-                }
-            }
         }
 
         fun getAddressById(
@@ -355,6 +337,11 @@ class ConnectNodeUtil {
         }
 
         fun rewriteConnectNodeDetails(roomId: String) {
+            if (getConnectNodeForZone(roomId, CCUHsApi.getInstance()).isEmpty()) {
+                CcuLog.e(L.TAG_CONNECT_NODE, "No connect node found for room: $roomId")
+                return
+            }
+
             val equips = CCUHsApi.getInstance()
                 .readAllEntities(
                     "equip and connectModule " +
@@ -374,6 +361,25 @@ class ConnectNodeUtil {
                     )
                 }
             }
+        }
+
+        private fun getConnectModuleAsZone(
+            ccuHsApi: CCUHsApi,
+            roomRef: String,
+            minAddr: Int = 100
+        ): HashMap<Any, Any> {
+            val query = "device and domainName == \"${DomainName.connectNodeDevice}\" and roomRef == \"$roomRef\""
+            return (ccuHsApi.readEntity(query)
+                ?.takeIf { it[Tags.ADDR]?.toString()?.toIntOrNull()?.let { addr -> addr > minAddr } == true }
+                ?: HashMap())
+
+        }
+
+        private fun isConnectModuleAsZonePaired (): Boolean {
+                val connectNodeList = CCUHsApi.getInstance().readAllEntities(
+                "device and domainName == \"" + DomainName.connectNodeDevice + "\""
+            )
+            return connectNodeList.any { it[Tags.ADDR]?.toString()?.toIntOrNull()?.let { addr -> addr > 1000 } == true }
         }
     }
 }

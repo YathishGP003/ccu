@@ -313,12 +313,13 @@ fun LabelTextViewForTable(text: AnnotatedString, modifier: Modifier = Modifier, 
 }
 
 @Composable
-fun LabelBoldTextViewForTable(text: String, modifier: Modifier = Modifier, fontSize: Int = 20, textAlign: TextAlign = TextAlign.Start, fontColor: Color = Color.White) {
+fun LabelBoldTextViewForTable(text: String, modifier: Modifier = Modifier, fontSize: Int = 20,
+                              textAlign: TextAlign = TextAlign.Start, fontColor: Color = Color.White, fontWeight : FontWeight = FontWeight.Bold) {
     Text(
         modifier = modifier,
         style = TextStyle(
             fontFamily = myFontFamily,
-            fontWeight = FontWeight.Bold,
+            fontWeight = fontWeight,
             fontSize = fontSize.sp,
             color = fontColor,
             textAlign = textAlign

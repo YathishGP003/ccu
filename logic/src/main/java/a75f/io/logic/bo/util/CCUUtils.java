@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,8 +27,10 @@ import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.devices.PCNDevice;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
@@ -35,6 +38,7 @@ import a75f.io.logic.R;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.pcn.PCNUtil;
 import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.logic.util.PreferenceUtil;
 
@@ -64,6 +68,17 @@ public class CCUUtils
             HisItem hisItem = CCUHsApi.getInstance().curRead(point.get("id").toString());
             return (hisItem == null) ? null : hisItem.getDate();
         }
+
+        // Check if there is any PCN equip with the given node address. PCN is a special case which does not have equip group as node address
+        // It is a device. Hence get the pcnNodeDevice and check if there is a heartbeat data for that device
+        PCNDevice pcnDevice = PCNUtil.Companion.getPcnNodeDevice(Integer.parseInt(nodeAddr));
+        if(!pcnDevice.getDeviceRef().equals("null")) {
+            HashMap<Object, Object> point = CCUHsApi.getInstance()
+                    .readEntity("domainName == \"" + DomainName.heartBeat + "\" and deviceRef == \"" + pcnDevice.getId() + "\"");
+            HisItem hisItem = CCUHsApi.getInstance().curRead(Objects.requireNonNull(point.get("id")).toString());
+            return (hisItem == null) ? null : hisItem.getDate();
+        }
+
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap point = CCUHsApi.getInstance().read("point and (heartBeat or heartbeat) and group == \""+nodeAddr+"\"");
         if(point.size() == 0){
@@ -75,6 +90,17 @@ public class CCUUtils
 
     public static Date getLastReceivedTimeForModBusAndBacnet(String slaveId){
         CCUHsApi hayStack = CCUHsApi.getInstance();
+
+        // Check if the slaveId corresponds to a ConnectNode device connected to PCN
+        HashMap<Object, Object> connectNodeEquip = ConnectNodeUtil.Companion.getConnectNodeByNodeAddress(slaveId, CCUHsApi.getInstance());
+
+        if (connectNodeEquip.containsKey(Tags.DEVICE_REF)) {
+            HashMap<Object, Object> point = CCUHsApi.getInstance()
+                    .readEntity("domainName == \"" + DomainName.heartBeat + "\" and deviceRef == \"" + connectNodeEquip.get(Tags.DEVICE_REF).toString() + "\"");
+            HisItem hisItem = CCUHsApi.getInstance().curRead(Objects.requireNonNull(point.get("id")).toString());
+            return (hisItem == null) ? null : hisItem.getDate();
+        }
+
         // Check if the slaveId is a valid Modbus slave ID (1-256) or Bacnet device ID (500-999)
         if (!slaveId.isEmpty() && Integer.parseInt(slaveId) <= 256) {
             List<HashMap<Object, Object>> equipList =
@@ -424,6 +450,9 @@ public class CCUUtils
         if(ConnectNodeUtil.Companion.isZoneContainingConnectNodeWithEquips(String.valueOf(address), CCUHsApi.getInstance())) {
             return ProfileType.CONNECTNODE;
         }
+        if(PCNUtil.Companion.isZoneContainingPCNWithEquips(String.valueOf(address), CCUHsApi.getInstance())) {
+            return ProfileType.PCN;
+        }
         return null;
     }
     public static NodeType getNodeType(HashMap<Object, Object> device) {
@@ -447,6 +476,8 @@ public class CCUUtils
             return NodeType.OTN;
         } else if (domainName.contains("connectnodedevice")) {
             return NodeType.CONNECTNODE;
+        } else if (domainName.contains("pcndevice")) {
+            return NodeType.PCN;
         } else {
             return null;
         }
@@ -468,8 +499,8 @@ public class CCUUtils
         return true;
     }
 
-    public static boolean isConnectModuleAlive(String deviceRef) {
-        Date updatedTime = CCUUtils.getLastUpdatedTimeForCN(deviceRef);
+    public static boolean isLowCodeDeviceAlive(String deviceRef) {
+        Date updatedTime = CCUUtils.getLastUpdatedTimeForLowCodeDevice(deviceRef);
         if (updatedTime == null) {
             return false;
         }
@@ -477,7 +508,7 @@ public class CCUUtils
                 updatedTime.getTime()) <= (double) 15;// 15 minutes
     }
 
-    public static Date getLastUpdatedTimeForCN(String deviceRef) {
+    public static Date getLastUpdatedTimeForLowCodeDevice(String deviceRef) {
         HashMap<Object, Object> point = CCUHsApi.getInstance()
                 .readEntity("domainName == \"" + DomainName.heartBeat + "\" and deviceRef == \"" + deviceRef + "\"");
         if (point.isEmpty()) {

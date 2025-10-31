@@ -1,6 +1,6 @@
 package a75f.io.renatus.modbus;
 
-import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
+import static a75f.io.logic.bo.building.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
 import static a75f.io.logic.bo.util.CustomScheduleUtilKt.isPointFollowingScheduleOrEvent;
 
 import android.content.Context;

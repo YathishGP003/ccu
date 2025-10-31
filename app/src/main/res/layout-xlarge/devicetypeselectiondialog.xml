@@ -521,7 +521,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_marginStart="60dp"
-                app:srcCompat="@drawable/external_equip" />
+                app:srcCompat="@drawable/external_equipment" />
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

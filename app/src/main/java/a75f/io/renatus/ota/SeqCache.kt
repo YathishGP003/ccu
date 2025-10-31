@@ -86,9 +86,9 @@ class SeqCache {
     fun saveRequest(intent: Intent) {
         val request = getRequestFromIntent(intent)
         val requestMap = getRequestMap()
-        requestMap[request[NODE_ADDRESS]] = request
+        requestMap[request[MESSAGE_ID]] = request
         saveRequestList(requestMap)
-        logIt("${request[NODE_ADDRESS]} New request saved")
+        logIt("${request[MESSAGE_ID]} New request saved")
     }
 
     private fun getRequestFromIntent(intent: Intent): LinkedTreeMap<String,String> {
@@ -103,6 +103,7 @@ class SeqCache {
         map[NODE_ADDRESS] = intent.getStringExtra(NODE_ADDRESS) // Since not applicable for firmware OTA type, no need of !!
         map[SEQ_NAME] = intent.getStringExtra(SEQ_NAME) // Since not applicable for firmware OTA type, no need of !!
         map[SEQ_VERSION] = intent.getStringExtra(SEQ_VERSION) // Since not applicable for firmware OTA type, no need of !!
+        map[SEQ_SERVER_ID] = intent.getStringExtra(SEQ_SERVER_ID) ?: "" // Since not applicable for firmware OTA type, no need of !!
         map[RETRY_COUNT] = "0"
         return map
     }
@@ -118,6 +119,7 @@ class SeqCache {
         otaUpdateIntent.putExtra(SEQ_NAME, request[SEQ_NAME] ?: "") // Since SEQ_VERSION might not be applicable for firmware OTA type
         otaUpdateIntent.putExtra(NODE_ADDRESS, request[NODE_ADDRESS] ?: "") // Since NODE_ADDRESS might not be applicable for firmware OTA type
         otaUpdateIntent.putExtra(SEQ_VERSION, request[SEQ_VERSION] ?: "") // Since SEQ_VERSION might not be applicable for firmware OTA type
+        otaUpdateIntent.putExtra(SEQ_SERVER_ID, request[SEQ_SERVER_ID] ?: "") // Since SEQ_SERVER_ID might not be applicable for firmware OTA type
         otaUpdateIntent.putExtra(RETRY_COUNT, request[RETRY_COUNT])
         return otaUpdateIntent
     }
@@ -202,6 +204,7 @@ class SeqCache {
         const val CMD_TYPE = "remoteCmdType"
         const val RETRY_COUNT = "retryCount"
         const val SEQ_VERSION = "seqVersion"
+        const val SEQ_SERVER_ID = "seqServerId"
         const val SEQ_NAME = "seqName"
         const val FIVE_MINUTES = 5 * 60000L
     }

@@ -29,6 +29,7 @@ public class Tags
     public static final String MARKER = "marker";
     public static final String CCU = "ccu";
     public static final String SITEREF = "siteRef";
+    public static final String PARAMETER_DEFINITION_TYPE = "parameterDefinitionType";
 
     public static final String WRITABLE = "writable";
     public static final String HIS = "his";
@@ -246,6 +247,7 @@ public class Tags
     public static final String MYSTAT = "mystat";
     public static final String INPUT_TYPE = "inputType";
     public static final String OUTPUT_TYPE = "outputType";
+    public static final String REG_NUM = "registerNumber";
 
     public static final String ADD_REMOVE_PROFILE = "addRemoveProfile";
 
@@ -288,4 +290,5 @@ public class Tags
     public static final String CCU_POINT_OBSERVER = "CCU_POINT_OBSERVER";
 
     public static final String PCN = "pcn";
+    public static final String DEVICE_REF = "deviceRef";
 }

@@ -3,7 +3,6 @@ package a75f.io.domain.migration
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
-import a75f.io.domain.api.Ccu
 import a75f.io.domain.api.Device
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getBypassEquipByDomainName
@@ -29,12 +28,12 @@ import a75f.io.domain.logic.applyLogicalOperations
 import a75f.io.domain.logic.evaluateConfiguration
 import a75f.io.domain.util.CommonQueries
 import a75f.io.domain.util.ModelCache
+import a75f.io.domain.util.ModelNames
 import a75f.io.domain.util.extractAndAppendExternalEdits
 import a75f.io.logger.CcuLog
 import android.util.Log
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
-import io.seventyfivef.domainmodeler.client.ModelTagDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -46,12 +45,6 @@ import io.seventyfivef.domainmodeler.common.point.Condition
 import io.seventyfivef.domainmodeler.common.point.DependentConfiguration
 import io.seventyfivef.domainmodeler.common.point.Operator
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
-import io.seventyfivef.ph.core.Tags
-import org.projecthaystack.HBool
-import org.projecthaystack.HList
-import org.projecthaystack.HNum
-import org.projecthaystack.HStr
-import org.projecthaystack.HVal
 
 /**
  * Created by Manjunath K on 16-06-2023.
@@ -153,8 +146,8 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             val equip = haystack.readEntity("equip and id == "+haystackDevice.equipRef.toString())
             val sourceModel = equip["sourceModel"].toString()
             val profileConfiguration = getProfileConfig(equip["profile"].toString())
-            val isConnectModuleDevice = haystackDevice.domainName?.equals(DomainName.connectNodeDevice) == true
-            val deviceBuilder = if (isConnectModuleDevice) {
+            val isLowCodeDevice = haystackDevice.domainName?.equals(DomainName.connectNodeDevice) == true || haystackDevice.domainName?.equals(ModelNames.pcnDevice) == true
+            val deviceBuilder = if (isLowCodeDevice) {
                 DeviceBuilder(haystack, null)
             } else {
                 val modelDirective = ModelCache.getModelById(sourceModel)
@@ -162,7 +155,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                 DeviceBuilder(haystack, entityMapper)
             }
 
-            if(!isConnectModuleDevice) {
+            if(!isLowCodeDevice) {
                 updateRef(equip, profileConfiguration)
             }
 
@@ -206,8 +199,8 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             val sourceModel = deviceEntity["sourceModel"].toString()
             val profileConfiguration = getProfileConfig(deviceEntity["profile"].toString())
 
-            val isConnectModuleDevice = haystackDevice.domainName?.equals(DomainName.connectNodeDevice) == true
-            val deviceBuilder = if (isConnectModuleDevice) {
+            val isLowCodeDevice = haystackDevice.domainName?.equals(DomainName.connectNodeDevice) == true || haystackDevice.domainName?.equals(ModelNames.pcnDevice) == true
+            val deviceBuilder = if (isLowCodeDevice) {
                 DeviceBuilder(haystack, null)
             } else {
                 val modelDirective = ModelCache.getModelById(sourceModel)
@@ -215,7 +208,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                 DeviceBuilder(haystack, entityMapper)
             }
 
-            if(!isConnectModuleDevice) {
+            if(!isLowCodeDevice) {
                 updateRef(deviceEntity, profileConfiguration)
             }
             val devicePoints = haystack.readAllEntities("point and deviceRef == \"${device.id}\"")
@@ -258,7 +251,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             val sourceModel = deviceEntity["sourceModel"].toString()
             val profileConfiguration = getProfileConfig(deviceEntity["profile"].toString())
 
-            val deviceBuilder = if (haystackDevice.domainName?.equals(DomainName.connectNodeDevice) == true) {
+            val deviceBuilder = if (haystackDevice.domainName?.equals(DomainName.connectNodeDevice) == true || haystackDevice.domainName?.equals(ModelNames.pcnDevice) == true) {
                 DeviceBuilder(haystack, null)
             } else {
                 val modelDirective = ModelCache.getModelById(sourceModel)

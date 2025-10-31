@@ -1,4 +1,4 @@
-package a75f.io.device.modbus
+package a75f.io.logic.bo.building.modbus
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
@@ -115,9 +115,12 @@ private fun getChildEquips(parentEquipRef: String): List<EquipmentDevice> {
 private fun buildEquipModel(parentMap: HashMap<Any, Any>, parentEquipRef: String?): EquipmentDevice {
     val equipId = parentMap[ID].toString()
     val equipDevice = getEquipByMap(parentMap, parentEquipRef)
-    val connectModule = ConnectNodeUtil.getConnectNodeForZone(equipDevice.zoneRef, CCUHsApi.getInstance())
-    val registersMapList = getRegistersMap(equipId, connectModule)
-    registersMapList.forEach { registerMap -> equipDevice.registers.add(getRegister(registerMap, connectModule)) }
+    val isConnectNodeAsZone = ConnectNodeUtil.getConnectNodeForZone(equipDevice.zoneRef, CCUHsApi.getInstance()).isNotEmpty()
+    val isConnectModule = parentMap.containsKey(Tags.CONNECTMODULE)
+    val isPCN = parentMap.containsKey(Tags.PCN)
+    val isLowCodeEquip = (isPCN || isConnectNodeAsZone || isConnectModule)
+    val registersMapList = getRegistersMap(equipId, isLowCodeEquip)
+    registersMapList.forEach { registerMap -> equipDevice.registers.add(getRegister(registerMap, isLowCodeEquip)) }
     return equipDevice
 }
 
@@ -125,9 +128,9 @@ private fun buildEquipModel(parentMap: HashMap<Any, Any>, parentEquipRef: String
  * @param equipId
  * return all the register map list for the the equip
  */
-private fun getRegistersMap(equipId: String, connectModule: HashMap<Any, Any>): ArrayList<HashMap<Any, Any>> {
+private fun getRegistersMap(equipId: String, isLowCodeEquip: Boolean): ArrayList<HashMap<Any, Any>> {
     val hsApi = CCUHsApi.getInstance()
-    if (connectModule.size > 0) {
+    if (isLowCodeEquip) {
         return hsApi.readAllEntities("registerNumber and point and equipRef == \"$equipId\"")
     }
     val deviceId = hsApi.readId("device and modbus and equipRef == \"$equipId\"")
@@ -138,7 +141,7 @@ private fun getRegistersMap(equipId: String, connectModule: HashMap<Any, Any>): 
  * @param rawMap
  * returns register object with all the register details
  */
-private fun getRegister(rawMap: HashMap<Any, Any>, connectModule: HashMap<Any, Any>): Register {
+private fun getRegister(rawMap: HashMap<Any, Any>, isLowCodeEquip: Boolean): Register {
     val physicalPoint = RawPoint.Builder().setHashMap(rawMap).build()
     val register = Register()
     register.registerNumber = physicalPoint.registerNumber
@@ -147,8 +150,9 @@ private fun getRegister(rawMap: HashMap<Any, Any>, connectModule: HashMap<Any, A
     register.parameterDefinitionType = getValue(rawMap, PARAM_DEFINITION_TYPE)
     register.wordOrder = getValue(rawMap, WORD_ORDER)
     register.multiplier = getValue(rawMap, MULTIPLIER)
+    register.parameters = mutableListOf(getParameter(physicalPoint, rawMap, isLowCodeEquip))
     register.defaultValue = if(rawMap.containsKey(DEFAULT_VALUE)) rawMap[DEFAULT_VALUE].toString().toDouble() else null
-    register.parameters = mutableListOf(getParameter(physicalPoint, rawMap, connectModule))
+    register.parameters = mutableListOf(getParameter(physicalPoint, rawMap, isLowCodeEquip))
     return register
 }
 
@@ -161,11 +165,11 @@ private fun getRegister(rawMap: HashMap<Any, Any>, connectModule: HashMap<Any, A
 private fun getParameter(
     physicalPoint: RawPoint,
     rawMap: HashMap<Any, Any>,
-    connectModule: HashMap<Any, Any>
+    isLowCodeEquip: Boolean
 ): Parameter {
-    val param = getBasicParamData(physicalPoint, rawMap, connectModule)
+    val param = getBasicParamData(physicalPoint, rawMap, isLowCodeEquip)
 
-    val logicalPoint = if (connectModule.isNotEmpty()) {
+    val logicalPoint = if (isLowCodeEquip) {
         Point.Builder().setHashMap(rawMap).build()
     } else {
         Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(physicalPoint.pointRef)).build()
@@ -209,13 +213,13 @@ private fun getParameter(
 private fun getBasicParamData(
     physicalPoint: RawPoint,
     rawMap: HashMap<Any, Any>,
-    connectModule: HashMap<Any, Any>
+    isLowCodeEquip: Boolean
 ): Parameter {
     val param = Parameter()
     param.parameterId = physicalPoint.parameterId
     param.name = physicalPoint.shortDis
-    param.startBit = if (connectModule.isEmpty()) physicalPoint.startBit.toInt() else {0}
-    param.endBit = if (connectModule.isEmpty()) physicalPoint.endBit.toInt() else {0}
+    param.startBit = if (!isLowCodeEquip) physicalPoint.startBit.toInt() else {0}
+    param.endBit = if (!isLowCodeEquip) physicalPoint.endBit.toInt() else {0}
     param.bitParamRange = getValue(rawMap, BIT_PARAM_RANGE)
     param.bitParam = if (rawMap.containsKey(BIT_PARAM)) strToDouble(rawMap[BIT_PARAM].toString()) else 0
     param.logicalPointTags = mutableListOf<LogicalPointTags>()

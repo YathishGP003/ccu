@@ -943,18 +943,18 @@ public class RestoreCCUHsApi {
         return ccuEquipMap.containsKey("domainName") && ccuEquipMap.get("domainName").equals(domainName);
     }
 
-    public HGrid getConnectNodeDevice(String address, RetryCountCallback retryCountCallback) {
+    public HGrid getLowCodeDevice(String address, RetryCountCallback retryCountCallback) {
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("filter",
                 "device and not ccu and addr == " + StringUtils.prependIfMissing(address,"@")).toDict();
         return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
     }
 
-    public HGrid getAllConnectNodes(String ccuId, String siteCode, RetryCountCallback retryCountCallback) {
+    public HGrid getAllLowCodeDevices(String ccuId, String siteCode, RetryCountCallback retryCountCallback) {
 
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("filter",
-                "domainName == \"connectNodeDevice\" and ccuRef == "+ ccuId +" and siteRef == "+ siteCode).toDict();
+                "(domainName == \"connectNodeDevice\" or domainName == \"pcnDevice\") and ccuRef == "+ ccuId +" and siteRef == "+ siteCode).toDict();
         return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
     }
     public void importPointScheduleAndEvent(RetryCountCallback retryCountCallback) {

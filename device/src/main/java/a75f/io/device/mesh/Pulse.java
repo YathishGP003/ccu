@@ -42,10 +42,12 @@ import a75f.io.device.serial.CcuToCmOverUsbSnSettings2Message_t;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatRegularUpdateMessage_t;
+import a75f.io.device.serial.CmToCcuOverUsbSnDiagonasticUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.FirmwareDeviceType_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.PcnRebootIndicationMessage_t;
 import a75f.io.device.serial.SmartNodeSensorReading_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
 import a75f.io.device.serial.SnRebootIndicationMessage_t;
@@ -63,6 +65,7 @@ import a75f.io.logic.bo.building.ccu.CazEquipUtil;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
+import a75f.io.logic.bo.building.pcn.PCNUtil;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
@@ -79,6 +82,7 @@ import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
+import kotlin.Triple;
 
 /**
  * Created by Yinten on 9/15/2017.
@@ -107,6 +111,7 @@ public class Pulse
 					"be serviced. "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()));
 		}
 	}
+
 	public static void regularSNUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdateMessage_t)
 	{
 		long time = System.currentTimeMillis();
@@ -1418,6 +1423,102 @@ public class Pulse
 			}catch (Exception e){
 				CcuLog.e(L.TAG_CCU_DEVICE, "error", e);
 			}
+	}
+
+	/**
+	 * Handles reboot indication messages from PCN devices and logs detailed
+	 * information about the reboot cause, firmware versions, and device identity.
+	 * Also updates stored firmware versions, sets flags for re-seeding, and
+	 * triggers alerts for monitoring services.
+	 *
+	 * Steps performed:
+	 *
+	 * 1. **Logging & Address Resolution**
+	 *    - Extracts the smart node address from reboot indication message.
+	 *    - Logs reboot details (address, cause, device status).
+	 *
+	 * 2. **Set reseed flag in LSerial**
+	 *    - Marks the system to resend seed/settings messages after reboot
+	 *      by calling `setResetSeedMessage(true)`.
+	 *
+	 * 3. **Update Firmware Version Records**
+	 *    - Builds master firmware version string (major.minor).
+	 *    - Updates firmware version in the CCU database using `CCUUtils.writeFirmwareVersion`.
+	 *    - If the device type is `HYPERSTAT_SPLIT`, it also updates the connected
+	 *      module (RTS) firmware version with `writeFirmwareVersionForConnectModule`.
+	 *
+	 * 4. **Determine Reboot Cause**
+	 *    - Derives reboot cause from the message (`POWER_ON_RESET`, `BROWNOUT_RESET`,
+	 *      `WATCHDOG_RESET`, `SOFTWARE_RESET`, etc.).
+	 *    - Defaults to `UNDEFINED` if no known cause matches.
+	 *
+	 * 5. **Add Device Metadata**
+	 *    - Appends device type, ID, and serial number to the log string.
+	 *
+	 * 6. **Generate Alert & Persist**
+	 *    - Logs the reboot alert with full details.
+	 *    - Triggers an alert through `AlertGenerateHandler.handleDeviceMessage`
+	 *      with the category `DEVICE_REBOOT`.
+	 *
+	 * @param pcnRebootIndicationMsgs The incoming reboot indication message containing
+	 *                                device address, type, firmware versions, reboot cause,
+	 *                                and associated metadata.
+	 */
+	public static void pcnDevicesRebootMessage(PcnRebootIndicationMessage_t pcnRebootIndicationMsgs){
+
+		CcuLog.d(L.TAG_CCU_DEVICE,"smartDevicesRebootMessage = "+pcnRebootIndicationMsgs.smartNodeAddress+
+				", "+pcnRebootIndicationMsgs.rebootCause+ "Node Status ");
+		short address = (short)pcnRebootIndicationMsgs.smartNodeAddress.get();
+		// Set the flag to send the seed, settings messages changes etc.
+		LSerial.getInstance().setResetSeedMessage(true);
+		String connectModuleFirmwareVersion;
+		String firmwareVersion =
+				pcnRebootIndicationMsgs.smartNodeMajorFirmwareVersion + "." + pcnRebootIndicationMsgs.smartNodeMinorFirmwareVersion;
+		CCUUtils.writeFirmwareVersion(firmwareVersion, address, false);
+		// updating the connectModule firmwareVersion  for hyperStatSplit : -> rts means slave device
+		if (pcnRebootIndicationMsgs.smartNodeDeviceType.toString().equals(FirmwareDeviceType_t.FIRMWARE_DEVICE_HYPERSTAT_SPLIT.toString())) {
+			connectModuleFirmwareVersion = pcnRebootIndicationMsgs.rtsMajorFirmwareVersion + "." + pcnRebootIndicationMsgs.rtsMinorFirmwareVersion;
+			writeFirmwareVersionForConnectModule(CCUHsApi.getInstance(), connectModuleFirmwareVersion, String.valueOf(address));
+		}
+		String str = "addr:"+address+ " Node status: ";
+		str+= ", master_fw_ver:" + firmwareVersion;
+		switch (pcnRebootIndicationMsgs.rebootCause.get()){
+			case MeshUtil.POWER_ON_RESET:
+				str+= ", cause:"+"POWER_ON_RESET";
+				break;
+			case MeshUtil.CORE_BROWNOUT_RESET:
+				str+= ", cause:"+"CORE_BROWNOUT_RESET";
+				break;
+			case MeshUtil.VDD_BROWNOUT_RESET:
+				str+= ", cause:"+"VDD_BROWNOUT_RESET";
+				break;
+			case MeshUtil.EXTERNAL_RESET:
+				str+= ", cause:"+"EXTERNAL_RESET";
+				break;
+			case MeshUtil.WATCHDOG_RESET:
+				str+= ", cause:"+"WATCHDOG_RESET";
+				break;
+			case MeshUtil.SOFTWARE_RESET:
+				str+= ", cause:"+"SOFTWARE_RESET";
+				break;
+			case MeshUtil.BACKUP_RESET:
+				str+= ", cause:"+"BACKUP_RESET";
+				break;
+			default:
+				str+= ", cause:"+"UNDEFINED";
+				break;
+		}
+		try {
+			str += ", device type:" + pcnRebootIndicationMsgs.smartNodeDeviceType.get().name();
+			str += ", device:" + pcnRebootIndicationMsgs.smartNodeDeviceId;
+			str += ", serialnumber:" + pcnRebootIndicationMsgs.smartNodeSerialNumber;
+			CcuLog.i(L.TAG_CCU_DEVICE, "Reboot Alert: "+str);
+
+			AlertGenerateHandler.handleDeviceMessage(DEVICE_REBOOT,"Device reboot info - "+str,
+					CCUHsApi.getInstance().readId("device and addr == \""+address+"\""));
+		}catch (Exception e){
+			CcuLog.e(L.TAG_CCU_DEVICE, "error", e);
+		}
 	}
 	public static void updateSetTempFromSmartNode(CmToCcuOverUsbSnLocalControlsOverrideMessage_t setTempUpdate){
 		short nodeAddr = (short)setTempUpdate.smartNodeAddress.get();

@@ -6,7 +6,7 @@ import a75f.io.domain.api.PhysicalPoint
 import a75f.io.logger.CcuLog
 import org.projecthaystack.HDateTime
 
-class ConnectNodeDevice(deviceRef: String) : DomainDevice(deviceRef) {
+open class ConnectNodeDevice(deviceRef: String) : DomainDevice(deviceRef) {
     val firmwareVersion = PhysicalPoint(DomainName.firmwareVersion, deviceRef)
     val otaStatus = PhysicalPoint(DomainName.otaStatus, deviceRef)
     val heartBeat = PhysicalPoint(DomainName.heartBeat, deviceRef)

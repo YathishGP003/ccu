@@ -1,6 +1,6 @@
 package a75f.io.renatus;
 
-import static a75f.io.logic.L.generateConnectAddrSkipZero;
+import static a75f.io.logic.L.generateLowCodeAddrSkipZero;
 
 import android.app.Dialog;
 import android.os.Bundle;
@@ -185,7 +185,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         if (HSUtil.getEquips(mRoomName).isEmpty()) {
 
             // If the last two digits are 00, then it is not allowed since modbus cannot have 00 as last two digits
-            mNodeAddress = generateConnectAddrSkipZero();
+            mNodeAddress = generateLowCodeAddrSkipZero();
 
             showDialogFragment(
                     FragmentBLEInstructionScreen.getInstance(

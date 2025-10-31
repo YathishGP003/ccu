@@ -191,7 +191,8 @@ public class HyperStatMessageSender {
 
         writeSeedMessage(seedMessage, address, checkDuplicate);
     }
-    private static void writeMessageBytesToUsb(int address, MessageType msgType, byte[] dataBytes) {
+
+    public static void writeMessageBytesToUsb(int address, MessageType msgType, byte[] dataBytes) {
         CcuLog.d(L.TAG_CCU_SERIAL,"writeMessageBytesToUsb");
         HyperStatSettingsUtil.Companion.setCcuControlMessageTimer(System.currentTimeMillis());
         byte[] msgBytes = new byte[dataBytes.length + FIXED_INT_BYTES_SIZE * 2 + 1];

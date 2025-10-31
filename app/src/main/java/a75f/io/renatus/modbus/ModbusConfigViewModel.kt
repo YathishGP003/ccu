@@ -4,7 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.modbus.EquipmentDevice
-import a75f.io.device.modbus.buildModbusModel
+import a75f.io.logic.bo.building.modbus.buildModbusModel
 import a75f.io.domain.api.Domain
 import a75f.io.domain.service.DomainService
 import a75f.io.domain.service.ResponseCallback

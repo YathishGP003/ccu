@@ -22,7 +22,8 @@ public enum FirmwareComponentType_t
 	MY_STAT_DEVICE_TYPE("MyStat", "ms_fw/", "mystat"),
 	Reserve2(null,null,null),
 	SMART_NODE2_DEVICE_TYPE("SmartNode", "sn_fw/", "smartnode"),
-	CONNECT_MODULE_SEQUENCE_TYPE("ConnectModule", "connect_seq/", null);
+	CONNECT_MODULE_SEQUENCE_TYPE("ConnectModule", "connect_seq/", null),
+	PCN_MODULE_SEQUENCE_TYPE("PcnModule", "pcn_seq/", null);
 
 
 	private final String updateFileName;

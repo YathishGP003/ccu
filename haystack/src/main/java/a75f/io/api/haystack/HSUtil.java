@@ -73,6 +73,10 @@ public class HSUtil {
         return equipList;
     }
 
+    public static boolean isZoneContainEquipOrDevice(String roomRef) {
+        return !CCUHsApi.getInstance().readAllEntities("(equip or device) and roomRef == \"" + roomRef + "\"").isEmpty();
+    }
+
     public static ArrayList<Equip> getNonModbusEquips(String roomRef) {
 
         ArrayList<HashMap<Object, Object>> equips =

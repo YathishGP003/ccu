@@ -10,5 +10,6 @@ public class DeviceConstants
     public static final  short  HEARTBEAT_INTERVAL   = 1;  // minutes
     public static final short  HEARTBEAT_MULTIPLIER = 5;
     public static final int    SIMULATION_SLEEP_TIME = 100;
+    public static final int    PCN_ADDRESS = 100;
     
 }

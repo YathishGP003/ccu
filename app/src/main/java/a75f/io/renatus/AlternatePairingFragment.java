@@ -33,6 +33,7 @@ import a75f.io.renatus.profiles.mystat.ui.MyStatPipe2Fragment;
 import a75f.io.renatus.profiles.oao.OAOProfileFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatPipe4Fragment;
 import a75f.io.renatus.profiles.oao.OAOProfileFragment;
+import a75f.io.renatus.profiles.pcn.PCNConfigView;
 import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
@@ -86,7 +87,7 @@ public class AlternatePairingFragment extends BaseDialogFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
-        if (mNodeType == NodeType.SMART_NODE) {
+        if (mNodeType == NodeType.SMART_NODE || mNodeType == NodeType.PCN){
             title.setText(getText(R.string.title_pair_sn_manual));
             if(CCUUiUtil.isDaikinEnvironment(requireContext())) {
                 imageView.setImageResource(R.drawable.manual_pairing_smartnode_daikin);
@@ -325,6 +326,10 @@ public class AlternatePairingFragment extends BaseDialogFragment {
             case CONNECTNODE:
                 showDialogFragment(ConnectNodeFragment.Companion.newInstance(mPairingAddress, mRoomName,
                         mFloorName, mNodeType, mProfileType), ConnectNodeFragment.Companion.getIdString());
+                break;
+            case PCN:
+                showDialogFragment(PCNConfigView.Companion.newInstance(mPairingAddress, mRoomName,
+                        mFloorName, mNodeType, mProfileType), PCNConfigView.Companion.getIdString());
                 break;
             case HYPERSTATSPLIT_4PIPE_UV:
                 showDialogFragment(Pipe4UVFragment.Companion.newInstance(mPairingAddress,mRoomName,mFloorName,

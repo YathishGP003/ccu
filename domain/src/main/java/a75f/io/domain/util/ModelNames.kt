@@ -53,4 +53,5 @@ object ModelNames {
     const val myStatCpu = "mystatCPU"
     const val myStatHpu = "mystatHPU"
 
+    const val pcnDevice = "pcnDevice"
 }

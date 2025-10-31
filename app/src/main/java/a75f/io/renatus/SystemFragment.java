@@ -1,6 +1,6 @@
 package a75f.io.renatus;
 
-import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
+import static a75f.io.logic.bo.building.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
 import static a75f.io.domain.api.DomainName.airTempCoolingSp;
 import static a75f.io.domain.api.DomainName.airTempHeatingSp;
 import static a75f.io.domain.api.DomainName.dcvDamperCalculatedSetpoint;

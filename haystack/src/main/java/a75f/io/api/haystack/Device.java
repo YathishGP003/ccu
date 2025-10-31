@@ -2,6 +2,7 @@ package a75f.io.api.haystack;
 
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
+import org.projecthaystack.HStr;
 import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
@@ -374,6 +375,8 @@ public class Device extends Entity
                 else if (pair.getKey().equals("domainName"))
                 {
                     this.domainName = pair.getValue().toString();
+                } else if (pair.getKey().equals(Tags.DEVICE_REF)) {
+                    this.tags.put(pair.getKey().toString(), HStr.make(pair.getValue().toString()));
                 }
                 else {
                     this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());

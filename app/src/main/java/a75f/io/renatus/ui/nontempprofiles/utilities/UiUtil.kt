@@ -35,23 +35,28 @@ fun showExternalEquipPointsUI(
     nonTempProfileViewModel: NonTempProfileViewModel,
     equipId: String,
     connectNodeName: String?,
-    remotePointUpdateInterface : RemotePointUpdateInterface? = null
+    remotePointUpdateInterface: RemotePointUpdateInterface? = null,
+    rs485Text: String? = null,
+    address: Int? = null
 ) {
     composeView
         .showExternalPointsList(
             nonTempProfileViewModel,
-            connectNodeName
+            connectNodeName,
+            rs485Text = rs485Text
         ) { selectedIndex: Int, point: Any ->
             backgroundExecutor.execute {
                 val externalPointItem = point as ExternalPointItem
                 val profileType = externalPointItem.profileType
                 val isConnectNode = "connectModule".equals(profileType, ignoreCase = true)
-                if ("modbus".equals(profileType, ignoreCase = true) || isConnectNode) {
-                    handleModbusOrConnectModulePoint(
+                val isPcn = "pcn".equals(profileType, ignoreCase = true) || (isConnectNode && address != null && address < 100)
+                if ("modbus".equals(profileType, ignoreCase = true) || isConnectNode || isPcn) {
+                    handleModbusOrConnectModulePoint (
                         externalPointItem,
                         equipId,
                         selectedIndex,
-                        isConnectNode
+                        isConnectNode,
+                        isPcn
                     )
                 } else {
                     handleBacnetPoint(externalPointItem, selectedIndex, remotePointUpdateInterface!!)
@@ -64,17 +69,18 @@ private fun handleModbusOrConnectModulePoint(
     externalPointItem: ExternalPointItem,
     equipId: String,
     selectedIndex: Int,
-    isConnectNode: Boolean
+    isConnectNode: Boolean,
+    isPCN: Boolean
 ) {
     val parameter = externalPointItem.point as Parameter?
-    val pointObject = readPoint(parameter!!, equipId, isConnectNode)
+    val pointObject = readPoint(parameter!!, equipId, isConnectNode, isPCN)
 
     if (parameter.getCommands() != null && parameter.getCommands().isNotEmpty()) {
         val command = parameter.getCommands()[selectedIndex]
-        writePoint(pointObject!!, command.bitValues, parameter, isConnectNode)
+        writePoint(pointObject!!, command.bitValues, parameter, isConnectNode, isPCN)
     } else {
         val value = externalPointItem.dropdownOptions[selectedIndex]
-        writePoint(pointObject!!, value, parameter, isConnectNode)
+        writePoint(pointObject!!, value, parameter, isConnectNode, isPCN)
     }
 }
 

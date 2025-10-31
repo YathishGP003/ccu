@@ -204,6 +204,9 @@ object ModelLoader {
     fun getSplitPipe4Model(): ModelDirective {
         return ModelCache.getModelById(MODEL_HYPERSTAT_SPLIT_PIPE4)
     }
+    fun getPcnDeviceModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_PCN_DEVICE)
+    }
     fun getSplitPipe2Model(): ModelDirective {
         return ModelCache.getModelById(MODEL_HYPERSTAT_SPLIT_PIPE2)
     }
@@ -251,6 +254,7 @@ object ModelLoader {
             DomainName.myStatCPU -> getMyStatCpuModel()
             DomainName.myStatHPU -> getMyStatHpuModel()
             DomainName.mystat2PFCU -> getMyStatPipe2Model()
+            ModelNames.pcnDevice -> getPcnDeviceModel()
             DomainName.mystat4PFCU -> getMyStatPipe4Model()
             else -> throw IllegalStateException("Invalid Model Name")
         }

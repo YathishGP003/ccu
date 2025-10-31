@@ -60,7 +60,43 @@ fun getParameters(equipment: EquipmentDevice): MutableList<RegisterItem> {
     return parameterList
 }
 
+fun getParametersForCN(equipment: EquipmentDevice): MutableList<a75f.io.logic.connectnode.RegisterItem> {
+    val parameterList = mutableListOf<a75f.io.logic.connectnode.RegisterItem>()
+    if (Objects.nonNull(equipment.registers)) {
+        for (registerTemp in equipment.registers) {
+            if (registerTemp.parameters != null) {
+                for (parameterTemp in registerTemp.parameters) {
+                    parameterTemp.registerNumber = registerTemp.getRegisterNumber()
+                    parameterTemp.registerAddress = registerTemp.getRegisterAddress()
+                    parameterTemp.registerType = registerTemp.getRegisterType()
+                    parameterTemp.parameterDefinitionType = registerTemp.getParameterDefinitionType()
+                    parameterTemp.multiplier = registerTemp.multiplier
+                    val register = a75f.io.logic.connectnode.RegisterItem()
+                    register.displayInUi.value = parameterTemp.isDisplayInUI
+                    register.schedulable.value = parameterTemp.isSchedulable
+                    register.param = mutableStateOf(parameterTemp)
+                    parameterList.add(register)
+                }
+            }
+        }
+    }
+    return parameterList
+}
+
 fun getParametersList(equipment: EquipModel): List<Parameter> {
+    val parameterList = mutableListOf<Parameter>()
+    if (Objects.nonNull(equipment.parameters.isNotEmpty())) {
+        equipment.parameters.forEach {
+            val param = it.param.value
+            param.isDisplayInUI = it.displayInUi.value
+            param.isSchedulable = it.schedulable.value
+            parameterList.add(param)
+        }
+    }
+    return parameterList
+}
+
+fun getParametersList(equipment: a75f.io.logic.connectnode.EquipModel): List<Parameter> {
     val parameterList = mutableListOf<Parameter>()
     if (Objects.nonNull(equipment.parameters.isNotEmpty())) {
         equipment.parameters.forEach {
@@ -137,7 +173,7 @@ fun isAllParamsSelected(equipDevice: EquipmentDevice) : Boolean {
                 isAllSelected = false
         }
     }
-    if (equipDevice.equips.isNotEmpty()) {
+    if (!equipDevice.equips.isNullOrEmpty()) {
         equipDevice.equips.forEach { subEquip ->
             if (subEquip.registers.isNotEmpty()) {
                 subEquip.registers[0].parameters.forEach {
@@ -242,6 +278,7 @@ const val SEARCH_MODEL = "Search model"
 const val SEARCH_SLAVE_ID = "Search Slave Id"
 const val MODELLED_VALUE = "MODELLED VALUE"
 const val DEVICE_VALUE = "DEVICE VALUE"
+const val SEARCH_FOR_MODEL = "Search for model"
 
 const val BAC_PROP_PRESENT_VALUE = "Present Value"
 const val BAC_PROP_UNIT = "Unit"

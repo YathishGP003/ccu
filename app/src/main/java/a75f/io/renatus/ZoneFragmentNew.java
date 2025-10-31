@@ -4,11 +4,17 @@ import static android.view.View.GONE;
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
 import static a75f.io.api.haystack.Tags.BACNET;
 import static a75f.io.api.haystack.Tags.CONNECTMODULE;
+import static a75f.io.api.haystack.Tags.MODBUS;
+import static a75f.io.api.haystack.Tags.PCN;
 import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
-import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModel;
+import static a75f.io.logic.bo.building.definitions.ProfileType.CONNECTNODE;
+import static a75f.io.logic.bo.util.CCUUtils.getTruncatedString;
+import static a75f.io.logic.bo.util.CustomScheduleUtilKt.isPointFollowingScheduleOrEvent;
+import static a75f.io.logic.jobs.StringConstants.RS485_bridged_equip;
+import static a75f.io.logic.util.bacnet.BacnetModelBuilderKt.buildBacnetModel;
+import static a75f.io.logic.bo.building.modbus.ModbusModelBuilderKt.buildModbusModel;
 import static a75f.io.logic.L.TAG_CCU_INIT;
 import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
-import static a75f.io.logic.bo.building.definitions.ProfileType.CONNECTNODE;
 import static a75f.io.logic.bo.building.definitions.ProfileType.VAV_ACB;
 import static a75f.io.logic.bo.building.definitions.ProfileType.VAV_PARALLEL_FAN;
 import static a75f.io.logic.bo.building.definitions.ProfileType.VAV_REHEAT;
@@ -27,11 +33,10 @@ import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.logic.util.bacnet.BacnetModelBuilderKt.buildBacnetModel;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.ui.nontempprofiles.helper.BacnetKt.fetchZoneDataForBacnet;
 import static a75f.io.renatus.ui.nontempprofiles.helper.BacnetKt.loadBacnetZone;
-import static a75f.io.renatus.ui.nontempprofiles.helper.ConnectModuleKt.loadConnectModuleZone;
+import static a75f.io.renatus.ui.nontempprofiles.helper.LowCodeViewKt.loadLowCodeModule;
 import static a75f.io.renatus.ui.nontempprofiles.helper.ModbusKt.loadModbusZone;
 import static a75f.io.renatus.ui.nontempprofiles.utilities.CcuUtilsKt.cleanUpNonTempViewModel;
 import static a75f.io.renatus.ui.nontempprofiles.utilities.CcuUtilsKt.cleanUpTempViewModel;
@@ -47,6 +52,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -111,6 +118,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -144,6 +152,10 @@ import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
+import a75f.io.logic.bo.building.pcn.ConnectModule;
+import a75f.io.logic.bo.building.pcn.ExternalEquip;
+import a75f.io.logic.bo.building.pcn.PCNUtil;
+import a75f.io.logic.bo.building.pcn.PcnConfiguration;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
@@ -153,6 +165,7 @@ import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.CustomScheduleUtilKt;
 import a75f.io.logic.bo.util.TemperatureMode;
+import a75f.io.logic.connectnode.EquipModel;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
@@ -882,7 +895,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
             boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equips);
             HashMap<Object, Object> connectNode = ConnectNodeUtil.Companion.getConnectNodeForZone(roomMap.get("id").toString(), CCUHsApi.getInstance());
             if (!connectNode.isEmpty()) {
-                isZoneAlive = CCUUtils.isConnectModuleAlive(connectNode.get(Tags.ID).toString());
+                isZoneAlive = CCUUtils.isLowCodeDeviceAlive(connectNode.get(Tags.ID).toString());
             }
             HashMap<String, ArrayList<HashMap>> zoneData = new HashMap<>();
             for (HashMap zoneModel : equips) {
@@ -915,6 +928,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                 String profileHyperStatMonitoring = "HYPERSTAT_MONITORING";
                 String profileOTN = "OTN";
                 String profileConnectNode = CONNECTNODE.name();
+                String profilePCN = ProfileType.PCN.name();
 
                 boolean tempModule = false;
                 boolean nontempModule = false;
@@ -949,6 +963,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                             || profileType.contains(profileModBus)
                             || profileType.contains(profileBacnet)
                             || profileType.contains(profileConnectNode)
+                            || profileType.contains(profilePCN)
                     ) {
                         nontempModule = true;
                     }
@@ -972,7 +987,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
             boolean isZoneAlive = false;
             HashMap<Object, Object> connectNode = ConnectNodeUtil.Companion.getConnectNodeForZone(roomMap.get("id").toString(), CCUHsApi.getInstance());
             if (!connectNode.isEmpty()) {
-                isZoneAlive = CCUUtils.isConnectModuleAlive(connectNode.get(Tags.ID).toString());
+                isZoneAlive = CCUUtils.isLowCodeDeviceAlive(connectNode.get(Tags.ID).toString());
             }
             viewNonTemperatureBasedZone(inflater, rootView, new ArrayList<>(), zoneTitle, gridPosition, tablerowLayout,
                     isZoneAlive, roomMap.get("id") .toString());
@@ -2618,47 +2633,49 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
             CcuLog.i("ProfileTypes", "Points:" + zoneMap);
             p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
             HashMap zoneEquips = zoneMap.get(0);
-            if ((zoneEquips.get("profile").toString()).contains("PLC")) {
+             if (ConnectNodeUtil.Companion.isConnectNodePaired(roomRef) ||
+                    !PCNUtil.Companion.getPCNForZone(roomRef, CCUHsApi.getInstance()).isEmpty()) {
+                vacationStatusTV.setVisibility(View.GONE);
+                vacationText.setVisibility(View.GONE);
+                vacationEditButton.setVisibility(View.GONE);
+                nonTempControl.setEquipType(2);
+                nonTempControl.setImage(R.drawable.ic_zone_modbus);
+                nonTempControl.setImageViewExpanded(R.drawable.ic_zone_modbus_mx);
+            } else if ((zoneEquips.get("profile").toString()).contains("PLC")) {
                 vacationStatusTV.setVisibility(View.GONE);
                 vacationText.setVisibility(View.GONE);
                 vacationEditButton.setVisibility(View.GONE);
                 nonTempControl.setEquipType(1);
                 nonTempControl.setImage(R.drawable.ic_zone_piloop);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_piloop_max);
-            }
-            if ((zoneEquips.get("profile").toString()).contains("TEMP_MONITOR")) {
+            } else if ((zoneEquips.get("profile").toString()).contains("TEMP_MONITOR")) {
                 nonTempControl.setImage(R.drawable.ic_zone_tempmonitor);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_tempmonitor);
-            }
-            if ((zoneEquips.get("profile").toString()).contains("TEMP_INFLUENCE")) {
+            } else if ((zoneEquips.get("profile").toString()).contains("TEMP_INFLUENCE")) {
                 nonTempControl.setImage(R.drawable.ic_zone_tempmonitor);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_tempmonitor);
-            }
-            if ((zoneEquips.get("profile").toString()).contains("EMR")) {
+            } else if ((zoneEquips.get("profile").toString()).contains("EMR")) {
                 vacationStatusTV.setVisibility(View.GONE);
                 vacationText.setVisibility(View.GONE);
                 vacationEditButton.setVisibility(View.GONE);
                 nonTempControl.setEquipType(0);
                 nonTempControl.setImage(R.drawable.ic_zone_em);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
-            }
-            if ((zoneEquips.get("profile").toString()).contains("MODBUS")) {
+            } else if ((zoneEquips.get("profile").toString()).contains("MODBUS")) {
                 vacationStatusTV.setVisibility(View.GONE);
                 vacationText.setVisibility(View.GONE);
                 vacationEditButton.setVisibility(View.GONE);
                 nonTempControl.setEquipType(2);
                 nonTempControl.setImage(R.drawable.ic_zone_modbus);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_modbus_mx);
-            }
-            if ((zoneEquips.get("profile").toString()).contains("BACNET_DEFAULT")) {
+            } else if ((zoneEquips.get("profile").toString()).contains("BACNET_DEFAULT")) {
                 vacationStatusTV.setVisibility(View.GONE);
                 vacationText.setVisibility(View.GONE);
                 vacationEditButton.setVisibility(View.GONE);
                 nonTempControl.setEquipType(2);
                 nonTempControl.setImage(R.drawable.ic_bacnet_logo);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_bacnet_logo);
-            }
-            if ((zoneEquips.get("profile").toString()).contains("MODBUS") && (zoneEquips.get("profile").toString()).contains("EMR")) {
+            } else if ((zoneEquips.get("profile").toString()).contains("MODBUS") && (zoneEquips.get("profile").toString()).contains("EMR")) {
                 vacationStatusTV.setVisibility(View.GONE);
                 vacationText.setVisibility(View.GONE);
                 vacationEditButton.setVisibility(View.GONE);
@@ -2666,22 +2683,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                 nonTempControl.setImage(R.drawable.ic_zone_em);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
             }
-            if (ConnectNodeUtil.Companion.isConnectNodePaired(roomRef)) {
-                vacationStatusTV.setVisibility(View.GONE);
-                vacationText.setVisibility(View.GONE);
-                vacationEditButton.setVisibility(View.GONE);
-                nonTempControl.setEquipType(2);
-                nonTempControl.setImage(R.drawable.ic_zone_modbus);
-                nonTempControl.setImageViewExpanded(R.drawable.ic_zone_modbus_mx);
-            }
-
-        } else if (ConnectNodeUtil.Companion.isConnectNodePaired(roomRef)) {
-                vacationStatusTV.setVisibility(View.GONE);
-                vacationText.setVisibility(View.GONE);
-                vacationEditButton.setVisibility(View.GONE);
-                nonTempControl.setEquipType(2);
-                nonTempControl.setImage(R.drawable.ic_zone_modbus);
-                nonTempControl.setImageViewExpanded(R.drawable.ic_zone_modbus_mx);
+        } else if (ConnectNodeUtil.Companion.isConnectNodePaired(roomRef) ||
+                !PCNUtil.Companion.getPCNForZone(roomRef, CCUHsApi.getInstance()).isEmpty()) {
+            vacationStatusTV.setVisibility(View.GONE);
+            vacationText.setVisibility(View.GONE);
+            vacationEditButton.setVisibility(View.GONE);
+            nonTempControl.setEquipType(2);
+            nonTempControl.setImage(R.drawable.ic_zone_modbus);
+            nonTempControl.setImageViewExpanded(R.drawable.ic_zone_modbus_mx);
         } else {
             //No devices paired zone
             nonTempControl.setEquipType(2);
@@ -2892,7 +2901,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                                 index =1;
                                 isLastUpdatedTimeShowable = true;
                             }
-                            loadConnectModuleZone(
+                            loadLowCodeModule(
                                     nonTempProfileViewModels,
                                     modbusDevice.deviceEquipRef,
                                     getEquipmentDeviceName(CONNECTMODULE, modbusDevice),
@@ -2900,9 +2909,134 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                                     modbusDevice,
                                     inflater.inflate(R.layout.item_modbus_detail_view, null),
                                     linearLayoutZonePoints,
-                                    connectNodeDevice
+                                    connectNodeDevice,
+                                    CONNECTMODULE,
+                                    null
                             );
                         }
+                    } else if (!PCNUtil.Companion.getPCNForZone(roomRef, CCUHsApi.getInstance()).isEmpty()) {
+                        CcuLog.i(L.TAG_PCN, "PCN Zone opened now for " + roomRef);
+                        HashMap<Object, Object> pcnDevice = PCNUtil.Companion.getPCNForZone(roomRef, CCUHsApi.getInstance());
+                        if (pcnDevice.isEmpty()) {
+                            CcuLog.i(L.TAG_PCN, "PCN device is null or empty.");
+                            return;
+                        }
+                        PcnConfiguration pcnConfig = PCNUtil.Companion.getPCNConfiguration(pcnDevice.get(Tags.ID).toString());
+                        disableVisibiltyForZoneScheduleUI(zoneDetails);
+
+                        List<EquipmentDevice> pcnEquips = new ArrayList<>();
+
+                        pcnConfig.getPcnEquips().forEach(equipmentDevice -> {
+                            pcnEquips.add(equipmentDevice.component5().getEquipDevice().getValue());
+                            if (equipmentDevice.component5().getEquipDevice().getValue().getEquips() != null) {
+                                pcnEquips.addAll(equipmentDevice.component5().getEquipDevice().getValue().getEquips());
+                            }
+                        });
+                        List<ConnectModule> connectModules = pcnConfig.getConnectModuleList().toList().stream().sorted(Comparator.comparingInt(ConnectModule::getServerId)).collect(Collectors.toList());
+                        List<EquipmentDevice> externalEquipDevice = new ArrayList<>();
+
+                        pcnConfig.getExternalEquipList().stream().sorted(Comparator.comparingInt(
+                                ExternalEquip::getServerId)).collect(Collectors.toList()).forEach(equipmentDevice -> {
+                            externalEquipDevice.add(equipmentDevice.getEquipModel().getEquipDevice().getValue());
+                            List<EquipmentDevice> subEquips = equipmentDevice.getEquipModel().getEquipDevice().getValue().getEquips();
+                            if (subEquips != null) {
+                                externalEquipDevice.addAll(subEquips);
+                            }
+                        });
+                        displayRoomSpecificCustomControlFields(zoneDetails, nonTempEquip);
+                        if (pcnEquips.isEmpty()) {
+                            View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
+                            showEmptyZoneUI(zoneDetails, linearLayoutZonePoints, pcnDevice.get(Tags.ADDR).toString(), "Smart Node-Custom Code");
+                        }
+
+                        int index = 0;
+                        for (EquipmentDevice modbusDevice : pcnEquips) {
+                            boolean isLastUpdatedTimeShowable = false;
+                            if(index == 0) {
+                                index =1;
+                                isLastUpdatedTimeShowable = true;
+                            }
+                            loadLowCodeModule(
+                                    nonTempProfileViewModels,
+                                    modbusDevice.deviceEquipRef,
+                                    getEquipmentDeviceName(PCN, modbusDevice),
+                                    isLastUpdatedTimeShowable,
+                                    modbusDevice,
+                                    inflater.inflate(R.layout.item_modbus_detail_view, null),
+                                    linearLayoutZonePoints,
+                                    pcnDevice,
+                                    PCN,
+                                    null
+                            );
+                        }
+                        for (ConnectModule connectModule : connectModules) {
+
+                            if (connectModule.getEquipModelList().isEmpty()) {
+                                View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
+                                showEmptyZoneUI(zoneDetails, linearLayoutZonePoints, String.valueOf(connectModule.getServerId()), "Connect Module");
+                            }
+                            int cnIndex = 0;
+                            for (EquipModel equipmentDevice : connectModule.getEquipModelList()){
+                                List<EquipmentDevice> cnEquips = new ArrayList<>();
+                                boolean isLastUpdatedTimeShowable = false;
+                                if(cnIndex == 0) {
+                                    cnIndex = 1;
+                                    isLastUpdatedTimeShowable = true;
+                                } else {
+                                    isLastUpdatedTimeShowable = false;
+                                    //observeEquipHealthByGroupId
+                                }
+                                cnEquips.add(equipmentDevice.getEquipDevice().getValue());
+                                if (equipmentDevice.getEquipDevice().getValue().getEquips() != null) {
+                                    cnEquips.addAll(equipmentDevice.getEquipDevice().getValue().getEquips());
+                                }
+
+                                for (EquipmentDevice equipmentDevice1 : cnEquips) {
+                                    HashMap<Object, Object> cnDevice = CCUHsApi.getInstance().readEntity(
+                                            "device and addr == \"" + equipmentDevice1.getSlaveId() + "\" and roomRef == \"" + roomRef + "\"");
+
+                                    loadLowCodeModule(
+                                            nonTempProfileViewModels,
+                                            equipmentDevice1.deviceEquipRef,
+                                            getEquipmentDeviceName(PCN, equipmentDevice1),
+                                            isLastUpdatedTimeShowable,
+                                            equipmentDevice1,
+                                            inflater.inflate(R.layout.item_modbus_detail_view, null),
+                                            linearLayoutZonePoints,
+                                            cnDevice,
+                                            CONNECTMODULE,
+                                            RS485_bridged_equip
+                                    );
+                                }
+
+                            }
+                        }
+
+                        for (EquipmentDevice externalEquip : externalEquipDevice) {
+                            HashMap<Object, Object> externalDevice = CCUHsApi.getInstance().readEntity(
+                                    "device and addr == \"" + externalEquip.getSlaveId() + "\" and roomRef == \"" + roomRef + "\"");
+
+                            loadLowCodeModule(
+                                    nonTempProfileViewModels,
+                                    externalEquip.deviceEquipRef,
+                                    getEquipmentDeviceName("External Equipment", externalEquip),
+                                    true,
+                                    externalEquip,
+                                    inflater.inflate(R.layout.item_modbus_detail_view, null),
+                                    linearLayoutZonePoints,
+                                    externalDevice,
+                                    MODBUS,
+                                    RS485_bridged_equip
+                            );
+                        }
+
+                       // linearLayoutZonePoints.addView(zoneDetails);
+
+                        if (nonTempEquip == null) {
+                            CcuLog.i(L.TAG_CONNECT_NODE, "Non temp equips are null.");
+                            return;
+                        }
+                        CcuLog.i(L.TAG_PCN, "PCN Zone loaded now for " + roomRef);
                     } else if (nonTempEquip != null) {
                         if (nonTempEquip.getProfile().startsWith("EMR")) {
                             disableVisibiltyForZoneScheduleUI(zoneDetails);
@@ -2982,6 +3116,36 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
         });
         isItemSelectedEvent = false;
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.viewNonTemperatureBasedZone Done");
+
+    }
+
+    private void showEmptyZoneUI(View zoneDetails, LinearLayout linearLayoutZonePoints, String address, String device) {
+
+        zoneDetails.findViewById(R.id.equipment_type_layout).setVisibility(View.VISIBLE);
+        zoneDetails.findViewById(R.id.last_updated_layout).setVisibility(View.VISIBLE);
+        TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
+        TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
+        TextView textViewUpdatedTimeHeading = zoneDetails.findViewById(R.id.last_updated);
+        TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
+
+        tvEquipmentType.setText(device + " (" + address + ")");
+        tvEquipmentType.setTextColor(Color.BLACK);
+        tvEquipmentType.setTextSize(28);
+        tvEquipmentType.setTypeface(null, Typeface.BOLD);
+        textViewModule.setVisibility(View.VISIBLE);
+        textViewUpdatedTimeHeading.setVisibility(View.VISIBLE);
+        textViewUpdatedTime.setVisibility(View.VISIBLE);
+
+        LinearLayout noEquipPairedLayout = zoneDetails.findViewById(R.id.noEquipPaired);
+        LinearLayout modbusLayout = zoneDetails.findViewById(R.id.modbus_layout_detain);
+        TextView noModelMessage = zoneDetails.findViewById(R.id.tvNoEquipPaired);
+        String message = "<b>No Model Configured.</b> Go to Site Sequencer to set up a model for this " + device + " .";
+        noModelMessage.setText(HtmlCompat.fromHtml(message, HtmlCompat.FROM_HTML_MODE_LEGACY));
+        noEquipPairedLayout.setVisibility(View.VISIBLE);
+        modbusLayout.setPadding(20, 0, 0, 0);
+        noEquipPairedLayout.setBackgroundColor(getResources().getColor(R.color.lite_orange));
+        linearLayoutZonePoints.addView(zoneDetails);
+        //  return;
 
     }
 
@@ -4901,21 +5065,22 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
 
     private String getEquipmentDeviceName(String profileType, Object profileParam) {
         StringBuilder equipName = new StringBuilder();
+        EquipmentDevice modbusDevice = (EquipmentDevice) profileParam;
 
-        switch(profileType) {
+        int displayIndex = modbusDevice.getName().lastIndexOf('-') + 1;
+        String displayName = modbusDevice.getName().substring(displayIndex);
+        if (!modbusDevice.getEquipType().contains(displayName)) {
+            equipName.append(displayName);
+        } else {
+            for (String equipType : modbusDevice.getEquipType().split(",")) {
+                equipName.append(StringUtils.capitalize(equipType.trim()));
+                equipName.append(" ");
+            }
+        }
+
+        switch (profileType) {
             case "MODBUS":
-                EquipmentDevice modbusDevice = (EquipmentDevice) profileParam;
 
-                int displayIndex = modbusDevice.getName().lastIndexOf('-') + 1;
-                String displayName = modbusDevice.getName().substring(displayIndex);
-                if(!modbusDevice.getEquipType().contains(displayName)) {
-                    equipName.append(displayName);
-                } else {
-                    for(String equipType : modbusDevice.getEquipType().split(",")){
-                        equipName.append(StringUtils.capitalize(equipType.trim()));
-                        equipName.append(" ");
-                    }
-                }
                 return equipName.toString().trim() + "(" + modbusDevice.getSlaveId() + ")";
 
             case "BACNET":
@@ -4934,7 +5099,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                     bacnetDeviceId = "NA";
                 }
 
-                for (BacnetModelDetailResponse item : buildBacnetModel(nonTempEquip.getRoomRef())){
+                for (BacnetModelDetailResponse item : buildBacnetModel(nonTempEquip.getRoomRef())) {
                     equipName.append(item.getName());
                     CcuLog.d(BACNET, "EquipName: " + equipName);
                     bacNetPointsList = fetchZoneDataForBacnet(
@@ -4953,7 +5118,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                         macAddr +
                         " )";
             case CONNECTMODULE:
+            case PCN:
                 return ((EquipmentDevice) profileParam).getName();
+            case "External Equipment":
+                return equipName.toString().trim();
             default:
                 return "";
         }

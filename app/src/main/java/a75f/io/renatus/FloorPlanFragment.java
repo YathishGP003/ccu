@@ -2,6 +2,7 @@ package a75f.io.renatus;
 
 import static a75f.io.logic.bo.building.NodeType.CONNECTNODE;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.addBacnetTags;
+import static a75f.io.logic.bo.building.NodeType.PCN;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.generateBacnetIdForRoom;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.updateBacnetMstpLinearAndCovSubscription;
 
@@ -84,6 +85,8 @@ import a75f.io.renatus.bacnet.BacNetSelectModelView;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
+import a75f.io.renatus.profiles.pcn.PCNConfigView;
+import a75f.io.logic.bo.building.pcn.PCNUtil;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.connectnode.ConnectNodeFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
@@ -453,7 +456,6 @@ public class FloorPlanFragment extends Fragment {
                 e.printStackTrace();
             }
         });
-
     }
 
     private void loadExistingZones() {
@@ -495,12 +497,14 @@ public class FloorPlanFragment extends Fragment {
         CcuLog.d(L.TAG_CCU_UI, "Zone Selected " + zone.getDisplayName());
         List<Equip> zoneEquips = HSUtil.getEquipsWithoutSubEquips(zone.getId());
         HashMap<Object, Object> connectNodeDevice = ConnectNodeUtil.Companion.getConnectNodeForZone(zone.getId(), CCUHsApi.getInstance());
+        HashMap<Object, Object> pcnDevice = PCNUtil.Companion.getPCNForZone(zone.getId(), CCUHsApi.getInstance());
         if (zoneEquips != null && (!zoneEquips.isEmpty())) {
-            mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(zoneEquips, connectNodeDevice), moduleListActionMenuListener.seletedModules, new ArrayList<>());
+            mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(zoneEquips, connectNodeDevice, pcnDevice), moduleListActionMenuListener.seletedModules, new ArrayList<>());
             requireActivity().runOnUiThread(() -> moduleListView.setAdapter(mModuleListAdapter));
-        } else if (ConnectNodeUtil.Companion.isZoneContainingEmptyConnectNode(zone.getId(), CCUHsApi.getInstance())) {
+        } else if (ConnectNodeUtil.Companion.isZoneContainingEmptyConnectNode(zone.getId(), CCUHsApi.getInstance()) ||
+                PCNUtil.Companion.isZoneContainingEmptyPCN(zone.getId(), CCUHsApi.getInstance())) {
             mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(),
-                    R.layout.listviewitem, createAddressListByDevice(connectNodeDevice),
+                    R.layout.listviewitem, createAddressListByDevice(connectNodeDevice, pcnDevice),
                     moduleListActionMenuListener.seletedModules, new ArrayList<>());
             requireActivity().runOnUiThread(() -> moduleListView.setAdapter(mModuleListAdapter));
         } else {
@@ -508,7 +512,7 @@ public class FloorPlanFragment extends Fragment {
         }
     }
 
-    private ArrayList<String> createAddressList(List<Equip> equips, HashMap<Object, Object> connectNodeDevice) {
+    private ArrayList<String> createAddressList(List<Equip> equips, HashMap<Object, Object> connectNodeDevice, HashMap<Object, Object> pcnDevice) {
         equips.sort(new ModuleComparator());
         ArrayList<String> arrayList = new ArrayList<>();
 
@@ -517,6 +521,10 @@ public class FloorPlanFragment extends Fragment {
             return arrayList;
         }
 
+        if (!pcnDevice.isEmpty()) {
+            arrayList.add(pcnDevice.get("addr").toString());
+            return arrayList;
+        }
         for (Equip e : equips) {
             arrayList.add(e.getGroup());
 
@@ -524,9 +532,13 @@ public class FloorPlanFragment extends Fragment {
         return arrayList;
     }
 
-    private ArrayList<String> createAddressListByDevice(HashMap<Object, Object> connectNodeDevice) {
+    private ArrayList<String> createAddressListByDevice(HashMap<Object, Object> connectNodeDevice, HashMap<Object, Object> pcnDevice) {
         ArrayList<String> arrayList = new ArrayList<>();
-        arrayList.add(connectNodeDevice.get("addr").toString() + " (No model configured)");
+        if (!pcnDevice.isEmpty()) {
+            arrayList.add(pcnDevice.get("addr").toString() + " (No model configured)");
+        } else if (!connectNodeDevice.isEmpty()) {
+            arrayList.add(connectNodeDevice.get("addr").toString() + " (No model configured)");
+        }
         return arrayList;
     }
 
@@ -1021,6 +1033,7 @@ public class FloorPlanFragment extends Fragment {
         boolean isMonitoringPaired = false;
         boolean isOTNPaired = false;
         boolean isConnectNodePaired;
+        boolean isPCNPaired;
 
         if (!zoneEquips.isEmpty()) {
             isPaired = true;
@@ -1049,7 +1062,7 @@ public class FloorPlanFragment extends Fragment {
         }
 
         isConnectNodePaired = devices.size() > 0 && devices.get(0).getDomainName() != null && devices.get(0).getDomainName().equalsIgnoreCase(DomainName.connectNodeDevice);
-
+        isPCNPaired = devices.size() > 0 && devices.get(0).getDomainName() != null && devices.get(0).getDomainName().equalsIgnoreCase(DomainName.connectNodeDevice);
         if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isMonitoringPaired && !isOTNPaired && !isConnectNodePaired) {
             short meshAddress = L.generateSmartNodeAddress();
             if (mFloorListAdapter.getSelectedPostion() == -1) {
@@ -1065,23 +1078,21 @@ public class FloorPlanFragment extends Fragment {
 
             }
         } else {
-            if (isPLCPaired) {
+            if (isPCNPaired) {
+                Toast.makeText(getActivity(), "PCN is already paired in this zone", Toast.LENGTH_LONG).show();
+            } else if (isConnectNodePaired) {
+                Toast.makeText(getActivity(), "Connect Node is already paired in this zone", Toast.LENGTH_LONG).show();
+            }else if (isPLCPaired) {
                 Toast.makeText(getActivity(), getString(R.string.pi_loop_already_paired), Toast.LENGTH_LONG).show();
-            }
-            if (isEMRPaired) {
+            } else if (isEMRPaired) {
                 Toast.makeText(getActivity(), getString(R.string.energy_meter_module_already_paired), Toast.LENGTH_LONG).show();
-            }
-            if (isCCUPaired) {
+            } else if (isCCUPaired) {
                 Toast.makeText(getActivity(), getString(R.string.ccu_zone_already_paired), Toast.LENGTH_LONG).show();
-            }
-            if (isMonitoringPaired) {
+            } else if (isMonitoringPaired) {
                 Toast.makeText(getActivity(), getString(R.string.hyperstat_monitoring_already_paired), Toast.LENGTH_LONG).show();
             }
             if (isOTNPaired) {
                 Toast.makeText(getActivity(), getString(R.string.otn_already_paired), Toast.LENGTH_LONG).show();
-            }
-            if (isConnectNodePaired) {
-                Toast.makeText(getActivity(), getString(R.string.connect_node_already_paired), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1137,10 +1148,10 @@ public class FloorPlanFragment extends Fragment {
 
         Floor floor = getSelectedFloor();
         Zone zone = getSelectedZone();
-        boolean isConnectNode = nodeAddress.contains("No model configured") ||
-                !ConnectNodeUtil.Companion.getConnectNodeForZone(zone.getId(), CCUHsApi.getInstance()).isEmpty();
+        boolean isConnectNode = !ConnectNodeUtil.Companion.getConnectNodeForZone(zone.getId(), CCUHsApi.getInstance()).isEmpty();
+        boolean isPCN = !PCNUtil.Companion.getPCNForZone(zone.getId(), CCUHsApi.getInstance()).isEmpty();
 
-        ZoneProfile profile = isConnectNode ? null : L.getProfile(Long.parseLong(nodeAddress));
+        ZoneProfile profile = (isConnectNode || isPCN) ? null : L.getProfile(Long.parseLong(nodeAddress));
         if (profile != null) {
             switch (profile.getProfileType()) {
                 case VAV_REHEAT:
@@ -1304,6 +1315,9 @@ public class FloorPlanFragment extends Fragment {
         } else if (isConnectNode) {
             showDialogFragment(ConnectNodeFragment.Companion.newInstance(Short.parseShort(ConnectNodeUtil.Companion.extractNodeAddressIfConnectPaired(nodeAddress)), zone.getId(),
                     floor.getId(), CONNECTNODE, ProfileType.CONNECTNODE).setIsNewPairing(false), ConnectNodeFragment.Companion.getIdString());
+        } else if(isPCN) {
+            showDialogFragment(PCNConfigView.Companion.newInstance(Short.parseShort(ConnectNodeUtil.Companion.extractNodeAddressIfConnectPaired(nodeAddress)), zone.getId(),
+                    floor.getId(), PCN, ProfileType.PCN), PCNConfigView.Companion.getIdString());
         } else
             Toast.makeText(getActivity(), getString(R.string.zone_profile_empty), Toast.LENGTH_LONG).show();
 

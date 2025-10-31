@@ -104,7 +104,7 @@ public class LSmartNode
         fillSmartNodeSettings(settingsMessage.settings,zone,address,equipRef, profile);
         return settingsMessage;
     }
-    private static void fillSmartNodeSettings(SmartNodeSettings_t settings,Zone zone, short address, String equipRef,String profile) {
+    static void fillSmartNodeSettings(SmartNodeSettings_t settings,Zone zone, short address, String equipRef,String profile) {
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         HashMap<Object, Object> equipMap = ccuHsApi.readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
@@ -485,6 +485,8 @@ public class LSmartNode
             return ProfileMap_t.PROFILE_MAP_SINGLE_STAGE_EQUIPMENT;
         } else if (profString.equals(ProfileType.BYPASS_DAMPER.name())) {
             return ProfileMap_t.PROFILE_MAP_BYPASS_DAMPER_CONTROL;
+        } else if( profString.equals(ProfileType.PCN.name())) {
+            return ProfileMap_t.PROFILE_MAP_PCN;
         }
 
         return ProfileMap_t.PROFILE_MAP_NOT_AVAILABLE;

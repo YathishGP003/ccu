@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -55,6 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -65,7 +67,9 @@ import kotlinx.coroutines.delay
 fun ComposeView.showExternalPointsList(
     nonTempProfileViewModel: NonTempProfileViewModel,
     connectNodeDeviceName: String?,
-    onValueChange: (selectedIndex: Int, point: Any) -> Unit
+    rs485Text : String? = null,
+    onValueChange: (selectedIndex: Int, point: Any) -> Unit,
+
 ) {
     setContent {
         ExternalPointsList(
@@ -73,7 +77,7 @@ fun ComposeView.showExternalPointsList(
             connectNodeDeviceName,
             onValueChange = { selectedIndex, point ->
                 onValueChange(selectedIndex, point)
-            })
+            }, rs485Text)
     }
 }
 
@@ -83,6 +87,7 @@ fun ExternalPointsList(
     nonTempProfileViewModel: NonTempProfileViewModel,
     connectNodeDeviceName: String?,
     onValueChange: (selectedIndex: Int, point: ExternalPointItem) -> Unit,
+    rs485Text : String? = null
 ) {
     val lastUpdatedTime = nonTempProfileViewModel.lastUpdated.value
     val pointList = nonTempProfileViewModel.detailedViewPoints
@@ -95,6 +100,7 @@ fun ExternalPointsList(
 
     ) {
         // this below code is only for connectModule profile type
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         if (connectNodeDeviceName != null) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -104,11 +110,9 @@ fun ExternalPointsList(
                     color = Color.Black,
                     fontSize = 28.sp,
                     lineHeight = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-
                 Box(modifier = Modifier.wrapContentSize()) {
                     HeartBeatCompose(
                         isActive = nonTempProfileViewModel.externalEquipHeartBeat,
@@ -118,7 +122,19 @@ fun ExternalPointsList(
                 }
             }
 
-            if (lastUpdatedTime.id != null) {
+            if (!rs485Text.isNullOrEmpty()) {
+                Text(
+                    fontStyle = FontStyle.Italic,
+                    text = rs485Text,
+                    color = Color.Gray,
+                    fontSize = 18.sp,
+                    lineHeight = 22.sp,
+                    fontWeight = FontWeight.Normal,
+                )
+            }
+        }
+            Spacer(modifier = Modifier.height(16.dp))
+            if (!lastUpdatedTime.id.isNullOrEmpty()) {
                 Box(modifier = Modifier.padding(bottom = 12.dp)) {
                     HeaderRow(
                         lastUpdatedTime,
@@ -131,20 +147,22 @@ fun ExternalPointsList(
         Row(
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(
-                text = nonTempProfileViewModel.equipName,
-                color = Color.Black,
-                fontSize = 24.sp,
-                lineHeight = 28.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
+            if (nonTempProfileViewModel.equipName.isNotEmpty()) {
+                Text(
+                    text = nonTempProfileViewModel.equipName,
+                    color = Color.Black,
+                    fontSize = 24.sp,
+                    lineHeight = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+            }
 
             val detailedViewItem = nonTempProfileViewModel.detailedViewPoints.firstOrNull()
 
             if (detailedViewItem != null &&
-                detailedViewItem.profileType != "connectModule"
+                detailedViewItem.profileType != "connectModule" && connectNodeDeviceName?.contains("External Equip" ) == false
             ) {
                 Box(modifier = Modifier.wrapContentSize()) {
                     HeartBeatCompose(
@@ -157,7 +175,7 @@ fun ExternalPointsList(
         }
         val detailedViewItem = nonTempProfileViewModel.detailedViewPoints.firstOrNull()
         if (detailedViewItem != null &&
-            detailedViewItem.profileType != "connectModule"
+            detailedViewItem.profileType != "connectModule" && connectNodeDeviceName?.contains("External Equip" ) == false
         ) {
             if (lastUpdatedTime.id != null) {
                 Box(modifier = Modifier.padding(bottom = 12.dp)) {

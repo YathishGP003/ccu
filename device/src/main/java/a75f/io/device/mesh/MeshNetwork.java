@@ -2,6 +2,8 @@ package a75f.io.device.mesh;
 
 import static a75f.io.device.mesh.DLog.tempLogdStructAsJson;
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
+import static a75f.io.device.mesh.MeshUtil.sendByteToCM;
+import static a75f.io.device.mesh.MeshUtil.sendByteToNodes;
 import static a75f.io.device.mesh.MeshUtil.sendStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToCM;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
@@ -36,14 +38,17 @@ import a75f.io.device.mesh.hyperstat.HyperStatSettingsUtil;
 import a75f.io.device.mesh.mystat.MyStatMsgSender;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedCnMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedPcnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbPcnSettingsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettings2Message_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.SmartNodeSettings_t;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.devices.ConnectDevice;
 import a75f.io.logger.CcuLog;
@@ -113,6 +118,8 @@ public class MeshNetwork extends DeviceNetwork
                             deviceType = NodeType.HYPERSTATSPLIT;
                         } else if(d.getMarkers().contains("connectModule")) {
                             deviceType = NodeType.CONNECTNODE;
+                        } else if(d.getMarkers().contains("pcn")) {
+                            deviceType = NodeType.PCN;
                         }
                         switch (deviceType) {
                             case SMART_NODE:
@@ -276,6 +283,60 @@ public class MeshNetwork extends DeviceNetwork
                                     CcuToCmOverUsbDatabaseSeedCnMessage_t seedMessage = LConnectNode.getSeedMessage(Short.parseShort(d.getAddr()), d.getEquipRef(), "connect");
                                     tempLogdStructAsJson(seedMessage);
                                     sendStructToCM(seedMessage);
+                                }
+                                break;
+                            case PCN:
+                                profile = "cpu";
+                                if (bSeedMessage) {
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING PCN SEEDS=====================" + zone.getId());
+                                    // Step 1: Send the seed message same as SN device
+                                    CcuToCmOverUsbDatabaseSeedPcnMessage_t seedSSMessage = LPcn.getSeedMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), profile);
+                                    sendStructToCM(seedSSMessage);
+
+                                    // Step 2: Send the PCN specific settings message in protobuf format
+                                    LPcn.sendPcnSettingsMessage(zone.getId(), Short.parseShort(d.getAddr()));
+
+                                    // Step 3: Send the settings MODBUS_REGULAR_UPDATE_SETTINGS and MODBUS_SERVER_WRITE_REGISTER_SETTINGS_1
+                                    CcuToCmOverUsbPcnSettingsMessage_t pcnSettingsMessage2 = LPcn.getPcnSettings1Message(zone, Short.parseShort(d.getAddr()));
+                                    sendByteToNodes(Short.parseShort(d.getAddr()), pcnSettingsMessage2.toByteArray());
+                                    CcuLog.d(L.TAG_CCU_SERIAL, java.util.Arrays.toString(pcnSettingsMessage2.toByteArray()));
+                                    sendByteToCM(pcnSettingsMessage2.toByteArray());
+
+                                    // Step 4: PCN specific MODBUS_SERVER_WRITE_REGISTER_SETTINGS_1 message
+                                    CcuToCmOverUsbPcnSettingsMessage_t pcnSettingsMessage3 = LPcn.getPcnSettings2Message(zone, Short.parseShort(d.getAddr()));
+                                    sendByteToNodes(Short.parseShort(d.getAddr()), pcnSettingsMessage3.toByteArray());
+                                    CcuLog.d(L.TAG_CCU_SERIAL, java.util.Arrays.toString(pcnSettingsMessage3.toByteArray()));
+                                    sendByteToCM(pcnSettingsMessage3.toByteArray());
+
+                                    // Step 5: PCN CCU_TO_CM_OVER_USB_MODBUS_SERVER_WRITE_REGISTER write messages
+                                    byte[] pcnWriteMessage = LPcn.getWritePcnRegularUpdate(zone, Short.parseShort(d.getAddr()));
+                                    sendByteToNodes(Short.parseShort(d.getAddr()), pcnWriteMessage);
+                                    CcuLog.d(L.TAG_CCU_SERIAL, java.util.Arrays.toString(pcnWriteMessage));
+                                    sendByteToCM(pcnWriteMessage);
+                                } else if(LSerial.getInstance().isWritePcnUpdate()) {
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING PCN Updates=====================");
+                                    // Step 1: Send the PCN specific settings message in protobuf format
+                                    LPcn.sendPcnSettingsMessage(zone.getId(), Short.parseShort(d.getAddr()));
+
+                                    // Step 2: Send the settings MODBUS_REGULAR_UPDATE_SETTINGS and MODBUS_SERVER_WRITE_REGISTER_SETTINGS_1
+                                    CcuToCmOverUsbPcnSettingsMessage_t pcnSettingsMessage2 = LPcn.getPcnSettings1Message(zone, Short.parseShort(d.getAddr()));
+                                    sendByteToNodes(Short.parseShort(d.getAddr()), pcnSettingsMessage2.toByteArray());
+                                    CcuLog.d(L.TAG_CCU_SERIAL, java.util.Arrays.toString(pcnSettingsMessage2.toByteArray()));
+                                    sendByteToCM(pcnSettingsMessage2.toByteArray());
+
+                                    // Step 3: PCN specific MODBUS_SERVER_WRITE_REGISTER_SETTINGS_1 message
+                                    CcuToCmOverUsbPcnSettingsMessage_t pcnSettingsMessage3 = LPcn.getPcnSettings2Message(zone, Short.parseShort(d.getAddr()));
+                                    sendByteToNodes(Short.parseShort(d.getAddr()), pcnSettingsMessage3.toByteArray());
+                                    CcuLog.d(L.TAG_CCU_SERIAL, java.util.Arrays.toString(pcnSettingsMessage3.toByteArray()));
+                                    sendByteToCM(pcnSettingsMessage3.toByteArray());
+
+                                    // Step 4: PCN CCU_TO_CM_OVER_USB_MODBUS_SERVER_WRITE_REGISTER write messages
+                                    byte[] pcnWriteMessage = LPcn.getWritePcnRegularUpdate(zone, Short.parseShort(d.getAddr()));
+                                    sendByteToNodes(Short.parseShort(d.getAddr()), pcnWriteMessage);
+                                    CcuLog.d(L.TAG_CCU_SERIAL, java.util.Arrays.toString(pcnWriteMessage));
+                                    sendByteToCM(pcnWriteMessage);
+
+                                    LSerial.getInstance().setWritePcnUpdate(false);
                                 }
                                 break;
                         }
@@ -443,7 +504,7 @@ public class MeshNetwork extends DeviceNetwork
 
         List<HashMap<Object, Object>> connectModules = hayStack.readAllEntities("connectModule and device");
         for (HashMap<Object, Object> connectModule : connectModules) {
-            if (CCUUtils.isConnectModuleAlive(connectModule.get(Tags.ID).toString())) {
+            if (CCUUtils.isLowCodeDeviceAlive(connectModule.get(Tags.ID).toString())) {
                 CcuLog.d(L.TAG_CCU_DEVICE, "Connect Module is alive: " + connectModule.get(Tags.ID));
                 return true;
             }

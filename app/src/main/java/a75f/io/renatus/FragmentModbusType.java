@@ -1,5 +1,8 @@
 package a75f.io.renatus;
 
+import static a75f.io.api.haystack.HSUtil.isZoneContainEquipOrDevice;
+import static a75f.io.logic.L.generateLowCodeAddrSkipZero;
+
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,6 +18,7 @@ import java.util.ArrayList;
 
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.lights.LightProfile;
@@ -30,6 +34,7 @@ public class FragmentModbusType  extends BaseDialogFragment {
     View modbusequip;
     View modbusem;
     View bacnetEm;
+    View pcnEquip;
     Zone mZone;
     LightProfile mLightProfile;
     short        mNodeAddress;
@@ -62,6 +67,7 @@ public class FragmentModbusType  extends BaseDialogFragment {
         View view = inflater.inflate(R.layout.modbustypeselectiondialog, container, false);
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         modbusequip  = view.findViewById(R.id.rl_mbequipment);
+        pcnEquip = view.findViewById(R.id.rl_pcn_equipment);
         modbusem = view.findViewById(R.id.rl_mbenergymeter);
         bacnetEm = view.findViewById(R.id.rl_bacnet_equipment);
         mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
@@ -82,6 +88,15 @@ public class FragmentModbusType  extends BaseDialogFragment {
         (view.findViewById(R.id.imageGoback)).setOnClickListener((v)->removeDialogFragment(MID));
         bacnetEm.setOnClickListener(v -> {
             showDialogFragment(BacNetSelectModelView.Companion.newInstance(String.valueOf(mNodeAddress), mRoomName, mFloorName, ProfileType.BACNET_DEFAULT,ModbusLevel.ZONE,""), BacNetSelectModelView.Companion.getID());
+        });
+
+        pcnEquip.setOnClickListener(v -> {
+            if (isZoneContainEquipOrDevice(mRoomName)){
+                Toast.makeText(getActivity(), "Unpair all Modules and try to pair PCN", Toast.LENGTH_LONG).show();
+                return;
+            }
+            mNodeAddress = generateLowCodeAddrSkipZero();
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.PCN, NodeType.PCN), FragmentBLEInstructionScreen.ID);
         });
         return view;
     }

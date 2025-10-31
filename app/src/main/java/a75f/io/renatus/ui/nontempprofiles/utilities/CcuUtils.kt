@@ -11,12 +11,13 @@ import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.api.haystack.modbus.Parameter
 import a75f.io.api.haystack.observer.HisWriteObservable
 import a75f.io.device.connect.ConnectModbusSerialComm.writeToConnectNode
+import a75f.io.device.mesh.LSerial
 import a75f.io.device.modbus.LModbus
-import a75f.io.device.modbus.buildModbusModelByEquipRef
 import a75f.io.domain.api.DomainName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.bacnet.BacnetEquip.TAG_BACNET
+import a75f.io.logic.bo.building.modbus.buildModbusModelByEquipRef
 import a75f.io.logic.bo.building.system.BacnetServicesUtils
 import a75f.io.logic.bo.building.system.BacnetWriteRequest
 import a75f.io.logic.bo.building.system.DestinationMultiRead
@@ -72,9 +73,10 @@ private fun fetchAllExternalParameterPoints(equipmentDevice: EquipmentDevice): L
 fun readPoint(
     configParams: Parameter,
     equipRef: String,
-    isConnectNodeView: Boolean
+    isConnectNodeView: Boolean,
+    isPcn: Boolean = false
 ): Point? {
-    if (isConnectNodeView) {
+    if (isConnectNodeView || isPcn) {
         val logicalPoint = CCUHsApi.getInstance().readHDict(
             "point " +
                     " and registerType == \"" + configParams.registerType + "\"" +
@@ -188,7 +190,7 @@ fun readHisVal(id: String?): Double {
 }
 
 
-fun writePoint(point: Point, value: String, parameter: Parameter, isConnectNodeView: Boolean) {
+fun writePoint(point: Point, value: String, parameter: Parameter, isConnectNodeView: Boolean, isPcn: Boolean) {
     val equipHashMap = CCUHsApi.getInstance().readMapById(point.equipRef)
     val equip = Equip.Builder().setHashMap(equipHashMap).build()
     if (!isPointFollowingScheduleOrEvent(point.id)) {
@@ -200,7 +202,10 @@ fun writePoint(point: Point, value: String, parameter: Parameter, isConnectNodeV
     val highestPriorityValue = CCUHsApi.getInstance().readPointPriorityVal(point.id)
     val modbusSubEquipList: MutableList<EquipmentDevice> = java.util.ArrayList()
 
-    if (isConnectNodeView) {
+    if (isPcn) {
+        LSerial.getInstance().isWritePcnUpdate = true
+        return
+    } else if (isConnectNodeView) {
         writeToConnectNode(
             point.group.toInt(),
             parameter.registerNumber.toInt(), highestPriorityValue

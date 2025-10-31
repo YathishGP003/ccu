@@ -117,6 +117,12 @@ object ModelCache {
 
         modelContainer[MODEL_MYSTAT_DEVICE] = getModelById(MODEL_MYSTAT_DEVICE)
         CcuLog.i(Domain.LOG_TAG, "mystat device loaded")
+
+        modelContainer[MODEL_CONNECT_NODE_DEVICE] = getModelById(MODEL_CONNECT_NODE_DEVICE)
+        CcuLog.i(Domain.LOG_TAG, "connect node device loaded")
+
+        modelContainer[MODEL_PCN_DEVICE] = getModelById(MODEL_PCN_DEVICE)
+        CcuLog.i(Domain.LOG_TAG, "pcn device loaded")
     }
     
     private fun loadVavZoneEquipModels() {

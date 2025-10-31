@@ -31,11 +31,11 @@ fun getModbusDetailedViewPoints(
     equipType: String,
     equipRef: String
 ): List<ExternalPointItem> {
-    var isConnectNode = false
-    if (equipType == "connectModule") {
-        isConnectNode = true
+    var isLowCode = false
+    if (equipType == Tags.PCN || equipType == Tags.CONNECTMODULE) {
+        isLowCode = true
     }
-    if (equipType == "modbus" || equipType == "connectModule") {
+    if (equipType == "modbus" || isLowCode) {
 
         val externalPoints = mutableListOf<ExternalPointItem>()
         val modbusDevice = deviceObj as EquipmentDevice
@@ -55,7 +55,7 @@ fun getModbusDetailedViewPoints(
                     )
                 ) {
                     var unit: String? = null
-                    val pointObject = readPoint(parameter, equipRef, isConnectNode)
+                    val pointObject = readPoint(parameter, equipRef, isLowCode)
                     if (
                         parameter.getUserIntentPointTags() != null &&
                         parameter.getUserIntentPointTags().isNotEmpty()
@@ -162,7 +162,7 @@ fun getModbusDetailedViewPoints(
                     parameter.getLogicalPointTags() != null &&
                     parameter.getLogicalPointTags().size > 0
                 ) {
-                    val p = readPoint(parameter, equipRef, isConnectNode)
+                    val p = readPoint(parameter, equipRef, isLowCode)
                     if (p != null) {
                         val unit = if (p.unit == null) " " else p.unit
                         var value = ""

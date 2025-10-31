@@ -124,7 +124,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
     private boolean isDeviceMatching(String deviceName) {
         switch (deviceName){
             case SerialConsts.SMART_NODE_NAME :
-                if(mNodeType == NodeType.SMART_NODE){
+                if(mNodeType == NodeType.SMART_NODE || mNodeType == NodeType.PCN){
                     return true;
                 }
                 break;
@@ -347,7 +347,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
 
     private boolean isDeviceSupportsAlternatePairing() {
         return mNodeType == NodeType.SMART_NODE || mNodeType.equals(NodeType.HELIO_NODE) || mNodeType.equals(NodeType.MYSTAT) ||
-                mNodeType.equals(NodeType.HYPER_STAT) || mNodeType.equals(NodeType.HYPERSTATSPLIT) || mNodeType.equals(NodeType.CONNECTNODE);
+                mNodeType.equals(NodeType.HYPER_STAT) || mNodeType.equals(NodeType.HYPERSTATSPLIT) || mNodeType.equals(NodeType.CONNECTNODE) || mNodeType.equals(NodeType.PCN);
     }
 
 

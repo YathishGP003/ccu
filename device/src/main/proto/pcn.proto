@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package a75f.io.device;
+
+option java_package = "a75f.io.device";
+option java_outer_classname = "pcn";
+
+enum PcnRequestType_e {
+  PCN_REQUEST_TYPE_PCN_UNKNOWN = 0; // default for unsupported decrypt, open-enums
+  PCN_REQUEST_TYPE_PCN_SETTINGS = 1; // Rs485 Config & Connect Node information
+}
+
+message PcnRequestMessage_t {
+  PcnRequestType_e type = 1; // enum specifies what data is being requested
+}
+
+message ConnectDiagnosticInformation_t {
+  uint32 slaveID = 1 ;
+  uint32 seqLastRunTime = 2; // in milli seconds last time how much time seq took to run
+  uint32 seqMaxRunTime = 3; // in milli seconds how much seq took to run
+  uint32 seqRunCount = 4; // in milli seconds how many times it has run
+  uint32 seqStatus = 5; // in milli seconds how many times it has run
+  uint32 seqErrorCode = 6; // in milli seconds how many times it has run
+}
+
+message PCN_ConnectDiagnosticMessage_t {
+  uint32 lqi = 1; ///< Link Quality Indicator of last received data packet
+  int32 rssi = 2; ///< Received Signal Strength Indicator of last received data packet
+  repeated ConnectDiagnosticInformation_t connectDiagnosticInfo = 3; //[(nanopb).max_count = 4, (nanopb).fixed_count = false];// connect info
+}
+
+enum profileMap2 {
+  PROFILE_MAP_VAV_NO_FAN = 0;
+  PROFILE_MAP_VAV_SERIES_FAN = 2;
+  PROFILE_MAP_PCN = 10;
+}
+
+message ConnectModbusServersConfiguration_t {
+  uint32 slaveID = 1;
+  bool diagnosticInformationNeeded = 2; // true = yes needed, false = will not be sent over RF
+}
+
+enum Rs485BaudRate_t{
+  RS485_BAUD_RATE_9600 = 0;
+  RS485_BAUD_RATE_19200 = 1;
+  RS485_BAUD_RATE_38400 = 2;
+  RS485_BAUD_RATE_57600 = 3;
+  RS485_BAUD_RATE_115200 = 4;
+  RS485_BAUD_RATE_NUM_OF = 5;
+}
+
+enum Rs485Parity_t {
+  RS485_PARITY_NONE = 0;
+  RS485_PARITY_ODD = 1;
+  RS485_PARITY_EVEN = 2;
+  RS485_PARITY_NUM_OF = 3;
+}
+
+/// Valid stop bit settings to configure RS485 port
+enum Rs485StopBits_t{
+  RS485_STOP_BITS_ONE = 0;
+  RS485_STOP_BITS_TWO = 1;
+  RS485_STOP_BITS_NUM_OF = 2;
+}
+
+/// Contains RS485 port hardware settings
+message RS485_Config_t {
+  Rs485BaudRate_t baud_rate = 1;
+  Rs485Parity_t parity = 2;
+  Rs485StopBits_t stop_bits = 3;
+}
+
+message PCN_Settings_t {
+  profileMap2 profileMap2 = 1; ///< New profile mapping values introduced for VAV, ACB, SSE, Generic PI, Bypass Damper
+  RS485_Config_t rs485Config = 2;
+  repeated ConnectModbusServersConfiguration_t connectConfiguration_t = 3; //[(nanopb).max_count = 4, (nanopb).fixed_count = false];// connect modbus servers
+}
+
+service MyService {
+  rpc GetMyMessage(PCN_Settings_t) returns (PCN_Settings_t);
+}

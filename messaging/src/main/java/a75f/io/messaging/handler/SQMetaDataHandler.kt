@@ -8,7 +8,7 @@ import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil
 import a75f.io.logic.bo.building.connectnode.SequenceMetaDownloader
-import a75f.io.logic.connectnode.ConnectNodeEntitiesBuilder
+import a75f.io.logic.bo.building.lowcode.LowCodeEntitiesBuilder
 import a75f.io.logic.connectnode.SequenceMetaDataDTO
 import a75f.io.logic.preconfig.LowCodeDownloadException
 import a75f.io.logic.preconfig.ModbusEquipCreationException
@@ -80,7 +80,7 @@ class SQMetaDataHandler {
         val deviceListToSendLowCode = (addedDeviceList + reconfiguredDeviceList).toSet().toList()
 
 
-        val errors = ConnectNodeEntitiesBuilder().createConnectNodeSequence(
+        val errors = LowCodeEntitiesBuilder().createLowCodeSequence(
             sequenceMetaData,
             addedDeviceList,
             hayStack,
@@ -88,7 +88,7 @@ class SQMetaDataHandler {
         )
 
         if (errors.isNotEmpty()) {
-            ConnectNodeEntitiesBuilder().deleteConnectNodeSequence(
+            LowCodeEntitiesBuilder().deleteLowCodeSequence(
                 addedDeviceList,
                 hayStack
             )
@@ -104,14 +104,14 @@ class SQMetaDataHandler {
         }
 
         // This will not create or delete any sequence, it will just create or delete equips in sequence.
-        ConnectNodeEntitiesBuilder().updateExistingSequence(
+        LowCodeEntitiesBuilder().updateExistingSequence(
             sequenceMetaData,
             reconfiguredDeviceList,
             hayStack,
             domainService
         )
 
-        ConnectNodeEntitiesBuilder().deleteConnectNodeSequence(
+        LowCodeEntitiesBuilder().deleteLowCodeSequence(
             removedDeviceList,
             hayStack
         )
@@ -124,7 +124,7 @@ class SQMetaDataHandler {
                     "\nAdded devices: $addedDeviceList, " +
                     "\nReconfigured devices: $reconfiguredDeviceList, " +
                     "\nRemoved devices: $removedDeviceList, " +
-                    "\nLow code will be sent devices: $ deviceListToSendLowCode"
+                    "\nLow code will be sent devices: $deviceListToSendLowCode"
         )
 
         val lowCodeFileName = seqName + "_v$seqVersion.mpy"
@@ -147,7 +147,7 @@ class SQMetaDataHandler {
         } catch (e: LowCodeDownloadException) {
             CcuLog.e(L.TAG_CCU_DOWNLOAD, "Handled LowCode download exception: ${e.message}")
 
-            ConnectNodeEntitiesBuilder().deleteConnectNodeSequence(addedDeviceList, hayStack)
+            LowCodeEntitiesBuilder().deleteLowCodeSequence(addedDeviceList, hayStack)
             SequenceApplyPrefHandler.removeMessageFromHandling(context, messageId)
 
             CcuLog.e(L.TAG_CCU_SEQUENCE_APPLY, "Failed to download low code for sequence")

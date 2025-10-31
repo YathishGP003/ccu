@@ -14,10 +14,12 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.pcn.PCNUtil;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.renatus.profiles.CopyConfiguration;
 import a75f.io.util.ExecutorTask;
@@ -174,6 +176,10 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 			String connectNodeZoneName = ConnectNodeUtil.Companion.getZoneNameByConnectNodeAddress(
 					seletedModules.get(0).toString(), ccuHsApi);
 			return " " + connectNodeZoneName + ": " + "ConnectNode" + " (" + seletedModules.get(0).intValue() + ") ";
+		} else if(PCNUtil.Companion.isZoneContainingPCNWithEquips(seletedModules.get(0).toString(), ccuHsApi)) {
+			String pcnZoneName = PCNUtil.Companion.getZoneNameByPCNAddress(
+					seletedModules.get(0).toString(), ccuHsApi);
+			return " " + pcnZoneName + ": " + "PCN" + " (" + seletedModules.get(0).intValue() + ") ";
 		}
 		else {
 			HashMap<Object,Object>device = ccuHsApi.read(" device and addr == \"" + seletedModules.get(0) + "\"");
@@ -198,7 +204,8 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 		{
 			seletedModules.add(smartNodeID);
 			// No sub equip if connectNode paired
-			if(ConnectNodeUtil.Companion.getConnectNodeByNodeAddress(nodeAddress, CCUHsApi.getInstance()).isEmpty()){
+			if(ConnectNodeUtil.Companion.getConnectNodeByNodeAddress(nodeAddress, CCUHsApi.getInstance()).isEmpty() &&
+					PCNUtil.Companion.getPcnByNodeAddress(nodeAddress, CCUHsApi.getInstance()).isEmpty()) {
 				seletedModules.addAll(HSUtil.getSubEquipPairingAddr(String.valueOf(smartNodeID)));
 			}
 			floorPlanActivity.mModuleListAdapter.addSelected(position, seletedModules, new ArrayList<>());
@@ -249,8 +256,11 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 			if (equip.containsKey("smartstat") || equip.containsKey("ti") ||equip.containsKey("dualDuct") || (equip.containsKey("emr") && (equip.containsKey("smartnode") || equip.containsKey("helionode")))) {
 				return false;
 			}
+			HashMap<Object, Object> device = ccuHsApi.readEntity("device and addr == \"" + seletedModules.get(0) + "\"");
+			boolean isEmptyPCN = PCNUtil.Companion.isZoneContainingEmptyPCN(device.get(Tags.ROOMREF).toString(), ccuHsApi);
+			boolean isEmptyConnectNode = ConnectNodeUtil.Companion.isEmptyConnectNodeDevice(seletedModules.get(0), ccuHsApi);
+            return !(isEmptyPCN || isEmptyConnectNode);
 
-            return !ConnectNodeUtil.Companion.isEmptyConnectNodeDevice(seletedModules.get(0), ccuHsApi);
         }
 		// Non DM profiles -- visibility false
 		else if (equip.containsKey("smartstat") || equip.containsKey("ti") || equip.containsKey("dualDuct") || (equip.containsKey("emr") && (equip.containsKey("smartnode") || equip.containsKey("helionode")))) {

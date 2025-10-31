@@ -202,11 +202,11 @@ public class RestoreCCU {
         }
 
         // Fetching Connect Node devices and their points -> CN may not not contain equips
-        HGrid connectNodeGrid = restoreCCUHsApi.getAllConnectNodes(ccuId, siteCode, retryCountCallback);
-        Iterator connectNodeDeviceGridIterator = connectNodeGrid.iterator();
+        HGrid lowCodeDevices = restoreCCUHsApi.getAllLowCodeDevices(ccuId, siteCode, retryCountCallback);
+        Iterator lowCodeDeviceGridIterator = lowCodeDevices.iterator();
 
-        while (connectNodeDeviceGridIterator.hasNext()) {
-            HRow deviceRow = (HRow) connectNodeDeviceGridIterator.next();
+        while (lowCodeDeviceGridIterator.hasNext()) {
+            HRow deviceRow = (HRow) lowCodeDeviceGridIterator.next();
             if (deviceRow.has(Tags.ROOMREF)) {
                 roomRefSet.add(deviceRow.get(Tags.ROOMREF).toString());
             }
@@ -215,7 +215,7 @@ public class RestoreCCU {
             }
 
             String address = deviceRow.get(Tags.ADDR).toString();
-            HGrid deviceGrid = restoreCCUHsApi.getConnectNodeDevice(address, retryCountCallback);
+            HGrid deviceGrid = restoreCCUHsApi.getLowCodeDevice(address, retryCountCallback);
             if (deviceGrid == null) {
                 throw new NullHGridException("Null occurred while fetching device.");
             }
@@ -403,7 +403,7 @@ public class RestoreCCU {
             while(equipGridIterator.hasNext()){
                 HRow equipRow = (HRow) equipGridIterator.next();
                 getEquipAndPoints(equipRow, retryCountCallback);
-                if(equipRow.has(Tags.MODBUS) && !equipRow.has(Tags.CONNECTMODULE)){
+                if(equipRow.has(Tags.MODBUS) && !(equipRow.has(Tags.CONNECTMODULE) || equipRow.has(Tags.PCN))){
                     HGrid subEquipGrid = restoreCCUHsApi.getModBusSubEquips(equipId, retryCountCallback);
                     if(subEquipGrid == null){
                         throw new NullHGridException("Null occurred while fetching subequip details for "+ equipId);
@@ -428,7 +428,7 @@ public class RestoreCCU {
                 else if (equipRow.has(Tags.BACNET)) { // For Bacnet Client Equipment we have device entity added. We needs fetch device entity
                     replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.COMPLETED.toString());
                     equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
-                } else if(equipRow.has(Tags.CONNECTMODULE) && equipRow.has(Tags.ZONE)) {
+                } else if((equipRow.has(Tags.CONNECTMODULE) ||  equipRow.has(Tags.PCN)) && equipRow.has(Tags.ZONE)) {
                     CcuLog.i(TAG, "Connect Node device already downloaded for : " + equipRow.get(Tags.DIS).toString());
                     replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.COMPLETED.toString());
                     equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());

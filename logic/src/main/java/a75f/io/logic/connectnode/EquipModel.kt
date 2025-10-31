@@ -18,10 +18,12 @@ class EquipModel {
     var jsonContent = String()
     var isDevicePaired = false
     var version: MutableState<String> = mutableStateOf("")
+    var subEquips = mutableListOf<MutableState<EquipModel>>()
 }
 
 class RegisterItem{
     var param = mutableStateOf(Parameter())
     val displayInUi = mutableStateOf(false)
+    val schedulable = mutableStateOf(false)
 
 }

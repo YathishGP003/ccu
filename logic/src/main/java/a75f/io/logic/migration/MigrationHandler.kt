@@ -1021,7 +1021,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun migrateEquipStatusEnums() {
         val equipStatusPointList = hayStack.readAllEntities("status and not ota and not message" +
-                " and zone and his and enum and not modbus and not connectModule")
+                " and zone and his and enum and not modbus and not connectModule and not pcn")
         equipStatusPointList.forEach{equipStatusMap ->
             val equipStatusPoint = Point.Builder().setHashMap(equipStatusMap).build()
             if (!equipStatusPoint.enums.toString().contains("rfdead")) {

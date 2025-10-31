@@ -2,7 +2,7 @@ package a75f.io.renatus.profiles.connectnode
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.modbus.EquipmentDevice
-import a75f.io.device.modbus.buildModbusModel
+import a75f.io.logic.bo.building.modbus.buildModbusModel
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
@@ -105,7 +105,7 @@ class ConnectNodeViewModel(application: Application) : AndroidViewModel(applicat
 
             fun getDeviceDis() = "${hayStack.siteName}-${deviceModel.name}-${config.nodeAddress}"
 
-            deviceBuilder.buildCnDeviceAndPoints(
+            deviceBuilder.buildLowCodeDeviceAndPoints(
                 config,
                 deviceModel,
                 hayStack.site!!.id,

@@ -1530,5 +1530,10 @@ object DomainName {
     const val mystatDeviceVersion = "mystatDeviceVersion"
 
 
+    // PCN view
+    const val modbusDataBits = "modbusDataBits"
+    const val modbusParity = "modbusParity"
+    const val modbusStopBits = "modbusStopBits"
+    const val modbusBaudRate = "modbusBaudRate"
 }
 

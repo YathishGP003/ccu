@@ -10,5 +10,6 @@ public interface ModbusWritableDataInterface {
     void writeRegister(String id );
     void writeSystemModbusRegister(String equipRef, ArrayList<String> registerList);
     void writeConnectModbusRegister(int slaveId, int registerAddress, double value);
+    void writeToPCN();
 }
 

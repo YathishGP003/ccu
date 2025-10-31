@@ -22,6 +22,7 @@ import a75f.io.api.haystack.Tags.MODBUS
 import a75f.io.api.haystack.Tags.CONNECTMODULE
 import a75f.io.api.haystack.Tags.BACNET_CONFIG
 import a75f.io.api.haystack.Tags.BACNET
+import a75f.io.api.haystack.Tags.PCN
 import org.joda.time.DateTime
 import org.joda.time.Interval
 import org.projecthaystack.HDict
@@ -233,6 +234,8 @@ private fun findExternalProfileType(equipMap: HashMap<Any, Any>) : String {
         return BACNET
     } else if (equipMap.containsKey(CONNECTMODULE)) {
         return CONNECTMODULE
+    } else if (equipMap.containsKey(PCN)) {
+        return PCN
     } else {
         CcuLog.d(L.TAG_CCU_POINT_SCHEDULE, "No external profile type found for equipId: ${equipMap["id"]}")
         return ""
@@ -374,6 +377,18 @@ private fun writeToPhysical (
             modbusWritableDataInterface?.writeConnectModbusRegister(
                 slaveId, registerAddress, value ?: 0.0
             )
+        }
+        PCN -> {
+            val slaveId = pointDict["group"].toString().toDouble().toInt()
+            val registerAddress = pointDict["registerNumber"].toString().toDouble().toInt()
+            CcuLog.d(
+                L.TAG_CCU_POINT_SCHEDULE,
+                "Writing value to PCN for " +
+                        "pointId=${pointID}, " +
+                        "slaveId=$slaveId, " +
+                        "registerAddress=$registerAddress, value=$value"
+            )
+            modbusWritableDataInterface?.writeToPCN()
         }
         "" -> {
             CcuLog.d(

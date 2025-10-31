@@ -116,6 +116,7 @@ dependencies {
     testImplementation "io.objectbox:objectbox-linux:$objectboxVersion"
     testImplementation "io.objectbox:objectbox-macos:$objectboxVersion"
     testImplementation "io.objectbox:objectbox-windows:$objectboxVersion"
+    implementation "androidx.compose.runtime:runtime-android:1.5.4"
 
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
     implementation 'io.reactivex.rxjava3:rxjava:3.0.0'

@@ -2,7 +2,9 @@ package a75f.io.device.mesh;
 
 import static a75f.io.device.mesh.DLog.LogdStructAsJson;
 import static a75f.io.device.mesh.MeshUtil.sendStructToCM;
-import static a75f.io.device.serial.MessageType.CM_TO_CCU_OVER_USB_SEQUENCE_PACKET_REQUEST;
+import static a75f.io.device.serial.MessageType.CCU_TO_CM_MODBUS_SERVER_REGULAR_UPDATE_SETTINGS;
+import static a75f.io.device.serial.MessageType.CM_TO_CCU_OVER_USB_MODBUS_SERVER_REGULAR_UPDATE;
+import static a75f.io.device.serial.MessageType.PCN_MODBUS_SERVER_REBOOT;
 import static a75f.io.logic.L.ccu;
 
 import android.content.Context;
@@ -40,6 +42,7 @@ import a75f.io.device.serial.CmToCcuOverUsbSmartStatRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.PcnRebootIndicationMessage_t;
 import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.logger.CcuLog;
@@ -63,6 +66,7 @@ public class LSerial
     private UsbConnectService mUsbConnectService;
     private static boolean mSendSeedMsgs;
     private static boolean isNodeSeeding;
+    private static boolean mWritePcnUpdate = false;
 
     /***
      * D
@@ -106,6 +110,15 @@ public class LSerial
         CcuLog.d(L.TAG_CCU_DEVICE,"setResetSeedMessage "+bSeedMsg);
         mSendSeedMsgs = bSeedMsg;
     }
+
+    public boolean isWritePcnUpdate(){
+        return mWritePcnUpdate;
+    }
+
+    public void setWritePcnUpdate(boolean writePcnUpdate){
+        mWritePcnUpdate = writePcnUpdate;
+    }
+
     /***
      * Handles all incoming messages from the CM.   It will parse them and
      * determine where they should be sent. It will also broadcast the events as an Intent
@@ -170,6 +183,10 @@ public class LSerial
                 DLog.LogdSerial("Event Type CM_TO_CCU_OVER_USB_SN_REBOOT DEVICE_REBOOT:"+data.length+","+data.toString());
                 Pulse.smartDevicesRebootMessage(fromBytes(data, SnRebootIndicationMessage_t.class));
                 Pulse.rebootMessageFromCM(fromBytes(data, WrmOrCmRebootIndicationMessage_t.class));
+            } else if(messageType == PCN_MODBUS_SERVER_REBOOT) {
+                DLog.LogdSerial("Event Type PCN_MODBUS_SERVER_REBOOT DEVICE_REBOOT:"+data.length+","+data.toString());
+                Pulse.pcnDevicesRebootMessage(fromBytes(data, PcnRebootIndicationMessage_t.class));
+                Pulse.rebootMessageFromCM(fromBytes(data, WrmOrCmRebootIndicationMessage_t.class));
             }
 
             // HyperStat and HyperSplit message are both sent to CCU through HyperStatCmToCcuSerializedMessage.
@@ -179,6 +196,8 @@ public class LSerial
                 HyperStatMsgReceiver.processMessage(data, CCUHsApi.getInstance());
                 HyperSplitMsgReceiver.processMessage(data, CCUHsApi.getInstance());
                 MyStatMsgReceiverKt.processMessage(data);
+                // Decode serialized PCN message
+                LPcn.processMessage(data);
             }
 
             else if (isHyperStatMessage(messageType) ) {
@@ -202,6 +221,8 @@ public class LSerial
                 } catch (Exception e) {
                     CcuLog.e(L.TAG_CCU_DEVICE, "Error handling modbus message !!! ", e);
                 }
+            } else if(CM_TO_CCU_OVER_USB_MODBUS_SERVER_REGULAR_UPDATE == messageType) {
+                LPcn.handlePcnRegularUpdateSettings(data);
             }
 
             // Pass event to external handlers
@@ -209,6 +230,7 @@ public class LSerial
                     messageType == MessageType.CM_TO_CCU_OVER_USB_FIRMWARE_PACKET_REQUEST ||
                     messageType == MessageType.CM_TO_CCU_OTA_STATUS ||
                     messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REBOOT ||
+                    messageType == MessageType.PCN_MODBUS_SERVER_REBOOT ||
                     messageType == MessageType.CM_TO_CCU_OVER_USB_SEQUENCE_PACKET_REQUEST ||
                     messageType == MessageType.CM_TO_CCU_OVER_USB_SEQUENCE_OTA_STATUS ||
                     messageType == MessageType.CM_ERROR_REPORT) {
@@ -360,6 +382,25 @@ public class LSerial
         }
         LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
+        return true;
+    }
+
+    public synchronized boolean sendSerialBytesToNodes(short smartNodeAddress, byte[] data)
+    {
+
+        Integer structHash = Arrays.hashCode(data);
+        if (checkDuplicate(Short.valueOf(smartNodeAddress), "byteArray", structHash))
+        {
+            //DLog.LogdStructAsJson(struct);
+            DLog.Logd("byte array was already sent, returning");
+            return false;
+        }
+        if (mUsbService == null)
+        {
+            DLog.logUSBServiceNotInitialized();
+            return false;
+        }
+        mUsbService.write(data);
         return true;
     }
 

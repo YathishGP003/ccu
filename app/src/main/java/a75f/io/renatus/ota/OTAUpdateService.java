@@ -865,7 +865,7 @@ public class OTAUpdateService extends IntentService {
         String id = intent.getStringExtra(ID);
         String firmwareVersion = intent.getStringExtra(FIRMWARE_VERSION);
         String cmdLevel = intent.getStringExtra(CMD_LEVEL);
-        currentOtaRequest = intent.getStringExtra(NODE_ADDRESS);
+        currentOtaRequest = intent.getStringExtra(MESSAGE_ID);
         currentRunningRequestType = intent.getStringExtra(CMD_TYPE);
 
         // If the sequence update is requested, we need to extract the metadata and binary file information and start sequence update
@@ -878,12 +878,16 @@ public class OTAUpdateService extends IntentService {
             // Send metadata only if the erase sequence is not requested
 
             if(!eraseSequence) {
+                // Overwrite the currentOtaRequest in case of sequence because we use NODE_ADDRESS as the unique identifier for sequence requests
+                currentOtaRequest = intent.getStringExtra(NODE_ADDRESS);
                 extractFileSequenceMeta(mSequenceMetaFileName, mCurrentLwMeshAddress,
                         Integer.parseInt(Objects.requireNonNull(intent.getStringExtra(SEQ_VERSION))));
                 mSequenceSeqFileName = intent.getStringExtra(FIRMWARE_NAME);
                 extractFileSequenceOta(mSequenceSeqFileName);
                 mSequenceEmptyRequest = false;
             } else {
+                // Overwrite the currentOtaRequest in case of sequence because we use NODE_ADDRESS as the unique identifier for sequence requests
+                currentOtaRequest = intent.getStringExtra(NODE_ADDRESS);
                 SeqCache cache = new SeqCache();
                 cache.removeRequest(currentOtaRequest);
                 otaRequestsQueue.removeIf(intent1 -> Objects.equals(intent1.getStringExtra(MESSAGE_ID), currentOtaRequest));

@@ -12,6 +12,7 @@ import a75f.io.api.haystack.modbus.LogicalPointTags
 import a75f.io.api.haystack.modbus.Parameter
 import a75f.io.api.haystack.modbus.Register
 import a75f.io.api.haystack.modbus.UserIntentPointTags
+import a75f.io.domain.api.Room
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil
 
 /**
@@ -60,6 +61,13 @@ fun buildModbusModel(slaveId: Int): EquipmentDevice {
     return equipDevice
 }
 
+fun buildModbusModel(slaveId: Int, zoneRef: String): EquipmentDevice {
+    val parentMap = getParentEquipMapBySlaveAndZone(slaveId, zoneRef)
+    val equipDevice = buildEquipModel(parentMap, null)
+    equipDevice.equips.addAll(getChildEquips(parentMap[ID].toString()))
+    return equipDevice
+}
+
 /**
  * @param equipRef
  * returns EquipmentDevice for given equip ref
@@ -97,6 +105,7 @@ private fun getEquipByMap(equipMap: HashMap<Any, Any>, parentEquipRef: String?):
     equipDevice.isPaired = (equipDevice.deviceEquipRef == null)
     equipDevice.slaveId = equip.group.toInt()
     equipDevice.deviceEquipRef = equip.id
+    equipDevice.port = equip.tags?.get("port")?.toString() ?: ""
     return equipDevice
 }
 
@@ -343,7 +352,7 @@ private fun getValue(map: HashMap<Any, Any>, key: String): String? {
  * Read parent equip details by slave id
  * return hashmap of equips
  */
-private fun getParentEquipMapBySlaveId(slaveId: Int): HashMap<Any, Any> {
+fun getParentEquipMapBySlaveId(slaveId: Int): HashMap<Any, Any> {
     return CCUHsApi.getInstance()
         .readEntity("equip and modbus and not equipRef and group == \"$slaveId\"")
 }
@@ -379,4 +388,9 @@ private fun getModelName(name: String,slaveId: String): String {
         modelName = modelName.replace("-$slaveId","")
     }
     return modelName
+}
+
+fun getParentEquipMapBySlaveAndZone(slaveId: Int, roomRef: String): HashMap<Any, Any> {
+    return CCUHsApi.getInstance()
+        .readEntity("equip and modbus and not equipRef and group == \"$slaveId\" and roomRef == \"$roomRef\"")
 }

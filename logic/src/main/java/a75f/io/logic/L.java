@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.CCUApplication;
@@ -19,6 +20,7 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.bacnet.BacnetProfile;
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.lowcode.LowCodeUtil;
 import a75f.io.logic.bo.building.pcn.PCNUtil;
 import a75f.io.util.ExecutorTask;
@@ -127,6 +129,7 @@ public class L
 
 
 
+    public static final String TAG_USB_MANAGER = "USB_MANAGER";
     public static Context app()
     {
         return Globals.getInstance().getApplicationContext();
@@ -153,7 +156,8 @@ public class L
     }
 
 
-    public static boolean isModbusSlaveIdExists(Short slaveId) {
+    public static boolean isModbusSlaveIdExists(Short slaveId, String port) {
+        CcuLog.d(TAG_CCU_MODBUS, "Checking Modbus slave ID existence: " + slaveId + " on port: " + port);
         CCUHsApi hsApi = CCUHsApi.getInstance();
         ArrayList<HashMap<Object, Object>> nodes = hsApi.readAllEntities("device and modbus");
         List<Integer> lowCodeSlaveIdList = LowCodeUtil.Companion.getLowCodeSlaveIdList(hsApi);
@@ -163,7 +167,22 @@ public class L
 
         for (HashMap<Object,Object> node : nodes) {
             if (node.get("addr").toString().equals(String.valueOf(slaveId))) {
-                return true;
+                if (port.isEmpty()) {
+                    return true;
+                }
+                try {
+                    String equipRef = node.get("equipRef").toString();
+                    HashMap<Object, Object> equip = hsApi.readEntity("equip and id == " + equipRef);
+                    CcuLog.d(TAG_CCU_MODBUS, "Found equip for node " + node + ": " + equip);
+                    Object modbusPort = equip.get("port");
+                    if (modbusPort != null && modbusPort.toString().equals(port)) {
+                        return true;
+                    } else {
+                        CcuLog.d(TAG_CCU_MODBUS, "Modbus port does not exist for : "+node);
+                    }
+                } catch (Exception e) {
+                    CcuLog.e(TAG_CCU_MODBUS, "Error checking Modbus port for slave ID existence", e);
+                }
             }
         }
         for (Integer node : lowCodeSlaveIdList) {
@@ -171,6 +190,7 @@ public class L
                 return true;
             }
         }
+        CcuLog.d(TAG_CCU_MODBUS, "Modbus slave ID " + slaveId + " does not exist on port: " + port);
         return false;
     }
 
@@ -216,7 +236,7 @@ public class L
             }
 
             // Check Modbus slave ID availability if address appears available
-            if (addressAvailable && !isModbusSlaveIdExists((short) (nextAddr % 100))) {
+            if (addressAvailable && !isModbusSlaveIdExists((short) (nextAddr % 100),"")) {
                 return nextAddr;
             }
 
@@ -364,10 +384,6 @@ public class L
            ConnectNodeUtil.Companion.removeConnectNodeEquips(node.toString(), hsApi);
         }
 
-        if (!PCNUtil.Companion.getPcnByNodeAddress(node.toString(), hsApi).isEmpty()) {
-            PCNUtil.Companion.removePcnDeviceAndEquips(node.toString(), hsApi);
-        }
-
         HashMap<Object, Object> device = hsApi.readEntity("device and addr == \""+node+"\"");
         if (device.get("id") != null)
         {
@@ -386,6 +402,23 @@ public class L
 
         }
         CcuLog.d("CCU","Profile Not found for "+addr);
+        return null;
+    }
+    public static ZoneProfile getModbusProfile(short addr, String zoneRef) {
+        for (ZoneProfile p : L.ccu().zoneProfiles) {
+            for (Short node : p.getNodeAddresses()) {
+                if (node == addr) {
+                    HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and group == \"" + addr + "\" and roomRef == \"" + zoneRef + "\"");
+                    if (!equip.isEmpty()) {
+                        CcuLog.d("CCU_MODBUS", "Modbus Profile found for " + addr + " with zoneRef " + zoneRef+" "+equip+": "+p);
+                        return p;
+                    } else {
+                        CcuLog.d("CCU_MODBUS", "Modbus Profile Not found for " + addr + " with zoneRef " + zoneRef);
+                    }
+                }
+            }
+
+        }
         return null;
     }
 

@@ -88,6 +88,22 @@ public class CCUUtils
         return (hisItem == null) ? null : hisItem.getDate();
     }
 
+    public static Date getLastReceivedTimeForEquipRssi(String nodeAddr, String equipId){
+        if(isDomainEquip(nodeAddr, "node")){
+            HashMap<Object, Object> point = CCUHsApi.getInstance()
+                    .readEntity("domainName == \"" + DomainName.heartBeat + "\" and equipRef == \"" + equipId + "\"");
+            HisItem hisItem = CCUHsApi.getInstance().curRead(point.get("id").toString());
+            return (hisItem == null) ? null : hisItem.getDate();
+        }
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap point = CCUHsApi.getInstance().read("point and (heartBeat or heartbeat) and equipRef == \""+equipId+"\"");
+        if(point.size() == 0){
+            return null;
+        }
+        HisItem hisItem = hayStack.curRead(point.get("id").toString());
+        return (hisItem == null) ? null : hisItem.getDate();
+    }
+
     public static Date getLastReceivedTimeForModBusAndBacnet(String slaveId){
         CCUHsApi hayStack = CCUHsApi.getInstance();
 

@@ -2118,6 +2118,25 @@
     <string name="point_schedule_assigned">Schedule Assigned</string>
     <string name="schedulable_points_without_point_schedule">The following schedulable points do not have a schedule assigned to them</string>
     <string name="equip_schedule_status">Equip Schedule Status: </string>
+    <string name="no_usb_devices_connected">No USB devices connected.</string>
+    <string name="plug_in_a_usb_device_to_get_started_once_connected_you_ll_be_able_to_assign_n_protocols_like_bacnet_mstp_modbus_or_biskit">Plug in a USB device to get started. Once connected, you\'ll be able to assign\n protocols like BACnet MSTP, Modbus or Biskit.</string>
+    <string name="usb_manager_default_image">Usb manager default image</string>
+    <string name="device_serial_no">Device Serial No.</string>
+    <string name="vendor_product">Vendor | Product</string>
+    <string name="protocol">Protocol</string>
+    <string name="port">Port</string>
+    <string name="na">NA</string>
+    <string-array name="usb_protocol_options">
+        <item>Not Assigned</item>
+        <item>Modbus</item>
+        <item>BACnet MSTP</item>
+    </string-array>
+    <string-array name="usb_protocol_options_dev">
+        <item>Not Assigned</item>
+        <item>Modbus</item>
+        <item>BACnet MSTP</item>
+        <item>Biskit</item>
+    </string-array>
     <string name="universal_Out1">Universal-Out 1</string>
     <string name="universal_Out2">Universal-Out 2</string>
     <string name="analog_Out"> Analog-Out</string>

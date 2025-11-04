@@ -1,12 +1,15 @@
 package a75f.io.renatus.profiles.system.externalahu
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.bacnet.parser.BacnetModelDetailResponse
 import a75f.io.api.haystack.bacnet.parser.BacnetProperty
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.api.haystack.util.hayStack
 import a75f.io.logic.bo.building.modbus.buildModbusModel
+import a75f.io.logic.bo.building.modbus.getParentEquipMapBySlaveId
+import a75f.io.domain.api.Domain
 import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.service.DomainService
@@ -20,17 +23,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.bacnet.BacnetProfile
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.modbus.ModbusProfile
-import a75f.io.logic.bo.building.system.BacnetReadRequestMultiple
-import a75f.io.logic.bo.building.system.BacnetWhoIsRequest
-import a75f.io.logic.bo.building.system.BroadCast
-import a75f.io.logic.bo.building.system.DestinationMultiRead
-import a75f.io.logic.bo.building.system.ObjectIdentifierBacNet
-import a75f.io.logic.bo.building.system.PropertyReference
-import a75f.io.logic.bo.building.system.ReadRequestMultiple
-import a75f.io.logic.bo.building.system.RpmRequest
-import a75f.io.logic.bo.building.system.SystemProfile
-import a75f.io.logic.bo.building.system.WhoIsRequest
-import a75f.io.logic.bo.building.system.addSystemEquip
+import a75f.io.logic.bo.building.system.*
 import a75f.io.logic.bo.building.system.client.BaseResponse
 import a75f.io.logic.bo.building.system.client.CcuService
 import a75f.io.logic.bo.building.system.client.MultiReadResponse
@@ -42,15 +35,15 @@ import a75f.io.logic.bo.building.system.getConfiguration
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.util.PreferenceUtil
-import a75f.io.logic.util.bacnet.BacnetConfigConstants
+import a75f.io.logic.util.bacnet.*
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_CONFIGURATION
-import a75f.io.logic.util.bacnet.buildBacnetModelSystem
 import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
 import a75f.io.renatus.bacnet.models.BacnetDevice
 import a75f.io.renatus.bacnet.models.BacnetModel
 import a75f.io.renatus.bacnet.models.BacnetPointState
+import a75f.io.renatus.bacnet.util.MSTP_CONFIGURATION
 import a75f.io.renatus.compose.ModelMetaData
 import a75f.io.renatus.compose.getModelListFromJson
 import a75f.io.renatus.modbus.models.EquipModel
@@ -80,15 +73,14 @@ import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.profiles.oao.updateOaoPoints
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
+import a75f.io.usbserial.UsbPrefHelper
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.preference.PreferenceManager
 import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.toMutableStateList
+import androidx.compose.runtime.*
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -103,6 +95,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.internal.toImmutableList
 import org.json.JSONException
 import org.json.JSONObject
+import org.projecthaystack.HStr
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.text.DecimalFormat
@@ -120,6 +113,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     var equipModel = mutableStateOf(EquipModel())
     var selectedModbusType = mutableStateOf(0)
     var modelName = mutableStateOf("Select Model")
+    var portList = UsbPrefHelper.getModbusComPorts(application.applicationContext).toMutableStateList()
 
     var configType = mutableStateOf(ConfigType.BACNET)
     var configTypeRadioOption = mutableStateOf(ConfigType.BACNET)
@@ -172,6 +166,11 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     val TAG: String = "CCU_SYSTEM"
     val TAG_BACNET: String = "ExternalAHU_BACNET"
     var externalBacnetEquipCreated : HashMap<Any, Any>? = null
+    var configurationType = mutableStateOf("Select Configuration Type")
+    val isAutoFetchSelected = mutableStateOf(false)
+    val showToast = mutableStateOf(false)
+    var textFieldValueMacAddress by mutableStateOf(0)
+        private set
 
     @SuppressLint("StaticFieldLeak")
     lateinit var context: Context
@@ -322,7 +321,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             val address: Short = modbusEquip["group"].toString().toShort()
             modbusProfile.addMbEquip(address, profileType)
             selectedSlaveId = modbusProfile.slaveId
-            val equipmentDevice = buildModbusModel(selectedSlaveId.toInt())
+            val equipmentDevice = buildModbusModel(selectedSlaveId.toInt(), "SYSTEM")
             val model = EquipModel()
             model.equipDevice.value = equipmentDevice
             model.selectAllParameters_Left.value = isAllLeftParamsSelected(equipmentDevice)
@@ -332,6 +331,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             equipModel.value = model
             equipModel.value.isDevicePaired = true
             equipModel.value.slaveId.value = equipmentDevice.slaveId
+            equipModel.value.port.value = equipmentDevice.port
             if (equipmentDevice.equips != null && equipmentDevice.equips.isNotEmpty()) {
                 equipmentDevice.equips.forEach {
                     val subEquip = EquipModel()
@@ -347,17 +347,29 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private fun getBacnetConfiguration(profileType: ProfileType, context: Context) {
+        CcuLog.d(TAG_BACNET, "--[1] looking for bacnet system profile [1]--")
         val bacnetSystemEquip =
             CCUHsApi.getInstance().readEntity("system and equip and bacnet and external")
 
         if(bacnetSystemEquip.isEmpty()){
-            CcuLog.d(TAG_BACNET, "no bacnet external equip present")
+            CcuLog.d(TAG_BACNET, "--[2] no bacnet external equip present")
         }
         if (PreferenceUtil.getIsNewExternalAhu()) bacnetSystemEquip.clear()
         if(bacnetSystemEquip != null && bacnetSystemEquip.isNotEmpty()){
-            CcuLog.d(TAG_BACNET, "-configType changed to bacnet--7")
+            CcuLog.d(TAG_BACNET, "---[3] found bacnet equip, configType changed to bacnet")
             configType.value = ConfigType.BACNET
             configTypeRadioOption.value = ConfigType.BACNET
+            CcuLog.d(TAG_BACNET, "---[4] checking if this is IP or MSTP, input-->${destinationMacAddress.value}")
+            val isMstpDevice = isMstpDevice(bacnetSystemEquip)
+            //val isConfigAsMstp = isValidMstpMacAddress(destinationMacAddress.value)
+            if (isMstpDevice) {
+                CcuLog.d(TAG_BACNET, "---[5] this is MSTP config")
+                configurationType.value = MSTP_CONFIGURATION
+            } else {
+                CcuLog.d(TAG_BACNET, "---[5] this is IP config")
+                configurationType.value = IP_CONFIGURATION
+            }
+
             configModelDefinitionBacnet(context, bacnetSystemEquip)
         }
 
@@ -455,6 +467,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             resetBacnetModelAndConfig()
             equipModel.value.isDevicePaired = true
         }else if(configType.value == ConfigType.BACNET){
+            CcuLog.d(TAG_BACNET, "--[1] -- saveConfigurationBacnet, remove old modbus equip if present")
             L.ccu().systemProfile.removeSystemEquipModbus()
             //populateBacnetConfigurationObject()
             saveConfigurationBacnet()
@@ -464,7 +477,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
 
     private fun setUpsModbusProfile(profileType: ProfileType) {
         equipModel.value.equipDevice.value.slaveId = equipModel.value.slaveId.value
-        val parentMap = getModbusEquipMap(equipModel.value.slaveId.value.toShort())
+        val parentMap = getModbusEquipMap(equipModel.value.slaveId.value.toShort(), equipModel.value.port.value)
 
         if (parentMap.isNullOrEmpty()) {
             val subEquipmentDevices = mutableListOf<EquipmentDevice>()
@@ -483,22 +496,57 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                 profileType,
                 subEquipmentDevices,
                 "system",
-                equipModel.value.version.value
+                equipModel.value.version.value,
+                equipModel.value.port.value
             )
         } else {
             updateModbusProfile()
+            if (!L.isModbusSlaveIdExists(equipModel.value.slaveId.value.toShort(), equipModel.value.port.value)) {
+                updatePortIfChanged(slaveId = equipModel.value.slaveId.value)
+            } else {
+                CcuLog.i(Domain.LOG_TAG, "Modbus Equip port not changed for slave id ${equipModel.value.slaveId.value}")
+            }
         }
         PreferenceUtil.setSelectedProfileWithAhu("modbus")
     }
 
+    private fun updatePortIfChanged(slaveId: Int) {
+        val parentMap = getParentEquipMapBySlaveId(slaveId)
+        val equip = Equip.Builder().setHashMap(parentMap).build()
+        if (equip != null && equip.tags.containsKey("port")) {
+            val currentPort = equip.tags["port"].toString()
+            if (currentPort != equipModel.value.port.value && !equipModel.value.port.value.isNullOrEmpty()) {
+                equip.tags["port"] = HStr.make(equipModel.value.port.value)
+                CCUHsApi.getInstance().updateEquip(equip, equip.id)
+                CcuLog.i(Domain.LOG_TAG, "Modbus Equip port updated $currentPort -> ${equipModel.value.port.value}")
+            }
+
+        }
+    }
+
+    private fun hasPortChanged(slaveId: Int): Boolean {
+        val parentMap = getParentEquipMapBySlaveId(slaveId)
+        val equip = Equip.Builder().setHashMap(parentMap).build()
+        if (equip != null && equip.tags.containsKey("port")) {
+            val currentPort = equip.tags["port"].toString()
+            if (currentPort != equipModel.value.port.value && !equipModel.value.port.value.isNullOrEmpty()) {
+                return true
+            }
+        }
+        return false
+    }
+
     private fun isValidConfiguration(): Boolean {
+        if (equipModel.value.port.value.isEmpty()) {
+            equipModel.value.port.value = if (portList.isNotEmpty()) portList[0] else ""
+        }
         if (equipModel.value.parameters.isEmpty()) {
             showToast("Please select modbus device", context)
             return false
         }
         if (equipModel.value.isDevicePaired) return true // If it is paired then will not allow the use to to edit slave id
 
-        if (L.isModbusSlaveIdExists(equipModel.value.slaveId.value.toShort())) {
+        if (L.isModbusSlaveIdExists(equipModel.value.slaveId.value.toShort(), equipModel.value.port.value)) {
             showToast(
                 "Slave Id " + equipModel.value.slaveId.value + " already exists, choose " + "another slave id to proceed",
                 context
@@ -507,22 +555,45 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         }
         return true
     }
+    fun updateMacAddress(newText: String){
+        if(newText.isNotEmpty() && newText.toIntOrNull() != null) {
+            textFieldValueMacAddress = newText.toInt()
+            CcuLog.d(TAG_BACNET, "---user entered mac address---$newText --->${destinationMacAddress.value}")
+            destinationMacAddress.value = newText
+        }
+    }
 
     private fun isValidConfigurationBacnet(): Boolean {
         if (bacnetModel.value.points.isEmpty()) {
             showToast("Please select bacnet model", context)
             return false
         }
-        if(!isBacnetConfigDetailsFilled()){
-            showToast("Please fill bacnet config details", context)
-            return false
-        }
+        if(configurationType.value == MSTP_CONFIGURATION){
+            // check for valid mac address
+            if(deviceSelectionMode.value == 0){
+                // this is slave device
+                if(textFieldValueMacAddress < 128 || textFieldValueMacAddress > 254){
+                    showToast("Slave device address range is 128 - 254", context)
+                    return false
+                }
+            }else{
+                // this is master device
+                if(textFieldValueMacAddress < 1 || textFieldValueMacAddress > 127){
+                    showToast("Master device address range is 1 - 127", context)
+                    return false
+                }
+            }
+        }else{
+            if(!isBacnetConfigDetailsFilled()){
+                showToast("Please fill bacnet config details", context)
+                return false
+            }
 
-        if(!isValidIPv4(destinationIp.value)){
-            showToast("Please provide valid ip address", context)
-            return false
+            if(!isValidIPv4(destinationIp.value)){
+                showToast("Please provide valid ip address", context)
+                return false
+            }
         }
-
         if (bacnetModel.value.isDevicePaired) return true
         return true
     }
@@ -761,7 +832,11 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         })
     }
 
-    private fun getModbusEquipMap(slaveId: Short): HashMap<Any, Any>? {
+    private fun getModbusEquipMap(slaveId: Short, port: String): HashMap<Any, Any>? {
+        if (port.isNotEmpty()) {
+            return CCUHsApi.getInstance()
+                .readEntity("equip and modbus and not equipRef and group == \"$slaveId\" and port == \"$port\"")
+        }
         return CCUHsApi.getInstance()
             .readEntity("equip and modbus and not equipRef and group == \"$slaveId\"")
     }
@@ -855,33 +930,30 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         context: Context,
         bacnetSystemEquip: java.util.HashMap<Any, Any>
     ) {
-        CcuLog.d(TAG_BACNET, "----configModelDefinitionBacnet---")
+        CcuLog.d(TAG_BACNET, "---[6] -configModelDefinitionBacnet recreate bacnet profile and fill points---")
         this.context = context
 
         if (bacnetSystemEquip != null) {
 
             bacnetProfile = BacnetProfile()
             if (bacnetProfile != null) {
-
-                //selectedSlaveIdBacnet = bacnetProfile.slaveId
-                CcuLog.d(TAG_BACNET, "-------load model from bacnet equip id==>${bacnetSystemEquip["id"].toString()}")
+                CcuLog.d(TAG_BACNET, "---[7] ----load model from bacnet equip id==>${bacnetSystemEquip["id"].toString()}")
                 val equipmentDevice = buildBacnetModelSystem(bacnetSystemEquip)
                 val version  = bacnetSystemEquip["version"].toString()
-                CcuLog.d(TAG_BACNET, "configModelDefinitionBacnet----loaded all points-->${equipmentDevice.size} --->version<-->$version")
+                CcuLog.d(TAG_BACNET, "---[8] configModelDefinitionBacnet----loaded all points-->${equipmentDevice.size} --->version<-->$version")
                 if(equipmentDevice.isNotEmpty()){
-                    CcuLog.d(TAG_BACNET, "configModelDefinitionBacnet----loaded all points-->${equipmentDevice[0].points.size}")
+                    CcuLog.d(TAG_BACNET, "---[9] configModelDefinitionBacnet----loaded all points-->${equipmentDevice[0].points.size}")
                 }
                 //val equipmentDevice = buildBacnetModel(bacnetSystemEquip["id"].toString())
 
-                CcuLog.d(TAG_BACNET, "------2-------")
+                CcuLog.d(TAG_BACNET, "---[10] ------create bacnet model and fill it-------")
                 val model = BacnetModel()
                 model.equipDevice.value = equipmentDevice[0]
-                CcuLog.d(TAG_BACNET, "------3-------")
+                CcuLog.d(TAG_BACNET, "---[11] ------bacnet model created successfully -------")
                 model.selectAllParameters.value = isAllParamsSelectedBacNet(equipmentDevice[0])
-                CcuLog.d(TAG_BACNET, "------4-------")
+                CcuLog.d(TAG_BACNET, "---[12] ------get points using model -------")
                 model.points = getBacnetPoints(equipmentDevice[0].points.toImmutableList()) //equipmentDevice[0].points
-
-                CcuLog.d(TAG_BACNET, "bacnet points to reconfigure==>${model.points.size}")
+                CcuLog.d(TAG_BACNET, "---[13] ------bacnet points to reconfigure==>${model.points.size}")
 
                 for(point in model.points){
                     if(!point.displayInUi.value){
@@ -889,23 +961,59 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                     }
                 }
 
-                CcuLog.d(TAG_BACNET, "update UI as bacnetModel got the value")
+                CcuLog.d(TAG_BACNET, "---[14] update UI as bacnetModel got the value")
                 model.version.value = version
                 bacnetModel.value = model
                 bacnetModel.value.isDevicePaired = true
 
-                model.equipDevice.value.bacnetConfig?.let { config ->
-                    config.split(",").forEach {
-                        val configParam = it.split(":")
-                        when(configParam[0]){
-                            "deviceId" -> deviceId.value = configParam[1]
-                            "destinationIp" -> destinationIp.value = configParam[1]
-                            "destinationPort" -> destinationPort.value = configParam[1]
-                            "macAddress" -> destinationMacAddress.value = configParam[1]
-                            "deviceNetwork" -> dnet.value = configParam[1]
+                if(configurationType.value == IP_CONFIGURATION){
+                    // we are looking for ip details
+                    CcuLog.d(TAG_BACNET, "---[15] -- since last config is ip load ip details")
+                    model.equipDevice.value.bacnetConfig?.let { config ->
+                        config.split(",").forEach {
+                            val configParam = it.split(":")
+                            when(configParam[0]){
+                                "deviceId" -> deviceId.value = configParam[1]
+                                "destinationIp" -> destinationIp.value = configParam[1]
+                                "destinationPort" -> destinationPort.value = configParam[1]
+                                "macAddress" -> destinationMacAddress.value = configParam[1]
+                                "deviceNetwork" -> dnet.value = configParam[1]
+                            }
+                        }
+                    }
+                }else{
+                    CcuLog.d(TAG_BACNET, "---[15] -- since last config is mstp load mstp details")
+                    // we are looking for mstp details
+                    model.equipDevice.value.bacnetConfig?.let { config ->
+                        config.split(",").forEach {
+                            val configParam = it.split(":")
+                            when(configParam[0]){
+                                "deviceId" -> deviceId.value = configParam[1]
+                                "destinationIp" -> destinationIp.value = configParam[1]
+                                "destinationPort" -> destinationPort.value = configParam[1]
+                                "macAddress" -> {
+                                    destinationMacAddress.value = configParam[1]
+                                    textFieldValueMacAddress = destinationMacAddress.value.toInt()
+                                }
+                                "deviceNetwork" -> dnet.value = configParam[1]
+                            }
+                        }
+                    }
+                    CcuLog.d(TAG_BACNET, "---[16] -- checking if its a valid mac address for mstp device")
+                    if (isValidMstpMacAddress(destinationMacAddress.value)) {
+                        if (isThisMasterDevice(destinationMacAddress.value)) {
+                            // device is master
+                            deviceSelectionMode.value = 1
+                            CcuLog.d(TAG_BACNET, "---[17] -- its a master mstp device")
+                        } else {
+                            // device is slave
+                            deviceSelectionMode.value = 0
+                            CcuLog.d(TAG_BACNET, "---[17] -- its a slave mstp device")
                         }
                     }
                 }
+
+
                 CcuLog.d(TAG, "--> deviceId ${deviceId.value} destinationIp ${destinationIp.value} destinationPort ${destinationPort.value} macAddress ${destinationMacAddress.value} dnet ${dnet.value}")
                 model.equipDevice.value.modelConfig?.let { config ->
                     config.split(",").forEach {
@@ -918,6 +1026,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             }
             isUpdateMode.value = true
         } else {
+            CcuLog.d(TAG_BACNET, "---[7] -since no equip found for bacnet its time to load bacnet models---")
             isUpdateMode.value = false
             ProgressDialogUtils.showProgressDialog(context, "Loading Bacnet Models")
             if(!::deviceModelList.isInitialized || deviceModelList.isEmpty()){
@@ -1003,10 +1112,10 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         sendRequestMultipleRead(BacnetReadRequestMultiple(destination, rpmRequest))
     }
     fun saveConfigurationBacnet() {
-        CcuLog.d(TAG_BACNET, "saveConfigurationBacnet")
+        CcuLog.d(TAG_BACNET, "--[2] -- saveConfigurationBacnet, saveConfigurationBacnet")
         viewModelScope.launch {
             val parentMap : HashMap<Any, Any>?
-            CcuLog.d(TAG_BACNET, "saveConfigurationBacnet check equip-->$externalBacnetEquipCreated")
+            CcuLog.d(TAG_BACNET, "--[3] -- saveConfigurationBacnet, saveConfigurationBacnet check equip-->$externalBacnetEquipCreated")
             if(externalBacnetEquipCreated != null){
                 parentMap = externalBacnetEquipCreated
             }else{
@@ -1015,16 +1124,16 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
 
             if(parentMap != null){
                 if(parentMap.size == 0){
-                    CcuLog.d(TAG_BACNET, "bacnet system for ahu not exists creating new one")
+                    CcuLog.d(TAG_BACNET, "-[4] -- saveConfigurationBacnet, bacnet system for ahu not exists creating new one")
                     saveBacnetProfile()
                 }else{
-                    CcuLog.d(TAG_BACNET, "bacnet system for ahu already exists ---1--go for update")
+                    CcuLog.d(TAG_BACNET, "-[5] -- saveConfigurationBacnet, bacnet system for ahu already exists ---1--go for update")
                     updateBacnetProfile(parentMap)
                 }
 
             }else{
                 saveBacnetProfile()
-                CcuLog.d(TAG_BACNET, "bacnet system for ahu not exists creating new one -- 2--")
+                CcuLog.d(TAG_BACNET, "-[6] -- saveConfigurationBacnet, bacnet system for ahu not exists creating new one -- 2--")
             }
 
         }
@@ -1033,32 +1142,86 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     private suspend fun saveBacnetProfile() {
         ProgressDialogUtils.showProgressDialog(context, SAVING_BACNET)
         try {
-            CcuLog.d(TAG_BACNET, "saveConfigurationBacnet start")
+            CcuLog.d(TAG_BACNET, "--[7] -- saveConfigurationBacnet, saveConfigurationBacnet start")
             updateOriginalModel()
             CCUHsApi.getInstance().resetCcuReady()
             setUpBacnetProfile()
+            if (configurationType.value == MSTP_CONFIGURATION) {
+                CcuLog.d(TAG_BACNET, "--[7.1] -- saveConfigurationBacnet, its mstp so send cov subscription request")
+                sendCovSubscription()
+            }
             L.saveCCUState()
             CCUHsApi.getInstance().setCcuReady()
-            CcuLog.d(TAG_BACNET, "saveConfigurationBacnet end")
+            CcuLog.d(TAG_BACNET, "--[8] -- saveConfigurationBacnet, saveConfigurationBacnet end")
             PreferenceUtil.setSelectedProfileWithAhu("bacnet")
             val equip = isBacnetSystemProfileEnabled()
-            CcuLog.d(TAG_BACNET, "saveConfigurationBacnet end ${equip.size}")
+            CcuLog.d(TAG_BACNET, "--[9] -- saveConfigurationBacnet, saveConfigurationBacnet end ${equip.size}")
             externalBacnetEquipCreated = equip
-            CcuLog.d(TAG_BACNET, "saveConfigurationBacnet end equip id $externalBacnetEquipCreated")
+            CcuLog.d(TAG_BACNET, "--[10] -- saveConfigurationBacnet, saveConfigurationBacnet end equip id $externalBacnetEquipCreated")
 
             if (externalBacnetEquipCreated != null) {
-                CcuLog.d(TAG_BACNET, "----configModelDefinitionBacnet after save--2---")
+                CcuLog.d(TAG_BACNET, "--[11] -- saveConfigurationBacnet, ----configModelDefinitionBacnet after save--2---")
                 configModelDefinitionBacnet(context, java.util.HashMap(externalBacnetEquipCreated))
             }
             context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
             showToast(SAVED, context)
             bacnetModel.value.isDevicePaired = true
             _isDialogOpen.value = false
-            Globals.getInstance().checkBacnetSystemProfileStatus()
+            //Globals.getInstance().checkBacnetSystemProfileStatus()
         } catch (e: Exception) {
+            e.printStackTrace()
             // Handle exceptions if needed
+            val errorMessage = e.message
+            CcuLog.d(TAG_BACNET, "--[12] -- saveConfigurationBacnet, ----error saving configuration---$errorMessage")
             ProgressDialogUtils.hideProgressDialog()
-            showToast("Error saving configuration: ${e.message}", context)
+            showToast("Error saving configuration: $errorMessage", context)
+        }
+    }
+
+    fun sendCovSubscription() {
+
+        val destination = DestinationMultiRead(destinationIp.value, destinationPort.value, deviceId.value, dnet.value, destinationMacAddress.value)
+
+        var objectIdentifierList = mutableListOf<ObjectIdentifierBacNet>()
+        bacnetModel.value.points.forEach {
+            val objectId = it.protocolData?.bacnet?.objectId
+            val objectType = it.protocolData?.bacnet?.objectType
+
+            val objectIdentifier = a75f.io.logic.util.bacnet.getDetailsFromObjectLayout(objectType!!, objectId.toString())
+            objectIdentifierList.add(objectIdentifier)
+        }
+
+
+        val subscribeCovRequest = mutableListOf( BacnetMstpSubscribeCov(
+                destination,
+                BacnetMstpSubscribeCovRequest(1,objectIdentifierList)
+        ))
+
+        CcuLog.d(TAG_BACNET, "--[7.2] -- saveConfigurationBacnet done, send subscription request list size===>${subscribeCovRequest.size}")
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = service.subscribeCov(BacnetMstpSubscribeCovForAllDevices( subscribeCovRequest ))
+                val resp = BaseResponse(response)
+                ProgressDialogUtils.hideProgressDialog()
+                if (response.isSuccessful) {
+                    val result = resp.data
+                    if (result != null) {
+                        val readResponse = result.body()
+                        CcuLog.d(TAG, "received response->${readResponse}")
+                    } else {
+                        CcuLog.d(TAG, "--null response--")
+                    }
+                } else {
+                    CcuLog.d(TAG, "--error--${resp.error}")
+                }
+            } catch (e: SocketTimeoutException) {
+                CcuLog.d(TAG, "--SocketTimeoutException--${e.message}")
+            } catch (e: ConnectException) {
+                CcuLog.d(TAG, "--ConnectException--${e.message}")
+            } catch (e: java.lang.Exception) {
+                CcuLog.d(TAG, "--connection time out--${e.message}")
+            }
         }
     }
 
@@ -1275,26 +1438,18 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
 
     private fun setUpBacnetProfile() {
         CcuLog.d(TAG_BACNET, "--setUpBacnetProfile node address ${deviceId.value}")
-        //val parentMap = getBacnetEquipMap(deviceId.value)
-        //if (parentMap.isNullOrEmpty()) {
-
-            bacnetProfile = BacnetProfile()
+        val deviceID = deviceId.value.ifEmpty { 0 }
+        bacnetProfile = BacnetProfile()
         CcuLog.d(TAG_BACNET, "--setUpBacnetProfile -----1-----")
-            val configParam = "deviceId:${deviceId.value},destinationIp:${destinationIp.value},destinationPort:${destinationPort.value},macAddress:${destinationMacAddress.value},deviceNetwork:${dnet.value}"
+        val configParam = "deviceId:${deviceId.value},destinationIp:${destinationIp.value},destinationPort:${destinationPort.value},macAddress:${destinationMacAddress.value},deviceNetwork:${dnet.value}"
 
         CcuLog.d(TAG_BACNET, "--setUpBacnetProfile -----2-----")
         val modelConfig = "modelName:${modelName.value},modelId:${getBacnetModelIdByName(modelName.value)}"
         CcuLog.d(TAG_BACNET, "------addBacAppEquip-----")
-        bacnetProfile.addBacAppEquip(configParam, modelConfig, deviceId.value, deviceId.value, "SYSTEM", "SYSTEM",
+        bacnetProfile.addBacAppEquip(configParam, modelConfig, deviceID.toString(), deviceID.toString(), "SYSTEM", "SYSTEM",
                 bacnetModel.value.equipDevice.value,
-                profileType,"system",bacnetModel.value.version.value,IP_CONFIGURATION,"", true)
-
-            //L.ccu().zoneProfiles.add(bacnetProfile)
-            //L.saveCCUState()
-            CcuLog.d(TAG_BACNET, "setUpBacnetProfile completed")
-        //} else {
-            //updateBacnetProfile()
-        //}
+                profileType, "system", bacnetModel.value.version.value, configurationType.value, destinationMacAddress.value, true)
+        CcuLog.d(TAG_BACNET, "setUpBacnetProfile completed")
     }
 
     private fun sendRequestMultipleRead(rpmRequest: BacnetReadRequestMultiple) {
@@ -1669,5 +1824,14 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         val ipv4Regex =
             Regex("^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$")
         return ipv4Regex.matches(ip)
+    }
+
+    fun clearConfigFieldData() {
+        deviceId.value = ""
+        destinationPort.value = ""
+        dnet.value = ""
+        destinationIp.value = ""
+        destinationMacAddress.value = ""
+        connectedDevices = mutableStateOf(emptyList())
     }
 }

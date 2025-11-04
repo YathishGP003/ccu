@@ -2,6 +2,7 @@ package a75f.io.usbserial
 
 import a75f.io.api.haystack.CCUTagsDb
 import a75f.io.logger.CcuLog
+import android.hardware.usb.UsbDevice
 import android.os.Environment
 import java.io.File
 import java.text.SimpleDateFormat
@@ -16,6 +17,25 @@ class UsbUtil {
 
         private val logDir: File by lazy {
             File(Environment.getExternalStorageDirectory().absolutePath + File.separator + LOGS_DIR)
+        }
+
+        @JvmStatic
+        fun writeUsbEvent(device : UsbDevice, msg : String) {
+            try {
+                val vendorId: Int = device.vendorId
+                val productId: Int = device.productId
+                val manufacturerName: String? = device.manufacturerName
+                val productName: String? = device.productName
+                val version: String = device.version
+                val serialNumber: String? = device.serialNumber
+                val logMessage = String.format(
+                    "Modbus USB $msg - VID: %d, PID: %d, Manufacturer: %s, Product Name: %s, Version: %s, Serial Number: %s",
+                    vendorId, productId, manufacturerName, productName, version, serialNumber
+                )
+                writeUsbEvent(logMessage)
+            } catch (e: Exception) {
+                CcuLog.e(CCUTagsDb.TAG_CCU_USB_EVENT, "Error logging USB event: ${e.message}")
+            }
         }
 
         @JvmStatic

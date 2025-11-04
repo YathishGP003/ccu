@@ -61,13 +61,19 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                 if (!equipDevice.getEquips().isEmpty())
                     modbusDeviceList.addAll(equipDevice.getEquips());
 
+                String port = "";
+                if (equipMap.get("port") != null) {
+                    port = equipMap.get("port").toString();
+                } else {
+                    CcuLog.e(L.TAG_CCU_MODBUS, "sendMessage : Equip without port assigned : "+equipMap);
+                }
                 for(EquipmentDevice modbusDevice : modbusDeviceList){
                     int count = 0;
                     LModbus.IS_MODBUS_DATA_RECEIVED = false;
                     for (Register register : modbusDevice.getRegisters()) {
                         if(count++ >= registerRequestCount && !LModbus.IS_MODBUS_DATA_RECEIVED)
                             break;
-                        LModbus.readRegister((short)modbusDevice.getSlaveId(), register, getRegisterCount(register));
+                        LModbus.readRegister((short)modbusDevice.getSlaveId(), register, getRegisterCount(register), port);
 
                         CcuLog.d(L.TAG_CCU_MODBUS,
                                 "modbus_data_received: "+LModbus.IS_MODBUS_DATA_RECEIVED+
@@ -101,6 +107,12 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
     public void writeSystemModbusRegister(String equipRef, ArrayList<String> registerList) {
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
+        String port = "";
+        if (equipHashMap.get("port") != null) {
+            port = equipHashMap.get("port").toString();
+        } else {
+            CcuLog.e(L.TAG_CCU_MODBUS, "writeSystemModbusRegister: Equip without port assigned "+equip.getDisplayName());
+        }
         List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
         if (equip.getEquipRef() != null) {
             EquipmentDevice parentEquip = buildModbusModelByEquipRef(equip.getEquipRef());
@@ -128,7 +140,7 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                             float priorityVal = (float) HSUtil.getPriorityVal(registerId);
                             CcuLog.i(L.TAG_CCU_MODBUS, "Write mb register "
                                     + register.getRegisterAddress() + " val " + priorityVal);
-                            LModbus.writeRegister(groupId, register, priorityVal);
+                            LModbus.writeRegister(groupId, register, priorityVal, port);
                         }
                     }
                 }
@@ -159,6 +171,13 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(point.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
 
+        String port = "";
+        if (equipHashMap.get("port") != null) {
+            port = equipHashMap.get("port").toString();
+        } else {
+            CcuLog.e(L.TAG_CCU_MODBUS, "writeRegister: Equip without port assigned "+equip.getDisplayName());
+        }
+
         short groupId = Short.parseShort(writablePoint.get("group").toString());
         List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
         if (equip.getEquipRef() != null) {
@@ -182,11 +201,11 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                         if(register.parameterDefinitionType!=null && register.parameterDefinitionType.equals("float")) {
                             CcuLog.i(L.TAG_CCU_MODBUS, "Write mb register "
                                     + register.getRegisterAddress() + " val " + priorityVal);
-                            LModbus.writeRegister(groupId, register, priorityVal);
+                            LModbus.writeRegister(groupId, register, priorityVal, port);
                         } else {
                             CcuLog.i(L.TAG_CCU_MODBUS, "Write mb register "
                                     + register.getRegisterAddress() + " val " + (int) priorityVal);
-                            LModbus.writeRegister(groupId, register, (int) priorityVal);
+                            LModbus.writeRegister(groupId, register, (int) priorityVal, port);
                         }
                     }
                 }

@@ -439,7 +439,7 @@ public class SerialMessageFragment extends DialogFragment {
     public void onSerialEvent(SerialEvent event) {
         CcuLog.d(L.TAG_CCU_MODBUS, "onSerialEvent  : " + event.getSerialAction().name());
         if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_PORT) {
-        } else if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_MODBUS) {
+        } else if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_MODBUS1) {
             byte[] data = (byte[]) event.getBytes();
 
             MessageType messageType = MessageType.values()[(event.getBytes()[0] & 0xff)];

@@ -87,6 +87,7 @@ public class CDCSerialDevice extends UsbSerialDevice
     @Override
     public void close()
     {
+        CcuLog.d(CLASS_ID, "Closing device");
         setControlCommand(CDC_SET_CONTROL_LINE_STATE, CDC_CONTROL_LINE_OFF, null);
         killWorkingThread();
         killWriteThread();

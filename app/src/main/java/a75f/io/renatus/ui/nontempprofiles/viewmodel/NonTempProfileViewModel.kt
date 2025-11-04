@@ -195,6 +195,20 @@ class NonTempProfileViewModel : ViewModel(), PointSubscriber {
         }
     }
 
+    fun initializeModbusEquipHealth(
+        eName: String,
+        showStatus: Boolean, deviceId: String, equipId: String
+    ) {
+        viewModelScope.launch(Dispatchers.Main) {
+            equipName = eName
+            if (showStatus) {
+                withContext(Dispatchers.IO) {
+                    setupModbusEquipHealth(deviceId, equipId)
+                }
+            }
+        }
+    }
+
     fun observeEquipHealthByGroupId(
         groupId: String
     ) {
@@ -249,9 +263,27 @@ class NonTempProfileViewModel : ViewModel(), PointSubscriber {
         handler.post(runnable!!)
     }
 
+    fun observeExternalModbusEquipHealth(
+        slaveId: String,
+        equipId: String
+    ) {
+        runnable = object : Runnable {
+            override fun run() {
+                setupModbusEquipHealth(slaveId, equipId)
+                handler.postDelayed(this, 60000)
+            }
+        }
+        handler.post(runnable!!)
+    }
+
     fun setupEquipHealth(deviceId: String) {
         this.setLastUpdatedPoint(getLastUpdatedViewItem(deviceId, this))
         this.externalEquipHeartBeat = heartBeatStatus(deviceId)
+    }
+
+    fun setupModbusEquipHealth(slaveId : String, equipId: String) {
+        this.setLastUpdatedPoint(getLastUpdatedViewItem(slaveId, this, equipRef = equipId))
+        this.externalEquipHeartBeat = heartBeatStatus(slaveId, equipId)
     }
 
     fun stopObservingEquipHealth() {

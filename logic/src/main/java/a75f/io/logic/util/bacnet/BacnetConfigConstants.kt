@@ -89,7 +89,7 @@ object  BacnetConfigConstants {
     const val VENDOR_NAME_VALUE = "75F"
 
     const val BROADCAST_BACNET_APP_GLOBAL_PARAM = "a75f.io.renatus.BROADCAST_BACNET_APP_GLOBAL_PARAM"
-
+    const val BACNET_MSTP_SERIAL_DEVICE = "bacnetMstpSerialDevice"
 
 }
 enum class BacnetServerStatus {

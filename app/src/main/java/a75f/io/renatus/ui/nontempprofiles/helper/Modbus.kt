@@ -1,6 +1,7 @@
 package a75f.io.renatus.ui.nontempprofiles.helper
 
 import a75f.io.api.haystack.modbus.EquipmentDevice
+import a75f.io.logger.CcuLog
 import a75f.io.renatus.R
 import a75f.io.renatus.ui.nontempprofiles.model.ExternalPointItem
 import a75f.io.renatus.ui.nontempprofiles.utilities.externalEquipsLayoutSetup
@@ -30,14 +31,15 @@ fun loadModbusZone(
     showExternalEquipPointsUI(composeView, viewModel, equipId, null)
     val modbusDevice = externalEquipDevice as EquipmentDevice
     val deviceId = modbusDevice.slaveId.toString()
-    viewModel.initializeEquipHealth(
+    viewModel.initializeModbusEquipHealth(
         equipmentDeviceName,
         showLastUpdatedTime,
-        deviceId
+        deviceId,
+        equipId
     ) // lastUpdate and heartbeat
     viewModel.setEquipStatusPoint(getPointScheduleHeaderViewItem(equipId)) // status message
     points =
         getModbusDetailedViewPoints(modbusDevice, "modbus", modbusDevice.deviceEquipRef)
     viewModel.initializeDetailedViewPoints(points)
-    viewModel.observeExternalEquipHealth(deviceId)
+    viewModel.observeExternalModbusEquipHealth(deviceId, equipId)
 }

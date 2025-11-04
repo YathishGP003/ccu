@@ -47,7 +47,7 @@ class PCNValidation {
                 (pcnViewState.connectModuleList.filter { it.newConfiguration } + pcnViewState.externalEquipList.filter { it.newConfiguration })
                     .sortedBy { it.serverId }
             mergedList.forEach { equip ->
-                if (L.isModbusSlaveIdExists(equip.serverId.toShort())) {
+                if (L.isModbusSlaveIdExists(equip.serverId.toShort(), "")) {
                     return equip.serverId
                 }
             }

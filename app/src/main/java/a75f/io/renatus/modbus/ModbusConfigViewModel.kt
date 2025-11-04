@@ -4,7 +4,6 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.modbus.EquipmentDevice
-import a75f.io.logic.bo.building.modbus.buildModbusModel
 import a75f.io.domain.api.Domain
 import a75f.io.domain.service.DomainService
 import a75f.io.domain.service.ResponseCallback
@@ -12,6 +11,8 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.modbus.ModbusProfile
+import a75f.io.logic.bo.building.modbus.buildModbusModel
+import a75f.io.logic.bo.building.modbus.getParentEquipMapBySlaveId
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
@@ -39,6 +40,7 @@ import a75f.io.renatus.modbus.util.parseModbusDataFromString
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.usbserial.UsbPrefHelper
 import a75f.io.util.ExecutorTask
 import android.annotation.SuppressLint
 import android.app.Application
@@ -48,6 +50,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -57,6 +60,7 @@ import io.seventyfivef.ph.core.Tags
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.projecthaystack.HStr
 import kotlin.properties.Delegates
 
 
@@ -72,7 +76,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     var equipModel = mutableStateOf(EquipModel())
     var selectedModbusType = mutableStateOf(0)
     var modelName = mutableStateOf("Select Model")
-
+    var portList = UsbPrefHelper.getModbusComPorts(application.applicationContext).toMutableStateList()
     private lateinit var modbusProfile: ModbusProfile
     private lateinit var filer: String
     private lateinit var moduleLevel: String
@@ -107,11 +111,11 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
 
     fun configModelDefinition(context: Context) {
         this.context = context
-        if (L.getProfile(selectedSlaveId) != null) {
-            modbusProfile = L.getProfile(selectedSlaveId) as ModbusProfile
+        if (L.getModbusProfile(selectedSlaveId, zoneRef) != null) {
+            modbusProfile = L.getModbusProfile(selectedSlaveId, zoneRef) as ModbusProfile
             val isTerminalProfile = modbusProfile.equip.roomRef.replace("@","") != "SYSTEM"
             selectedSlaveId = modbusProfile.slaveId
-            val equipmentDevice = buildModbusModel(selectedSlaveId.toInt())
+            val equipmentDevice = buildModbusModel(selectedSlaveId.toInt(), zoneRef)
             val model = EquipModel()
             model.equipDevice.value = equipmentDevice
             model.selectAllParameters.value =
@@ -125,6 +129,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
             equipModel.value = model
             equipModel.value.isDevicePaired = true
             equipModel.value.slaveId.value = equipmentDevice.slaveId
+            equipModel.value.port.value = equipmentDevice.port
             if (equipmentDevice.equips != null && equipmentDevice.equips.isNotEmpty()) {
                 equipmentDevice.equips.forEach {
                     val subEquip = EquipModel()
@@ -275,6 +280,10 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
 
     private fun isValidConfiguration(): Boolean {
 
+        if (equipModel.value.port.value.isEmpty()) {
+            equipModel.value.port.value = if (portList.isNotEmpty()) portList[0] else ""
+        }
+
         if (modelName.value.contentEquals("Select Model")) {
             showToast(context.getString(R.string.no_device_paired), context)
             return false
@@ -294,8 +303,9 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                 return false
             }
         }
-
-        if (L.isModbusSlaveIdExists(equipModel.value.slaveId.value.toShort())) {
+        CcuLog.i(Domain.LOG_TAG, "Check modbus slave ${equipModel.value.slaveId.value} " +
+                "exists on ${equipModel.value.port.value}")
+        if (L.isModbusSlaveIdExists(equipModel.value.slaveId.value.toShort(), equipModel.value.port.value)) {
             showToast("Slave Id " + equipModel.value.slaveId.value + " already exists, choose " +
                     "another slave id to proceed",context)
             return false
@@ -303,7 +313,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
         if (equipModel.value.subEquips.isNotEmpty()) {
             equipModel.value.subEquips.forEach {
                 if  (it.value.slaveId.value != 0) {
-                    if (L.isModbusSlaveIdExists(it.value.slaveId.value.toShort())
+                    if (L.isModbusSlaveIdExists(it.value.slaveId.value.toShort(), equipModel.value.port.value)
                         || it.value.slaveId.value == equipModel.value.slaveId.value ) {
                         showToast("Make sure all sub equips have unique slave Id, if it is not same as Parent",context)
                         return false
@@ -324,6 +334,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                 }
             }
         }
+        CcuLog.i("CCU_MODBUS", "Modbus configuration is valid")
         return true
     }
 
@@ -386,6 +397,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                 ProgressDialogUtils.showProgressDialog(context, SAVING)
             }, {
                 CCUHsApi.getInstance().resetCcuReady()
+                CcuLog.i(Domain.LOG_TAG, "Saving Modbus Equip configuration")
                 setUpsModbusProfile()
                 L.saveCCUState()
                 CCUHsApi.getInstance().setCcuReady()
@@ -406,8 +418,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
 
     private fun setUpsModbusProfile() {
         equipModel.value.equipDevice.value.slaveId = equipModel.value.slaveId.value
-        val parentMap = getModbusEquipMap(equipModel.value.slaveId.value.toShort())
-
+        val parentMap = getModbusEquipMap(equipModel.value.slaveId.value.toShort(), equipModel.value.port.value)
         if (parentMap.isNullOrEmpty()) {
             val subEquipmentDevices = mutableListOf<EquipmentDevice>()
             if (equipModel.value.subEquips.isNotEmpty()) {
@@ -418,17 +429,38 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
             modbusProfile = ModbusProfile()
             modbusProfile.addMbEquip(equipModel.value.slaveId.value.toShort(), floorRef, zoneRef,
                 equipModel.value.equipDevice.value, getParametersList(equipModel.value.equipDevice.value),
-                profileType, subEquipmentDevices,moduleLevel,equipModel.value.version.value)
-
+                profileType, subEquipmentDevices,moduleLevel,equipModel.value.version.value, equipModel.value.port.value)
+            CcuLog.i(Domain.LOG_TAG, "New Modbus Equip added with port : " + equipModel.value.port.value)
             L.ccu().zoneProfiles.add(modbusProfile)
             L.saveCCUState()
         } else {
+            CcuLog.i(Domain.LOG_TAG, "Update Modbus Profile : Check modbus slave ${equipModel.value.slaveId.value} " +
+                    "exists on ${equipModel.value.port.value}")
             updateModbusProfile()
+            if (!L.isModbusSlaveIdExists(equipModel.value.slaveId.value.toShort(), equipModel.value.port.value)) {
+                updatePortIfChanged(slaveId = equipModel.value.slaveId.value)
+            } else {
+                CcuLog.i(Domain.LOG_TAG, "Modbus Equip port not changed for slave id ${equipModel.value.slaveId.value}")
+            }
+        }
+    }
+
+    private fun updatePortIfChanged(slaveId: Int) {
+        val parentMap = getParentEquipMapBySlaveId(slaveId)
+        val equip = Equip.Builder().setHashMap(parentMap).build()
+        if (equip != null && equip.tags.containsKey("port")) {
+            val currentPort = equip.tags["port"].toString()
+            if (currentPort != equipModel.value.port.value && !equipModel.value.port.value.isNullOrEmpty()) {
+                equip.tags["port"] = HStr.make(equipModel.value.port.value)
+                CCUHsApi.getInstance().updateEquip(equip, equip.id)
+                CcuLog.i(Domain.LOG_TAG, "Modbus Equip port updated $currentPort -> ${equipModel.value.port.value}")
+            }
+
         }
     }
 
     fun isExistingProfile(filter: String) : Boolean {
-        val parentMap = getModbusEquipMap(equipModel.value.slaveId.value.toShort())
+        val parentMap = getModbusEquipMap(equipModel.value.slaveId.value.toShort(), equipModel.value.port.value)
         return !parentMap.isNullOrEmpty() && parentMap.containsKey(filter)
     }
 
@@ -463,7 +495,11 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    private fun getModbusEquipMap(slaveId: Short): HashMap<Any, Any>? {
+    private fun getModbusEquipMap(slaveId: Short, port: String): HashMap<Any, Any>? {
+        if (port.isNotEmpty()) {
+            return CCUHsApi.getInstance()
+                .readEntity("equip and modbus and not equipRef and group == \"$slaveId\" and port == \"$port\"")
+        }
         return CCUHsApi.getInstance()
             .readEntity("equip and modbus and not equipRef and group == \"$slaveId\"")
     }

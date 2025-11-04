@@ -50,6 +50,7 @@ import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.netty.NettyApplicationEngine
 import io.ktor.websocket.WebSockets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,6 +67,7 @@ import org.projecthaystack.UnknownRecException
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.ReentrantLock
 
 class HttpServer {
 
@@ -78,6 +80,7 @@ class HttpServer {
         var modbusDataInterface: ModbusDataInterface? = null
         var sharedPreferences: SharedPreferences? = null
         private var instance: HttpServer? = null
+        private var server: NettyApplicationEngine? = null
         fun getInstance(context: Context): HttpServer? {
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
             if (instance == null) {
@@ -91,23 +94,55 @@ class HttpServer {
         return sharedPreferences!!.getBoolean(HTTP_SERVER_STATUS, false)
     }
 
+    private val lock = ReentrantLock()
+    @Volatile private var running = false
+
     fun startServer() {
-        CoroutineScope(Dispatchers.IO).launch {
-            server.start(wait = true)
+        lock.lock()
+        try {
+            if (server != null) {
+                CcuLog.d(HTTP_SERVER, "Server already running")
+                return
+            }
+
+            val newServer = createServer()
+            server = newServer
+
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    newServer.start(wait = true)
+                } catch (e: Exception) {
+                    CcuLog.e(HTTP_SERVER, "Error starting server", e)
+                }
+            }
+
+            sharedPreferences?.edit()?.putBoolean(HTTP_SERVER_STATUS, true)?.apply()
+            CcuLog.d(HTTP_SERVER, "Server started")
+        } finally {
+            lock.unlock()
         }
-        sharedPreferences!!.edit().putBoolean(HTTP_SERVER_STATUS, true).apply()
-        CcuLog.d(L.TAG_CCU_BACNET, "server started.")
     }
 
     fun stopServer() {
-        server.stop(1_000, 2_000)
-        instance = null
-        sharedPreferences!!.edit().putBoolean(HTTP_SERVER_STATUS, false).apply()
-        CcuLog.d(L.TAG_CCU_BACNET, "server stopped.")
+        lock.lock()
+        try {
+            val s = server ?: return
+            try {
+                s.stop(1000, 2000)
+            } catch (e: Exception) {
+                CcuLog.e(HTTP_SERVER, "Error stopping server", e)
+            } finally {
+                server = null
+                sharedPreferences?.edit()?.putBoolean(HTTP_SERVER_STATUS, false)?.apply()
+                CcuLog.d(HTTP_SERVER, "Server stopped")
+            }
+        } finally {
+            lock.unlock()
+        }
     }
 
-    val server by lazy {
-        embeddedServer(Netty, PORT, watchPaths = emptyList()) {
+    private fun createServer(): NettyApplicationEngine {
+        return embeddedServer(Netty, PORT, watchPaths = emptyList()) {
             install(WebSockets)
             install(CallLogging)
             // provides the automatic content conversion of requests based on theirContent-Type
@@ -138,19 +173,26 @@ class HttpServer {
             routing {
 
                 get("/read/{query}") {
-                    CcuLog.i(HTTP_SERVER," read: "+call.parameters["query"])
+                    CcuLog.i(HTTP_SERVER, " read: " + call.parameters["query"])
                     val query = call.parameters["query"]
                     if (query != null) {
-                        call.respond(HttpStatusCode.OK, BaseResponse(HZincWriter.gridToString(
-                            HGridBuilder.dictToGrid(CCUHsApi.getInstance()
-                                .getHSClient().read(query)))))
-                    }  else {
+                        call.respond(
+                            HttpStatusCode.OK, BaseResponse(
+                                HZincWriter.gridToString(
+                                    HGridBuilder.dictToGrid(
+                                        CCUHsApi.getInstance()
+                                            .getHSClient().read(query)
+                                    )
+                                )
+                            )
+                        )
+                    } else {
                         call.respond(HttpStatusCode.NotFound)
                     }
                 }
 
                 get("/hisRead/{query}") {
-                    CcuLog.i(HTTP_SERVER," hisRead: "+call.parameters["query"])
+                    CcuLog.i(HTTP_SERVER, " hisRead: " + call.parameters["query"])
                     val query = call.parameters["query"]
                     if (query != null) {
                         val isHeartBeatPoint = isHeartBeatPoint("heartbeat", query)
@@ -161,7 +203,7 @@ class HttpServer {
                                 val currentTimeInMillis = System.currentTimeMillis()
                                 val diffTime =
                                     TimeUnit.MILLISECONDS.toMinutes(currentTimeInMillis - lastModifiedTimeInMillis)
-                                if (diffTime > 15 || hisItem.`val`== null) {
+                                if (diffTime > 15 || hisItem.`val` == null) {
                                     call.respond(
                                         HttpStatusCode.OK, BaseResponse(
                                             0
@@ -186,7 +228,7 @@ class HttpServer {
                             CcuLog.i(HTTP_SERVER, "his item present -> $hisItem")
                             call.respond(HttpStatusCode.OK, BaseResponse(hisItem))
                         }
-                    }else{
+                    } else {
                         call.respond(HttpStatusCode.NotFound)
                     }
                 }
@@ -194,18 +236,27 @@ class HttpServer {
                 get("/readAll/{query}") {
                     val query = call.parameters["query"]
                     val isVirtualZoneEnabled = isVirtualZoneEnabled()
-                    CcuLog.i(HTTP_SERVER, "read all query: $query <-isVirtualZoneEnabled-> $isVirtualZoneEnabled")
+                    CcuLog.i(
+                        HTTP_SERVER,
+                        "read all query: $query <-isVirtualZoneEnabled-> $isVirtualZoneEnabled"
+                    )
                     var equipRefId = ""
                     if (query != null) {
                         var group = ""
-                        if(query.contains("equipRef")){
+                        if (query.contains("equipRef")) {
                             try {
-                                equipRefId = getEquipRefId(query).replace("@","").trim()
-                                CcuLog.d(HTTP_SERVER, "read all query contains equipRef equipRefId is==> $equipRefId")
-                                if(CCUHsApi.getInstance().readMapById(equipRefId)["group"] != null){
-                                    group = CCUHsApi.getInstance().readMapById(equipRefId)["group"] as String
+                                equipRefId = getEquipRefId(query).replace("@", "").trim()
+                                CcuLog.d(
+                                    HTTP_SERVER,
+                                    "read all query contains equipRef equipRefId is==> $equipRefId"
+                                )
+                                if (CCUHsApi.getInstance()
+                                        .readMapById(equipRefId)["group"] != null
+                                ) {
+                                    group = CCUHsApi.getInstance()
+                                        .readMapById(equipRefId)["group"] as String
                                 }
-                            }catch (e: UnknownRecException){
+                            } catch (e: UnknownRecException) {
                                 e.printStackTrace()
                             }
                         }
@@ -213,13 +264,16 @@ class HttpServer {
                         val mutableDictList = repackagePoints(tempGrid, isVirtualZoneEnabled, group)
                         val finalGrid = HGridBuilder.dictsToGrid(mutableDictList.toTypedArray())
                         val modifiedGridResponse = HZincWriter.gridToString(finalGrid)
-                        if(query.contains("point")){
-                            val levelData =  getLevelValues(finalGrid)
+                        if (query.contains("point")) {
+                            val levelData = getLevelValues(finalGrid)
                             val fullResponse = ReadAllResponse(modifiedGridResponse, levelData)
                             CcuLog.i(HTTP_SERVER, " fullResponse: ${BaseResponse(fullResponse)}")
                             call.respond(HttpStatusCode.OK, BaseResponse(fullResponse))
-                        }else {
-                            CcuLog.i(HTTP_SERVER, " response: ${BaseResponse(modifiedGridResponse)}")
+                        } else {
+                            CcuLog.i(
+                                HTTP_SERVER,
+                                " response: ${BaseResponse(modifiedGridResponse)}"
+                            )
                             call.respond(HttpStatusCode.OK, BaseResponse(modifiedGridResponse))
                         }
                     } else {
@@ -237,7 +291,7 @@ class HttpServer {
                 }
 
                 get("/bacnet/stackInitStatus") {
-                    CcuLog.d(HTTP_SERVER,"called API: /bacnet/stackInitStatus ")
+                    CcuLog.d(HTTP_SERVER, "called API: /bacnet/stackInitStatus ")
                     val stackStatus = call.request.queryParameters["status"]
                     val stack = call.request.queryParameters["stack"]
                     if (stackStatus != null && stack != null) {
@@ -246,12 +300,21 @@ class HttpServer {
                             updateBacnetStackInitStatus(stackStatus.toBoolean())
                             updateBacnetIpModeConfigurations(stackStatus.toBoolean())
                         } else if (stack == "MSTP") {
-                            CcuLog.i(HTTP_SERVER, "Bacnet stack: MSTP stackInitStatus: $stackStatus")
+                            CcuLog.i(
+                                HTTP_SERVER,
+                                "Bacnet stack: MSTP stackInitStatus: $stackStatus"
+                            )
                             if (stackStatus.toBoolean()) {
-                                CcuLog.d(L.TAG_CCU_BACNET_MSTP, "BACnet MSTP Stack initialized successfully!!!. Sending COV Subscription....")
+                                CcuLog.d(
+                                    L.TAG_CCU_BACNET_MSTP,
+                                    "BACnet MSTP Stack initialized successfully!!!. Sending COV Subscription...."
+                                )
                                 scheduleJobToResubscribeBacnetMstpCOV()
-                            }  else {
-                                CcuLog.d(L.TAG_CCU_BACNET_MSTP, "BACnet MSTP Stack initialization failed. Not sending COV Subscription")
+                            } else {
+                                CcuLog.d(
+                                    L.TAG_CCU_BACNET_MSTP,
+                                    "BACnet MSTP Stack initialization failed. Not sending COV Subscription"
+                                )
                             }
                             mstpDataInterface?.updateMstpBacnetUi(stackStatus.toBoolean(), "", "")
                         }
@@ -260,7 +323,7 @@ class HttpServer {
                 }
 
                 get("/bacnet/heartbeat") {
-                    CcuLog.i(HTTP_SERVER,"called API: /bacnet/heartbeat ")
+                    CcuLog.i(HTTP_SERVER, "called API: /bacnet/heartbeat ")
                     val stack = call.request.queryParameters["stack"]
                     if (stack != null) {
                         CcuLog.i(HTTP_SERVER, "Bacnet stack: --> $stack")
@@ -273,7 +336,7 @@ class HttpServer {
                 }
 
                 post("/watchSub") {
-                    CcuLog.i(HTTP_SERVER," watch sub: ")
+                    CcuLog.i(HTTP_SERVER, " watch sub: ")
                     val body = call.receive<String>()
                     if (body != null) {
                         val hGrid = retrieveGridFromRequest(body)
@@ -281,14 +344,18 @@ class HttpServer {
                             hGrid
                         )
                         CcuLog.i(HTTP_SERVER, "check values in response ${watchSubRequest.isEmpty}")
-                        call.respondText(HZincWriter.gridToString(watchSubRequest), ContentType.Any , HttpStatusCode.OK)
+                        call.respondText(
+                            HZincWriter.gridToString(watchSubRequest),
+                            ContentType.Any,
+                            HttpStatusCode.OK
+                        )
                     } else {
                         call.respond(HttpStatusCode.NotFound)
                     }
                 }
 
                 post("/watchUnSub") {
-                    CcuLog.i(HTTP_SERVER," watch un sub: ")
+                    CcuLog.i(HTTP_SERVER, " watch un sub: ")
                     val body = call.receive<String>()
                     if (body != null) {
                         val hGrid = retrieveGridFromRequest(body)
@@ -296,29 +363,46 @@ class HttpServer {
                             hGrid
                         )
                         CcuLog.i(HTTP_SERVER, "check values in response ${watchSubRequest.isEmpty}")
-                        call.respondText(HZincWriter.gridToString(watchSubRequest), ContentType.Any , HttpStatusCode.OK)
+                        call.respondText(
+                            HZincWriter.gridToString(watchSubRequest),
+                            ContentType.Any,
+                            HttpStatusCode.OK
+                        )
                     } else {
                         call.respond(HttpStatusCode.NotFound)
                     }
                 }
 
                 post("/watchPoll") {
-                    CcuLog.d(HTTP_SERVER," watchPoll: ")
+                    CcuLog.d(HTTP_SERVER, " watchPoll: ")
                     val body = call.receive<String>()
                     if (body != null) {
                         val hGrid = retrieveGridFromRequest(body)
                         val watchPollResponse = CCUHsApi.getInstance().hsClient.watchPoll(
                             hGrid
                         )
-                        CcuLog.i(HTTP_SERVER, "check values in response ${watchPollResponse.isEmpty}")
-                        if(!watchPollResponse.isEmpty){
-                            CcuLog.i(HTTP_SERVER, "no of rows in response ${watchPollResponse.numRows()}")
+                        CcuLog.i(
+                            HTTP_SERVER,
+                            "check values in response ${watchPollResponse.isEmpty}"
+                        )
+                        if (!watchPollResponse.isEmpty) {
+                            CcuLog.i(
+                                HTTP_SERVER,
+                                "no of rows in response ${watchPollResponse.numRows()}"
+                            )
                         }
-                        if(!watchPollResponse.isErr){
-                            call.respondText(HZincWriter.gridToString(watchPollResponse), ContentType.Any , HttpStatusCode.OK)
-                        }else{
+                        if (!watchPollResponse.isErr) {
+                            call.respondText(
+                                HZincWriter.gridToString(watchPollResponse),
+                                ContentType.Any,
+                                HttpStatusCode.OK
+                            )
+                        } else {
                             call.respond(HttpStatusCode.NotFound)
-                            CcuLog.i(HTTP_SERVER, "Error in watch poll response ${watchPollResponse.isErr}")
+                            CcuLog.i(
+                                HTTP_SERVER,
+                                "Error in watch poll response ${watchPollResponse.isErr}"
+                            )
                             reInitialiseBacnetStack() // wrong watch id, needs to reInitialiseBacnetStack to get unique watch id
                         }
                     } else {
@@ -341,40 +425,61 @@ class HttpServer {
                     var level = call.parameters["level"]
                     var value = call.parameters["val"]
                     val who = call.parameters["who"]
-                    var duration : String? = call.parameters["duration"]
+                    var duration: String? = call.parameters["duration"]
 
-                    CcuLog.i(HTTP_SERVER, "called API: /pointWrite-id->$id<--value-->$value<--level-->$level")
+                    CcuLog.i(
+                        HTTP_SERVER,
+                        "called API: /pointWrite-id->$id<--value-->$value<--level-->$level"
+                    )
 
-                    if(id == null || level == null || who == null || duration == null) {
-                        call.respond(HttpStatusCode.NotFound, BaseResponse( "Invalid request"))
-                    }else{
+                    if (id == null || level == null || who == null || duration == null) {
+                        call.respond(HttpStatusCode.NotFound, BaseResponse("Invalid request"))
+                    } else {
                         // if level is coming null ie. user wanted to reset level
-                        if(value == "null"){
+                        if (value == "null") {
                             value = "0"
                             duration = "1000"
                         }
-                        if(isBacnetClientPoint(id)){
+                        if (isBacnetClientPoint(id)) {
                             level = "8"
                         }
 
                         val pointMap = CCUHsApi.getInstance().readMapById(id)
                         if (pointMap.isEmpty()) {
                             CcuLog.e(HTTP_SERVER, "Point not found for id: $id")
-                            call.respond(HttpStatusCode.NotFound, BaseResponse("Point not found for id: $id"))
+                            call.respond(
+                                HttpStatusCode.NotFound,
+                                BaseResponse("Point not found for id: $id")
+                            )
                             return@get
                         } else {
-                            if(pointMap.containsKey(Tags.WRITABLE)) {
-                                val pointGrid = CCUHsApi.getInstance().writePoint(id, level!!.toInt(), who, value!!.toDouble(), duration!!.toInt())
-                                CCUHsApi.getInstance().writeHisValById(id, hayStack.readPointPriorityVal(id))
+                            if (pointMap.containsKey(Tags.WRITABLE)) {
+                                val pointGrid = CCUHsApi.getInstance().writePoint(
+                                    id,
+                                    level!!.toInt(),
+                                    who,
+                                    value!!.toDouble(),
+                                    duration!!.toInt()
+                                )
+                                CCUHsApi.getInstance()
+                                    .writeHisValById(id, hayStack.readPointPriorityVal(id))
                                 if (pointGrid != null) {
-                                    if(!pointGrid.isEmpty || !pointGrid.isErr){
-                                        call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK))
+                                    if (!pointGrid.isEmpty || !pointGrid.isErr) {
+                                        call.respond(
+                                            HttpStatusCode.OK,
+                                            BaseResponse(HttpStatusCode.OK)
+                                        )
                                         updateHeartBeatPoint(id)
-                                    }
-                                    else
-                                        call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
+                                    } else
+                                        call.respond(
+                                            HttpStatusCode.OK,
+                                            BaseResponse(HttpStatusCode.NoContent)
+                                        )
                                 } else {
-                                    call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
+                                    call.respond(
+                                        HttpStatusCode.OK,
+                                        BaseResponse(HttpStatusCode.NoContent)
+                                    )
                                 }
                             } else {
                                 CCUHsApi.getInstance().writeHisValById(id, value!!.toDouble())
@@ -383,16 +488,19 @@ class HttpServer {
                             }
                         }
 
-                        if(isBacnetClientPoint(id)){
+                        if (isBacnetClientPoint(id)) {
                             CcuLog.i(HTTP_SERVER, "this is a bacnet client point update ui-->$id")
                             updateZoneUi(id)
                         }
 
                         if (isBacnetMSTPPoint(id)) {
-                            CcuLog.i(HTTP_SERVER, "this is a bacnet mstp point--> $id and updating UI")
+                            CcuLog.i(
+                                HTTP_SERVER,
+                                "this is a bacnet mstp point--> $id and updating UI"
+                            )
                             updateZoneUi(id)
                             if (level != null && value != null) {
-                                sendWriteRequestToMstpEquip(id,level!!, value!!)
+                                sendWriteRequestToMstpEquip(id, level!!, value!!)
                             }
                         }
                     }
@@ -400,30 +508,42 @@ class HttpServer {
 
                 //example call = http://127.0.0.1:5001/pointWrite/mstp?deviceId=1199&level=0&val=75.0&who=bacnet&duration=0&objectId=1&objectType=2
                 get("/pointWrite/mstp") {
-                    val deviceId:String? = call.parameters["deviceId"]
+                    val deviceId: String? = call.parameters["deviceId"]
                     val macAddr = call.parameters["macAddress"]
                     var level = call.parameters["level"]
                     var value = call.parameters["val"]
                     val who = call.parameters["who"]
                     val objectId = call.parameters["objectId"]
                     val objectType = call.parameters["objectType"]
-                    var duration : String? = call.parameters["duration"]
+                    var duration: String? = call.parameters["duration"]
 
-                    CcuLog.i(HTTP_SERVER, "called API: /pointWrite/mstp -deviceId->$deviceId macAddr -> $macAddr <--value-->$value<--level-->$level")
+                    CcuLog.i(
+                        HTTP_SERVER,
+                        "called API: /pointWrite/mstp -deviceId->$deviceId macAddr -> $macAddr <--value-->$value<--level-->$level"
+                    )
 
-                    if(level == null || who == null || duration == null || objectId == null || objectType == null) {
-                        call.respond(HttpStatusCode.NotFound, BaseResponse( "Invalid request"))
+                    if (level == null || who == null || duration == null || objectId == null || objectType == null) {
+                        call.respond(HttpStatusCode.NotFound, BaseResponse("Invalid request"))
                     } else {
-                        var updatedObjectType = getBacNetType( ObjectType.values()[objectType.toInt()].key.replace("OBJECT_", ""))
+                        var updatedObjectType = getBacNetType(
+                            ObjectType.values()[objectType.toInt()].key.replace(
+                                "OBJECT_",
+                                ""
+                            )
+                        )
                         CcuLog.i(HTTP_SERVER, "MSTP -> updatedObjectType: $updatedObjectType")
                         CcuLog.i(HTTP_SERVER, "MSTP -> objectId: $objectId")
-                        val query = "point and bacnetDeviceMacAddr == \"$macAddr\" and bacnetObjectId==$objectId and bacnetType==\"$updatedObjectType\""
+                        val query =
+                            "point and bacnetDeviceMacAddr == \"$macAddr\" and bacnetObjectId==$objectId and bacnetType==\"$updatedObjectType\""
                         CcuLog.i(HTTP_SERVER, "MSTP -> query: $query")
-                        val pointMap  = CCUHsApi.getInstance().read(query)
+                        val pointMap = CCUHsApi.getInstance().read(query)
                         val id = pointMap?.get("id")?.toString()
 
                         if (id == null) {
-                            CcuLog.e(HTTP_SERVER, "MSTP -> Point not found for deviceId: $deviceId and objectId: $objectId and  objectType: $objectType")
+                            CcuLog.e(
+                                HTTP_SERVER,
+                                "MSTP -> Point not found for deviceId: $deviceId and objectId: $objectId and  objectType: $objectType"
+                            )
                             call.respond(
                                 HttpStatusCode.NotFound,
                                 BaseResponse("MSTP -> Point not found for deviceId: $deviceId and objectId: $objectId")
@@ -440,18 +560,33 @@ class HttpServer {
                                 level = "8"
                             }
 
-                            if(pointMap.containsKey(Tags.WRITABLE)) {
-                                val pointGrid = CCUHsApi.getInstance().writePoint(id, level!!.toInt(), who, value!!.toDouble(), duration!!.toInt())
-                                CCUHsApi.getInstance().writeHisValById(id, hayStack.readPointPriorityVal(id))
+                            if (pointMap.containsKey(Tags.WRITABLE)) {
+                                val pointGrid = CCUHsApi.getInstance().writePoint(
+                                    id,
+                                    level!!.toInt(),
+                                    who,
+                                    value!!.toDouble(),
+                                    duration!!.toInt()
+                                )
+                                CCUHsApi.getInstance()
+                                    .writeHisValById(id, hayStack.readPointPriorityVal(id))
                                 if (pointGrid != null) {
-                                    if(!pointGrid.isEmpty || !pointGrid.isErr) {
-                                        call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK))
-                                    }
-                                    else {
-                                        call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
+                                    if (!pointGrid.isEmpty || !pointGrid.isErr) {
+                                        call.respond(
+                                            HttpStatusCode.OK,
+                                            BaseResponse(HttpStatusCode.OK)
+                                        )
+                                    } else {
+                                        call.respond(
+                                            HttpStatusCode.OK,
+                                            BaseResponse(HttpStatusCode.NoContent)
+                                        )
                                     }
                                 } else {
-                                    call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
+                                    call.respond(
+                                        HttpStatusCode.OK,
+                                        BaseResponse(HttpStatusCode.NoContent)
+                                    )
                                 }
                             } else {
                                 CCUHsApi.getInstance().writeHisValById(id, value!!.toDouble())
@@ -479,7 +614,7 @@ class HttpServer {
 
                 post("/hisReadMany") {
                     val ids = call.receive<String>()
-                    CcuLog.i(HTTP_SERVER," hisReadMany: $ids")
+                    CcuLog.i(HTTP_SERVER, " hisReadMany: $ids")
                     val responseData = JSONArray()
                     val haystack = CCUHsApi.getInstance()
                     if (ids.isNotBlank()) {
@@ -514,7 +649,7 @@ class HttpServer {
 
                 post("/pointWriteMany") {
                     val ids = call.receive<String>()
-                    CcuLog.i(HTTP_SERVER," pointWriteMany: $ids")
+                    CcuLog.i(HTTP_SERVER, " pointWriteMany: $ids")
                     val responseData = JSONArray()
                     if (ids.isNotBlank()) {
                         val items: Iterator<*> = getHGridData(ids).iterator()
@@ -555,7 +690,8 @@ class HttpServer {
                     CcuLog.i(HTTP_SERVER, " /query  : $query")
 
                     if (query != null) {
-                        val entities = CCUHsApi.getInstance().readAllEntities(getModifiedQuery(query))
+                        val entities =
+                            CCUHsApi.getInstance().readAllEntities(getModifiedQuery(query))
                         if (entities.isNullOrEmpty()) {
                             call.respond(HttpStatusCode.BadRequest, "No points found for the query")
                         } else {
@@ -605,18 +741,50 @@ class HttpServer {
                                     } else if (entity.containsKey(Tags.WRITABLE)) {
                                         when (value) {
                                             is Int, Double, is Number -> {
-                                                haystack.pointWrite(HRef.copy(id), level , "CCU_DASHBOARD", HNum.make(value.toString().toDouble()), HNum.make(duration))
-                                                haystack.writeHisValById(id, haystack.readPointPriorityVal(id))
-                                                idsStatus.put(JSONObject().put(id, "Updated successfully"))
+                                                haystack.pointWrite(
+                                                    HRef.copy(id),
+                                                    level,
+                                                    "CCU_DASHBOARD",
+                                                    HNum.make(value.toString().toDouble()),
+                                                    HNum.make(duration)
+                                                )
+                                                haystack.writeHisValById(
+                                                    id,
+                                                    haystack.readPointPriorityVal(id)
+                                                )
+                                                idsStatus.put(
+                                                    JSONObject().put(
+                                                        id,
+                                                        "Updated successfully"
+                                                    )
+                                                )
                                             }
+
                                             is String -> {
-                                                haystack.pointWrite(HRef.copy(id), level , "CCU_DASHBOARD", HStr.make(value), HNum.make(duration))
-                                                idsStatus.put(JSONObject().put(id, "Updated successfully"))
+                                                haystack.pointWrite(
+                                                    HRef.copy(id),
+                                                    level,
+                                                    "CCU_DASHBOARD",
+                                                    HStr.make(value),
+                                                    HNum.make(duration)
+                                                )
+                                                idsStatus.put(
+                                                    JSONObject().put(
+                                                        id,
+                                                        "Updated successfully"
+                                                    )
+                                                )
                                             }
+
                                             else -> {}
                                         }
                                     } else {
-                                        idsStatus.put(JSONObject().put(id, "ID does not have writable tag"))
+                                        idsStatus.put(
+                                            JSONObject().put(
+                                                id,
+                                                "ID does not have writable tag"
+                                            )
+                                        )
                                     }
                                 }
                             } else {
@@ -640,11 +808,12 @@ class HttpServer {
                 }
 
                 get("/getDashboardConfiguration") {
-                    CcuLog.i(HTTP_SERVER," getDashboardConfiguration")
+                    CcuLog.i(HTTP_SERVER, " getDashboardConfiguration")
                     call.respond(HttpStatusCode.OK, getDashboardConfiguration())
                 }
             }
         }
+
     }
 
     private fun isBacnetClientPoint(id: String): Boolean {

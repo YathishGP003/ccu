@@ -21,11 +21,11 @@ public class ModbusProfile extends ZoneProfile {
 
     public void addMbEquip(short slaveId, String floorRef, String roomRef, EquipmentDevice equipmentDevice,
                            List<Parameter> configParams, ProfileType profileType,
-                           List<EquipmentDevice> subEquipmentDevices, String modbusLevel,String modelVersion) {
+                           List<EquipmentDevice> subEquipmentDevices, String modbusLevel,String modelVersion, String port) {
         modBusEquip = new ModbusEquip(profileType, slaveId);
         String equipRef = modBusEquip.createEntities(floorRef, roomRef, equipmentDevice, configParams,
                 null, false, modbusLevel, modelVersion, false,false, false,
-                null, false, "", null, null, null);
+                null, false, "", null, null, null, port);
         equipmentDevice.setEquips(null);
         List<EquipmentDevice> intermediateList = new ArrayList<>();
         for(EquipmentDevice subEquipmentDevice : subEquipmentDevices){
@@ -51,7 +51,7 @@ public class ModbusProfile extends ZoneProfile {
             boolean isSlaveIdSameAsParent = subEquipmentDevice.getSlaveId() == equipmentDevice.getSlaveId();
             String subEquipRef = modBusEquip.createEntities(floorRef, roomRef, subEquipmentDevice, parameterList,
                     equipRef, isSlaveIdSameAsParent, modbusLevel,null, false,false, false,
-                    null, true, "", null, null, null);
+                    null, true, "", null, null, null, port);
             subEquipmentDevice.setDeviceEquipRef(subEquipRef);
             intermediateList.add(subEquipmentDevice);
         }
@@ -97,6 +97,13 @@ public class ModbusProfile extends ZoneProfile {
         HashMap equip = CCUHsApi.getInstance().read("equip and modbus and not equipRef and " +
                         "group == \"" + modBusEquip.slaveId + "\"");
         return new Equip.Builder().setHashMap(equip).build();
+    }
+
+    public String getPort(){
+        HashMap equip = CCUHsApi.getInstance().read("equip and modbus and not equipRef and " +
+                "group == \"" + modBusEquip.slaveId + "\"");
+        Object port = equip.get("port");
+        return port != null ? port.toString() : "";
     }
 
 }

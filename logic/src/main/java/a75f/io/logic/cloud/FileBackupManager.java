@@ -6,10 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.domain.api.Ccu;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.cloudservice.FileBackupService;
 import static a75f.io.logic.L.TAG_CCU_BACKUP;
 import static a75f.io.logic.L.TAG_CCU_REPLACE;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_MSTP_INITIALIZED;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_GLOBAL;
 
 import android.content.SharedPreferences;
@@ -112,7 +114,7 @@ public class FileBackupManager {
                         CcuLog.e(TAG_CCU_REPLACE, "name:" + name +"-"+ "value:" + value);
                     }
                 }
-
+                CcuLog.e(TAG_CCU_REPLACE, "Modbus Configs found: " + new Gson().toJson(modbusConfigs));
                 NodeList stringList = doc.getElementsByTagName("string");
                 for (int temp = 0; temp < stringList.getLength(); temp++) {
                     Node node = stringList.item(temp);
@@ -148,9 +150,16 @@ public class FileBackupManager {
                             CcuLog.e(TAG_CCU_REPLACE, "String : name:" + name +"-"+ "value:" + value);
                             bacnet_pref.edit().putString(name, value).apply();
                         }
+
+                        if(name.equalsIgnoreCase("usb_device_list")){
+                            String value = element.getTextContent();
+                            CcuLog.i(TAG_CCU_REPLACE, "String : name:" + name +"-"+ "value:" + value);
+                            CcuLog.i(TAG_CCU_REPLACE, "Restored USB Device List: " + value);
+                            bacnet_pref.edit().putString(name, value).apply();
+                        }
                     }
                 }
-
+                CcuLog.e(TAG_CCU_REPLACE, "BacnetConfig Configs restored from backup."+bacnet_pref.getAll().toString());
                 NodeList aBooleanList = doc.getElementsByTagName("boolean");
                 for (int temp = 0; temp < aBooleanList.getLength(); temp++) {
                     Node node = aBooleanList.item(temp);
@@ -172,6 +181,11 @@ public class FileBackupManager {
                         if(name.equalsIgnoreCase(IS_GLOBAL)){
                             String value = element.getAttribute("value");
                             CcuLog.e(TAG_CCU_REPLACE, "Boolean : name:" + name +"-"+ "value:" + value);
+                            bacnet_pref.edit().putBoolean(name, Boolean.parseBoolean(value)).apply();
+                        }
+                        if (name.equals(IS_BACNET_MSTP_INITIALIZED)) {
+                            String value = element.getAttribute("value");
+                            CcuLog.e(TAG_CCU_REPLACE, "Boolean : name:" + name + "-" + "value:" + value);
                             bacnet_pref.edit().putBoolean(name, Boolean.parseBoolean(value)).apply();
                         }
                     }

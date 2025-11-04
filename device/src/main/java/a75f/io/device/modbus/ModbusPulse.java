@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
@@ -25,22 +26,22 @@ import org.projecthaystack.HStr;
 public class ModbusPulse {
     private static final int MODBUS_DATA_START_INDEX = 3;
     private static int registerIndex = 0;
-    private static Map<Integer, Long> lastHisItemMap = new HashMap<>();
+    private static Map<String, Long> lastHisItemMap = new HashMap<>();
 
-    public static void handleModbusPulseData(byte[] data, int slaveid){
+    public static void handleModbusPulseData(byte[] data, int slaveid, String port){
         if(UsbModbusUtils.validSlaveId(slaveid) ) {
             switch (UsbModbusUtils.validateFunctionCode((data[1] & 0xff))) {
                 case UsbModbusUtils.READ_COILS:
-                    validateResponse(slaveid, data, "registerNumber", UsbModbusUtils.READ_COILS);
+                    validateResponse(slaveid, data, port, UsbModbusUtils.READ_COILS);
                     break;
                 case UsbModbusUtils.READ_DISCRETE_INPUTS:
-                    validateResponse(slaveid, data, "registerNumber",UsbModbusUtils.READ_DISCRETE_INPUTS);
+                    validateResponse(slaveid, data, port,UsbModbusUtils.READ_DISCRETE_INPUTS);
                     break;
                 case UsbModbusUtils.READ_HOLDING_REGISTERS:
-                    validateResponse(slaveid, data,"registerNumber", UsbModbusUtils.READ_HOLDING_REGISTERS);
+                    validateResponse(slaveid, data,port, UsbModbusUtils.READ_HOLDING_REGISTERS);
                     break;
                 case UsbModbusUtils.READ_INPUT_REGISTERS:
-                    validateResponse(slaveid, data, "registerNumber",UsbModbusUtils.READ_INPUT_REGISTERS);
+                    validateResponse(slaveid, data, port,UsbModbusUtils.READ_INPUT_REGISTERS);
                     break;
                 case UsbModbusUtils.WRITE_COIL:
                 case UsbModbusUtils.READ_EXCEPTION_STATUS:
@@ -50,14 +51,14 @@ public class ModbusPulse {
                 case UsbModbusUtils.WRITE_MASK_REGISTER:
                     break;
                 case UsbModbusUtils.WRITE_REGISTER:
-                    validateResponse(slaveid, data, "registerNumber",UsbModbusUtils.WRITE_REGISTER);
+                    validateResponse(slaveid, data, port,UsbModbusUtils.WRITE_REGISTER);
                     break;
 
             }
         }
     }
 
-    private static void validateResponse(int slaveid, byte[] data, String registerNumber, byte registerType){
+    private static void validateResponse(int slaveid, byte[] data, String port, byte registerType){
         try {
             ByteQueue queue = new ByteQueue(data);
 
@@ -69,7 +70,7 @@ public class ModbusPulse {
 
             if(!rtuResponse.getModbusResponse().isException()){
                 CcuLog.d(L.TAG_CCU_MODBUS, "Response success==" + rtuResponse.getModbusMessage().toString());
-                updateResponseToHaystack(slaveid, rtuResponse, registerType);
+                updateResponseToHaystack(slaveid, rtuResponse, registerType, port);
             }else {
                 CcuLog.d(L.TAG_CCU_MODBUS,
                       "handlingResponse, exception-"+rtuResponse.getModbusResponse().getExceptionMessage());
@@ -79,16 +80,29 @@ public class ModbusPulse {
         }
     }
 
-    private static void updateResponseToHaystack(int slaveid, RtuMessageResponse response, byte registerType){
+    public static void updateResponseToHaystack(int slaveid, RtuMessageResponse response, byte registerType, String port){
         CCUHsApi hayStack = CCUHsApi.getInstance();
         List<HashMap<Object, Object>> deviceList = hayStack.readAllEntities("device and addr == \""+slaveid+"\"");
+        if (deviceList == null || deviceList.isEmpty()) return;
+
+        List<HashMap<Object, Object>> comDevices = deviceList.stream()
+                .filter(device -> {
+                    Object equipRef = device.get("equipRef");
+                    if (equipRef == null) return false;
+                    HashMap<Object, Object> equip =
+                            hayStack.readEntity("equip and id == "+ equipRef);
+                    if (equip == null || equip.isEmpty()) return false;
+                    Object equipPort = equip.get("port");
+                    return equipPort != null && port.equalsIgnoreCase(equipPort.toString());
+                })
+                .collect(Collectors.toList());
 
         StringBuilder deviceRefString = new StringBuilder("(");
         int index = 0;
-        for(HashMap<Object, Object> device : deviceList){
+        for(HashMap<Object, Object> device : comDevices){
             deviceRefString.append("deviceRef == ");
             deviceRefString.append("\""+StringUtils.prependIfMissing(device.get("id").toString(), "@")+"\"");
-            if(index == deviceList.size()-1){
+            if(index == comDevices.size()-1){
                 deviceRefString.append(" ) ");
             }
             else{
@@ -96,17 +110,18 @@ public class ModbusPulse {
             }
             index++;
         }
-        if (!deviceList.isEmpty()) {
+        CcuLog.d(L.TAG_CCU_MODBUS, "Device Ref String for Modbus Pulse: "+ deviceRefString);
+        if (!comDevices.isEmpty()) {
             LModbus.IS_MODBUS_DATA_RECEIVED = true;
             updateModbusResponse(deviceRefString.toString(), response, registerType);
-            updateHeartBeatPoint(slaveid, hayStack);
+            updateHeartBeatPoint(slaveid, port, hayStack);
         }
     }
 
-    private static void updateHeartBeatPoint(int slaveId, CCUHsApi hayStack){
+    private static void updateHeartBeatPoint(int slaveId, String port, CCUHsApi hayStack){
         List<HashMap<Object, Object>> equipList =
                 hayStack.readAllEntities("equip and modbus and group == \"" + slaveId +
-                        "\"");
+                        "\" and port == \"" + port + "\"");
         for(HashMap<Object, Object> equip : equipList) {
             if(CCUUtils.isModbusHeartbeatRequired(equip, hayStack)) {
                 HashMap<Object, Object> heartBeatPoint = hayStack.readEntity("point and (heartBeat or heartbeat) and equipRef == " +
@@ -114,10 +129,11 @@ public class ModbusPulse {
                 long current_millis = System.currentTimeMillis();
                 if(!lastHisItemMap.containsKey(slaveId)) {
                     hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 1.0);
-                    lastHisItemMap.put(slaveId, current_millis);
+                    lastHisItemMap.put(port+slaveId, current_millis);
                 } else if((current_millis - lastHisItemMap.get(slaveId)) > 40000) {
+                    CcuLog.d(L.TAG_CCU_MODBUS, "Updating heartbeat point for equip " + equip.get("id"));
                     hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 1.0);
-                    lastHisItemMap.put(slaveId, current_millis);
+                    lastHisItemMap.put(port+slaveId, current_millis);
                 }
             }
         }
@@ -407,10 +423,17 @@ public class ModbusPulse {
             if ((priorityVal != formattedVal)) {
                 CcuLog.d(L.TAG_CCU_MODBUS, "Received Modbus value is different from Haystack priority value. " +
                         "Haystack priority value: " + priorityVal + ", Modbus value: " + formattedVal + ", hence sending the priority data to the device.");
+                HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and id == \"" + logPoint.get("equipRef") + "\"");
+                String port = "";
+                if (equip.get("port") != null) {
+                    port = equip.get("port").toString();
+                } else {
+                    CcuLog.e(L.TAG_CCU_MODBUS, "sendUpdatedWritableDataToDevice: Equip without port assigned : "+equip);
+                }
                 if(readRegister.parameterDefinitionType.equals("float")) {
-                    LModbus.writeRegister(Integer.parseInt(Objects.requireNonNull(logPoint.get("group")).toString()), readRegister, (float) priorityVal);
+                    LModbus.writeRegister(Integer.parseInt(Objects.requireNonNull(logPoint.get("group")).toString()), readRegister, (float) priorityVal, port);
                 }  else {
-                    LModbus.writeRegister(Integer.parseInt(Objects.requireNonNull(logPoint.get("group")).toString()), readRegister, (int) priorityVal);
+                    LModbus.writeRegister(Integer.parseInt(Objects.requireNonNull(logPoint.get("group")).toString()), readRegister, (int) priorityVal, port);
                 }
             }
         }

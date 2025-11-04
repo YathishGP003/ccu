@@ -1,6 +1,5 @@
 package a75f.io.renatus;
 
-import static a75f.io.logic.L.BAC_APP_PACKAGE_NAME;
 import static a75f.io.logic.L.TAG_CCU_BACNET_MSTP;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.APDU_SEGMENT_TIMEOUT;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.APDU_TIMEOUT;
@@ -40,7 +39,6 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_BAUD_RAT
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_MAX_FRAME;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_MAX_MASTER;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_DEVICE_ID;
-import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_PORT_ADDRESS;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_SOURCE_ADDRESS;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.VIRTUAL_NETWORK_NUMBER;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.ZONE_TO_VIRTUAL_DEVICE_MAPPING;
@@ -84,6 +82,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
@@ -101,16 +102,22 @@ import java.net.ServerSocket;
 import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.Ccu;
+import a75f.io.logic.L;
 import a75f.io.logic.interfaces.MstpDataInterface;
+import a75f.io.logic.service.FileBackupJobReceiver;
 import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.renatus.bacnet.BacnetConfigChange;
+import a75f.io.renatus.usbmanager.UsbDeviceAdapter;
+import a75f.io.renatus.usbmanager.UsbManagerViewModel;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CustomSelectionAdapter;
 import a75f.io.renatus.util.DataBbmd;
@@ -123,33 +130,27 @@ import a75f.io.renatus.util.UsbHelper;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.restserver.server.HttpServer;
+import a75f.io.usbserial.UsbDeviceItem;
 import a75f.io.usbserial.UsbModbusService;
+import a75f.io.usbserial.UsbModbusServiceCom2;
 import a75f.io.usbserial.UsbPortTrigger;
+import a75f.io.usbserial.UsbPrefHelper;
+import a75f.io.usbserial.UsbService;
 import a75f.io.util.DashboardUtilKt;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class Communication extends Fragment implements MstpDataInterface {
-    
-    private final String PREF_MB_BAUD_RATE = "mb_baudrate";
-    private final String PREF_MB_PARITY = "mb_parity";
-    private final String PREF_MB_DATA_BITS = "mb_databits";
-    private final String PREF_MB_STOP_BITS = "mb_stopbits";
+
 
     private String deviceIpAddress = "";
     private int portNumber = 47808;
     private short subnetMask = 1;
     private int bacnetConfigSelectedPosition = 2; // Default value mapped to Normal
 
-    @BindView(R.id.spinnerBaudRate) Spinner spinnerBaudRate;
     
-    @BindView(R.id.spinnerParity) Spinner spinnerParity;
-    
-    @BindView(R.id.spinnerDatabits) Spinner spinnerDatabits;
-    
-    @BindView(R.id.spinnerStopBits) Spinner spinnerStopbits;
-    
-    @BindView(R.id.btnRestart) Button btnRestart;
+    @BindView(R.id.btnSave) Button btnSave;
 
     @BindView(R.id.mstpSpinnerBaudRate) Spinner mstpSpinnerBaudRate;
 
@@ -283,6 +284,12 @@ public class Communication extends Fragment implements MstpDataInterface {
 
     @BindView(R.id.bacnetConfigSpinner) Spinner bacnetConfigSpinner;
 
+    @BindView(R.id.usbConfigDefault) LinearLayout usbConfigDefault;
+    @BindView(R.id.usbConfigLayout) LinearLayout usbConfigLayout;
+
+    UsbManagerViewModel usbManagerViewModel;
+    UsbDeviceAdapter adapter;
+
     SharedPreferences sharedPreferences;
     JSONObject config;
     JSONObject networkObject;
@@ -351,60 +358,50 @@ public class Communication extends Fragment implements MstpDataInterface {
             mstpConfigLayout.setVisibility(View.GONE);
         }
 
-        ArrayAdapter<String> spinnerBaudRateAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.mb_config_baudrate_array))));
-        spinnerBaudRate.setAdapter(spinnerBaudRateAdapter);
-        spinnerBaudRate.setSelection(((ArrayAdapter<String>)spinnerBaudRate.getAdapter())
-                                         .getPosition(String.valueOf(readIntPref(PREF_MB_BAUD_RATE, 9600))));
-        spinnerBaudRate.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                writeIntPref(PREF_MB_BAUD_RATE, Integer.parseInt(spinnerBaudRate.getSelectedItem().toString()));
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
+        btnSave.setOnClickListener(v -> {
 
-        ArrayAdapter<String> spinnerParityAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.mb_config_parity_array))));
-        spinnerParity.setAdapter(spinnerParityAdapter);
-        spinnerParity.setSelection(readIntPref(PREF_MB_PARITY, 0),false);
-        spinnerParity.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                writeIntPref(PREF_MB_PARITY, position);
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
+            List<UsbDeviceItem> oldConfig = UsbPrefHelper.getUsbDeviceList(context);
+            List<UsbDeviceItem> newConfig = usbManagerViewModel.getUsbDevices().getValue();
+            CcuLog.i(L.TAG_USB_MANAGER,"btnSave onClick: oldConfig "+new Gson().toJson(oldConfig));
+            CcuLog.i(L.TAG_USB_MANAGER,"btnSave onClick: newConfig "+new Gson().toJson(newConfig));
 
-        ArrayAdapter<String> spinnerDatabitsAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.mb_config_databits_array))));
-        spinnerDatabits.setAdapter(spinnerDatabitsAdapter);
-        spinnerDatabits.setSelection(((ArrayAdapter<String>)spinnerDatabits.getAdapter())
-                       .getPosition(String.valueOf(readIntPref(PREF_MB_DATA_BITS, 8))),false);
-        spinnerDatabits.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                writeIntPref(PREF_MB_DATA_BITS, Integer.parseInt(spinnerDatabits.getSelectedItem().toString()));
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            
-            }
-        });
+            int oldModbusNwCount = (int) oldConfig.stream().filter(item -> item.getProtocol().equalsIgnoreCase("Modbus")).count();
+            int newModbusNwCount = (int) newConfig.stream().filter(item -> item.getProtocol().equalsIgnoreCase("Modbus")).count();
+            boolean wasBiskitEnabled = oldConfig.stream().anyMatch(item -> item.getProtocol().equalsIgnoreCase("Biskit"));
+            boolean isBiskitEnabled = newConfig.stream().anyMatch(item -> item.getProtocol().equalsIgnoreCase("Biskit"));
+            usbManagerViewModel.saveUsbConfiguration(context);
 
-        ArrayAdapter<String> spinnerStopbitsAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.mb_config_stopbits_array))));
-        spinnerStopbits.setAdapter(spinnerStopbitsAdapter);
-        spinnerStopbits.setSelection(((ArrayAdapter<String>)spinnerStopbits.getAdapter())
-                                         .getPosition(String.valueOf(readIntPref(PREF_MB_STOP_BITS, 1))));
-        spinnerStopbits.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                writeIntPref(PREF_MB_STOP_BITS, Integer.parseInt(spinnerStopbits.getSelectedItem().toString()));
+            boolean modbusConfigChanged = false;
+            if (newConfig != null) {
+                for (UsbDeviceItem newItem : newConfig) {
+                    for (UsbDeviceItem oldItem : oldConfig) {
+                        if (oldItem.getSerial().equals(newItem.getSerial())) {
+                            if (oldItem.getModbusConfig() != null &&
+                                    newItem.getModbusConfig() != null &&
+                                    !oldItem.getModbusConfig().equals(newItem.getModbusConfig())) {
+                                modbusConfigChanged = true;
+                                CcuLog.d(L.TAG_USB_MANAGER,"Modbus config changed for device: "
+                                        +newItem.getSerial()+" from "+oldItem.getModbusConfig()+" to "+newItem.getModbusConfig());
+                                break;
+                            }
+                        }
+                    }
+                    if (modbusConfigChanged) break;
+                }
             }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            
+
+            if (modbusConfigChanged || (oldModbusNwCount != newModbusNwCount)) {
+                CcuLog.d(L.TAG_USB_MANAGER,"Modbus configuration changed : Protocol Selection "+oldModbusNwCount+" to "+newModbusNwCount);
+                restartModbusService();
             }
+            if (isBiskitEnabled != wasBiskitEnabled) {
+                CcuLog.d(L.TAG_USB_MANAGER,"Biskit configuration changed : "+wasBiskitEnabled+" to "+isBiskitEnabled);
+                restartSerialService();
+            }
+            ExecutorTask.executeBackground(FileBackupJobReceiver::performConfigFileBackup);
+            displayCustomToastMessageOnSuccess("USB configuration updated successfully.");
+
         });
-    
-        btnRestart.setOnClickListener(v -> CCUUiUtil.triggerRestart(getActivity()));
         setSpinnerBackground();
         String confString = sharedPreferences.getString(BACNET_CONFIGURATION,null);
 
@@ -477,7 +474,7 @@ public class Communication extends Fragment implements MstpDataInterface {
         }
 
         btnMstpInitialize.setOnClickListener(v -> {
-            prepareMstpInit();
+            //prepareMstpInit();
         });
 
         btnMstpDisable.setOnClickListener(v -> {
@@ -586,6 +583,56 @@ public class Communication extends Fragment implements MstpDataInterface {
         }
 
         RenatusLandingActivity.isBacnetConfigStateChanged = false;
+        configureUsbManager(view);
+    }
+
+    private void restartSerialService() {
+        Intent intent = new Intent(context, UsbService.class);
+        boolean stopStatus = context.stopService(intent);
+        CcuLog.i(L.TAG_USB_MANAGER, "Protocol changed : Biskit/CM, restarting UsbServuce: "+stopStatus);
+        RenatusApp.backgroundServiceInitiator.initServices();
+    }
+
+    private void restartModbusService() {
+        Intent intent = new Intent(context, UsbModbusService.class);
+        boolean stopStatus = context.stopService(intent);
+        CcuLog.i(L.TAG_USB_MANAGER, "Protocol changed : restarting UsbModbusServuce: "+stopStatus);
+        Intent intentCom2 = new Intent(context, UsbModbusServiceCom2.class);
+        boolean stopStatusCom2 = context.stopService(intentCom2);
+        CcuLog.i(L.TAG_USB_MANAGER, "Protocol changed : restarting UsbModbusServuceCom2: "+stopStatusCom2);
+        RenatusApp.backgroundServiceInitiator.initServices();
+    }
+
+    private void configureUsbManager(View view) {
+        usbManagerViewModel = new ViewModelProvider(
+                requireActivity(),
+                new ViewModelProvider.AndroidViewModelFactory(requireActivity().getApplication())
+        ).get(UsbManagerViewModel.class);
+        adapter = new UsbDeviceAdapter(context, new ArrayList<>(), new ArrayList<>(), usbManagerViewModel);
+        CcuLog.i(L.TAG_USB_MANAGER,"configureUsbManager : Set adapter "+adapter.getItemCount());
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(adapter);
+
+        usbManagerViewModel.getUsbDevices().observe(getViewLifecycleOwner(), devices -> {
+            CcuLog.i(L.TAG_USB_MANAGER,"devices found : "+devices.size());
+            if (devices.isEmpty()) {
+                usbConfigLayout.setVisibility(View.GONE);
+                btnSave.setVisibility(View.GONE);
+                usbConfigDefault.setVisibility(View.VISIBLE);
+            } else {
+                usbConfigLayout.setVisibility(View.VISIBLE);
+                btnSave.setVisibility(View.VISIBLE);
+                usbConfigDefault.setVisibility(View.GONE);
+                adapter.updateDevices(devices, usbManagerViewModel.getCMConnectedDevices());
+            }
+        });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        usbManagerViewModel.loadUsbData();
     }
 
     private void enableMstpConfigView() {
@@ -1086,11 +1133,11 @@ public class Communication extends Fragment implements MstpDataInterface {
     
 
     private void setSpinnerBackground(){
-        CCUUiUtil.setSpinnerDropDownColor(spinnerBaudRate,getContext());
+        /*CCUUiUtil.setSpinnerDropDownColor(spinnerBaudRate,getContext());
         CCUUiUtil.setSpinnerDropDownColor(spinnerParity,getContext());
         CCUUiUtil.setSpinnerDropDownColor(spinnerDatabits,getContext());
         CCUUiUtil.setSpinnerDropDownColor(spinnerBaudRate,getContext());
-        CCUUiUtil.setSpinnerDropDownColor(spinnerStopbits,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spinnerStopbits,getContext());*/
     }
 
     public void setIsBacConfigStateChangedAndUpdateView(boolean stateChanged) {
@@ -1918,99 +1965,5 @@ public class Communication extends Fragment implements MstpDataInterface {
         }
 
         return usbSerialPorts;
-    }
-
-    private void runChmodUsbDevices() {
-        CcuLog.e(TAG_CCU_BACNET_MSTP, "--runChmodUsbDevices--");
-        try {
-            // Start root shell
-            Process process = Runtime.getRuntime().exec("su");
-
-            String[] commands = {
-                    "chmod 755 /dev/bus/usb\n",
-                    "chmod 755 /dev/bus/usb/*\n",
-                    "chmod 666 /dev/bus/usb/*/*\n",
-                    "exit\n"
-            };
-
-            // Send commands to the shell
-            DataOutputStream os = new DataOutputStream(process.getOutputStream());
-            for (String command : commands) {
-                os.writeBytes(command);
-            }
-            os.flush();
-
-            // Wait for the command to complete
-            process.waitFor();
-
-            // Log exit code
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "chmod executed with exit code: " + process.exitValue());
-
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-            CcuLog.e(TAG_CCU_BACNET_MSTP, "Error executing chmod", e);
-        }
-    }
-
-    private void prepareMstpInit(){
-        executorService.submit(() -> {
-            RenatusApp.backgroundServiceInitiator.unbindServices();
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 1--unbind modbus service--");
-
-            Intent intent = new Intent(requireContext(), UsbModbusService.class);
-            requireContext().stopService(intent);
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 2--stop modbus service--");
-
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 3--apply permissions--");
-
-            UsbHelper.runChmodUsbDevices();
-            UsbPortTrigger.triggerUsbSerialBinding(requireContext());
-            UsbHelper.listUsbDevices(requireContext());
-            UsbHelper.runAsRoot("ls /dev/tty*");
-
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 4--update ui--");
-            updateMstpUi();
-
-            if(!isUSBSerialPortAvailable){
-                requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(requireContext(), "Check USB connection, MSTP can not initialized.", Toast.LENGTH_LONG).show();
-                });
-                CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 4--update ui Check USB connection, mstp can not initialized.--");
-                return;
-            }
-
-            writeIntPref(PREF_MSTP_BAUD_RATE, Integer.parseInt(mstpSpinnerBaudRate.getSelectedItem().toString()));
-            writeIntPref(PREF_MSTP_SOURCE_ADDRESS, Integer.parseInt(etMstpSourceAddress.getText().toString()));
-            writeIntPref(PREF_MSTP_MAX_MASTER, Integer.parseInt(etMstpMaxMaster.getText().toString()));
-            writeIntPref(PREF_MSTP_MAX_FRAME, Integer.parseInt(etMstpMaxFrame.getText().toString()));
-            writeIntPref(PREF_MSTP_DEVICE_ID, Integer.parseInt(etMstpDeviceId.getText().toString()));
-
-            if (!HttpServer.Companion.getInstance(context).isServerRunning()) {
-                startRestServer();
-            }
-
-            DataMstpObj dataMstpObj = new DataMstpObj();
-            dataMstpObj.setDataMstp(new DataMstp(
-                    Integer.parseInt(mstpSpinnerBaudRate.getSelectedItem().toString()),
-                    Integer.parseInt(etMstpSourceAddress.getText().toString()),
-                    Integer.parseInt(etMstpMaxMaster.getText().toString()),
-                    Integer.parseInt(etMstpMaxFrame.getText().toString()),
-                    Integer.parseInt(etMstpDeviceId.getText().toString()),
-                    portAddress
-            ));
-
-            String jsonString = new Gson().toJson(dataMstpObj);
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 5--create mstp init json--"+jsonString);
-            sharedPreferences.edit().putString(BACNET_MSTP_CONFIGURATION, jsonString).apply();
-            sharedPreferences.edit().putBoolean(IS_BACNET_MSTP_INITIALIZED, true).apply();
-
-            BacnetUtilKt.launchBacApp(context, BROADCAST_BACNET_APP_START, "Start BACnet App", ipDeviceInstanceNumber.getText().toString(),true);
-
-            requireActivity().runOnUiThread(() -> {
-                hideMstpConfigView();
-            });
-
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "MSTP configuration initialized");
-        });
     }
 }

@@ -50,7 +50,7 @@ open class MyStatEquip(equipRef: String) : DomainEquip(equipRef) {
     val relay1OutputAssociation = Point(DomainName.relay1OutputAssociation, equipRef)
     val relay2OutputAssociation = Point(DomainName.relay2OutputAssociation, equipRef)
     val relay3OutputAssociation = Point(DomainName.relay3OutputAssociation, equipRef)
-
+    val analog1OutputAssociation = Point(DomainName.analog1OutputAssociation, equipRef)
     val universalOut1Association = Point(DomainName.universal1OutputAssociation, equipRef)
     val universalOut2Association = Point(DomainName.universal2OutputAssociation, equipRef)
 

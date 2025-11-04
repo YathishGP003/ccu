@@ -37,6 +37,7 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Message;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.Html;
@@ -383,14 +384,14 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
         }
 
         checkBacnetDeviceType();
-        if(UtilityApplication.isBacnetMstpInitialized()) {
+        if(isDeviceReboot(context) && UtilityApplication.isBacnetMstpInitialized()) {
             CcuLog.i(TAG_CCU_BACNET_MSTP,"--renatus landing act mstp is initialized check for serial ports--");
             executorService.submit(() -> {
                 RenatusApp.backgroundServiceInitiator.unbindServices();
                 CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 1--unbind modbus service--");
 
-                Intent intent = new Intent(getApplicationContext(), UsbModbusService.class);
-                getApplicationContext().stopService(intent);
+                //Intent intent = new Intent(getApplicationContext(), UsbModbusService.class);
+                //getApplicationContext().stopService(intent);
                 CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 2--stop modbus service--");
 
                 CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 3--apply permissions--");
@@ -398,7 +399,7 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
                 UsbPortTrigger.triggerUsbSerialBinding(getApplicationContext());
                 UsbHelper.listUsbDevices(getApplicationContext());
                 UsbHelper.runAsRoot("ls /dev/tty*");
-                UsbHelper.getPortAddressMstpDevices(getApplicationContext());
+                //UsbHelper.getPortAddressMstpDevices(getApplicationContext());
             });
         }else{
             CcuLog.i(TAG,"--no mstp dont check for serial ports--");
@@ -1108,6 +1109,18 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
                 CcuLog.d(TAG, "---bacnet configuration is ---"+ BACNET_DEVICE_TYPE_NORMAL);
             }
         }
+    }
+
+    public static boolean isDeviceReboot(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+        long lastUptime = prefs.getLong("last_uptime", -1);
+        long currentUptime = SystemClock.elapsedRealtime();
+        prefs.edit().putLong("last_uptime", currentUptime).apply();
+        if (lastUptime == -1) {
+            return false; // First run, not a reboot
+        }
+        return currentUptime < lastUptime;
     }
 
 }

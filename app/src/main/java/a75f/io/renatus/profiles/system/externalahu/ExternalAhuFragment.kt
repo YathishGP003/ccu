@@ -29,47 +29,19 @@ import a75f.io.logic.util.bacnet.BacnetConfigConstants
 import a75f.io.logic.util.bacnet.TAG_BACNET
 import a75f.io.renatus.R
 import a75f.io.renatus.bacnet.BacnetDeviceSelectionFragment
+import a75f.io.renatus.bacnet.models.BacnetModel
 import a75f.io.renatus.bacnet.models.BacnetPointState
-import a75f.io.renatus.bacnet.util.CONST_AUTO_DISCOVERY
-import a75f.io.renatus.compose.HeaderCenterLeftAlignedTextView
-import a75f.io.renatus.compose.HeaderLeftAlignedTextView
-import a75f.io.renatus.compose.HeaderLeftAlignedTextViewNew
-import a75f.io.renatus.compose.HeaderTextView
-import a75f.io.renatus.compose.HeaderTextViewCustom
-import a75f.io.renatus.compose.HeaderTextViewMultiLine
-import a75f.io.renatus.compose.ImageViewComposable
-import a75f.io.renatus.compose.LabelTextView
-import a75f.io.renatus.compose.LabelTextViewForModbus
-import a75f.io.renatus.compose.ParameterLabel_ForOneColumn
-import a75f.io.renatus.compose.RadioButtonComposeBacnet
-import a75f.io.renatus.compose.RadioButtonComposeSelectModelCustom
-import a75f.io.renatus.compose.RadioButtonComposeWithToast
-import a75f.io.renatus.compose.SaveTextView
-import a75f.io.renatus.compose.SetPointConfig
-import a75f.io.renatus.compose.SetPointControlCompose
-import a75f.io.renatus.compose.SubTitle
-import a75f.io.renatus.compose.TextViewWithClick
-import a75f.io.renatus.compose.TextViewWithClickOption
-import a75f.io.renatus.compose.ToggleButton
-import a75f.io.renatus.compose.UnderlinedInput
-import a75f.io.renatus.compose.UnderlinedInputNumberOnly
-import a75f.io.renatus.compose.VersionTextView
+import a75f.io.renatus.bacnet.util.*
+import a75f.io.renatus.composables.DropDownWithLabel
+import a75f.io.renatus.compose.*
 import a75f.io.renatus.modbus.ModelSelectionFragment
 import a75f.io.renatus.modbus.models.EquipModel
 import a75f.io.renatus.modbus.models.RegisterItemForSubEquip
-import a75f.io.renatus.modbus.util.BAC_PROP_NOT_FETCHED
-import a75f.io.renatus.modbus.util.CANCEL
-import a75f.io.renatus.modbus.util.DESTINATION_IP
-import a75f.io.renatus.modbus.util.DESTINATION_PORT
-import a75f.io.renatus.modbus.util.DEVICE_ID
-import a75f.io.renatus.modbus.util.FETCH
+import a75f.io.renatus.modbus.util.*
 import a75f.io.renatus.modbus.util.LOADING
+import a75f.io.renatus.modbus.util.MAC_ADDRESS
 import a75f.io.renatus.modbus.util.MODBUS
-import a75f.io.renatus.modbus.util.OnItemSelect
-import a75f.io.renatus.modbus.util.RE_FETCH
 import a75f.io.renatus.modbus.util.SAME_AS_PARENT
-import a75f.io.renatus.modbus.util.SAVE
-import a75f.io.renatus.modbus.util.SEARCH_DEVICE
 import a75f.io.renatus.modbus.util.SEARCH_MODEL
 import a75f.io.renatus.modbus.util.SEARCH_SLAVE_ID
 import a75f.io.renatus.modbus.util.SLAVE_ID
@@ -81,24 +53,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -113,12 +76,20 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import org.json.JSONException
 import org.json.JSONObject
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.sp
 
 
 /**
@@ -129,6 +100,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
     private lateinit var viewModel: ExternalAhuViewModel
     //private lateinit var bacnetConfigViewmodel : BacNetConfigViewModel
     private var isBacNetInitialized = false
+    private var isBacnetMstpInitialized = false
     companion object {
         private const val RESET_VALUE = "0"
     }
@@ -146,8 +118,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             setContent {
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(10.dp),
+                            .fillMaxSize()
+                            .padding(10.dp),
                 ) {
 
                     item {
@@ -212,8 +184,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
 
                                         Row(
                                             modifier = Modifier
-                                                .fillMaxWidth()
-                                                .wrapContentHeight()
+                                                    .fillMaxWidth()
+                                                    .wrapContentHeight()
                                         ) {
 
                                             if (satHeatingMin != null) {
@@ -255,8 +227,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                         }
                                         Row(
                                             modifier = Modifier
-                                                .fillMaxWidth()
-                                                .wrapContentHeight()
+                                                    .fillMaxWidth()
+                                                    .wrapContentHeight()
                                         ) {
                                             if (satCoolingMin != null) {
                                                 val items = viewModel.itemsFromMinMax(
@@ -334,8 +306,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                 Column {
                                     Row(
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .wrapContentHeight()
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
                                     ) {
                                         if (fanSpMin != null) {
                                             val items = viewModel.itemsFromMinMax(
@@ -428,8 +400,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                 Column {
                                     Row(
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .wrapContentHeight()
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
                                     ) {
                                         if (dcvMin != null) {
                                             val items = viewModel.itemsFromMinMax(
@@ -468,8 +440,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                 Column {
                                     Row(
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .wrapContentHeight()
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
                                     ) {
                                         if (co2Threshold != null) {
                                             val items = viewModel.itemsFromMinMax(
@@ -511,8 +483,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                 Column {
                                     Row(
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .wrapContentHeight()
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
                                     ) {
 
                                         if (damperOpeningRate != null) {
@@ -572,16 +544,16 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                     item {
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(PaddingValues(top = 10.dp, end = 30.dp))
-                                .wrapContentHeight(), contentAlignment = Alignment.Center
+                                    .fillMaxWidth()
+                                    .padding(PaddingValues(top = 10.dp, end = 30.dp))
+                                    .wrapContentHeight(), contentAlignment = Alignment.Center
                         ) { HeaderCenterLeftAlignedTextView(text = SELECT_PROTOCOL) }
                     }
                     item {
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight(),
+                                    .fillMaxWidth()
+                                    .wrapContentHeight(),
                             contentAlignment = Alignment.Center
                         ) {
 
@@ -719,28 +691,28 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
     fun SaveConfig() {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(PaddingValues(top = 20.dp)),
+                    .fillMaxWidth()
+                    .padding(PaddingValues(top = 20.dp)),
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .wrapContentWidth()
-                    .padding(PaddingValues(bottom = 10.dp, end = 5.dp)),
+                        .wrapContentWidth()
+                        .padding(PaddingValues(bottom = 10.dp, end = 5.dp)),
                 contentAlignment = Alignment.Center
             ) { SaveTextView(CANCEL, viewModel.configModel.value.isStateChanged) { reload() } }
             Divider(
                 modifier = Modifier
-                    .height(25.dp)
-                    .width(2.dp)
-                    .padding(bottom = 6.dp),
+                        .height(25.dp)
+                        .width(2.dp)
+                        .padding(bottom = 6.dp),
                 color = Color.LightGray
             )
             Box(
                 modifier = Modifier
-                    .wrapContentWidth()
-                    .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
+                        .wrapContentWidth()
+                        .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 SaveTextView(SAVE, viewModel.configModel.value.isStateChanged) { viewModel.saveConfiguration() }
@@ -782,8 +754,90 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
 
         BacnetHeader()
         BacnetModelSelection()
+        val expanded = remember { mutableStateOf(false) }
 
+        val onConfigDropdownClickEvent =
+                //if(isEditable) {
+                    {
+                        expanded.value = true
+                        //viewModel.clearConfigFieldData()
+                    }
+                //} else { {} }
+        if(!viewModel.bacnetModel.value.isDevicePaired){
+            // device not paired
+            Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+            ) {
+                Column(
+                        modifier = Modifier
+                                .wrapContentWidth()         // ✅ keep natural width
+                                .widthIn(max = 400.dp),     // ✅ optional cap
+                        horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    ExternalConfigDropdownSelector(
+                            titleText = CONFIGURATION_TYPE,
+                            isPaired = viewModel.bacnetModel.value.isDevicePaired,
+                            selectedItemName = viewModel.configurationType,
+                            modelVersion = "",
+                            onClickEvent = onConfigDropdownClickEvent,
+                            otherUiComposable = {
+                                //if(isEditable) {
+                                Box(
+                                        modifier = Modifier.wrapContentWidth(),
+                                        contentAlignment = Alignment.Center
+                                ) {
+                                    ShowDropdownList(expanded) // stays centered
+                                }
+                                //}
+                            },
+                            isNested = true
+                    )
+                }
+            }
+            // add here
+            when (viewModel.configurationType.value) {
+                IP_CONFIGURATION -> {
+                    CcuLog.d("ExternalAhuFragment", "--IP_CONFIGURATION--")
+                    AddressSelector()
+                }
+                MSTP_CONFIGURATION -> {
+                    CcuLog.d("ExternalAhuFragment", "--MSTP_CONFIGURATION--")
+                    Box(
+                            modifier = Modifier
+                                    .fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                    ) {
+                        DeviceSelector()
+                    }
+                    DeviceInfo()
+                }
+                else -> {}
+            }
+        }else{
+            // device is paired
+            when(viewModel.configurationType.value) {
+                IP_CONFIGURATION -> {
+                    CcuLog.d("ExternalAhuFragment","--IP_CONFIGURATION--")
+                    AddressSelector()
+                }
+                MSTP_CONFIGURATION -> {
+                    CcuLog.d("ExternalAhuFragment","--MSTP_CONFIGURATION--")
+                    DeviceSelector()
+                    DeviceInfo()
+                }
+                else -> {}
+            }
+        }
 
+        BacnetModelName()
+        Row(modifier = Modifier.padding(start = 10.dp)) {
+            ParameterLabel()
+        }
+    }
+
+    @Composable
+    fun AddressSelector(){
         if(viewModel.bacnetModel.value.isDevicePaired){
             BacnetDeviceDetailsReadOnly()
             BacnetPortDetailsReadOnly()
@@ -801,10 +855,333 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                 BacnetDeviceNetworkDetailsReadOnly()
             }
         }
+    }
 
-        BacnetModelName()
-        Row(modifier = Modifier.padding(start = 10.dp)) {
-            ParameterLabel()
+
+    @Composable
+    fun DeviceInfo(){
+        val configType = MSTP_CONFIGURATION
+        val defaultTextList =
+                when(configType) {
+                    MSTP_CONFIGURATION -> listOf(MAC_ADDRESS)
+                    else -> emptyList()
+                }
+
+        val configEntryWithHint =
+                when(configType) {
+                    IP_CONFIGURATION -> listOf(DEVICE_ID, DESTINATION_PORT, DEVICE_NETWORK)
+                    MSTP_CONFIGURATION -> listOf(MAC_ADDRESS)
+                    else -> emptyList()
+                }
+
+        val numberTypeConfigEntries =
+                when(configType) {
+                    IP_CONFIGURATION -> listOf(DEVICE_ID, DESTINATION_PORT, DEVICE_NETWORK)
+                    MSTP_CONFIGURATION -> listOf(MAC_ADDRESS)
+                    else -> emptyList()
+                }
+
+        val editableEventMap =
+                when(configType) {
+                    IP_CONFIGURATION -> hashMapOf(
+                            DEVICE_ID to { state: String ->
+                                viewModel.deviceId.value = state
+                            },
+                            DESTINATION_PORT to { state: String ->
+                                viewModel.destinationPort.value = state
+                            },
+                            DEVICE_NETWORK to { state: String ->
+                                viewModel.dnet.value = state
+                            },
+                            DESTINATION_IP to { state: String ->
+                                viewModel.destinationIp.value = state
+                            },
+                            MAC_ADDRESS to { state: String ->
+                                viewModel.destinationMacAddress.value = state
+                            },
+                    )
+                    MSTP_CONFIGURATION -> hashMapOf(
+                            MAC_ADDRESS to { state: String ->
+                                viewModel.destinationMacAddress.value = state
+                            }
+                    )
+                    else -> hashMapOf()
+                }
+
+        val configTableData : List<Pair<Triple<String, String, String>?, Triple<String, String, String>?>> =
+                when(configType) {
+                    IP_CONFIGURATION -> listOf(
+                            Pair(
+                                    Triple(
+                                            DEVICE_ID,
+                                            viewModel.deviceId.value,
+                                            getString(R.string.txt_ip_device_instance_number_hint)
+                                    ),
+                                    Triple(DESTINATION_IP, viewModel.destinationIp.value, ""),
+                            ),
+                            Pair(
+                                    Triple(
+                                            DESTINATION_PORT,
+                                            viewModel.destinationPort.value,
+                                            getString(R.string.txt_destination_port_value_hint)
+                                    ),
+                                    Triple(MAC_ADDRESS, viewModel.destinationMacAddress.value, "")
+                            ),
+                            Pair(
+                                    Triple(
+                                            DEVICE_NETWORK,
+                                            viewModel.dnet.value,
+                                            getString(R.string.txt_dnet_value_hint)
+                                    ),
+                                    null
+                            )
+                    )
+
+                    MSTP_CONFIGURATION -> listOf(
+                            Pair(
+                                    Triple(
+                                            MAC_ADDRESS,
+                                            viewModel.destinationMacAddress.value,
+                                            if (viewModel.deviceSelectionMode.value == 0) MAC_ADDRESS_INFO_SLAVE
+                                            else MAC_ADDRESS_INFO_MASTER
+                                    ),
+                                    null
+                            )
+                    )
+
+                    else -> emptyList()
+                }
+
+        if(viewModel.deviceSelectionMode.value == 0){
+            // slave device config
+            EditableConfigFields(configTableData, configEntryWithHint, numberTypeConfigEntries, editableEventMap,
+                    defaultTextList)
+        }else{
+            // master device config
+            EditableConfigFields(configTableData, configEntryWithHint, numberTypeConfigEntries, editableEventMap,
+                    defaultTextList)
+        }
+    }
+
+    @Composable
+    private fun EditableConfigFields(
+            configTableData: List<Pair<Triple<String, String, String>?, Triple<String, String, String>?>>,
+            configEntryWithHint: List<String>,
+            numberTypeConfigEntries: List<String>,
+            editableEventMap: HashMap<String, (String) -> Unit>,
+            defaultTextList: List<String>
+    ) {
+        Column(modifier = Modifier
+                .padding(top = 20.dp)
+                .wrapContentHeight()
+                .fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            configTableData.forEach { rowPair ->
+                val subRowPair1 = rowPair.first
+                val subRowPair2 = rowPair.second
+
+                Row(horizontalArrangement = Arrangement.spacedBy(50.dp)) {
+                    Row(modifier = Modifier
+                            .padding(top = 14.dp)
+                            .weight(0.5f)
+                            .align(Alignment.Top), verticalAlignment = Alignment.Top) {
+                        subRowPair1?.let {
+                            Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.TopStart) {
+                                if(subRowPair1.first in configEntryWithHint) {
+                                    TextViewWithHint(modifier = Modifier, text = annotatedStringBySpannableString(text = subRowPair1.first), hintText = subRowPair1.third, fontSize = 22)
+                                } else {
+                                    LabelTextViewForTable(
+                                            modifier = Modifier.align(Alignment.CenterStart),
+                                            text = subRowPair1.first,
+                                            fontSize = 22
+                                    )
+                                }
+                            }
+                            Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.TopStart) {
+                                editableEventMap[subRowPair1.first]?.let { it1 -> HintedEditableText(valueTypeIsNumber = numberTypeConfigEntries.contains(subRowPair1.first), hintText = "Enter ${subRowPair1.first}", defaultText = if(defaultTextList.contains(subRowPair1.first)) subRowPair1.second else "", onEditEvent = { it1 -> viewModel.updateMacAddress(it1) }) }
+                            }
+                        }
+                    }
+                    Row(modifier = Modifier
+                            .padding(top = 14.dp)
+                            .weight(0.5f)
+                            .align(Alignment.Top), verticalAlignment = Alignment.Top) {
+                        subRowPair2?.let {
+                            Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.TopStart) {
+                                if(subRowPair2.first in configEntryWithHint) {
+                                    TextViewWithHint(modifier = Modifier, text = annotatedStringBySpannableString(text = subRowPair2.first), hintText = subRowPair2.third, fontSize = 22)
+                                } else {
+                                    LabelTextViewForTable(
+                                            modifier = Modifier.align(Alignment.CenterStart),
+                                            text = subRowPair2.first,
+                                            fontSize = 22
+                                    )
+                                }
+                            }
+                            Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.TopStart) {
+                                editableEventMap[subRowPair2.first]?.let { it1 -> HintedEditableText(valueTypeIsNumber = numberTypeConfigEntries.contains(subRowPair2.first), hintText = "Enter ${subRowPair2.first}", defaultText = if(defaultTextList.contains(subRowPair2.first)) subRowPair2.second else "", onEditEvent = { it1 -> viewModel.updateMacAddress(it1) }) }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun DeviceSelector() {
+
+        Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.CenterStart
+        ) {
+
+            Row {
+                Box(modifier = Modifier
+                        .weight(1f)
+                ) {
+                }
+                Box(modifier = Modifier
+                        .weight(1f)
+                        /*.padding(top = 5.dp, bottom = 10.dp)*/) {
+                    //RadioButtonComposeSelectModel()
+                    val radioOptions = listOf("Slave", "Master")
+                    RadioButtonComposeSelectModelCustom(
+                            radioOptions, viewModel.deviceSelectionMode.value
+                    ) {
+                        when (it) {
+                            "Slave" -> {
+                                //viewModel.resetBacnetNetworkConfig()
+                                viewModel.deviceSelectionMode.value = 0
+                            }
+
+                            "Master" -> {
+                                //ProgressDialogUtils.showProgressDialog(context, CONST_AUTO_DISCOVERY)
+                                //viewModel.resetBacnetNetworkConfig()
+                                viewModel.deviceSelectionMode.value = 1
+                                //viewModel.searchDevices()
+                                CcuLog.d("TAG", "searching devices ${viewModel.isConnectedDevicesSearchFinished.value}")
+                            }
+                        }
+                    }
+                }
+                Box(modifier = Modifier
+                        .weight(1f)
+                ) {
+                }
+            }
+        }
+
+        /*RadioButtonSelector(SEARCH_DEVICE, listOf("Slave", "Master"), viewModel.deviceSelectionMode.value) {
+            //viewModel.clearConfigFieldData()
+            when (it) {
+                "Slave" -> {
+                    viewModel.deviceSelectionMode.value = 0
+                }
+
+                "Master" -> {
+//                    if (!viewModel.isAutoFetchSelected.value) {
+//                        viewModel.isAutoFetchSelected.value = true
+//
+                        viewModel.deviceSelectionMode.value = 1
+//                        if (!isBacnetMstpInitialized) {
+//                            viewModel.showToast.value = true
+//                        } else {
+//                            viewModel.showToast.value = false
+//                            viewModel.searchDevices()
+//
+//                            ProgressDialogUtils.showProgressDialog(context, CONST_AUTO_DISCOVERY)
+//                            CcuLog.d(
+//                                    "ExternalAhuFragment",
+//                                    "searching devices ${viewModel.isConnectedDevicesSearchFinished.value}"
+//                            )
+//                        }
+//                    }
+                }
+            }
+        }*/
+    }
+
+    @Composable
+    fun RadioButtonSelector(
+            headerText: String,
+            radioOptions: List<String>,
+            defaultValue: Int,
+            onSelectEvent: (String) -> Unit
+    ) {
+        Column (/*modifier = Modifier.padding(top = 20.dp)*/){
+            Box(
+                    modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.Gray)
+                            .padding(PaddingValues(top = 10.dp, end = 25.dp)),
+                    contentAlignment = Alignment.Center
+            ) {
+                HeaderLeftAlignedTextViewNewFixedWidth(
+                        headerText,
+                        fontSize = 18,
+                        Modifier.padding(bottom = 0.dp)
+                )
+            }
+
+            Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+            ) {
+                Column(
+//                        modifier = Modifier
+//                                .wrapContentWidth()         // ✅ keep natural width
+//                                .widthIn(max = 400.dp),     // ✅ optional cap
+                        horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+//                    Box(
+//                            modifier = Modifier
+//                    ) {
+                    RadioButtonComposeSelectModelCustom(
+                                radioOptions, defaultValue
+                        ) {
+                            onSelectEvent(it)
+                        }
+                    //}
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ShowDropdownList(expanded: MutableState<Boolean>) {
+        val configurationTypes = listOf(
+                MSTP_CONFIGURATION,
+                IP_CONFIGURATION
+        )
+
+        var selectedIndex by remember { mutableStateOf(-1) }
+        DropdownMenu(
+                expanded = expanded.value,
+                onDismissRequest = { expanded.value = false },
+                modifier = Modifier
+                        .width(280.dp)
+                        .height(120.dp)
+                        .background(Color.White)
+                        .border(0.5.dp, Color.LightGray)
+                        .shadow(1.dp, shape = RoundedCornerShape(2.dp))
+
+        ) {
+            LazyColumn(modifier = Modifier
+                    .width(280.dp)
+                    .height(120.dp)) {
+
+                itemsIndexed(configurationTypes) { index, s ->
+                    DropdownMenuItem(onClick = {
+                        selectedIndex = index
+                        expanded.value = false
+                        viewModel.configurationType.value = s
+                        viewModel.deviceSelectionMode.value = 0
+                    }, text = { Text(text = s, style = TextStyle(fontSize = 22.sp)) },
+                            modifier = Modifier.background(if (index == selectedIndex) ComposeUtil.secondaryColor else Color.White),
+                            contentPadding = PaddingValues(10.dp),
+                    )
+                }
+            }
         }
     }
 
@@ -812,9 +1189,9 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
     fun BacnetButtons(){
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(50.dp)
-                .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
+                    .fillMaxWidth()
+                    .padding(50.dp)
+                    .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
             contentAlignment = Alignment.CenterEnd
         ) {
         }
@@ -842,39 +1219,23 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             if(viewModel.bacnetPropertiesFetched.value){
                 fetchButtonText = RE_FETCH
             }
-
-            SaveTextView(fetchButtonText, isEnabledFetch) {
-                if(viewModel.destinationIp.value.isNullOrEmpty() ){
-                    Toast.makeText(requireContext(), "Please input ip address", Toast.LENGTH_SHORT).show()
-                }else if(viewModel.destinationPort.value.isNullOrEmpty()){
-                    Toast.makeText(requireContext(), "Please input port number", Toast.LENGTH_SHORT).show()
-                }else if(viewModel.deviceId.value.isNullOrEmpty()){
-                    Toast.makeText(requireContext(), "Please input deviceId number", Toast.LENGTH_SHORT).show()
-                }else{
-                    if(viewModel.isBacntEnabled.value){
-                        viewModel.fetchData()
+            if(viewModel.configurationType.value == IP_CONFIGURATION){
+                SaveTextView(fetchButtonText, isEnabledFetch) {
+                    if(viewModel.destinationIp.value.isNullOrEmpty() ){
+                        Toast.makeText(requireContext(), "Please input ip address", Toast.LENGTH_SHORT).show()
+                    }else if(viewModel.destinationPort.value.isNullOrEmpty()){
+                        Toast.makeText(requireContext(), "Please input port number", Toast.LENGTH_SHORT).show()
+                    }else if(viewModel.deviceId.value.isNullOrEmpty()){
+                        Toast.makeText(requireContext(), "Please input deviceId number", Toast.LENGTH_SHORT).show()
                     }else{
-                        Toast.makeText(requireContext(), "BacNet is not initialized", Toast.LENGTH_SHORT).show()
+                        if(viewModel.isBacntEnabled.value){
+                            viewModel.fetchData()
+                        }else{
+                            Toast.makeText(requireContext(), "BacNet is not initialized", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             }
-
-//            if(viewModel.bacnetPropertiesFetched.value && viewModel.isDeviceIdValid.value){
-//                Divider(modifier = Modifier
-//                    .height(40.dp)
-//                    .width(1.dp))
-//                SaveTextView(SAVE) {
-//                    if(viewModel.destinationIp.value.isNullOrEmpty() ){
-//                        Toast.makeText(requireContext(), "Please input ip address", Toast.LENGTH_SHORT).show()
-//                    }else if(viewModel.destinationPort.value.isNullOrEmpty()){
-//                        Toast.makeText(requireContext(), "Please input port number", Toast.LENGTH_SHORT).show()
-//                    }else if(viewModel.deviceId.value.isNullOrEmpty()){
-//                        Toast.makeText(requireContext(), "Please input deviceId number", Toast.LENGTH_SHORT).show()
-//                    }else{
-//                        viewModel.save()
-//                    }
-//                }
-//            }
         }
     }
 
@@ -894,8 +1255,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             ) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
+                            .fillMaxWidth()
+                            .padding(PaddingValues(bottom = 0.dp)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -931,8 +1292,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             ) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
+                            .fillMaxWidth()
+                            .padding(PaddingValues(bottom = 0.dp)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -944,8 +1305,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
 
                     Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
+                                .weight(1f)
+                                .fillMaxWidth()
                     ) {
                         LabelTextView(viewModel.destinationPort.value, fontSize = 22)
                     }
@@ -958,8 +1319,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             ) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
+                            .fillMaxWidth()
+                            .padding(PaddingValues(bottom = 0.dp)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -971,8 +1332,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
 
                     Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
+                                .weight(1f)
+                                .fillMaxWidth()
                     ) {
                         LabelTextView(viewModel.destinationMacAddress.value, fontSize = 22)
                     }
@@ -996,8 +1357,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             ) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
+                            .fillMaxWidth()
+                            .padding(PaddingValues(bottom = 0.dp)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -1009,8 +1370,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
 
                     Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
+                                .weight(1f)
+                                .fillMaxWidth()
                     ) {
                         UnderlinedInputNumberOnly(
                             onTextChanged = {
@@ -1030,8 +1391,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             ) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
+                            .fillMaxWidth()
+                            .padding(PaddingValues(bottom = 0.dp)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -1043,8 +1404,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
 
                     Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
+                                .weight(1f)
+                                .fillMaxWidth()
                     ) {
                         val isDestinationIpInvalid = viewModel.isDestinationIpValid
 
@@ -1066,8 +1427,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
     fun BacnetModelName(){
         Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(PaddingValues(bottom = 20.dp, top = 20.dp)),
+                    .fillMaxSize()
+                    .padding(PaddingValues(bottom = 20.dp, top = 20.dp)),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -1086,8 +1447,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
         Row {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(PaddingValues(top = 10.dp, end = 25.dp)),
+                        .fillMaxWidth()
+                        .padding(PaddingValues(top = 10.dp, end = 25.dp)),
                 contentAlignment = Alignment.Center
             ) { HeaderCenterLeftAlignedTextView(SELECT_MODEL) }
         }
@@ -1096,8 +1457,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
     fun BacnetModelSelection(){
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(PaddingValues(top = 10.dp, end = 25.dp)),
+                    .fillMaxWidth()
+                    .padding(PaddingValues(top = 10.dp, end = 25.dp)),
             contentAlignment = Alignment.Center
         ) {
             Row {
@@ -1143,8 +1504,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                 ) {
                 }
                 Box(modifier = Modifier
-                    .weight(1f)
-                    .padding(top = 0.dp, bottom = 0.dp, start = 15.dp, end = 0.dp)) {
+                        .weight(1f)
+                        .padding(top = 0.dp, bottom = 0.dp, start = 15.dp, end = 0.dp)) {
                     HeaderTextViewCustom("Select address")
                 }
                 Box(modifier = Modifier
@@ -1199,8 +1560,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
     @Composable
     fun ParameterLabel() {
         Row(modifier = Modifier
-            .padding(start = 10.dp)
-            .fillMaxWidth()) {
+                .padding(start = 10.dp)
+                .fillMaxWidth()) {
             Box(modifier = Modifier.weight(4f)) { SubTitle("PARAMETER") }
             Box(modifier = Modifier.weight(3f)) {
 
@@ -1238,8 +1599,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
 
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
+                    .fillMaxWidth()
+                    .padding(5.dp),
             contentAlignment = Alignment.CenterEnd
         ) {
         }
@@ -1256,8 +1617,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             ) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
+                            .fillMaxWidth()
+                            .padding(PaddingValues(bottom = 0.dp)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -1269,8 +1630,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
 
                     Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
+                                .weight(1f)
+                                .fillMaxWidth()
                     ) {
                         LabelTextView(viewModel.deviceId.value, fontSize = 22)
                     }
@@ -1283,8 +1644,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             ) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
+                            .fillMaxWidth()
+                            .padding(PaddingValues(bottom = 0.dp)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -1296,8 +1657,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
 
                     Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
+                                .weight(1f)
+                                .fillMaxWidth()
                     ) {
                         LabelTextView(viewModel.destinationIp.value, fontSize = 22)
                     }
@@ -1332,8 +1693,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             ) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
+                            .fillMaxWidth()
+                            .padding(PaddingValues(bottom = 0.dp)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -1345,8 +1706,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
 
                     Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
+                                .weight(1f)
+                                .fillMaxWidth()
                     ) {
                         UnderlinedInputNumberOnly(onTextChanged = {
                             CcuLog.d("BacNetSelectModelView", "port value-->$it")
@@ -1365,8 +1726,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             ) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
+                            .fillMaxWidth()
+                            .padding(PaddingValues(bottom = 0.dp)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -1378,8 +1739,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
 
                     Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
+                                .weight(1f)
+                                .fillMaxWidth()
                     ) {
                         UnderlinedInput(
                             onTextChanged = {
@@ -1398,8 +1759,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
     fun BacnetDeviceNetworkDetails() {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(PaddingValues(bottom = 5.dp, top = 16.dp)),
+                    .fillMaxWidth()
+                    .padding(PaddingValues(bottom = 5.dp, top = 16.dp)),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -1409,8 +1770,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             ) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 0.dp)),
+                            .fillMaxWidth()
+                            .padding(PaddingValues(bottom = 0.dp)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -1444,16 +1805,16 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
         Row {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(PaddingValues(top = 10.dp, end = 25.dp)),
+                        .fillMaxWidth()
+                        .padding(PaddingValues(top = 10.dp, end = 25.dp)),
                 contentAlignment = Alignment.Center
             ) { HeaderCenterLeftAlignedTextView(SELECT_MODEL) }
         }
 
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 430.dp),
+                    .fillMaxWidth()
+                    .padding(start = 430.dp),
             contentAlignment = Alignment.CenterStart
         ) {
             Row {
@@ -1489,8 +1850,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
+                    .fillMaxWidth()
+                    .padding(8.dp)
         ) {
 
             Box(modifier = Modifier.weight(7f)) {
@@ -1498,10 +1859,32 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                     if (viewModel.equipModel.value.equipDevice.value.name.isNullOrEmpty()) "" else viewModel.equipModel.value.equipDevice.value.name
                 )
             }
+
+            DropDownWithLabel(
+                label = "Port:",
+                list = viewModel.portList,
+                previewWidth = 100,
+                expandedWidth = 150,
+                onSelected = { index ->
+                    if (viewModel.equipModel.value.port.value != viewModel.portList[index]) {
+                       setStateChanged()
+                    }
+                    viewModel.equipModel.value.port.value = viewModel.portList[index]
+                },
+                defaultSelection = if (viewModel.equipModel.value.port.value.isNotEmpty()) {
+                    val savedIndex =
+                        viewModel.portList.indexOf(viewModel.equipModel.value.port.value)
+                    if (savedIndex >= 0) savedIndex else 0
+                } else 0,
+                spacerLimit = 20,
+                heightValue = 272
+            )
+            Spacer(modifier = Modifier.width(32.dp))
+
             Box(modifier = Modifier.weight(1f)) { HeaderTextView(SLAVE_ID, fontSize = 20) }
             Box(modifier = Modifier
-                .weight(1f)
-                .wrapContentHeight()) {
+                    .weight(1f)
+                    .wrapContentHeight()) {
                 val onItemSelect = object : OnItemSelect {
                     override fun onItemSelected(index: Int, item: String) {
                         viewModel.equipModel.value.slaveId.value = item.toInt()
@@ -1543,14 +1926,15 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
         // This index -1 refers to parameters equip and other index 0 to n refers index of sub equips
         ParametersListView(data = viewModel.equipModel, indexForSelectAllRelay = -1)
         SubEquipments(viewModel.equipModel)
+        setStateChanged()
     }
 
     @Composable
     private fun ParametersListItem(item: BacnetPointState) {
         Row {
             Box(modifier = Modifier
-                .weight(3f)
-                .padding(top = 10.dp, bottom = 10.dp)) {
+                    .weight(3f)
+                    .padding(top = 10.dp, bottom = 10.dp)) {
                 Row {
                     val images = listOf(
                         R.drawable.ic_arrow_down,
@@ -1574,8 +1958,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
 
             Box(modifier =
             Modifier
-                .weight(3f)
-                .padding(top = 10.dp, bottom = 10.dp)
+                    .weight(3f)
+                    .padding(top = 10.dp, bottom = 10.dp)
             ) {
                 ToggleButton(item.displayInUi.value) {
                     // need to fix below 2 lines
@@ -1591,8 +1975,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
 
             Box(modifier =
             Modifier
-                .weight(1f)
-                .padding(top = 10.dp, bottom = 10.dp), contentAlignment = Alignment.Center
+                    .weight(1f)
+                    .padding(top = 10.dp, bottom = 10.dp), contentAlignment = Alignment.Center
             ) { LabelTextView(pointDisplayValue, fontSize = 22) }
         }
 
@@ -1607,8 +1991,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
     fun populateProperties(item: BacnetPointState) {
         item.bacnetProperties!!.forEach {bacnetProperty ->
             Row(modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 100.dp)) {
+                    .fillMaxWidth()
+                    .padding(start = 100.dp)) {
 
                 Box(modifier = Modifier.weight(3f)) { LabelTextView(bacnetProperty.displayName, fontSize = 22) }
                 Box(modifier = Modifier.weight(3f)) {
@@ -1617,16 +2001,16 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                             Row(modifier = Modifier.fillMaxWidth()) {
                                 if (bacnetProperty.defaultValue == null) {
                                     Box(modifier = Modifier
-                                        .weight(3f)
-                                        .padding(top = 10.dp, bottom = 10.dp)) { LabelTextView("-", fontSize = 22) }
+                                            .weight(3f)
+                                            .padding(top = 10.dp, bottom = 10.dp)) { LabelTextView("-", fontSize = 22) }
                                 } else {
                                     Box(modifier = Modifier
-                                        .weight(3f)
-                                        .padding(top = 10.dp, bottom = 10.dp)) { LabelTextView("${bacnetProperty.defaultValue}", fontSize = 22) }
+                                            .weight(3f)
+                                            .padding(top = 10.dp, bottom = 10.dp)) { LabelTextView("${bacnetProperty.defaultValue}", fontSize = 22) }
                                 }
                                 Box(modifier = Modifier
-                                    .weight(3f)
-                                    .padding(top = 10.dp, bottom = 10.dp)) { LabelTextView(
+                                        .weight(3f)
+                                        .padding(top = 10.dp, bottom = 10.dp)) { LabelTextView(
                                     BAC_PROP_NOT_FETCHED, fontSize = 22) }
                             }
                         } else {
@@ -1698,8 +2082,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             while (index < data.value.parameters.size) {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
+                            .fillMaxWidth()
+                            .wrapContentHeight()
                 ) {
                     Row {
                         for (rowIndex in 0 until 2) {
@@ -1747,8 +2131,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
+                            .fillMaxWidth()
+                            .padding(8.dp)
                 ) {
                     Box(modifier = Modifier.weight(7f)) {
                         HeaderLeftAlignedTextView(

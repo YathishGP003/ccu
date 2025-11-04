@@ -23,4 +23,5 @@ class EquipModel {
     var jsonContent = String()
     var isDevicePaired = false
     var version: MutableState<String> = mutableStateOf("")
+    var port : MutableState<String> = mutableStateOf("")
 }

@@ -1,5 +1,7 @@
 package a75f.io.usbserial;
 
+import static a75f.io.usbserial.UsbSerialUtil.DEVICE_ID_FTDI;
+
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,7 +30,9 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -82,9 +86,11 @@ public class UsbModbusService extends Service {
     public SerialInputStream serialInputStream;
     private int reconnectCounter = 0;
     
-    private Timer usbPortScanTimer = new Timer();
+    private static Timer usbPortScanTimer = new Timer();
 
     public static String TAG_CCU_SERIAL = "CCU_SERIAL";
+
+    private UsbDeviceItem usbModbusDevice = null;
     /*
      * Different notifications from OS will be received here (USB attached, detached, permission responses...)
      * About BroadcastReceiver: http://developer.android.com/reference/android/content/BroadcastReceiver.html
@@ -109,25 +115,15 @@ public class UsbModbusService extends Service {
                 }
             } else if (arg1.getAction().equals(ACTION_USB_ATTACHED)) {
                 UsbDevice attachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                if (UsbSerialUtil.isModbusDevice(attachedDevice, context) && !serialPortConnected) {
+                if (UsbSerialUtil.isModbusDevice(attachedDevice, UsbPrefHelper.getUsbDeviceList(context)) && !serialPortConnected) {
                     CcuLog.d(TAG,"Modbus Serial device connected "+attachedDevice.toString());
                     scheduleUsbConnectedEvent();
-                    int vendorId = attachedDevice.getVendorId();
-                    int productId = attachedDevice.getProductId();
-                    String manufacturerName = attachedDevice.getManufacturerName();
-                    String productName = attachedDevice.getProductName();
-                    String version = attachedDevice.getVersion();
-                    String serialNumber = attachedDevice.getSerialNumber();
-                    String logMessage = String.format(
-                            "Modbus USB Attached - VID: %d, PID: %d, Manufacturer: %s, Product Name: %s, Version: %s, Serial Number: %s",
-                            vendorId, productId, manufacturerName, productName, version, serialNumber
-                    );
-                    UsbUtil.writeUsbEvent(logMessage);
+                    UsbUtil.writeUsbEvent(attachedDevice, "Attached");
                 }
             } else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
                 // Usb device was disconnected. send an intent to the Main Activity
                 UsbDevice detachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                if (UsbSerialUtil.isModbusDevice(detachedDevice, context)) {
+                if (UsbSerialUtil.isModbusDevice(detachedDevice, UsbPrefHelper.getUsbDeviceList(context))) {
                     usbPortScanTimer.cancel();
                     CcuLog.d(TAG,"Modbus Serial device disconnected "+detachedDevice.toString());
                     if (serialPortConnected && serialPort != null) {
@@ -138,17 +134,7 @@ public class UsbModbusService extends Service {
                     Intent intent = new Intent(ACTION_USB_MODBUS_DISCONNECTED);
                     arg0.sendBroadcast(intent);
 
-                    int vendorId = detachedDevice.getVendorId();
-                    int productId = detachedDevice.getProductId();
-                    String manufacturerName = detachedDevice.getManufacturerName();
-                    String productName = detachedDevice.getProductName();
-                    String version = detachedDevice.getVersion();
-                    String serialNumber = detachedDevice.getSerialNumber();
-                    String logMessage = String.format(
-                            "Modbus USB Detached - VID: %d, PID: %d, Manufacturer: %s, Product Name: %s, Version: %s, Serial Number: %s",
-                            vendorId, productId, manufacturerName, productName, version, serialNumber
-                    );
-                    UsbUtil.writeUsbEvent(logMessage);
+                    UsbUtil.writeUsbEvent(detachedDevice, "Detached");
                 }
             }
             CcuLog.d(TAG,"UsbModbusService: OnReceive == "+arg1.getAction()+","+serialPortConnected);
@@ -156,14 +142,14 @@ public class UsbModbusService extends Service {
     };
     
     private void scheduleUsbConnectedEvent() {
+        CcuLog.d(TAG, "USB_CONNECTED Event received , Schedule port scan for Modbus device");
         usbPortScanTimer.cancel();
         usbPortScanTimer = new Timer();
         usbPortScanTimer.schedule(new TimerTask() {
             @Override public void run() {
-                CcuLog.d(TAG, "USB_CONNECTED Event received , Schedule port scan for Modbus device");
                 findModbusSerialPortDevice();
             }
-        }, 1000);
+        }, 2000);
     }
     /*
      *  Data received from serial port will be received here. Just populate onReceivedData with your code
@@ -222,7 +208,7 @@ public class UsbModbusService extends Service {
         }
         SerialAction serialAction = SerialAction.MESSAGE_FROM_SERIAL_PORT;
         if (isModbusData)
-            serialAction = SerialAction.MESSAGE_FROM_SERIAL_MODBUS;
+            serialAction = SerialAction.MESSAGE_FROM_SERIAL_MODBUS1;
         SerialEvent serialEvent = new SerialEvent(serialAction, data);
         EventBus.getDefault().post(serialEvent);
         
@@ -240,6 +226,7 @@ public class UsbModbusService extends Service {
     @Override
     public void onCreate() {
         this.context = this;
+        CcuLog.d(TAG, "--onCreate-- UsbModbusService");
         serialPortConnected = false;
         UsbModbusService.SERVICE_CONNECTED = true;
         setFilter();
@@ -259,6 +246,15 @@ public class UsbModbusService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        CcuLog.d(TAG, "--onStartCommand-- UsbModbusService");
+        try {
+            doModbusUsbManagerMigrationIfNeeded();
+        } catch (Exception e) {
+            //It can fail if the device does not have a valid serial.
+            e.printStackTrace();
+            CcuLog.e(TAG, "Modbus USB Manager migration failed", e);
+        }
+        //scheduleUsbConnectedEvent();
         return Service.START_NOT_STICKY;
     }
 
@@ -269,17 +265,19 @@ public class UsbModbusService extends Service {
         shouldStop = true;
         running.interrupt();
         unregisterReceiver(usbReceiver);
+        serialPortConnected = false;
         UsbModbusService.SERVICE_CONNECTED = false;
         super.onDestroy();
+        if (serialPort != null) {
+            CcuLog.d(TAG,"Closing serial port");
+            serialPort.close();
+            serialPort = null;
+        }
     }
 
-
-    /* MUST READ about services
-     * http://developer.android.com/guide/components/services.html
-     * http://developer.android.com/guide/components/bound-services.html
-     */
     @Override
     public IBinder onBind(Intent intent) {
+        CcuLog.d(TAG, "--onBind-- UsbModbusService");
         return binder;
     }
 
@@ -293,15 +291,24 @@ public class UsbModbusService extends Service {
     }
 
     private void findModbusSerialPortDevice() {
-
+        if (serialPortConnected) {
+            CcuLog.d(TAG, "findModbusSerialPortDevice : Modbus Serial Port already connected. Returning");
+            return;
+        }
         HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
         CcuLog.d(TAG, "findMBSerialPortDevice = " + usbDevices.size());
+        List<UsbDeviceItem> configuredUsbDevices = UsbPrefHelper.getUsbDeviceList(getApplicationContext());
         if (!usbDevices.isEmpty()) {
             boolean keep = true;
             for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
                 device = entry.getValue();
-                CcuLog.e(TAG, "UsbModbusService.findModbusSerialPortDevice: assigned value to device from deviceList= " + device);
-                if (UsbSerialUtil.isModbusDevice(device, getApplicationContext())) {
+                CcuLog.e(TAG, "UsbModbusService.findModbusSerialPortDevice: iterating device : " + device.getSerialNumber());
+                usbModbusDevice= UsbSerialUtil.getModbusDeviceCom1(device, configuredUsbDevices);
+                if (usbModbusDevice != null) {
+                    CcuLog.d(TAG, "Modbus configuration found "+usbModbusDevice);
+                }
+                if (usbModbusDevice != null) {
+                    CcuLog.e(TAG, "UsbModbusService.findModbusSerialPortDevice: Modbus configured device found= " + device.getSerialNumber());
                     boolean success = false;
                     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
                         success = grantRootPermissionToUSBDevice(device);
@@ -311,6 +318,7 @@ public class UsbModbusService extends Service {
                     connection = usbManager.openDevice(device);
                     if (connection != null) {
                         if (success) {
+                            serialPortConnected = true;
                             ModbusRunnable modbusRunnable = new ModbusRunnable(device, connection);
                             new Thread(modbusRunnable).start();
                             Intent intent = new Intent(ACTION_USB_PERMISSION_GRANTED);
@@ -327,6 +335,8 @@ public class UsbModbusService extends Service {
                     } else {
                         CcuLog.d(TAG, "Failed to Open Serial MODBUS device "+device.toString());
                     }
+                    CcuLog.d(TAG, "Modbus device found ");
+                    break;
                 } else {
                     connection = null;
                     device = null;
@@ -359,11 +369,13 @@ public class UsbModbusService extends Service {
         if (!usbDevices.isEmpty()) {
             connection = null;
             device = null;
-            CcuLog.e(TAG, "UsbModbusService.scanSerialPortSilentlyForMbDevice: assigned value to device before iterating usb devices= null");
+            List<UsbDeviceItem> configuredUsbDevices = UsbPrefHelper.getUsbDeviceList(getApplicationContext());
             for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
                 device = entry.getValue();
-                CcuLog.e(TAG, "UsbModbusService.scanSerialPortSilentlyForMbDevice(): assigned value to device while iterating usb devices= " + device);
-                if (UsbSerialUtil.isModbusDevice(device, context)) {
+                CcuLog.e(TAG, "UsbModbusService.scanSerialPortSilentlyForMbDevice(): device " + device);
+                usbModbusDevice= UsbSerialUtil.getModbusDeviceCom1(device, configuredUsbDevices);
+                if (usbModbusDevice != null) {
+                    CcuLog.d(TAG, "Modbus configuration found "+usbModbusDevice);
                     boolean success = false;
                     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
                         success = grantRootPermissionToUSBDevice(device);
@@ -379,10 +391,12 @@ public class UsbModbusService extends Service {
                     if (connection != null && success) {
                         ModbusRunnable modbusRunnable = new ModbusRunnable(device, connection);
                         new Thread(modbusRunnable).start();
-                        CcuLog.d(TAG, "Opened Serial MODBUS device "+device.getDeviceName());
+                        CcuLog.d(TAG, "Opened Serial MODBUS device "+device.getProductName());
                     } else {
-                        CcuLog.d(TAG, "Failed to Open Serial MODBUS device "+device.getDeviceName());
+                        CcuLog.d(TAG, "Failed to Open Serial MODBUS device "+device.getProductName());
                     }
+                    CcuLog.d(TAG, "Modbus device found ");
+                    break;
                 }
                 sleep(1000);
             }
@@ -441,7 +455,7 @@ public class UsbModbusService extends Service {
                     if (!serialPortConnected) {
                         CcuLog.i(TAG, "MB Serial Port is not connected sleeping");
                         //When only modbus is disconnected
-                        if (++reconnectCounter >= 60) {
+                        if (++reconnectCounter >= 30) {
                             CcuLog.i(TAG, "scanSerialPortSilentlyForMbDevice");
                             ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance()
                                                                                       .readAllEntities("equip and modbus");
@@ -450,7 +464,7 @@ public class UsbModbusService extends Service {
                             }
                             reconnectCounter = 0;
                         }
-                        sleep(5000);
+                        sleep(30000);
                         continue;
                     }
 
@@ -463,7 +477,7 @@ public class UsbModbusService extends Service {
                         }
                     }
                 } catch (Exception exception) {
-                    CcuLog.i(TAG, "Modbus serial transaction failed ", exception);
+                    CcuLog.i(TAG, "Modbus serial transaction stopped ", exception);
                     exception.printStackTrace();
                 }
             }
@@ -522,11 +536,6 @@ public class UsbModbusService extends Service {
         }
     }
 
-    /*
-     * A simple thread to open a mobus serial port.
-     * Although it should be a fast operation. moving usb operations away from UI thread is a good thing.
-     */
-
     public class ModbusRunnable implements Runnable {
         
         public ModbusRunnable(UsbDevice usbDevice, UsbDeviceConnection usbDeviceConnection) {
@@ -549,17 +558,14 @@ public class UsbModbusService extends Service {
         private void configureMbSerialPort() {
             serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
             CcuLog.d(TAG," ModbusRunnable : run serialPortMB "+serialPort+" connection: "+connection);
-            CcuLog.d(TAG," ModbusRunnable : USB Params "+getModbusBaudrate()+" "+getModbusParity()+" "
-                      +getModbusDataBits()+" "+getModbusStopBits());
-            if (serialPort != null) {
-                CcuLog.d(TAG,"device name: "+device);
+            CcuLog.d(TAG,"device name: "+device.getSerialNumber()+" confguration : "+usbModbusDevice);
+            if (serialPort != null && usbModbusDevice != null) {
                 if (serialPort.open()) {
-                    serialPortConnected = true;
-                    serialPort.setBaudRate(getModbusBaudrate());
+                    serialPort.setBaudRate(usbModbusDevice.getModbusConfig().getBaudRate());
                     serialPort.setModbusDevice(true);
-                    serialPort.setDataBits(getModbusDataBits());
-                    serialPort.setStopBits(getModbusStopBits());
-                    serialPort.setParity(getModbusParity());
+                    serialPort.setDataBits(usbModbusDevice.getModbusConfig().getDataBits());
+                    serialPort.setStopBits(usbModbusDevice.getModbusConfig().getStopBits());
+                    serialPort.setParity(usbModbusDevice.getModbusConfig().getParity());
                     /**
                      * Current flow control Options:
                      * UsbSerialInterface.FLOW_CONTROL_OFF
@@ -581,44 +587,30 @@ public class UsbModbusService extends Service {
                     // Everything went as expected. Send an intent to MainActivity
                     Intent intent = new Intent(ACTION_USB_MODBUS_READY);
                     context.sendBroadcast(intent);
-                    CcuLog.d(TAG,"device opened: - device: "+device);
+                    CcuLog.d(TAG,"device opened: - device: "+device.getSerialNumber());
                 } else {
-                    CcuLog.d(TAG,"closing USB serial device "+device+"," +
+                    CcuLog.d(TAG,"closing USB serial device "+device.getSerialNumber()+"," +
                             " because this device interface can not be claimed at this moment");
                     serialPort.close();
                     serialPort = null;
                     Intent intent = new Intent(ACTION_USB_DEVICE_NOT_WORKING);
                     context.sendBroadcast(intent);
+                    serialPortConnected = false;
                 }
             } else {
+                CcuLog.d(TAG, "Closing USB serial device " + device.getSerialNumber() + "," +
+                        " because it is null or no configuration found");
                 // No driver for given device, even generic CDC driver could not be loaded
                 Intent intent = new Intent(ACTION_USB_NOT_SUPPORTED);
                 context.sendBroadcast(intent);
+                serialPortConnected = false;
             }
         }
     }
-    
-    
-    
-    private int getModbusBaudrate() {
-        return readIntPref("mb_baudrate", 9600);
-    }
-    
-    private int getModbusParity() {
-        return readIntPref("mb_parity", 0);
-    }
-    
-    private int getModbusDataBits() {
-        return readIntPref("mb_databits", 8);
-    }
-    
-    private int getModbusStopBits() {
-        return readIntPref("mb_stopbits", 1);
-    }
-    
-    private int readIntPref(String key, int defaultVal) {
-        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        return spDefaultPrefs.getInt(key, defaultVal);
+
+    private int getIntPref(String key, int defaultValue) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getInt(key, defaultValue);
     }
 
     public void sleep(long millis){
@@ -628,5 +620,55 @@ public class UsbModbusService extends Service {
             e.printStackTrace();
         }
     }
+
+    private void doModbusUsbManagerMigrationIfNeeded() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean migrated = prefs.getBoolean("modbus_usb_manager_migrated", false);
+        if (!migrated) {
+            int baudRate = getIntPref("mb_baudrate", 0);
+            if (baudRate == 0) {
+                CcuLog.d(TAG, "No modbus devices configured. No migration needed");
+                prefs.edit().putBoolean("modbus_usb_manager_migrated", true).apply();
+                return;
+            }
+            CcuLog.d(TAG, "Modbus USB Manager migration started");
+
+            HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
+            for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
+                UsbDevice usbDevice = entry.getValue();
+                if (UsbSerialUtil.isModbusDevice(usbDevice, context)) {
+                    CcuLog.d(TAG, "Modbus FTDI USB device found "+usbDevice);
+                    List<UsbDeviceItem> usbDeviceItems = UsbPrefHelper.getUsbDeviceList(this);
+                    if (usbDeviceItems.isEmpty()) {
+                        UsbDeviceItem usbDeviceItem = new UsbDeviceItem(usbDevice.getSerialNumber(),
+                                String.valueOf(usbDevice.getVendorId()), String.valueOf(usbDevice.getProductId()), "Modbus", "COM 1", usbDevice.getProductName());
+                        ModbusConfig usbModbusConfig = new ModbusConfig(Objects.requireNonNull(usbDevice.getSerialNumber()),
+                                baudRate,
+                                getIntPref("mb_parity", 0),
+                                getIntPref("mb_databits", 8),
+                                getIntPref("mb_stopbits", 1));
+                        CcuLog.d(TAG, "Modbus USB device config "+usbModbusConfig);
+                        usbDeviceItem.setModbusConfig(usbModbusConfig);
+                        usbDeviceItems.add(usbDeviceItem);
+                        UsbPrefHelper.saveUsbDeviceList(this, usbDeviceItems);
+                    } else {
+                        CcuLog.d(TAG, "UsbManager is already configured:  Skipping modbus migration");
+                    }
+                    prefs.edit().putBoolean("modbus_usb_manager_migrated", true).apply();
+                    CcuLog.d(TAG, "Modbus USB Manager migration completed");
+                    break;
+                }
+            }
+        }
+        scheduleUsbConnectedEvent();
+    }
+
+    public String getActiveComPort() {
+        if (usbModbusDevice != null) {
+            return usbModbusDevice.getPort();
+        }
+        return "";
+    }
+
 }
 

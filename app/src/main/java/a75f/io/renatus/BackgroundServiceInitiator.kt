@@ -11,6 +11,7 @@ import a75f.io.renatus.ota.OTAUpdateHandlerService
 import a75f.io.renatus.util.CCUUtils
 import a75f.io.usbserial.UsbConnectService
 import a75f.io.usbserial.UsbModbusService
+import a75f.io.usbserial.UsbModbusServiceCom2
 import a75f.io.usbserial.UsbService
 import a75f.io.usbserial.UsbServiceActions
 import android.annotation.SuppressLint
@@ -32,6 +33,7 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
 
     private var usbService: UsbService? = null
     private var usbModbusService: UsbModbusService? = null
+    private var usbModbusService2: UsbModbusServiceCom2? = null
     private var usbConnectService: UsbConnectService? = null
 
     private val TAG_CCU_SERVICE_INIT = "CCU_SERVICE_INIT"
@@ -88,7 +90,7 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
                 usbConnection,
                 null
             ) // Start UsbService(if it was not started before) and
-            if(!UtilityApplication.isBacnetMstpInitialized()){
+            /*if(!UtilityApplication.isBacnetMstpInitialized()){
                 startUsbModbusService(
                     UsbModbusService::class.java,
                     usbModbusConnection,
@@ -97,7 +99,20 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
                 CcuLog.d(TAG_CCU_SERVICE_INIT, "startService for UsbModbusService")
             }else{
                 CcuLog.d(TAG_CCU_SERVICE_INIT, "--mstp is initialized not starting modbus service--")
-            }
+            }*/
+            CcuLog.d(TAG_CCU_SERVICE_INIT, "startService for UsbModbusService")
+            startUsbModbusService(
+                UsbModbusService::class.java,
+                usbModbusConnection,
+                null
+            )
+            CcuLog.d(TAG_CCU_SERVICE_INIT, "startService for UsbModbusServiceCom2")
+            startUsbModbus2Service(
+                UsbModbusServiceCom2::class.java,
+                usbModbus2Connection,
+                null
+            )
+
             CcuLog.d(TAG_CCU_SERVICE_INIT, "startService for UsbConnectService")
             startConnectService(UsbConnectService::class.java, usbConnectConnection, null)
         }
@@ -142,6 +157,9 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
                 }
 
                 UsbModbusService.ACTION_USB_MODBUS_DISCONNECTED ->                     //NotificationHandler.setCMConnectionStatus(false);
+                    Toast.makeText(context, "USB Modbus disconnected", Toast.LENGTH_SHORT).show()
+
+                UsbModbusServiceCom2.ACTION_USB_MODBUS_DISCONNECTED ->                     //NotificationHandler.setCMConnectionStatus(false);
                     Toast.makeText(context, "USB Modbus disconnected", Toast.LENGTH_SHORT).show()
 
                 UsbConnectService.ACTION_USB_CONNECT_DISCONNECTED ->                     //NotificationHandler.setCMConnectionStatus(false);
@@ -201,6 +219,14 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
             }
             context.startService(startService)
         }
+        try {
+            if (UsbService.SERVICE_CONNECTED) {
+                context.unbindService(serviceConnection)
+                CcuLog.d(TAG_CCU_SERVICE_INIT, "UsbService unbound")
+            }
+        } catch (e: Exception) {
+            CcuLog.e(TAG_CCU_SERVICE_INIT, "Error unbinding UsbService", e)
+        }
         val bindingIntent = Intent(context, service)
         context.bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
@@ -210,6 +236,7 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
         serviceConnection: ServiceConnection,
         extras: Bundle?
     ) {
+        CcuLog.d(TAG_CCU_SERVICE_INIT, "UsbModbusService connection "+UsbModbusService.SERVICE_CONNECTED)
         if (!UsbModbusService.SERVICE_CONNECTED) {
             val startService = Intent(context, service)
             if (extras != null && !extras.isEmpty()) {
@@ -219,8 +246,51 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
                     startService.putExtra(key, extra)
                 }
             }
+
             context.startService(startService)
         }
+
+        try {
+            if (UsbModbusService.SERVICE_CONNECTED) {
+                context.unbindService(serviceConnection)
+                CcuLog.d(TAG_CCU_SERVICE_INIT, "UsbModbusService unbound")
+            }
+        } catch (e: Exception) {
+            CcuLog.e(TAG_CCU_SERVICE_INIT, "Error unbinding UsbModbusService", e)
+        }
+        
+        val bindingIntent = Intent(context, service)
+        context.bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE)
+    }
+
+    private fun startUsbModbus2Service(
+        service: Class<*>,
+        serviceConnection: ServiceConnection,
+        extras: Bundle?
+    ) {
+        CcuLog.d(TAG_CCU_SERVICE_INIT, "UsbModbusServiceCom2 connection "+UsbModbusService.SERVICE_CONNECTED)
+        if (!UsbModbusService.SERVICE_CONNECTED) {
+            val startService = Intent(context, service)
+            if (extras != null && !extras.isEmpty()) {
+                val keys = extras.keySet()
+                for (key in keys) {
+                    val extra = extras.getString(key)
+                    startService.putExtra(key, extra)
+                }
+            }
+
+            context.startService(startService)
+        }
+
+        try {
+            if (UsbModbusServiceCom2.SERVICE_CONNECTED) {
+                context.unbindService(serviceConnection)
+                CcuLog.d(TAG_CCU_SERVICE_INIT, "UsbModbusService2 unbound")
+            }
+        } catch (e: Exception) {
+            CcuLog.e(TAG_CCU_SERVICE_INIT, "Error unbinding UsbModbusService2", e)
+        }
+
         val bindingIntent = Intent(context, service)
         context.bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
@@ -237,6 +307,29 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
                     usbModbusService = (arg1 as UsbModbusService.UsbBinder).service
                     LSerial.getInstance().setModbusUSBService(usbModbusService)
                     usbModbusService?.setHandler(null)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            usbModbusService = null
+        }
+    }
+
+    private val usbModbus2Connection: ServiceConnection = object : ServiceConnection {
+        override fun onServiceConnected(arg0: ComponentName, arg1: IBinder) {
+            try {
+                CcuLog.d(
+                    TAG_CCU_SERVICE_INIT,
+                    "BackgroundServiceInitiator -" + arg1.isBinderAlive + "," + arg1.toString() + "," + arg0.className + "," + arg1.interfaceDescriptor
+                )
+                if (arg1.isBinderAlive) {
+                    //Todo : modbus USB Serial to tested with real device
+                    usbModbusService2 = (arg1 as UsbModbusServiceCom2.UsbBinder).service
+                    LSerial.getInstance().setModbusUSBService2(usbModbusService2)
+                    usbModbusService2?.setHandler(null)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

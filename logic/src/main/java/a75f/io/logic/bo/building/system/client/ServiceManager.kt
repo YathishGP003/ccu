@@ -4,6 +4,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
 object ServiceManager {
@@ -16,40 +17,33 @@ object ServiceManager {
         }
 
         OkHttpClient.Builder()
-            .connectTimeout(300, TimeUnit.SECONDS)
-            .readTimeout(300, TimeUnit.SECONDS)
-            .writeTimeout(300, TimeUnit.SECONDS)
-            .addInterceptor(loggingInterceptor)
-            .build()
+                .connectTimeout(300, TimeUnit.SECONDS)
+                .readTimeout(300, TimeUnit.SECONDS)
+                .writeTimeout(300, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(true)
+                .addInterceptor(loggingInterceptor)
+                .build()
     }
 
-    private var retrofit: Retrofit? = null
+    private val retrofitCache = ConcurrentHashMap<String, Retrofit>()
+
+    private fun getRetrofit(baseUrl: String): Retrofit {
+        return retrofitCache.getOrPut(baseUrl) {
+            Retrofit.Builder()
+                    .baseUrl(baseUrl)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .client(okHttpClient)
+                    .build()
+        }
+    }
 
     fun makeCcuService(ipAddress: String): CcuService {
-        val url = "http://$ipAddress:5005"
-
-        if (retrofit == null || retrofit!!.baseUrl().toString() != url) {
-            retrofit = Retrofit.Builder()
-                .baseUrl(url)
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(okHttpClient)
-                .build()
-        }
-
-        return retrofit!!.create(CcuService::class.java)
+        val baseUrl = "http://$ipAddress:5005/"
+        return getRetrofit(baseUrl).create(CcuService::class.java)
     }
 
     fun makeCcuServiceForMSTP(ipAddress: String): CcuService {
-        val url = "http://$ipAddress:5006"
-
-        if (retrofit == null || retrofit!!.baseUrl().toString() != url) {
-            retrofit = Retrofit.Builder()
-                .baseUrl(url)
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(okHttpClient)
-                .build()
-        }
-
-        return retrofit!!.create(CcuService::class.java)
+        val baseUrl = "http://$ipAddress:5006/"
+        return getRetrofit(baseUrl).create(CcuService::class.java)
     }
 }

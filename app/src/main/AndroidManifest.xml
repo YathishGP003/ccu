@@ -99,6 +99,10 @@
             android:enabled="true"
             android:foregroundServiceType="connectedDevice" />
         <service
+            android:name="a75f.io.usbserial.UsbModbusServiceCom2"
+            android:enabled="true"
+            android:foregroundServiceType="connectedDevice" />
+        <service
             android:name="a75f.io.usbserial.UsbConnectService"
             android:enabled="true"
             android:foregroundServiceType="connectedDevice" />

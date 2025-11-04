@@ -2755,7 +2755,8 @@ public class CCUHsApi
         }
         catch (UnknownRecException e)
         {
-            e.printStackTrace();
+            CcuLog.e(TAG_CCU_HS, "readEntity: Entity not found for query "+query);
+            //e.printStackTrace();
         }
         return map;
     }

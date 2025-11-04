@@ -65,13 +65,14 @@ public class ModbusEquip {
                                List<Parameter> configParams, String parentEquipId, boolean isSlaveIdSameAsParent,
                                  String modbusLevel,String modelVersion, boolean isConnectNode, boolean isPCN,boolean isExternalEquip, Map<String,
                     Pair<String, String>> registerAddressMap, boolean isSubEquip, String modelSuffix,
-                                 String nodeAddress, String modelId, String parentDeviceId) {
+                                 String nodeAddress, String modelId, String parentDeviceId, String port) {
         String deviceId;
         if (parentDeviceId != null) {
             deviceId = addAtSymbolIfMissing(parentDeviceId);
         } else {
             deviceId = "";
         }
+
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -125,6 +126,11 @@ public class ModbusEquip {
                     .addMarker("equip")
                     .addTag("version", HStr.make(modelVersion))
                     .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(equipmentInfo.getSlaveId()));
+        if (port != null && !port.isEmpty()) {
+            mbEquip.addTag("port", HStr.make(port));
+        } else {
+            CcuLog.d(TAG, "ModbusEquip port is null or empty");
+        }
         if (parentEquipId != null) {
             mbEquip.setEquipRef(parentEquipId);
         }

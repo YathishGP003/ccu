@@ -32,6 +32,7 @@ import org.projecthaystack.HDict;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -341,6 +342,11 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         } else {
             modbusSubEquipList.add(buildModbusModelByEquipRef(equip.getId()));
         }
+        String port = "";
+        if (equipHashMap.get("port") != null) {
+            port = equipHashMap.get("port").toString();
+        }
+
 
         for (EquipmentDevice modbusDevice : modbusSubEquipList) {
             for (Register register : modbusDevice.getRegisters()) {
@@ -348,9 +354,9 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                     if (pam.getUserIntentPointTags() != null) {
                         if (pam.getName().equals(point.getShortDis())) {
                             if(register.parameterDefinitionType!=null && register.parameterDefinitionType.equals("float")) {
-                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (float) value);
+                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (float) value, port);
                             } else {
-                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) value);
+                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) value, port);
                             }
                             break;
                         }
@@ -432,6 +438,10 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
 
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(point.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
+        String port = "";
+        if (equipHashMap.get("port") != null) {
+            port = equipHashMap.get("port").toString();
+        }
         if(!isPointFollowingScheduleOrEvent(point.getId())) {
             CCUHsApi.getInstance().writePoint(point.getId(), Double.valueOf(value));
             if (point.getMarkers().contains("his")) {
@@ -461,9 +471,9 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                         if (pam.getName().equals(parameter.getName())) {
                             // if it connect node view, then write only in int
                             if(register.parameterDefinitionType!=null && register.parameterDefinitionType.equals("float")) {
-                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (float) highestPriorityValue);
+                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (float) highestPriorityValue, port);
                             } else {
-                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) highestPriorityValue);
+                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) highestPriorityValue, port);
                             }
                             break;
                         }

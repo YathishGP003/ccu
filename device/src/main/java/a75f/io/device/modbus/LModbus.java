@@ -71,17 +71,17 @@ public class LModbus {
      * Hence for now, wait until the response is received.
      * */
     
-    public static synchronized void readRegister(Short slaveId, Register register, int offset) {
-        CcuLog.d(L.TAG_CCU_MODBUS,"Read Register "+register.toString()+" SERIAL_COMM_TIMEOUT_MS "+SERIAL_COMM_TIMEOUT_MS+" slaveId "+slaveId);
+    public static synchronized void readRegister(Short slaveId, Register register, int offset, String port) {
+        CcuLog.d(L.TAG_CCU_MODBUS,"Read Register "+register.toString()+" SERIAL_COMM_TIMEOUT_MS "+SERIAL_COMM_TIMEOUT_MS+" slaveId "+slaveId+" port "+port);
         byte[] requestData = LModbus.getModbusData(slaveId,
                                                    register.registerType,
                                                    register.registerAddress,
                                                    offset);
-        LSerial.getInstance().sendSerialToModbus(requestData);
+        LSerial.getInstance().sendSerialToModbus(requestData, port);
         LModbus.getModbusCommLock().lock(register, SERIAL_COMM_TIMEOUT_MS);
     }
     
-    public static synchronized void writeRegister(int slaveId, Register register, int writeValue) {
+    public static synchronized void writeRegister(int slaveId, Register register, int writeValue, String port) {
         CcuLog.d(L.TAG_CCU_MODBUS, "writeRegister Register " + register.toString()+" writeValue "+writeValue);
         try {
             if(Objects.nonNull(register.multiplier)&&!register.getParameterDefinitionType().equals("boolean")&&!register.getParameterDefinitionType().equals("binary")){
@@ -110,7 +110,7 @@ public class LModbus {
 
 
             if (LSerial.getInstance().isModbusConnected()) {
-                LSerial.getInstance().sendSerialToModbus(rtuMessageRequest.getMessageData());
+                LSerial.getInstance().sendSerialToModbus(rtuMessageRequest.getMessageData(), port);
             }
             LModbus.getModbusCommLock().lock(register, SERIAL_COMM_TIMEOUT_MS);
         } catch (Exception e) {
@@ -155,7 +155,7 @@ public class LModbus {
         return modbusMessage;
     }
 
-    public static synchronized void writeRegister(int slaveId, Register register, float writeValue) {
+    public static synchronized void writeRegister(int slaveId, Register register, float writeValue, String port) {
         CcuLog.d(L.TAG_CCU_MODBUS, "writeRegister Register " + register.toString()+" writeValue "+writeValue);
         try {
             if(Objects.nonNull(register.multiplier)&&!register.getParameterDefinitionType().equals("boolean")&&!register.getParameterDefinitionType().equals("binary")){
@@ -185,7 +185,7 @@ public class LModbus {
             LSerial.getInstance().sendSerialToCM(modbusMessage);
 
             if (LSerial.getInstance().isModbusConnected()) {
-                LSerial.getInstance().sendSerialToModbus(rtuMessageRequest.getMessageData());
+                LSerial.getInstance().sendSerialToModbus(rtuMessageRequest.getMessageData(), port);
             }
             LModbus.getModbusCommLock().lock(register, SERIAL_COMM_TIMEOUT_MS);
         } catch (Exception e) {

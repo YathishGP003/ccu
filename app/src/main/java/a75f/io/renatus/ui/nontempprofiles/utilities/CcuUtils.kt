@@ -192,6 +192,7 @@ fun readHisVal(id: String?): Double {
 
 fun writePoint(point: Point, value: String, parameter: Parameter, isConnectNodeView: Boolean, isPcn: Boolean) {
     val equipHashMap = CCUHsApi.getInstance().readMapById(point.equipRef)
+    val port = equipHashMap["port"]?.toString() ?: ""
     val equip = Equip.Builder().setHashMap(equipHashMap).build()
     if (!isPointFollowingScheduleOrEvent(point.id)) {
         CCUHsApi.getInstance().writePoint(point.id, value.toDouble())
@@ -230,13 +231,15 @@ fun writePoint(point: Point, value: String, parameter: Parameter, isConnectNodeV
                             LModbus.writeRegister(
                                 point.group.toShort().toInt(),
                                 register,
-                                highestPriorityValue.toFloat()
+                                highestPriorityValue.toFloat(),
+                                port
                             )
                         } else {
                             LModbus.writeRegister(
                                 point.group.toShort().toInt(),
                                 register,
-                                highestPriorityValue.toInt()
+                                highestPriorityValue.toInt(),
+                                port
                             )
                         }
                         break
@@ -502,9 +505,10 @@ fun getPointScheduleHeaderViewItem(equipRef: String): HeaderViewItem {
 
 fun getLastUpdatedViewItem(
     slaveId: String,
-    subscriber: NonTempProfileViewModel
+    subscriber: NonTempProfileViewModel,
+    equipRef: String = ""
 ): HeaderViewItem {
-    var lastUpdatedDateTime = getLastUpdatedTime(slaveId, subscriber)
+    var lastUpdatedDateTime = getLastUpdatedTime(slaveId, subscriber, equipRef)
     if (lastUpdatedDateTime?.second == null) {
         lastUpdatedDateTime = Pair(
             lastUpdatedDateTime?.first,
@@ -520,14 +524,15 @@ fun getLastUpdatedViewItem(
 
 fun getLastUpdatedTime(
     nodeAddress: String,
-    subscriber: NonTempProfileViewModel
+    subscriber: NonTempProfileViewModel,
+    equipRef: String = ""
 ): Pair<String, String>? {
     val lastUpdatedObject: Pair<String, Date>? = when {
         nodeAddress.equals(Tags.CLOUD, ignoreCase = true) ->
             getLastReceivedTimeForCloudConnectivity(subscriber)
 
         nodeAddress.length < 4 ->
-            getLastReceivedTimeForModBusAndBacnet(nodeAddress, subscriber)
+            getLastReceivedTimeForModBusAndBacnet(nodeAddress, subscriber, equipRef)
 
         else ->
             getLastReceivedTimeForRssi(nodeAddress, subscriber)
@@ -588,12 +593,18 @@ fun getLastReceivedTimeForRssi(nodeAddr: String,
 }
 
 fun getLastReceivedTimeForModBusAndBacnet(slaveId: String,
-                                          subscriber: NonTempProfileViewModel): Pair<String, Date>?  {
+                                          subscriber: NonTempProfileViewModel,
+                                          equipRef: String = ""): Pair<String, Date>?  {
     val hayStack = CCUHsApi.getInstance()
     // Check if the slaveId is a valid Modbus slave ID (1-256) or Bacnet device ID (500-999)
     if (slaveId.isNotEmpty() && slaveId.toInt() <= 256) {
-        val equipList: List<java.util.HashMap<Any?, Any>> =
+
+        val equipList: List<java.util.HashMap<Any?, Any>> = if (equipRef.isNotEmpty()) {
+            hayStack.readAllEntities("equip and id == $equipRef")
+        } else {
             hayStack.readAllEntities("equip and modbus and group == \"$slaveId\"")
+        }
+
         if (equipList.isEmpty()) {
             return null
         }
@@ -654,9 +665,10 @@ fun getLastReceivedTimeForCloudConnectivity(subscriber: NonTempProfileViewModel)
 }
 
 fun heartBeatStatus(
-    nodeAddress: String
+    nodeAddress: String,
+    equipRef: String = ""
 ): Boolean {
-    return HeartBeatUtil.isModuleAlive(nodeAddress)
+    return HeartBeatUtil.isModbusModuleAlive(nodeAddress, equipRef)
 }
 
 

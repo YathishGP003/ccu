@@ -185,6 +185,22 @@ fun HeaderLeftAlignedTextViewNew(text: String, fontSize : Int = 22, modifier: Mo
 }
 
 @Composable
+fun HeaderLeftAlignedTextViewNewFixedWidth(text: String, fontSize : Int = 22, modifier: Modifier= Modifier) {
+    Text(
+            modifier = modifier
+                    .wrapContentSize().width(280.dp),
+            style = TextStyle(
+                    fontFamily = myFontFamily,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = fontSize.sp,
+                    color = Color.Black,
+                    textAlign = TextAlign.Left,
+            ),
+            text = text
+    )
+}
+
+@Composable
 fun HeaderLeftAlignedTextViewNew(text: AnnotatedString, fontSize : Int = 22, modifier: Modifier= Modifier) {
     Text(
         modifier = modifier

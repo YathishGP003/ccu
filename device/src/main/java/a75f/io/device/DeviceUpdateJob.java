@@ -22,6 +22,7 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.device.mesh.MeshNetwork;
 import a75f.io.device.mesh.Pulse;
 import a75f.io.device.modbus.ModbusNetwork;
+import a75f.io.device.modbus.ModbusPulse;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
@@ -52,6 +53,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     
     private Lock jobLock = new ReentrantLock();
     private DiagUpdateJob diagUpdateJob;
+    private BacnetUpdateJob bacnetUpdateJob;
     private List<String> connectNodeList = null;
     @Override
     public void bark() {
@@ -70,8 +72,13 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         modbusNetwork = new ModbusNetwork();
     
         diagUpdateJob = new DiagUpdateJob();
-        diagUpdateJob.scheduleJob("diagUpdateJob", Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                        .getInt("control_loop_frequency",60), 45, TimeUnit.SECONDS);
+        int controlLoopFrequency = Globals.getInstance().getApplicationContext()
+                                        .getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                                        .getInt("control_loop_frequency",60);
+        diagUpdateJob.scheduleJob("diagUpdateJob", controlLoopFrequency, 45, TimeUnit.SECONDS);
+
+        bacnetUpdateJob = new BacnetUpdateJob();
+        bacnetUpdateJob.scheduleJob("bacnetUpdateJob", controlLoopFrequency, 30, TimeUnit.SECONDS);
 
         if (SystemProperties.getBoolean("ccu_inject_message", false)) {
             injectTestInputMessage(1);
@@ -137,8 +144,6 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                     } else {
                         CcuLog.e(L.TAG_CCU_DEVICE, "Device update skipped , buildingProcess not running");
                     }
-                    BacnetUtilKt.checkBacnetHealth();
-                    BacnetUtilKt.updateBacnetMstpLinearAndCovSubscription(false);
                     modbusNetwork.sendMessage();
                     CcuLog.d(L.TAG_CCU_JOB, "<-DeviceUpdateJob ");
             }

@@ -5,6 +5,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.bacnet.util.SELECT_MODEL
+import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.compose.ButtonListRow
 import a75f.io.renatus.compose.ExternalConfigDropdownSelector
 import a75f.io.renatus.compose.FormattedTableWithoutHeader
@@ -60,18 +61,23 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 
 /**
@@ -197,6 +203,23 @@ class ModbusConfigView : BaseDialogFragment() {
                                         )
                                     )
                                 }
+                                DropDownWithLabel(
+                                    label = "Port:",
+                                    list = viewModel.portList,
+                                    previewWidth = 100,
+                                    expandedWidth = 150,
+                                    onSelected = { index ->
+                                        viewModel.equipModel.value.port.value = viewModel.portList[index]
+                                    },
+                                    defaultSelection = if (viewModel.equipModel.value.port.value.isNotEmpty()) {
+                                        val savedIndex =
+                                            viewModel.portList.indexOf(viewModel.equipModel.value.port.value)
+                                        if (savedIndex >= 0) savedIndex else 0
+                                    } else 0,
+                                    spacerLimit = 20,
+                                    heightValue = 272
+                                )
+                                Spacer(modifier = Modifier.width(32.dp))
                                 Box(modifier = Modifier.weight(1f)) { HeaderTextView(SLAVE_ID) }
                                 Box(modifier = Modifier.weight(1f)) {
                                     val onItemSelect = object : OnItemSelect {
@@ -523,6 +546,22 @@ class ModbusConfigView : BaseDialogFragment() {
                 )
             }
 
+            DropDownWithLabel(
+                label = "Port:",
+                list = viewModel.portList,
+                previewWidth = 100,
+                expandedWidth = 150,
+                onSelected = { index ->
+                    viewModel.equipModel.value.port.value = viewModel.portList[index]
+                },
+                defaultSelection = if (viewModel.equipModel.value.port.value.isNotEmpty()) {
+                    val savedIndex =
+                        viewModel.portList.indexOf(viewModel.equipModel.value.port.value)
+                    if (savedIndex >= 0) savedIndex else 0
+                } else 0,
+                spacerLimit = 20,
+                heightValue = 272
+            )
             // Displays the Slave ID
             Box(modifier = Modifier.weight(2f), contentAlignment = Alignment.CenterEnd) {
                 Row(modifier = Modifier.offset(x = 16.dp), verticalAlignment = Alignment.CenterVertically) {

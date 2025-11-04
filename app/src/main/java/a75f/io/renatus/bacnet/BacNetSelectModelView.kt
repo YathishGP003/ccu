@@ -1034,7 +1034,7 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
         var warningToastMessage = ""
         val buttonInfoMap = mutableMapOf (
             CANCEL to Pair(true) { closeAllBaseDialogFragments() },
-            getFetchText() to Pair(isFetchReady()) {
+            /*getFetchText() to Pair(isFetchReady()) {
                 val (isWarningApplicable, warningMessage) = getFetchWarningToastMessageIfValid()
                 if(isWarningApplicable) {
                     showToast = true
@@ -1042,20 +1042,18 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                 } else {
                     viewModel.fetchData()
                 }
-            }
+            }*/
         )
 
-        if(viewModel.bacnetPropertiesFetched.value && viewModel.isDeviceIdValid.value){
-            buttonInfoMap[SAVE] =
-                Pair(true) {
-                    val (isValidWarning, warningMessage) = getMinValidationWarningToastMessage()
-                    if(isValidWarning) {
-                        Toast.makeText(requireContext(), warningMessage, Toast.LENGTH_SHORT).show()
-                    }else{
-                        viewModel.save()
-                    }
+        buttonInfoMap[SAVE] =
+            Pair(true) {
+                val (isValidWarning, warningMessage) = getMinValidationWarningToastMessage()
+                if(isValidWarning) {
+                    Toast.makeText(requireContext(), warningMessage, Toast.LENGTH_SHORT).show()
+                }else{
+                    viewModel.save()
                 }
-        }
+            }
         if (showToast) {
             ErrorToastMessage(
                 message = warningToastMessage,
@@ -1144,7 +1142,7 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
     @Composable
     private fun ShowDropdownList(expanded: MutableState<Boolean>) {
         val configurationTypes = listOf(
-//            MSTP_CONFIGURATION,
+            MSTP_CONFIGURATION,
             IP_CONFIGURATION
         )
 
@@ -1154,7 +1152,7 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
             onDismissRequest = { expanded.value = false },
             modifier = Modifier
                 .width(280.dp)
-                .height(60.dp)
+                .height(120.dp)
                 .background(Color.White)
                 .border(0.5.dp, Color.LightGray)
                 .shadow(1.dp, shape = RoundedCornerShape(2.dp))

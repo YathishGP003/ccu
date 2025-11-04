@@ -284,7 +284,8 @@ class LowCodeEntitiesBuilder {
             suffix,
             nodeAddress,
             modelId,
-            deviceId
+            deviceId,
+            ""
         )
     }
 

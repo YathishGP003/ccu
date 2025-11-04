@@ -240,10 +240,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             PreferenceUtil.setUnoccupiedSetbackMaxUpdate()
         }
 
-        if (!isMigrationRequired()) {
+        /*if (!isMigrationRequired()) {
             CcuLog.i(TAG_CCU_MIGRATION_UTIL, "---- Migration Not Required ----")
             return
-        }
+        }*/
         isMigrationOngoing = true
         CcuLog.i(TAG_CCU_MIGRATION_UTIL, "---- Migration Started ----")
         Globals.getInstance().applicationContext.getSharedPreferences("crash_preference", Context.MODE_PRIVATE)
@@ -539,6 +539,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if (!PreferenceUtil.getPLCTargetAndErrorRangeMigrationStatus()) {
             migratePLCTargetAndErrorRange()
             PreferenceUtil.setPLCTargetAndErrorRangeMigrationStatus()
+        }
+
+        if (!PreferenceUtil.getModbusEquipComPortMigrationStatus()) {
+            migrateModbusEquipComPortTag()
+            PreferenceUtil.setModbusEquipComPortMigrationStatus()
         }
 
         hayStack.scheduleSync()
@@ -4386,6 +4391,21 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             ).getActiveConfiguration()
 
             config.updateMinMaxValues(config, model)
+        }
+    }
+
+    private fun migrateModbusEquipComPortTag() {
+        val modbusEquips = hayStack.readAllHDictByQuery("modbus and equip")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Migrating Modbus Equip ComPort Tag: ")
+        modbusEquips.forEach { modbusEquip ->
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Migrating Modbus Equip: ${modbusEquip[Tags.DIS]}")
+            val equipBuilder = Equip.Builder().setHDict(modbusEquip)
+            equipBuilder.addTag("port", HStr.make("COM 1"))
+            CcuLog.d(
+                TAG_CCU_MIGRATION_UTIL,
+                "Modbus Equip: ${modbusEquip[Tags.DIS]} added COM 1 tag"
+            )
+            hayStack.updateEquip(equipBuilder.build(), modbusEquip.id().toString())
         }
     }
 }

@@ -2,14 +2,15 @@ package a75f.io.device.mesh;
 
 import static a75f.io.device.mesh.DLog.LogdStructAsJson;
 import static a75f.io.device.mesh.MeshUtil.sendStructToCM;
-import static a75f.io.device.serial.MessageType.CCU_TO_CM_MODBUS_SERVER_REGULAR_UPDATE_SETTINGS;
 import static a75f.io.device.serial.MessageType.CM_TO_CCU_OVER_USB_MODBUS_SERVER_REGULAR_UPDATE;
+import static a75f.io.device.serial.MessageType.CM_TO_CCU_OVER_USB_SEQUENCE_PACKET_REQUEST;
 import static a75f.io.device.serial.MessageType.PCN_MODBUS_SERVER_REBOOT;
 import static a75f.io.logic.L.ccu;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.util.Log;
 
 import org.javolution.io.Struct;
 
@@ -52,6 +53,7 @@ import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbConnectService;
 import a75f.io.usbserial.UsbModbusService;
+import a75f.io.usbserial.UsbModbusServiceCom2;
 import a75f.io.usbserial.UsbService;
 
 /**
@@ -66,6 +68,7 @@ public class LSerial
     private UsbConnectService mUsbConnectService;
     private static boolean mSendSeedMsgs;
     private static boolean isNodeSeeding;
+    private UsbModbusServiceCom2 mUsbModbusService2;
     private static boolean mWritePcnUpdate = false;
 
     /***
@@ -230,7 +233,6 @@ public class LSerial
                     messageType == MessageType.CM_TO_CCU_OVER_USB_FIRMWARE_PACKET_REQUEST ||
                     messageType == MessageType.CM_TO_CCU_OTA_STATUS ||
                     messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REBOOT ||
-                    messageType == MessageType.PCN_MODBUS_SERVER_REBOOT ||
                     messageType == MessageType.CM_TO_CCU_OVER_USB_SEQUENCE_PACKET_REQUEST ||
                     messageType == MessageType.CM_TO_CCU_OVER_USB_SEQUENCE_OTA_STATUS ||
                     messageType == MessageType.CM_ERROR_REPORT) {
@@ -239,9 +241,20 @@ public class LSerial
                 eventIntent.putExtra("eventBytes", data);
                 context.sendBroadcast(eventIntent);
             }
-        }else if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_MODBUS) {
+        }else if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_MODBUS1) {
+            if (LSerial.getInstance().mUsbModbusService == null) {
+                Log.i(L.TAG_CCU_MODBUS, "MESSAGE_FROM_SERIAL_MODBUS1 Failed mUsbModbusService is null");
+                return;
+            }
             byte[] data = event.getBytes();
-            ModbusPulse.handleModbusPulseData(data, (event.getBytes()[0] & 0xff));
+            ModbusPulse.handleModbusPulseData(data, (event.getBytes()[0] & 0xff), LSerial.getInstance().mUsbModbusService.getActiveComPort());
+        } else if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_MODBUS2) {
+            if (LSerial.getInstance().mUsbModbusService2 == null) {
+                Log.i(L.TAG_CCU_MODBUS, "MESSAGE_FROM_SERIAL_MODBUS2 Failed mUsbModbusService2 is null");
+                return;
+            }
+            byte[] data = event.getBytes();
+            ModbusPulse.handleModbusPulseData(data, (event.getBytes()[0] & 0xff), LSerial.getInstance().mUsbModbusService2.getActiveComPort());
         } else if (event.getSerialAction() == SerialAction.MESSAGE_FROM_CM_CONNECT_PORT) {
             byte[] data = event.getBytes();
             ConnectModbusSerialComm.handleModbusResponse(data);
@@ -300,11 +313,20 @@ public class LSerial
     }
     public boolean isModbusConnected()
     {
-        if (mUsbModbusService == null)
+        if (mUsbModbusService == null && mUsbModbusService2 == null)
         {
             return false;
         }
-        return mUsbModbusService.isConnected();
+        return mUsbModbusService.isConnected() || mUsbModbusService2.isConnected();
+    }
+
+    public boolean isModbusCom2Connected()
+    {
+        if (mUsbModbusService2 == null)
+        {
+            return false;
+        }
+        return mUsbModbusService2.isConnected();
     }
 
     public boolean isConnectModuleConnected()
@@ -338,6 +360,12 @@ public class LSerial
     {
         structs.clear();
         mUsbModbusService = modbusUSBService;
+    }
+
+    public void setModbusUSBService2(UsbModbusServiceCom2 modbusUSBService)
+    {
+        structs.clear();
+        mUsbModbusService2 = modbusUSBService;
     }
 
     public void setUsbConnectService(UsbConnectService usbService)
@@ -483,16 +511,22 @@ public class LSerial
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }
-    public synchronized boolean sendSerialToModbus(byte[] data)
+    public synchronized boolean sendSerialToModbus(byte[] data, String port)
     {
-
-        if (mUsbModbusService == null)
-        {
-            DLog.logUSBServiceNotInitialized();
+        if (port == null || port.isEmpty()) {
+            Log.i(L.TAG_CCU_MODBUS, "sendSerialToModbus Failed port is null");
             return false;
         }
+        CcuLog.d(L.TAG_CCU_MODBUS,"sendSerialToModbus "+port+" "+Arrays.toString(data));
 
-        mUsbModbusService.modbusWrite(data);
+        if (mUsbModbusService != null && mUsbModbusService.getActiveComPort().equals(port)) {
+            mUsbModbusService.modbusWrite(data);
+        } else if (mUsbModbusService2 != null && mUsbModbusService2.getActiveComPort().equals(port)) {
+            mUsbModbusService2.modbusWrite(data);
+        } else {
+            Log.i(L.TAG_CCU_MODBUS, "USB SERVICE NOT INITIALIZED! for port : "+port);
+            return false;
+        }
         return true;
     }
     

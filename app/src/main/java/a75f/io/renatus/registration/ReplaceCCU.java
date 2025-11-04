@@ -77,6 +77,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.sitesequencer.SequenceManager;
+import a75f.io.usbserial.UsbPrefHelper;
 import a75f.io.util.DashboardUtilKt;
 import a75f.io.util.ExecutorTask;
 
@@ -636,6 +637,21 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         prefs.setString(BacnetConfigConstants.BACNET_FD_CONFIGURATION, bacnet_pref.getString(BacnetConfigConstants.BACNET_FD_CONFIGURATION,null));
         prefs.setString(BacnetConfigConstants.BACNET_DEVICE_TYPE, bacnet_pref.getString(BacnetConfigConstants.BACNET_DEVICE_TYPE,null));
         prefs.setBoolean(BacnetConfigConstants.IS_GLOBAL, bacnet_pref.getBoolean(BacnetConfigConstants.IS_GLOBAL,true));
+        prefs.setBoolean(BacnetConfigConstants.IS_BACNET_MSTP_INITIALIZED, bacnet_pref.getBoolean(BacnetConfigConstants.IS_BACNET_MSTP_INITIALIZED,false));
+        String usbDeviceList = bacnet_pref.getString("usb_device_list", null);
+        CcuLog.i(TAG_CCU_REPLACE, "Saving USB device list after CCU replace: " + usbDeviceList);
+        if (usbDeviceList != null) {
+            if (usbDeviceList.startsWith("\"") && usbDeviceList.endsWith("\"")) {
+                try {
+                    usbDeviceList = new Gson().fromJson(usbDeviceList, String.class);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            CcuLog.i(TAG_CCU_REPLACE, "Parsed USB device list after CCU replace: " + usbDeviceList);
+            UsbPrefHelper.saveUsbDeviceList(Globals.getInstance().getApplicationContext(),
+                    usbDeviceList);
+        }
         DashboardHandlerKt.getDashboardConfiguration();
     }
 

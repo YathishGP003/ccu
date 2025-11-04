@@ -136,7 +136,7 @@ public abstract class UtilityApplication extends Application implements Globals.
 
     private DeviceUpdateJob deviceUpdateJob;
     private static Prefs prefs;
-    protected static BackgroundServiceInitiator backgroundServiceInitiator;
+    public static BackgroundServiceInitiator backgroundServiceInitiator;
     private static ConnectivityManager.NetworkCallback ethernetCallback;
 
     @Override

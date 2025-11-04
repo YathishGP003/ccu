@@ -909,7 +909,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                     zoneData.put(zoneModel.get("roomRef").toString(), newData);
                 }
             }
-            CcuLog.d(LOG_TAG + "ZonesMap", "Size:" + zoneData.size() + " Data:" + zoneData);
+            CcuLog.d(LOG_TAG + "ZonesMap", "Size:" + zoneData.size() + " Data:" + zoneData+" isZoneAlive "+isZoneAlive);
             for (ArrayList<HashMap> equipZones : zoneData.values()) {
 
                 String profileType = "";

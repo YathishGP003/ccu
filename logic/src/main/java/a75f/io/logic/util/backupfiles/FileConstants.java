@@ -7,4 +7,5 @@ public class FileConstants {
     public static final String CCU_REPLACE_BACNET_CONFIG = "ccu_replace_bacnet_config";
     public static final String ADB_COMMANDS_PATH = "/sdcard/ccu/adbcommands/";
     public static final String START_UP_COMMAND = "startUpAdbCommands.txt";
+
 }

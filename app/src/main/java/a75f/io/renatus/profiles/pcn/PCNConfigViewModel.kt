@@ -200,7 +200,7 @@ class PCNConfigViewModel (application: Application) : AndroidViewModel(applicati
                 ModbusEquip(ProfileType.MODBUS_EMR, externalEquip.serverId.toShort()).createEntities(floorRef, zoneRef,
                     externalEquip.equipModel.equipDevice.value.apply { slaveId =  externalEquip.serverId}, getParametersList(externalEquip.equipModel),
                     null, false, Tags.ZONE, null, false, false, true,
-                    null, true, "", null, null, pcnConfiguration.pcnDeviceMap[Tags.ID].toString())
+                    null, true, "", null, null, pcnConfiguration.pcnDeviceMap[Tags.ID].toString(),"")
 
             }
         }

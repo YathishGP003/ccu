@@ -329,6 +329,7 @@ fun mapBacnetPoint(
     val bacnetObjectId = point["bacnetObjectId"].toString().toInt()
     val objectType = point["bacnetType"].toString()
     val bacnetConfig = equip["bacnetConfig"].toString()
+    val isMstpDevice = equip.containsKey("bacnetMstp")
     val defaultPriority = point["defaultWriteLevel"].toString()
     //val isSystemPoint = point["system"]
     //var objectId = 0
@@ -366,14 +367,14 @@ fun mapBacnetPoint(
         ) {
             val wholeNumber = value.toInt()
             updatePointValueChanges(pointId, haystack, setPointsList, wholeNumber.toDouble())
-            doMakeRequest(getConfig(bacnetConfig), bacnetObjectId, wholeNumber.toString(),objectTypeWithSuffix, defaultPriority, pointId)
+            doMakeRequest(getConfig(bacnetConfig), bacnetObjectId, wholeNumber.toString(),objectTypeWithSuffix, defaultPriority, pointId, isMstpDevice)
         }else{
             if(query == DAMPER_CMD){
                 updatePointValueChanges(pointId, haystack, setPointsList, valueFromPercentage)
-                doMakeRequest(getConfig(bacnetConfig), bacnetObjectId, valueFromPercentage.toString(),objectTypeWithSuffix, defaultPriority, pointId)
+                doMakeRequest(getConfig(bacnetConfig), bacnetObjectId, valueFromPercentage.toString(),objectTypeWithSuffix, defaultPriority, pointId, isMstpDevice)
             }else{
                 updatePointValueChanges(pointId, haystack, setPointsList, value)
-                doMakeRequest(getConfig(bacnetConfig), bacnetObjectId, value.toString(),objectTypeWithSuffix, defaultPriority, pointId)
+                doMakeRequest(getConfig(bacnetConfig), bacnetObjectId, value.toString(),objectTypeWithSuffix, defaultPriority, pointId, isMstpDevice)
             }
 
         }
@@ -1048,7 +1049,12 @@ fun getSetPoint(domainName: String): String {
 fun getOperatingMode(equipName: String): String {
     val systemEquip = Domain.getSystemEquipByDomainName(equipName)
     val mode = getHisValueByDomain(systemEquip!!, operatingMode).toInt()
-    return when (SystemController.State.values()[mode]) {
+    //TODO- Temp , to be removed after testing
+    val coercedMode = mode.coerceIn(
+        0,
+        SystemController.State.values().size - 1
+    )
+    return when (SystemController.State.values()[coercedMode]) {
         SystemController.State.COOLING -> " Cooling"
         SystemController.State.HEATING -> " Heating"
         else -> {
@@ -1173,34 +1179,18 @@ private fun generateWriteObject(
     objectType: String,
     priority: String
 ): BacnetWriteRequest {
-    var macAddress: String? = ""
+    var macAddress = ""
     if (configMap[MAC_ADDRESS] != null) {
-        macAddress = configMap[MAC_ADDRESS]
+        macAddress = configMap[MAC_ADDRESS].toString()
     }
     //OBJECT_MULTI_STATE_VALUE
-    val destinationMultiRead = Objects.requireNonNull(
-        configMap[DESTINATION_IP]
-    )?.let {
-        Objects.requireNonNull(
-            configMap[DESTINATION_PORT]
-        )?.let { it1 ->
-            Objects.requireNonNull(
-                configMap[DEVICE_ID]
-            )?.let { it2 ->
-                Objects.requireNonNull(
-                    configMap[DEVICE_NETWORK]
-                )?.let { it3 ->
-                    DestinationMultiRead(
-                        it,
-                        it1,
-                        it2,
-                        it3,
-                        macAddress!!
-                    )
-                }
-            }
-        }
-    }
+    val destinationMultiRead = DestinationMultiRead(configMap.getOrDefault(DESTINATION_IP, "").toString(),
+            configMap.getOrDefault(DESTINATION_PORT, "0").toString(),
+            configMap.getOrDefault(DEVICE_ID, "0").toString(),
+            configMap.getOrDefault(DEVICE_NETWORK, "0").toString(),
+            macAddress
+    )
+
     val dataType: Int
     val selectedValueAsPerType: String
     if (BacNetConstants.ObjectType.valueOf(objectType).value == 2) {
@@ -1226,14 +1216,19 @@ private fun generateWriteObject(
     return BacnetWriteRequest(destinationMultiRead!!, writeRequest)
 }
 fun doMakeRequest(configMap: Map<String, String?>, objectId : Int, newValue : String,
-                          objectType: String, priority: String, pointId: String){
+                          objectType: String, priority: String, pointId: String, isMstpDevice : Boolean){
     val bacnetServicesUtils = BacnetServicesUtils()
     val serverIpAddress: String? = bacnetServicesUtils.getServerIpAddress()
     if(serverIpAddress != null){
-        CcuLog.d(TAG_BACNET, "--doMakeRequest-->$objectId<--newValue-->$newValue-->objectType-->$objectType<-pointId->$pointId<---serverIpAddress-->$serverIpAddress")
+        CcuLog.d(TAG_BACNET, "--doMakeRequest-->$objectId<--newValue-->$newValue-->objectType-->$objectType<-pointId->$pointId<---serverIpAddress-->$serverIpAddress--isMstpDevice--$isMstpDevice")
+        var checkPriority = priority
+        if(isMstpDevice){
+            CcuLog.d(TAG_BACNET, "--doMakeRequest since this is mstp point make priority to -1 ")
+            checkPriority = "-1"
+        }
         bacnetServicesUtils.sendWriteRequest(generateWriteObject(configMap, objectId, newValue,
-            objectType, priority),
-            serverIpAddress, remotePointUpdateInterface, newValue, pointId, false)
+            objectType, checkPriority),
+            serverIpAddress, remotePointUpdateInterface, newValue, pointId, isMstpDevice)
     }
 }
 

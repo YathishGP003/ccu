@@ -102,11 +102,8 @@ public class UsbService extends Service
 	private int   reconnectCounter = 0;
 	private Timer usbPortScanTimer = new Timer();
 	
-	/*
-	 * Different notifications from OS will be received here (USB attached, detached, permission responses...)
-	 * About BroadcastReceiver: http://developer.android.com/reference/android/content/BroadcastReceiver.html
-	 */
-	private final BroadcastReceiver                  usbReceiver = new BroadcastReceiver()
+
+	private final BroadcastReceiver usbReceiver = new BroadcastReceiver()
 	{
 		@Override
 		public void onReceive(Context arg0, Intent arg1)
@@ -149,8 +146,10 @@ public class UsbService extends Service
 				
 				if (UsbSerialUtil.isCMDevice(detachedDevice, context)) {
 					CcuLog.d(TAG_CCU_USB,"CM Serial device disconnected "+ detachedDevice);
+					CcuLog.d(TAG_CCU_USB,"serialPortConnected = "+serialPortConnected+", serialPort = "+serialPort);
 					usbPortScanTimer.cancel();
-					if (serialPortConnected) {
+					if (serialPortConnected && serialPort != null) {
+						CcuLog.d(TAG_CCU_USB,"Closing serial port");
 						serialPort.close();
 						serialPort = null;
 					}
@@ -291,6 +290,7 @@ public class UsbService extends Service
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId)
 	{
+		CcuLog.d(TAG_CCU_USB,"onStartCommand -- UsbService");
 		return Service.START_NOT_STICKY;
 	}
 
@@ -298,15 +298,23 @@ public class UsbService extends Service
 	@Override
 	public void onDestroy()
 	{
+		CcuLog.d(TAG_CCU_USB,"onDestroy -- UsbService");
+
+		try {
+			unregisterReceiver(usbReceiver); // Replace `myBroadcastReceiver` with the actual receiver instance
+		} catch (IllegalArgumentException e) {
+			CcuLog.e(TAG, "Receiver not registered or already unregistered: " + e.getMessage());
+		}
+		serialPortConnected = false;
 		super.onDestroy();
 		UsbService.SERVICE_CONNECTED = false;
+		if (serialPort != null) {
+			CcuLog.d(TAG_CCU_USB,"Closing serial port");
+			serialPort.close();
+			serialPort = null;
+		}
 	}
 
-
-	/* MUST READ about services
-	 * http://developer.android.com/guide/components/services.html
-	 * http://developer.android.com/guide/components/bound-services.html
-	 */
 	@Override
 	public IBinder onBind(Intent intent)
 	{

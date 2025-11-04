@@ -67,6 +67,29 @@ public class HeartBeatUtil {
         return TimeUnit.MILLISECONDS.toMinutes(new Date().getTime() - updatedTime.getTime()) <= zoneDeadTime;
     }
 
+    public static boolean isModbusModuleAlive(String nodeAddress, String equipId){
+        double zoneDeadTime = 0;
+        Date updatedTime = CCUUtils.getLastReceivedTimeForEquipRssi(nodeAddress, equipId);
+        CcuLog.d(L.TAG_CCU_UI, "Last updated time for Modbus module: " + updatedTime);
+        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and id == "+equipId);
+        if (!equip.isEmpty()) {
+            if(CCUUtils.isDomainEquip(equip.get(Tags.ID).toString(), "equip")){
+                zoneDeadTime = TunerUtil
+                        .readTunerValByQuery("domainName == \"" + DomainName.zoneDeadTime + "\"", equip.get(Tags.ID).toString());
+            }else{
+                zoneDeadTime = TunerUtil.readTunerValByQuery("zone and dead and time", equip.get(Tags.ID).toString());
+            }
+        }
+        if(updatedTime == null){
+            return false;
+        }
+        if (zoneDeadTime < 1) {
+            CcuLog.e(L.TAG_CCU_ZONE, "ZoneDeadTime tuner not valid, use default "+nodeAddress);
+            zoneDeadTime = DEFAULT_ZONE_DEAD_TIME_MINUTES;
+        }
+        return TimeUnit.MILLISECONDS.toMinutes(new Date().getTime() - updatedTime.getTime()) <= zoneDeadTime;
+    }
+
     public static String getLastUpdatedTime(String nodeAddress){
         Date updatedTime = null;
         if(nodeAddress.equalsIgnoreCase(Tags.CLOUD)){
@@ -163,6 +186,12 @@ public class HeartBeatUtil {
         }
         for (HashMap equip : equips) {
             String address = equip.get("group").toString();
+            if (equip.get("modbus") != null) {
+                if (!isModbusModuleAlive(address, equip.get("id").toString())) {
+                    return false; // Return false if any modbus module is not alive
+                }
+                continue;
+            }
             if (!isModuleAlive(address)) {
                 return false; // Return false if any module is not alive
             }

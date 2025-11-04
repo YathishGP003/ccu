@@ -141,6 +141,7 @@ public class PreferenceUtil {
     private static final String MIGRATE_PCN_TARGET_ERROR = "migratePcnTargetError";
 
     private static final String MIGRATE_SYSTEM_TUNER_SYNC = "migrateMissingSystemTunerValues";
+    private static final String MIGRATE_MODBUS_EQUIP_COM = "migrateModbusEquipComPort";
     public static void setContext(Context c) {
         context= c;
     }
@@ -1078,5 +1079,12 @@ public class PreferenceUtil {
 
     public static void setPLCTargetAndErrorRangeMigrationStatus() {
         setBooleanPreference(MIGRATE_PCN_TARGET_ERROR, true);
+    }
+
+    public static boolean getModbusEquipComPortMigrationStatus() {
+        return getBooleanPreference(MIGRATE_MODBUS_EQUIP_COM);
+    }
+    public static void setModbusEquipComPortMigrationStatus() {
+        setBooleanPreference(MIGRATE_MODBUS_EQUIP_COM, true);
     }
 }

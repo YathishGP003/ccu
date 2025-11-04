@@ -5065,21 +5065,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
 
     private String getEquipmentDeviceName(String profileType, Object profileParam) {
         StringBuilder equipName = new StringBuilder();
-        EquipmentDevice modbusDevice = (EquipmentDevice) profileParam;
-
-        int displayIndex = modbusDevice.getName().lastIndexOf('-') + 1;
-        String displayName = modbusDevice.getName().substring(displayIndex);
-        if (!modbusDevice.getEquipType().contains(displayName)) {
-            equipName.append(displayName);
-        } else {
-            for (String equipType : modbusDevice.getEquipType().split(",")) {
-                equipName.append(StringUtils.capitalize(equipType.trim()));
-                equipName.append(" ");
-            }
-        }
 
         switch (profileType) {
             case "MODBUS":
+                EquipmentDevice modbusDevice = (EquipmentDevice) profileParam;
+
+                int displayIndex = modbusDevice.getName().lastIndexOf('-') + 1;
+                String displayName = modbusDevice.getName().substring(displayIndex);
+                if (!modbusDevice.getEquipType().contains(displayName)) {
+                    equipName.append(displayName);
+                } else {
+                    for (String equipType : modbusDevice.getEquipType().split(",")) {
+                        equipName.append(StringUtils.capitalize(equipType.trim()));
+                        equipName.append(" ");
+                    }
+                }
 
                 return equipName.toString().trim() + "(" + modbusDevice.getSlaveId() + ")";
 
@@ -5121,6 +5121,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
             case PCN:
                 return ((EquipmentDevice) profileParam).getName();
             case "External Equipment":
+                EquipmentDevice externalDevice = (EquipmentDevice) profileParam;
+
+                int displayIndexForExternal = externalDevice.getName().lastIndexOf('-') + 1;
+                String displayNameForExternal = externalDevice.getName().substring(displayIndexForExternal);
+                if (!externalDevice.getEquipType().contains(displayNameForExternal)) {
+                    equipName.append(displayNameForExternal);
+                } else {
+                    for (String equipType : externalDevice.getEquipType().split(",")) {
+                        equipName.append(StringUtils.capitalize(equipType.trim()));
+                        equipName.append(" ");
+                    }
+                }
                 return equipName.toString().trim();
             default:
                 return "";

@@ -8,6 +8,7 @@ import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_ROOM_DB;
 import static a75f.io.api.haystack.Tags.DEVICE;
 import static a75f.io.api.haystack.Tags.MODBUS;
 import static a75f.io.api.haystack.Tags.SYSTEM;
+import static a75f.io.constants.CcuFieldConstants.BILLING_ADMIN_EMAIL;
 
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
@@ -2540,7 +2541,7 @@ public class CCUHsApi
         return siteRegistrationHandler.sendSiteData();
     }
 
-    public void registerCcu(String installerEmail) {
+    public void registerCcu(String installerEmail, String billingEmailAddress) {
 
         HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
         CcuLog.i("REGISTRATION","registerCcu");
@@ -2555,13 +2556,21 @@ public class CCUHsApi
                 if (StringUtils.isBlank(installEmail)) {
                     installEmail = site.get(CcuFieldConstants.INSTALLER_EMAIL).toString();
                 }
+                if (billingEmailAddress == null &&
+                        site.containsKey(BILLING_ADMIN_EMAIL) &&
+                        site.get(BILLING_ADMIN_EMAIL) != null) {
+                    billingEmailAddress = site.get(BILLING_ADMIN_EMAIL).toString();
+                } else {
+                    billingEmailAddress = facilityManagerEmail;
+                }
+
                 String dis = ccu.get("dis").toString();
                 String ahuRef = ccu.get("ahuRef").toString();
                 String gatewayRef = ccu.get("gatewayRef").toString();
                 String equipRef = ccu.get("equipRef").toString();
 
                 JSONObject ccuRegistrationRequest = getCcuRegisterJson(ccuLuid, getSiteIdRef().toString(),
-                        dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installEmail, null);
+                        dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installEmail, null, billingEmailAddress);
                 if (ccuRegistrationRequest != null) {
                     CcuLog.d("REGISTRATION","Sending CCU registration request: " + ccuRegistrationRequest);
                     CareTakerResponse ccuRegistrationResponse = HttpUtil.executeJsonWithApiKey(
@@ -2626,7 +2635,8 @@ public class CCUHsApi
             String equipRef,
             String facilityManagerEmail,
             String installerEmail,
-            String buildingTuneId) {
+            String buildingTuneId,
+            String billingEmailAddress) {
         JSONObject ccuJsonRequest = null;
 
         try {
@@ -2652,6 +2662,7 @@ public class CCUHsApi
 
             ccuJsonRequest.put(CcuFieldConstants.FACILITY_MANAGER_EMAIL, facilityManagerEmail);
             ccuJsonRequest.put(CcuFieldConstants.INSTALLER_EMAIL, installerEmail);
+            ccuJsonRequest.put(BILLING_ADMIN_EMAIL, billingEmailAddress);
 
             if (buildingTuneId != null) {
                 HashMap<Object, Object> tunerEquip = CCUHsApi.getInstance().readEntity("equip and tuner");

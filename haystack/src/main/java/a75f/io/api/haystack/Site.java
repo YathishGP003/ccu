@@ -26,6 +26,7 @@ public class Site extends Entity
     private double area;
     public String  organization;
     public String  installerEmail;
+    public String  billingAdminEmail;
     public String  fcManagerEmail;
     public String  weatherRef;
     private String id;
@@ -75,6 +76,9 @@ public class Site extends Entity
     public String getInstallerEmail() {
         return installerEmail;
     }
+    public String getBillingAdminEmail() {
+        return billingAdminEmail;
+    }
     public String getFcManagerEmail() {
         return fcManagerEmail;
     }
@@ -105,6 +109,7 @@ public class Site extends Entity
         public String  organization;
         public String  fcManagerEmail;
         public String  installerEmail;
+        public String  billingAdminEmail;
         public String  weatherRef;
         private HDateTime createdDateTime;
         private HDateTime lastModifiedDateTime;
@@ -176,6 +181,11 @@ public class Site extends Entity
             return this;
         }
 
+        public Builder setBillingAdminEmail(String billingAdminEmail){
+            this.billingAdminEmail = billingAdminEmail;
+            return this;
+        }
+
         public Builder setFcManager(String fcManager){
             this.fcManagerEmail = fcManager;
             return this;
@@ -214,6 +224,7 @@ public class Site extends Entity
             s.organization = this.organization;
             s.fcManagerEmail = this.fcManagerEmail;
             s.installerEmail = this.installerEmail;
+            s.billingAdminEmail = this.billingAdminEmail;
             s.weatherRef = this.weatherRef;
             s.setCreatedDateTime(createdDateTime);
             s.setLastModifiedDateTime(lastModifiedDateTime);
@@ -279,6 +290,10 @@ public class Site extends Entity
                 {
                     this.installerEmail = pair.getValue().toString();
                 }
+                else if(pair.getKey().equals(CcuFieldConstants.BILLING_ADMIN_EMAIL))
+                {
+                    this.billingAdminEmail = pair.getValue().toString();
+                }
                 else if(pair.getKey().equals("weatherRef"))
                 {
                     this.weatherRef = pair.getValue().toString();
@@ -324,6 +339,7 @@ public class Site extends Entity
             tz.equals(site.tz) &&
             organization.equals(site.organization) &&
             installerEmail.equals(site.installerEmail) &&
+            billingAdminEmail.equals(site.billingAdminEmail) &&
             fcManagerEmail.equals(site.fcManagerEmail)) {
             return true;
         }

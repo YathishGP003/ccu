@@ -552,6 +552,7 @@ public class CCUTagsDb extends HServer {
                 .add(ORGANIZATION, s.getOrganization())
                 .add(SiteFieldConstants.FACILITY_MANAGER_EMAIL, s.getFcManagerEmail())
                 .add(SiteFieldConstants.INSTALLER_EMAIL, s.getInstallerEmail())
+                .add(SiteFieldConstants.BILLING_ADMIN_EMAIL, s.getBillingAdminEmail())
                 .add(AREA, HNum.make(s.getArea(), "ft\u00B2"));
         if(s.getCreatedDateTime() != null){
             site.add("createdDateTime", s.getCreatedDateTime());
@@ -590,6 +591,7 @@ public class CCUTagsDb extends HServer {
                 .add("organization", s.getOrganization())
                 .add(CcuFieldConstants.FACILITY_MANAGER_EMAIL, s.getFcManagerEmail())
                 .add(CcuFieldConstants.INSTALLER_EMAIL, s.getInstallerEmail())
+                .add(SiteFieldConstants.BILLING_ADMIN_EMAIL, s.getBillingAdminEmail())
                 .add("area", HNum.make(s.getArea(), "ft\u00B2"));
 
         String weatherRef = s.getWeatherRef();

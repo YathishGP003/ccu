@@ -252,11 +252,64 @@
                     android:textSize="19.5dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <LinearLayout
+                android:id="@+id/ltBillingAdminEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textInputInstallerEmail"
+                android:layout_marginTop="-9dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:weightSum="2">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputBillingAdminEmail"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="40dp"
+                    android:layout_weight="1"
+                    app:errorTextAppearance="?error_appearance">
+
+                    <EditText
+                        android:id="@+id/editBillingAdminEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="42dp"
+                        android:fontFamily="@font/lato_regular"
+                        android:inputType="textWebEmailAddress"
+                        android:singleLine="true"
+                        android:textColor="@color/input_textcolor"
+                        android:textSize="19.5dp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+               <LinearLayout
+                   android:orientation="horizontal"
+                   android:layout_width="0dp"
+                   android:layout_height="wrap_content"
+                   android:gravity="bottom"
+                   android:layout_weight="1">
+                   <CheckBox
+                       android:id="@+id/billingCheckBox"
+                       android:textSize="22sp"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"/>
+                   <TextView
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:textSize="22sp"
+                       android:textStyle="bold"
+                       android:text="@string/facility_manager_email_checkbox"
+                       />
+
+               </LinearLayout>
+
+            </LinearLayout>
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputOrganization"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/textInputInstallerEmail"
+                android:layout_below="@+id/ltBillingAdminEmail"
                 android:layout_marginTop="-9dp"
                 app:errorTextAppearance="?error_appearance">
 

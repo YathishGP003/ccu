@@ -108,6 +108,12 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             return
         }
         val roomMap = hayStack.readMapById(hayStackEquip.roomRef)
+
+        if (hayStack.defaultNamedSchedule == null) {
+            CcuLog.d(Domain.LOG_TAG, "no default schedule available")
+            return
+        }
+
         val defaultScheduleType = hayStack.defaultNamedSchedule.id
         if (defaultScheduleType != null) {
             val zone = Zone.Builder().setHashMap(roomMap).setScheduleRef(defaultScheduleType).build()

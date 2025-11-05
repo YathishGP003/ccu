@@ -1,6 +1,8 @@
 package a75f.io.api.haystack.sync;
 
 
+import static a75f.io.constants.CcuFieldConstants.BILLING_ADMIN_EMAIL;
+
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import java.util.HashMap;
@@ -46,6 +48,13 @@ public class CcuRegistrationHandler {
 
         String facilityManagerEmail = Objects.toString(ccu.get(CcuFieldConstants.FACILITY_MANAGER_EMAIL));
         String installerEmail = Objects.toString(ccu.get(CcuFieldConstants.INSTALLER_EMAIL));
+        String billingEmailAddress = facilityManagerEmail;
+        if (site.containsKey(BILLING_ADMIN_EMAIL) &&
+                site.get(BILLING_ADMIN_EMAIL) != null) {
+            billingEmailAddress = site.get(BILLING_ADMIN_EMAIL).toString();
+        } else {
+            billingEmailAddress = facilityManagerEmail;
+        }
 
         if (StringUtils.isNotBlank(id)
                 && StringUtils.isNotBlank(dis)
@@ -63,7 +72,9 @@ public class CcuRegistrationHandler {
                     equipRef,
                     ccu.get(CcuFieldConstants.FACILITY_MANAGER_EMAIL).toString(),
                     ccu.get(CcuFieldConstants.INSTALLER_EMAIL).toString(),
-                    buildTunerId);
+                    buildTunerId,
+                    billingEmailAddress
+            );
 
             if (ccuUpdateJson != null) {
                 // TODO Matt Rudd - Add the ability to call put in order to sync the CCU

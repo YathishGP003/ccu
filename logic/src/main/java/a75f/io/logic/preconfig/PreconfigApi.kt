@@ -56,6 +56,7 @@ fun createSite (
     zipCode: String,
     fmEmail: String,
     installerEmail: String,
+    billingAdminEmail: String,
     ccuHsApi: CCUHsApi
 ): String {
 
@@ -74,6 +75,7 @@ fun createSite (
         .setOrgnization(organisationName)
         .setInstaller(installerEmail)
         .setFcManager(fmEmail)
+        .setBillingAdminEmail(billingAdminEmail)
         .setGeoAddress(streetAddress)
         .setGeoFence("2.0")
         .setArea(10000).build()
@@ -86,6 +88,7 @@ fun createCcuDevice(
     siteId: String,
     installerEmail: String,
     facilityManagerEmail: String,
+    billingAdminEmail: String,
     ccuHsApi: CCUHsApi
 ): String {
 
@@ -97,7 +100,7 @@ fun createCcuDevice(
 
     val ccuRef = ccuBaseConfigurationBuilder.createCCUBaseConfiguration(
         ccuName,
-        installerEmail, facilityManagerEmail, diagEquipId, ccuBaseConfigurationModel
+        installerEmail, facilityManagerEmail, diagEquipId, ccuBaseConfigurationModel, billingAdminEmail
     )
     Domain.ccuEquip.addressBand.writeDefaultVal("1000") // Default value`for address band
     L.ccu().addressBand = "1000".toShort()
@@ -191,6 +194,11 @@ private fun applyStagesToConfig(
             DomainName.coolingStage2 -> {
                 profileConfiguration.relay2Enabled.enabled = true
                 profileConfiguration.relay2Association.associationVal = Stage.COOLING_2.ordinal
+            }
+
+            DomainName.fanEnable -> {
+                profileConfiguration.relay3Enabled.enabled = true
+                profileConfiguration.relay3Association.associationVal = Stage.FAN_ENABLE.ordinal
             }
 
             DomainName.fanStage1 -> {

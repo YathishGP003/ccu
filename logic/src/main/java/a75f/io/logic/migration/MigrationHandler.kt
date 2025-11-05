@@ -1,6 +1,5 @@
 package a75f.io.logic.migration
 
-import a75f.io.api.haystack.Alert_.equipId
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.Equip
@@ -127,7 +126,6 @@ import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleFanMode
 import a75f.io.logic.bo.building.system.DefaultSystemConfig
 import a75f.io.logic.bo.building.system.dab.config.DabAdvancedHybridAhuConfig
-import a75f.io.logic.bo.building.system.util.AdvancedHybridAhuConfig
 import a75f.io.logic.bo.building.system.util.getAdvancedAhuSystemEquip
 import a75f.io.logic.bo.building.system.util.getConnectEquip
 import a75f.io.logic.bo.building.system.vav.config.DabModulatingRtuProfileConfig
@@ -176,6 +174,9 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.TagType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import org.projecthaystack.HDateTime
 import org.projecthaystack.HDict
@@ -546,6 +547,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             PreferenceUtil.setModbusEquipComPortMigrationStatus()
         }
 
+        if (!PreferenceUtil.getBillingEmailAddressMigrationStatus()) {
+            updateBillingAdminEmail()
+            PreferenceUtil.setBillingEmailAddressMigrationStatus();
+        }
         hayStack.scheduleSync()
     }
 
@@ -4406,6 +4411,41 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 "Modbus Equip: ${modbusEquip[Tags.DIS]} added COM 1 tag"
             )
             hayStack.updateEquip(equipBuilder.build(), modbusEquip.id().toString())
+        }
+    }
+
+     private fun updateBillingAdminEmail() {
+        CoroutineScope(Dispatchers.IO).launch {
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "start updateBillingAdminEmail")
+            try {
+                val site: HashMap<Any, Any> = hayStack.readEntity("site")
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "site $site")
+                if (site.isEmpty()) {
+                    CcuLog.d(
+                        TAG_CCU_MIGRATION_UTIL,
+                        "site is empty no site update updated for billing admin email."
+                    )
+                    return@launch
+                }
+                val updatedSite =
+                    Site.Builder().setHashMap(site).setBillingAdminEmail(site["fmEmail"].toString())
+                        .build();
+                CCUHsApi.getInstance().updateSite(updatedSite, updatedSite.id)
+                val deviceHDict = CCUHsApi.getInstance().readHDict("ccu and device");
+
+
+                val device = Device.Builder().setHDict(deviceHDict).build()
+                device.tags["billingAdminEmail"] = HStr.make(updatedSite.billingAdminEmail.toString())
+
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "device ${device.tags}")
+                if (device != null) {
+                    CCUHsApi.getInstance().updateDevice(device, device.id)
+                }
+                L.saveCCUState()
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "ends updateBillingAdminEmail")
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }

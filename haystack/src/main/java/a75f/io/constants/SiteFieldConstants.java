@@ -8,6 +8,7 @@ public class SiteFieldConstants {
     public static final String ORGANIZATION = "organization";
     public static final String INSTALLER_EMAIL = "installerEmail";
     public static final String FACILITY_MANAGER_EMAIL = "fmEmail";
+    public static final String BILLING_ADMIN_EMAIL = "billingAdminEmail";
     public static final String GEOADDRESS = "geoAddr";
     public static final String GEOCITY = "geoCity";
     public static final String GEOSTATE = "geoState";

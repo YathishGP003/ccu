@@ -33,6 +33,7 @@ class PreconfigurationHandler {
             preconfigData.siteAddress.geoPostalCode,
             preconfigData.fmEmail,
             preconfigData.installerEmail,
+            preconfigData.billingAdminEmail,
             ccuHsApi
         )
         CcuLog.i(L.TAG_PRECONFIGURATION,"Created Site with ID: $siteId")
@@ -42,6 +43,7 @@ class PreconfigurationHandler {
             siteId,
             preconfigData.installerEmail,
             preconfigData.fmEmail,
+            preconfigData.billingAdminEmail,
             ccuHsApi
         )
         CcuLog.i(L.TAG_PRECONFIGURATION,"Created CCU with ID: $ccuId")

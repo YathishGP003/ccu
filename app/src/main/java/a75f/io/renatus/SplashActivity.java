@@ -108,7 +108,8 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
                                     CreateNewSite.postSiteCreationSetup(
                                             false, site, prefs.getString("temp_ccu_name"),
                                             site.get(Tags.INSTALLER_EMAIL).toString(),
-                                            site.get(Tags.FM_EMAIL).toString());
+                                            site.get(Tags.FM_EMAIL).toString(),
+                                            site.get("billingAdminEmail") != null ? site.get("billingAdminEmail").toString() : site.get(Tags.FM_EMAIL) != null ? site.get(Tags.FM_EMAIL).toString() : "");
                                 }
                             },
                             () -> {

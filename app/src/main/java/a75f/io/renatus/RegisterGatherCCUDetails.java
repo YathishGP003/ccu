@@ -170,10 +170,10 @@ public class RegisterGatherCCUDetails extends Activity {
                 }
                 L.saveCCUState();
                 L.ccu().setCCUName(ccuName);
-                String ccuId = getCcuId(ccuName, installerEmail, managerEmail);
+                String ccuId = getCcuId(ccuName, installerEmail, managerEmail, managerEmail);
                 L.ccu().systemProfile = new DefaultSystem().createDefaultSystemEquip();
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuId));
-                CCUHsApi.getInstance().registerCcu(installerEmail);
+                CCUHsApi.getInstance().registerCcu(installerEmail, null);
                 prefs.setString(CcuFieldConstants.INSTALLER_EMAIL, installerEmail);
                 Domain.ccuEquip.getAddressBand().writeDefaultVal(addressBandSelected);
                 L.ccu().setAddressBand(Short.parseShort(addressBandSelected));
@@ -188,13 +188,13 @@ public class RegisterGatherCCUDetails extends Activity {
     }
 
     @NonNull
-    private static String getCcuId(String ccuName, String installerEmail, String managerEmail) {
+    private static String getCcuId(String ccuName, String installerEmail, String managerEmail, String billingAdminEmail) {
         DiagEquipConfigurationBuilder diagEquipConfigurationBuilder = new DiagEquipConfigurationBuilder(CCUHsApi.getInstance());
         CCUBaseConfigurationBuilder ccuBaseConfigurationBuilder = new CCUBaseConfigurationBuilder(CCUHsApi.getInstance());
         ModelDirective ccuBaseConfigurationModel = ModelLoader.INSTANCE.getCCUBaseConfigurationModel();
         String diagEquipId = diagEquipConfigurationBuilder.createDiagEquipAndPoints(ccuName, getMigrationVersion());
         String ccuId = ccuBaseConfigurationBuilder.createCCUBaseConfiguration(ccuName,
-                installerEmail, managerEmail, diagEquipId, ccuBaseConfigurationModel);
+                installerEmail, managerEmail, diagEquipId, ccuBaseConfigurationModel, billingAdminEmail);
         return ccuId;
     }
 

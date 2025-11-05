@@ -1456,7 +1456,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         ExecutorTask.executeBackground( () ->  {
             try {
                 CcuLog.i(L.TAG_REGISTRATION, "Registering CCU with email: " + installerEmail);
-                CCUHsApi.getInstance().registerCcu(installerEmail);
+                CCUHsApi.getInstance().registerCcu(installerEmail, null);
                 if (Globals.getInstance().isAckdMessagingEnabled()) {
                     MessagingClient.getInstance().init();
                 }

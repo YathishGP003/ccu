@@ -19,7 +19,7 @@ class CCUDeviceBuilder {
         ccuName: String,
         installerEmail: String,
         managerEmail: String,
-        ahuRef: String,
+        ahuRef: String
     ): String {
         val ccuDevice = CCUHsApi.getInstance().readEntity("ccu and device")
         val hsApi = Domain.hayStack
@@ -39,7 +39,6 @@ class CCUDeviceBuilder {
         hDictBuilder.add(Tags.CCU)
         hDictBuilder.add(CcuFieldConstants.GATEWAYREF, ahuRef)
         hDictBuilder.add(CcuFieldConstants.AHUREF, ahuRef)
-
         hsApi.tagsDb.addHDict(cleanedCCURef, hDictBuilder.toDict())
         if(ccuDevice.isNotEmpty()){
             hsApi.syncStatusService.addUpdatedEntity(

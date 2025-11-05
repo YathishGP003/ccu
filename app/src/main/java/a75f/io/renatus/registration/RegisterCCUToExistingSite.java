@@ -107,6 +107,8 @@ public class RegisterCCUToExistingSite extends DialogFragment {
         String ccuFmEmail = site.get(CcuFieldConstants.FACILITY_MANAGER_EMAIL) != null ? site.get(CcuFieldConstants.FACILITY_MANAGER_EMAIL).toString() : "";
         String ccuInstallerEmail = site.get(CcuFieldConstants.INSTALLER_EMAIL) != null ? site.get(CcuFieldConstants.INSTALLER_EMAIL).toString() : "";
         mInstallerEmailET.setText(ccuInstallerEmail);
+        String ccuBillingAdminEmail = site.get(CcuFieldConstants.BILLING_ADMIN_EMAIL) != null ? site.get(CcuFieldConstants.BILLING_ADMIN_EMAIL).toString() : ccuFmEmail;
+        if (ccuBillingAdminEmail.isEmpty() || ccuBillingAdminEmail.equals("null")) ccuBillingAdminEmail = ccuFmEmail;
         mManagerEmailET.setText(ccuFmEmail);
         mManagerEmailET.setEnabled(ccuFmEmail.isEmpty());
         mInstallerEmailET.setEnabled(ccuInstallerEmail.isEmpty());
@@ -145,6 +147,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
             }
         });
 
+        String finalCcuBillingAdminEmail = ccuBillingAdminEmail;
         mAddCCU.setOnClickListener(v -> {
             String ccuName = mCCUNameET.getText().toString().trim();
             String installerEmail = mInstallerEmailET.getText().toString();
@@ -161,7 +164,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
             }
             if (!CCUUiUtil.isInvalidName(ccuName)) {
                 mAddCCU.setEnabled(false);
-                next(ccuName, installerEmail, managerEmail);
+                next(ccuName, installerEmail, managerEmail, finalCcuBillingAdminEmail);
             }else{
                 Toast.makeText(getApplicationContext(), "Please provide proper details",
                         Toast.LENGTH_SHORT).show();
@@ -199,7 +202,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
         return rootView;
     }
 
-    private void next(String ccuName, String installerEmail, String managerEmail) {
+    private void next(String ccuName, String installerEmail, String managerEmail, String billingAdminEmail) {
         ExecutorTask.executeAsync(
                 ()-> ProgressDialogUtils.showProgressDialog(getActivity(),"Adding CCU"),
                 ()->{
@@ -209,11 +212,11 @@ public class RegisterCCUToExistingSite extends DialogFragment {
                     }
                     L.saveCCUState();
                     L.ccu().setCCUName(ccuName);
-                    String ccuId = getCcuId(ccuName, installerEmail, managerEmail);
+                    String ccuId = getCcuId(ccuName, installerEmail, managerEmail, billingAdminEmail);
                     L.ccu().systemProfile = new DefaultSystem().createDefaultSystemEquip();
                     DomainManager.INSTANCE.addSystemDomainEquip(CCUHsApi.getInstance());
                     CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuId));
-                    CCUHsApi.getInstance().registerCcu(installerEmail);
+                    CCUHsApi.getInstance().registerCcu(installerEmail, null);
                     prefs.setString(CcuFieldConstants.INSTALLER_EMAIL, installerEmail);
                     Domain.ccuEquip.getAddressBand().writeDefaultVal(addressBandSelected);
                     L.ccu().setAddressBand(Short.parseShort(addressBandSelected));
@@ -234,13 +237,13 @@ public class RegisterCCUToExistingSite extends DialogFragment {
     }
 
     @NonNull
-    private static String getCcuId(String ccuName, String installerEmail, String managerEmail) {
+    private static String getCcuId(String ccuName, String installerEmail, String managerEmail, String billingAdminEmail) {
         DiagEquipConfigurationBuilder diagEquipConfigurationBuilder = new DiagEquipConfigurationBuilder(CCUHsApi.getInstance());
         CCUBaseConfigurationBuilder ccuBaseConfigurationBuilder = new CCUBaseConfigurationBuilder(CCUHsApi.getInstance());
         ModelDirective ccuBaseConfigurationModel = ModelLoader.INSTANCE.getCCUBaseConfigurationModel();
         String diagEquipId = diagEquipConfigurationBuilder.createDiagEquipAndPoints(ccuName, getMigrationVersion());
         String ccuId = ccuBaseConfigurationBuilder.createCCUBaseConfiguration(ccuName,
-                installerEmail, managerEmail, diagEquipId, ccuBaseConfigurationModel);
+                installerEmail, managerEmail, diagEquipId, ccuBaseConfigurationModel, billingAdminEmail);
         return ccuId;
     }
 

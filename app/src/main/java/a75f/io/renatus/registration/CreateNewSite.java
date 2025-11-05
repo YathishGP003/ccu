@@ -42,6 +42,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -144,6 +145,11 @@ public class CreateNewSite extends Fragment {
     TextInputLayout mTextInputInstallerEmail;
     EditText mSiteInstallerEmailId;
 
+    TextInputLayout mTextInputBillingAdminEmail;
+    EditText mSiteBillingAdminEmailId;
+
+    CheckBox billingCheckBoxId;
+
     TextInputLayout mTextInputOrg;
     EditText mSiteOrg;
 
@@ -232,6 +238,9 @@ public class CreateNewSite extends Fragment {
         mTextInputInstallerEmail = rootView.findViewById(R.id.textInputInstallerEmail);
         mSiteInstallerEmailId = rootView.findViewById(R.id.editInstallerEmail);
 
+        mTextInputBillingAdminEmail = rootView.findViewById(R.id.textInputBillingAdminEmail);
+        mSiteBillingAdminEmailId = rootView.findViewById(R.id.editBillingAdminEmail);
+        billingCheckBoxId = rootView.findViewById(R.id.billingCheckBox);
         mTextInputOrg = rootView.findViewById(R.id.textInputOrganization);
         mSiteOrg = rootView.findViewById(R.id.editFacilityOrganization);
 
@@ -262,6 +271,7 @@ public class CreateNewSite extends Fragment {
         mSiteEmailId.setHint(getHTMLCodeForHints(R.string.input_facilityemail));
         mSiteOrg.setHint(getHTMLCodeForHints(R.string.input_facilityorg));
         mSiteInstallerEmailId.setHint(getHTMLCodeForHints(R.string.input_installer_email));
+        mSiteBillingAdminEmailId.setHint(getHTMLCodeForHints(R.string.billing_admin_email));
 
         if (CCUHsApi.getInstance().isCCURegistered()) {
             btnUnregisterSite.setText(requireContext().getString(R.string.unregister_lowercase));
@@ -292,6 +302,7 @@ public class CreateNewSite extends Fragment {
         mTextInputCCU.setErrorEnabled(true);
         mTextInputEmail.setErrorEnabled(true);
         mTextInputInstallerEmail.setErrorEnabled(true);
+        mTextInputBillingAdminEmail.setErrorEnabled(true);
         mTextInputOrg.setErrorEnabled(true);
 
         mTextInputSitename.setError(getString(R.string.hint_sitename));
@@ -303,6 +314,7 @@ public class CreateNewSite extends Fragment {
         mTextInputCCU.setError("");
         mTextInputEmail.setError("");
         mTextInputInstallerEmail.setError("");
+        mTextInputBillingAdminEmail.setError("");
         mTextInputOrg.setError("");
 
 
@@ -315,8 +327,18 @@ public class CreateNewSite extends Fragment {
         mSiteCCU.addTextChangedListener(new EditTextWatcher(mSiteCCU));
         mSiteEmailId.addTextChangedListener(new EditTextWatcher(mSiteEmailId));
         mSiteInstallerEmailId.addTextChangedListener(new EditTextWatcher(mSiteInstallerEmailId));
+        mSiteBillingAdminEmailId.addTextChangedListener(new EditTextWatcher(mSiteBillingAdminEmailId));
         mSiteOrg.addTextChangedListener(new EditTextWatcher(mSiteOrg));
 
+        billingCheckBoxId.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                mSiteBillingAdminEmailId.setText(mSiteEmailId.getText().toString());
+                mSiteBillingAdminEmailId.setEnabled(false);
+            } else {
+                mSiteBillingAdminEmailId.setText(mSiteBillingAdminEmailId.getText());
+                mSiteBillingAdminEmailId.setEnabled(true);
+            }
+        });
 
         mNext.setOnClickListener(v -> {
             mNext.setEnabled(false);
@@ -332,10 +354,12 @@ public class CreateNewSite extends Fragment {
                             R.id.editFacilityEmail,
                             R.id.editFacilityOrganization,
                             R.id.editInstallerEmail,
+                            R.id.editBillingAdminEmail,
                     };
 
             if (!validateEditText(mandatoryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()
                     && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()
+                    && Patterns.EMAIL_ADDRESS.matcher(mSiteBillingAdminEmailId.getText().toString()).matches()
                     && !CCUUiUtil.isInvalidName(mSiteName.getText().toString()) && !CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())
                     && CCUUiUtil.isValidOrgName(mSiteOrg.getText().toString())
             ) {
@@ -351,6 +375,7 @@ public class CreateNewSite extends Fragment {
 
                 String managerEmail = mSiteEmailId.getText().toString().trim();
                 String installerEmail = mSiteInstallerEmailId.getText().toString().trim();
+                String billingAdminEmail = mSiteBillingAdminEmailId.getText().toString().trim();
                 String installerOrg = mSiteOrg.getText().toString().trim();
                 String ccuName = mSiteCCU.getText().toString().trim();
                 AtomicBoolean siteRegistered = new AtomicBoolean(false);
@@ -364,14 +389,18 @@ public class CreateNewSite extends Fragment {
                             HashMap<Object, Object> siteEntity = CCUHsApi.getInstance().readEntity("site");
                             if (!siteEntity.isEmpty()) {
                                 String siteId = siteEntity.get("id").toString();
-                                updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail);
+                                updateSite(siteName, siteCity, siteZip, siteAddress, siteState,
+                                        siteCountry, siteId, installerOrg,
+                                        installerEmail, managerEmail, billingAdminEmail);
                             } else {
-                                saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail,managerEmail);
+                                saveSite(siteName, siteCity, siteZip, siteAddress, siteState,
+                                        siteCountry, installerOrg, installerEmail, managerEmail,
+                                        billingAdminEmail);
                             }
 
                             CcuLog.i(L.TAG_REGISTRATION,"Create CCU & Diag Equip ");
                             boolean isCCUDeviceExists = !CCUHsApi.getInstance().readEntity("ccu and device").isEmpty();
-                            postSiteCreationSetup(isCCUDeviceExists, siteEntity, ccuName, installerEmail, managerEmail);
+                            postSiteCreationSetup(isCCUDeviceExists, siteEntity, ccuName, installerEmail, managerEmail, billingAdminEmail);
 
                             try {
                                 CareTakerResponse siteResponse = CCUHsApi.getInstance().registerSite();
@@ -434,9 +463,11 @@ public class CreateNewSite extends Fragment {
                                 R.id.editFacilityEmail,
                                 R.id.editFacilityOrganization,
                                 R.id.editInstallerEmail,
+                                R.id.editBillingAdminEmail
                         };
                 if (!validateEditText(mandatoryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()
                         && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()
+                        && Patterns.EMAIL_ADDRESS.matcher(mSiteBillingAdminEmailId.getText().toString()).matches()
                         && !CCUUiUtil.isInvalidName(mSiteName.getText().toString()) && !CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())
                 ) {
 
@@ -448,15 +479,19 @@ public class CreateNewSite extends Fragment {
                     String siteCountry = mSiteCountry.getText().toString().trim();
 
                     String installerEmail = mSiteInstallerEmailId.getText().toString().trim();
+                    String billingAdminEmail = mSiteBillingAdminEmailId.getText().toString().trim();
                     String facilityManagerEmail = mSiteEmailId.getText().toString().trim();
                     String installerOrg = mSiteOrg.getText().toString().trim();
                     String ccuName = mSiteCCU.getText().toString().trim();
 
                     if (!site.isEmpty()) {
                         String siteId = site.get("id").toString();
-                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId, installerOrg, installerEmail, facilityManagerEmail);
+                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState,
+                                siteCountry, siteId, installerOrg, installerEmail,
+                                facilityManagerEmail, billingAdminEmail);
                     } else {
-                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail, facilityManagerEmail);
+                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry,
+                                installerOrg, installerEmail, facilityManagerEmail, billingAdminEmail);
                     }
 
                     Intent locationUpdateIntent = new Intent(RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED);
@@ -472,14 +507,15 @@ public class CreateNewSite extends Fragment {
                             CcuLog.d(TAG, "Update CCU " + ccuDevice.getCcuDisName());
                             CCUDeviceBuilder ccuDeviceBuilder = new CCUDeviceBuilder();
                             ccuDeviceBuilder.buildCCUDevice(Domain.ccuDevice.getEquipRef(),
-                                    site.get("id").toString(),ccuName, installerEmail,
+                                    site.get("id").toString(), ccuName, installerEmail,
                                     Domain.ccuDevice.getManagerEmail(),
-                                    Domain.INSTANCE.checkSystemEquipInitialisedAndGetId());
+                                    Domain.INSTANCE.checkSystemEquipInitialisedAndGetId()
+                            );
                             L.ccu().setCCUName(ccuName);
                         }
 
                     } else {
-                        String ccuRef = getCcuRef(ccuName, installerEmail, facilityManagerEmail);
+                        String ccuRef = getCcuRef(ccuName, installerEmail, facilityManagerEmail, billingAdminEmail);
                         L.ccu().setCCUName(ccuName);
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuRef));
                     }
@@ -508,6 +544,8 @@ public class CreateNewSite extends Fragment {
             String siteZipCode = site.get(GEOPOSTALCODE).toString();
             String ccuFmEmail = site.get(CcuFieldConstants.FACILITY_MANAGER_EMAIL) != null ?  site.get(CcuFieldConstants.FACILITY_MANAGER_EMAIL).toString() : "";
             String ccuInstallerEmail = site.get(CcuFieldConstants.INSTALLER_EMAIL) != null ? site.get(CcuFieldConstants.INSTALLER_EMAIL).toString() : "";
+            String ccuBillingAdminEmail = site.get(CcuFieldConstants.BILLING_ADMIN_EMAIL) != null ? site.get(CcuFieldConstants.BILLING_ADMIN_EMAIL).toString() : ccuFmEmail;
+            if (ccuBillingAdminEmail.isEmpty() || ccuBillingAdminEmail.equals("null")) ccuBillingAdminEmail = ccuFmEmail;
             String siteTz = site.get(Tags.TZ).toString();
             String siteOrg = site.get(ORGANIZATION) != null ? site.get(ORGANIZATION).toString(): "";
 
@@ -520,6 +558,7 @@ public class CreateNewSite extends Fragment {
             mSiteOrg.setText(siteOrg);
             mSiteEmailId.setText(ccuFmEmail);
             mSiteInstallerEmailId.setText(ccuInstallerEmail);
+            mSiteBillingAdminEmailId.setText(ccuBillingAdminEmail);
 
             String[] tzIds = TimeZone.getAvailableIDs();
             for (String timeZone : tzIds) {
@@ -535,8 +574,15 @@ public class CreateNewSite extends Fragment {
                 mSiteCCU.setText(ccuName);
                 ccuInstallerEmail = ccuDevice.getInstallerEmail();
                 mSiteInstallerEmailId.setText(ccuInstallerEmail);
+                mSiteBillingAdminEmailId.setText(ccuBillingAdminEmail);
             }
 
+        }
+
+        if (!mSiteEmailId.getText().toString().isEmpty() &&
+                mSiteEmailId.getText().toString().equals(mSiteBillingAdminEmailId.getText().toString())) {
+            mSiteBillingAdminEmailId.setEnabled(false);
+            billingCheckBoxId.setChecked(true);
         }
 
         View.OnClickListener unregisterSiteOnClickListener = v -> {
@@ -556,17 +602,19 @@ public class CreateNewSite extends Fragment {
 
                 String facilityManagerEmail = mSiteEmailId.getText().toString().trim();
                 String installerEmail = mSiteInstallerEmailId.getText().toString().trim();
+                String billingAdminEmail = mSiteBillingAdminEmailId.getText().toString().trim();
                 String ccuName = mSiteCCU.getText().toString().trim();
 
                 CCUDeviceBuilder ccuDeviceBuilder = new CCUDeviceBuilder();
                 String deviceId = ccuDeviceBuilder.buildCCUDevice(
-                        diagEquip.get("id").toString(), site.get("id").toString(),ccuName, installerEmail,
+                        diagEquip.get("id").toString(), site.get("id").toString(), ccuName, installerEmail,
                         facilityManagerEmail,
-                        Domain.INSTANCE.checkSystemEquipInitialisedAndGetId());
+                        Domain.INSTANCE.checkSystemEquipInitialisedAndGetId()
+                );
                 L.ccu().setCCUName(ccuName);
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(deviceId));
                 L.saveCCUState();
-                handleRegistrationAsync(installerEmail);
+                handleRegistrationAsync(installerEmail, billingAdminEmail);
             }
         };
         btnUnregisterSite.setOnClickListener(unregisterSiteOnClickListener);
@@ -577,7 +625,7 @@ public class CreateNewSite extends Fragment {
     }
 
     @NonNull
-    private static String getCcuRef(String ccuName, String installerEmail, String facilityManagerEmail) {
+    private static String getCcuRef(String ccuName, String installerEmail, String facilityManagerEmail, String billingAdminEmail) {
 
         DiagEquipConfigurationBuilder diagEquipConfigurationBuilder = new DiagEquipConfigurationBuilder(CCUHsApi.getInstance());
         CCUBaseConfigurationBuilder ccuBaseConfigurationBuilder = new CCUBaseConfigurationBuilder(CCUHsApi.getInstance());
@@ -585,7 +633,7 @@ public class CreateNewSite extends Fragment {
         ModelDirective ccuBaseConfigurationModel = ModelLoader.INSTANCE.getCCUBaseConfigurationModel();
         String diagEquipId = diagEquipConfigurationBuilder.createDiagEquipAndPoints(ccuName, getMigrationVersion());
         String ccuRef = ccuBaseConfigurationBuilder.createCCUBaseConfiguration(ccuName,
-                installerEmail, facilityManagerEmail, diagEquipId, ccuBaseConfigurationModel);
+                installerEmail, facilityManagerEmail, diagEquipId, ccuBaseConfigurationModel, billingAdminEmail);
         L.ccu().setAddressBand(Short.parseShort("1000"));
         return ccuRef;
     }
@@ -627,14 +675,14 @@ public class CreateNewSite extends Fragment {
         });
     }
 
-    private void handleRegistrationAsync(String installerEmail) {
+    private void handleRegistrationAsync(String installerEmail, String billingAdminEmail) {
         CcuLog.d(TAG, "Register Button Clicked");
         ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(), requireContext().getString(R.string.registering_ccu)),
                 () -> {
                     CcuLog.d(TAG, "Registration operation started.");
                     CCUUtils.updateCcuSpecificEntitiesWithCcuRef(CCUHsApi.getInstance(), true);
-                    CCUHsApi.getInstance().registerCcu(installerEmail);
+                    CCUHsApi.getInstance().registerCcu(installerEmail, billingAdminEmail);
                     CCUHsApi.getInstance().resyncSiteTree();
                     Globals.getInstance().copyModels();
                     CcuLog.d(TAG, "Reregistration operation completed. Closing down progress dialog.");
@@ -675,6 +723,7 @@ public class CreateNewSite extends Fragment {
             mSiteOrg.setText("75F Dev");
             mSiteEmailId.setText(user);
             mSiteInstallerEmailId.setText(user);
+            mSiteBillingAdminEmailId.setText(user);
         }
     }
 
@@ -703,11 +752,13 @@ public class CreateNewSite extends Fragment {
             String siteRef = Domain.ccuDevice.getSiteRef();
             String managerEmail = mSiteEmailId.getText().toString().trim();
             String installerEmail = mSiteInstallerEmailId.getText().toString().trim();
+            String billingAdminEmail = mSiteBillingAdminEmailId.getText().toString().trim();
             String ccuName = mSiteCCU.getText().toString().trim();
             CCUDeviceBuilder ccuDeviceBuilder = new CCUDeviceBuilder();
             ccuDeviceBuilder.buildCCUDevice(equipRef, siteRef, ccuName,
                     installerEmail, managerEmail,
-                    ahuRef);
+                    ahuRef
+            );
             L.ccu().setCCUName(ccuName);
 
             ProgressDialogUtils.showProgressDialog(getActivity(), requireContext().getString(R.string.unregister_ccu));
@@ -777,6 +828,9 @@ public class CreateNewSite extends Fragment {
         mSiteCCU.setEnabled(isEnable);
         mSiteEmailId.setEnabled(isEnable);
         mSiteInstallerEmailId.setEnabled(isEnable);
+        billingCheckBoxId.setEnabled(isEnable);
+        mTextInputBillingAdminEmail.setEnabled(!billingCheckBoxId.isChecked());
+        if(!isEnable) mTextInputBillingAdminEmail.setEnabled(false);
         mSiteOrg.setEnabled(false);
     }
 
@@ -927,6 +981,20 @@ public class CreateNewSite extends Fragment {
                         mSiteInstallerEmailId.setError(null);
                     }
 
+                case R.id.editBillingAdminEmail:
+                    if (!mSiteBillingAdminEmailId.getText().toString().trim().isEmpty()) {
+                        mTextInputBillingAdminEmail.setErrorEnabled(true);
+                        mTextInputBillingAdminEmail.setError(getString(R.string.billing_admin_email));
+                        mSiteBillingAdminEmailId.setError(null);
+                        String billingEmailID = mSiteBillingAdminEmailId.getText().toString();
+                        if (!Patterns.EMAIL_ADDRESS.matcher(billingEmailID).matches()) {
+                            mSiteBillingAdminEmailId.setError(requireContext().getString(R.string.invalid_billing_email_address));
+                        }
+                    } else {
+                        mTextInputBillingAdminEmail.setError("");
+                        mSiteBillingAdminEmailId.setError(null);
+                    }
+
             }
         }
     }
@@ -958,7 +1026,9 @@ public class CreateNewSite extends Fragment {
     }
     /* This site never existed we are creating a new orphaned site. */
 
-    public String saveSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String org, String installer, String fcManager) {
+    public String saveSite(String siteName, String siteCity, String siteZip, String geoAddress,
+                           String siteState, String siteCountry, String org, String installer,
+                           String fcManager, String billingAdminEmail) {
         String tzID = mTimeZoneSelector.getSelectedItem().toString();
 
         AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
@@ -974,6 +1044,7 @@ public class CreateNewSite extends Fragment {
                 .setGeoCountry(siteCountry)
                 .setOrgnization(org)
                 .setInstaller(installer)
+                .setBillingAdminEmail(billingAdminEmail)
                 .setFcManager(fcManager)
                 .setGeoAddress(geoAddress)
                 .setGeoFence("2.0")
@@ -1003,7 +1074,9 @@ public class CreateNewSite extends Fragment {
         return localSiteId;
     }
 
-    public void updateSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String siteId, String org, String installer, String fcManager) {
+    public void updateSite(String siteName, String siteCity, String siteZip, String geoAddress,
+                           String siteState, String siteCountry, String siteId, String org,
+                           String installer, String fcManager, String billingAdminEmail) {
 
         String tzID = mTimeZoneSelector.getSelectedItem().toString();
         AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
@@ -1024,11 +1097,13 @@ public class CreateNewSite extends Fragment {
                 .setOrgnization(org)
                 .setInstaller(installer)
                 .setFcManager(fcManager)
+                .setBillingAdminEmail(billingAdminEmail)
                 .setArea(10000).build();
 
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
 
         Site currentSite = new Site.Builder().setHashMap(site).build();
+        if (currentSite.billingAdminEmail == null) currentSite.billingAdminEmail = currentSite.fcManagerEmail;
         if (currentSite.equals(s75f)) {
             CcuLog.d(TAG, "Update Site not detected : return");
             return;
@@ -1119,7 +1194,7 @@ public class CreateNewSite extends Fragment {
     }
 
     public static void postSiteCreationSetup(boolean isCCUDeviceExists, HashMap<Object, Object> site,
-                                       String ccuName, String installerEmail, String managerEmail) {
+                                       String ccuName, String installerEmail, String managerEmail, String billingAdminEmail) {
         CcuLog.d(TAG, "RegisterCcuToExistingSite postSiteCreationSetup()");
         if (isCCUDeviceExists) {
             CCUDeviceBuilder ccuDeviceBuilder = new CCUDeviceBuilder();
@@ -1128,7 +1203,7 @@ public class CreateNewSite extends Fragment {
                     Domain.INSTANCE.checkSystemEquipInitialisedAndGetId());
             L.ccu().setCCUName(ccuName);
         } else {
-            String ccuRef = getCcuRef(ccuName, installerEmail, managerEmail);
+            String ccuRef = getCcuRef(ccuName, installerEmail, managerEmail, billingAdminEmail);
             L.ccu().setCCUName(ccuName);
             CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuRef));
         }

@@ -629,11 +629,13 @@
     <string name="input_facilityemail">Facility Manager Email</string>
     <string name="input_facilityorg">Organization</string>
     <string name="input_installer_email">Installer Email</string>
+    <string name="billing_admin_email">Billing Admin Email</string>
     <string name="button_next">Next </string>
     <string name="otp_send_email">Enter email id</string>
     <string name="adding_new_site_progress_dialog">Adding New Site...</string>
     <string name="site_registration_failed_dialog_title">Site Registration Failed</string>
     <string name="invalid_email_address">Invalid Email Address</string>
+    <string name="invalid_billing_email_address">Invalid Billing Email Address</string>
     <string name="cannot_start_with_special_char_error">Cannot start with Special characters</string>
     <string name="special_chars_not_allowed_error">Special characters are not allowed</string>
     <string name="must_enter_value">Must enter Value"</string>
@@ -641,6 +643,7 @@
     <string name="retry">RETRY</string>
    <string name="failed_to_sync_data_to_cloud">Failed to sync data to cloud.Please check your internet connection and retry.
 </string>
+    <string name="facility_manager_email_checkbox">Same as Facility Manager</string>
     <!--Installer Option-->
     <string name="title_installeroption">Installer Options</string>
     <string name="pairingadd">Pairing Start Address </string>

@@ -17,7 +17,8 @@ class CCUBaseConfigurationBuilder(private val hayStack : CCUHsApi): DefaultEquip
                                    installerEmail : String,
                                    managerEmail : String,
                                    diagEquipId: String,
-                                   ccuConfigurationModelDef: ModelDirective
+                                   ccuConfigurationModelDef: ModelDirective,
+                                   billingAdminEmail: String
     ): String {
         CcuLog.i(Domain.LOG_TAG, "Creating CCU Base Configuration $ccuName")
         val siteRef = hayStack.siteIdRef.toString()

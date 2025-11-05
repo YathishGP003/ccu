@@ -10,7 +10,7 @@ data class PreconfigurationData (
     val siteAddress : SiteAddress,
     val fmEmail: String,
     val installerEmail: String,
-
+    val billingAdminEmail: String,
     val systemProfile : String,
     val relayMappingSet : List<String>,
 

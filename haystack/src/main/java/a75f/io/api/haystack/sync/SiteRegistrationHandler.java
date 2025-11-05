@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projecthaystack.HDict;
+import org.projecthaystack.HStr;
 
 import java.util.HashMap;
 
@@ -127,6 +128,14 @@ public class SiteRegistrationHandler {
                     siteCreationRequestJson.put(SiteFieldConstants.PRECONFIG_ID, preconfigurationId);
                 }
             }
+
+            String billingAdminEmail;
+            if(siteDict.has(CcuFieldConstants.BILLING_ADMIN_EMAIL)){
+                billingAdminEmail = siteDict.get(CcuFieldConstants.BILLING_ADMIN_EMAIL).toString();
+            } else {
+                billingAdminEmail = siteDict.get(SiteFieldConstants.FACILITY_MANAGER_EMAIL).toString();
+            }
+
             siteCreationRequestJson.put(SiteFieldConstants.ID, siteDict.get(SiteFieldConstants.ID));
             siteCreationRequestJson.put(SiteFieldConstants.AREA, siteDict.get(SiteFieldConstants.AREA));
             siteCreationRequestJson.put(SiteFieldConstants.DESCRIPTION, siteDict.dis());
@@ -138,6 +147,7 @@ public class SiteRegistrationHandler {
             siteCreationRequestJson.put(SiteFieldConstants.GEOPOSTALCODE, siteDict.get(SiteFieldConstants.GEOPOSTALCODE));
             siteCreationRequestJson.put(SiteFieldConstants.GEOSTATE, siteDict.get(SiteFieldConstants.GEOSTATE));
             siteCreationRequestJson.put(SiteFieldConstants.INSTALLER_EMAIL, siteDict.get(CcuFieldConstants.INSTALLER_EMAIL));
+            siteCreationRequestJson.put(SiteFieldConstants.BILLING_ADMIN_EMAIL, HStr.make(billingAdminEmail));
             siteCreationRequestJson.put(SiteFieldConstants.ORGANIZATION, siteDict.get(SiteFieldConstants.ORGANIZATION));
             siteCreationRequestJson.put(SiteFieldConstants.TIMEZONE, siteDict.get(SiteFieldConstants.TIMEZONE));
             siteCreationRequestJson.put(SiteFieldConstants.WEATHERREF, siteDict.get(SiteFieldConstants.WEATHERREF, false));

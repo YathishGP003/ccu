@@ -142,6 +142,10 @@ public class PreferenceUtil {
 
     private static final String MIGRATE_SYSTEM_TUNER_SYNC = "migrateMissingSystemTunerValues";
     private static final String MIGRATE_MODBUS_EQUIP_COM = "migrateModbusEquipComPort";
+
+    private static final String MIGRATE_BILLING_EMAIL_ADDRESS_STATUS = "migrateBillingEmailAddressStatus";
+
+
     public static void setContext(Context c) {
         context= c;
     }
@@ -1086,5 +1090,13 @@ public class PreferenceUtil {
     }
     public static void setModbusEquipComPortMigrationStatus() {
         setBooleanPreference(MIGRATE_MODBUS_EQUIP_COM, true);
+    }
+
+    public static boolean getBillingEmailAddressMigrationStatus() {
+        return getBooleanPreference(MIGRATE_BILLING_EMAIL_ADDRESS_STATUS);
+    }
+
+    public static void setBillingEmailAddressMigrationStatus() {
+        setBooleanPreference(MIGRATE_BILLING_EMAIL_ADDRESS_STATUS, true);
     }
 }

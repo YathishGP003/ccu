@@ -404,12 +404,12 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
             val universalMapping = MyStatConfiguration.UniversalMapping.values()
                 .find { it.ordinal == config.universalIn1Association.associationVal }
             when (universalMapping) {
-                MyStatConfiguration.UniversalMapping.DOOR_WINDOW_SENSOR_NC_TITLE24 -> {
+                MyStatConfiguration.UniversalMapping.TH_DOOR_WINDOW_SENSOR_NC_TITLE24 -> {
                     isDoorWindowMapped = 1.0
                     doorWindowSensorValue = equip.doorWindowSensorNCTitle24.readHisVal()
                 }
 
-                MyStatConfiguration.UniversalMapping.DOOR_WINDOW_SENSOR_TITLE24 -> {
+                MyStatConfiguration.UniversalMapping.AN_DOOR_WINDOW_SENSOR_TITLE24 -> {
                     isDoorWindowMapped = 1.0
                     doorWindowSensorValue = equip.doorWindowSensorTitle24.readHisVal()
                 }

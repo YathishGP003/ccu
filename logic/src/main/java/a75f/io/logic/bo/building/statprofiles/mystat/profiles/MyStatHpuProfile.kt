@@ -497,7 +497,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
 
     private fun runForKeyCardSensor(config: MyStatConfiguration, equip: MyStatEquip) {
         val isKeyCardEnabled = (config.universalIn1Enabled.enabled
-                && config.universalIn1Association.associationVal == MyStatConfiguration.UniversalMapping.KEY_CARD_SENSOR.ordinal)
+                && config.universalIn1Association.associationVal == MyStatConfiguration.UniversalMapping.AN_KEY_CARD_SENSOR.ordinal)
         keyCardIsInSlot((if (isKeyCardEnabled) 1.0 else 0.0), if (equip.keyCardSensor.readHisVal() > 0) 1.0 else 0.0, equip)
     }
 

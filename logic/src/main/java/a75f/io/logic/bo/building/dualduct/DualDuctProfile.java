@@ -369,12 +369,10 @@ public class DualDuctProfile extends ZoneProfile {
     }
     
     private void updateZoneStatus() {
-        
-        if(TemperatureProfileUtil.getStatus(dualDuctEquip.nodeAddr) != state.ordinal()) {
+
             TemperatureProfileUtil.setStatus(dualDuctEquip.nodeAddr, state.ordinal(),
                                              DabSystemController.getInstance().isEmergencyMode() &&
                                              (state == HEATING ? buildingLimitMinBreached() : state == COOLING ? buildingLimitMaxBreached() : false));
-        }
     }
     
     protected void setDamperLimits(Damper d, String heatCool) {

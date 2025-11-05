@@ -130,10 +130,8 @@ public class TemperatureProfileUtil {
     }
     
     public static void setStatus(int nodeAddr, double status, boolean emergency) {
-        if (getStatus(nodeAddr) != status ) {
             CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + nodeAddr + "\"", status);
-        }
-        
+
         String message;
         if (emergency) {
             message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
@@ -144,11 +142,8 @@ public class TemperatureProfileUtil {
                 message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
             }
         }
-        
-        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+nodeAddr+"\"");
-        if (!curStatus.equals(message)) {
+
             CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + nodeAddr + "\"", message);
-        }
     }
     
     public static void setScheduleStatus(int nodeAddr, String status)

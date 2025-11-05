@@ -5,6 +5,7 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.Tags
+import a75f.io.api.haystack.Tags.CREATED_BY_APPLICATION
 import a75f.io.api.haystack.Zone
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
@@ -327,14 +328,13 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         }
     }
     private fun deletePoints(entityConfiguration: EntityConfiguration, equipRef: String) {
-       runBlocking {
+        runBlocking {
             entityConfiguration.tobeDeleted.forEach { point ->
                 async(highPriorityDispatcher) {
-                    CcuLog.i(Domain.LOG_TAG, "deletePoint - ${point.domainName}")
-                    val existingPoint =
-                        hayStack.readEntity("domainName == \"" + point.domainName + "\" and equipRef == \"" + equipRef + "\"")
-                    if (existingPoint.isNotEmpty()) {
-                        hayStack.deleteEntity(existingPoint["id"].toString())
+                    val existingPoint = a75f.io.domain.api.Point(point.domainName, equipRef)
+                    if (existingPoint.pointExists() && existingPoint.getPoint()[CREATED_BY_APPLICATION]?.toString() != Tags.SITE_MANAGER) {
+                        CcuLog.i(Domain.LOG_TAG, "deletePoint - ${point.domainName}")
+                        hayStack.deleteEntity(existingPoint.id)
                     }
                 }.await()
             }

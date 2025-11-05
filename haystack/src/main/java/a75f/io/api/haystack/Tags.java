@@ -291,4 +291,6 @@ public class Tags
 
     public static final String PCN = "pcn";
     public static final String DEVICE_REF = "deviceRef";
+    public static final String CREATED_BY_APPLICATION = "createdByApplication";
+    public static final String SITE_MANAGER = "SITE_MANAGER";
 }

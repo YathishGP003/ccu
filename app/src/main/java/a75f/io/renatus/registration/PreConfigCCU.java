@@ -290,6 +290,7 @@ public class PreConfigCCU extends Fragment {
                         postMessage(e.getMessage());
                     } catch (Exception e) {
                         CcuLog.e(L.TAG_PRECONFIGURATION, "Preconfiguration failed: " + e.getMessage());
+                        e.printStackTrace();
                         PreconfigurationManager.INSTANCE.transitionTo(PreconfigurationState.Failed.INSTANCE);
                         postMessage("Preconfiguration failed: " + e.getMessage());
                     } finally {

@@ -5,16 +5,17 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.sync.CcuRegistrationHandler
-import a75f.io.domain.equips.BuildingEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.cutover.BuildingEquipCutOverMapping
+import a75f.io.domain.equips.BuildingEquip
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
-import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.ph.core.Tags
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 
 class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder() {
 
@@ -52,9 +53,13 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
     private fun createPoints(modelDef: ModelDirective, equipRef: String, siteRef: String) {
         val tz = hayStack.timeZone
         val equipDis = hayStack.readMapById(equipRef)["dis"].toString()
-        modelDef.points.forEach {
-            createPoint(PointBuilderConfig(it, null, equipRef, siteRef, tz, equipDis))
-            CcuLog.i(Domain.LOG_TAG," Created tuner point ${it.domainName}")
+        runBlocking {
+            modelDef.points.map { point ->
+                async(highPriorityDispatcher) {
+                    createPoint(PointBuilderConfig(point, null, equipRef, siteRef, tz, equipDis))
+                    CcuLog.i(Domain.LOG_TAG, " Created tuner point ${point.domainName}")
+                }
+            }
         }
     }
 

@@ -35,7 +35,7 @@ class CCUBaseConfigurationBuilder(private val hayStack : CCUHsApi): DefaultEquip
             Domain.checkSystemEquipInitialisedAndGetId()
         )
         createCCUEquip(ccuConfigurationModelDef, ccuName)
-        return ccuDeviceId
+        return ccuDeviceId.removePrefix("@")
     }
 
     fun createCCUEquip(ccuConfigurationModelDef: ModelDirective, ccuName: String) {

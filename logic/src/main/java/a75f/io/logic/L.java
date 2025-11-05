@@ -31,6 +31,13 @@ import a75f.io.util.ExecutorTask;
 
 public class L
 {
+    // External App package names
+    public static final String BAC_APP_PACKAGE_NAME = "io.seventyfivef.bacapp";
+    public static final String BAC_APP_PACKAGE_NAME_OBSOLETE = "com.example.ccu_bacapp";
+    public static final String REMOTE_ACCESS_PACKAGE_NAME = "io.seventyfivef.remoteaccess";
+    public static final String HOME_APP_PACKAGE_NAME = "com.x75frenatus.home";
+    public static final String HOME_APP_PACKAGE_NAME_OBSOLETE = "io.seventyfivef.home";
+
     public static final String TAG_CCU = "CCU";
     public static final String TAG_CCU_INIT = "CCU_INIT";
     public static final String TAG_CCU_UI = "CCU_UI";
@@ -62,11 +69,10 @@ public class L
     public static final String TAG_CCU_MESSAGING = "CCU_MESSAGING";
     public static final String TAG_CCU_COPY_CONFIGURATION = "CCU_COPY_CONFIGURATION";
     public static final String TAG_CCU_WEATHER = "CCU_WEATHER";
-    public static final String TAG_CCU_MIGRATION_UTIL = "MIGRATION_UTIL";
-    public static final String TAG_OTN = "CCU_OTN";
+    public static final String TAG_CCU_MIGRATION_UTIL = "CCU_MIGRATION_UTIL";
     public static final String TAG_CCU_BLE = "CCU_BLE";
     public static final String TAG_CCU_READ_CHANGES = "CCU_READ_CHANGES";
-    public static final String TAG_CCU_OTA_PROCESS= "OTA_PROCESS";
+    public static final String TAG_CCU_OTA_PROCESS= "CCU_OTA_PROCESS";
     public static final String TAG_CCU_AUTO_COMMISSIONING = "CCU_AUTO_COMMISSIONING";
     public static final String TAG_CCU_UPDATE = "CCU_UPDATE";
     public static final String TAG_SCHEDULABLE = "CCU_SCHEDULABLE";
@@ -97,30 +103,23 @@ public class L
     public static final String TAG_CCU_UI_PROFILING = "CCU_UI_PROFILING";
     public static final String TAG_CCU_DOMAIN = "CCU_DOMAIN";
     public static final String TAG_CCU_FILES = "CCU_FILES";
-    public static final String TAG_ZONE_SCHEDULE_SPILL = "ZONE_SCHEDULE_SPILL";
-
-    // External App package names
-    public static final String BAC_APP_PACKAGE_NAME = "io.seventyfivef.bacapp";
-    public static final String BAC_APP_PACKAGE_NAME_OBSOLETE = "com.example.ccu_bacapp";
-    public static final String REMOTE_ACCESS_PACKAGE_NAME = "io.seventyfivef.remoteaccess";
-    public static final String HOME_APP_PACKAGE_NAME = "com.x75frenatus.home";
-    public static final String HOME_APP_PACKAGE_NAME_OBSOLETE = "io.seventyfivef.home";
+    public static final String TAG_ZONE_SCHEDULE_SPILL = "CCU_ZONE_SCHEDULE_SPILL";
     public static final String TAG_CCU_BUNDLE = "CCU_BUNDLE";
 
-    public static final String TAG_CCU_LOGS_FILE_PATH = "TAG_CCU_LOGS_FILE_PATH";
-    public static final String TAG_CCU_LOGS_FILE_ID = "TAG_CCU_LOGS_FILE_ID";
-    public static final String TAG_SEQUENCER_LOGS_FILE_PATH = "TAG_SEQUENCER_LOGS_FILE_PATH";
-    public static final String TAG_SEQUENCER_LOGS_FILE_ID = "TAG_SEQUENCER_LOGS_FILE_ID";
-    public static final String TAG_ALERT_LOGS_FILE_PATH = "TAG_ALERT_LOGS_FILE_PATH";
-    public static final String TAG_ALERT_LOGS_FILE_ID = "TAG_ALERT_LOGS_FILE_ID";
+    public static final String TAG_CCU_LOGS_FILE_PATH = "CCU_LOGS_FILE_PATH";
+    public static final String TAG_CCU_LOGS_FILE_ID = "CCU_LOGS_FILE_ID";
+    public static final String TAG_SEQUENCER_LOGS_FILE_PATH = "CCU_SEQUENCER_LOGS_FILE_PATH";
+    public static final String TAG_SEQUENCER_LOGS_FILE_ID = "CCU_SEQUENCER_LOGS_FILE_ID";
+    public static final String TAG_ALERT_LOGS_FILE_PATH = "CCU_ALERT_LOGS_FILE_PATH";
+    public static final String TAG_ALERT_LOGS_FILE_ID = "CCU_ALERT_LOGS_FILE_ID";
 
     public static final String TAG_CCU_LOGS = "CCU_LOGS";
-    public static final String TAG_SEQUENCER_LOGS = "SEQUENCER_LOGS";
-    public static final String TAG_ALERT_LOGS = "ALERT_LOGS";
-    public static final String TAG_PRECONFIGURATION = "PRECONFIGURATION";
+    public static final String TAG_SEQUENCER_LOGS = "CCU_SEQUENCER_LOGS";
+    public static final String TAG_ALERT_LOGS = "CCU_ALERT_LOGS";
+    public static final String TAG_PRECONFIGURATION = "CCU_PRECONFIGURATION";
     public static final String TAG_CONNECT_NODE = "CCU_CONNECT_NODE";
     public static final String TAG_CCU_SEQUENCE_APPLY = "CCU_SEQUENCE_APPLY";
-    public static final String TAG_REGISTRATION = "REGISTRATION";
+    public static final String TAG_REGISTRATION = "CCU_REGISTRATION";
     public static final String TAG_CCU_POINT_SCHEDULE = "CCU_POINT_SCHEDULE";
     public static final String TAG_PCN = "CCU_PCN";
 
@@ -129,7 +128,7 @@ public class L
 
 
 
-    public static final String TAG_USB_MANAGER = "USB_MANAGER";
+    public static final String TAG_USB_MANAGER = "CCU_USB_MANAGER";
     public static Context app()
     {
         return Globals.getInstance().getApplicationContext();

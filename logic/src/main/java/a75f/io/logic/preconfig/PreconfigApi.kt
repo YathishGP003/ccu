@@ -146,14 +146,13 @@ fun createSystemEquip(
     val equipModel = ModelLoader.getDabStagedVfdRtuModelDef() as SeventyFiveFProfileDirective
     val profileConfiguration = StagedVfdRtuProfileConfig(equipModel).getDefaultConfiguration()
 
-    CcuLog.i("CCU_PRECONFIGURATION", "applyStagesToConfig")
+    CcuLog.i(L.TAG_PRECONFIGURATION, "applyStagesToConfig")
     applyStagesToConfig(
         profileConfiguration,
         enabledStages
     )
-    CcuLog.i("CCU_PRECONFIGURATION", "applyStagesToConfig Done")
+    CcuLog.i(L.TAG_PRECONFIGURATION, "applyStagesToConfig Done")
     val deviceModel = ModelLoader.getCMDeviceModel() as SeventyFiveFDeviceDirective
-
     val equipBuilder = ProfileEquipBuilder(hayStack)
     val entityMapper = EntityMapper(equipModel)
     val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
@@ -162,7 +161,7 @@ fun createSystemEquip(
     val equipId = equipBuilder.buildEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, equipDis)
 
     val deviceDis = hayStack.siteName +"-"+ deviceModel.name
-    CcuLog.i("CCU_PRECONFIGURATION", "buildDeviceAndPoints")
+    CcuLog.i(L.TAG_PRECONFIGURATION, "buildDeviceAndPoints")
     deviceBuilder.buildDeviceAndPoints(
         profileConfiguration,
         deviceModel,
@@ -171,7 +170,7 @@ fun createSystemEquip(
         deviceDis
     )
 
-    CcuLog.i("CCU_PRECONFIGURATION", "addSystemDomainEquip")
+    CcuLog.i(L.TAG_PRECONFIGURATION, "addSystemDomainEquip")
     DomainManager.addSystemDomainEquip(hayStack)
     DomainManager.addCmBoardDevice(hayStack)
     L.ccu().systemProfile = DabStagedRtuWithVfd()
@@ -185,7 +184,7 @@ private fun applyStagesToConfig(
     enabledStages: List<String>
 ) {
     enabledStages.filterNotNull().forEach { stage ->
-        CcuLog.i("CCU_PRECONFIGURATION", "applyStagesToConfig $stage")
+        CcuLog.i(L.TAG_PRECONFIGURATION, "applyStagesToConfig $stage")
         when (stage) {
             DomainName.coolingStage1 ->  {
                 profileConfiguration.relay1Enabled.enabled = true
@@ -222,7 +221,7 @@ private fun applyStagesToConfig(
             }
 
             else -> {
-                CcuLog.i("CCU_PRECONFIGURATION", "applyStagesToConfig $stage not supported")
+                CcuLog.i(L.TAG_PRECONFIGURATION, "applyStagesToConfig $stage not supported")
             }
         }
     }
@@ -265,7 +264,7 @@ fun createTerminalEquip(
     val entityMapper = EntityMapper(equipModel)
     val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
     val deviceDis = hayStack.siteName + deviceName + deviceAddress
-    CcuLog.i(Domain.LOG_TAG, " buildDeviceAndPoints")
+    CcuLog.i(L.TAG_PRECONFIGURATION, " building Device And Points for $deviceDis")
     deviceBuilder.buildDeviceAndPoints(
         profileConfiguration,
         deviceModel,
@@ -316,7 +315,6 @@ fun createBypassDamperEquip(deviceAddress: Int, floorRef: String, zoneRef: Strin
 fun doZoneConfig(hsZone: Zone ) {
     addSchedulableLimits(false, hsZone.id, hsZone.displayName)
     hsZone.setId(hsZone.getId())
-    DefaultSchedules.setDefaultCoolingHeatingTemp()
     val zoneSchedule = DefaultSchedules.generateDefaultZoneSchedule(hsZone.id)
     hsZone.scheduleRef = zoneSchedule
 

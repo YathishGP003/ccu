@@ -1119,9 +1119,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	public void fetchPoints()
 	{
-		if(getActivity() != null && L.ccu().systemProfile != null) {
+		Context context = getContext();
+		if(getActivity() != null && L.ccu().systemProfile != null && context != null) {
 			getActivity().runOnUiThread(() -> {
-				String colorHex = CCUUiUtil.getColorCode(getContext());
+				String colorHex = CCUUiUtil.getColorCode(context);
 				String status;
 				String cnStatus;
 				if (isDMSupportProfile()) {

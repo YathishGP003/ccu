@@ -107,7 +107,7 @@ object ModelCache {
         CcuLog.i(Domain.LOG_TAG, "hyperstat split device model loaded")
 
         modelContainer[MODEL_CONNECT_DEVICE] = getModelById(MODEL_CONNECT_DEVICE)
-        CcuLog.i(Domain.LOG_TAG, "cmBoardDevice loaded")
+        CcuLog.i(Domain.LOG_TAG, "connectDevice loaded")
 
         modelContainer[MODEL_OTN_DEVICE] = getModelById(MODEL_OTN_DEVICE)
         CcuLog.i(Domain.LOG_TAG, "otnDevice loaded")
@@ -192,6 +192,9 @@ object ModelCache {
 
         modelContainer[MODEL_DEFAULT_SYSTEM_PROFILE] = getModelById(MODEL_DEFAULT_SYSTEM_PROFILE)
         CcuLog.i(Domain.LOG_TAG, "Default System Profile model loaded")
+
+        modelContainer[MODEL_DAB_STAGED_VFD_RTU] = getModelById(MODEL_DAB_STAGED_VFD_RTU)
+        CcuLog.i(Domain.LOG_TAG, "DabStagedVfd model loaded")
     }
 
     private fun loadBypassDamperModels() {

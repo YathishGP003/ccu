@@ -5,12 +5,15 @@ import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Queries
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.schedule.BuildingOccupancy
+import a75f.io.domain.util.highPriorityDispatcher
 import a75f.io.logger.CcuLog
+import a75f.io.logic.DefaultSchedules
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd
-import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.tuners.TunerEquip.initialize
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.projecthaystack.client.HClient
 
 class PreconfigurationHandler {
@@ -47,19 +50,26 @@ class PreconfigurationHandler {
             ccuHsApi
         )
         CcuLog.i(L.TAG_PRECONFIGURATION,"Created CCU with ID: $ccuId")
-
         initialize(ccuHsApi, false)
-        CcuLog.i(L.TAG_PRECONFIGURATION,"Initialised Building Equipment")
-        if (ccuHsApi.readEntity(Queries.BUILDING_OCCUPANCY).isEmpty()) {
-            BuildingOccupancy.buildDefaultBuildingOccupancy()
+        CcuLog.i(L.TAG_PRECONFIGURATION, "Initialised Building Equipment")
+
+        runBlocking {
+            withContext(highPriorityDispatcher) {
+                DefaultSchedules.setDefaultCoolingHeatingTemp()
+                if (ccuHsApi.readEntity(Queries.BUILDING_OCCUPANCY).isEmpty()) {
+                    BuildingOccupancy.buildDefaultBuildingOccupancy()
+                }
+                CcuLog.i(L.TAG_PRECONFIGURATION, "Building Occupancy created")
+                ccuHsApi.importNamedScheduleWithOrg(
+                    HClient(ccuHsApi.hsUrl, HayStackConstants.USER, HayStackConstants.PASS),
+                    preconfigData.orgName
+                )
+                //highPriorityDispatcher.close()
+            }
         }
+        CcuLog.i(L.TAG_PRECONFIGURATION, "importing named schedule")
 
-        CcuLog.i(L.TAG_PRECONFIGURATION,"Building Occupancy created")
-        ccuHsApi.importNamedScheduleWithOrg(
-            HClient(ccuHsApi.hsUrl, HayStackConstants.USER, HayStackConstants.PASS),
-            preconfigData.orgName
-        )
-
+        CcuLog.i(L.TAG_PRECONFIGURATION,"creating system equip")
         val systemEquipId = createSystemEquip(
             preconfigData.relayMappingSet,
             ccuHsApi
@@ -83,26 +93,10 @@ class PreconfigurationHandler {
             )
             CcuLog.i(L.TAG_PRECONFIGURATION, "Created Floor with ID: $floorId")
 
-            for (zone in preconfigData.zones) {
-                val zoneId = createZone(
-                    zone,
-                    floorId,
-                    siteId,
-                    ccuHsApi
-                )
-                CcuLog.i(L.TAG_PRECONFIGURATION, "Created Zone with ID: $zoneId")
-                val equipId = createTerminalEquip(
-                    "dabSmartNode", //TODO
-                    floorId,
-                    zoneId,
-                    L.generateSmartNodeAddress().toInt(),
-                    NodeType.SMART_NODE,
-                    ccuHsApi
-                )
-                CcuLog.i(L.TAG_PRECONFIGURATION, "Created Terminal Equip with ID: $equipId")
-
-                DesiredTempDisplayMode.setModeType(zoneId, ccuHsApi)
+            runBlocking {
+                PreConfigZoneUtil.createAllZones(preconfigData, floorId, siteId, ccuHsApi)
             }
+            CcuLog.i(L.TAG_PRECONFIGURATION, "All zones and terminal equips created successfully")
         }
         else
         {

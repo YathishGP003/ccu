@@ -120,6 +120,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
             {
                 mBLEProvisionService.retryCount = 1;
                 mBLEProvisionService.connect(mDevice.getAddress());
+                CcuLog.i(L.TAG_CCU_BLE, "BLE Service Connected for "+ mDevice.getAddress());
             }
         }
         
@@ -130,6 +131,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
             mBLEProvisionService.disconnect();
             mBLEProvisionService.close();
             mBLEProvisionService = null;
+            CcuLog.i(L.TAG_CCU_BLE, "BLE Service disconnected");
         }
     };
     @BindView(R.id.ble_dialog_enter_pin_textview)
@@ -211,6 +213,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
         if (mBLEProvisionService != null){
             mBLEProvisionService.disconnect();
             mBLEProvisionService = null;
+            CcuLog.i(L.TAG_CCU_BLE, "UI no longer visible, so stopping BLE service");
         }
     }
 
@@ -252,7 +255,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
     @OnClick(R.id.ble_dialog_done_button)
     void done()
     {
-        if (mGattPin == null) {
+        if (mGattPin == null || mBLEProvisionService == null) {
             Toast.makeText(FragmentBLEDevicePin.this
                                .getActivity(), "BLE module disconnected. Please try again!", Toast.LENGTH_LONG)
                  .show();

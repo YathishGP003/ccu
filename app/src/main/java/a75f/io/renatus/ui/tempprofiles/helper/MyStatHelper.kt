@@ -1,5 +1,6 @@
 package a75f.io.renatus.ui.tempprofiles.helper
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Schedule
 import a75f.io.domain.api.Domain
@@ -512,6 +513,12 @@ class MyStatHelper(
     }
 
     override fun refreshSchedules() {
+        // some times this is called before equip is created
+        val equipDict = CCUHsApi.getInstance().readHDictById(equip.getId())
+        if (equipDict == null || equipDict.isEmpty) {
+            CcuLog.e(L.TAG_CCU_ZONE, "Failed to refresh schedules: Equip dictionary is null or empty for equip id ${equip.getId()}")
+            return
+        }
         val schedule = getSchedule()
         tempProfileViewModel.setSchedule(schedule)
 

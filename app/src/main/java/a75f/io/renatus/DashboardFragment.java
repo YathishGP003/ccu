@@ -65,7 +65,11 @@ public class DashboardFragment extends Fragment implements DashboardRefreshListe
 
 	private void dashboardView() {
 		if(DashboardUtilKt.isDashboardConfig(Globals.getInstance().getApplicationContext())) {
-			ProgressDialogUtils.showProgressDialog(getActivity(),requireContext().getString(R.string.loading_dashboard));
+			if(DashboardFragment.this.getUserVisibleHint() && DashboardFragment.this.isVisible()) {
+				ProgressDialogUtils.showProgressDialog(getActivity(), requireContext().getString(R.string.loading_dashboard));
+			} else {
+				CcuLog.d(DASHBOARD, "DashboardFragment is not visible, so progress bar not shown");
+			}
 			emptyDashboard.setVisibility(View.GONE);
 			webView.setVisibility(View.VISIBLE);
 			// Configure WebView settings
@@ -128,14 +132,7 @@ public class DashboardFragment extends Fragment implements DashboardRefreshListe
 
 	@Override
 	public void refreshDashboard(boolean isDashboardConfigured) {
-		CcuLog.d(DASHBOARD, "onDashboardConfigured: " + isDashboardConfigured);
-
-		if(DashboardFragment.this.getUserVisibleHint() && DashboardFragment.this.isVisible()) {
-			CcuLog.d(DASHBOARD, "onDashboardConfigured: DashboardFragment is  visible");
+		CcuLog.d(DASHBOARD, "Refreshing dashboard " + isDashboardConfigured);
 			dashboardView();
-		}
-		else {
-			CcuLog.d(DASHBOARD, "onDashboardConfigured: DashboardFragment is not visible");
-		}
 	}
 }

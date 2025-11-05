@@ -158,7 +158,9 @@ import a75f.io.logic.util.PreferenceUtil.setMigrateDeleteRedundantOaoPointsBySys
 import a75f.io.logic.util.PreferenceUtil.setModbusKvtagsDataTypeUpdate
 import a75f.io.logic.util.addEquipScheduleStatusPoint
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.ETHERNET
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.NETWORK_INTERFACE
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.WIFI
 import a75f.io.logic.util.modifyConditioningMode
 import a75f.io.logic.util.modifyFanMode
 import android.content.Context
@@ -776,13 +778,13 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             when {
                 ethernetAvailable && wifiAvailable -> {
                     // If both Ethernet and Wi-Fi are available, prefer Ethernet
-                    networkObject.put(NETWORK_INTERFACE, "Ethernet")
+                    networkObject.put(NETWORK_INTERFACE, ETHERNET)
                 }
                 ethernetAvailable -> {
-                    networkObject.put(NETWORK_INTERFACE, "Ethernet")
+                    networkObject.put(NETWORK_INTERFACE, ETHERNET)
                 }
                 wifiAvailable -> {
-                    networkObject.put(NETWORK_INTERFACE, "Wifi")
+                    networkObject.put(NETWORK_INTERFACE, WIFI)
                 }
                 else -> {
                     CcuLog.e(TAG_CCU_MIGRATION_UTIL, "No network interfaces available")

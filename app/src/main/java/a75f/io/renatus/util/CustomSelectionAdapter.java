@@ -21,6 +21,7 @@ import a75f.io.renatus.R;
 public class CustomSelectionAdapter<T> extends ArrayAdapter<T> {
     private Context context;
     private int configuredIndex;
+    private int ipConnectedState;
     private boolean isIpAddressSpinner;
     private List<T> values;
     public CustomSelectionAdapter(Context context, int textViewResourceId, List<T> values, boolean isIpAddressSpinner) {
@@ -29,6 +30,7 @@ public class CustomSelectionAdapter<T> extends ArrayAdapter<T> {
         this.values = values;
         this.isIpAddressSpinner = isIpAddressSpinner;
         this.configuredIndex = 2; // default value mapped to Normal
+        this.ipConnectedState = -1; // default value mapped to disconnected
     }
 
     @Override
@@ -54,36 +56,39 @@ public class CustomSelectionAdapter<T> extends ArrayAdapter<T> {
                 row = inflater.inflate(R.layout.custom_spinner_view, parent, false);
                 TextView ipAddress = row.findViewById(R.id.spinnerFirstTextView);
                 TextView typeName = row.findViewById(R.id.spinnerSecondTextView);
+                TextView connectedStateText = row.findViewById(R.id.spinnerThirdTextView);
                 if (item.contains("(") && item.contains(")")) {
                     // Split the item into IP address and network type
-                    String[] parts = item.split(" \\(");
+                    String[] parts = item.split(" ");
                     String ip = parts[0];
-                    String type = "(" + parts[1];
+                    String type = parts[1];
 
                     // Set the IP address and type to respective TextViews
                     ipAddress.setText(ip.trim());
                     typeName.setText(type.trim());
+                    if (position == ipConnectedState) {
+                        connectedStateText.setVisibility(View.VISIBLE);
+                    }
+                    row.setBackgroundResource(R.drawable.custmspinner);
                 } else {
                     // In case the item is not formatted as expected
                     ipAddress.setText(item);
                     typeName.setText("");
                 }
                 row.setPadding(10, 0, 10, 0);
-                row.setBackgroundResource(R.drawable.custmspinner);
             } else {
                 row = inflater.inflate(R.layout.custom_dropdown_item_text_only, parent, false);
                 TextView textView = row.findViewById(R.id.textView);
                 if (item.contains("(") && item.contains(")")) {
-                    String[] parts = item.split(" \\(");
+                    String[] parts = item.split(" ");
                     String ip = parts[0]; // The IP address part
-
                     // Create a SpannableString to apply different colors
                     SpannableString spannable = new SpannableString(item);
                     spannable.setSpan(new ForegroundColorSpan(Color.BLACK), 0, ip.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     spannable.setSpan(new ForegroundColorSpan(Color.GRAY), ip.length(), item.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     textView.setText(spannable);
                 } else {
-                    textView.setText(item);
+                    textView.setText("Select");
                 }
                 textView.setTextSize(20);
                 textView.setMaxLines(1);
@@ -129,6 +134,10 @@ public class CustomSelectionAdapter<T> extends ArrayAdapter<T> {
 
     public int getConfiguredIndex(){
         return configuredIndex;
+    }
+
+    public void setIpConnectedState(int index){
+        this.ipConnectedState = index;
     }
 
 }

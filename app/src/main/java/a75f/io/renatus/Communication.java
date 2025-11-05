@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import static a75f.io.logic.L.TAG_CCU_BACNET_MSTP;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.APDU_SEGMENT_TIMEOUT;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.APDU_TIMEOUT;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.AVAILABLE_IP_ADDRESSES;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_BBMD_CONFIGURATION;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_BBMD_CONFIGURATION_BACKUP;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
@@ -19,6 +20,7 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_A
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_STOP;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.DESCRIPTION;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.EMPTY_STRING;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.ETHERNET;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_ADDRESS;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME;
@@ -41,6 +43,7 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_MAX_MAST
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_DEVICE_ID;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_SOURCE_ADDRESS;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.VIRTUAL_NETWORK_NUMBER;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.WIFI;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.ZONE_TO_VIRTUAL_DEVICE_MAPPING;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.cancelScheduleJobToResubscribeBacnetMstpCOV;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.sendBroadCast;
@@ -50,6 +53,7 @@ import static a75f.io.renatus.UtilityApplication.context;
 import static a75f.io.renatus.UtilityApplication.startRestServer;
 import static a75f.io.renatus.UtilityApplication.stopRestServer;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
@@ -103,8 +107,12 @@ import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
@@ -144,7 +152,8 @@ import butterknife.ButterKnife;
 public class Communication extends Fragment implements MstpDataInterface {
 
 
-    private String deviceIpAddress = "";
+    private Pair<String,Boolean> deviceIpAddress = new Pair<>("",true);
+    private String networkInterface = "";
     private int portNumber = 47808;
     private short subnetMask = 1;
     private int bacnetConfigSelectedPosition = 2; // Default value mapped to Normal
@@ -279,6 +288,8 @@ public class Communication extends Fragment implements MstpDataInterface {
 
     @BindView(R.id.iv_refresh_ip)
     ImageView ivRefreshView;
+
+    @BindView(R.id.iv_ipConnectedState) ImageView ivIpConnectedState;
 
     @BindView(R.id.tvBacAppVersion) TextView tvBacAppVersion;
 
@@ -1074,7 +1085,9 @@ public class Communication extends Fragment implements MstpDataInterface {
 
     private boolean validateEntries() {
 
-        if(deviceIpAddress.equals(EMPTY_STRING) || (!CCUUiUtil.isValidIPAddress(deviceIpAddress.toString().trim()))) return false;
+        if(deviceIpAddress.first.equals(EMPTY_STRING) || (!CCUUiUtil.isValidIPAddress(deviceIpAddress.first.toString().trim()))) return false;
+
+        if (deviceIpAddress.second) return false; // Check if device notConnected state was true
 
         if(localNetworkNumber.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(localNetworkNumber.getText().toString()), 1, 65534, 1)))  return false;
 
@@ -1418,6 +1431,15 @@ public class Communication extends Fragment implements MstpDataInterface {
             if (!HttpServer.Companion.getInstance(context).isServerRunning()) {
                 startRestServer();
             }
+
+            try {
+                networkObject.put(NETWORK_INTERFACE, networkInterface);
+                networkObject.put(IP_ADDRESS, deviceIpAddress.first.trim());
+                sharedPreferences.edit().putString(BACNET_CONFIGURATION, config.toString()).apply();
+            } catch (Exception e) {
+                CcuLog.e(TAG_CCU_BACNET,"Exception while updating network object "+e);
+            }
+
             sharedPreferences.edit().putBoolean(IS_BACNET_INITIALIZED, true).apply();
             BacnetUtilKt.launchBacApp(context, BROADCAST_BACNET_APP_START, "Start BACnet App", ipDeviceInstanceNumber.getText().toString(),false);
             performConfigFileBackup();
@@ -1464,9 +1486,11 @@ public class Communication extends Fragment implements MstpDataInterface {
             executorService.shutdown();
         }
     }
+    @SuppressLint("ClickableViewAccessibility")
     private void getIpAddress() {
-        ArrayList<String> ipAddresses = new ArrayList<>();
-        ArrayList<Pair<String,Short>> ipData = new ArrayList<>();
+        ArrayList<String> ipAddresses = new ArrayList<>(); // Final Modified List of IP Addresses shared to drop down list
+        ArrayList<Pair<String,Short>> ipData = new ArrayList<>(); // List to hold IP addresses with subnet masks
+        HashMap<String,String> ipDataMap = new HashMap<>(); // Temporary map to hold network type and corresponding IP address which is connected to CCU
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
@@ -1481,10 +1505,10 @@ public class Communication extends Fragment implements MstpDataInterface {
                         InetAddress addr = addresses.nextElement();
                         if (!addr.isLoopbackAddress() && addr.getHostAddress().indexOf(':') == -1) {
                             CcuLog.d(Tags.BACNET, "device interface and ip " + iface.getDisplayName() + " - " + addr.getHostAddress());
-                            String networkType = iface.getName().startsWith("eth") ? "Ethernet" : "Wi-Fi";
+                            String networkType = iface.getName().startsWith("eth") ? ETHERNET : "Wi-Fi";
                             String item = addr.getHostAddress() + " (" + networkType + ")";
-                            if (!ipAddresses.contains(item)) { // Avoid duplicate items
-                                ipAddresses.add(item);
+                            if (!ipDataMap.containsKey(networkType)) { // Avoid duplicate entries
+                                ipDataMap.put(networkType, addr.getHostAddress());
                             }
 
                             for (InterfaceAddress interfaceAddress : iface.getInterfaceAddresses()) {
@@ -1503,65 +1527,167 @@ public class Communication extends Fragment implements MstpDataInterface {
             e.printStackTrace();
         }
 
-        // If no addresses are found, add a default message
-        if (ipAddresses.isEmpty()) {
-            ipAddresses.add("No Network interfaces");
-        }
-
-        // Update the spinner with the dynamically fetched IP addresses
-        ArrayAdapter<String> adapter = new CustomSelectionAdapter<>(this.requireContext(),R.layout.custom_spinner_view,ipAddresses,true);
-        ipAddressSpinner.setAdapter(adapter);
-
+        String ipAddressString = "";
         try {
-            if (ipAddresses.size() > 1 ) { // We needs to Maintain the selection if we have 2 items
-                String networkInterface = networkObject.get(NETWORK_INTERFACE).toString();
-                if(!networkInterface.isEmpty()) {
-                    for(String item : ipAddresses) {
-                        if(item.contains(networkInterface) || (networkInterface.equals("Wifi") && item.contains("Wi-Fi"))) {
-                            ipAddressSpinner.setSelection(ipAddresses.indexOf(item));
-                            break;
-                        }
-                    }
-                } else {
-                    for(String item : ipAddresses) {
-                        if(item.contains("Ethernet")) {
-                            ipAddressSpinner.setSelection(ipAddresses.indexOf(item));
-                            break;
-                        }
-                    }
-                }
-            }
+            networkInterface = networkObject.get(NETWORK_INTERFACE).toString();
+            ipAddressString = networkObject.get(IP_ADDRESS).toString();
         } catch (JSONException e) {
             CcuLog.e(TAG_CCU_BACNET, "Exception while fetching network object "+ e);
         }
 
+            int ipAddressNotconnectedState = -1;
+            HashSet listOfAvailableIpInPreference = (HashSet) sharedPreferences.getStringSet(AVAILABLE_IP_ADDRESSES, new HashSet<>());
+            if (listOfAvailableIpInPreference.isEmpty()) {
+                // First time saving the available IP addresses
+
+                    if(ipDataMap.containsKey("Wi-Fi")) {
+                        String temp = ipDataMap.getOrDefault("Wi-Fi","");
+                        if (!temp.isEmpty()) {
+                            ipAddresses.add(temp + " (Wi-Fi)");
+                        }
+                    } else if (networkInterface.equals(WIFI)) {
+                        // If previously selected network interface is Wi-Fi but it's not available now
+
+                        if (!ipAddressString.isEmpty()) {
+                            deviceIpAddress = new Pair<>(ipAddressString, false);
+                        }
+                        if (!deviceIpAddress.first.isEmpty()) {
+                            ipAddresses.add(deviceIpAddress.first + " (Wi-Fi)");
+                            ipAddressNotconnectedState = ipAddresses.size() - 1;
+                        }
+                    }
+                    if(ipDataMap.containsKey(ETHERNET)) {
+                        String temp = ipDataMap.getOrDefault(ETHERNET,"");
+                        if (!temp.isEmpty()) {
+                            ipAddresses.add(temp + " ("+ETHERNET+")");
+                        }
+                    } else if (networkInterface.equals(ETHERNET)) {
+                        // If previously selected network interface is Ethernet but it's not available now
+                        if (!ipAddressString.isEmpty()) {
+                            deviceIpAddress = new Pair<>(ipAddressString, false);
+                        }
+                        if (!deviceIpAddress.first.isEmpty()) {
+                            ipAddresses.add(deviceIpAddress.first + " ("+ETHERNET+")");
+                            ipAddressNotconnectedState = ipAddresses.size()-1;
+                        }
+                    }
+            } else if (ipDataMap.isEmpty()) {
+                // No available IP addresses found
+                CcuLog.d(TAG_CCU_BACNET, "No available IP addresses found.");
+                for (Object ip : listOfAvailableIpInPreference) {
+                    String ipStr = (String) ip;
+                    if ((networkInterface.equals(WIFI) && ipStr.contains("Wi-Fi")) ||
+                            (networkInterface.equals(ETHERNET) && ipStr.contains(ETHERNET))) {
+                        ipAddresses.add(ipStr);
+                        ipAddressNotconnectedState = 0;
+                    }
+                }
+            } else {
+                    // There are changes in the available IP addresses
+                    CcuLog.d(TAG_CCU_BACNET, "Available IP addresses have changed.");
+                    for (Object ip : listOfAvailableIpInPreference) {
+                        String ipStr = (String) ip;
+                        if(ipStr.contains("Wi-Fi")) {
+                            String temp = ipDataMap.getOrDefault("Wi-Fi","");
+                            if (!temp.isEmpty()) {
+                              ipAddresses.add(temp + " (Wi-Fi)");
+                              ipDataMap.remove("Wi-Fi");
+                            } else if (networkInterface.equals(WIFI)) {
+                                ipAddresses.add(ipStr); // Retain the old IP if the new one is not found
+                                ipAddressNotconnectedState = ipAddresses.size()-1;
+                            }
+                        } else if (ipStr.contains(ETHERNET)) {
+
+                            String temp = ipDataMap.getOrDefault(ETHERNET,"");
+                            if (!temp.isEmpty()) {
+                                ipAddresses.add(temp + " ("+ETHERNET+")");
+                                ipDataMap.remove(ETHERNET);
+                            } else if (networkInterface.equals(ETHERNET)) {
+                                ipAddresses.add(ipStr); // Retain the old IP if the new one is not found
+                                ipAddressNotconnectedState = ipAddresses.size()-1;
+                            }
+                        }
+                    }
+
+                    for (String remainingIp : ipDataMap.values()) {
+                        if (!remainingIp.isEmpty()) {
+                            String networkType = ipDataMap.entrySet().stream()
+                                    .filter(entry -> entry.getValue().equals(remainingIp))
+                                    .map(Map.Entry::getKey)
+                                    .findFirst()
+                                    .orElse("");
+                            ipAddresses.add(remainingIp + " (" + networkType + ")");
+                        }
+                    }
+            }
+
+
+        // If no addresses are found, add a default message
+        if (ipAddresses.isEmpty()) {
+            ipAddresses.add("No Network interfaces");
+            ipAddressNotconnectedState = -1;
+        } else {
+            sharedPreferences.edit().putStringSet(AVAILABLE_IP_ADDRESSES, new HashSet<>(ipAddresses)).apply();
+        }
+
+        // Update Ip Address device Connected state
+        if (ipAddressNotconnectedState != -1 ) {
+            ivIpConnectedState.setVisibility(View.VISIBLE);
+        } else {
+            ivIpConnectedState.setVisibility(View.INVISIBLE);
+        }
+        // Update the spinner with the dynamically fetched IP addresses
+        CustomSelectionAdapter<String> adapter = new CustomSelectionAdapter<>(this.requireContext(),R.layout.custom_spinner_view,ipAddresses,true);
+        adapter.setIpConnectedState(ipAddressNotconnectedState);
+        adapter.notifyDataSetChanged();
+        ipAddressSpinner.setAdapter(adapter);
+
+        if (ipAddresses.size() > 1 ) { // We needs to Maintain the selection if we have 2 items
+            if(!networkInterface.isEmpty()) {
+                for(String item : ipAddresses) {
+                    if(item.contains(networkInterface) || (networkInterface.equals(WIFI) && item.contains("Wi-Fi"))) {
+                        ipAddressSpinner.setSelection(ipAddresses.indexOf(item));
+                        break;
+                    }
+                }
+            } else {
+                for(String item : ipAddresses) {
+                    if(item.contains(ETHERNET)) {
+                        ipAddressSpinner.setSelection(ipAddresses.indexOf(item));
+                        break;
+                    }
+                }
+            }
+        }
+
+        int finalConnectedState = ipAddressNotconnectedState;
         ipAddressSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedIp = ipAddresses.get(position);
                 if(selectedIp.contains(" (")) {
-                    deviceIpAddress = selectedIp.substring(0, selectedIp.indexOf(" ("));
+                    deviceIpAddress = new Pair<>( selectedIp.substring(0, selectedIp.indexOf(" (")), finalConnectedState == position);
                 } else {
-                    deviceIpAddress = "";
+                    deviceIpAddress = new Pair<>( "", false);
                 }
-                CcuLog.d(TAG_CCU_BACNET," item selected -- > "+deviceIpAddress);
+                CcuLog.d(TAG_CCU_BACNET," item selected -- > "+deviceIpAddress.first);
 
                 try {
                     if (selectedIp.contains("Wi-Fi")) {
-                        networkObject.put(NETWORK_INTERFACE, "Wifi");
-                    } else if (selectedIp.contains("Ethernet")) {
-                        networkObject.put(NETWORK_INTERFACE, "Ethernet");
+                        networkInterface = WIFI;
+                    } else if (selectedIp.contains(ETHERNET)) {
+                        networkInterface = ETHERNET;
                     } else {
-                        networkObject.put(NETWORK_INTERFACE, "");
+                        networkInterface = "";
                     }
                 } catch (Exception e) {
                    CcuLog.e(TAG_CCU_BACNET,"Exception while updating network object "+e);
                 }
 
                 for (Pair<String,Short> pair : ipData) {
-                    if (pair.first.equals(deviceIpAddress)) {
+                    if (pair.first.equals(deviceIpAddress.first)) {
                         subnetMask = pair.second;
-                        CcuLog.d(TAG_CCU_BACNET, "Selected IP Address: " + deviceIpAddress + ", Subnet Mask: " + subnetMask);
+                        CcuLog.d(TAG_CCU_BACNET, "Selected IP Address: " + deviceIpAddress.first + ", Subnet Mask: " + subnetMask);
                         break;
                     }
                 }
@@ -1583,7 +1709,7 @@ public class Communication extends Fragment implements MstpDataInterface {
         }
         String selectedDeviceType = sharedPreferences.getString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_NORMAL);
         if (selectedDeviceType.equalsIgnoreCase(BACNET_DEVICE_TYPE_BBMD) || bacnetConfigSelectedPosition == BACnetConfigurationType.BBMD.ordinal()) {
-            fillBbmdView(new DataBbmd(deviceIpAddress, portNumber, subnetMask),0);
+            fillBbmdView(new DataBbmd(deviceIpAddress.first, portNumber, subnetMask),0);
         }
     }
 
@@ -1903,33 +2029,13 @@ public class Communication extends Fragment implements MstpDataInterface {
     }
 
     private void updateSelectedIpAddress() {
-        try {
-            if (!deviceIpAddress.trim().isEmpty()) {
-                CcuLog.i(TAG_CCU_BACNET, "Key: ipAddress, Value: " + ipAddressSpinner.getSelectedItem().toString() + ", isValid: " + CCUUiUtil.isValidIPAddress(deviceIpAddress));
-                if (!CCUUiUtil.isValidIPAddress(deviceIpAddress)) {
-                    initializeBACnet.setEnabled(false);
-                    initializeBACnet.setClickable(false);
-                    initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
-                } else {
-                    networkObject.put(IP_ADDRESS, deviceIpAddress.trim());
-                    sharedPreferences.edit().putString(BACNET_CONFIGURATION, config.toString()).apply();
-                    if (validateEntries()) {
-                        initializeBACnet.setEnabled(true);
-                        initializeBACnet.setClickable(true);
-
-                        TypedValue typedValue = new TypedValue();
-                        requireActivity().getTheme().resolveAttribute(R.attr.orange_75f, typedValue, true);
-                        int color = typedValue.data;
-                        initializeBACnet.setTextColor(color);
-                    } else {
-                        initializeBACnet.setEnabled(false);
-                        initializeBACnet.setClickable(false);
-                        initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
-                    }
-                }
+        if (!deviceIpAddress.first.trim().isEmpty()) {
+            CcuLog.i(TAG_CCU_BACNET, "Key: ipAddress, Value: " + ipAddressSpinner.getSelectedItem().toString() + ", isValid: " + CCUUiUtil.isValidIPAddress(deviceIpAddress.first));
+            if (!CCUUiUtil.isValidIPAddress(deviceIpAddress.first)) {
+                initializeBACnet.setEnabled(false);
+                initializeBACnet.setClickable(false);
+                initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
             } else {
-                networkObject.put(IP_ADDRESS, "");
-                sharedPreferences.edit().putString(BACNET_CONFIGURATION, config.toString()).apply();
                 if (validateEntries()) {
                     initializeBACnet.setEnabled(true);
                     initializeBACnet.setClickable(true);
@@ -1944,8 +2050,20 @@ public class Communication extends Fragment implements MstpDataInterface {
                     initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
                 }
             }
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+        } else {
+            if (validateEntries()) {
+                initializeBACnet.setEnabled(true);
+                initializeBACnet.setClickable(true);
+
+                TypedValue typedValue = new TypedValue();
+                requireActivity().getTheme().resolveAttribute(R.attr.orange_75f, typedValue, true);
+                int color = typedValue.data;
+                initializeBACnet.setTextColor(color);
+            } else {
+                initializeBACnet.setEnabled(false);
+                initializeBACnet.setClickable(false);
+                initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
+            }
         }
     }
 

@@ -5,8 +5,14 @@ import static a75f.io.alerts.model.AlertCauses.CCU_CRASH;
 import static a75f.io.api.haystack.Constants.TWENTY_FOUR_HOURS;
 import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
 import static a75f.io.logic.util.PreferenceUtil.getSyncStartTime;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.ETHERNET;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_ADDRESS;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_MSTP_INITIALIZED;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.NETWORK_INTERFACE;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.WIFI;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.reInitialiseBacnetStack;
 import static a75f.io.renatus.util.CCUUiUtil.UpdateAppRestartCause;
 
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.cancelScheduleJobToResubscribeBacnetMstpCOV;
@@ -24,6 +30,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.wifi.WifiManager;
+import android.preference.PreferenceManager;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
@@ -32,6 +39,8 @@ import com.raygun.raygun4android.RaygunClient;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -41,9 +50,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +68,7 @@ import javax.inject.Inject;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.bacnet.parser.BacnetRequestProcessor;
 import a75f.io.api.haystack.util.DatabaseAction;
 import a75f.io.api.haystack.util.DatabaseEvent;
@@ -138,6 +151,7 @@ public abstract class UtilityApplication extends Application implements Globals.
     private static Prefs prefs;
     public static BackgroundServiceInitiator backgroundServiceInitiator;
     private static ConnectivityManager.NetworkCallback ethernetCallback;
+    private static ConnectivityManager.NetworkCallback wifiCallback;
 
     @Override
     public void onCreate() {
@@ -203,6 +217,7 @@ public abstract class UtilityApplication extends Application implements Globals.
         cache.restoreOtaRequests(context);
         CCUUtils.setCCUReadyProperty("false");
         registerEthernetListener();
+        registerWifiListener();
         checkAndServerStatus();
         DashboardHandler.Companion.setDashboardListener(dashboardListener);
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
@@ -668,6 +683,7 @@ public abstract class UtilityApplication extends Application implements Globals.
             public void onAvailable(Network network) {
                 CcuLog.d(L.TAG_CCU, "Ethernet network connected");
                 initNetworkConfig();
+                updateBacnetIpAddressIfNetworkChanged(ETHERNET);
             }
             @Override
             public void onLost(Network network) {
@@ -686,6 +702,98 @@ public abstract class UtilityApplication extends Application implements Globals.
             CcuLog.e(L.TAG_CCU, "Error unregistering ethernet listener: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void registerWifiListener() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkRequest ethernetRequest = new NetworkRequest.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .build();
+        wifiCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(Network network) {
+                CcuLog.d(L.TAG_CCU, "Wifi network connected");
+                updateBacnetIpAddressIfNetworkChanged(WIFI);
+            }
+            @Override
+            public void onLost(Network network) {
+                CcuLog.d(L.TAG_CCU, "Wifi network lost");
+            }
+        };
+        connectivityManager.registerNetworkCallback(ethernetRequest, wifiCallback);
+    }
+    public static void unRegisterWifiListener() {
+        try {
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (wifiCallback != null) {
+                connectivityManager.unregisterNetworkCallback(wifiCallback);
+            }
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU, "Error unregistering wifi listener: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void updateBacnetIpAddressIfNetworkChanged(String networkType) {
+        CcuLog.d(L.TAG_CCU, "Checking for network change for " + networkType);
+        if (isBACnetIntialized()) {
+            String confString = PreferenceManager.getDefaultSharedPreferences(context).getString(BACNET_CONFIGURATION, "");
+            JSONObject config;
+            JSONObject networkObject;
+            try {
+                config = new JSONObject(confString);
+                networkObject = config.getJSONObject("network");
+                String networkInterfaceFromConfig = networkObject.get(NETWORK_INTERFACE).toString();
+                String ipAddressFromConfig = networkObject.get(IP_ADDRESS).toString();
+                CcuLog.d(L.TAG_CCU, "Network interface and Ip from config: " + networkInterfaceFromConfig + ", " + ipAddressFromConfig);
+
+                String ipAddress = getIpAddress(networkType);
+                CcuLog.d(L.TAG_CCU, "Current IP address for " + networkType + ": " + ipAddress);
+
+                if (networkType.equals(networkInterfaceFromConfig) && !ipAddress.isEmpty() && !ipAddress.equals(ipAddressFromConfig)) {
+                    CcuLog.i(L.TAG_CCU, "Network change found, updating BACnet IP address");
+                    networkObject.put(IP_ADDRESS, ipAddress);
+                    config.put("network", networkObject);
+                    PreferenceManager.getDefaultSharedPreferences(context).edit().putString(BACNET_CONFIGURATION, config.toString()).apply();
+                    CcuLog.i(L.TAG_CCU, "BACnet configuration updated with new IP address: " + ipAddress);
+                    reInitialiseBacnetStack();
+                } else {
+                    CcuLog.d(L.TAG_CCU, "No network change detected or IP address is already up-to-date");
+                }
+            } catch (JSONException e) {
+                CcuLog.d(L.TAG_CCU, "Error parsing BACnet configuration: " + e.getMessage());
+            }
+        } else {
+            CcuLog.d(L.TAG_CCU, "BACnet is not initialized, skipping network change check");
+        }
+    }
+
+    private String getIpAddress(String networkType) {
+        String networkInterface = networkType.equals(WIFI) ? "wlan" : "eth";
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface iface = interfaces.nextElement();
+                // filters out 127.0.0.1 and inactive interfaces
+                if (iface.isLoopback() || !iface.isUp()) {
+                    continue;
+                }
+
+                if (iface.getName().startsWith(networkInterface)) {
+                    Enumeration<InetAddress> addresses = iface.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        InetAddress addr = addresses.nextElement();
+                        if (!addr.isLoopbackAddress() && addr.getHostAddress().indexOf(':') == -1) {
+                            CcuLog.d(Tags.BACNET, "device interface and ip " + iface.getDisplayName() + " - " + addr.getHostAddress());
+                            return addr.getHostAddress();
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
     private void initNetworkConfig() {

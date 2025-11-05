@@ -47,10 +47,13 @@ object  BacnetConfigConstants {
     const val DESTINATION_PORT = "destinationPort"
     const val MAC_ADDRESS = "macAddress"
     const val DEVICE_NETWORK = "deviceNetwork"
+    const val AVAILABLE_IP_ADDRESSES = "availableIpAddresses"
 
     const val ZONE_TO_VIRTUAL_DEVICE_MAPPING = "zoneToVirtualDeviceMapping"
     //net work config constants
     const val IP_ADDRESS = "ipAddress"
+    const val ETHERNET = "Ethernet"
+    const val WIFI = "Wifi"
     const val LOCAL_NETWORK_NUMBER = "localNetNum"
     const val VIRTUAL_NETWORK_NUMBER = "virtualNetNum"
     const val PORT = "port"

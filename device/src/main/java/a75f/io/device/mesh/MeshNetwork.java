@@ -103,6 +103,9 @@ public class MeshNetwork extends DeviceNetwork
                         if (d.getMarkers().contains("modbus")) {
                           continue;
                         }
+                        if (d.getMarkers().contains("bacnet")) {
+                            continue;
+                        }
                         NodeType deviceType = NodeType.SMART_NODE;
                         if(d.getMarkers().contains("smartstat"))
                             deviceType = NodeType.SMART_STAT;

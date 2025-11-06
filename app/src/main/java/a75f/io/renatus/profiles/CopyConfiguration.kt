@@ -50,7 +50,7 @@ import kotlin.properties.Delegates
 
 class CopyConfiguration {
     companion object {
-
+        //
         private lateinit var config: ProfileConfiguration
         @SuppressLint("StaticFieldLeak")
         private val ccuHsApiInstance = CCUHsApi.getInstance()

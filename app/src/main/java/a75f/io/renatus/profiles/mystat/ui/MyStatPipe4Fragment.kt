@@ -152,13 +152,15 @@ class MyStatPipe4Fragment : MyStatFragment(),OnPairingCompleteListener {
                     universalOut1.association,
                     analogOut1MinMax.hotWaterValve,
                     MyStatPipe4AnalogOutMapping.HOT_MODULATING_VALUE.displayName,
-                    MyStatPipe4AnalogOutMapping.HOT_MODULATING_VALUE.ordinal, 1
+                    MyStatPipe4AnalogOutMapping.HOT_MODULATING_VALUE.ordinal, 1,
+                    isAnalogType = isMyStatV1DeviceType()
                 )
                 ConfigMinMax(
                     universalOut1.association,
                     analogOut1MinMax.chilledWaterValve,
                     MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.displayName,
-                    MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.ordinal, 1
+                    MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.ordinal, 1,
+                    isAnalogType = isMyStatV1DeviceType()
                 )
             }
             if (universalOut2.enabled) {
@@ -166,13 +168,15 @@ class MyStatPipe4Fragment : MyStatFragment(),OnPairingCompleteListener {
                     universalOut2.association,
                     analogOut2MinMax.chilledWaterValve,
                     MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.displayName,
-                    MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.ordinal, 2
+                    MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.ordinal, 2,
+                    isAnalogType = isMyStatV1DeviceType()
                 )
                 ConfigMinMax(
                     universalOut2.association,
                     analogOut2MinMax.hotWaterValve,
                     MyStatPipe4AnalogOutMapping.HOT_MODULATING_VALUE.displayName,
-                    MyStatPipe4AnalogOutMapping.HOT_MODULATING_VALUE.ordinal, 2
+                    MyStatPipe4AnalogOutMapping.HOT_MODULATING_VALUE.ordinal, 2,
+                    isAnalogType = isMyStatV1DeviceType()
                 )
             }
         }
@@ -185,13 +189,15 @@ class MyStatPipe4Fragment : MyStatFragment(),OnPairingCompleteListener {
                 universalOut1.association,
                 analogOut1MinMax.dcvDamperConfig,
                 MyStatPipe4AnalogOutMapping.DCV_DAMPER_MODULATION.displayName,
-                MyStatPipe4AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal, 1
+                MyStatPipe4AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal, 1,
+                isAnalogType = isMyStatV1DeviceType()
             )
             if (universalOut2.enabled) ConfigMinMax(
                 universalOut2.association,
                 analogOut2MinMax.dcvDamperConfig,
                 MyStatPipe4AnalogOutMapping.DCV_DAMPER_MODULATION.displayName,
-                MyStatPipe4AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal, 2
+                MyStatPipe4AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal, 2,
+                isAnalogType = isMyStatV1DeviceType()
             )
         }
     }
@@ -203,13 +209,15 @@ class MyStatPipe4Fragment : MyStatFragment(),OnPairingCompleteListener {
                 universalOut1.association,
                 analogOut1MinMax.fanSpeedConfig,
                 MyStatPipe4AnalogOutMapping.FAN_SPEED.displayName,
-                MyStatPipe4AnalogOutMapping.FAN_SPEED.ordinal, 1
+                MyStatPipe4AnalogOutMapping.FAN_SPEED.ordinal, 1,
+                isAnalogType = isMyStatV1DeviceType()
             )
             if (universalOut2.enabled) ConfigMinMax(
                 universalOut2.association,
                 analogOut2MinMax.fanSpeedConfig,
                 MyStatPipe4AnalogOutMapping.FAN_SPEED.displayName,
-                MyStatPipe4AnalogOutMapping.FAN_SPEED.ordinal, 2
+                MyStatPipe4AnalogOutMapping.FAN_SPEED.ordinal, 2,
+                isAnalogType = isMyStatV1DeviceType()
             )
         }
     }
@@ -218,15 +226,29 @@ class MyStatPipe4Fragment : MyStatFragment(),OnPairingCompleteListener {
     fun FanConfiguration() {
         (viewModel.viewState.value as MyStatPipe4ViewState).apply {
             if (universalOut1.enabled && universalOut1.association == MyStatPipe4AnalogOutMapping.FAN_SPEED.ordinal) {
-                MinMaxConfiguration(
-                    minLabel = getString(R.string.universal_out1_Fan_Low),
-                    maxLabel = getString(R.string.universal_out1_Fan_high),
-                    itemList = testVoltage,
-                    unit = "%",
-                    minDefault = analogOut1FanConfig.low.toString(),
-                    maxDefault = analogOut1FanConfig.high.toString(),
-                    onMinSelected = { analogOut1FanConfig.low = it.value.toInt() },
-                    onMaxSelected = { analogOut1FanConfig.high = it.value.toInt() })
+                if (!isMyStatV1DeviceType()) {
+                    MinMaxConfiguration(
+                        minLabel = getString(R.string.universal_out1_Fan_Low),
+                        maxLabel = getString(R.string.universal_out1_Fan_high),
+                        itemList = testVoltage,
+                        unit = "%",
+                        minDefault = analogOut1FanConfig.low.toString(),
+                        maxDefault = analogOut1FanConfig.high.toString(),
+                        onMinSelected = { analogOut1FanConfig.low = it.value.toInt() },
+                        onMaxSelected = { analogOut1FanConfig.high = it.value.toInt() })
+                }
+                else
+                {
+                    MinMaxConfiguration(
+                        minLabel = getString(R.string.analog_out_fan_low),
+                        maxLabel = getString(R.string.analog_out_fan_high),
+                        itemList = testVoltage,
+                        unit = "%",
+                        minDefault = analogOut1FanConfig.low.toString(),
+                        maxDefault = analogOut1FanConfig.high.toString(),
+                        onMinSelected = { analogOut1FanConfig.low = it.value.toInt() },
+                        onMaxSelected = { analogOut1FanConfig.high = it.value.toInt() })
+                }
             }
             if (universalOut2.enabled && universalOut2.association == MyStatPipe4AnalogOutMapping.FAN_SPEED.ordinal) {
                 MinMaxConfiguration(

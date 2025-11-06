@@ -116,7 +116,7 @@ public class CCUTagsDb extends HServer {
 
     private static final String PREFS_HAS_MIGRATED_GUID = "hasMigratedGuid";
     private static final String BROADCAST_BACNET_ZONE_ADDED = "a75f.io.renatus.BACNET_ZONE_ADDED";
-    private static final String BROADCAST_BACNET_POINT_ADDED = "a75f.io.renatus.BACNET_POINT_ADDED";
+    public static final String BROADCAST_BACNET_POINT_ADDED = "a75f.io.renatus.BACNET_POINT_ADDED";
 
     private static final String BROADCAST_BACNET_POINT_UPDATED = "a75f.io.renatus.BACNET_POINT_UPDATED";
     private static final String TAG_CCU_BACNET = "CCU_BACNET";

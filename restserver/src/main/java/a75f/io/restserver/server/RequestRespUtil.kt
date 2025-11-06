@@ -1,15 +1,11 @@
 package a75f.io.restserver.server
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.logger.CcuLog
 import a75f.io.logic.util.bacnet.BacnetConfigConstants
 import org.json.JSONException
 import org.json.JSONObject
-import org.projecthaystack.HDict
-import org.projecthaystack.HDictBuilder
-import org.projecthaystack.HGrid
-import org.projecthaystack.HRow
-import org.projecthaystack.HVal
+import org.projecthaystack.*
+import org.projecthaystack.io.HZincWriter
 import kotlin.math.abs
 
 fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: String): MutableList<HDict> {
@@ -255,4 +251,24 @@ fun isVirtualZoneEnabled() : Boolean{
         }
     }
     return isVirtualZoneEnabled
+}
+
+fun createRowWithMinValue(minVal : Double): String {
+    val b = HGridBuilder()
+    b.addCol("level")
+    b.addCol("val")
+    b.addCol("who")
+    b.addCol("duration")
+    b.addCol("lastModifiedDateTime")
+
+    val level = 16
+    b.addRow(arrayOf(
+            HNum.make(level),
+            HNum.make(minVal),
+            HStr.make("ccu"),
+            HNum.make("0.0".toDouble()),
+            HDateTime.make(System.currentTimeMillis())
+    ))
+
+    return HZincWriter.gridToString(b.toGrid())
 }

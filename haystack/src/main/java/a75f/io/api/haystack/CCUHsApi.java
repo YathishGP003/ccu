@@ -104,7 +104,7 @@ public class CCUHsApi
     public static boolean CACHED_HIS_QUERY = false ;
     private static CCUHsApi instance;
     private static final String PREFS_HAS_MIGRATED_TO_SILO = "hasMigratedToSilo";
-    private static final String INTENT_POINT_DELETED = "a75f.io.renatus.POINT_DELETED";
+    public static final String INTENT_POINT_DELETED = "a75f.io.renatus.POINT_DELETED";
     private static final String INTENT_ZONE_DELETED = "a75f.io.renatus.ZONE_DELETED";
     public AndroidHSClient hsClient;
     public CCUTagsDb       tagsDb;

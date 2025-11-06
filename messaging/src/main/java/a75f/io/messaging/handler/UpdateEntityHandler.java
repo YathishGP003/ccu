@@ -1,8 +1,14 @@
 package a75f.io.messaging.handler;
 
+import static a75f.io.api.haystack.CCUHsApi.INTENT_POINT_DELETED;
+import static a75f.io.api.haystack.CCUTagsDb.BROADCAST_BACNET_POINT_ADDED;
+import static a75f.io.logic.L.TAG_CCU_BACNET;
 import static a75f.io.logic.bo.util.CustomScheduleUtilKt.updateWritableDataUponCustomControlChanges;
 import static a75f.io.messaging.handler.DataSyncHandler.isCloudEntityHasLatestValue;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 
@@ -144,6 +150,7 @@ public class UpdateEntityHandler implements MessageHandler {
                     updateWritableDataUponCustomControlChanges(point);
                 }
                 updateEquipRefIfRequired(point);
+                updatePointToBacnet(point, entityId);
                 CCUHsApi.getInstance().tagsDb.updatePoint(point, entityId);
                 CcuLog.d(L.TAG_CCU_MESSAGING, "UpdateEntityHandler: point updated--> "+row);
             }
@@ -365,5 +372,72 @@ public class UpdateEntityHandler implements MessageHandler {
                 (point.getMarkers().contains(Tags.MODBUS) ||
                 point.getMarkers().contains(Tags.BACNET_DEVICE_ID) ||
                 point.getMarkers().contains(Tags.CONNECTMODULE));
+    }
+
+    private static void updatePointToBacnet(Point newEntity, String i) {
+        CcuLog.d(TAG_CCU_BACNET, "@@updatePoint: updatePointToBacnet-->"+i);
+        if(CCUHsApi.getInstance().tagsDb.isBacNetEnabled()){
+            HashMap<Object, Object> oldEntity = CCUHsApi.getInstance().readMapById(i);
+            if(bacnetTagsRemoved(newEntity, oldEntity)){
+                CcuLog.d(TAG_CCU_BACNET, "@@updatePoint: remove point " + newEntity + " bacnetId: " + newEntity.getBacnetId() + " bacnetType: " + newEntity.getBacnetType() + "tags@-->" + newEntity.getTags().containsKey("bacnetId"));
+                Intent intent = new Intent(INTENT_POINT_DELETED);
+                intent.putExtra("message", i);
+                CCUHsApi.getInstance().getContext().sendBroadcast(intent);
+            }else{
+                if(writableTagAddedRemoved(newEntity, oldEntity)){
+                    CcuLog.d(TAG_CCU_BACNET, "@@updatePoint: writable tag added or removed, remove old point and add new one");
+                    Intent intent = new Intent(INTENT_POINT_DELETED);
+                    intent.putExtra("message", i);
+                    CCUHsApi.getInstance().getContext().sendBroadcast(intent);
+
+                    // Delay the addition broadcast by 10 seconds (10,000 milliseconds)
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        Intent intentPointAdded = new Intent(BROADCAST_BACNET_POINT_ADDED);
+                        intentPointAdded.putExtra("message", newEntity.getId());
+                        CCUHsApi.getInstance().getContext().sendBroadcast(intentPointAdded);
+                    }, 10_000);
+                }
+
+                if(bacnetTagsAdded(newEntity, oldEntity)){
+                    CcuLog.d(TAG_CCU_BACNET, "@@updatePoint: bacnet tags added add this point");
+                    Intent intentPointAdded = new Intent(BROADCAST_BACNET_POINT_ADDED);
+                    intentPointAdded.putExtra("message", newEntity.getId());
+                    CCUHsApi.getInstance().getContext().sendBroadcast(intentPointAdded);
+                }
+            }
+        }
+    }
+
+    private static boolean bacnetTagsRemoved(Point newEntity, HashMap<Object, Object> oldEntity){
+        boolean bacnetTagsRemoved = false;
+        if ((oldEntity.containsKey("bacnetId") || oldEntity.containsKey("bacnetType"))) {
+            if (newEntity.getBacnetType() == null) {
+                bacnetTagsRemoved = true;
+            }
+        }
+        return bacnetTagsRemoved;
+    }
+
+    private static boolean bacnetTagsAdded(Point newEntity, HashMap<Object, Object> oldEntity){
+        boolean bacnetTagsAdded = false;
+        if ((!oldEntity.containsKey("bacnetId") || !oldEntity.containsKey("bacnetType"))) {
+            if (newEntity.getBacnetType() != null) {
+                bacnetTagsAdded = true;
+            }
+        }
+        return bacnetTagsAdded;
+    }
+
+    private static boolean writableTagAddedRemoved(Point newEntity, HashMap<Object, Object> oldEntity){
+        boolean isWriteableTagAddedRemoved = false;
+        if (!oldEntity.containsKey("writable") && newEntity.getMarkers().contains("writable")) {
+            isWriteableTagAddedRemoved = true;
+        }
+
+        if (oldEntity.containsKey("writable") && !newEntity.getMarkers().contains("writable")) {
+            isWriteableTagAddedRemoved = true;
+        }
+
+        return isWriteableTagAddedRemoved;
     }
 }

@@ -13,20 +13,9 @@ import a75f.io.logic.L
 import a75f.io.logic.interfaces.ModbusDataInterface
 import a75f.io.logic.interfaces.MstpDataInterface
 import a75f.io.logic.interfaces.ZoneDataInterface
+import a75f.io.logic.util.bacnet.*
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.HTTP_SERVER_STATUS
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED
-import a75f.io.logic.util.bacnet.ObjectType
-import a75f.io.logic.util.bacnet.getBacNetType
-import a75f.io.logic.util.bacnet.reInitialiseBacnetStack
-import a75f.io.logic.util.bacnet.readExternalBacnetJsonFile
-import a75f.io.logic.util.bacnet.scheduleJobToResubscribeBacnetMstpCOV
-import a75f.io.logic.util.bacnet.sendWriteRequestToMstpEquip
-import a75f.io.logic.util.bacnet.updateBacnetHeartBeat
-import a75f.io.logic.util.bacnet.updateBacnetIpModeConfigurations
-import a75f.io.logic.util.bacnet.updateBacnetMstpLinearAndCovSubscription
-import a75f.io.logic.util.bacnet.updateBacnetMstpHeartBeat
-import a75f.io.logic.util.bacnet.updateBacnetStackInitStatus
-import a75f.io.logic.util.bacnet.updateHeartBeatPoint
 import a75f.io.util.query_parser.modifyKVPairFromFilter
 import android.content.Context
 import android.content.SharedPreferences
@@ -52,18 +41,22 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.netty.NettyApplicationEngine
 import io.ktor.websocket.WebSockets
+import io.ktor.application.*
+import io.ktor.features.*
+import io.ktor.gson.*
+import io.ktor.http.*
+import io.ktor.request.*
+import io.ktor.response.*
+import io.ktor.routing.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.websocket.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
-import org.projecthaystack.HGrid
-import org.projecthaystack.HGridBuilder
-import org.projecthaystack.HNum
-import org.projecthaystack.HRef
-import org.projecthaystack.HRow
-import org.projecthaystack.HStr
-import org.projecthaystack.UnknownRecException
+import org.projecthaystack.*
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
 import java.util.concurrent.TimeUnit
@@ -412,10 +405,16 @@ class HttpServer {
 
                 //example call = http://127.0.0.1:5001/pointWrite/6a1f6539-86dd-48d3-be6c-0ae0b50fa388
                 get("/pointWrite/{id}") {
-                    CcuLog.i(HTTP_SERVER, "called API: /pointWrite/{id} ")
+                    CcuLog.i(HTTP_SERVER, "called API: /pointWrite/{id} -->")
                     val id = call.parameters["id"]
-                    val response = CCUHsApi.getInstance().readPointArr("@$id")
-                    CcuLog.i(HTTP_SERVER, " response: $response")
+                    var response = CCUHsApi.getInstance().readPointArr("@$id")
+                    if(HZincReader(response).readGrid().numRows() == 0){
+                        CcuLog.i(HTTP_SERVER, "pointWrite response is empty add min value at level 16: $response")
+                        val entity: HashMap<Any, Any> = CCUHsApi.getInstance().readEntity("id == @$id")
+                        val minVal: Double = entity["minVal"].toString().toDouble()
+                        response = createRowWithMinValue(minVal)
+                    }
+                    CcuLog.i(HTTP_SERVER, " response: $response<---")
                     call.respond(HttpStatusCode.OK, BaseResponse(response))
                 }
 

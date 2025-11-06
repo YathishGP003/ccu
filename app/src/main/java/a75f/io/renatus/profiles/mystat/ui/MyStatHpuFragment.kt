@@ -158,7 +158,7 @@ class MyStatHpuFragment : MyStatFragment() {
                 analogOut1MinMax.compressorConfig,
                 MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.displayName,
                 MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal,1,
-                isMyStatV1DeviceType()
+                viewModel.isV1()
             )
             if (universalOut2.enabled) ConfigMinMax(
                 universalOut2.association,
@@ -177,7 +177,7 @@ class MyStatHpuFragment : MyStatFragment() {
                 analogOut1MinMax.dcvDamperConfig,
                 MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.displayName,
                 MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION.ordinal,1,
-                isAnalogType = isMyStatV1DeviceType()
+                isAnalogType = viewModel.isV1()
             )
             if (universalOut2.enabled) ConfigMinMax(
                 universalOut2.association,
@@ -196,7 +196,7 @@ class MyStatHpuFragment : MyStatFragment() {
                 analogOut1MinMax.fanSpeedConfig,
                 MyStatHpuAnalogOutMapping.FAN_SPEED.displayName,
                 MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal,1,
-                isAnalogType = isMyStatV1DeviceType()
+                isAnalogType = viewModel.isV1()
             )
             if (universalOut2.enabled) ConfigMinMax(
                 universalOut2.association,
@@ -211,7 +211,7 @@ class MyStatHpuFragment : MyStatFragment() {
     fun FanConfiguration() {
         (viewModel.viewState.value as MyStatHpuViewState).apply {
             if (universalOut1.enabled && universalOut1.association == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal) {
-                if (isMyStatV1DeviceType()) {
+                if (viewModel.isV1()) {
                     MinMaxConfiguration(
                         minLabel = getString(R.string.analog_out_fan_low),
                         maxLabel = getString(R.string.analog_out_fan_high),

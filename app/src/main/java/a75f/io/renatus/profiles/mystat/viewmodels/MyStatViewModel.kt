@@ -228,27 +228,19 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
             equip.fanOpMode.writePointValue(StandaloneConditioningMode.AUTO.ordinal.toDouble())
         }
     }
+    fun isV1() = devicesVersion.equals(MyStatDeviceType.MYSTAT_V1.name, true)
 
     fun getRelayStatus(relayIndex: Int): Boolean {
+
         if (equipRef != null) {
-            // Device ref is not required here so passing empty string
             val device = getMyStatDomainDevice("", equipRef!!)
-            if (devicesVersion.equals(MyStatDeviceType.MYSTAT_V1.name, true)) {
+            device.apply {
                 return when (relayIndex) {
-                    1 -> device.relay1.readPointValue() > 0
-                    2 -> device.relay2.readPointValue() > 0
-                    3 -> device.relay3.readPointValue() > 0
-                    4 -> device.universalOut2.readPointValue() > 0
-                    5 -> device.universalOut1.readPointValue() > 0
-                    else -> false
-                }
-            } else {
-                return when (relayIndex) {
-                    1 -> device.relay1.readPointValue() > 0
-                    2 -> device.relay2.readPointValue() > 0
-                    3 -> device.relay3.readPointValue() > 0
-                    4 -> device.universalOut1.readPointValue() > 0
-                    5 -> device.universalOut2.readPointValue() > 0
+                    1 -> relay1.readPointValue() > 0
+                    2 -> relay2.readPointValue() > 0
+                    3 -> relay3.readPointValue() > 0
+                    4 -> (if (isV1()) universalOut2 else universalOut1).readPointValue() > 0
+                    5 -> (if (isV1()) universalOut1 else universalOut2).readPointValue() > 0
                     else -> false
                 }
             }
@@ -260,45 +252,31 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         if (equipRef != null) {
             // Device ref is not required here so passing empty string
             val device = getMyStatDomainDevice("", equipRef!!)
-
-            if (devicesVersion.equals(MyStatDeviceType.MYSTAT_V1.name, true)) {
-                if (index == 4) return device.universalOut2.readPointValue()
-                if (index == 5) return device.universalOut1.readPointValue()
-            } else {
-                if (index == 4) return device.universalOut1.readPointValue()
-                if (index == 5) return device.universalOut2.readPointValue()
+            device.apply {
+                return when(index) {
+                    4 -> (if (isV1()) universalOut2 else universalOut1).readPointValue()
+                    5 -> (if (isV1()) universalOut1 else universalOut2).readPointValue()
+                    else -> 0.0
+                }
             }
         }
         return 0.0
     }
 
-    fun sendTestSignal(relayIndex: Int = 0, relayStatus: Double = 0.0, universalOut1: Double? = null, universalOut2: Double? = null) {
+    fun sendTestSignal(relayIndex: Int = 0, relayStatus: Double = 0.0) {
 
         if (equipRef != null) {
             // Device ref is not required here so passing empty string
             val device = getMyStatDomainDevice("", equipRef!!)
-
-            if(devicesVersion.equals(MyStatDeviceType.MYSTAT_V1.name, true)){
+            device.apply {
                 when (relayIndex) {
-                    1 -> device.relay1.writePointValue(relayStatus)
-                    2 -> device.relay2.writePointValue(relayStatus)
-                    3 -> device.relay3.writePointValue(relayStatus)
-                    4 -> device.universalOut2.writePointValue(relayStatus)
-                    5 -> device.universalOut1.writePointValue(relayStatus)
+                    1 -> relay1.writePointValue(relayStatus)
+                    2 -> relay2.writePointValue(relayStatus)
+                    3 -> relay3.writePointValue(relayStatus)
+                    4 -> (if (isV1()) universalOut2 else universalOut1).writePointValue(relayStatus)
+                    5 -> (if (isV1()) universalOut1 else universalOut2).writePointValue(relayStatus)
                 }
             }
-            else {
-                when (relayIndex) {
-                    1 -> device.relay1.writePointValue(relayStatus)
-                    2 -> device.relay2.writePointValue(relayStatus)
-                    3 -> device.relay3.writePointValue(relayStatus)
-                    4 -> device.universalOut1.writePointValue(relayStatus)
-                    5 -> device.universalOut2.writePointValue(relayStatus)
-                }
-            }
-            if (universalOut1 != null) device.universalOut1.writePointValue(universalOut1)
-            if (universalOut2 != null) device.universalOut2.writePointValue(universalOut2)
-
             CcuLog.d(L.TAG_CCU_MSHST, "R1 ${device.relay1.readPointValue()} R2 ${device.relay2.readPointValue()} R3 ${device.relay3.readPointValue()} \n" +
                     "U1 ${device.universalOut1.readPointValue()} U2 ${device.universalOut2.readPointValue()}")
         } else {

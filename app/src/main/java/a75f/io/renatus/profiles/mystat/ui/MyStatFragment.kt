@@ -6,7 +6,6 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuRelayMapping
-import a75f.io.logic.bo.building.statprofiles.util.MyStatDeviceType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.DependentPointMappingView
@@ -100,9 +99,6 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
             Globals.getInstance().isTestMode = false
         }
     }
-
-     fun isMyStatV1DeviceType(): Boolean = viewModel.devicesVersion.equals(MyStatDeviceType.MYSTAT_V1.name, ignoreCase = true)
-
     private fun getHpuDisabledIndices(config: ConfigState): List<Int> {
         return if (viewModel.viewState.value.isAnyRelayMapped(
                 MyStatHpuRelayMapping.CHANGE_OVER_B_HEATING.ordinal,
@@ -244,8 +240,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
     @Composable
     open fun MyStatConfiguration() {
         Row {
-            if(!isMyStatV1DeviceType()) {
-
+            if(viewModel.isV1().not()) {
                 Image(
                     painter = painterResource(id = R.drawable.ms),
                     contentDescription = "Relays",
@@ -303,7 +298,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                         viewModel.equipModel
                     )
                    val relayEnums = universalEnums.filter { it.index < viewModel.getAnalogStatIndex() }
-                    if (isMyStatV1DeviceType()) {
+                    if (viewModel.isV1()) {
                         UniversalOutConfiguration(
                             portName = getString(R.string.relay4),
                             enabled = universalOut2.enabled,
@@ -324,10 +319,10 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                             testSingles = testVoltage,
                             testVal = viewModel.getAnalogValue(4),
                             padding = 6,
-                            onTestSignalSelected = { viewModel.sendTestSignal(universalOut2 =  it) },
+                            onTestSignalSelected = { viewModel.sendTestSignal(4, it) },
                             analogStartPosition = viewModel.getAnalogStatIndex(),
                             disabledIndices = if (viewModel is MyStatHpuViewModel) getHpuDisabledIndices(universalOut2) else emptyList(),
-                            myStatV1Device = isMyStatV1DeviceType()
+                            myStatV1Device = viewModel.isV1()
                         )
                         val analogEnums = universalEnums.filter { it.index >= viewModel.getAnalogStatIndex() }
                         UniversalOutConfiguration(
@@ -351,10 +346,10 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                             testVal = viewModel.getAnalogValue(5),
                             padding = 6,
                             analogStartPosition = viewModel.getAnalogStatIndex(),
-                            onTestSignalSelected = { viewModel.sendTestSignal(universalOut1 =  it) },
+                            onTestSignalSelected = { viewModel.sendTestSignal(5, it) },
                             disabledIndices = if (viewModel is MyStatHpuViewModel) getHpuDisabledIndices(universalOut1) else emptyList(),
                             isAnalogType = true,
-                            myStatV1Device = isMyStatV1DeviceType(),
+                            myStatV1Device = viewModel.isV1(),
                         )
 
                     } else {
@@ -371,15 +366,15 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                             onAssociationChanged = { associationIndex ->
                                 universalOut1.association = associationIndex.index
                             },
-                            testState = viewModel.getRelayStatus(5),
+                            testState = viewModel.getRelayStatus(4),
                             onTestActivated = {
-                                viewModel.sendTestSignal(5, if (it) 1.0 else 0.0)
+                                viewModel.sendTestSignal(4, if (it) 1.0 else 0.0)
                             },
                             testSingles = testVoltage,
                             testVal = viewModel.getAnalogValue(4),
                             padding = 6,
                             analogStartPosition = viewModel.getAnalogStatIndex(),
-                            onTestSignalSelected = { viewModel.sendTestSignal(universalOut1 =  it) },
+                            onTestSignalSelected = { viewModel.sendTestSignal(4, it) },
                             disabledIndices = if (viewModel is MyStatHpuViewModel) getHpuDisabledIndices(universalOut1) else emptyList()
                         )
                         UniversalOutConfiguration(
@@ -395,14 +390,14 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                             onAssociationChanged = { associationIndex ->
                                 universalOut2.association = associationIndex.index
                             },
-                            testState = viewModel.getRelayStatus(4),
+                            testState = viewModel.getRelayStatus(5),
                             onTestActivated = {
-                                viewModel.sendTestSignal(4, if (it) 1.0 else 0.0)
+                                viewModel.sendTestSignal(5, if (it) 1.0 else 0.0)
                             },
                             testSingles = testVoltage,
                             testVal = viewModel.getAnalogValue(5),
                             padding = 6,
-                            onTestSignalSelected = { viewModel.sendTestSignal(universalOut2 = it) },
+                            onTestSignalSelected = { viewModel.sendTestSignal(5, it) },
                             analogStartPosition = viewModel.getAnalogStatIndex(),
                             disabledIndices = if (viewModel is MyStatHpuViewModel) getHpuDisabledIndices(universalOut2) else emptyList()
                         )
@@ -457,7 +452,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
 
             }
         }
-        if(!isMyStatV1DeviceType()) {
+        if(viewModel.isV1().not()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

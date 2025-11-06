@@ -158,7 +158,7 @@ class MyStatPipe2Fragment : MyStatFragment() {
                 analogOut1MinMax.waterModulatingValue,
                 MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.displayName,
                 MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal, 1,
-                isMyStatV1DeviceType()
+                viewModel.isV1()
             )
             if (universalOut2.enabled) ConfigMinMax(
                 universalOut2.association,
@@ -177,7 +177,7 @@ class MyStatPipe2Fragment : MyStatFragment() {
                 analogOut1MinMax.dcvDamperConfig,
                 MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.displayName,
                 MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal, 1,
-                isMyStatV1DeviceType()
+                viewModel.isV1()
             )
             if (universalOut2.enabled) ConfigMinMax(
                 universalOut2.association,
@@ -196,14 +196,14 @@ class MyStatPipe2Fragment : MyStatFragment() {
                 analogOut1MinMax.fanSpeedConfig,
                 MyStatPipe2AnalogOutMapping.FAN_SPEED.displayName,
                 MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal, 1,
-                isMyStatV1DeviceType()
+                viewModel.isV1()
             )
             if (universalOut2.enabled) ConfigMinMax(
                 universalOut2.association,
                 analogOut2MinMax.fanSpeedConfig,
                 MyStatPipe2AnalogOutMapping.FAN_SPEED.displayName,
                 MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal, 2,
-                isMyStatV1DeviceType()
+                viewModel.isV1()
             )
         }
     }
@@ -213,7 +213,7 @@ class MyStatPipe2Fragment : MyStatFragment() {
         (viewModel.viewState.value as MyStatPipe2ViewState).apply {
             if (universalOut1.enabled && universalOut1.association == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
 
-                if (isMyStatV1DeviceType()) {
+                if (viewModel.isV1()) {
                     MinMaxConfiguration(
                         minLabel = getString(R.string.analog_out_fan_low),
                         maxLabel = getString(R.string.analog_out_fan_high),

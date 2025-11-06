@@ -153,14 +153,14 @@ class MyStatPipe4Fragment : MyStatFragment(),OnPairingCompleteListener {
                     analogOut1MinMax.hotWaterValve,
                     MyStatPipe4AnalogOutMapping.HOT_MODULATING_VALUE.displayName,
                     MyStatPipe4AnalogOutMapping.HOT_MODULATING_VALUE.ordinal, 1,
-                    isAnalogType = isMyStatV1DeviceType()
+                    isAnalogType = viewModel.isV1()
                 )
                 ConfigMinMax(
                     universalOut1.association,
                     analogOut1MinMax.chilledWaterValve,
                     MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.displayName,
                     MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.ordinal, 1,
-                    isAnalogType = isMyStatV1DeviceType()
+                    isAnalogType = viewModel.isV1()
                 )
             }
             if (universalOut2.enabled) {
@@ -169,14 +169,14 @@ class MyStatPipe4Fragment : MyStatFragment(),OnPairingCompleteListener {
                     analogOut2MinMax.chilledWaterValve,
                     MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.displayName,
                     MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.ordinal, 2,
-                    isAnalogType = isMyStatV1DeviceType()
+                    isAnalogType = viewModel.isV1()
                 )
                 ConfigMinMax(
                     universalOut2.association,
                     analogOut2MinMax.hotWaterValve,
                     MyStatPipe4AnalogOutMapping.HOT_MODULATING_VALUE.displayName,
                     MyStatPipe4AnalogOutMapping.HOT_MODULATING_VALUE.ordinal, 2,
-                    isAnalogType = isMyStatV1DeviceType()
+                    isAnalogType = viewModel.isV1()
                 )
             }
         }
@@ -190,14 +190,14 @@ class MyStatPipe4Fragment : MyStatFragment(),OnPairingCompleteListener {
                 analogOut1MinMax.dcvDamperConfig,
                 MyStatPipe4AnalogOutMapping.DCV_DAMPER_MODULATION.displayName,
                 MyStatPipe4AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal, 1,
-                isAnalogType = isMyStatV1DeviceType()
+                isAnalogType = viewModel.isV1()
             )
             if (universalOut2.enabled) ConfigMinMax(
                 universalOut2.association,
                 analogOut2MinMax.dcvDamperConfig,
                 MyStatPipe4AnalogOutMapping.DCV_DAMPER_MODULATION.displayName,
                 MyStatPipe4AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal, 2,
-                isAnalogType = isMyStatV1DeviceType()
+                isAnalogType = viewModel.isV1()
             )
         }
     }
@@ -210,14 +210,14 @@ class MyStatPipe4Fragment : MyStatFragment(),OnPairingCompleteListener {
                 analogOut1MinMax.fanSpeedConfig,
                 MyStatPipe4AnalogOutMapping.FAN_SPEED.displayName,
                 MyStatPipe4AnalogOutMapping.FAN_SPEED.ordinal, 1,
-                isAnalogType = isMyStatV1DeviceType()
+                isAnalogType = viewModel.isV1()
             )
             if (universalOut2.enabled) ConfigMinMax(
                 universalOut2.association,
                 analogOut2MinMax.fanSpeedConfig,
                 MyStatPipe4AnalogOutMapping.FAN_SPEED.displayName,
                 MyStatPipe4AnalogOutMapping.FAN_SPEED.ordinal, 2,
-                isAnalogType = isMyStatV1DeviceType()
+                isAnalogType = viewModel.isV1()
             )
         }
     }
@@ -226,7 +226,7 @@ class MyStatPipe4Fragment : MyStatFragment(),OnPairingCompleteListener {
     fun FanConfiguration() {
         (viewModel.viewState.value as MyStatPipe4ViewState).apply {
             if (universalOut1.enabled && universalOut1.association == MyStatPipe4AnalogOutMapping.FAN_SPEED.ordinal) {
-                if (!isMyStatV1DeviceType()) {
+                if (!viewModel.isV1()) {
                     MinMaxConfiguration(
                         minLabel = getString(R.string.universal_out1_Fan_Low),
                         maxLabel = getString(R.string.universal_out1_Fan_high),

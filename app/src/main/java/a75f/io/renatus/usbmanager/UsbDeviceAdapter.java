@@ -172,6 +172,22 @@ public class UsbDeviceAdapter extends RecyclerView.Adapter<UsbDeviceAdapter.UsbV
                     device.setPort(updatedPort);
                     holder.tvPort.setText(updatedPort);
 
+                    if (selected.equals(PROTOCOL_BACNET_MSTP) || selected.equals(PROTOCOL_MODBUS)) {
+                        if (expandedPosition != position) {
+                            int previousExpanded = expandedPosition;
+                            expandedPosition = position;
+                            if (previousExpanded != -1) {
+                                notifyItemChanged(previousExpanded);
+                            }
+                            notifyItemChanged(position);
+                        }
+                    } else {
+                        if (expandedPosition == position) {
+                            expandedPosition = -1;
+                            notifyItemChanged(position);
+                        }
+                    }
+
                     updateDetails((LinearLayout) holder.expandableLayout, selected, device); // Update expanded content
                 }
 
@@ -289,6 +305,7 @@ public class UsbDeviceAdapter extends RecyclerView.Adapter<UsbDeviceAdapter.UsbV
     }
 
     private void updateDetails(LinearLayout parentLayout, String protocol, UsbDeviceItem device) {
+        CcuLog.i(L.TAG_CCU_UI, "Update details for protocol "+protocol+" device "+device.getSerial());
         parentLayout.removeAllViews();
         switch (protocol) {
             case PROTOCOL_NA:

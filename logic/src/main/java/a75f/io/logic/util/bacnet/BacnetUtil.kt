@@ -280,6 +280,7 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
         val bacnetLastHeartBeatTime = preferences.getLong(BACNET_HEART_BEAT, 0)
         CcuLog.d(TAG_CCU_BACNET, "Last Bacnet Ip stack HeartBeat Time: $bacnetLastHeartBeatTime,  time: "+(System.currentTimeMillis() - bacnetLastHeartBeatTime))
         val isBACnetIntialized = preferences.getBoolean(IS_BACNET_INITIALIZED, false)
+        CcuLog.d(TAG_CCU_BACNET_MSTP, "BACnet IP stack is initialized")
         if(isBACnetIntialized) {
             if ((System.currentTimeMillis() - bacnetLastHeartBeatTime) > 300000) {
                 preferences.edit().putLong(BACNET_HEART_BEAT, System.currentTimeMillis()).apply()  // resetting the timer again

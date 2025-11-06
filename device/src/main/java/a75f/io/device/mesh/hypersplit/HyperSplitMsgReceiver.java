@@ -524,6 +524,7 @@ public class HyperSplitMsgReceiver {
         pointsMap.put(DomainName.currentTx100, new MinMaxVoltage(0, 10, 0, 100));
         pointsMap.put(DomainName.currentTx120, new MinMaxVoltage(0, 10, 0, 120));
         pointsMap.put(DomainName.currentTx150, new MinMaxVoltage(0, 10, 0, 150));
+        pointsMap.put(DomainName.currentTx200, new MinMaxVoltage(0, 10, 0, 200));
         voltagePoints = Collections.unmodifiableMap(pointsMap);
     }
 

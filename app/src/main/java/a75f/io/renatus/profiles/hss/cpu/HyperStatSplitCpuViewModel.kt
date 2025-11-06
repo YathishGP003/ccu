@@ -222,43 +222,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
             isUniversalInDuplicated(UniversalInputs.CURRENT_TX_100) ||
             isUniversalInDuplicated(UniversalInputs.CURRENT_TX_120) ||
             isUniversalInDuplicated(UniversalInputs.CURRENT_TX_150) ||
-            isUniversalInDuplicated(UniversalInputs.CURRENT_TX_200) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_10) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_20)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_10) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_30)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_10) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_50)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_10) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_60)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_10) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_100)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_10) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_120)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_10) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_150)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_10) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_200)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_20) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_30)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_20) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_50)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_20) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_60)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_20) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_100)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_20) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_120)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_20) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_150)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_20) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_200)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_30) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_50)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_30) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_60)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_30) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_100)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_30) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_120)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_30) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_150)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_30) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_200)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_50) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_60)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_50) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_100)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_50) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_120)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_50) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_150)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_50) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_200)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_60) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_100)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_60) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_120)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_60) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_150)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_60) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_200)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_100) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_120)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_100) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_150)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_100) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_200)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_120) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_150)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_120) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_200)) ||
-            (isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_150) && isAnyUniversalInMapped(UniversalInputs.CURRENT_TX_200))
+            isUniversalInDuplicated(UniversalInputs.CURRENT_TX_200)
         ) {
             openDuplicateDialog = true
             return false

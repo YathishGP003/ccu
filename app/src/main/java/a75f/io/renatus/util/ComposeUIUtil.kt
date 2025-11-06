@@ -132,7 +132,7 @@ fun ErrorToastMessage(
 ) {
     Popup(
         alignment = Alignment.BottomCenter,
-        offset = IntOffset(0, 300), // adjust height from bottom
+        offset = IntOffset(0, -10), // adjust height from bottom
         onDismissRequest = onDismiss
     ) {
         Box(

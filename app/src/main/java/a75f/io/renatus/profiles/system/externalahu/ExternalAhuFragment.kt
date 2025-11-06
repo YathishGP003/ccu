@@ -559,7 +559,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
 
                             val radioOptions = listOf(BACNET, MODBUS)
                             var disabledOptions: List<String>
-                            if(!viewModel.isBacntEnabled.value){
+                            if(!viewModel.isBacnetIpEnabled.value && !viewModel.isBacnetMstpEnabled.value){
                                 disabledOptions =  listOf(BACNET)
                             }else{
                                 disabledOptions = listOf()
@@ -745,7 +745,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                 showDialogFragment(
                     BacnetDeviceSelectionFragment.newInstance(
                         viewModel.connectedDevices,
-                        viewModel.onBacnetDeviceSelect, SEARCH_DEVICE
+                        viewModel.onBacnetDeviceSelect, SEARCH_DEVICE,
+                        viewModel.configurationType.value == MSTP_CONFIGURATION
                     ), BacnetDeviceSelectionFragment.ID
                 )
                 ProgressDialogUtils.hideProgressDialog()
@@ -755,79 +756,47 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
         BacnetHeader()
         BacnetModelSelection()
         val expanded = remember { mutableStateOf(false) }
-
-        val onConfigDropdownClickEvent =
-                //if(isEditable) {
-                    {
-                        expanded.value = true
-                        //viewModel.clearConfigFieldData()
-                    }
-                //} else { {} }
-        if(!viewModel.bacnetModel.value.isDevicePaired){
-            // device not paired
-            Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+        val onConfigDropdownClickEvent = if (!viewModel.bacnetModel.value.isDevicePaired) { { expanded.value = true } } else { {} }
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .wrapContentWidth()         // ✅ keep natural width
+                    .widthIn(max = 400.dp),     // ✅ optional cap
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                        modifier = Modifier
-                                .wrapContentWidth()         // ✅ keep natural width
-                                .widthIn(max = 400.dp),     // ✅ optional cap
-                        horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    ExternalConfigDropdownSelector(
-                            titleText = CONFIGURATION_TYPE,
-                            isPaired = viewModel.bacnetModel.value.isDevicePaired,
-                            selectedItemName = viewModel.configurationType,
-                            modelVersion = "",
-                            onClickEvent = onConfigDropdownClickEvent,
-                            otherUiComposable = {
-                                //if(isEditable) {
-                                Box(
-                                        modifier = Modifier.wrapContentWidth(),
-                                        contentAlignment = Alignment.Center
-                                ) {
-                                    ShowDropdownList(expanded) // stays centered
-                                }
-                                //}
-                            },
-                            isNested = true
-                    )
-                }
+                ExternalConfigDropdownSelector(
+                    titleText = CONFIGURATION_TYPE,
+                    isPaired = viewModel.bacnetModel.value.isDevicePaired,
+                    selectedItemName = viewModel.configurationType,
+                    modelVersion = "",
+                    onClickEvent = onConfigDropdownClickEvent,
+                    otherUiComposable = {
+                        if (!viewModel.bacnetModel.value.isDevicePaired) {
+                            Box(
+                                modifier = Modifier.wrapContentWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                ShowDropdownList(expanded) // stays centered
+                            }
+                        }
+                    },
+                    isNested = true
+                )
             }
-            // add here
-            when (viewModel.configurationType.value) {
-                IP_CONFIGURATION -> {
-                    CcuLog.d("ExternalAhuFragment", "--IP_CONFIGURATION--")
-                    AddressSelector()
-                }
-                MSTP_CONFIGURATION -> {
-                    CcuLog.d("ExternalAhuFragment", "--MSTP_CONFIGURATION--")
-                    Box(
-                            modifier = Modifier
-                                    .fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                    ) {
-                        DeviceSelector()
-                    }
-                    DeviceInfo()
-                }
-                else -> {}
-            }
-        }else{
-            // device is paired
-            when(viewModel.configurationType.value) {
-                IP_CONFIGURATION -> {
-                    CcuLog.d("ExternalAhuFragment","--IP_CONFIGURATION--")
-                    AddressSelector()
-                }
-                MSTP_CONFIGURATION -> {
-                    CcuLog.d("ExternalAhuFragment","--MSTP_CONFIGURATION--")
+        }
+        when (viewModel.configurationType.value) {
+            IP_CONFIGURATION -> AddressSelector()
+            MSTP_CONFIGURATION-> {
+                if (!viewModel.bacnetModel.value.isDevicePaired) {
                     DeviceSelector()
-                    DeviceInfo()
+                } else {
+                    ConfigurationDetailsReadOnly(viewModel.configurationType.value)
                 }
-                else -> {}
             }
+            else -> {}
         }
 
         BacnetModelName()
@@ -853,6 +822,76 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                 BacnetDeviceDetailsReadOnly()
                 BacnetPortDetailsReadOnly()
                 BacnetDeviceNetworkDetailsReadOnly()
+            }
+        }
+    }
+    @Composable
+    fun ConfigurationDetailsReadOnly(configType: String) {
+
+        val configTableData : List<Pair<Pair<String, String>?, Pair<String, String>?>> =
+            when(configType) {
+                IP_CONFIGURATION -> listOf(
+                    Pair(
+                        Pair(DEVICE_ID, viewModel.deviceId.value),
+                        Pair(DESTINATION_IP, viewModel.destinationIp.value),
+                    ),
+                    Pair(
+                        Pair(DESTINATION_PORT, viewModel.destinationPort.value),
+                        Pair(MAC_ADDRESS, viewModel.destinationMacAddress.value)
+                    ),
+                    Pair(
+                        Pair(DEVICE_NETWORK, viewModel.dnet.value),
+                        null
+                    )
+                )
+                MSTP_CONFIGURATION -> listOf(
+                    Pair(
+                        Pair(MAC_ADDRESS, viewModel.destinationMacAddress.value),
+                        null
+                    )
+                )
+
+                else -> emptyList()
+            }
+
+
+        ReadOnlyConfigFields(configTableData)
+    }
+
+    @Composable
+    private fun ReadOnlyConfigFields(
+        configTableData: List<Pair<Pair<String, String>?, Pair<String, String>?>>
+    ) {
+        Column(modifier = Modifier
+            .padding(top = 20.dp)
+            .wrapContentHeight()
+            .fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            configTableData.forEach { rowPair ->
+                val subRowPair1 = rowPair.first
+                val subRowPair2 = rowPair.second
+
+                Row(horizontalArrangement = Arrangement.spacedBy(50.dp)) {
+                    Row(modifier = Modifier.weight(0.5f)) {
+                        subRowPair1?.let {
+                            Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.CenterStart) {
+                                LabelBoldTextViewForTable(subRowPair1.first, fontSize = 22, fontColor = Color.Black)
+                            }
+                            Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.CenterStart) {
+                                LabelTextView(subRowPair1.second, fontSize = 22)
+                            }
+                        }
+                    }
+                    Row(modifier = Modifier.weight(0.5f)) {
+                        subRowPair2?.let {
+                            Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.CenterStart) {
+                                LabelBoldTextViewForTable(subRowPair2.first, fontSize = 22, fontColor = Color.Black)
+                            }
+                            Box(modifier = Modifier.weight(0.25f), contentAlignment = Alignment.CenterStart) {
+                                LabelTextView(subRowPair2.second, fontSize = 22)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -1050,15 +1089,15 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                     ) {
                         when (it) {
                             "Slave" -> {
-                                //viewModel.resetBacnetNetworkConfig()
+                                viewModel.resetBacnetNetworkConfig()
                                 viewModel.deviceSelectionMode.value = 0
                             }
 
                             "Master" -> {
-                                //ProgressDialogUtils.showProgressDialog(context, CONST_AUTO_DISCOVERY)
-                                //viewModel.resetBacnetNetworkConfig()
+                                ProgressDialogUtils.showProgressDialog(context, CONST_AUTO_DISCOVERY)
+                                viewModel.resetBacnetNetworkConfig()
                                 viewModel.deviceSelectionMode.value = 1
-                                //viewModel.searchDevices()
+                                viewModel.searchDevices()
                                 CcuLog.d("TAG", "searching devices ${viewModel.isConnectedDevicesSearchFinished.value}")
                             }
                         }
@@ -1070,35 +1109,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                 }
             }
         }
-
-        /*RadioButtonSelector(SEARCH_DEVICE, listOf("Slave", "Master"), viewModel.deviceSelectionMode.value) {
-            //viewModel.clearConfigFieldData()
-            when (it) {
-                "Slave" -> {
-                    viewModel.deviceSelectionMode.value = 0
-                }
-
-                "Master" -> {
-//                    if (!viewModel.isAutoFetchSelected.value) {
-//                        viewModel.isAutoFetchSelected.value = true
-//
-                        viewModel.deviceSelectionMode.value = 1
-//                        if (!isBacnetMstpInitialized) {
-//                            viewModel.showToast.value = true
-//                        } else {
-//                            viewModel.showToast.value = false
-//                            viewModel.searchDevices()
-//
-//                            ProgressDialogUtils.showProgressDialog(context, CONST_AUTO_DISCOVERY)
-//                            CcuLog.d(
-//                                    "ExternalAhuFragment",
-//                                    "searching devices ${viewModel.isConnectedDevicesSearchFinished.value}"
-//                            )
-//                        }
-//                    }
-                }
-            }
-        }*/
+        DeviceInfo()
     }
 
     @Composable
@@ -1189,9 +1200,9 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
     fun BacnetButtons(){
         Box(
             modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(50.dp)
-                    .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
+                .fillMaxWidth()
+                .padding(50.dp)
+                .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
             contentAlignment = Alignment.CenterEnd
         ) {
         }
@@ -1222,16 +1233,16 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             if(viewModel.configurationType.value == IP_CONFIGURATION){
                 SaveTextView(fetchButtonText, isEnabledFetch) {
                     if(viewModel.destinationIp.value.isNullOrEmpty() ){
-                        Toast.makeText(requireContext(), "Please input ip address", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.ipAddressValidation), Toast.LENGTH_SHORT).show()
                     }else if(viewModel.destinationPort.value.isNullOrEmpty()){
-                        Toast.makeText(requireContext(), "Please input port number", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.portValidation), Toast.LENGTH_SHORT).show()
                     }else if(viewModel.deviceId.value.isNullOrEmpty()){
-                        Toast.makeText(requireContext(), "Please input deviceId number", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.deviceIdValidation), Toast.LENGTH_SHORT).show()
                     }else{
-                        if(viewModel.isBacntEnabled.value){
+                        if(viewModel.isBacnetIpEnabled.value){
                             viewModel.fetchData()
                         }else{
-                            Toast.makeText(requireContext(), "BacNet is not initialized", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), getString(R.string.bacnetIpNotInitializedWarning), Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -1255,8 +1266,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             ) {
                 Row(
                     modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(PaddingValues(bottom = 0.dp)),
+                        .fillMaxWidth()
+                        .padding(PaddingValues(bottom = 0.dp)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -2265,7 +2276,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
 
     fun onOpenFragment(){
         viewModel.isBacNetEnabled("dynamic")
-        CcuLog.d(TAG_BACNET, "--externalAhuFragment--onOpenFragment --isBacnetEnabled-->${viewModel.isBacntEnabled}")
+        CcuLog.d(TAG_BACNET, "--externalAhuFragment--onOpenFragment --isBacnetEnabled-->${viewModel.isBacnetIpEnabled}")
     }
 
 }

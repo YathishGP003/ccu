@@ -609,21 +609,23 @@ fun updateBacnetMstpLinearAndCovSubscription( isInitProcessRequired: Boolean = t
         }*/
 
     }
-    if (serverIpAddress != null ) {
         if (subscribeCovForAllDevices.isEmpty()) {
             CcuLog.d(TAG_CCU_BACNET_MSTP, "No COV subscription found for any device")
         } else {
             CcuLog.d(TAG_CCU_BACNET_MSTP, "Sending COV subscription for all devices: $subscribeCovForAllDevices")
-            serviceUtils.sendCovSubscription(BacnetMstpSubscribeCovForAllDevices(subscribeCovForAllDevices), serverIpAddress)
+            serviceUtils.sendCovSubscription(BacnetMstpSubscribeCovForAllDevices(subscribeCovForAllDevices), "")
         }
-    }
 
 }
 
-private fun sendRequestMultipleRead(rpmRequest: BacnetReadRequestMultiple, deviceIp: String, deviceId: String, equipId: String) {
+private fun sendRequestMultipleRead(
+    rpmRequest: BacnetReadRequestMultiple,
+    deviceId: String,
+    equipId: String
+) {
     CoroutineScope(Dispatchers.IO).launch {
         try {
-            val service =  ServiceManager.makeCcuServiceForMSTP(ipAddress = deviceIp)
+            val service =  ServiceManager.makeCcuServiceForMSTP()
             val response = service.multiread(rpmRequest)
             val resp = BaseResponse(response)
             if (response.isSuccessful) {
@@ -663,14 +665,11 @@ fun handleLinearPoints(bacnetMstpEquip: MutableList<HDict>) {
     if (equipProcessed < equipsToProcess || equipsToProcess == 0) {
         equipsToProcess = bacnetMstpEquip.size
         equipProcessed = 0
-
-        val serviceUtils = BacnetServicesUtils()
-        val serverIpAddress = serviceUtils.getServerIpAddress()
         var equip : HDict
         for (i in 0 until equipsToProcess) {
             equip = bacnetMstpEquip[i]
             CcuLog.d(TAG_CCU_BACNET_MSTP, "--[6]-- mstp rpm Processing equip no-->$i <--id-->${equip.id()} <--dis-->${equip.dis()}")
-            handlePointsWithDelay(equip, serverIpAddress)
+            handlePointsWithDelay(equip)
             equipProcessed = i + 1
         }
     } else {
@@ -679,8 +678,7 @@ fun handleLinearPoints(bacnetMstpEquip: MutableList<HDict>) {
 }
 
 fun handlePointsWithDelay(
-        t1: HDict,
-        serverIpAddress: String?
+    t1: HDict
 ) {
     CcuLog.d(TAG_CCU_BACNET_MSTP, "--[8]-- mstp rpm --inside handlePointsWithDelay---checking if equip has linear points")
     val points = CCUHsApi.getInstance()
@@ -719,12 +717,11 @@ fun handlePointsWithDelay(
             }
         }
 
-        if (serverIpAddress != null && readAccessSpecification.isNotEmpty()) {
+        if (readAccessSpecification.isNotEmpty()) {
             val rpmRequest = RpmRequest(readAccessSpecification)
             CcuLog.d(TAG_CCU_BACNET_MSTP, "--[12]-- mstp rpm Sending RPM batch ${batchIndex + 1} for device $deviceId")
             sendRequestMultipleRead(
                 BacnetReadRequestMultiple(destination, rpmRequest),
-                serverIpAddress,
                 deviceId,
                 t1.id().toString()
             )
@@ -753,7 +750,7 @@ fun updateHeartBeatPoint(id: String, isEquipId: Boolean = false) {
         val equipId = if (!isEquipId) point["equipRef"] //if given id is point id then get equipRef from point
                       else id    //if given id is equip id then use it directly
         CcuLog.i(TAG_CCU_BACNET, "updateHeartBeatPoint for equip: $equipId  isIp -> $isBacnetClientPoint isMstp-> $isBacnetMstpPoint" )
-        val heartBeatPointId = CCUHsApi.getInstance().readEntity("point and heartbeat and (bacnetCur or bacnetMstp) and equipRef==\"$equipId\"")["id"]
+        val heartBeatPointId = CCUHsApi.getInstance().readEntity("point and heartbeat and (bacnet or bacnetCur or bacnetMstp) and equipRef==\"$equipId\"")["id"]
         if(heartBeatPointId != null && heartBeatPointId.toString().isNotEmpty()){
             CcuLog.i(TAG_CCU_BACNET, "updateHeartBeatPoint for equip: $equipId with heartBeatPointId: $heartBeatPointId")
             CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(heartBeatPointId.toString(), 1.0)

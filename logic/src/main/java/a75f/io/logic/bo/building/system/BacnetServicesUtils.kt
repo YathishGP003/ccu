@@ -37,8 +37,8 @@ class BacnetServicesUtils: BacnetRequestUtil {
     ) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val service = if (isMstpEquip) ServiceManager.makeCcuServiceForMSTP(ipAddress)
-                              else ServiceManager.makeCcuService(ipAddress)
+                val service = if (isMstpEquip) ServiceManager.makeCcuServiceForMSTP()
+                              else ServiceManager.makeCcuService()
                 val response = service.write(bacnetWriteRequest)
                 val resp = BaseResponse(response)
                 if (response.isSuccessful) {
@@ -90,7 +90,7 @@ class BacnetServicesUtils: BacnetRequestUtil {
 
     fun sendCovSubscription( subscribeCovRequest: BacnetMstpSubscribeCovForAllDevices , ipAddress: String) {
 
-        val service = ServiceManager.makeCcuServiceForMSTP(ipAddress)
+        val service = ServiceManager.makeCcuServiceForMSTP()
       CcuLog.d(TAG, "sendCovSubscription called with request: $subscribeCovRequest")
         CoroutineScope(Dispatchers.IO).launch {
             try {

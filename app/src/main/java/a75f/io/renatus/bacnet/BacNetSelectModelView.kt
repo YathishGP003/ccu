@@ -2,6 +2,7 @@ package a75f.io.renatus.bacnet
 
 import a75f.io.api.haystack.bacnet.parser.BacnetSelectedValue
 import a75f.io.logger.CcuLog
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.util.bacnet.BacnetConfigConstants
 import a75f.io.logic.util.bacnet.validateInputdata
@@ -1031,18 +1032,9 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
     @Composable
     fun CreateOnlyConfigControlButtonList() {
         var showToast by remember { mutableStateOf(false) }
-        var warningToastMessage = ""
+        var warningToastMessage by remember { mutableStateOf("") }
         val buttonInfoMap = mutableMapOf (
             CANCEL to Pair(true) { closeAllBaseDialogFragments() },
-            /*getFetchText() to Pair(isFetchReady()) {
-                val (isWarningApplicable, warningMessage) = getFetchWarningToastMessageIfValid()
-                if(isWarningApplicable) {
-                    showToast = true
-                    warningToastMessage = warningMessage
-                } else {
-                    viewModel.fetchData()
-                }
-            }*/
         )
 
         buttonInfoMap[SAVE] =
@@ -1095,9 +1087,9 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
         var (isValidWarning, warningMessage) = getMinValidationWarningToastMessage()
         if(!isValidWarning){
             if(viewModel.configurationType.value == IP_CONFIGURATION && !isBacNetInitialized) {
-                warningMessage = "BACnet IP is not initialized"
+                warningMessage = getString(R.string.bacnetIpNotInitializedWarning)
             } else if(viewModel.configurationType.value == MSTP_CONFIGURATION && !isBacnetMstpInitialized) {
-                warningMessage = "BACnet MSTP is not initialized"
+                warningMessage = getString(R.string.bacnetMstpNotInitializedWarning)
             } else {
                 return Pair(false, "")
             }
@@ -1110,19 +1102,23 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
 
         if(viewModel.configurationType.value == IP_CONFIGURATION) {
             warningMessage = if(viewModel.destinationIp.value.isEmpty() ){
-                "Please input ip address"
+                getString(R.string.ipAddressValidation)
             }else if(viewModel.destinationPort.value.isEmpty()){
-                "Please input port number"
+                getString(R.string.portValidation)
             }else if(viewModel.deviceId.value.isEmpty()){
-                "Please input deviceId number"
+                getString(R.string.deviceIdValidation)
             } else {
                 return Pair(false, "")
             }
         } else if (viewModel.configurationType.value == MSTP_CONFIGURATION) {
             if (viewModel.destinationMacAddress.value.isEmpty()) {
-                warningMessage = "Please input mac address"
+                warningMessage = getString(R.string.macAddressValidation)
             } else {
-                return Pair(false, "")
+                if (L.isBacnetMstpMacAddressExists(viewModel.destinationMacAddress.value.toInt())) {
+                    warningMessage = "${getString(R.string.macAddress)} ${viewModel.destinationMacAddress.value} ${getString(R.string.already_exists_validation)}"
+                } else {
+                    return Pair(false, "")
+                }
             }
         }
 

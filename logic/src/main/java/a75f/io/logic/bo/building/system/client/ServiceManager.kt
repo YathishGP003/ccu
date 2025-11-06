@@ -37,13 +37,13 @@ object ServiceManager {
         }
     }
 
-    fun makeCcuService(ipAddress: String): CcuService {
-        val baseUrl = "http://$ipAddress:5005/"
+    fun makeCcuService(): CcuService {
+        val baseUrl = "http://127.0.0.1:5005/" // Updating to loopback address (localhost)
         return getRetrofit(baseUrl).create(CcuService::class.java)
     }
 
-    fun makeCcuServiceForMSTP(ipAddress: String): CcuService {
-        val baseUrl = "http://$ipAddress:5006/"
+    fun makeCcuServiceForMSTP(): CcuService {
+        val baseUrl = "http://127.0.0.1:5006/" // Updating to loopback address (localhost)
         return getRetrofit(baseUrl).create(CcuService::class.java)
     }
 }

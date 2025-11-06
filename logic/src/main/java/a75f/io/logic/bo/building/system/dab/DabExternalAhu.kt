@@ -282,6 +282,7 @@ class DabExternalAhu : DabSystemProfile() {
                 if (previousOperationMode == SystemController.State.HEATING.ordinal ) TempDirection.HEATING else TempDirection.COOLING
             }
         }
+        CcuLog.d(L.TAG_CCU_SYSTEM,"Previous Operation Mode after loop direction: $previousOperationMode")
 
         updatePointValue(systemEquip, coolingLoopOutput, basicConfig.coolingLoop.toDouble())
         updatePointValue(systemEquip, heatingLoopOutput, basicConfig.heatingLoop.toDouble())
@@ -289,6 +290,7 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     private fun getUpdatedOperatingMode() : Int{
+        CcuLog.d(L.TAG_CCU_SYSTEM,"Getting updated operating mode. Current system state: ${dabSystem.systemState} Previous Operation Mode: $previousOperationMode")
         return when(dabSystem.systemState) {
             SystemController.State.COOLING -> dabSystem.systemState.ordinal
             SystemController.State.HEATING -> dabSystem.systemState.ordinal

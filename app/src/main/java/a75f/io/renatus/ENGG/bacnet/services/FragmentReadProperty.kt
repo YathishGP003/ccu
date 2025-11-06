@@ -75,7 +75,7 @@ class FragmentReadProperty : Fragment(R.layout.lyt_frag_read_property) {
                 val networkObject = config.getJSONObject("network")
                 ipAddress = networkObject.getString(IP_ADDRESS)
                 port = networkObject.getInt(PORT)
-                service = ServiceManager.makeCcuService(ipAddress)
+                service = ServiceManager.makeCcuService()
                 val deviceObject = config.getJSONObject("device")
                 deviceId = deviceObject.getString(IP_DEVICE_INSTANCE_NUMBER)
             } catch (e: JSONException) {

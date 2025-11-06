@@ -81,6 +81,7 @@ import com.tooltip.Tooltip;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.jsoup.helper.StringUtil;
+import org.projecthaystack.HStr;
 
 import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
@@ -91,6 +92,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -156,6 +158,7 @@ import a75f.io.renatus.util.SystemProfileUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.OaoArc;
+import a75f.io.util.EntityKVStringParserUtilKt;
 import a75f.io.util.ExecutorTask;
 
 /**
@@ -269,7 +272,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	private TextView externalModbusStatus;
 	private TextView externalModbusLastUpdated;
 	private TextView external_last_updated;
-
+	private TextView external_device_type_text;
 	LinearLayout setPointConfig;
 	LinearLayout dcv_config;
 	LinearLayout dual_config;
@@ -907,6 +910,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		externalModbusStatus = view.findViewById(R.id.external_device_status);
 		externalModbusLastUpdated = view.findViewById(R.id.external_last_updated_status);
 		external_last_updated = view.findViewById(R.id.external_last_updated);
+		external_device_type_text = view.findViewById(R.id.extenal_bacnetDeviceType);
 		lastUpdatedStatusOao = view.findViewById(R.id.linear_layout_lastupdate);
 		showExternalModbusDevice();
 		setUpDRModeActivationLayout();
@@ -1644,14 +1648,12 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		Double hisValue = CCUHsApi.getInstance().readHisValById(heartBeatPointId);
 		HisItem heartBeatHisItem = CCUHsApi.getInstance().curRead(heartBeatPointId);
 		String lastUpdatedTime = "--";
-
-		if(hisValue == 1.0){
-			lastUpdatedTime = "Just now";
-			externalModbusStatus.setBackgroundResource(R.drawable.module_alive);
-		}else{
-			if(heartBeatHisItem != null){
-				Date updatedTime = heartBeatHisItem.getDate();
-				lastUpdatedTime = HeartBeatUtil.getLastUpdatedTimeBacnetSystem(updatedTime);
+		if(heartBeatHisItem != null) {
+			Date updatedTime = heartBeatHisItem.getDate();
+			lastUpdatedTime = HeartBeatUtil.getLastUpdatedTimeBacnetSystem(updatedTime);
+			if (hisValue == 1.0) {
+				externalModbusStatus.setBackgroundResource(R.drawable.module_alive);
+			} else {
 
 				Date currTime = new Date();
 				Calendar calendar = Calendar.getInstance();
@@ -1659,7 +1661,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				calendar.add(Calendar.MINUTE, 15);
 				Date currTimePlus15 = calendar.getTime();
 
-				CcuLog.d(TAG_BACNET_HEART_BEAT, "--heart beat point his value-->"+hisValue+"<--heartBeatHisItem time-->"+heartBeatHisItem.getDate() + "<----currTimePlus15-->"+currTimePlus15 + "<currTime>"+currTime);
+				CcuLog.d(TAG_BACNET_HEART_BEAT, "--heart beat point his value-->" + hisValue + "<--heartBeatHisItem time-->" + heartBeatHisItem.getDate() + "<----currTimePlus15-->" + currTimePlus15 + "<currTime>" + currTime);
 
 				if (currTime.after(currTimePlus15)) {
 					CcuLog.d(TAG_BACNET_HEART_BEAT, "givenTime is more than 15 minutes ahead of current time.");
@@ -1668,10 +1670,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					CcuLog.d(TAG_BACNET_HEART_BEAT, "givenTime is not more than 15 minutes ahead.");
 					externalModbusStatus.setBackgroundResource(R.drawable.module_alive);
 				}
-			}else{
-				CcuLog.d(TAG_BACNET_HEART_BEAT, "givenTime not found");
-				externalModbusStatus.setBackgroundResource(R.drawable.module_dead);
 			}
+		} else {
+			CcuLog.d(TAG_BACNET_HEART_BEAT, "givenTime not found");
+			externalModbusStatus.setBackgroundResource(R.drawable.module_dead);
 		}
 
 
@@ -1682,8 +1684,27 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		externalModbusLastUpdated.setVisibility(View.VISIBLE);
 		externalModbusLastUpdated.setText(lastUpdatedTime);
 		external_last_updated.setVisibility(View.VISIBLE);
+		if (bacnetEquip.containsKey(Tags.BACNET_CUR)) {
+			external_device_type_text.setText(R.string.bacnetIpDevice);
+		} else {
+			external_device_type_text.setText(R.string.bacnetMstpDevice);
+		}
+		external_device_type_text.setVisibility(View.VISIBLE);
 		externalModbusModelDetails.setVisibility(View.VISIBLE);
-		externalModbusModelDetails.setText(Objects.requireNonNull(bacnetEquip.get("dis")).toString());
+		Map<String, String> bacnetConfig = EntityKVStringParserUtilKt.getConfig(
+				bacnetEquip.getOrDefault(
+						"bacnetConfig",
+						HStr.make("")).toString());
+		String macAddr = bacnetConfig.get("macAddress");
+		if (macAddr == null || macAddr.isEmpty()) {
+			macAddr = "NA";
+		}
+		String bacnetDeviceId = bacnetConfig.get("deviceId");
+		if (bacnetDeviceId == null || bacnetDeviceId.isEmpty()) {
+			bacnetDeviceId = "NA";
+		}
+		String disName = " ( Device ID: " + bacnetDeviceId + " | MAC Addr: " + macAddr + " )";
+		externalModbusModelDetails.setText(Objects.requireNonNull(bacnetEquip.get("dis")) + disName);
 
 		for (BacnetModelDetailResponse item : list){
 			List<BacnetPoint> bacnetPoints = item.getPoints();
@@ -1707,9 +1728,11 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	private RemotePointUpdateInterface remotePointUpdateInterface = (message, id, value) -> {
 		//CcuLog.d(LOG_TAG, "--updateMessage::>> " + message);
-		getActivity().runOnUiThread(() -> {
-			Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-		});
+		if(getActivity() != null) {
+			getActivity().runOnUiThread(() -> {
+				Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+			});
+		}
 
 		CCUHsApi.getInstance().writeDefaultValById(id, Double.parseDouble(value));
 		CCUHsApi.getInstance().writeHisValById(id, Double.parseDouble(value));

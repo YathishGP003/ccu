@@ -94,6 +94,7 @@ object  BacnetConfigConstants {
     const val BROADCAST_BACNET_APP_GLOBAL_PARAM = "a75f.io.renatus.BROADCAST_BACNET_APP_GLOBAL_PARAM"
     const val BACNET_MSTP_SERIAL_DEVICE = "bacnetMstpSerialDevice"
 
+    const val BACNET_DEVICE_MAC_ADDR: String = "bacnetDeviceMacAddr"
 }
 enum class BacnetServerStatus {
     NOT_INITIALIZED,

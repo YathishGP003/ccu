@@ -233,6 +233,8 @@ public class Tags
     public static final String BACNET_DEVICE_ID = "bacnetDeviceId";
     public static final String BACNET_CONFIG = "bacnetConfig";
 
+    public static final String BACNET_CUR = "bacnetCur";
+    public static final String BACNET_MSTP = "bacnetMstp";
     public static final String BACNET_SUB_UN_SUB_POLL = "BACNET_SUB_UN_SUB_POLL";
     public static final String PHYSICAL = "physical";
     public static final String PROFILE = "profile";

@@ -1014,7 +1014,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun migrationToHandleInfluenceOfUserIntentOnSentPoints() {
-        val standaloneEquips = hayStack.readAllEntities("equip and (hyperstat or smartstat or hyperstatsplit)")
+        val standaloneEquips = hayStack.readAllEntities("equip and (hyperstat or smartstat or hyperstatsplit) and not modbus and not bacnetDeviceId")
         val roomRefs = getRoomRefsForAllStandaloneProfiles(standaloneEquips)
         roomRefs.forEach{roomRef ->
             DesiredTempDisplayMode.setModeTypeOnUserIntentChange(roomRef, hayStack)

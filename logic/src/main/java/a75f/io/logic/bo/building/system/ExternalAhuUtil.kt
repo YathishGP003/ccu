@@ -1120,12 +1120,14 @@ fun getPreviousOperatingModeFromDb(systemEquip: Equip, hayStack: CCUHsApi): Int 
     val point = Domain.readPoint(operatingMode)
     val hisItems = hayStack.getHisItems(point["id"].toString(), 0, 2)
     if (hisItems.isEmpty()) {
+        CcuLog.d(L.TAG_CCU_SYSTEM, "getPreviousOperatingMode: No history found")
         return SystemController.State.COOLING.ordinal
     }
     return if (hisItems.size > 1) {
         CcuLog.d(L.TAG_CCU_SYSTEM, "getPreviousOperatingMode: ${hisItems[0]} ${hisItems[1]}")
         maxOf(hisItems[1].`val`.toInt(), SystemController.State.COOLING.ordinal)
     } else {
+        CcuLog.d(L.TAG_CCU_SYSTEM, "getPreviousOperatingMode: ${hisItems[0]}")
         maxOf(hisItems[0].`val`.toInt(), SystemController.State.COOLING.ordinal)
     }
 }

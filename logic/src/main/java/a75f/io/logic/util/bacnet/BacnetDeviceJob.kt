@@ -13,6 +13,7 @@ import a75f.io.logic.bo.building.system.client.CcuService
 import a75f.io.logic.bo.building.system.client.ServiceManager
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_JOB_TASK_TYPE
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_PERIODIC_RESUBSCRIBE_COV
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_DEVICE_ID
 import android.content.Context
 import android.preference.PreferenceManager
 import androidx.work.CoroutineWorker
@@ -47,30 +48,31 @@ class BacnetDeviceJob(appContext: Context, workerParams: WorkerParameters) :
     }
 
     companion object {
-        private var bacnetEquip: HashMap<Any, Any>? = null
+        private var bacnetEquip: HashMap<Any, Any> = HashMap()
         fun handleDoWork(context: Context) {
-            bacnetEquip = findPoint("system and equip and bacnet and not emr and not btu")
+            bacnetEquip = findPoint("system and equip and bacnetCur and not emr and not btu")
             if (bacnetEquip != null) {
                 CcuLog.d(
                     BACNET_DEVICE_JOB,
                     "--globals bacnet equip found attached with external ahu---"
                 )
-                val bacnetDeviceId = bacnetEquip!!["bacnetDeviceId"].toString()
-                fetchConnectedDeviceGlobally(bacnetDeviceId, context)
+                fetchConnectedDeviceGlobally(bacnetEquip, context)
             }
         }
 
-        private fun findPoint(query: String): HashMap<Any, Any>? {
+        private fun findPoint(query: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(query)
         }
 
-        private fun fetchConnectedDeviceGlobally(bacnetDeviceId: String, context: Context) {
-            if (bacnetDeviceId.isEmpty()) {
-                CcuLog.d(BACNET_DEVICE_JOB, "----bacnetDeviceId is empty returning from here----")
+        private fun fetchConnectedDeviceGlobally(bacnetEquip: HashMap<Any, Any>, context: Context) {
+            if (bacnetEquip.isEmpty()) {
+                CcuLog.d(BACNET_DEVICE_JOB, "----bacnetEquip is empty returning from here----")
                 return
             }
-            val lowLimit = bacnetDeviceId.toInt() - 1
-            val highLimit = bacnetDeviceId.toInt() + 1
+            val bacnetDeviceId = bacnetEquip["bacnetDeviceId"].toString()
+            val isMstp = bacnetEquip.contains(Tags.BACNET_MSTP)
+            val lowLimit = bacnetDeviceId.toInt()
+            val highLimit = bacnetDeviceId.toInt()
 
             val networkDetailsCurrentDevice = getNetworkDetails(context)
             if (networkDetailsCurrentDevice != null) {
@@ -78,18 +80,22 @@ class BacnetDeviceJob(appContext: Context, workerParams: WorkerParameters) :
                     networkDetailsCurrentDevice.getString(BacnetConfigConstants.IP_ADDRESS)
                 val devicePort =
                     networkDetailsCurrentDevice.getInt(BacnetConfigConstants.PORT).toString()
-                val service = ServiceManager.makeCcuService(ipAddress = serverIpAddress)
+                val service = if (isMstp) ServiceManager.makeCcuServiceForMSTP() else ServiceManager.makeCcuService()
                 CcuLog.d(
                     Tags.BACNET_DEVICE_JOB,
                     "--fetchConnectedDeviceGlobally for ip --> $serverIpAddress --- service--$service---devicePort-->$devicePort <--lowLimit-->$lowLimit<--highLimit-->$highLimit"
                 )
                 try {
+
+                    val srcDeviceID = PreferenceManager.getDefaultSharedPreferences(context).getInt(
+                        PREF_MSTP_DEVICE_ID,0).toString()
                     val broadCastValue = "global"
                     val bacnetWhoIsRequest = BacnetWhoIsRequest(
                         WhoIsRequest("$lowLimit", "$highLimit"),
                         BroadCast(broadCastValue),
                         devicePort,
-                        serverIpAddress
+                        serverIpAddress,
+                        srcDeviceId = srcDeviceID
                     )
                     val request = Gson().toJson(bacnetWhoIsRequest)
                     CcuLog.d(BACNET_DEVICE_JOB, "this is the broadcast request-->$request")
@@ -150,14 +156,8 @@ class BacnetDeviceJob(appContext: Context, workerParams: WorkerParameters) :
                 "--updateHeartBeatPoint--$newValue<--heartBeatPointId-->$heartBeatPointId <--bacnetEquipId-->$bacnetEquipId"
             )
             if (heartBeatPointId.toString().isNotEmpty()) {
-                val lastValue = CCUHsApi.getInstance().readHisValById(heartBeatPointId.toString())
-                if(lastValue != newValue){
-                    CCUHsApi.getInstance()
-                        .writeHisValueByIdWithoutCOV(heartBeatPointId.toString(), newValue)
-                    CcuLog.d(BACNET_DEVICE_JOB, "--updateHeartBeatPoint--updated successfully -->$lastValue<--newValue-->$newValue")
-                }else{
-                    CcuLog.d(BACNET_DEVICE_JOB, "--updateHeartBeatPoint--not updated as no change in status -->$lastValue<--newValue-->$newValue")
-                }
+                CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(heartBeatPointId.toString(), newValue)
+                CcuLog.d(BACNET_DEVICE_JOB, "--updateHeartBeatPoint--updated successfully -->Value-->$newValue")
             }
         }
 

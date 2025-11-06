@@ -1,5 +1,8 @@
 package a75f.io.logic;
 
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_MAC_ADDR;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_SOURCE_ADDRESS;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
@@ -190,6 +193,32 @@ public class L
             }
         }
         CcuLog.d(TAG_CCU_MODBUS, "Modbus slave ID " + slaveId + " does not exist on port: " + port);
+        return false;
+    }
+
+    public static boolean isBacnetMstpMacAddressExists(int slaveId) {
+        CcuLog.d(TAG_CCU_BACNET_MSTP, "Checking Bacnet MSTP MAC Address existence: " + slaveId );
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
+        int deviceMacAddress = sharedPreferences.getInt(PREF_MSTP_SOURCE_ADDRESS, 1);
+        if (deviceMacAddress == slaveId) {
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "Bacnet MSTP MAC Address " + slaveId + " is the same as device MAC address");
+            return true;
+        }
+
+        CCUHsApi hsApi = CCUHsApi.getInstance();
+        ArrayList<HashMap<Object, Object>> bacnetequips = hsApi.readAllEntities("equip and bacnetMstp");
+
+        if(bacnetequips.isEmpty()){
+            return false;
+        }
+
+        for (HashMap<Object,Object> equip : bacnetequips) {
+            if (equip.get(BACNET_DEVICE_MAC_ADDR).toString().equals(String.valueOf(slaveId))) {
+               return true;
+            }
+        }
+        CcuLog.d(TAG_CCU_BACNET_MSTP, "Bacnet MSTP MAC Address " + slaveId );
         return false;
     }
 

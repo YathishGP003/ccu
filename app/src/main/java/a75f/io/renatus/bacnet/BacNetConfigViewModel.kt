@@ -548,9 +548,9 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         bacnetPropertiesFetched.value = false
         CcuLog.d(TAG, "--------------fetchData--isDestinationIpInvalidValid-----$deviceIp--------")
         service = if (configurationType.value == MSTP_CONFIGURATION) {
-            ServiceManager.makeCcuServiceForMSTP(ipAddress = deviceIp)
+            ServiceManager.makeCcuServiceForMSTP()
         } else {
-            ServiceManager.makeCcuService(ipAddress = deviceIp)
+            ServiceManager.makeCcuService()
         }
         val destination =
             DestinationMultiRead(destinationIp.value, destinationPort.value, deviceId.value, dnet.value, destinationMacAddress.value)
@@ -583,9 +583,9 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                 destinationMacAddress = macAddressToByteArray(it.deviceMacAddress)
             }
             service = if(configurationType.value == MSTP_CONFIGURATION) {
-                ServiceManager.makeCcuServiceForMSTP(ipAddress = deviceIp)
+                ServiceManager.makeCcuServiceForMSTP()
             } else {
-                ServiceManager.makeCcuService(ipAddress = deviceIp)
+                ServiceManager.makeCcuService()
             }
             val destination = DestinationMultiRead(
                 it.deviceIp,
@@ -764,9 +764,9 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
 
     private fun fetchConnectedDeviceGlobally() {
         service = if (configurationType.value == MSTP_CONFIGURATION) {
-            ServiceManager.makeCcuServiceForMSTP(deviceIp)
+            ServiceManager.makeCcuServiceForMSTP()
         } else {
-            ServiceManager.makeCcuService(deviceIp)
+            ServiceManager.makeCcuService()
         }
         CcuLog.d(TAG, "fetchConnectedDevice for ${deviceId.value} -- ${destinationIp.value} -- ${destinationPort.value} -- ${destinationMacAddress.value} -- ${dnet.value}")
         try {

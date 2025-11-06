@@ -2140,6 +2140,22 @@
         <item>BACnet MSTP</item>
         <item>Biskit</item>
     </string-array>
+    <string name="bacnetMstpDevice">BACnet - MSTP Device</string>
+    <string name="bacnetIpDevice">BACnet - IP Device</string>
+    <string name="ipAddressValidation">Please input ip address</string>
+    <string name="portValidation">Please input port number</string>
+    <string name="macAddressValidation">Please input mac address</string>
+    <string name="deviceIdValidation">Please input device id</string>
+    <string name="macAddress">MAC Address</string>
+    <string name="already_exists_validation">is already exists, choose another mac address to proceed</string>
+    <string name="bacnetIpNotInitializedWarning">BACnet IP is not initialized</string>
+    <string name="bacnetMstpNotInitializedWarning">BACnet MSTP is not initialized</string>
+    <string name="bacnetMstpMasterMacValidation">Master device address range is 1 - 127</string>
+    <string name="bacnetMstpSlaveMacValidation">Slave device address range is 128 - 254</string>
+    <string name="bacnetSelectModel">Please select bacnet model</string>
+    <string name="modbusSlaveWarning"> already exists, choose another slave id to proceed</string>
+    <string name="bacnetConfigModelValidation">Please fill bacnet config details</string>
+
     <string name="universal_Out1">Universal-Out 1</string>
     <string name="universal_Out2">Universal-Out 2</string>
     <string name="analog_Out"> Analog-Out</string>

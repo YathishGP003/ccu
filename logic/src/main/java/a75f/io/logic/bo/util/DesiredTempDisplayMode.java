@@ -453,7 +453,7 @@ public class DesiredTempDisplayMode {
     }
 
     public static void setSystemModeForStandaloneProfile(CCUHsApi ccuHsApi) {
-        ArrayList<HashMap<Object, Object>> standaloneEquips = ccuHsApi.readAllEntities("equip and (hyperstat or smartstat or hyperstatsplit) and roomRef");
+        ArrayList<HashMap<Object, Object>> standaloneEquips = ccuHsApi.readAllEntities("equip and (hyperstat or smartstat or hyperstatsplit) and roomRef  and not modbus and not bacnetDeviceId");
         List<String> roomRefs = getRoomRefsForAllStandaloneProfiles(standaloneEquips);
         for (String roomRef : roomRefs) {
             setModeTypeOnUserIntentChange(roomRef, ccuHsApi);

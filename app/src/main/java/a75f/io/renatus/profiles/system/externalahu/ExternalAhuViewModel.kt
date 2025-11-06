@@ -37,6 +37,9 @@ import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.bacnet.*
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_CONFIGURATION
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_MSTP_INITIALIZED
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_DEVICE_ID
 import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
@@ -175,7 +178,8 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     @SuppressLint("StaticFieldLeak")
     lateinit var context: Context
     lateinit var profileType: ProfileType
-    val isBacntEnabled = mutableStateOf(false)
+    val isBacnetIpEnabled = mutableStateOf(false)
+    val isBacnetMstpEnabled = mutableStateOf(false)
 
     private var domainService = DomainService()
     val onItemSelect = object : OnItemSelect {
@@ -246,9 +250,10 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
 
     fun isBacNetEnabled(source : String) {
         val defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
-        isBacntEnabled.value = defaultSharedPrefs.getBoolean("isBACnetinitialized", false)
-        CcuLog.d(TAG_BACNET, "-source--$source-isBacntEnabled--${isBacntEnabled.value} --isModbusSystemProfileEnabled()--${isModbusSystemProfileEnabled().size} --iBacnetSystemProfileEnabled()--${iBacnetSystemProfileEnabled().size}")
-        if(isBacntEnabled.value){
+        isBacnetIpEnabled.value = defaultSharedPrefs.getBoolean(IS_BACNET_INITIALIZED, false)
+        isBacnetMstpEnabled.value = defaultSharedPrefs.getBoolean(IS_BACNET_MSTP_INITIALIZED, false)
+        CcuLog.d(TAG_BACNET, "-source--$source-isBacnetIpEnabled--${isBacnetIpEnabled.value} --isModbusSystemProfileEnabled()--${isModbusSystemProfileEnabled().size} --iBacnetSystemProfileEnabled()--${iBacnetSystemProfileEnabled().size}")
+        if(isBacnetIpEnabled.value || isBacnetMstpEnabled.value){
             // bacnet is enabled
             if(PreferenceUtil.getSelectedProfileWithAhu() != "") {
                 if(PreferenceUtil.getSelectedProfileWithAhu() == "bacnet" && iBacnetSystemProfileEnabled().size > 0){
@@ -541,14 +546,14 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             equipModel.value.port.value = if (portList.isNotEmpty()) portList[0] else ""
         }
         if (equipModel.value.parameters.isEmpty()) {
-            showToast("Please select modbus device", context)
+            showToast(context.getString(R.string.no_device_paired), context)
             return false
         }
         if (equipModel.value.isDevicePaired) return true // If it is paired then will not allow the use to to edit slave id
 
         if (L.isModbusSlaveIdExists(equipModel.value.slaveId.value.toShort(), equipModel.value.port.value)) {
             showToast(
-                "Slave Id " + equipModel.value.slaveId.value + " already exists, choose " + "another slave id to proceed",
+                "${context.getString(R.string.title_start_address)} " + equipModel.value.slaveId.value + context.getString(R.string.modbusSlaveWarning),
                 context
             )
             return false
@@ -565,36 +570,42 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
 
     private fun isValidConfigurationBacnet(): Boolean {
         if (bacnetModel.value.points.isEmpty()) {
-            showToast("Please select bacnet model", context)
+            showToast(context.getString(R.string.bacnetSelectModel), context)
             return false
         }
+        if (bacnetModel.value.isDevicePaired) return true // If it is paired then will not allow the use to to edit device id
         if(configurationType.value == MSTP_CONFIGURATION){
+
+            if(L.isBacnetMstpMacAddressExists(textFieldValueMacAddress)){
+                showToast("${context.getString(R.string.macAddress)} $textFieldValueMacAddress ${context.getString(R.string.already_exists_validation)}", context)
+                return false
+            }
+
             // check for valid mac address
             if(deviceSelectionMode.value == 0){
                 // this is slave device
-                if(textFieldValueMacAddress < 128 || textFieldValueMacAddress > 254){
-                    showToast("Slave device address range is 128 - 254", context)
+                if(destinationMacAddress.value.isNotEmpty() && (destinationMacAddress.value.toInt() < 128 || destinationMacAddress.value.toInt() > 254)){
+                    showToast(context.getString(R.string.bacnetMstpSlaveMacValidation), context)
                     return false
                 }
             }else{
                 // this is master device
-                if(textFieldValueMacAddress < 1 || textFieldValueMacAddress > 127){
-                    showToast("Master device address range is 1 - 127", context)
+                if(destinationMacAddress.value.isNotEmpty() && (destinationMacAddress.value.toInt() < 1 || destinationMacAddress.value.toInt() > 127)){
+                    showToast(context.getString(R.string.bacnetMstpMasterMacValidation), context)
                     return false
                 }
             }
         }else{
             if(!isBacnetConfigDetailsFilled()){
-                showToast("Please fill bacnet config details", context)
+                showToast(context.getString(R.string.bacnetConfigModelValidation), context)
                 return false
             }
 
             if(!isValidIPv4(destinationIp.value)){
-                showToast("Please provide valid ip address", context)
+                showToast(context.getString(R.string.ipAddressValidation), context)
                 return false
             }
         }
-        if (bacnetModel.value.isDevicePaired) return true
         return true
     }
 
@@ -913,7 +924,8 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             destinationIp.value = item.deviceIp
             deviceId.value = item.deviceId
             destinationPort.value = item.devicePort
-            destinationMacAddress.value = item.deviceMacAddress?.let { macAddressToByteArray(it) } ?: ""
+            destinationMacAddress.value = if(configurationType.value == IP_CONFIGURATION) item.deviceMacAddress?.let { macAddressToByteArray(it) } ?: ""
+            else item.deviceMacAddress?:""
             dnet.value = item.deviceNetwork
         }
     }
@@ -1088,7 +1100,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         deviceValue.value = false
         bacnetPropertiesFetched.value = false
         CcuLog.d(TAG_BACNET, "--------------fetchData--isDestinationIpInvalidValid-----$deviceIp--------")
-        service = ServiceManager.makeCcuService(ipAddress = deviceIp)
+        service = ServiceManager.makeCcuService()
         val destination =
             DestinationMultiRead(destinationIp.value, destinationPort.value, deviceId.value, dnet.value, destinationMacAddress.value)
         val readAccessSpecification = mutableListOf<ReadRequestMultiple>()
@@ -1325,20 +1337,36 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private fun fetchConnectedDeviceGlobally() {
-        service = ServiceManager.makeCcuService(ipAddress = deviceIp)
+        service = if (configurationType.value == IP_CONFIGURATION) ServiceManager.makeCcuService()
+                  else ServiceManager.makeCcuServiceForMSTP()
         CcuLog.d(TAG, "--fetchConnectedDevice for ip --> ${deviceIp} --- service--${service.toString()}---devicePort-->$devicePort")
         try {
             val broadCastValue = "global"
+            val srcDeviceID = PreferenceManager.getDefaultSharedPreferences(context).getInt(
+                PREF_MSTP_DEVICE_ID,0).toString()
 
-            val bacnetWhoIsRequest = BacnetWhoIsRequest(
-                WhoIsRequest(
-                    "",
-                    ""
-                ),
-                BroadCast(broadCastValue),
-                devicePort,
-                deviceIp
-            )
+            val bacnetWhoIsRequest = if (configurationType.value == IP_CONFIGURATION) {
+                BacnetWhoIsRequest(
+                    WhoIsRequest(
+                        "",
+                        ""
+                    ),
+                    BroadCast(broadCastValue),
+                    devicePort,
+                    deviceIp
+                )
+            } else {
+                BacnetWhoIsRequest(
+                    WhoIsRequest(
+                        "",
+                        ""
+                    ),
+                    BroadCast(broadCastValue),
+                    devicePort,
+                    deviceIp,
+                    srcDeviceId = srcDeviceID
+                )
+            }
             val request = Gson().toJson(
                 bacnetWhoIsRequest
             )
@@ -1446,7 +1474,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         CcuLog.d(TAG_BACNET, "--setUpBacnetProfile -----2-----")
         val modelConfig = "modelName:${modelName.value},modelId:${getBacnetModelIdByName(modelName.value)}"
         CcuLog.d(TAG_BACNET, "------addBacAppEquip-----")
-        bacnetProfile.addBacAppEquip(configParam, modelConfig, deviceID.toString(), deviceID.toString(), "SYSTEM", "SYSTEM",
+        bacnetProfile.addBacAppEquip(configParam, modelConfig, deviceID.toString(),if (configurationType.value == IP_CONFIGURATION) deviceID.toString() else destinationMacAddress.value, "SYSTEM", "SYSTEM",
                 bacnetModel.value.equipDevice.value,
                 profileType, "system", bacnetModel.value.version.value, configurationType.value, destinationMacAddress.value, true)
         CcuLog.d(TAG_BACNET, "setUpBacnetProfile completed")
@@ -1813,10 +1841,10 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     fun getDisabledOptions(): List<String> {
-        if(isBacntEnabled.value){
-            return listOf()
+        return if(isBacnetIpEnabled.value || isBacnetMstpEnabled.value){
+            listOf()
         }else{
-            return listOf(BACNET)
+            listOf(BACNET)
         }
     }
 

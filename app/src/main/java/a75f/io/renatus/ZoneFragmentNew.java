@@ -975,6 +975,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                 if (tempModule) {
                     viewTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, gridPosition, tablerowLayout, isZoneAlive);
                 }
+
+                HashMap<Object, Object> pcn = PCNUtil.Companion.getPCNForZone(roomMap.get("id").toString(), CCUHsApi.getInstance());
+                if (!pcn.isEmpty()) {
+                    isZoneAlive = CCUUtils.isLowCodeDeviceAlive(pcn.get(Tags.ID).toString());
+                }
+
                 if (!tempModule && nontempModule && !profileType.contains(profileHyperStatMonitoring)) {
                     viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, gridPosition,
                             tablerowLayout, isZoneAlive, roomMap.get("id").toString());
@@ -989,6 +995,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
             if (!connectNode.isEmpty()) {
                 isZoneAlive = CCUUtils.isLowCodeDeviceAlive(connectNode.get(Tags.ID).toString());
             }
+            HashMap<Object, Object> pcn = PCNUtil.Companion.getPCNForZone(roomMap.get("id").toString(), CCUHsApi.getInstance());
+            if (!pcn.isEmpty()) {
+                isZoneAlive = CCUUtils.isLowCodeDeviceAlive(pcn.get(Tags.ID).toString());
+            }
+
             viewNonTemperatureBasedZone(inflater, rootView, new ArrayList<>(), zoneTitle, gridPosition, tablerowLayout,
                     isZoneAlive, roomMap.get("id") .toString());
             gridPosition++;

@@ -3,6 +3,7 @@ package a75f.io.renatus.ui.nontempprofiles.helper
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.renatus.R
+import a75f.io.renatus.ui.model.HeaderViewItem
 import a75f.io.renatus.ui.nontempprofiles.utilities.externalEquipsLayoutSetup
 import a75f.io.renatus.ui.nontempprofiles.utilities.getPointScheduleHeaderViewItem
 import a75f.io.renatus.ui.nontempprofiles.utilities.showExternalEquipPointsUI
@@ -56,9 +57,14 @@ fun loadLowCodeModule(
     showExternalEquipPointsUI(composeView, viewModel, equipId, headerName, null, rs485Text, address.toInt())
 
     val equipmentDevice = externalEquipDevice as EquipmentDevice
+    var deviceAddress = equipmentDevice.slaveId.toString()
+    if(equipType == Tags.PCN) {
+        // For PCN, use the node address, not device address
+        deviceAddress = address
+    }
     // lastUpdate and heartbeat
     if (showLastUpdatedTime) {
-        viewModel.initializeEquipHealth(equipmentDeviceName, true, address)
+        viewModel.initializeEquipHealth(equipmentDeviceName, true, deviceAddress)
     } else {
         viewModel.equipName = equipmentDeviceName
     }

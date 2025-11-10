@@ -248,7 +248,8 @@ class NonTempProfileViewModel : ViewModel(), PointSubscriber {
                 handler.postDelayed(this, 60_000L)
             }
         }
-        handler.post(runnable!!)
+        // Delay by 1 sec since it is not working when we run immediately first time
+        handler.postDelayed(runnable!!, 1_000L)
     }
 
     fun observeExternalEquipHealth(

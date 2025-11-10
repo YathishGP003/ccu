@@ -595,7 +595,7 @@ class LPcn {
             pcnNodeDevice.heartBeat.writeHisValueByIdWithoutCOV(1.0)
             val connectNodeDevices = CCUHsApi.getInstance().readAllEntities("device and connectModule and deviceRef==\"${pcnNodeDevice.getId()}\"")
             connectNodeDevices.forEach() { connectNodeDevice ->
-                val heartBeatPoint = CCUHsApi.getInstance().readEntity("heartbeat and deviceRef==\"${connectNodeDevice}\"")
+                val heartBeatPoint = CCUHsApi.getInstance().readEntity("heartbeat and deviceRef==\"${connectNodeDevice.get("id")}\"")
                 CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 1.0)
             }
 

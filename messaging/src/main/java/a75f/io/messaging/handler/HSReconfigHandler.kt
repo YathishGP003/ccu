@@ -10,17 +10,22 @@ import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HyperStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode
+import a75f.io.logic.bo.building.statprofiles.util.getHSDomainEquipByEquipRef
 import a75f.io.logic.bo.building.statprofiles.util.getHSModelByEquipRef
 import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getHsFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
+import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.logic.util.modifyConditioningMode
+import a75f.io.logic.util.modifyFanMode
 import a75f.io.messaging.handler.MessageUtil.Companion.returnDurationDiff
 import com.google.gson.JsonObject
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
@@ -78,6 +83,23 @@ fun reconfigureHSV2(msgObject: JsonObject, configPoint: Point) {
     if ((pointNewValue == null || pointNewValue.asString.isEmpty()) && configPoint.domainName == DomainName.fanOpMode) {
         updateFanModeCache(configPoint.equipRef, HSUtil.getPriorityVal(configPoint.id).toInt())
     }
+
+    // Update fan/conditioning mode enums for HS Domain Equip
+        val hsDomainEquip = getHSDomainEquipByEquipRef(configPoint.equipRef)
+        hsDomainEquip?.let { equip ->
+            config.apply {
+                val possibleConditioningMode = getPossibleConditionMode(this)
+                val possibleFanMode = getHsPossibleFanModeSettings(getHsFanLevel(config))
+                modifyFanMode(possibleFanMode.ordinal, equip.fanOpMode)
+                modifyConditioningMode(
+                    possibleConditioningMode.ordinal,
+                    equip.conditioningMode,
+                    allStandaloneProfileConditions
+                )
+
+                CcuLog.i(L.TAG_CCU_PUBNUB, "updated ConfigPoint for HS fan/cond mode")
+            }
+        }
 
     CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for CPU Reconfiguration $config")
 

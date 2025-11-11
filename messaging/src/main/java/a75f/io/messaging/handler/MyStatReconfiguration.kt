@@ -10,17 +10,25 @@ import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.L.TAG_CCU_PUBNUB
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.util.MyStatDeviceType
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
 import a75f.io.logic.bo.building.statprofiles.util.MyStatPossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatDomainDeviceByEquipRef
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatDomainEquipByEquipRef
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatModelByEquipRef
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.logic.util.modifyConditioningMode
+import a75f.io.logic.util.modifyFanMode
 import a75f.io.messaging.handler.MessageUtil.Companion.returnDurationDiff
 import com.google.gson.JsonObject
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
@@ -33,6 +41,10 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
 
     val mystatEquip = hayStack.readEntity("equip and id == "+configPoint.equipRef)
     val model = getMyStatModelByEquipRef(configPoint.equipRef)
+    val myStatDomainEquip = getMyStatDomainEquipByEquipRef(configPoint.equipRef)
+    val myStatDomainDevice = getMyStatDomainDeviceByEquipRef(configPoint.equipRef)
+    val myStatDeviceVersion = if(myStatDomainDevice.mystatDeviceVersion.readPointValue().toInt() ==1) MyStatDeviceType.MYSTAT_V2 else MyStatDeviceType.MYSTAT_V1
+    CcuLog.d(L.TAG_CCU_PUBNUB,"reconfigureMyStat: myStatDeviceVersion : ${myStatDeviceVersion.name} for equipRef: ${configPoint.group} domain Name : ${configPoint.domainName}")
 
     if (model == null) {
         CcuLog.e(L.TAG_CCU_PUBNUB, "model is null for $configPoint")
@@ -51,6 +63,16 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
     if(pointNewValue == null || pointNewValue.asString.isEmpty()){
         CcuLog.e(L.TAG_CCU_PUBNUB, "point is null $config")
     } else {
+        // if it is myStat v1 device need to set the UOut 1 default value when UOut 1 was enabled at first time
+        if (myStatDeviceVersion.name.equals(MyStatDeviceType.MYSTAT_V1.name) && config.universalOut1.enabled.not() && configPoint.domainName.equals(DomainName.universal1OutputEnable))
+        {
+            config.getAnalogOutDefaultValueForMyStatV1(config,myStatDeviceVersion.name)
+            CcuLog.d(TAG_CCU_PUBNUB,"reconfigureMyStat: set UOut1 default value for MyStat V1 device : ${config.universalOut1.enabled} -  Association ${config.universalOut1Association.associationVal}")
+        }
+        else
+        {
+            CcuLog.d(TAG_CCU_PUBNUB,"reconfigureMyStat: UOut1 already enabled : ${config.universalOut1.enabled} -  Association ${config.universalOut1Association.associationVal}")
+        }
         updateConfiguration(configPoint.domainName, pointNewValue.asDouble, config)
         equipBuilder.updateEquipAndPoints(config, model , hayStack.getSite()!!.id, mystatEquip["dis"].toString(), true)
         if (configPoint.domainName == DomainName.fanOpMode) {
@@ -77,8 +99,29 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
     if ((pointNewValue == null || pointNewValue.asString.isEmpty()) && configPoint.domainName == DomainName.fanOpMode) {
         myStatupdateFanMode(configPoint.equipRef, HSUtil.getPriorityVal(configPoint.id).toInt())
     }
+    if(myStatDeviceVersion.name.equals(MyStatDeviceType.MYSTAT_V1.name)){
+        config.updateEnumConfigs(myStatDomainEquip, myStatDeviceVersion.name)
+        CcuLog.d(TAG_CCU_PUBNUB,"reconfigureMyStat:  MyStat V1 device :  ${myStatDeviceVersion.name}: updated the enum associated configs")
 
-    CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for CPU Reconfiguration $config")
+    }
+
+    // updating the fan/con mode eums
+        config.apply {
+
+            val possibleConditioningMode = getMyStatPossibleConditionMode(config)
+            val possibleFanMode = getMyStatPossibleFanModeSettings(getMyStatFanLevel(config))
+            myStatDomainEquip?.let {
+                modifyFanMode(possibleFanMode, it.fanOpMode)
+                modifyConditioningMode(
+                    possibleConditioningMode.ordinal,
+                    it.conditioningMode,
+                    allStandaloneProfileConditions
+                )
+            }
+            CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for MyStat Reconfiguration fan / conditioning mode ")
+        }
+    
+    CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for MyStat  Reconfiguration $config")
 
 }
 

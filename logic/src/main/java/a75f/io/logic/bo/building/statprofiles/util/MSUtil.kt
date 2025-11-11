@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.devices.MyStatDevice
 import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
@@ -510,5 +511,24 @@ fun logMsResults(config: MyStatConfiguration, tag: String, logicalPointsList: Ha
             }
         }
     }
+}
 
+fun getMyStatDomainEquipByEquipRef(equipRef: String): MyStatEquip {
+    return when (val equip = Domain.getDomainEquip(equipRef) as MyStatEquip) {
+        is MyStatCpuEquip -> equip
+        is MyStatHpuEquip -> equip
+        is MyStatPipe2Equip -> equip
+        is MyStatPipe4Equip -> equip
+        else -> equip
+    }
+}
+
+fun getMyStatDomainDeviceByEquipRef(equipRef: String): MyStatDevice {
+    val device = Domain.getEquipDevices()
+    if (device.containsKey(equipRef)) {
+        return device[equipRef] as MyStatDevice
+    } else {
+        Domain.devices[equipRef] = MyStatDevice(equipRef)
+    }
+    return device[equipRef] as MyStatDevice
 }

@@ -415,6 +415,32 @@ abstract class MyStatConfiguration(
         AI_GENERIC_VOLTAGE_INPUT,
         AI_GENERIC_THERMISTOR_INPUT
     }
+
+
+    fun getAnalogOutDefaultValueForMyStatV1(config: MyStatConfiguration, devicesVersion: String) {
+        if(devicesVersion == MyStatDeviceType.MYSTAT_V2.name) return
+
+        if (!config.universalOut1.enabled) {
+            config.universalOut1Association.associationVal = when (config) {
+                is MyStatCpuConfiguration -> {
+                    MyStatCpuAnalogOutMapping.COOLING.ordinal
+                }
+
+                is MyStatHpuConfiguration -> {
+                    MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal
+                }
+
+                is MyStatPipe2Configuration -> {
+                    MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal
+                }
+                is MyStatPipe4Configuration ->{
+                    MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.ordinal
+                }
+
+                else -> 0
+            }
+        }
+    }
 }
 
 data class MyStatFanConfig(val low: ValueConfig, val high: ValueConfig)

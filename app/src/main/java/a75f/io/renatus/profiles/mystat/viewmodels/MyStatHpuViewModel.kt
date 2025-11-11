@@ -75,11 +75,11 @@ class MyStatHpuViewModel(application: Application) : MyStatViewModel(application
             ).getDefaultConfiguration()
         }
         updateDeviceType(equipRef.toString())
+        profileConfiguration.getAnalogOutDefaultValueForMyStatV1(profileConfiguration,devicesVersion)
         viewState.value = MyStatViewStateUtil.hpuConfigToState(
             profileConfiguration as MyStatHpuConfiguration,
             MyStatHpuViewState()
         )
-        getAnalogOutDefaultValueForMyStatV1(profileConfiguration)
     }
     override fun getAnalogStatIndex() = MyStatHpuRelayMapping.values().size
 

@@ -144,7 +144,7 @@ public class PreferenceUtil {
     private static final String MIGRATE_MODBUS_EQUIP_COM = "migrateModbusEquipComPort";
 
     private static final String MIGRATE_BILLING_EMAIL_ADDRESS_STATUS = "migrateBillingEmailAddressStatus";
-
+    private static final String MIGRATE_AO_RELAY_MS_STATUS = "migrateAO&RelayEnumMS";
 
     public static void setContext(Context c) {
         context= c;
@@ -1098,5 +1098,12 @@ public class PreferenceUtil {
 
     public static void setBillingEmailAddressMigrationStatus() {
         setBooleanPreference(MIGRATE_BILLING_EMAIL_ADDRESS_STATUS, true);
+    }
+    public static boolean getUpdateEnumAndRelayPortsMSMigrationStatus() {
+        return getBooleanPreference(MIGRATE_AO_RELAY_MS_STATUS);
+    }
+
+    public static void setUpdateEnumAOAndRelayPortsMSMigrationStatus() {
+        setBooleanPreference(MIGRATE_AO_RELAY_MS_STATUS, true);
     }
 }

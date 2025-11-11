@@ -67,11 +67,11 @@ class MyStatPipe4ViewModel(application: Application) : MyStatViewModel(applicati
             ).getDefaultConfiguration()
         }
         updateDeviceType(equipRef.toString())
+        profileConfiguration.getAnalogOutDefaultValueForMyStatV1(profileConfiguration,devicesVersion)
         viewState.value = MyStatViewStateUtil.pipe4ConfigToState(
             profileConfiguration as MyStatPipe4Configuration,
             MyStatPipe4ViewState()
         )
-        getAnalogOutDefaultValueForMyStatV1(profileConfiguration)
     }
 
     override fun getAnalogStatIndex() = MyStatPipe4RelayMapping.values().size

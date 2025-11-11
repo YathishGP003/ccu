@@ -29,7 +29,6 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.MonitoringCon
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
-import kotlin.math.log
 
 /**
  * Created by Manjunath K on 28-04-2025.
@@ -456,5 +455,14 @@ fun getPossibleConditionMode(config: HyperStatConfiguration): PossibleConditioni
         PossibleConditioningMode.HEATONLY
     } else {
         PossibleConditioningMode.OFF
+    }
+}
+
+fun getHSDomainEquipByEquipRef(equipRef: String): HyperStatEquip? {
+    return when (val equip = Domain.getDomainEquip(equipRef)) {
+        is CpuV2Equip -> equip
+        is HpuV2Equip -> equip
+        is Pipe2V2Equip -> equip
+        else -> null
     }
 }

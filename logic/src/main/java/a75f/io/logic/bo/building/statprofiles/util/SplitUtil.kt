@@ -137,6 +137,15 @@ fun getDomainHyperStatSplitDevice(equipRef: String): HyperStatSplitDevice {
     return device[equipRef] as HyperStatSplitDevice
 }
 
+fun getSplitDomainEquipByEquipRef(equipRef: String):HyperStatSplitEquip?{
+    return when(val equip = Domain.getEquip(equipRef)){
+        is HsSplitCpuEquip -> equip
+        is Pipe2UVEquip -> equip
+        is Pipe4UVEquip -> equip
+        else -> null
+    }
+}
+
 
 
 

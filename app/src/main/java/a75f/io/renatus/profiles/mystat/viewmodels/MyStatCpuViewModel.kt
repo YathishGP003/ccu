@@ -72,11 +72,11 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
             ).getDefaultConfiguration()
         }
         updateDeviceType(equipRef.toString())
+        profileConfiguration.getAnalogOutDefaultValueForMyStatV1(profileConfiguration,devicesVersion)
         viewState.value = MyStatViewStateUtil.cpuConfigToState(
             profileConfiguration as MyStatCpuConfiguration,
             MyStatCpuViewState()
         )
-        getAnalogOutDefaultValueForMyStatV1(profileConfiguration)
     }
     override fun getAnalogStatIndex() = MyStatCpuRelayMapping.values().size
     override fun saveConfiguration() {

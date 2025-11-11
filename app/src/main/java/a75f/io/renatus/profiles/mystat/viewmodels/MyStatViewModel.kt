@@ -168,7 +168,7 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
             )
         }
 
-        getAnalogOutDefaultValueForMyStatV1(config as MyStatConfiguration)
+        profileConfiguration.getAnalogOutDefaultValueForMyStatV1(config as MyStatConfiguration,devicesVersion)
         reloadUiRequired()
         disablePasteConfiguration()
         formattedToastMessage(
@@ -366,31 +366,6 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
             "Device version updated to ${device.mystatDeviceVersion.readPointValue()} for equip $myStatEquipId"
         )
 
-    }
-
-    fun getAnalogOutDefaultValueForMyStatV1(config: MyStatConfiguration) {
-        if(devicesVersion == MyStatDeviceType.MYSTAT_V2.name) return
-
-        if (!config.universalOut1.enabled) {
-            viewState.value.universalOut1.association = when (config) {
-                is MyStatCpuConfiguration -> {
-                    MyStatCpuAnalogOutMapping.COOLING.ordinal
-                }
-
-                is MyStatHpuConfiguration -> {
-                    MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal
-                }
-
-                is MyStatPipe2Configuration -> {
-                    MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal
-                }
-                is MyStatPipe4Configuration ->{
-                    MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.ordinal
-                }
-
-                else -> 0
-            }
-        }
     }
 }
 

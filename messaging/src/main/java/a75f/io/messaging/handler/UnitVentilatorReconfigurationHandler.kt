@@ -14,16 +14,22 @@ import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getHssProfileConditioningMode
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getHssProfileFanLevel
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.UvFanStages
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.getSplitConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getSplitDomainEquipByEquipRef
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.logic.util.modifyConditioningMode
+import a75f.io.logic.util.modifyFanMode
 import a75f.io.messaging.handler.MessageUtil.Companion.returnDurationDiff
 import com.google.gson.JsonObject
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -90,6 +96,24 @@ fun reconfigureUnitVentilator(msgObject: JsonObject, configPoint: Point) {
     if ((pointNewValue == null || pointNewValue.asString.isEmpty()) && configPoint.domainName == DomainName.fanOpMode) {
         uvUpdateFanMode(configPoint.equipRef, HSUtil.getPriorityVal(configPoint.id).toInt())
     }
+
+    // Update fan/conditioning mode enums for Split Domain Equip
+        val splitDomainEquip = getSplitDomainEquipByEquipRef(configPoint.equipRef)
+        splitDomainEquip?.let { equip ->
+            val config = getSplitConfiguration(configPoint.equipRef)
+            config.apply {
+                val possibleConditioningMode = getHssProfileConditioningMode(this)
+                val possibleFanMode = getPossibleFanMode(equip)
+                modifyFanMode(possibleFanMode.ordinal, equip.fanOpMode)
+                modifyConditioningMode(
+                    possibleConditioningMode.ordinal,
+                    equip.conditioningMode,
+                    allStandaloneProfileConditions
+                )
+
+                CcuLog.i(L.TAG_CCU_PUBNUB, "updated ConfigPoint for unit ventilator fan/cond mode")
+            }
+        }
 
     CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for Unit ventilator Reconfiguration $config")
 }

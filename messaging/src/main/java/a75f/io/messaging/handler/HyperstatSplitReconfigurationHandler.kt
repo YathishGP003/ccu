@@ -13,12 +13,15 @@ import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getHssProfileConditioningMode
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getHssProfileFanLevel
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.CpuEconSensorBusTempAssociation
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitControlType
@@ -30,7 +33,12 @@ import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventil
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVRelayControls
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UvAnalogOutControls
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.util.getPossibleFanMode
+import a75f.io.logic.bo.building.statprofiles.util.getSplitConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getSplitDomainEquipByEquipRef
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.logic.util.modifyConditioningMode
+import a75f.io.logic.util.modifyFanMode
 import a75f.io.messaging.handler.MessageUtil.Companion.returnDurationDiff
 import android.util.Log
 import com.google.gson.JsonObject
@@ -96,13 +104,30 @@ class HyperstatSplitReconfigurationHandler {
                 Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "updateConfigPoint: ${e.localizedMessage}")
             }
             pointUpdateOwner(configPoint, msgObject, hayStack)
+            val splitDomainEquip = getSplitDomainEquipByEquipRef(configPoint.equipRef)
             if (configPoint.markers.contains(Tags.USERINTENT) && configPoint.markers.contains(Tags.CONDITIONING)) {
                 DesiredTempDisplayMode.setModeTypeOnUserIntentChange(configPoint.roomRef, CCUHsApi.getInstance())
             } else {
                 DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance())
             }
-
             if (isDynamicConfigPoint(configPoint)) handleDynamicConfig(configPoint, hayStack)
+            // Update fan/conditioning mode enums for Split Domain Equip
+                splitDomainEquip?.let { equip ->
+                    val config = getSplitConfiguration(configPoint.equipRef)
+                    config.apply {
+                        val possibleConditioningMode = getHssProfileConditioningMode(this)
+                        val possibleFanMode = getPossibleFanMode(equip)
+                        modifyFanMode(possibleFanMode.ordinal, equip.fanOpMode)
+                        modifyConditioningMode(
+                            possibleConditioningMode.ordinal,
+                            equip.conditioningMode,
+                            allStandaloneProfileConditions
+                        )
+
+                        CcuLog.i(L.TAG_CCU_PUBNUB, "updatedConfigPoint for HS Split fan/cond mode -> $this")
+                    }
+                }
+
 
             hayStack.scheduleSync()
 

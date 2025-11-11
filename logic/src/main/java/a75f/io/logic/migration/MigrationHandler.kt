@@ -40,6 +40,7 @@ import a75f.io.domain.cutover.VavStagedRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
 import a75f.io.domain.cutover.getDomainNameForMonitoringProfile
+import a75f.io.domain.devices.MyStatDevice
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.DabEquip
 import a75f.io.domain.equips.HyperStatSplitEquip
@@ -53,9 +54,10 @@ import a75f.io.domain.equips.hyperstat.HpuV2Equip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.domain.equips.mystat.MyStatCpuEquip
+import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
-import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
+import a75f.io.domain.equips.mystat.MyStatPipe4Equip
 import a75f.io.domain.logic.CCUBaseConfigurationBuilder
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager.addCmBoardDevice
@@ -104,13 +106,21 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfigurat
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.MonitoringConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getHssProfileConditioningMode
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.UniversalInputs
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuAnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuRelayMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2AnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2RelayMapping
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4AnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.util.MyStatDeviceType
 import a75f.io.logic.bo.building.statprofiles.util.getCpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getHpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
@@ -124,6 +134,8 @@ import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMod
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleFanMode
+import a75f.io.logic.bo.building.statprofiles.util.getSplitConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.getSplitDomainEquipByEquipRef
 import a75f.io.logic.bo.building.system.DefaultSystemConfig
 import a75f.io.logic.bo.building.system.dab.config.DabAdvancedHybridAhuConfig
 import a75f.io.logic.bo.building.system.util.getAdvancedAhuSystemEquip
@@ -243,10 +255,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             PreferenceUtil.setUnoccupiedSetbackMaxUpdate()
         }
 
-        /*if (!isMigrationRequired()) {
+        if (!isMigrationRequired()) {
             CcuLog.i(TAG_CCU_MIGRATION_UTIL, "---- Migration Not Required ----")
             return
-        }*/
+        }
         isMigrationOngoing = true
         CcuLog.i(TAG_CCU_MIGRATION_UTIL, "---- Migration Started ----")
         Globals.getInstance().applicationContext.getSharedPreferences("crash_preference", Context.MODE_PRIVATE)
@@ -553,21 +565,29 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             updateBillingAdminEmail()
             PreferenceUtil.setBillingEmailAddressMigrationStatus();
         }
+        if (!PreferenceUtil.getUpdateEnumAndRelayPortsMSMigrationStatus()) {
+            updateEnumAOAndRelayForMsV1Device()
+            CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Updating Enum and Relay Ports for MS V1 Device Migration Completed")
+            updateEnumValueForTerminalProfile()
+            PreferenceUtil.setUpdateEnumAOAndRelayPortsMSMigrationStatus();
+        }
+
         hayStack.scheduleSync()
     }
 
     private fun updateEnumValueForTerminalProfile() {
+        CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Updating Enum Value for Terminal Profile Equipments started ")
         val standaloneEquip = hayStack.readAllEntities("equip and domainName and standalone")
 
         standaloneEquip.forEach { equip ->
             CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating Enum Value for Equip: ${equip["id"]}")
             val equipIdStr = equip["id"]?.toString() ?: return@forEach
-            if (equip["domainName"].toString().equals(DomainName.hyperstatSplitCpu, ignoreCase = true)) {
-                // For HyperStat Split CPU, we need to handle it separately
-                val equipId = HsSplitCpuEquip(equip["id"].toString())
-                val possibleConditioningMode =
-                    HSSplitHaystackUtil.getPossibleConditioningModeSettings(equipId)
-                val possibleFanMode = getPossibleFanMode(equipId)
+            if ( equip["domainName"].toString() in listOf(DomainName.hyperstatSplitCpu,DomainName.hyperstatSplit2PEcon,DomainName.hyperstatSplit4PEcon)) {
+                // For HyperStat Split CPU & UV, we need to handle it separately
+                val equipId = getSplitDomainEquipByEquipRef(equipIdStr)?: return@forEach
+                val config = getSplitConfiguration(equipIdStr)
+                val possibleConditioningMode = getHssProfileConditioningMode(config)
+                val possibleFanMode = getPossibleFanMode(equipId!!)
                 modifyFanMode(possibleFanMode.ordinal, equipId.fanOpMode)
                 modifyConditioningMode(
                     possibleConditioningMode.ordinal,
@@ -4448,6 +4468,87 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+        }
+    }
+    private fun updateEnumAOAndRelayForMsV1Device() {
+
+        fun getAnalogThreshold(equip: MyStatEquip): Int = when (equip) {
+            is MyStatCpuEquip -> MyStatCpuAnalogOutMapping.COOLING.ordinal
+            is MyStatHpuEquip -> MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal
+            is MyStatPipe2Equip -> MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal
+            is MyStatPipe4Equip -> MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.ordinal
+            else -> -1
+        }
+
+        fun getRelayDefaultValue(equip: MyStatEquip): Double = when (equip) {
+            is MyStatCpuEquip -> MyStatCpuRelayMapping.HEATING_STAGE_1.ordinal.toDouble()
+            is MyStatHpuEquip -> MyStatHpuRelayMapping.CHANGE_OVER_O_COOLING.ordinal.toDouble()
+            is MyStatPipe2Equip -> MyStatPipe2RelayMapping.FAN_ENABLED.ordinal.toDouble()
+            is MyStatPipe4Equip -> MyStatPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal.toDouble()
+            else -> 0.0
+        }
+
+        fun getAODefaultValue(equip: MyStatEquip): Double = when (equip) {
+            is MyStatCpuEquip -> MyStatCpuAnalogOutMapping.COOLING.ordinal.toDouble()
+            is MyStatHpuEquip -> MyStatHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal.toDouble()
+            is MyStatPipe2Equip -> MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal.toDouble()
+            is MyStatPipe4Equip -> MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.ordinal.toDouble()
+            else -> 0.0
+        }
+
+        fun shouldUpdateAO(equip: MyStatEquip): Boolean {
+            if(!equip.universalOut1Association.pointExists()) return true
+            val aOValue = equip.universalOut1Association.readPriorityVal()
+            CcuLog.d("TAG_CCU_MIGRATION_UTIL", "AO Value for MyStat Equip: ${equip.equipRef} is $aOValue  Threshold: ${getAnalogThreshold(equip)}")
+            return aOValue >= getAnalogThreshold(equip)
+        }
+
+        fun shouldUpdateRelay(equip: MyStatEquip): Boolean {
+            if(!equip.universalOut2Association.pointExists()) return true
+            val relayValue = equip.universalOut2Association.readPriorityVal()
+            CcuLog.d("TAG_CCU_MIGRATION_UTIL", "Relay Value for MyStat Equip: ${equip.equipRef} is $relayValue Threshold: ${getAnalogThreshold(equip)}")
+            return relayValue < getAnalogThreshold(equip)
+        }
+
+        fun updateOutputPort(
+            equip: MyStatEquip,
+            isAO: Boolean
+        ) {
+            CcuLog.d("TAG_CCU_MIGRATION_UTIL", "Output Port for MyStat Equip: ${equip.equipRef} isAO: $isAO")
+            if (isAO) {
+                if (equip.universalOut1Enable.isEnabled() && shouldUpdateAO(equip)) return
+                equip.universalOut1Association.writePointValue(getAODefaultValue(equip))
+                CcuLog.d("TAG_CCU_MIGRATION_UTIL", "Updated AO for MyStat Equip: ${equip.equipRef} to ${equip.universalOut1Association.readDefaultVal()}")
+            } else {
+                if (equip.universalOut2Enable.isEnabled() && shouldUpdateRelay(equip)) return
+                equip.universalOut2Association.writePointValue(getRelayDefaultValue(equip))
+                CcuLog.d("TAG_CCU_MIGRATION_UTIL", "Updated Relay for MyStat Equip: ${equip.equipRef} to ${equip.universalOut2Association.readDefaultVal()}")
+            }
+        }
+
+        // Read all MyStat v1 requipment
+        hayStack.readAllEntities(CommonQueries.MYSTAT_EQUIP).forEach { entity ->
+            val myStatDevice = MyStatDevice(entity["id"].toString())
+            val isV1 = myStatDevice.mystatDeviceVersion.readPointValue().toInt() == 0
+            CcuLog.d("TAG_CCU_MIGRATION_UTIL", "Updating AO and relay ports for MyStat Equip: ${entity["id"]} isV1 device : ${isV1}  deviceVersion: ${myStatDevice.mystatDeviceVersion.readPointValue()}")
+            if (!isV1) return@forEach
+
+            val equip = when (entity["domainName"].toString()) {
+                DomainName.myStatCPU -> MyStatCpuEquip(entity["id"].toString())
+                DomainName.myStatHPU -> MyStatHpuEquip(entity["id"].toString())
+                DomainName.mystat2PFCU -> MyStatPipe2Equip(entity["id"].toString())
+                DomainName.mystat4PFCU -> MyStatPipe4Equip(entity["id"].toString())
+                else -> return@forEach
+            }
+
+            val config = getMyStatConfiguration(equip.equipRef) ?: return@forEach
+            val deviceType = MyStatDeviceType.MYSTAT_V1
+
+            updateOutputPort(equip, isAO = true)
+            updateOutputPort(equip, isAO = false)
+
+            config.updateEnumConfigs(equip, deviceType.name)
+            CcuLog.d("TAG_CCU_MIGRATION_UTIL", "Completed AO and relay  Update for MyStat Equip: ${entity["id"]}")
         }
     }
 }

@@ -357,11 +357,11 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
 
     private fun isFanGoodRun(isDoorWindowOpen: Boolean, equip: MyStatPipe2Equip): Boolean {
         return if (fanLowVentilationAvailable.readHisVal() > 0) true
-        else if (isDoorWindowOpen || heatingLoopOutput > 0 && supplyWaterTempTh2 > coolingThreshold) {
+        else if (isDoorWindowOpen || heatingLoopOutput > 0) {
             // If current direction is heating then check allow only when valve or heating is available
             (isConfigPresent(MyStatPipe2RelayMapping.WATER_VALVE) || equip.modulatingWaterValve.pointExists()
                     || isConfigPresent(MyStatPipe2RelayMapping.AUX_HEATING_STAGE1))
-        } else if (isDoorWindowOpen || coolingLoopOutput > 0 && supplyWaterTempTh2 < coolingThreshold) {
+        } else if (isDoorWindowOpen || coolingLoopOutput > 0) {
             (isConfigPresent(MyStatPipe2RelayMapping.WATER_VALVE) || equip.modulatingWaterValve.pointExists())
         } else {
             false

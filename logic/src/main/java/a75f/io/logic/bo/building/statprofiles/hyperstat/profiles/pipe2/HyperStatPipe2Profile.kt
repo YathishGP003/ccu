@@ -620,13 +620,13 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
     }
 
     private fun isFanGoodRun(isDoorWindowOpen: Boolean): Boolean {
-        return if (isDoorWindowOpen || heatingLoopOutput > 0 && supplyWaterTempTh2 > coolingThreshold) {
+        return if (isDoorWindowOpen || heatingLoopOutput > 0) {
             // If current direction is heating then check allow only when valve or heating is available
             (isConfigPresent(HsPipe2RelayMapping.WATER_VALVE)
                     || isConfigPresent(HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE)
                     || isConfigPresent(HsPipe2RelayMapping.AUX_HEATING_STAGE1)
                     || isConfigPresent(HsPipe2RelayMapping.AUX_HEATING_STAGE2))
-        } else if (isDoorWindowOpen || coolingLoopOutput > 0 && supplyWaterTempTh2 < coolingThreshold) {
+        } else if (isDoorWindowOpen || coolingLoopOutput > 0) {
             isConfigPresent(HsPipe2RelayMapping.WATER_VALVE) || isConfigPresent(HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE)
         } else {
             false

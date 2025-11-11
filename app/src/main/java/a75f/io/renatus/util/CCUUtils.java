@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.Address;
+import android.os.PowerManager;
 import android.util.Pair;
 
 import androidx.lifecycle.Lifecycle;
@@ -288,7 +289,8 @@ public class CCUUtils {
 		}
 	}
 
-	public static boolean isAppInForeground() {
-		return ProcessLifecycleOwner.get().getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED);
+	public static boolean isAppInForegroundAndInteractive(PowerManager powerManager) {
+        return ProcessLifecycleOwner.get().getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED) 
+				&& powerManager.isInteractive();
 	}
 }

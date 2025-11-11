@@ -6,7 +6,6 @@ import a75f.io.domain.util.CommonQueries
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.connectnode.ConnectNodeUtil
-import a75f.io.logic.util.PreferenceUtil
 import a75f.io.renatus.ota.OTAUpdateHandlerService
 import a75f.io.renatus.util.CCUUtils
 import a75f.io.usbserial.UsbConnectService
@@ -14,7 +13,6 @@ import a75f.io.usbserial.UsbModbusService
 import a75f.io.usbserial.UsbModbusServiceCom2
 import a75f.io.usbserial.UsbService
 import a75f.io.usbserial.UsbServiceActions
-import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
@@ -23,6 +21,7 @@ import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.os.PowerManager
 import android.widget.Toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -72,8 +71,9 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
             }
 
             // Wait until app is in foreground
-            while (!CCUUtils.isAppInForeground()) {
-                CcuLog.d(TAG_CCU_SERVICE_INIT, "App not in foreground. Waiting for 1 sec")
+            val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+            while (!CCUUtils.isAppInForegroundAndInteractive(powerManager)) {
+                CcuLog.d(TAG_CCU_SERVICE_INIT, "App not in foreground or Screen is off. Waiting for 1 sec")
                 delay(1000)
             }
             setUsbFilters() // Start listening notifications from UsbService

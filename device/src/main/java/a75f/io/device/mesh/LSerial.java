@@ -185,7 +185,6 @@ public class LSerial
             }else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REBOOT){
                 DLog.LogdSerial("Event Type CM_TO_CCU_OVER_USB_SN_REBOOT DEVICE_REBOOT:"+data.length+","+data.toString());
                 Pulse.smartDevicesRebootMessage(fromBytes(data, SnRebootIndicationMessage_t.class));
-                Pulse.rebootMessageFromCM(fromBytes(data, WrmOrCmRebootIndicationMessage_t.class));
             } else if(messageType == PCN_MODBUS_SERVER_REBOOT) {
                 DLog.LogdSerial("Event Type PCN_MODBUS_SERVER_REBOOT DEVICE_REBOOT:"+data.length+","+data.toString());
                 Pulse.pcnDevicesRebootMessage(fromBytes(data, PcnRebootIndicationMessage_t.class));

@@ -1374,6 +1374,11 @@ public class Pulse
 		CcuLog.d(L.TAG_CCU_DEVICE,"smartDevicesRebootMessage = "+snRebootIndicationMsgs.smartNodeAddress+
 				", "+snRebootIndicationMsgs.rebootCause+ "Node Status ");
 		short address = (short)snRebootIndicationMsgs.smartNodeAddress.get();
+		// when CM is rebooted, we receive its address as 0, so we need to correct it, coz,
+		// we are constructing device entity by address
+		if (address == 0) {
+			address = 99;
+		}
 			LSerial.getInstance().setResetSeedMessage(true);
 		String connectModuleFirmwareVersion;
 		String firmwareVersion =

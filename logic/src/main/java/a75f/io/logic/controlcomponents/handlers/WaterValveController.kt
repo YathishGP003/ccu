@@ -13,7 +13,7 @@ import a75f.io.logic.controlcomponents.util.logIt
 
 class WaterValveController(
     private val controllerName: String,
-    private val current: CalibratedPoint,
+    private val current: Point,
     private val activationHysteresis: Point,
     private val logTag: String
 ) : Controller {

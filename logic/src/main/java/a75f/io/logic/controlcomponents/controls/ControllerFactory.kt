@@ -12,7 +12,6 @@ import a75f.io.logic.controlcomponents.handlers.FanRunCommandController
 import a75f.io.logic.controlcomponents.handlers.HumidifierController
 import a75f.io.logic.controlcomponents.handlers.OccupiedEnabledController
 import a75f.io.logic.controlcomponents.handlers.StageControlHandler
-import a75f.io.logic.controlcomponents.handlers.ValveController
 import a75f.io.logic.controlcomponents.handlers.WaterValveController
 import a75f.io.logic.controlcomponents.util.ControllerNames
 import a75f.io.logic.controlcomponents.util.logIt
@@ -370,12 +369,12 @@ open class ControllerFactory {
     }
 
     fun addCoolingValveController(
-        controllers: HashMap<String, Any>, coolingLoop: Point, logTag: String,
+        controllers: HashMap<String, Any>, coolingLoop: Point, logTag: String, actionHysteresis: Point,
         onConstrains: List<Constraint> = emptyList(),
         offConstrains: List<Constraint> = emptyList(),
-    ): ValveController {
+    ): WaterValveController {
         if (!controllers.containsKey(ControllerNames.COOLING_VALVE_CONTROLLER)) {
-            val controller = ValveController(ControllerNames.COOLING_VALVE_CONTROLLER, coolingLoop, logTag)
+            val controller = WaterValveController(ControllerNames.COOLING_VALVE_CONTROLLER, coolingLoop, actionHysteresis, logTag)
             if (onConstrains.isNotEmpty()) {
                 onConstrains.forEach { constraint ->
                     controller.addOnConstraint(constraint)
@@ -389,16 +388,16 @@ open class ControllerFactory {
             controllers[ControllerNames.COOLING_VALVE_CONTROLLER] = controller
             logIt(logTag, "Controller added with name: COOLING_VALVE_CONTROLLER")
         }
-        return controllers[ControllerNames.COOLING_VALVE_CONTROLLER] as ValveController
+        return controllers[ControllerNames.COOLING_VALVE_CONTROLLER] as WaterValveController
     }
 
     fun addHeatingValveController(
-        controllers: HashMap<String, Any>, heatingLoop: Point, logTag: String,
+        controllers: HashMap<String, Any>, heatingLoop: Point, logTag: String, actionHysteresis: Point,
         onConstrains: List<Constraint> = emptyList(),
         offConstrains: List<Constraint> = emptyList(),
-    ): ValveController {
+    ): WaterValveController {
         if (!controllers.containsKey(ControllerNames.HEATING_VALVE_CONTROLLER)) {
-            val controller = ValveController(ControllerNames.HEATING_VALVE_CONTROLLER, heatingLoop, logTag)
+            val controller = WaterValveController(ControllerNames.HEATING_VALVE_CONTROLLER, heatingLoop, actionHysteresis, logTag)
             if (onConstrains.isNotEmpty()) {
                 onConstrains.forEach { constraint ->
                     controller.addOnConstraint(constraint)
@@ -412,30 +411,7 @@ open class ControllerFactory {
             controllers[ControllerNames.HEATING_VALVE_CONTROLLER] = controller
             logIt(logTag, "Controller added with name: HEATING_VALVE_CONTROLLER")
         }
-        return controllers[ControllerNames.HEATING_VALVE_CONTROLLER] as ValveController
-    }
-
-    fun addWaterValveController(
-        controllers: HashMap<String, Any>, heatingLoop: Point, logTag: String,
-        onConstrains: List<Constraint> = emptyList(),
-        offConstrains: List<Constraint> = emptyList(),
-    ): ValveController {
-        if (!controllers.containsKey(ControllerNames.HEATING_VALVE_CONTROLLER)) {
-            val controller = ValveController(ControllerNames.HEATING_VALVE_CONTROLLER, heatingLoop, logTag)
-            if (onConstrains.isNotEmpty()) {
-                onConstrains.forEach { constraint ->
-                    controller.addOnConstraint(constraint)
-                }
-            }
-            if (offConstrains.isNotEmpty()) {
-                offConstrains.forEach { constraint ->
-                    controller.addOffConstraint(constraint)
-                }
-            }
-            controllers[ControllerNames.HEATING_VALVE_CONTROLLER] = controller
-            logIt(logTag, "Controller added with name: HEATING_VALVE_CONTROLLER")
-        }
-        return controllers[ControllerNames.HEATING_VALVE_CONTROLLER] as ValveController
+        return controllers[ControllerNames.HEATING_VALVE_CONTROLLER] as WaterValveController
     }
 
     fun addFaceBypassController(

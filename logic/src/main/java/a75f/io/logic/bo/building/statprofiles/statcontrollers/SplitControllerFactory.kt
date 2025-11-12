@@ -90,6 +90,7 @@ class SplitControllerFactory(
                 controllers,
                 equip.coolingLoopOutput,
                 offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
+                actionHysteresis = equip.standaloneRelayActivationHysteresis,
                 logTag = tag
             )
         } else {
@@ -103,6 +104,7 @@ class SplitControllerFactory(
                 controllers,
                 equip.heatingLoopOutput,
                 offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
+                actionHysteresis = equip.standaloneRelayActivationHysteresis,
                 logTag = tag
             )
         } else {

@@ -29,11 +29,13 @@ import a75f.io.domain.util.MODEL_HYPERSTAT_MONITORING
 import a75f.io.domain.util.MODEL_HYPERSTAT_PIPE2
 import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_CPU
 import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_DEVICE
+import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_PIPE2
 import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_PIPE4
 import a75f.io.domain.util.MODEL_MYSTAT_CPU
 import a75f.io.domain.util.MODEL_MYSTAT_DEVICE
 import a75f.io.domain.util.MODEL_MYSTAT_HPU
 import a75f.io.domain.util.MODEL_MYSTAT_PIPE2
+import a75f.io.domain.util.MODEL_MYSTAT_PIPE4
 import a75f.io.domain.util.MODEL_OTN_DEVICE
 import a75f.io.domain.util.MODEL_OTN_TI
 import a75f.io.domain.util.MODEL_PCN_DEVICE
@@ -80,6 +82,7 @@ fun getRequiredModels(): List<String> {
             MODEL_HN_VAV_ACB,
             MODEL_HYPERSTAT_SPLIT_CPU,
             MODEL_HYPERSTAT_SPLIT_PIPE4,
+            MODEL_HYPERSTAT_SPLIT_PIPE2,
             MODEL_SN_BYPASS_DAMPER,
             MODEL_SMART_NODE_DEVICE,
             MODEL_HELIO_NODE_DEVICE,
@@ -120,6 +123,7 @@ fun getRequiredModels(): List<String> {
             MODEL_MYSTAT_DEVICE,
             MODEL_MYSTAT_CPU,
             MODEL_MYSTAT_PIPE2,
+            MODEL_MYSTAT_PIPE4,
             MODEL_MYSTAT_HPU,
             MODEL_DEFAULT_SYSTEM_PROFILE,
             MODEL_CONNECT_NODE_DEVICE,

@@ -203,6 +203,9 @@ object ModelCache {
 
     private fun loadStandAloneModels() {
         modelContainer[MODEL_HYPERSTAT_SPLIT_CPU] = getModelById(MODEL_HYPERSTAT_SPLIT_CPU)
+        modelContainer[MODEL_HYPERSTAT_SPLIT_PIPE4] = getModelById(MODEL_HYPERSTAT_SPLIT_PIPE4)
+        modelContainer[MODEL_HYPERSTAT_SPLIT_PIPE2] = getModelById(MODEL_HYPERSTAT_SPLIT_PIPE2)
+
         modelContainer[MODEL_HYPERSTAT_CPU] = getModelById(MODEL_HYPERSTAT_CPU)
         modelContainer[MODEL_HYPERSTAT_PIPE2] = getModelById(MODEL_HYPERSTAT_PIPE2)
         modelContainer[MODEL_HYPERSTAT_HPU] = getModelById(MODEL_HYPERSTAT_HPU)
@@ -210,6 +213,7 @@ object ModelCache {
         modelContainer[MODEL_MYSTAT_CPU] = getModelById(MODEL_MYSTAT_CPU)
         modelContainer[MODEL_MYSTAT_PIPE2] = getModelById(MODEL_MYSTAT_PIPE2)
         modelContainer[MODEL_MYSTAT_HPU] = getModelById(MODEL_MYSTAT_HPU)
+        modelContainer[MODEL_MYSTAT_PIPE4] = getModelById(MODEL_MYSTAT_PIPE4)
 
         modelContainer[MODEL_OTN_TI] = getModelById(MODEL_OTN_TI)
         CcuLog.i(Domain.LOG_TAG, "Otn profile model loaded")

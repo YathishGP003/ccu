@@ -283,6 +283,7 @@ class MyStatControlFactory(
                 controllers,
                 equip.coolingLoopOutput,
                 offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
+                actionHysteresis = equip.standaloneRelayActivationHysteresis,
                 logTag = L.TAG_CCU_MSPIPE4
             )
         } else {
@@ -296,6 +297,7 @@ class MyStatControlFactory(
                 controllers,
                 equip.heatingLoopOutput,
                 offConstrains = ArrayList(listOf(Constraint { equip.isCondensateTripped() })),
+                actionHysteresis = equip.standaloneRelayActivationHysteresis,
                 logTag = L.TAG_CCU_MSPIPE4
             )
         } else {

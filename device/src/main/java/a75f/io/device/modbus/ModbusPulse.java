@@ -423,7 +423,7 @@ public class ModbusPulse {
             if ((priorityVal != formattedVal)) {
                 CcuLog.d(L.TAG_CCU_MODBUS, "Received Modbus value is different from Haystack priority value. " +
                         "Haystack priority value: " + priorityVal + ", Modbus value: " + formattedVal + ", hence sending the priority data to the device.");
-                HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and id == \"" + logPoint.get("equipRef") + "\"");
+                HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and id == " + logPoint.get("equipRef"));
                 String port = "";
                 if (equip.get("port") != null) {
                     port = equip.get("port").toString();

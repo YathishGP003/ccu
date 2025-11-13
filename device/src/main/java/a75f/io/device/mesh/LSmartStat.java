@@ -1,5 +1,9 @@
 package a75f.io.device.mesh;
 
+import static a75f.io.device.mesh.LSmartNode.readDeadBand;
+import static a75f.io.device.mesh.MeshUtil.getSetTemp;
+import static a75f.io.logic.L.TAG_CCU_DEVICE;
+
 import android.util.Log;
 
 import org.javolution.io.Struct;
@@ -13,6 +17,7 @@ import java.util.Iterator;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.RawPoint;
@@ -36,10 +41,8 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
-
-import static a75f.io.device.mesh.MeshUtil.getSetTemp;
-import static a75f.io.logic.L.TAG_CCU_DEVICE;
 
 /**
  * Created by Anilkumar isOn 1/10/2019.
@@ -149,8 +152,36 @@ public class LSmartStat {
         }
         double hdb = StandaloneTunerUtil.getStandaloneHeatingDeadband(equipId);
         double cdb = StandaloneTunerUtil.getStandaloneCoolingDeadband(equipId);
-        settings_t.minUserTemp.set(DeviceUtil.getMinUserTempLimits(hdb, zone.getId()));
-        settings_t.maxUserTemp.set(DeviceUtil.getMaxUserTempLimits(cdb, zone.getId()));
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+        HashMap<Object, Object> equipMap = ccuHsApi.readMapById(equipId);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        try {
+            int modeType = ccuHsApi.readHisValByQuery("zone and hvacMode and roomRef" +
+                    " == \"" + equip.getRoomRef() + "\"").intValue();
+            TemperatureMode temperatureMode = TemperatureMode.values()[modeType];
+            double heatingDeadBand = readDeadBand("heating", zone);
+            double coolingDeadBand = readDeadBand("cooling", zone);
+            switch (temperatureMode) {
+                case COOLING:
+                    settings_t.minUserTemp.set(DeviceUtil.getMinUserTempLimits( zone.getId(), false));
+                    settings_t.maxUserTemp.set(DeviceUtil.getMaxUserTempLimits(zone.getId(), false));
+                    break;
+
+                case HEATING:
+                    settings_t.minUserTemp.set(DeviceUtil.getMinUserTempLimits( zone.getId(), true));
+                    settings_t.maxUserTemp.set(DeviceUtil.getMaxUserTempLimits( zone.getId(), true));
+                    break;
+
+                case DUAL:
+                    settings_t.minUserTemp.set(DeviceUtil.getMinUserTempLimits(zone.getId(), true));
+                    settings_t.maxUserTemp.set(DeviceUtil.getMaxUserTempLimits( zone.getId(), false));
+                    break;
+            }
+        } catch (Exception e) {
+            //Equips not having user temps are bound to throw exception
+            settings_t.maxUserTemp.set((short) 75);
+            settings_t.minUserTemp.set((short) 69);
+        }
         if (settings_t.maxUserTemp.get() <= 0){   // if exception happens in getting the max and min temp from the zone, then set the default values
             settings_t.maxUserTemp.set((short) 75);
         }

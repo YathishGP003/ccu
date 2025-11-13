@@ -626,7 +626,7 @@ public class Pulse
 		HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+node+"\"");
 		Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 		if( equip == null ) return;
-		double coolingDesiredTemp;
+		double coolingDesiredTemp = 0;
 		double heatingDesiredTemp = 0;
 		double averageTemp;
 		double cdb = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and not multiplier and roomRef == \""+equip.getRoomRef()+"\"");
@@ -641,11 +641,6 @@ public class Pulse
 		double coolingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and not multiplier and roomRef == \""+equip.getRoomRef()+"\"");
 		double heatingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and not multiplier and roomRef == \""+equip.getRoomRef()+"\"");
 
-
-		 coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
-				 dt,coolingDeadband,DeviceUtil.getMaxCoolingUserLimit(zoneId),
-				DeviceUtil.getMinCoolingUserLimit(zoneId)
-		);
 		HashMap<Object, Object> coolingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and cooling and sp and equipRef == \""+equip.getId()+"\"");
 		HashMap<Object, Object> heatingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
 		int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
@@ -654,24 +649,24 @@ public class Pulse
 		if(temperatureMode == TemperatureMode.COOLING){
 			coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
 					dt, coolingDeadband, DeviceUtil.getMaxCoolingUserLimit(zoneId),
-					DeviceUtil.getMinCoolingUserLimit(zoneId));
+					DeviceUtil.getMinCoolingUserLimit(zoneId),false);
 			averageTemp = (dt + CCUHsApi.getInstance().readPointPriorityVal(heatingDtPoint.get("id").toString())) / 2;
 		}else if(temperatureMode == TemperatureMode.HEATING) {
 			heatingDesiredTemp = DeviceUtil.getValidDesiredHeatingTemp(
 					dt, heatingDeadband, DeviceUtil.getMaxHeatingUserLimit(zoneId),
-					DeviceUtil.getMinHeatingUserLimit(zoneId)
+					DeviceUtil.getMinHeatingUserLimit(zoneId),false
 			);
 			averageTemp = (dt + CCUHsApi.getInstance().readPointPriorityVal(coolingDtPoint.get("id").toString())) / 2;
 		}
 		else {
 			coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
 					dt, coolingDeadband, DeviceUtil.getMaxCoolingUserLimit(zoneId),
-					DeviceUtil.getMinCoolingUserLimit(zoneId)
+					DeviceUtil.getMinCoolingUserLimit(zoneId),true
 			);
 
 			heatingDesiredTemp = DeviceUtil.getValidDesiredHeatingTemp(
 					dt, heatingDeadband, DeviceUtil.getMaxHeatingUserLimit(zoneId),
-					DeviceUtil.getMinHeatingUserLimit(zoneId)
+					DeviceUtil.getMinHeatingUserLimit(zoneId),true
 			);
 			averageTemp = dt;
 		}
@@ -724,15 +719,18 @@ public class Pulse
 
 		HashMap<Object, Object> coolingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and cooling and sp and equipRef == \""+equip.getId()+"\"");
 		HashMap<Object, Object> heatinDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
-
+		boolean isDualTempMode = false;
+		if (temperatureMode.equals(TemperatureMode.DUAL.name())) {
+			isDualTempMode = true;
+		}
 		coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
 				dt, coolingDeadband, DeviceUtil.getMaxCoolingUserLimit(zoneId),
-				DeviceUtil.getMinCoolingUserLimit(zoneId)
+				DeviceUtil.getMinCoolingUserLimit(zoneId),isDualTempMode
 		);
 
 		heatingDesiredTemp = DeviceUtil.getValidDesiredHeatingTemp(
 				dt, heatingDeadband, DeviceUtil.getMaxHeatingUserLimit(zoneId),
-				DeviceUtil.getMinHeatingUserLimit(zoneId)
+				DeviceUtil.getMinHeatingUserLimit(zoneId),isDualTempMode
 		);
 
 

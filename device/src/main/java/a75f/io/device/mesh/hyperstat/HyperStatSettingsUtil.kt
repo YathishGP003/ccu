@@ -21,6 +21,7 @@ import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.hyperstat.MonitoringEquip
 import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsCpuAnalogOutMapping
+import a75f.io.logic.bo.util.TemperatureMode
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.tuners.TunerUtil
 
@@ -184,14 +185,16 @@ private fun getAnalogInputConfigs(equip: HyperStatEquip): HyperStat.HyperstatAna
 fun getHyperStatSettingsMessage(equipRef: String, zone: String): HyperStatSettingsMessage_t {
     val hyperStatEquip = Domain.getDomainEquip(equipRef) as HyperStatEquip
     val zoneId = HSUtil.getZoneIdFromEquipId(equipRef)
-    return HyperStatSettingsMessage_t.newBuilder()
+    val modeType: Int = CCUHsApi.getInstance().readHisValByQuery(
+        "zone and hvacMode and roomRef" +
+                " == \"" + zoneId + "\""
+    ).toInt()
+    val hvacMode = TemperatureMode.values()[modeType]
+
+    val msg = HyperStatSettingsMessage_t.newBuilder()
             .setRoomName(zone)
             .setHeatingDeadBand((getHeatingDeadBand(zoneId) * 10).toInt())
             .setCoolingDeadBand((getCoolingDeadBand(zoneId) * 10).toInt())
-            .setMinCoolingUserTemp(getCoolingUserLimit("min", zoneId))
-            .setMaxCoolingUserTemp(getCoolingUserLimit("max", zoneId))
-            .setMinHeatingUserTemp(getHeatingUserLimit("min", zoneId))
-            .setMaxHeatingUserTemp(getHeatingUserLimit("max", zoneId))
             .setTemperatureOffset((hyperStatEquip.temperatureOffset.readPriorityVal() * 10).toInt())
             .setHumidityMinSetpoint(hyperStatEquip.targetHumidifier.readPriorityVal().toInt())
             .setHumidityMaxSetpoint(hyperStatEquip.targetDehumidifier.readPriorityVal().toInt())
@@ -208,7 +211,30 @@ fun getHyperStatSettingsMessage(equipRef: String, zone: String): HyperStatSettin
             .setTemperatureMode(getTempMode())
             .setMiscSettings1(getMiscSettings(hyperStatEquip))
 
-            .build()
+    // based on hvacMode sending the user limits
+    when (hvacMode) {
+        TemperatureMode.DUAL -> {
+            msg.setMinCoolingUserTemp(getCoolingUserLimit("min", zoneId))
+                .setMaxCoolingUserTemp(getCoolingUserLimit("max", zoneId))
+                .setMinHeatingUserTemp(getHeatingUserLimit("min", zoneId))
+                .setMaxHeatingUserTemp(getHeatingUserLimit("max", zoneId))
+        }
+
+        TemperatureMode.COOLING -> {
+            msg.setMinCoolingUserTemp(getCoolingUserLimit("min", zoneId))
+                .setMaxCoolingUserTemp(getCoolingUserLimit("max", zoneId))
+        }
+
+        TemperatureMode.HEATING -> {
+            msg.setMinHeatingUserTemp(getHeatingUserLimit("min", zoneId))
+                .setMaxHeatingUserTemp(getHeatingUserLimit("max", zoneId))
+        }
+
+        else -> {}
+    }
+    return msg.build()
+
+
 }
 
 fun getHyperStatSettings2Message(equipRef: String): HyperStatSettingsMessage2_t {

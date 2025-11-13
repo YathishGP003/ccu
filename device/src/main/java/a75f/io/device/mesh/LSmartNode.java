@@ -55,6 +55,7 @@ import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.system.FanType;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
+import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.tuners.TunerUtil;
 
 /**
@@ -109,19 +110,46 @@ public class LSmartNode
         HashMap<Object, Object> equipMap = ccuHsApi.readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 
-        try
-        {
-            double coolingDeadband =
-                    ccuHsApi.readPointPriorityValByQuery("cooling and deadband and schedulable and roomRef == \""+zone.getId()+"\"");
-            settings.maxUserTem.set(DeviceUtil.getMaxUserTempLimits(coolingDeadband,zone.getId()));
-    
-            double heatingDeadband =
-                    ccuHsApi.readPointPriorityValByQuery("heating and deadband and schedulable and roomRef == \""+zone.getId()+"\"");
-            
-            settings.minUserTemp.set(DeviceUtil.getMinUserTempLimits(heatingDeadband, zone.getId()));
-        } catch (Exception e) {
+        try {
+            int modeType = ccuHsApi.readHisValByQuery("zone and hvacMode and roomRef" +
+                    " == \"" + equip.getRoomRef() + "\"").intValue();
+            TemperatureMode temperatureMode = TemperatureMode.values()[modeType];
+            HashMap<Object, Object> reheat = ccuHsApi.readEntity("point and domainName == \"" + DomainName.reheatType + "\"   and equipRef == \"" + equip.getId() + "\"");
+           Double reheatType;
+            if (reheat.isEmpty()) {
+                reheatType = 0.0;
+            } else {
+                reheatType = ccuHsApi.readPointPriorityVal(reheat.get("id").toString());
+            }
+            double heatingDeadBand = readDeadBand("heating", zone);
+            double coolingDeadBand = readDeadBand("cooling", zone);
+            // Reheat disabled
+            if (reheatType == 0.0) {
+                switch (temperatureMode) {
+                    case COOLING:
+                        settings.minUserTemp.set(DeviceUtil.getMinUserTempLimits( zone.getId(), false));
+                        settings.maxUserTemp.set(DeviceUtil.getMaxUserTempLimits( zone.getId(), false));
+                        break;
+
+                    case HEATING:
+                        settings.minUserTemp.set(DeviceUtil.getMinUserTempLimits(zone.getId(), true));
+                        settings.maxUserTemp.set(DeviceUtil.getMaxUserTempLimits( zone.getId(), true));
+                        break;
+
+                    case DUAL:
+                        settings.minUserTemp.set((short) (DeviceUtil.getMinUserTempLimits( zone.getId(), true)- heatingDeadBand));
+                        settings.maxUserTemp.set((short)(DeviceUtil.getMaxUserTempLimits( zone.getId(), false) + coolingDeadBand));
+                        break;
+                }
+            } else {
+                // Reheat enabled
+                settings.minUserTemp.set((short) (DeviceUtil.getMinUserTempLimits( zone.getId(), true) - heatingDeadBand));
+                settings.maxUserTemp.set((short) (DeviceUtil.getMaxUserTempLimits( zone.getId(), false) + coolingDeadBand));
+            }
+        }
+        catch (Exception e){
             //Equips not having user temps are bound to throw exception
-            settings.maxUserTem.set((short) 75);
+            settings.maxUserTemp.set((short) 75);
             settings.minUserTemp.set((short) 69);
         }
 
@@ -261,7 +289,13 @@ public class LSmartNode
         }
     }
 
-    private static int getOaoDamperPos(OAOEquip oaoEquip) {
+    static double readDeadBand(String mode, Zone zone) {
+        return CCUHsApi.getInstance().
+                readPointPriorityValByQuery(mode + " and deadband and schedulable and roomRef == \"" + zone.getId() + "\"");
+    }
+
+
+        private static int getOaoDamperPos(OAOEquip oaoEquip) {
         try {
 
             int reCirc = (int) oaoEquip.getOutsideDamperMinOpenDuringRecirculation().readDefaultVal();

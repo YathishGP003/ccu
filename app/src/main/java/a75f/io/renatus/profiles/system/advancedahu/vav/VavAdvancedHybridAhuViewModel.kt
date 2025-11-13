@@ -17,6 +17,7 @@ import a75f.io.logic.bo.building.system.util.getCurrentSystemEquip
 import a75f.io.logic.bo.building.system.util.getVavConnectEquip
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.BackgroundServiceInitiator
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.oao.updateOaoPoints
@@ -102,6 +103,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                         ProgressDialogUtils.hideProgressDialog()
                     }
                 }
+                DesiredTempDisplayMode.setSystemModeForVav(hayStack)
                 L.saveCCUState()
                 viewState.value.isSaveRequired = false
                 viewState.value.isStateChanged = false

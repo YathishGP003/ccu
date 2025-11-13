@@ -36,6 +36,7 @@ import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2RelayMap
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4AnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4RelayMapping
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
+import a75f.io.logic.bo.util.TemperatureMode
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.tuners.TunerUtil
 import android.util.Log
@@ -263,14 +264,15 @@ private fun getCommonTuners(equipRef: String): MyStat.MyStatTunersGeneric_t {
 fun getMyStatSettingsMessage(equipRef: String, zone: String): MyStat.MyStatSettingsMessage_t {
     val myStatEquip = Domain.getDomainEquip(equipRef) as MyStatEquip
     val zoneId = HSUtil.getZoneIdFromEquipId(equipRef)
-    return MyStat.MyStatSettingsMessage_t.newBuilder()
+    val modeType: Int = CCUHsApi.getInstance().readHisValByQuery(
+        "zone and hvacMode and roomRef" +
+                " == \"" + zoneId + "\""
+    ).toInt()
+    val hvacMode = TemperatureMode.values()[modeType]
+    val msg =  MyStat.MyStatSettingsMessage_t.newBuilder()
         .setRoomName(zone)
         .setHeatingDeadBand((getHeatingDeadBand(zoneId) * 10).toInt())
         .setCoolingDeadBand((getCoolingDeadBand(zoneId) * 10).toInt())
-        .setMinCoolingUserTemp(getCoolingUserLimit("min", zoneId))
-        .setMaxCoolingUserTemp(getCoolingUserLimit("max", zoneId))
-        .setMinHeatingUserTemp(getHeatingUserLimit("min", zoneId))
-        .setMaxHeatingUserTemp(getHeatingUserLimit("max", zoneId))
         .setTemperatureOffset((myStatEquip.temperatureOffset.readPriorityVal() * 10).toInt())
         .setHumidityMinSetpoint(myStatEquip.targetHumidifier.readPriorityVal().toInt())
         .setHumidityMaxSetpoint(myStatEquip.targetDehumidifier.readPriorityVal().toInt())
@@ -285,7 +287,28 @@ fun getMyStatSettingsMessage(equipRef: String, zone: String): MyStat.MyStatSetti
             // bit 2: brightnessVariationEnable
         .setInstallerLockPin(getPin(myStatEquip.pinLockInstallerAccess))
         .setUserLockPin(getPin(myStatEquip.pinLockConditioningModeFanAccess))
-        .build()
+    // based on hvacMode sending the user limits
+    when (hvacMode) {
+        TemperatureMode.DUAL -> {
+            msg.setMinCoolingUserTemp(getCoolingUserLimit("min", zoneId))
+                .setMaxCoolingUserTemp(getCoolingUserLimit("max", zoneId))
+                .setMinHeatingUserTemp(getHeatingUserLimit("min", zoneId))
+                .setMaxHeatingUserTemp(getHeatingUserLimit("max", zoneId))
+        }
+
+        TemperatureMode.COOLING -> {
+            msg.setMinCoolingUserTemp(getCoolingUserLimit("min", zoneId))
+                .setMaxCoolingUserTemp(getCoolingUserLimit("max", zoneId))
+        }
+
+        TemperatureMode.HEATING -> {
+            msg.setMinHeatingUserTemp(getHeatingUserLimit("min", zoneId))
+                .setMaxHeatingUserTemp(getHeatingUserLimit("max", zoneId))
+        }
+
+        else -> {}
+    }
+        return  msg.build()
 }
 
 

@@ -134,3 +134,25 @@ fun getPin(point: Point): Int {
         0
     }
 }
+
+fun validatingCoolingDesiredTemp(coolingDesiredTemp :Double , roomRef : String) : Double {
+    val coolingUserMaxLimit = getCoolingUserLimit(Tags.MAX, roomRef)
+    val coolingUserMinLimit = getCoolingUserLimit(Tags.MIN, roomRef)
+    if (coolingDesiredTemp > coolingUserMaxLimit) {
+        return coolingUserMaxLimit.toDouble()
+    } else if (coolingDesiredTemp < coolingUserMinLimit) {
+        return  coolingUserMinLimit.toDouble()
+    }
+    return coolingDesiredTemp
+}
+
+fun validatingHeatingDesiredTemp(heatingDesiredTemp :Double , roomRef : String) : Double {
+    val heatingUserMaxLimit = getHeatingUserLimit(Tags.MAX, roomRef)
+    val heatingUserMinLimit = getHeatingUserLimit(Tags.MIN, roomRef)
+    if (heatingDesiredTemp > heatingUserMaxLimit) {
+        return heatingUserMaxLimit.toDouble()
+    } else if (heatingDesiredTemp < heatingUserMinLimit) {
+        return  heatingUserMinLimit.toDouble()
+    }
+    return heatingDesiredTemp
+}

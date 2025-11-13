@@ -95,7 +95,7 @@ public class HyperStatMsgReceiver {
         HashMap device = HyperStatControlUtilKt.getHyperStatDevice(nodeAddress);
         Equip hsEquip = new Equip.Builder().setHashMap(device).build();
         if (hsEquip.getMarkers().contains(HYPERSTAT)) {
-            HyperStatMsgHandlerKt.handleOverrideMsg(message, nodeAddress, hsEquip.getEquipRef());
+            HyperStatMsgHandlerKt.handleOverrideMsg(message, nodeAddress, hsEquip.getEquipRef(),currentTempInterface);
         }
     }
 

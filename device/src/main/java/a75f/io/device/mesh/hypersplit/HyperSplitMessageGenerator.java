@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.statprofiles.util.BasicSettings;
+import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.tuners.TunerConstants;
 
 public class HyperSplitMessageGenerator {
@@ -56,24 +57,29 @@ public class HyperSplitMessageGenerator {
 
     public static HyperSplit.HyperSplitSettingsMessage_t getSettingsMessage(String zone,
                                                                             String equipRef) {
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+        HashMap<Object,Object> equipMap = ccuHsApi.readMapById(equipRef);
         int temperatureMode = (int) Domain.readValAtLevelByDomain(DomainName.temperatureMode,
                 TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
+        int modeType = ccuHsApi.readHisValByQuery("zone and hvacMode and roomRef" +
+                " == \"" + equipMap.get("roomRef") + "\"").intValue();
+        TemperatureMode hvacMode = TemperatureMode.values()[modeType];
 
-        int minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery("min", equipRef)).intValue();
-        int maxCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery("max", equipRef)).intValue();
-        int minHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery("min", equipRef)).intValue();
-        int maxHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery("max", equipRef)).intValue();
+        int minCoolingUserTemp = ccuHsApi.readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery("min", equipRef)).intValue();
+        int maxCoolingUserTemp = ccuHsApi.readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery("max", equipRef)).intValue();
+        int minHeatingUserTemp = ccuHsApi.readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery("min", equipRef)).intValue();
+        int maxHeatingUserTemp = ccuHsApi.readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery("max", equipRef)).intValue();
 
         if (minCoolingUserTemp == 0) {
-            minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery("point and schedulable and default and cooling and user and limit and min").intValue();
+            minCoolingUserTemp = ccuHsApi.readPointPriorityValByQuery("point and schedulable and default and cooling and user and limit and min").intValue();
             CcuLog.d(L.TAG_CCU_DEVICE, "Zone min cooling user limit not found; falling back to BuildingTuner value of " + minCoolingUserTemp);
         }
         if (maxCoolingUserTemp == 0) {
-            maxCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery("point and schedulable and default and cooling and user and limit and max").intValue();
+            maxCoolingUserTemp = ccuHsApi.readPointPriorityValByQuery("point and schedulable and default and cooling and user and limit and max").intValue();
             CcuLog.d(L.TAG_CCU_DEVICE, "Zone max cooling user limit not found; falling back to BuildingTuner value of " + maxCoolingUserTemp);
         }
         if (minHeatingUserTemp == 0) {
-            minHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery("point and schedulable and default and heating and user and limit and min").intValue();
+            minHeatingUserTemp = ccuHsApi.readPointPriorityValByQuery("point and schedulable and default and heating and user and limit and min").intValue();
             CcuLog.d(L.TAG_CCU_DEVICE, "Zone min heating user limit not found; falling back to BuildingTuner value of " + minHeatingUserTemp);
         }
         if (maxHeatingUserTemp == 0) {
@@ -86,10 +92,6 @@ public class HyperSplitMessageGenerator {
                 .setRoomName(zone)
                 .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef) * 10))
                 .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef) * 10))
-                .setMinCoolingUserTemp(minCoolingUserTemp)
-                .setMaxCoolingUserTemp(maxCoolingUserTemp)
-                .setMinHeatingUserTemp(minHeatingUserTemp)
-                .setMaxHeatingUserTemp(maxHeatingUserTemp)
                 .setTemperatureOffset((int)(equip.getTemperatureOffset().readDefaultVal() * 10))
                 .setHumidityMinSetpoint((int)(equip.getTargetHumidifier().readDefaultVal()))
                 .setHumidityMaxSetpoint((int)(equip.getTargetDehumidifier().readDefaultVal()))
@@ -106,6 +108,23 @@ public class HyperSplitMessageGenerator {
                 .setMiscSettings1(HyperSplitSettingsUtil.Companion.getMisSettings(equipRef))
                 .setInstallerLockPin(getPin(equip.getPinLockInstallerAccess()))
                 .setUserLockPin(getPin(equip.getPinLockConditioningModeFanAccess()));
+        // based on hvacMode sending the user limits
+        switch (hvacMode) {
+            case COOLING:
+                msg.setMinCoolingUserTemp(minCoolingUserTemp)
+                        .setMaxCoolingUserTemp(maxCoolingUserTemp);
+                break;
+            case HEATING:
+                msg.setMinHeatingUserTemp(minHeatingUserTemp)
+                        .setMaxHeatingUserTemp(maxHeatingUserTemp);
+                break;
+            case DUAL:
+                msg.setMinHeatingUserTemp(minHeatingUserTemp)
+                        .setMaxHeatingUserTemp(maxHeatingUserTemp)
+                        .setMinCoolingUserTemp(minCoolingUserTemp)
+                        .setMaxCoolingUserTemp(maxCoolingUserTemp);
+
+        }
         return msg.build();
 
     }

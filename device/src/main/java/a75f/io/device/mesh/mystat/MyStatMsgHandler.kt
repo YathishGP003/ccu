@@ -19,6 +19,8 @@ import a75f.io.device.mesh.updateHumidity
 import a75f.io.device.mesh.updateLogicalPoint
 import a75f.io.device.mesh.updateOccupancy
 import a75f.io.device.mesh.updateTemp
+import a75f.io.device.mesh.validatingCoolingDesiredTemp
+import a75f.io.device.mesh.validatingHeatingDesiredTemp
 import a75f.io.domain.api.Domain.getDomainEquip
 import a75f.io.domain.api.Domain.hayStack
 import a75f.io.domain.api.DomainName
@@ -27,6 +29,7 @@ import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.Zone
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
@@ -47,6 +50,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe4FanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.logic.bo.util.CCUUtils
+import a75f.io.logic.bo.util.TemperatureMode
 import a75f.io.logic.interfaces.ZoneDataInterface
 import a75f.io.logic.util.uiutils.updateUserIntentPoints
 import java.util.Calendar
@@ -54,12 +58,15 @@ import java.util.Calendar
 /**
  * Created by Manjunath K on 13-01-2025.
  */
-
+var zoneRefreshListener :ZoneDataInterface? = null
 fun handleMyStatRegularUpdate(
     regularUpdateMsg: MyStat.MyStatRegularUpdateMessage_t,
     address: Int,
     reference: ZoneDataInterface?
 ) {
+    if (zoneRefreshListener == null) {
+        zoneRefreshListener = reference
+    }
     if (DLog.isLoggingEnabled()) {
         CcuLog.i(L.TAG_CCU_DEVICE, "handleRegularUpdate: $regularUpdateMsg")
     }
@@ -96,8 +103,11 @@ fun handleMyStatRegularUpdate(
 }
 
 fun handleMyStatOverrideMessage(
-    message: MyStat.MyStatLocalControlsOverrideMessage_t, nodeAddress: Int
+    message: MyStat.MyStatLocalControlsOverrideMessage_t, nodeAddress: Int, zoneInterface: ZoneDataInterface?
 ) {
+    if (zoneRefreshListener == null) {
+        zoneRefreshListener = zoneInterface
+    }
     val device = getMyStatDevice(nodeAddress)
     val hsEquip = Equip.Builder().setHashMap(device).build()
     if (hsEquip.markers.contains(Tags.MYSTAT)) {
@@ -136,12 +146,29 @@ fun runProfileAlgo(nodeAddress: Short) {
 private fun updateDesiredTemp(
     equip: MyStatEquip, message: MyStat.MyStatLocalControlsOverrideMessage_t
 ) {
+    val modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" + " == \"" + equip.roomRef + "\"").toInt()
+    val temperatureMode = TemperatureMode.values()[modeType]
+    CcuLog.e(L.TAG_CCU_DEVICE, "MS Desired Temperature ModeType: " + TemperatureMode.values()[modeType])
+    var coolingDesiredTemp = message.setTempCooling.toDouble() / 2
+    var heatingDesiredTemp = message.setTempHeating.toDouble() / 2
 
-    val coolingDesiredTemp = message.setTempCooling.toDouble() / 2
-    val heatingDesiredTemp = message.setTempHeating.toDouble() / 2
+    when (temperatureMode.name) {
+        TemperatureMode.COOLING.name -> {
+            coolingDesiredTemp = validatingCoolingDesiredTemp(coolingDesiredTemp,equip.roomRef.toString());
+            equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
+        }
+        TemperatureMode.HEATING.name -> {
+            heatingDesiredTemp = validatingHeatingDesiredTemp(heatingDesiredTemp,equip.roomRef.toString());
+            equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
+        }
+        else -> {
+            heatingDesiredTemp = validatingHeatingDesiredTemp(heatingDesiredTemp,equip.roomRef.toString());
+            coolingDesiredTemp = validatingCoolingDesiredTemp(coolingDesiredTemp,equip.roomRef.toString());
+            equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
+            equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
+        }
+    }
     val avgDesiredTemp = (coolingDesiredTemp + heatingDesiredTemp) / 2
-    equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
-    equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
     equip.desiredTemp.writePointValue(avgDesiredTemp)
     val haystack = CCUHsApi.getInstance()
 
@@ -162,6 +189,7 @@ private fun updateDesiredTemp(
         hayStack,
         WhoFiledConstants.MYSTAT_WHO
     )
+    zoneRefreshListener?.refreshDesiredTemp(equip.nodeAddress.toString(),coolingDesiredTemp.toString(),heatingDesiredTemp.toString(),equip.getId())
 }
 
 private fun updateModes(

@@ -52,7 +52,7 @@ fun processMessage(data: ByteArray) {
             MessageType.MYSTAT_LOCAL_CONTROLS_OVERRIDE_MESSAGE -> {
                 val overrideMessage =
                     MyStat.MyStatLocalControlsOverrideMessage_t.parseFrom(msgArray)
-                handleMyStatOverrideMessage(overrideMessage, address)
+                handleMyStatOverrideMessage(overrideMessage, address, currentTempInterface)
             }
 
             else -> {

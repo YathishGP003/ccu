@@ -18,6 +18,7 @@ import a75f.io.logic.bo.building.system.util.deleteCurrentSystemProfile
 import a75f.io.logic.bo.building.system.util.deleteSystemConnectModule
 import a75f.io.logic.bo.building.system.util.getCurrentSystemEquip
 import a75f.io.logic.bo.building.system.util.getDabConnectEquip
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.BackgroundServiceInitiator
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.oao.updateOaoPoints
@@ -107,6 +108,7 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                         ProgressDialogUtils.hideProgressDialog()
                     }
                 }
+                DesiredTempDisplayMode.setSystemModeForDab(hayStack)
                 L.saveCCUState()
                 viewState.value.isSaveRequired = false
                 viewState.value.isStateChanged = false

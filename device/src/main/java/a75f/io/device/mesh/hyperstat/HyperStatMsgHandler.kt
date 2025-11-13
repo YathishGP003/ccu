@@ -24,6 +24,8 @@ import a75f.io.device.mesh.updateOccupancy
 import a75f.io.device.mesh.updateSensorData
 import a75f.io.device.mesh.updateSound
 import a75f.io.device.mesh.updateTemp
+import a75f.io.device.mesh.validatingCoolingDesiredTemp
+import a75f.io.device.mesh.validatingHeatingDesiredTemp
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t
 import a75f.io.device.serial.MessageType
 import a75f.io.domain.api.Domain.getDomainEquip
@@ -56,17 +58,21 @@ import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
 import a75f.io.logic.bo.util.CCUUtils
+import a75f.io.logic.bo.util.TemperatureMode
 import a75f.io.logic.interfaces.ZoneDataInterface
 import a75f.io.logic.util.uiutils.updateUserIntentPoints
 
 /**
  * Created by Manjunath K on 22-10-2024.
  */
+var zoneRefreshListener : ZoneDataInterface? =null
 
 fun handleRegularUpdate(regularUpdateMessage: HyperStatRegularUpdateMessage_t, device: HashMap<Any, Any>, nodeAddress: Int, refresh: ZoneDataInterface?) {
+    if (zoneRefreshListener == null) {
+        zoneRefreshListener = refresh
+    }
     val equipRef = device[Tags.EQUIPREF].toString()
     val hsDevice = getHyperStatDomainDevice(device[Tags.ID].toString(), equipRef)
-
     CcuLog.d(L.TAG_CCU_DEVICE, "HyperStat RegularUpdate: nodeAddress $nodeAddress :  $regularUpdateMessage")
     if (Globals.getInstance().isTemporaryOverrideMode) {
         updateHsRssi(hsDevice.rssi, regularUpdateMessage.rssi)
@@ -92,8 +98,10 @@ fun handleRegularUpdate(regularUpdateMessage: HyperStatRegularUpdateMessage_t, d
     refresh?.refreshHeartBeatStatus(nodeAddress.toString())
 }
 
-fun handleOverrideMsg(message: HyperStatLocalControlsOverrideMessage_t, nodeAddress: Int, equipRef: String) {
-
+fun handleOverrideMsg(message: HyperStatLocalControlsOverrideMessage_t, nodeAddress: Int, equipRef: String, refresh: ZoneDataInterface?) {
+    if (zoneRefreshListener == null) {
+        zoneRefreshListener = refresh
+    }
     CcuLog.d(L.TAG_CCU_DEVICE, "HyperStat Override: nodeAddress $nodeAddress :  $message")
     val equip = getDomainEquip(equipRef) as HyperStatEquip
     updateDesiredTemp(equip, message)
@@ -105,11 +113,28 @@ fun handleOverrideMsg(message: HyperStatLocalControlsOverrideMessage_t, nodeAddr
 
 private fun updateDesiredTemp(equip: HyperStatEquip, message: HyperStatLocalControlsOverrideMessage_t) {
 
-    val coolingDesiredTemp = message.setTempCooling.toDouble() / 2
-    val heatingDesiredTemp = message.setTempHeating.toDouble() / 2
+    val modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" + " == \"" + equip.roomRef + "\"").toInt()
+    val temperatureMode = TemperatureMode.values()[modeType]
+    CcuLog.e(L.TAG_CCU_DEVICE, "HS Desired Temperature ModeType: " + TemperatureMode.values()[modeType])
+    var coolingDesiredTemp = message.setTempCooling.toDouble() / 2
+    var heatingDesiredTemp = message.setTempHeating.toDouble() / 2
+    when (temperatureMode.name) {
+        TemperatureMode.COOLING.name -> {
+            coolingDesiredTemp = validatingCoolingDesiredTemp(coolingDesiredTemp,equip.roomRef.toString());
+            equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
+        }
+        TemperatureMode.HEATING.name -> {
+            heatingDesiredTemp = validatingHeatingDesiredTemp(heatingDesiredTemp,equip.roomRef.toString());
+            equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
+        }
+        else -> {
+            heatingDesiredTemp = validatingHeatingDesiredTemp(heatingDesiredTemp,equip.roomRef.toString());
+            coolingDesiredTemp = validatingCoolingDesiredTemp(coolingDesiredTemp,equip.roomRef.toString());
+            equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
+            equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
+        }
+    }
     val avgDesiredTemp = (coolingDesiredTemp + heatingDesiredTemp) / 2
-    equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
-    equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
     equip.desiredTemp.writePointValue(avgDesiredTemp)
 
     val coolingPoint = Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(equip.desiredTempCooling.id)).build()
@@ -117,6 +142,8 @@ private fun updateDesiredTemp(equip: HyperStatEquip, message: HyperStatLocalCont
     val desiredPoint = Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(equip.desiredTemp.id)).build()
     CcuLog.d(L.TAG_CCU_DEVICE, "device overriding CoolingDesiredTemp: $coolingDesiredTemp HeatingDesiredTemp: $heatingDesiredTemp AvgDesiredTemp: $avgDesiredTemp")
     DeviceUtil.updateDesiredTempFromDevice(coolingPoint, heatingPoint, desiredPoint, coolingDesiredTemp, heatingDesiredTemp, avgDesiredTemp, hayStack, WhoFiledConstants.HYPERSTAT_WHO)
+    zoneRefreshListener?.refreshDesiredTemp(equip.nodeAddress.toString(),coolingDesiredTemp.toString(),heatingDesiredTemp.toString(),equip.getId())
+
 }
 
 private fun updateModes(equip: HyperStatEquip, message: HyperStatLocalControlsOverrideMessage_t, nodeAddress: Int) {

@@ -41,15 +41,14 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.RawPoint;
-import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.Tags;
 import a75f.io.constants.DeviceFieldConstants;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.domain.api.Domain;
-import a75f.io.domain.api.PhysicalPoint;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.api.PhysicalPoint;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -125,14 +124,25 @@ public class DeviceUtil {
         return 0;
     }
 
-    public static short getMaxUserTempLimits(double deadband, String zoneId){
-        double maxCool = CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and user and limit and max and roomRef == \""+zoneId+"\"");
-        return (short)(maxCool- deadband);
+    public static short getMaxUserTempLimits( String zoneId, Boolean isHeatingLimit) {
+        double maxLimit;
+        if (isHeatingLimit) {
+            maxLimit = CCUHsApi.getInstance().readPointPriorityValByQuery("heating and user and limit and max and roomRef == \"" + zoneId + "\"");
+        } else {
+            maxLimit = CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and user and limit and max and roomRef == \"" + zoneId + "\"");
+        }
+        return (short) (maxLimit); //77
     }
-    
-    public static short getMinUserTempLimits(double deadband, String zoneId){
-        double maxHeat = CCUHsApi.getInstance().readPointPriorityValByQuery("heating and user and limit and min and roomRef == \""+zoneId+"\"");
-        return (short)(maxHeat+ deadband);
+
+    public static short getMinUserTempLimits(String zoneId, Boolean isHeatingLimit) {
+
+        double minLimit;
+        if (isHeatingLimit) {
+            minLimit = CCUHsApi.getInstance().readPointPriorityValByQuery("heating and user and limit and min and roomRef == \"" + zoneId + "\"");
+        } else {
+            minLimit = CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and user and limit and min and roomRef == \"" + zoneId + "\"");
+        }
+        return (short) (minLimit); //67
     }
     
     /**
@@ -170,12 +180,18 @@ public class DeviceUtil {
     public static double getValidDesiredCoolingTemp(double desiredTemp,
                                                     double coolingDeadband,
                                                     double maxCoolingUserLimit,
-                                                    double minCoolingUserLimit
+                                                    double minCoolingUserLimit,
+                                                    Boolean isDualMode
                                                     ) {
-        double calculateCoolingDesiredTemp = desiredTemp + coolingDeadband;
+        double calculateCoolingDesiredTemp;
+        if (isDualMode) {
+            calculateCoolingDesiredTemp = desiredTemp + coolingDeadband;
+        } else {
+            calculateCoolingDesiredTemp = desiredTemp;
+        }
         if (calculateCoolingDesiredTemp <= maxCoolingUserLimit &&
                 calculateCoolingDesiredTemp >= minCoolingUserLimit)
-            return desiredTemp + coolingDeadband;
+            return calculateCoolingDesiredTemp;
         else if (calculateCoolingDesiredTemp < minCoolingUserLimit)
             return minCoolingUserLimit;
         else
@@ -185,9 +201,15 @@ public class DeviceUtil {
     public static double getValidDesiredHeatingTemp(double desiredTemp,
                                                     double heatingDeadband,
                                                     double maxHeatingUserLimit,
-                                                    double minHeatingUserLimit) {
+                                                    double minHeatingUserLimit,
+                                                    Boolean isDualMode) {
 
-        double calculateHeatingDesiredTemp = desiredTemp - heatingDeadband;
+        double calculateHeatingDesiredTemp;
+        if (isDualMode) {
+            calculateHeatingDesiredTemp = desiredTemp - heatingDeadband;
+        } else {
+            calculateHeatingDesiredTemp = desiredTemp;
+        }
         if (calculateHeatingDesiredTemp <= maxHeatingUserLimit &&
                 calculateHeatingDesiredTemp >= minHeatingUserLimit)
             return calculateHeatingDesiredTemp;

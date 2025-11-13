@@ -25,6 +25,13 @@ public class VavSystemProfileRelayAssociationUtil {
         if (profileInstance == null) {
             return false;
         }
+        if (profileType == ProfileType.SYSTEM_VAV_ADVANCED_AHU) {
+            if (modeType == TemperatureMode.COOLING) {
+                return L.ccu().systemProfile.isCoolingAvailable();
+            } else if (modeType == TemperatureMode.HEATING) {
+                return L.ccu().systemProfile.isHeatingAvailable();
+            }
+        }
         VavSystemProfile systemProfile = getSystemProfileInstance(profileInstance);
 
 

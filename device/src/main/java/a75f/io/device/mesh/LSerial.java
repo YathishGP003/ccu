@@ -353,23 +353,27 @@ public class LSerial
     public void setUSBService(UsbService usbService)
     {
         structs.clear();
+        CcuLog.d("CCU_USB", "LSerial setUSBService "+usbService);
         mUsbService = usbService;
     }
     public void setModbusUSBService(UsbModbusService modbusUSBService)
     {
         structs.clear();
+        CcuLog.d("CCU_USB", "LSerial setModbusUSBService "+modbusUSBService);
         mUsbModbusService = modbusUSBService;
     }
 
     public void setModbusUSBService2(UsbModbusServiceCom2 modbusUSBService)
     {
         structs.clear();
+        CcuLog.d("CCU_USB", "LSerial setModbusUSBService2 "+modbusUSBService);
         mUsbModbusService2 = modbusUSBService;
     }
 
     public void setUsbConnectService(UsbConnectService usbService)
     {
         structs.clear();
+        CcuLog.d("CCU_USB", "LSerial setUsbConnectService "+usbService);
         mUsbConnectService = usbService;
     }
 
@@ -545,7 +549,6 @@ public class LSerial
     {
         if (mUsbConnectService == null) {
             CcuLog.d(L.TAG_CCU_DEVICE, "sendSerialBytesToConnect Failed");
-            DLog.logUSBServiceNotInitialized();
             return false;
         }
 

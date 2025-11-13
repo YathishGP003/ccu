@@ -544,8 +544,8 @@ public class UsbService extends Service
 							nOffset++;
 							buffer[nOffset + len] = (byte) (EOF_BYTE & 0xff);
 							nOffset++;
-							CcuLog.i(TAG_CCU_USB, "Serial Message array length "+ (len + nOffset));
 							serialPort.write(Arrays.copyOfRange(buffer, 0, len + nOffset));
+							CcuLog.i(TAG_CCU_USB, "Serial Message sent "+ Arrays.toString(Arrays.copyOfRange(buffer, 0, len + nOffset)));
 							sleep(300);
 						}
 					}

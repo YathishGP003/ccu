@@ -39,6 +39,7 @@ import a75f.io.renatus.modbus.util.isAllParamsSelectedTerminal
 import a75f.io.renatus.modbus.util.parseModbusDataFromString
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.CopyConfiguration
+import a75f.io.renatus.util.ErrorToastMessage
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.usbserial.UsbPrefHelper
 import a75f.io.util.ExecutorTask
@@ -47,6 +48,7 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -96,6 +98,8 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     val isDisabled: LiveData<Boolean> = _isDisabled
     private var selectedModelForCopyConfig :String? = null
 
+    var isNewProfile = true
+
     val isDialogOpen: LiveData<Boolean>
         get() = _isDialogOpen
 
@@ -112,6 +116,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     fun configModelDefinition(context: Context) {
         this.context = context
         if (L.getModbusProfile(selectedSlaveId, zoneRef) != null) {
+            isNewProfile = false
             modbusProfile = L.getModbusProfile(selectedSlaveId, zoneRef) as ModbusProfile
             val isTerminalProfile = modbusProfile.equip.roomRef.replace("@","") != "SYSTEM"
             selectedSlaveId = modbusProfile.slaveId
@@ -418,8 +423,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
 
     private fun setUpsModbusProfile() {
         equipModel.value.equipDevice.value.slaveId = equipModel.value.slaveId.value
-        val parentMap = getModbusEquipMap(equipModel.value.slaveId.value.toShort(), equipModel.value.port.value)
-        if (parentMap.isNullOrEmpty()) {
+        if (isNewProfile) {
             val subEquipmentDevices = mutableListOf<EquipmentDevice>()
             if (equipModel.value.subEquips.isNotEmpty()) {
                 equipModel.value.subEquips.forEach {

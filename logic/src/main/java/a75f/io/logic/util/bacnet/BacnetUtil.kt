@@ -280,8 +280,8 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
         val bacnetLastHeartBeatTime = preferences.getLong(BACNET_HEART_BEAT, 0)
         CcuLog.d(TAG_CCU_BACNET, "Last Bacnet Ip stack HeartBeat Time: $bacnetLastHeartBeatTime,  time: "+(System.currentTimeMillis() - bacnetLastHeartBeatTime))
         val isBACnetIntialized = preferences.getBoolean(IS_BACNET_INITIALIZED, false)
-        CcuLog.d(TAG_CCU_BACNET_MSTP, "BACnet IP stack is initialized")
         if(isBACnetIntialized) {
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "BACnet IP stack is initialized")
             if ((System.currentTimeMillis() - bacnetLastHeartBeatTime) > 300000) {
                 preferences.edit().putLong(BACNET_HEART_BEAT, System.currentTimeMillis()).apply()  // resetting the timer again
                 updateBacnetServerStatus(BacnetServerStatus.INITIALIZED_OFFLINE.ordinal)
@@ -670,7 +670,7 @@ fun handleLinearPoints(bacnetMstpEquip: MutableList<HDict>) {
         for (i in 0 until equipsToProcess) {
             equip = bacnetMstpEquip[i]
             CcuLog.d(TAG_CCU_BACNET_MSTP, "--[6]-- mstp rpm Processing equip no-->$i <--id-->${equip.id()} <--dis-->${equip.dis()}")
-            handlePointsWithDelay(equip)
+            fetchEquipLinearPoints(equip)
             equipProcessed = i + 1
         }
     } else {
@@ -678,7 +678,7 @@ fun handleLinearPoints(bacnetMstpEquip: MutableList<HDict>) {
     }
 }
 
-fun handlePointsWithDelay(
+fun fetchEquipLinearPoints(
     t1: HDict
 ) {
     CcuLog.d(TAG_CCU_BACNET_MSTP, "--[8]-- mstp rpm --inside handlePointsWithDelay---checking if equip has linear points")
@@ -696,46 +696,49 @@ fun handlePointsWithDelay(
     val deviceMacAddress = t1["bacnetDeviceMacAddr"]?.toString() ?: "0"
     val destination = DestinationMultiRead("", "0", deviceId, "", deviceMacAddress)
 
-    points.chunked(10).forEachIndexed { batchIndex, chunk ->
-        val readAccessSpecification = mutableListOf<ReadRequestMultiple>()
+    val readAccessSpecification = mutableListOf<ReadRequestMultiple>()
 
-        chunk.forEach { point ->
-            try {
-                val objectId = point[Tags.BACNET_OBJECT_ID]?.toString()?.toDouble()?.toInt()
-                val objectType = point[Tags.BACNET_TYPE]?.toString()?.let { BacnetTypeMapper.getObjectType(it) }
-
-                if (objectId != null && objectType != null) {
-                    val objectIdentifier = getDetailsFromObjectLayout(objectType, objectId.toString())
-                    val propertyReference = listOf(
-                        PropertyReference(BacNetConstants.PropertyType.PROP_PRESENT_VALUE.value, -1)
-                    )
-                    readAccessSpecification.add(ReadRequestMultiple(objectIdentifier, propertyReference as MutableList<PropertyReference>))
-                } else {
-                    CcuLog.e(TAG_CCU_BACNET_MSTP, "--[10]-- mstp rpm Invalid point: ${point.id()}")
-                }
-            } catch (e: Exception) {
-                CcuLog.e(TAG_CCU_BACNET_MSTP, "--[11]-- mstp rpm Error processing point: ${point.id()} - ${e.message}")
+    points.forEach { point ->
+        try {
+            val objectId = point[Tags.BACNET_OBJECT_ID]?.toString()?.toDouble()?.toInt()
+            val objectType = point[Tags.BACNET_TYPE]?.toString()?.let {
+                BacnetTypeMapper.getObjectType(it)
             }
-        }
 
-        if (readAccessSpecification.isNotEmpty()) {
-            val rpmRequest = RpmRequest(readAccessSpecification)
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "--[12]-- mstp rpm Sending RPM batch ${batchIndex + 1} for device $deviceId")
-            sendRequestMultipleRead(
-                BacnetReadRequestMultiple(destination, rpmRequest),
-                deviceId,
-                t1.id().toString()
+            if (objectId != null && objectType != null) {
+                val objectIdentifier = getDetailsFromObjectLayout(objectType, objectId.toString())
+
+                val propertyReference = mutableListOf(
+                    PropertyReference(BacNetConstants.PropertyType.PROP_PRESENT_VALUE.value, -1)
+                )
+
+                readAccessSpecification.add(
+                    ReadRequestMultiple(objectIdentifier, propertyReference)
+                )
+            } else {
+                CcuLog.e(TAG_CCU_BACNET_MSTP, "--[10]-- mstp rpm Invalid point: ${point.id()}")
+            }
+        } catch (e: Exception) {
+            CcuLog.e(
+                TAG_CCU_BACNET_MSTP,
+                "--[11]-- mstp rpm Error processing point: ${point.id()} - ${e.message}"
             )
-        }else{
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "--[12]-- mstp rpm either serverIpAddress is null or readAccessSpecification is empty")
-        }
-
-        CcuLog.d(TAG_CCU_BACNET_MSTP, "--[13]-- mstp rpm waiting for 10 seconds")
-        // wait 5 seconds before sending next batch
-        if (batchIndex < (points.size / 10)) {
-            sleep(5000)
         }
     }
+
+    if (readAccessSpecification.isNotEmpty()) {
+        val rpmRequest = RpmRequest(readAccessSpecification)
+        CcuLog.d(TAG_CCU_BACNET_MSTP, "--[12]-- mstp rpm Sending combined RPM request for device $deviceId")
+
+        sendRequestMultipleRead(
+            BacnetReadRequestMultiple(destination, rpmRequest),
+            deviceId,
+            t1.id().toString()
+        )
+    } else {
+        CcuLog.d(TAG_CCU_BACNET_MSTP, "--[12]-- mstp rpm destination null or empty specification list")
+    }
+
 }
 
 

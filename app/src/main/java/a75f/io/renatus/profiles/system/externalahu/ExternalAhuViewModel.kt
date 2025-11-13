@@ -182,6 +182,8 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     val isBacnetMstpEnabled = mutableStateOf(false)
 
     private var domainService = DomainService()
+    var isNewModbusProfile = true
+
     val onItemSelect = object : OnItemSelect {
         override fun onItemSelected(index: Int, item: String) {
             selectedModbusType.value = index
@@ -320,6 +322,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
 
         if (modbusEquip != null && modbusEquip.isNotEmpty()) {
             CcuLog.d(TAG_BACNET, "-configType changed to modbus--6")
+            isNewModbusProfile = false
             configType.value = ConfigType.MODBUS
             configTypeRadioOption.value = ConfigType.MODBUS
             modbusProfile = ModbusProfile()
@@ -482,9 +485,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
 
     private fun setUpsModbusProfile(profileType: ProfileType) {
         equipModel.value.equipDevice.value.slaveId = equipModel.value.slaveId.value
-        val parentMap = getModbusEquipMap(equipModel.value.slaveId.value.toShort(), equipModel.value.port.value)
-
-        if (parentMap.isNullOrEmpty()) {
+        if (isNewModbusProfile) {
             val subEquipmentDevices = mutableListOf<EquipmentDevice>()
             if (equipModel.value.subEquips.isNotEmpty()) {
                 equipModel.value.subEquips.forEach {
@@ -510,6 +511,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                 updatePortIfChanged(slaveId = equipModel.value.slaveId.value)
             } else {
                 CcuLog.i(Domain.LOG_TAG, "Modbus Equip port not changed for slave id ${equipModel.value.slaveId.value}")
+                formattedToastMessage("Port not updated", context)
             }
         }
         PreferenceUtil.setSelectedProfileWithAhu("modbus")

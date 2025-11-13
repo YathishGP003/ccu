@@ -50,6 +50,7 @@ import static a75f.io.logic.util.bacnet.BacnetUtilKt.sendBroadCast;
 import static a75f.io.logic.L.TAG_CCU_BACNET;
 import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
 import static a75f.io.renatus.UtilityApplication.context;
+import static a75f.io.renatus.UtilityApplication.isBacnetMstpInitialized;
 import static a75f.io.renatus.UtilityApplication.startRestServer;
 import static a75f.io.renatus.UtilityApplication.stopRestServer;
 
@@ -1388,7 +1389,7 @@ public class Communication extends Fragment implements MstpDataInterface {
     private void handleClick(boolean isPortAvailable){
 
         if (!isPortAvailable && HttpServer.Companion.getInstance(context).isServerRunning()) {
-            if(!DashboardUtilKt.isDashboardConfig(context)){
+            if(!DashboardUtilKt.isDashboardConfig(context) && !isBacnetMstpInitialized()) {
                 CcuLog.d(TAG_CCU_BACNET,"5001 port is busy-->");
                 Toast.makeText(context, "Port is busy try after some time", Toast.LENGTH_SHORT).show();
                 HttpServer.Companion.getInstance(context).stopServer();

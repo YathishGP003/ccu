@@ -110,6 +110,7 @@ import a75f.io.renatus.util.TestSignalManager;
 import a75f.io.renatus.util.UsbHelper;
 import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
 import a75f.io.renatus.util.remotecommand.bundle.BundleInstallManager;
+import a75f.io.restserver.server.HttpServer;
 import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbPortTrigger;
 import a75f.io.usbserial.UsbServiceActions;
@@ -1033,7 +1034,7 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
     }
 
     private void intializeBACnet() {
-        if(UtilityApplication.isBACnetIntialized()) {
+        if(UtilityApplication.isBACnetIntialized() || UtilityApplication.isBacnetMstpInitialized()) {
             executeTask();
         }
     }
@@ -1048,10 +1049,12 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
 
     private void handleClick(boolean isPortAvailable){
         if(!isPortAvailable){
-            Toast.makeText(context, getString(R.string.port_is_busy), Toast.LENGTH_SHORT).show();
+            CcuLog.d(TAG_BACNET, "--Bacnet port 5001 is busy or Server already running--");
             return;
         }
-        UtilityApplication.startRestServer();
+        if (!HttpServer.Companion.getInstance(context).isServerRunning()) {
+            UtilityApplication.startRestServer();
+        }
     }
     private void updateStatusViewPagerAdapter() {
         mViewPager.removeAllViews();

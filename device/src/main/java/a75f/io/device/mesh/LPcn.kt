@@ -21,7 +21,6 @@ import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZoneState
-import a75f.io.logic.bo.building.pcn.PCNUtil
 import a75f.io.logic.bo.building.pcn.PCNUtil.Companion.getConnectNodeEquip
 import a75f.io.logic.bo.building.pcn.PCNUtil.Companion.getPCNForZone
 import a75f.io.logic.bo.building.pcn.PCNUtil.Companion.getPcnByNodeAddress
@@ -138,20 +137,16 @@ class LPcn {
             try {
                 val coolingDeadband =
                     ccuHsApi.readPointPriorityValByQuery("cooling and deadband and schedulable and roomRef == \"" + zone.id + "\"")
-                settings.maxUserTem.set(DeviceUtil.getMaxUserTempLimits(coolingDeadband, zone.id))
 
                 val heatingDeadband =
                     ccuHsApi.readPointPriorityValByQuery("heating and deadband and schedulable and roomRef == \"" + zone.id + "\"")
-
-                settings.minUserTemp.set(
-                    DeviceUtil.getMinUserTempLimits(
-                        heatingDeadband,
-                        zone.id
-                    )
-                )
+                settings.minUserTemp.set((DeviceUtil.getMinUserTempLimits(zone.id, true)
+                        - heatingDeadband).toInt().toShort())
+                settings.maxUserTemp.set((DeviceUtil.getMaxUserTempLimits(zone.id, false)
+                        + coolingDeadband).toInt().toShort())
             } catch (e: java.lang.Exception) {
                 //Equips not having user temps are bound to throw exception
-                settings.maxUserTem.set(75.toShort())
+                settings.maxUserTemp.set(75.toShort())
                 settings.minUserTemp.set(69.toShort())
             }
 

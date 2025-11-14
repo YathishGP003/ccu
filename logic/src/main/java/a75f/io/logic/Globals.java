@@ -809,7 +809,7 @@ public class Globals {
      */
     private void updateCCUAhuRef() {
         HashMap<Object, Object> ccuDevice = CCUHsApi.getInstance().readEntity("device and ccu");
-        HashMap<Object, Object> systemProfile = CCUHsApi.getInstance().readEntity("system and profile and not modbus and not connectModule");
+        HashMap<Object, Object> systemProfile = CCUHsApi.getInstance().readEntity(CommonQueries.SYSTEM_PROFILE);
 
         if (systemProfile.isEmpty() || ccuDevice.isEmpty()) {
             return;

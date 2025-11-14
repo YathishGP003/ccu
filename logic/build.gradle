@@ -324,12 +324,20 @@ repositories {
     mavenCentral()
 }
 
-def buildHealthAndInfoUrls (LinkedHashMap<String, String> baseUrls, String env, def defaultConfig) {
+static def buildHealthAndInfoUrls (LinkedHashMap<String, String> baseUrls, String env, def defaultConfig) {
     baseUrls.each { key, subdomain ->
         if (key == "WEATHER") {
             defaultConfig.buildConfigField "String", "WEATHER", "\"https://${subdomain}.${env}.service.75f.io/api/v1/health\""
         } else if (key == "AUTHORIZATION") {
             defaultConfig.buildConfigField "String", "AUTHORIZATION", "\"https://${subdomain}.${env}.service.75f.io/api/v1/health\""
+        } else if (key == "HAYLOFT") {
+            if (env == "qa" || env == "dev" || env == "staging") {
+                defaultConfig.buildConfigField "String", "HAYLOFT_INFO", "\"https://${subdomain}.${env}.service.75f.io/\""
+                defaultConfig.buildConfigField "String", "HAYLOFT_HEALTH", "\"https://${subdomain}.${env}.service.75f.io/actuator/health\""
+            } else {
+                defaultConfig.buildConfigField "String", "HAYLOFT_INFO", "\"https://${subdomain}.${"prod"}.service.75f.io/\""
+                defaultConfig.buildConfigField "String", "HAYLOFT_HEALTH", "\"https://${subdomain}.${"prod"}.service.75f.io/actuator/health\""
+            }
         } else {
             defaultConfig.buildConfigField "String", "${key}_INFO", "\"https://${subdomain}.${env}.service.75f.io/actuator/info\""
             defaultConfig.buildConfigField "String", "${key}_HEALTH", "\"https://${subdomain}.${env}.service.75f.io/actuator/health\""

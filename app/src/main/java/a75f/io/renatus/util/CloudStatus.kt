@@ -14,7 +14,15 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.ResponseBody
 import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import java.util.concurrent.TimeUnit
+
 
 object CloudStatus {
     private val renatusServicesUrls = RenatusServicesEnvironment.instance.urls
@@ -81,7 +89,11 @@ object CloudStatus {
             async(Dispatchers.IO) {
                 try {
                     val healthCheckResponse = getResponse(urls.first)
-                    val infoResponse = getResponse(urls.second)
+                    val infoResponse: String? = if (name == "Hayloft") {
+                        getHayloftVersion(urls.second)
+                    } else {
+                        getResponse(urls.second)
+                    }
                     CcuLog.d(L.TAG_CCU_CLOUD_STATUS, "Service $name health check response: $healthCheckResponse \n" +
                             "Service $name info response: $infoResponse")
 
@@ -139,4 +151,36 @@ object CloudStatus {
             }
         }
     }
+
+    // For haylot version we need to use Retrofit since it "/" suffix is not allowed in url
+    interface DomainModelerApi {
+        @GET("actuator/info")
+        fun getActuatorInfo(): Call<ResponseBody>
+    }
+
+    private fun getCloudStatusRetrofit(baseUrl: String): Retrofit {
+        val client = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder().build()
+                chain.proceed(request)
+            }
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl(baseUrl)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
+            .build()
+    }
+
+    private fun getHayloftVersion(baseUrl: String): String? {
+        val result =
+            getCloudStatusRetrofit(baseUrl).create(DomainModelerApi::class.java)
+                .getActuatorInfo().execute()
+
+        return result.body()?.string()
+    }
+
 }

@@ -563,13 +563,18 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
         if (!PreferenceUtil.getBillingEmailAddressMigrationStatus()) {
             updateBillingAdminEmail()
-            PreferenceUtil.setBillingEmailAddressMigrationStatus();
+            PreferenceUtil.setBillingEmailAddressMigrationStatus()
         }
         if (!PreferenceUtil.getUpdateEnumAndRelayPortsMSMigrationStatus()) {
             updateEnumAOAndRelayForMsV1Device()
             CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Updating Enum and Relay Ports for MS V1 Device Migration Completed")
             updateEnumValueForTerminalProfile()
-            PreferenceUtil.setUpdateEnumAOAndRelayPortsMSMigrationStatus();
+            PreferenceUtil.setUpdateEnumAOAndRelayPortsMSMigrationStatus()
+        }
+
+        if (!PreferenceUtil.getMonitorCo2Migration()) {
+            migrateMonitorCo2ProfilePoints()
+            PreferenceUtil.setMonitorCo2Migration()
         }
 
         hayStack.scheduleSync()
@@ -1605,7 +1610,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             if (hssEquip.temperatureSensorBusAdd0.pointExists()) {
                 val humiditySensorBusAdd0Def = model.points.find { it.domainName == DomainName.humiditySensorBusAdd0 }
                 humiditySensorBusAdd0Def.run {
-                    val humiditySensorBusAdd0Id = equipBuilder.createPoint(
+                    equipBuilder.createPoint(
                         PointBuilderConfig(
                             this as ModelPointDef,
                             profileConfiguration,
@@ -1622,7 +1627,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             if (hssEquip.temperatureSensorBusAdd1.pointExists()) {
                 val humiditySensorBusAdd1Def = model.points.find { it.domainName == DomainName.humiditySensorBusAdd1 }
                 humiditySensorBusAdd1Def.run {
-                    val humiditySensorBusAdd1Id = equipBuilder.createPoint(
+                    equipBuilder.createPoint(
                         PointBuilderConfig(
                             this as ModelPointDef,
                             profileConfiguration,
@@ -1639,7 +1644,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             if (hssEquip.temperatureSensorBusAdd2.pointExists()) {
                 val humiditySensorBusAdd2Def = model.points.find { it.domainName == DomainName.humiditySensorBusAdd2 }
                 humiditySensorBusAdd2Def.run {
-                    val humiditySensorBusAdd2Id = equipBuilder.createPoint(
+                    equipBuilder.createPoint(
                         PointBuilderConfig(
                             this as ModelPointDef,
                             profileConfiguration,
@@ -3752,7 +3757,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             val oaoDamper = it.oaoDamper.pointExists()
             val enableOao = it.enableOutsideAirOptimization.pointExists()
 
-            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "----- [oaoDamperPoint]: $oaoDamper [enableOaoPoint] : $enableOao ------");
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "----- [oaoDamperPoint]: $oaoDamper [enableOaoPoint] : $enableOao ------")
 
             if (!enableOao) {
                 createDomainPoint(
@@ -4451,9 +4456,9 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 }
                 val updatedSite =
                     Site.Builder().setHashMap(site).setBillingAdminEmail(site["fmEmail"].toString())
-                        .build();
+                        .build()
                 CCUHsApi.getInstance().updateSite(updatedSite, updatedSite.id)
-                val deviceHDict = CCUHsApi.getInstance().readHDict("ccu and device");
+                val deviceHDict = CCUHsApi.getInstance().readHDict("ccu and device")
 
 
                 val device = Device.Builder().setHDict(deviceHDict).build()
@@ -4530,7 +4535,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         hayStack.readAllEntities(CommonQueries.MYSTAT_EQUIP).forEach { entity ->
             val myStatDevice = MyStatDevice(entity["id"].toString())
             val isV1 = myStatDevice.mystatDeviceVersion.readPointValue().toInt() == 0
-            CcuLog.d("TAG_CCU_MIGRATION_UTIL", "Updating AO and relay ports for MyStat Equip: ${entity["id"]} isV1 device : ${isV1}  deviceVersion: ${myStatDevice.mystatDeviceVersion.readPointValue()}")
+            CcuLog.d("TAG_CCU_MIGRATION_UTIL", "Updating AO and relay ports for MyStat Equip: ${entity["id"]} isV1 device : $isV1  deviceVersion: ${myStatDevice.mystatDeviceVersion.readPointValue()}")
             if (!isV1) return@forEach
 
             val equip = when (entity["domainName"].toString()) {
@@ -4549,6 +4554,51 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
             config.updateEnumConfigs(equip, deviceType.name)
             CcuLog.d("TAG_CCU_MIGRATION_UTIL", "Completed AO and relay  Update for MyStat Equip: ${entity["id"]}")
+        }
+    }
+
+    private fun migrateMonitorCo2ProfilePoints() {
+        try {
+            hayStack.readAllEntities(CommonQueries.HS_MONITOR_EQUIPS).forEach { entity ->
+                val zoneCo2 = Domain.readPointForEquip(DomainName.zoneCo2, entity["id"].toString())
+                val zoneHumidity = Domain.readPointForEquip(DomainName.zoneHumidity, entity["id"].toString())
+                CcuLog.d(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "zoneCo2  migration for Equip: ${entity["id"]} zoneCo2 pointExists: $zoneCo2"
+                )
+                val device =
+                    Domain.hayStack.readEntity("device and equipRef == \"${entity["id"].toString()}\"")
+                if (zoneCo2.isNotEmpty()) {
+
+                    val cp2Sensor = Domain.hayStack.readEntity("domainName == \"${DomainName.co2Sensor}\" and deviceRef == \"${device["id"]}\"")
+                    val dbPoint = RawPoint.Builder()
+                        .setHDict(Domain.hayStack.readHDictById(cp2Sensor["id"].toString()))
+                        .setPointRef(zoneCo2["id"].toString()).build()
+                    CcuLog.d(
+                        TAG_CCU_MIGRATION_UTIL,
+                        "zoneCo2 ${zoneCo2["id"].toString()} zoneCo2 applied pointRef: ${dbPoint.id}"
+                    )
+                    Domain.hayStack.updatePoint(dbPoint, dbPoint.id)
+                }
+
+                if (zoneHumidity.isNotEmpty()) {
+                    val humiditySensor = Domain.hayStack.readEntity("domainName == \"${DomainName.humiditySensor}\" and deviceRef == \"${device["id"]}\"")
+                    val dbPoint = RawPoint.Builder()
+                        .setHDict(Domain.hayStack.readHDictById(humiditySensor["id"].toString()))
+                        .setPointRef(zoneHumidity["id"].toString()).build()
+                    CcuLog.d(
+                        TAG_CCU_MIGRATION_UTIL,
+                        "zoneHumidity ${zoneHumidity["id"].toString()} zoneHumidity applied pointRef: ${dbPoint.id}"
+                    )
+                    Domain.hayStack.updatePoint(dbPoint, dbPoint.id)
+                }
+            }
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Completed zoneCo2 migration for Monitor Co2 Humidity Equips")
+        } catch (e: Exception) {
+            CcuLog.e(
+                TAG_CCU_MIGRATION_UTIL,
+                "Error during migration for Monitor Co2 Humidity Equips: ${e.message}"
+            )
         }
     }
 }

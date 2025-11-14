@@ -145,6 +145,7 @@ public class PreferenceUtil {
 
     private static final String MIGRATE_BILLING_EMAIL_ADDRESS_STATUS = "migrateBillingEmailAddressStatus";
     private static final String MIGRATE_AO_RELAY_MS_STATUS = "migrateAO&RelayEnumMS";
+    private static final String MIGRATE_MONITOR_CO2_MAPPING = "MIGRATE_MONITOR_CO2_MAPPING";
 
     public static void setContext(Context c) {
         context= c;
@@ -1105,5 +1106,12 @@ public class PreferenceUtil {
 
     public static void setUpdateEnumAOAndRelayPortsMSMigrationStatus() {
         setBooleanPreference(MIGRATE_AO_RELAY_MS_STATUS, true);
+    }
+
+    public static boolean getMonitorCo2Migration() {
+        return getBooleanPreference(MIGRATE_MONITOR_CO2_MAPPING);
+    }
+    public static void setMonitorCo2Migration() {
+        setBooleanPreference(MIGRATE_MONITOR_CO2_MAPPING, true);
     }
 }

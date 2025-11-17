@@ -351,10 +351,10 @@ public class Globals {
                 try {
                     loadEquipProfiles();
                 } catch (Exception e) {
+                    e.printStackTrace();
                     CcuLog.i(L.TAG_CCU_INIT, "Failed to load profiles", e);
                 }
                 isInitCompleted = true;
-                updateTemperatureModeForEquips(); // Update temperature mode fo all equips while app restart
                 DEFAULT_HEARTBEAT_INTERVAL = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                         .getInt("control_loop_frequency", 60);
                 initCompletedListeners.forEach(OnCcuInitCompletedListener::onInitCompleted);
@@ -369,13 +369,6 @@ public class Globals {
         if (isTestMode()) {
             setTestMode(false);
         }
-    }
-
-    private void updateTemperatureModeForEquips() {
-        CcuLog.d(L.TAG_CCU, "UtilityApplication.updateTemperatureModeForEquips");
-        DesiredTempDisplayMode.setSystemModeForVav(CCUHsApi.getInstance());
-        DesiredTempDisplayMode.setSystemModeForDab(CCUHsApi.getInstance());
-        DesiredTempDisplayMode.setSystemModeForStandaloneProfile(CCUHsApi.getInstance());
     }
 
     private void modelMigration(MigrationHandler migrationHandler) {

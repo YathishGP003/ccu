@@ -10,9 +10,10 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
-import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logger.CcuLog
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
-import a75f.io.logic.bo.building.statprofiles.util.getHyperStatDevice
+import a75f.io.logic.bo.building.definitions.ProfileType
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.projecthaystack.HDict
 
@@ -347,11 +348,19 @@ abstract class HyperStatConfiguration(
 
     abstract fun getHighestFanStageCount(): Int
 
-    fun setPortConfiguration(nodeAddress: Int, relays: Map<String, Boolean>, analogOuts: Map<String, Pair<Boolean, String>>) {
+
+    fun setPortConfiguration(
+        nodeAddress: Int,
+        relays: Map<String, Boolean>,
+        analogOuts: Map<String, Pair<Boolean, String>>,
+    ) {
 
         val hayStack = CCUHsApi.getInstance()
-        val device = getHyperStatDevice(nodeAddress)
-        val deviceRef = device[Tags.ID].toString()
+        val device = hayStack.readHDict("device and addr == \"$nodeAddress\"")
+        val deviceRef = device.id() ?: run {
+            CcuLog.e(L.TAG_CCU_PUBNUB, "Device not found for node address: $nodeAddress")
+            return
+        }
 
         fun getPortDict(portName: String): HDict? {
             return hayStack.readHDict("point and deviceRef == \"$deviceRef\" and domainName == \"$portName\"")
@@ -363,7 +372,7 @@ abstract class HyperStatConfiguration(
             if (isWritable) {
                 port.addMarker(Tags.WRITABLE)
                 port.addMarker(Tags.UNUSED)
-            } else if(portDict.has(Tags.UNUSED)) {
+            } else if(portDict.has(Tags.UNUSED)){
                 port.removeMarkerIfExists(Tags.WRITABLE)
                 port.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(port.build().id)
@@ -374,9 +383,9 @@ abstract class HyperStatConfiguration(
 
         relays.forEach { (relayName, externallyMapped) ->
             val portDict = getPortDict(relayName)
-            if (portDict != null && !portDict.isEmpty) {
-                updatePort(portDict, OutputRelayActuatorType.NormallyOpen.displayName, externallyMapped)
-            }
+            if (portDict != null && !portDict.isEmpty) updatePort(
+                portDict, OutputRelayActuatorType.NormallyOpen.displayName, externallyMapped
+            )
         }
 
         analogOuts.forEach { (analogName, config) ->
@@ -385,6 +394,8 @@ abstract class HyperStatConfiguration(
                 updatePort(portDict, config.second, config.first)
             }
         }
+
     }
+
 }
 

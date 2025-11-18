@@ -65,6 +65,9 @@ class Pipe2UVConfiguration(
         }
     }
 
+    override fun isCoolingAvailable(): Boolean = true
+    override fun isHeatingAvailable(): Boolean = true
+
     private fun addValueConfig(analogOutVoltage: AnalogOutVoltage, list:MutableList<ValueConfig>): MutableList<ValueConfig> {
         return list.apply {
             add(analogOutVoltage.fanMin)
@@ -209,17 +212,6 @@ class Pipe2UVConfiguration(
 
     }
 
-    fun isAnyRelayMappedAndEnabled(pipe2UVRelayControls: Pipe2UVRelayControls): Boolean {
-        return getRelayEnabledAssociations().any { (enabled, association) ->
-            enabled && association == pipe2UVRelayControls.ordinal
-        }
-    }
-
-    fun isAnyAnalogMappedAndEnabled(pipe2UvAnalogOutControls: Pipe2UvAnalogOutControls): Boolean {
-        return getAnalogEnabledAssociations().any { (enabled, association) ->
-            enabled && association == pipe2UvAnalogOutControls.ordinal
-        }
-    }
 
     private  fun getAnalogOut1Voltage() {
          analogOut1Voltage= AnalogOutVoltage (
@@ -400,53 +392,6 @@ class Pipe2UVConfiguration(
         return "${minVoltage.currentVal} - ${maxVoltage.currentVal}v"
     }
 
-    private fun getAnalogOutVoltageRange(
-        associationVal: Int,
-        voltage: AnalogOutVoltage
-    ): String {
-        return when (associationVal) {
-            Pipe2UvAnalogOutControls.WATER_MODULATING_VALVE.ordinal -> {
-                voltageRange(voltage.waterValveMin.currentVal.toInt(), voltage.waterValveMax.currentVal.toInt())
-            }
-
-
-            Pipe2UvAnalogOutControls.FACE_DAMPER_VALVE.ordinal -> {
-                voltageRange(voltage.faceAndBypassDamperMin.currentVal.toInt(), voltage.faceAndBypassDamperMax.currentVal.toInt())
-            }
-
-            Pipe2UvAnalogOutControls.FAN_SPEED.ordinal -> {
-                voltageRange(voltage.fanMin.currentVal.toInt(), voltage.fanMax.currentVal.toInt())
-            }
-
-            Pipe2UvAnalogOutControls.OAO_DAMPER.ordinal -> {
-                voltageRange(voltage.oaoDamperMinVoltage.currentVal.toInt(), voltage.oaoDamperMaxVoltage.currentVal.toInt())
-            }
-
-            Pipe2UvAnalogOutControls.DCV_MODULATING_DAMPER.ordinal -> {
-                voltageRange(voltage.dcvModulationMinVoltage.currentVal.toInt(), voltage.dcvModulationMaxVoltage.currentVal.toInt())
-            }
-
-            else -> "2-10v"
-        }
-    }
-    private fun voltageRange(min: Int, max: Int) = min.toString()+"-"+max.toString() + "v"
-
-    override fun analogOut1TypeToString(): String {
-        return getAnalogOutVoltageRange(analogOut1Association.associationVal, analogOut1Voltage)
-    }
-
-    override fun analogOut2TypeToString(): String {
-        return getAnalogOutVoltageRange(analogOut2Association.associationVal, analogOut2Voltage)
-    }
-
-    override fun analogOut3TypeToString(): String {
-        return getAnalogOutVoltageRange(analogOut3Association.associationVal, analogOut3Voltage)
-    }
-
-    override fun analogOut4TypeToString(): String {
-        return getAnalogOutVoltageRange(analogOut4Association.associationVal, analogOut4Voltage)
-    }
-
     fun getFanConfiguration(port: Port): AnalogOutVoltage {
         return when (port) {
             Port.ANALOG_OUT_ONE -> analogOut1Voltage
@@ -459,7 +404,7 @@ class Pipe2UVConfiguration(
 
     override fun getHighestFanStageCount(): Int {
         val stageOrdinal = getHighestStage(
-            if (isAnyRelayMappedToFanLowVentilation()) {
+            if (isAnyRelayEnabledAndMapped(this, Pipe2UVRelayControls.FAN_LOW_SPEED_VENTILATION.name)) {
                 Pipe2UVRelayControls.FAN_LOW_SPEED_VENTILATION.ordinal
             } else {
                 Pipe2UVRelayControls.FAN_LOW_SPEED.ordinal
@@ -476,16 +421,9 @@ class Pipe2UVConfiguration(
         }
     }
 
-    private fun isAnyRelayMappedToFanLowVentilation(): Boolean {
-        return isAnyRelayEnabledAndMapped(Pipe2UVRelayControls.FAN_LOW_SPEED_VENTILATION)
-    }
-
-    fun isAnyRelayEnabledAndMapped(mapping: Pipe2UVRelayControls): Boolean {
-        return getRelayEnabledAssociations().any { (enabled, type) -> enabled && type == mapping.ordinal }
-    }
 
     fun getLowestFanSelected(): Int {
-        val lowestSelected = if (isAnyRelayMappedToFanLowVentilation()) {
+        val lowestSelected = if (isAnyRelayEnabledAndMapped(this, Pipe2UVRelayControls.FAN_LOW_SPEED_VENTILATION.name)) {
             getLowestStage(
                 Pipe2UVRelayControls.FAN_LOW_SPEED_VENTILATION.ordinal,
                 Pipe2UVRelayControls.FAN_MEDIUM_SPEED.ordinal,

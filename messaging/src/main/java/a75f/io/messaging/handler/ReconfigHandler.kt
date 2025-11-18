@@ -21,7 +21,7 @@ fun updateConfiguration(domainName: String, pointValue: Double, config: ProfileC
 
     CcuLog.i(L.TAG_CCU_PUBNUB, "updatePortStatus: received $pointValue $domainName $config")
     config.getEnableConfigs().forEach {
-        if (it.domainName.equals(domainName)) {
+        if (it.domainName == domainName) {
             CcuLog.i(L.TAG_CCU_PUBNUB, "updatePortStatus: updated config")
             setEnabledStatus(it, pointValue)
             return
@@ -29,7 +29,7 @@ fun updateConfiguration(domainName: String, pointValue: Double, config: ProfileC
     }
 
     config.getAssociationConfigs().forEach {
-        if (it.domainName.equals(domainName)) {
+        if (it.domainName == domainName) {
             CcuLog.i(L.TAG_CCU_PUBNUB, "updatePortStatus: updated association")
             setAssociation(it, pointValue)
             return
@@ -37,7 +37,7 @@ fun updateConfiguration(domainName: String, pointValue: Double, config: ProfileC
     }
 
     config.getValueConfigs().forEach {
-        if (it.domainName.equals(domainName)) {
+        if (it.domainName == domainName) {
             CcuLog.i(L.TAG_CCU_PUBNUB, "updatePortStatus: updated getValueConfigs")
             it.currentVal = pointValue
             return
@@ -106,5 +106,5 @@ fun setPortConfiguration(
 
 fun getDeviceByNodeAddress(nodeAddress: Int): HDict {
     val hayStack = CCUHsApi.getInstance()
-    return hayStack.readHDict("device and addr == \"$nodeAddress\"");
+    return hayStack.readHDict("device and addr == \"$nodeAddress\"")
 }

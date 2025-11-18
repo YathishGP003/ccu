@@ -3,6 +3,7 @@ package a75f.io.device.mesh.hypersplit;
 import static a75f.io.api.haystack.Tags.HYPERSTATSPLIT;
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
 import static a75f.io.device.mesh.StatUtilKt.validatingCoolingDesiredTemp;
+import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getCpuPossibleConditioningModeSettings;
 import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getPossibleFanMode;
 import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getSplitConfiguration;
 import static a75f.io.logic.bo.building.statprofiles.util.SplitUtilKt.getUvPossibleConditioningMode;
@@ -48,7 +49,7 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil;
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UVConfiguration;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVConfiguration;
@@ -835,7 +836,8 @@ public class HyperSplitMsgReceiver {
         PossibleFanMode possibleFanMode = PossibleFanMode.OFF;
 
         if (equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_CPU.name())) {
-            possibleConditioningMode = HSSplitHaystackUtil.Companion.getPossibleConditioningModeSettings(nodeAddress);
+            HyperStatSplitCpuConfiguration config = (HyperStatSplitCpuConfiguration) getSplitConfiguration(equipId);
+            possibleConditioningMode = getCpuPossibleConditioningModeSettings(config);
             HsSplitCpuEquip hsSplitCpuEquip = new HsSplitCpuEquip(equipId);
             possibleFanMode = getPossibleFanMode(hsSplitCpuEquip);
         } else if (equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_4PIPE_UV.name())) {

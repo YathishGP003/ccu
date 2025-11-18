@@ -7,9 +7,9 @@ import a75f.io.api.haystack.Point
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.HyperStatSplitEquip
+import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
 import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
 import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
-import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
@@ -19,8 +19,6 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getHssProfileConditioningMode
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getHssProfileFanLevel
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.UvFanStages
@@ -41,36 +39,34 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
  * Mukesh Kumar K
  */
 
-fun reconfigureUnitVentilator(msgObject: JsonObject, configPoint: Point) {
+fun reconfigureHsSplitEquip(msgObject: JsonObject, configPoint: Point) {
 
     val hayStack = CCUHsApi.getInstance()
-    val unitVentilatorEquip = hayStack.readEntity("equip and id == " + configPoint.equipRef)
+    val equip = hayStack.readEntity("equip and id == " + configPoint.equipRef)
 
-    val model = getUnitVentilatorModelByEquipRef(configPoint.equipRef)
-    if (model == null) {
+    val equipModel = getSplitModelByEquipRef(configPoint.equipRef)
+    if (equipModel == null) {
         CcuLog.e(L.TAG_CCU_PUBNUB, "model is null for $configPoint")
         return
     }
 
-    val config = getSplitConfiguration(configPoint.equipRef) as UnitVentilatorConfiguration
+    val config = getSplitConfiguration(configPoint.equipRef)
     val equipBuilder = ProfileEquipBuilder(hayStack)
     val deviceModel = ModelLoader.getHyperStatSplitDeviceModel() as SeventyFiveFDeviceDirective
-    val entityMapper = EntityMapper(model as SeventyFiveFProfileDirective)
+    val entityMapper = EntityMapper(equipModel as SeventyFiveFProfileDirective)
     val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
-    val deviceDis = "${hayStack.siteName}-HSS-${config.nodeAddress}"
-
+    val deviceDis = "${hayStack.siteName}-${deviceModel.name}-${config?.nodeAddress}"
 
     val pointNewValue = msgObject["val"]
     if (pointNewValue == null || pointNewValue.asString.isEmpty()) {
         CcuLog.e(L.TAG_CCU_PUBNUB, "Point value is null or empty for $configPoint")
-
     } else {
-        updateConfiguration(configPoint.domainName, pointNewValue.asDouble, config)
+        updateConfiguration(configPoint.domainName, pointNewValue.asDouble, config!!)
         equipBuilder.updateEquipAndPoints(
             config,
-            model,
+            equipModel,
             hayStack.site!!.id,
-            unitVentilatorEquip["dis"].toString(),
+            equip["dis"].toString(),
             true
         )
 
@@ -80,7 +76,7 @@ fun reconfigureUnitVentilator(msgObject: JsonObject, configPoint: Point) {
         deviceBuilder.updateDeviceAndPoints(
             config,
             deviceModel,
-            unitVentilatorEquip["id"].toString(),
+            equip["id"].toString(),
             hayStack.site!!.id,
             deviceDis
         )
@@ -90,7 +86,7 @@ fun reconfigureUnitVentilator(msgObject: JsonObject, configPoint: Point) {
         }
     }
     writePointFromJson(configPoint, msgObject, hayStack)
-    config.apply { setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap()) }
+    config!!.apply { setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap()) }
     DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance())
 
     if ((pointNewValue == null || pointNewValue.asString.isEmpty()) && configPoint.domainName == DomainName.fanOpMode) {
@@ -98,29 +94,26 @@ fun reconfigureUnitVentilator(msgObject: JsonObject, configPoint: Point) {
     }
 
     // Update fan/conditioning mode enums for Split Domain Equip
-        val splitDomainEquip = getSplitDomainEquipByEquipRef(configPoint.equipRef)
-        splitDomainEquip?.let { equip ->
-            val config = getSplitConfiguration(configPoint.equipRef)
-            config.apply {
-                val possibleConditioningMode = getHssProfileConditioningMode(this)
-                val possibleFanMode = getPossibleFanMode(equip)
-                modifyFanMode(possibleFanMode.ordinal, equip.fanOpMode)
-                modifyConditioningMode(
-                    possibleConditioningMode.ordinal,
-                    equip.conditioningMode,
-                    allStandaloneProfileConditions
-                )
+    val splitDomainEquip = getSplitDomainEquipByEquipRef(configPoint.equipRef)!!
 
-                CcuLog.i(L.TAG_CCU_PUBNUB, "updated ConfigPoint for unit ventilator fan/cond mode")
-            }
-        }
-
+    config.apply {
+        val possibleConditioningMode = getHssProfileConditioningMode(this)
+        val possibleFanMode = getPossibleFanMode(splitDomainEquip)
+        modifyFanMode(possibleFanMode.ordinal, splitDomainEquip.fanOpMode)
+        modifyConditioningMode(
+            possibleConditioningMode.ordinal,
+            splitDomainEquip.conditioningMode,
+            allStandaloneProfileConditions
+        )
+        CcuLog.i(L.TAG_CCU_PUBNUB, "updated ConfigPoint for unit ventilator fan/cond mode")
+    }
     CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for Unit ventilator Reconfiguration $config")
 }
 
 
-fun getUnitVentilatorModelByEquipRef(equipRef: String): ModelDirective? {
-    return when (Domain.getDomainEquip(equipRef) as UnitVentilatorEquip) {
+fun getSplitModelByEquipRef(equipRef: String): ModelDirective? {
+    return when (Domain.getDomainEquip(equipRef) as HyperStatSplitEquip) {
+        is HsSplitCpuEquip -> ModelLoader.getHyperStatSplitCpuModel()
         is Pipe4UVEquip -> ModelLoader.getSplitPipe4Model()
         is Pipe2UVEquip -> ModelLoader.getSplitPipe2Model()
         else -> null

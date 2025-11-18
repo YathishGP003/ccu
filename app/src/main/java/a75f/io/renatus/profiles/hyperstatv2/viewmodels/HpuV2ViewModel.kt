@@ -22,6 +22,8 @@ import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
 import a75f.io.logic.bo.building.system.logIt
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.logic.util.modifyConditioningMode
+import a75f.io.logic.util.modifyFanMode
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.hyperstatv2.util.HyperStatViewStateUtil
@@ -29,8 +31,6 @@ import a75f.io.renatus.profiles.hyperstatv2.viewstates.HpuViewState
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.HyperStatV2ViewState
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
-import a75f.io.logic.util.modifyConditioningMode
-import a75f.io.logic.util.modifyFanMode
 import a75f.io.renatus.util.showErrorDialog
 import android.app.Application
 import android.content.Context
@@ -39,7 +39,6 @@ import android.os.Bundle
 import android.text.Html
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -181,14 +180,5 @@ class HpuV2ViewModel(application: Application) : HyperStatViewModel(application)
             modifyConditioningMode(possibleConditioningMode.ordinal, equip.conditioningMode, allStandaloneProfileConditions)
             setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap())
         }
-    }
-
-    private fun addEquipment(config: HpuConfiguration, equipModel: SeventyFiveFProfileDirective, deviceModel: SeventyFiveFDeviceDirective): String {
-        val equipBuilder = ProfileEquipBuilder(hayStack)
-        val entityMapper = EntityMapper(equipModel)
-        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
-        val equipId = equipBuilder.buildEquipAndPoints(config, equipModel, hayStack.site!!.id, getEquipDis())
-        deviceBuilder.buildDeviceAndPoints(config, deviceModel, equipId, hayStack.site!!.id, getDeviceDis())
-        return equipId
     }
 }

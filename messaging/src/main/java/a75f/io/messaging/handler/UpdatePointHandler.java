@@ -3,10 +3,10 @@ package a75f.io.messaging.handler;
 import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_VAL;
 import static a75f.io.logic.bo.building.BackfillUtilKt.updateBackfillDuration;
 import static a75f.io.messaging.handler.DataSyncHandler.isCloudEntityHasLatestValue;
-import static a75f.io.messaging.handler.HSReconfigHandlerKt.reconfigureHSV2;
+import static a75f.io.messaging.handler.HSReconfigHandlerKt.reconfigureHyperstatEquips;
 import static a75f.io.messaging.handler.MyStatReconfigurationKt.reconfigureMyStat;
 import static a75f.io.messaging.handler.TiReconfigKt.tiReconfiguration;
-import static a75f.io.messaging.handler.UnitVentilatorReconfigurationHandlerKt.reconfigureUnitVentilator;
+import static a75f.io.messaging.handler.SplitReconfigurationHandlerKt.reconfigureHsSplitEquip;
 
 import android.content.Context;
 import android.util.Log;
@@ -145,7 +145,7 @@ public class UpdatePointHandler implements MessageHandler
         || HSUtil.isHSPipe2Equip(pointUid, CCUHsApi.getInstance())
         || HSUtil.isHSHpuEquip(pointUid, CCUHsApi.getInstance()))
         && !isReconfigurationPoint(localPoint)){
-            reconfigureHSV2(msgObject, localPoint);
+            reconfigureHyperstatEquips(msgObject, localPoint);
             updatePoints(localPoint);
             hayStack.scheduleSync();
             return;
@@ -162,10 +162,12 @@ public class UpdatePointHandler implements MessageHandler
             return;
         }
 
-        if (HSUtil.isUnitVentilatorEquip(pointUid, CCUHsApi.getInstance()) &&
+        if (HSUtil.isHyperStatSplitEquip(pointUid, CCUHsApi.getInstance()) &&
                 !isReconfigurationPoint(localPoint)) {
-            reconfigureUnitVentilator(msgObject, localPoint);
+            reconfigureHsSplitEquip(msgObject, localPoint);
+            updatePoints(localPoint);
             hayStack.scheduleSync();
+            return;
         }
 
         if (HSUtil.isSystemConfigOutputPoint(pointUid, CCUHsApi.getInstance())
@@ -204,15 +206,6 @@ public class UpdatePointHandler implements MessageHandler
             if (localPoint.getMarkers().contains(Tags.VRV)) {
                 VrvControlMessageCache.getInstance().setControlsPending(Integer.parseInt(localPoint.getGroup()));
             }
-            return;
-        }
-
-        if (HSUtil.isHyperStatSplitConfig(pointUid, CCUHsApi.getInstance())
-                && !localPoint.getMarkers().contains(Tags.DESIRED)
-                && !localPoint.getMarkers().contains(Tags.SCHEDULE_TYPE)
-                && !localPoint.getMarkers().contains(Tags.TUNER)) {
-            HyperstatSplitReconfigurationHandler.Companion.handleHyperStatSplitConfigChange(msgObject, localPoint, CCUHsApi.getInstance());
-            updatePoints(localPoint);
             return;
         }
 

@@ -5,7 +5,7 @@ import a75f.io.domain.api.Domain.getListOfDisNameByDomainName
 import a75f.io.domain.api.DomainName
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.CpuEconSensorBusTempAssociation
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.EconSensorBusTempAssociation
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.UniversalInputs
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UVConfiguration
@@ -118,22 +118,22 @@ open class UnitVentilatorViewModel : HyperStatSplitViewModel() {
         if (viewState.value.enableOutsideAirOptimization && (
                     !isAnyAnalogEnabledAndMapped(HyperStatSplitControlType.OAO_DAMPER.name) ||
                             !(isAnyUniversalInMapped(UniversalInputs.OUTSIDE_AIR_TEMPERATURE)  || isAnySensorBusMapped(
-                                CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY)) ||
+                                EconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY)) ||
                             !(isAnyUniversalInMapped(UniversalInputs.MIXED_AIR_TEMPERATURE) || isAnySensorBusMapped(
-                                CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY))
+                                EconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY))
                     )
         ) {
             return Pair(true, Html.fromHtml(oaoError,Html.FROM_HTML_MODE_LEGACY))
         }
         if (isUniversalInDuplicated(UniversalInputs.MIXED_AIR_TEMPERATURE) ||
-            isSensorBusDuplicated(CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY) ||
-            (isAnyUniversalInMapped(UniversalInputs.MIXED_AIR_TEMPERATURE) && isAnySensorBusMapped(CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY))
+            isSensorBusDuplicated(EconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY) ||
+            (isAnyUniversalInMapped(UniversalInputs.MIXED_AIR_TEMPERATURE) && isAnySensorBusMapped(EconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY))
         ) {
             return Pair(true, Html.fromHtml(duplicateSensor, Html.FROM_HTML_MODE_LEGACY))
         }
         if (isUniversalInDuplicated(UniversalInputs.OUTSIDE_AIR_TEMPERATURE) ||
-            isSensorBusDuplicated(CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY) ||
-            (isAnyUniversalInMapped(UniversalInputs.OUTSIDE_AIR_TEMPERATURE) && isAnySensorBusMapped(CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY))
+            isSensorBusDuplicated(EconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY) ||
+            (isAnyUniversalInMapped(UniversalInputs.OUTSIDE_AIR_TEMPERATURE) && isAnySensorBusMapped(EconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY))
         ) {
             return Pair(true, Html.fromHtml(duplicateSensor, Html.FROM_HTML_MODE_LEGACY))
         }
@@ -145,8 +145,8 @@ open class UnitVentilatorViewModel : HyperStatSplitViewModel() {
         }
 
         if (isUniversalInDuplicated(UniversalInputs.SUPPLY_AIR_TEMPERATURE) ||
-            isSensorBusDuplicated(CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY) ||
-            (isAnyUniversalInMapped(UniversalInputs.SUPPLY_AIR_TEMPERATURE) && isAnySensorBusMapped(CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY))
+            isSensorBusDuplicated(EconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY) ||
+            (isAnyUniversalInMapped(UniversalInputs.SUPPLY_AIR_TEMPERATURE) && isAnySensorBusMapped(EconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY))
         ) {
             return Pair(true, Html.fromHtml(duplicateSensor, Html.FROM_HTML_MODE_LEGACY))
         }
@@ -201,7 +201,7 @@ open class UnitVentilatorViewModel : HyperStatSplitViewModel() {
                     isAnyAnalogMappedToControl(Pipe2UvAnalogOutControls.DCV_MODULATING_DAMPER.ordinal))
         ) {
             if (!(isAnyUniversalInMapped(UniversalInputs.MIXED_AIR_TEMPERATURE)
-                        || isAnySensorBusMapped(CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY)
+                        || isAnySensorBusMapped(EconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY)
                 )) {
                 return Pair(true, Html.fromHtml(NO_MAT_SENSOR, Html.FROM_HTML_MODE_LEGACY))
             }

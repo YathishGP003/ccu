@@ -2,7 +2,6 @@ package a75f.io.logic.bo.building.statprofiles.util
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
-import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.hyperstat.CpuV2Equip
 import a75f.io.domain.equips.hyperstat.HpuV2Equip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
@@ -288,10 +287,6 @@ fun getHSPipe2FanLevel(config: Pipe2Configuration): Int {
     }
 
     return fanLevel
-}
-
-fun getHyperStatDevice(nodeAddress: Int): HashMap<Any, Any> {
-    return CCUHsApi.getInstance().readEntity("domainName == \"${DomainName.hyperstatDevice}\" and addr == \"$nodeAddress\"")
 }
 
 fun getHsFanLevel(config: HyperStatConfiguration): Int {

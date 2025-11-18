@@ -33,7 +33,7 @@ import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuState
 import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.Pipe2UvViewModel
-import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.Pipe4ViewModel
+import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.Pipe4UvViewModel
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe2UvViewState
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe4UvViewState
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN1
@@ -246,14 +246,14 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
 
                 fun setTemping(value: Boolean) {
                     when(viewModel){
-                        is Pipe4ViewModel -> (viewModel.viewState.value as Pipe4UvViewState).saTempering = value
+                        is Pipe4UvViewModel -> (viewModel.viewState.value as Pipe4UvViewState).saTempering = value
                         is Pipe2UvViewModel -> (viewModel.viewState.value as Pipe2UvViewState).saTempering = value
                     }
                 }
 
                 fun getTemping(): Boolean {
                     return when(viewModel){
-                        is Pipe4ViewModel -> (viewModel.viewState.value as Pipe4UvViewState).saTempering
+                        is Pipe4UvViewModel -> (viewModel.viewState.value as Pipe4UvViewState).saTempering
                         is Pipe2UvViewModel -> (viewModel.viewState.value as Pipe2UvViewState).saTempering
                         else -> false
                     }
@@ -703,7 +703,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         if (viewModel.profileType == ProfileType.HYPERSTATSPLIT_4PIPE_UV || viewModel.profileType == ProfileType.HYPERSTATSPLIT_2PIPE_UV)
         {
             val controlViaMode = when (viewModel) {
-                is Pipe4ViewModel -> (viewModel.viewState.value as Pipe4UvViewState).controlVia
+                is Pipe4UvViewModel -> (viewModel.viewState.value as Pipe4UvViewState).controlVia
                 is Pipe2UvViewModel -> (viewModel.viewState.value as Pipe2UvViewState).controlVia
               else -> (viewModel.viewState.value as Pipe4UvViewState).controlVia
             }

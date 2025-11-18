@@ -455,10 +455,10 @@ public class HSUtil {
         return equipMap.containsKey(Tags.MYSTAT);
     }
 
-    public static boolean isUnitVentilatorEquip(String id, CCUHsApi hayStack) {
+    public static boolean isHyperStatSplitEquip(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> equipMap = hayStack.readMapById(id);
         HashMap<Object, Object> equip = hayStack.readMapById(equipMap.get("equipRef").toString());
-        return equip.containsKey(Tags.ECONOMIZER) && (equip.containsKey(Tags.PIPE4) || equip.containsKey(Tags.PIPE2));
+        return equip.containsKey(Tags.ECONOMIZER) && (equip.containsKey(Tags.CPU) || equip.containsKey(Tags.PIPE4) || equip.containsKey(Tags.PIPE2));
     }
 
     public static boolean isVAVTrueCFMConfig(String id, CCUHsApi hayStack) {

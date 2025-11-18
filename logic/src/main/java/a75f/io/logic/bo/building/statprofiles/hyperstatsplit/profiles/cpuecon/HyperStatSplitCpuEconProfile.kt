@@ -33,7 +33,6 @@ import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.handlers.doAnalogOperation
 import a75f.io.logic.controlcomponents.util.ControllerNames
-import a75f.io.logic.controlcomponents.util.isSoftOccupied
 import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler
 import kotlin.math.max
 import kotlin.math.min
@@ -190,7 +189,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         fanLoopOutput: Int,
         config: HyperStatSplitCpuConfiguration
     ): Int {
-        val isCompressorAvailable = config.isCompressorStagesAvailable()
+        val isCompressorAvailable = config.isCompressorAvailable()
         var voltage = getPercentFromVolt(getCoolingStateActivated().roundToInt())
 
         if (isCompressorAvailable) {
@@ -214,7 +213,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         fanLoopOutput: Int,
         config: HyperStatSplitCpuConfiguration
     ): Int {
-        val isCompressorAvailable = config.isCompressorStagesAvailable()
+        val isCompressorAvailable = config.isCompressorAvailable()
         var voltage = getPercentFromVolt(getHeatingStateActivated().roundToInt())
 
         if (isCompressorAvailable) {
@@ -564,7 +563,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
                         doAnalogStagedFanAction(
                             config.getFanConfiguration(port),
                             basicSettings.fanMode,
-                            HyperStatSplitAssociationUtil.isAnyRelayAssociatedToFanEnabled(config),
+                            config.isAnyRelayEnabledAndMapped(config, CpuRelayType.FAN_ENABLED.name),
                             basicSettings.conditioningMode,
                             fanLoopOutput,
                             analogOutStages,
@@ -615,7 +614,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
 
     private fun runTitle24Rule(config: HyperStatSplitCpuConfiguration) {
         resetFanStatus()
-        fanEnabledStatus = (HyperStatSplitAssociationUtil.isAnyRelayAssociatedToFanEnabled(config))
+        fanEnabledStatus = config.isAnyRelayEnabledAndMapped(config, CpuRelayType.FAN_ENABLED.name)
         when (HyperStatSplitAssociationUtil.getLowestFanStage(config)) {
             CpuRelayType.FAN_LOW_SPEED -> lowestStageFanLow = true
             CpuRelayType.FAN_MEDIUM_SPEED -> lowestStageFanMedium = true

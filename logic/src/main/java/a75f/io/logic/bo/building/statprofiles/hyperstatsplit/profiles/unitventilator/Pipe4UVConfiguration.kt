@@ -31,6 +31,17 @@ class Pipe4UVConfiguration(
             Collections.addAll(addValueConfig(analogOut4Voltage, this))
         }
     }
+
+    override fun isCoolingAvailable(): Boolean {
+        return (isAnyRelayEnabledAndMapped(this, Pipe4UVRelayControls.COOLING_WATER_VALVE.name)
+                || isAnyAnalogEnabledAndMapped(this, Pipe4UvAnalogOutControls.COOLING_WATER_MODULATING_VALVE.name
+        ))
+    }
+    override fun isHeatingAvailable(): Boolean {
+        return (isAnyRelayEnabledAndMapped(this, Pipe4UVRelayControls.HEATING_WATER_VALVE.name) || isAnyAuxHeatingStageMapped()
+                || isAnyAnalogEnabledAndMapped(this, Pipe4UvAnalogOutControls.HEATING_WATER_MODULATING_VALVE.name))
+    }
+
     override fun getDefaultConfiguration(): UnitVentilatorConfiguration {
         var config = super.getDefaultConfiguration()
         config = config as Pipe4UVConfiguration
@@ -97,7 +108,7 @@ class Pipe4UVConfiguration(
         (enabled.enabled && association.associationVal == Pipe4UVRelayControls.EXTERNALLY_MAPPED.ordinal)
 
     private  fun isAnalogOutExternallyMapped(enabled: EnableConfig,association: AssociationConfig) =
-        (enabled.enabled && association.associationVal == Pipe4UVRelayControls.EXTERNALLY_MAPPED.ordinal)
+        (enabled.enabled && association.associationVal == Pipe4UvAnalogOutControls.EXTERNALLY_MAPPED.ordinal)
 
     private fun getPortType(
         association: AssociationConfig,
@@ -358,7 +369,7 @@ class Pipe4UVConfiguration(
     /**
      * Add all value configs to the list
      */
-    fun addValueConfig(
+    private fun addValueConfig(
         analogConfig: AnalogOutVoltage, list: MutableList<ValueConfig>
     ): MutableList<ValueConfig> {
         return list.apply {
@@ -428,85 +439,13 @@ class Pipe4UVConfiguration(
     }
 
     private fun isAnyRelayMappedToFanLowVentilation(): Boolean {
-        return isAnyRelayEnabledAndMapped(Pipe4UVRelayControls.FAN_LOW_SPEED_VENTILATION)
-    }
-
-    fun isAnyCoolingPortMappedInRelayOrAO(): Boolean {
-        return isAnyRelayEnabledAndMapped(Pipe4UVRelayControls.COOLING_WATER_VALVE) || isAnyAnalogEnabledAndMapped(
-            Pipe4UvAnalogOutControls.COOLING_WATER_MODULATING_VALVE
-        )
-    }
-
-    fun isAnyHeatingPortMappedInRelayOrAO(): Boolean {
-        return isAnyRelayEnabledAndMapped(Pipe4UVRelayControls.HEATING_WATER_VALVE) || isAnyAuxHeatingStageMapped() ||
-                isAnyAnalogEnabledAndMapped(Pipe4UvAnalogOutControls.HEATING_WATER_MODULATING_VALVE)
+        return isAnyRelayEnabledAndMapped(this,Pipe4UVRelayControls.FAN_LOW_SPEED_VENTILATION.name)
     }
 
     private fun isAnyAuxHeatingStageMapped(): Boolean {
-        return isAnyRelayEnabledAndMapped(Pipe4UVRelayControls.AUX_HEATING_STAGE1) || isAnyRelayEnabledAndMapped(
-            Pipe4UVRelayControls.AUX_HEATING_STAGE2
-        )
+        return isAnyRelayEnabledAndMapped(this,Pipe4UVRelayControls.AUX_HEATING_STAGE1.name)
+                || isAnyRelayEnabledAndMapped(this,Pipe4UVRelayControls.AUX_HEATING_STAGE2.name)
     }
-
-
-    fun isAnyAnalogEnabledAndMapped(mapping: Pipe4UvAnalogOutControls): Boolean {
-        return getAnalogEnabledAssociations().any { (enabled, type) -> enabled && type == mapping.ordinal }
-    }
-
-    fun isAnyRelayEnabledAndMapped(mapping: Pipe4UVRelayControls): Boolean {
-        return getRelayEnabledAssociations().any { (enabled, type) -> enabled && type == mapping.ordinal }
-    }
-
-    private fun getAnalogOutVoltageRange(
-        associationVal: Int,
-        voltage: AnalogOutVoltage
-    ): String {
-        return when (associationVal) {
-            Pipe4UvAnalogOutControls.HEATING_WATER_MODULATING_VALVE.ordinal -> {
-                voltageRange(voltage.hotWaterValveMinVoltage.currentVal.toInt(), voltage.hotWaterValveMaxVoltage.currentVal.toInt())
-            }
-
-            Pipe4UvAnalogOutControls.COOLING_WATER_MODULATING_VALVE.ordinal -> {
-                voltageRange(voltage.coolingWaterValveMinVoltage.currentVal.toInt(), voltage.coolingWaterValveMaxVoltage.currentVal.toInt())
-            }
-
-            Pipe4UvAnalogOutControls.FACE_DAMPER_VALVE.ordinal -> {
-                voltageRange(voltage.faceAndBypassDamperMin.currentVal.toInt(), voltage.faceAndBypassDamperMax.currentVal.toInt())
-            }
-
-            Pipe4UvAnalogOutControls.FAN_SPEED.ordinal -> {
-                voltageRange(voltage.fanMin.currentVal.toInt(), voltage.fanMax.currentVal.toInt())
-            }
-
-            Pipe4UvAnalogOutControls.OAO_DAMPER.ordinal -> {
-                voltageRange(voltage.oaoDamperMinVoltage.currentVal.toInt(), voltage.oaoDamperMaxVoltage.currentVal.toInt())
-            }
-
-            Pipe4UvAnalogOutControls.DCV_MODULATING_DAMPER.ordinal -> {
-                voltageRange(voltage.dcvModulationMinVoltage.currentVal.toInt(), voltage.dcvModulationMaxVoltage.currentVal.toInt())
-            }
-
-            else -> "2-10v"
-        }
-    }
-    private fun voltageRange(min: Int, max: Int) = min.toString()+"-"+max.toString() + "v"
-
-    override fun analogOut1TypeToString(): String {
-        return getAnalogOutVoltageRange(analogOut1Association.associationVal, analogOut1Voltage)
-    }
-
-    override fun analogOut2TypeToString(): String {
-        return getAnalogOutVoltageRange(analogOut2Association.associationVal, analogOut2Voltage)
-    }
-
-    override fun analogOut3TypeToString(): String {
-        return getAnalogOutVoltageRange(analogOut3Association.associationVal, analogOut3Voltage)
-    }
-
-    override fun analogOut4TypeToString(): String {
-        return getAnalogOutVoltageRange(analogOut4Association.associationVal, analogOut4Voltage)
-    }
-
 
     data class AnalogOutVoltage(
         var oaoDamperMinVoltage: ValueConfig, var oaoDamperMaxVoltage: ValueConfig,

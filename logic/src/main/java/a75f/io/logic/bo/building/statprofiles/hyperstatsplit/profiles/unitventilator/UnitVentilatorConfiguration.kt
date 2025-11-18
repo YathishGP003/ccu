@@ -17,9 +17,6 @@ abstract class UnitVentilatorConfiguration(
     lateinit var saTempering: EnableConfig
     abstract fun getActiveConfiguration(): HyperStatSplitConfiguration
 
-    abstract fun getRelayMap(): Map<String, Boolean>
-
-    abstract fun getAnalogMap(): Map<String, Pair<Boolean, String>>
 
     override fun getEnableConfigs(): List<EnableConfig> {
         return super.getEnableConfigs().toMutableList().apply {

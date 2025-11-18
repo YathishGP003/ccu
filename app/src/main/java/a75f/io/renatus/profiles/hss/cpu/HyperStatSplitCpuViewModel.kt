@@ -3,7 +3,6 @@ package a75f.io.renatus.profiles.hss.cpu
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
-import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
@@ -12,23 +11,24 @@ import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getPossibleConditioningModeSettings
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.CpuEconSensorBusTempAssociation
+import a75f.io.logic.bo.building.ZonePriority
+import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getHssProfileFanLevel
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.EconSensorBusTempAssociation
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.UniversalInputs
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuAnalogControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile
+import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
+import a75f.io.logic.bo.building.statprofiles.util.correctSensorBusTempPoints
+import a75f.io.logic.bo.building.statprofiles.util.getCpuPossibleConditioningModeSettings
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleFanMode
+import a75f.io.logic.bo.building.statprofiles.util.mapSensorBusPressureLogicalPoint
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.util.modifyConditioningMode
 import a75f.io.logic.util.modifyFanMode
-import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.correctSensorBusTempPoints
-import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultConditioningMode
-import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultFanMode
-import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus
-import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.mapSensorBusPressureLogicalPoint
-import a75f.io.messaging.handler.HyperstatSplitReconfigurationHandler.Companion.setOutputTypes
+import a75f.io.messaging.handler.setPortConfiguration
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.showToast
@@ -43,7 +43,6 @@ import android.text.Html
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -104,15 +103,12 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
                 saveJob = viewModelScope.launch(highPriorityDispatcher) {
                     CCUHsApi.getInstance().resetCcuReady()
                     setUpHyperStatSplitProfile()
-                    CcuLog.i(Domain.LOG_TAG, "HSS Profile Setup complete")
                     L.saveCCUState()
                     hayStack.syncEntityTree()
                     CCUHsApi.getInstance().setCcuReady()
-                    CcuLog.i(Domain.LOG_TAG, "HSS Profile Pairing complete")
                     withContext(Dispatchers.Main) {
                         context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
                         showToast(context.getString(R.string.hss_config_saved), context)
-                        CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
                         ProgressDialogUtils.hideProgressDialog()
                         pairingCompleteListener.onPairingComplete()
                     }
@@ -158,8 +154,8 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
         if (viewState.value.enableOutsideAirOptimization && (
                 !isAnyAnalogMappedToControl(CpuAnalogControlType.OAO_DAMPER.ordinal) ||
                 !(isAnyUniversalInMapped(UniversalInputs.OUTSIDE_AIR_TEMPERATURE)  || isAnySensorBusMapped(
-                    CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY)) ||
-                !(isAnyUniversalInMapped(UniversalInputs.MIXED_AIR_TEMPERATURE) || isAnySensorBusMapped(CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY))
+                    EconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY)) ||
+                !(isAnyUniversalInMapped(UniversalInputs.MIXED_AIR_TEMPERATURE) || isAnySensorBusMapped(EconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY))
             )
         ) {
             openMissingDialog = true
@@ -167,16 +163,16 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
         }
 
         if (isUniversalInDuplicated(UniversalInputs.OUTSIDE_AIR_TEMPERATURE) ||
-            isSensorBusDuplicated(CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY) ||
-            (isAnyUniversalInMapped(UniversalInputs.OUTSIDE_AIR_TEMPERATURE) && isAnySensorBusMapped(CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY))
+            isSensorBusDuplicated(EconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY) ||
+            (isAnyUniversalInMapped(UniversalInputs.OUTSIDE_AIR_TEMPERATURE) && isAnySensorBusMapped(EconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY))
         ) {
             openDuplicateDialog = true
             return false
         }
 
         if (isUniversalInDuplicated(UniversalInputs.MIXED_AIR_TEMPERATURE) ||
-            isSensorBusDuplicated(CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY) ||
-            (isAnyUniversalInMapped(UniversalInputs.MIXED_AIR_TEMPERATURE) && isAnySensorBusMapped(CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY))
+            isSensorBusDuplicated(EconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY) ||
+            (isAnyUniversalInMapped(UniversalInputs.MIXED_AIR_TEMPERATURE) && isAnySensorBusMapped(EconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY))
         ) {
             openDuplicateDialog = true
             return false
@@ -191,8 +187,8 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
         }
 
         if (isUniversalInDuplicated(UniversalInputs.SUPPLY_AIR_TEMPERATURE) ||
-            isSensorBusDuplicated(CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY) ||
-            (isAnyUniversalInMapped(UniversalInputs.SUPPLY_AIR_TEMPERATURE) && isAnySensorBusMapped(CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY))
+            isSensorBusDuplicated(EconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY) ||
+            (isAnyUniversalInMapped(UniversalInputs.SUPPLY_AIR_TEMPERATURE) && isAnySensorBusMapped(EconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY))
         ) {
             openDuplicateDialog = true
             return false
@@ -229,7 +225,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
         }
 
         if (isAnyAnalogMappedToControl(CpuAnalogControlType.DCV_MODULATING_DAMPER.ordinal)) {
-            if (!(isAnySensorBusMapped(CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY)
+            if (!(isAnySensorBusMapped(EconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY)
                         || isAnyUniversalInMapped(UniversalInputs.MIXED_AIR_TEMPERATURE))) {
                 noMatSensor = true
                 return false
@@ -260,145 +256,68 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
 
     private fun setUpHyperStatSplitProfile() {
         (viewState.value as HyperStatSplitCpuState).updateConfigFromViewState(profileConfiguration as HyperStatSplitCpuConfiguration)
+        profileConfiguration.nodeType = nodeType.name
+        profileConfiguration.nodeAddress = deviceAddress.toInt()
+        profileConfiguration.priority = ZonePriority.NONE.ordinal
 
         val equipBuilder = ProfileEquipBuilder(hayStack)
-        val equipDis = hayStack.siteName + "-cpuecon-" + profileConfiguration.nodeAddress
         val equipId: String
         if (profileConfiguration.isDefault) {
-
-            equipId = addEquipAndPoints(
-                deviceAddress,
-                profileConfiguration,
-                hayStack,
-                equipModel,
-                deviceModel
-            )
-
-            handleNonDefaultConditioningMode(
-                profileConfiguration as HyperStatSplitCpuConfiguration,
-                hayStack
-            )
-
-            handleNonDefaultFanMode(
-                profileConfiguration as HyperStatSplitCpuConfiguration,
-                hayStack
-            )
-
-            CoroutineScope(highPriorityDispatcher).launch {
-                runBlocking {
-
-                    correctSensorBusTempPoints(
-                        profileConfiguration,
-                        hayStack
-                    )
-                    mapSensorBusPressureLogicalPoint(
-                        profileConfiguration,
-                        equipId,
-                        hayStack
-                    )
-                    setOutputTypes(
-                        profileConfiguration,
-                        hayStack
-                    )
-                    setScheduleType(profileConfiguration)
-
-                    initializePrePurgeStatus(
-                        profileConfiguration,
-                        hayStack,
-                        1.0
-                    )
-                    L.ccu().zoneProfiles.add(hssProfile)
-                }
-            }
-
+            equipId = addEquipment(profileConfiguration, equipModel, deviceModel)
+            hssProfile = HyperStatSplitCpuEconProfile(equipId, profileConfiguration.nodeAddress.toShort())
+            L.ccu().zoneProfiles.add(hssProfile)
+            val equip = HsSplitCpuEquip(equipId)
+            setConditioningMode(equip)
+            updateFanMode(false, equip,getHssProfileFanLevel(equip))
         } else {
-            equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, equipDis, true)
+            equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, getEquipDis(), true)
             val entityMapper = EntityMapper(equipModel)
             val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
-            val deviceDis = hayStack.siteName +  "-HSS-" + profileConfiguration.nodeAddress
             CcuLog.i(Domain.LOG_TAG, " updateDeviceAndPoints")
-            deviceBuilder.updateDeviceAndPoints(
-                profileConfiguration,
-                deviceModel,
-                equipId,
-                hayStack.site!!.id,
-                deviceDis
-            )
-
-            handleNonDefaultConditioningMode(
-                profileConfiguration as HyperStatSplitCpuConfiguration,
-                hayStack
-            )
-
-            handleNonDefaultFanMode(
-                profileConfiguration as HyperStatSplitCpuConfiguration,
-                hayStack
-            )
-
-            CoroutineScope(highPriorityDispatcher).launch {
-                runBlocking {
-
-                    correctSensorBusTempPoints(
-                        profileConfiguration,
-                        hayStack
-                    )
-                    mapSensorBusPressureLogicalPoint(
-                        profileConfiguration,
-                        equipId,
-                        hayStack
-                    )
-                    setOutputTypes(
-                        profileConfiguration,
-                        hayStack
-                    )
-                    setScheduleType(profileConfiguration)
-                    initializePrePurgeStatus(
-                        profileConfiguration,
-                        hayStack,
-                        1.0
-                    )
-                }
+            deviceBuilder.updateDeviceAndPoints(profileConfiguration, deviceModel, equipId, hayStack.site!!.id, getDeviceDis())
+            val equip = HsSplitCpuEquip(equipId)
+            updateConditioningMode(equip)
+            updateFanMode(true, equip, getHssProfileFanLevel(equip))
+        }
+        CoroutineScope(highPriorityDispatcher).launch {
+            runBlocking {
+                correctSensorBusTempPoints(profileConfiguration)
+                mapSensorBusPressureLogicalPoint(profileConfiguration, equipId)
             }
         }
         val hssEquip = HsSplitCpuEquip(equipId)
-        val possibleConditioningMode = getPossibleConditioningModeSettings(profileConfiguration as HyperStatSplitCpuConfiguration)
+        profileConfiguration.updateConditioningMode(equipId)
+        profileConfiguration.apply { setPortConfiguration(profileConfiguration.nodeAddress, getRelayMap(), getAnalogMap())  }
+        val possibleConditioningMode = getCpuPossibleConditioningModeSettings(profileConfiguration as HyperStatSplitCpuConfiguration)
         val possibleFanMode = getPossibleFanMode(hssEquip)
         modifyFanMode(possibleFanMode.ordinal,hssEquip.fanOpMode)
         modifyConditioningMode(possibleConditioningMode.ordinal, hssEquip.conditioningMode, allStandaloneProfileConditions)
         DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
     }
 
-    private fun addEquipAndPoints(
-        addr: Short,
-        config: ProfileConfiguration,
-        hayStack: CCUHsApi,
-        equipModel: SeventyFiveFProfileDirective?,
-        deviceModel: SeventyFiveFDeviceDirective?
-    ) : String {
-        requireNotNull(equipModel)
-        requireNotNull(deviceModel)
-        val equipBuilder = ProfileEquipBuilder(hayStack)
-        val equipDis = hayStack.siteName + "-cpuecon-" + config.nodeAddress
-        CcuLog.i(Domain.LOG_TAG, " buildEquipAndPoints ${equipModel.domainName} profileType ${config.profileType}" )
-        val equipId = equipBuilder.buildEquipAndPoints(
-            config, equipModel, hayStack.site!!
-                .id, equipDis
-        )
-        val entityMapper = EntityMapper(equipModel)
-        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
-        val deviceDis = hayStack.siteName +  "-HSS-" + config.nodeAddress
-        CcuLog.i(Domain.LOG_TAG, " buildDeviceAndPoints")
-        deviceBuilder.buildDeviceAndPoints(
-            config,
-            deviceModel,
-            equipId,
-            hayStack.site!!.id,
-            deviceDis
-        )
-        CcuLog.i(Domain.LOG_TAG, " add Profile")
-        hssProfile = HyperStatSplitCpuEconProfile(equipId, addr)
-        return equipId
+    private fun updateConditioningMode(equip: HsSplitCpuEquip) {
+        val currentMode = equip.conditioningMode.readPriorityVal().toInt()
+        val possible = getCpuPossibleConditioningModeSettings(profileConfiguration as HyperStatSplitCpuConfiguration)
+        val offValue = StandaloneConditioningMode.OFF.ordinal.toDouble()
+        if (possible == PossibleConditioningMode.OFF ||
+            (currentMode == StandaloneConditioningMode.AUTO.ordinal &&
+                    (possible == PossibleConditioningMode.HEATONLY || possible == PossibleConditioningMode.COOLONLY)) ||
+            (currentMode == StandaloneConditioningMode.HEAT_ONLY.ordinal && possible == PossibleConditioningMode.COOLONLY) ||
+            (currentMode == StandaloneConditioningMode.COOL_ONLY.ordinal && possible == PossibleConditioningMode.HEATONLY)
+        ) {
+            equip.conditioningMode.writePointValue(offValue)
+        }
+    }
 
+    private fun setConditioningMode(equip: HsSplitCpuEquip) {
+        val possible = getCpuPossibleConditioningModeSettings(profileConfiguration as HyperStatSplitCpuConfiguration)
+        val newMode = when (possible) {
+            PossibleConditioningMode.BOTH -> StandaloneConditioningMode.AUTO
+            PossibleConditioningMode.HEATONLY -> StandaloneConditioningMode.HEAT_ONLY
+            PossibleConditioningMode.COOLONLY -> StandaloneConditioningMode.COOL_ONLY
+            else -> StandaloneConditioningMode.OFF
+        }
+        equip.conditioningMode.writePointValue(newMode.ordinal.toDouble())
     }
 
     override fun hasUnsavedChanges() : Boolean {

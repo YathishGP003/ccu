@@ -51,7 +51,7 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
         return
     }
 
-    val config = getMyStatConfiguration(configPoint.equipRef)?.getActiveConfiguration()
+    val config = getMyStatConfiguration(configPoint.equipRef)
     val equipBuilder = ProfileEquipBuilder(hayStack)
     val deviceModel = ModelLoader.getMyStatDeviceModel() as SeventyFiveFDeviceDirective
     val entityMapper = EntityMapper(model as SeventyFiveFProfileDirective)

@@ -7,7 +7,7 @@ import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.compose.StyledTextView
 import a75f.io.renatus.profiles.hss.HyperStatSplitFragment
 import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.Pipe2UvViewModel
-import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.Pipe4ViewModel
+import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.Pipe4UvViewModel
 import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.UnitVentilatorViewModel
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe2UvViewState
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe4UvViewState
@@ -31,7 +31,7 @@ open class UnitVentilatorFragment : HyperStatSplitFragment() {
 
 
     private fun isPipe4UnitVentilator(): Boolean {
-        return viewModel is Pipe4ViewModel
+        return viewModel is Pipe4UvViewModel
     }
 
     @Composable
@@ -109,7 +109,7 @@ open class UnitVentilatorFragment : HyperStatSplitFragment() {
     fun FanControl(viewModel: UnitVentilatorViewModel, modifier: Modifier = Modifier) {
 
         val key = when(viewModel){
-            is Pipe4ViewModel -> Pipe4UvAnalogOutControls.FAN_SPEED.ordinal
+            is Pipe4UvViewModel -> Pipe4UvAnalogOutControls.FAN_SPEED.ordinal
             is Pipe2UvViewModel -> Pipe2UvAnalogOutControls.FAN_SPEED.ordinal
             else -> { Pipe4UvAnalogOutControls.FAN_SPEED.ordinal}
         }
@@ -127,7 +127,7 @@ open class UnitVentilatorFragment : HyperStatSplitFragment() {
         val isPipe4 = isPipe4UnitVentilator()
         var viewCount :Int
         val key = when (viewModel) {
-            is Pipe4ViewModel -> Pipe4UvAnalogOutControls.FAN_SPEED.ordinal
+            is Pipe4UvViewModel -> Pipe4UvAnalogOutControls.FAN_SPEED.ordinal
             is Pipe2UvViewModel -> Pipe2UvAnalogOutControls.FAN_SPEED.ordinal
             else -> Pipe4UvAnalogOutControls.FAN_SPEED.ordinal
         }
@@ -662,7 +662,7 @@ open class UnitVentilatorFragment : HyperStatSplitFragment() {
     @Composable
     fun FaceAndBypassDamper(viewModel: UnitVentilatorViewModel,modifier: Modifier = Modifier) {
         val key = when(viewModel){
-            is Pipe4ViewModel -> Pipe4UvAnalogOutControls.FACE_DAMPER_VALVE.ordinal
+            is Pipe4UvViewModel -> Pipe4UvAnalogOutControls.FACE_DAMPER_VALVE.ordinal
             is Pipe2UvViewModel -> Pipe2UvAnalogOutControls.FACE_DAMPER_VALVE.ordinal
             else -> { Pipe4UvAnalogOutControls.FACE_DAMPER_VALVE.ordinal}
         }
@@ -771,7 +771,7 @@ open class UnitVentilatorFragment : HyperStatSplitFragment() {
     @Composable
     fun DcvModulationControl(viewModel: UnitVentilatorViewModel,modifier: Modifier = Modifier) {
         val key = when(viewModel){
-            is Pipe4ViewModel -> Pipe4UvAnalogOutControls.DCV_MODULATING_DAMPER.ordinal
+            is Pipe4UvViewModel -> Pipe4UvAnalogOutControls.DCV_MODULATING_DAMPER.ordinal
             is Pipe2UvViewModel -> Pipe2UvAnalogOutControls.DCV_MODULATING_DAMPER.ordinal
             else -> { Pipe4UvAnalogOutControls.DCV_MODULATING_DAMPER.ordinal}
         }
@@ -881,7 +881,7 @@ open class UnitVentilatorFragment : HyperStatSplitFragment() {
     @Composable
     fun OAODamperControl(viewModel: UnitVentilatorViewModel,modifier: Modifier = Modifier) {
         val key = when(viewModel){
-            is Pipe4ViewModel -> Pipe4UvAnalogOutControls.OAO_DAMPER.ordinal
+            is Pipe4UvViewModel -> Pipe4UvAnalogOutControls.OAO_DAMPER.ordinal
             is Pipe2UvViewModel -> Pipe2UvAnalogOutControls.OAO_DAMPER.ordinal
             else -> { Pipe4UvAnalogOutControls.OAO_DAMPER.ordinal}
         }

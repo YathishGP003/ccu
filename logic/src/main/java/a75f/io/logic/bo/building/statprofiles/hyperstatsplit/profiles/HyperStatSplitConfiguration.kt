@@ -11,6 +11,7 @@ import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.HyperStatSplitEquip
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuAnalogControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
@@ -130,6 +131,14 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
      * Only configs which are configured via UI.
      *
      */
+
+    abstract fun isCoolingAvailable(): Boolean
+    abstract fun isHeatingAvailable(): Boolean
+
+    abstract fun getRelayMap(): Map<String, Boolean>
+
+    abstract fun getAnalogMap(): Map<String, Pair<Boolean, String>>
+
     override fun getEnableConfigs(): List<EnableConfig> {
         return mutableListOf<EnableConfig>().apply {
             add(autoAway)
@@ -789,25 +798,9 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
         )
     }
 
-    open fun analogOut1TypeToString(): String {
-        return "0-10v"
-    }
-
-    open fun analogOut2TypeToString(): String {
-        return "0-10v"
-    }
-
-    open fun analogOut3TypeToString(): String {
-        return "0-10v"
-    }
-
-    open fun analogOut4TypeToString(): String {
-        return "0-10v"
-    }
-
     abstract fun getHighestFanStageCount(): Int
 
-    fun getRelayEnabledAssociations(): List<Pair<Boolean, Int>> = buildList {
+    private fun getRelayEnabledAssociations(): List<Pair<Boolean, Int>> = buildList {
         listOf(
             relay1Enabled to relay1Association,
             relay2Enabled to relay2Association,
@@ -822,7 +815,7 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
         }
     }
 
-    fun getAnalogEnabledAssociations(): List<Pair<Boolean, Int>> = buildList {
+    private fun getAnalogEnabledAssociations(): List<Pair<Boolean, Int>> = buildList {
         listOf(
             analogOut1Enabled to analogOut1Association,
             analogOut2Enabled to analogOut2Association,
@@ -831,6 +824,15 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
         ).forEach { (enable, association) ->
             if (enable.enabled) add(true to association.associationVal)
         }
+    }
+
+    fun isAnySensorBusMapped(
+        config: HyperStatSplitConfiguration,
+        type: EconSensorBusTempAssociation
+    ): Boolean {
+        return (config.address0Enabled.enabled && config.address0SensorAssociation.temperatureAssociation.associationVal == type.ordinal) ||
+                (config.address1Enabled.enabled && config.address1SensorAssociation.temperatureAssociation.associationVal == type.ordinal) ||
+                (config.address2Enabled.enabled && config.address2SensorAssociation.temperatureAssociation.associationVal == type.ordinal)
     }
 
     /**
@@ -848,6 +850,36 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
         relayControl: String = HyperStatSplitControlType.FAN_ENABLED.name
     ) = isAnyRelayEnabledAndMapped(config, relayControl)
 
+
+    fun isAnyAnalogEnabledAndMapped(
+        config: HyperStatSplitConfiguration,
+        analogType: String
+    ): Boolean {
+        return when (config) {
+            is Pipe4UVConfiguration -> {
+                val target = Pipe4UvAnalogOutControls.valueOf(analogType)
+                config.getAnalogEnabledAssociations().any { (enabled, type) ->
+                    enabled && type == target.ordinal
+                }
+            }
+
+            is HyperStatSplitCpuConfiguration -> {
+                val target = CpuAnalogControlType.valueOf(analogType)
+                config.getAnalogEnabledAssociations().any { (enabled, type) ->
+                    enabled && type == target.ordinal
+                }
+            }
+
+            is Pipe2UVConfiguration -> {
+                val target = Pipe2UvAnalogOutControls.valueOf(analogType)
+                config.getAnalogEnabledAssociations().any { (enabled, type) ->
+                    enabled && type == target.ordinal
+                }
+            }
+
+            else -> false
+        }
+    }
 
     fun isAnyRelayEnabledAndMapped(
         config: HyperStatSplitConfiguration,
@@ -906,6 +938,21 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
             }
         }
     }
+
+    fun updateConditioningMode(equipId: String) {
+        val equip = HyperStatSplitEquip(equipId)
+        val isCoolingAvailable = isCoolingAvailable()
+        val isHeatingAvailable = isHeatingAvailable()
+        equip.apply {
+            if (!isCoolingAvailable && !isHeatingAvailable) {
+                conditioningMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
+            } else if (!isCoolingAvailable) {
+                conditioningMode.writePointValue(StandaloneConditioningMode.HEAT_ONLY.ordinal.toDouble())
+            } else if (!isHeatingAvailable) {
+                conditioningMode.writePointValue(StandaloneConditioningMode.COOL_ONLY.ordinal.toDouble())
+            }
+        }
+    }
 }
 
     /// this enum is used only  for string reference
@@ -941,7 +988,7 @@ enum class CpuSensorBusType {
     SUPPLY_AIR, MIXED_AIR, OUTSIDE_AIR
 }
 
-enum class CpuEconSensorBusTempAssociation {
+enum class EconSensorBusTempAssociation {
    SUPPLY_AIR_TEMPERATURE_HUMIDITY,
    MIXED_AIR_TEMPERATURE_HUMIDITY,
    OUTSIDE_AIR_TEMPERATURE_HUMIDITY

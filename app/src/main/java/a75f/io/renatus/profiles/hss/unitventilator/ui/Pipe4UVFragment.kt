@@ -8,9 +8,8 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UvAnalogOutControls
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.composables.CancelDialog
-import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.profiles.OnPairingCompleteListener
-import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.Pipe4ViewModel
+import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.Pipe4UvViewModel
 import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.UnitVentilatorViewModel
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe4UvViewState
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
@@ -19,19 +18,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
@@ -43,7 +36,7 @@ import kotlinx.coroutines.withContext
 
 class Pipe4UVFragment : UnitVentilatorFragment(), OnPairingCompleteListener {
 
-    override val viewModel: Pipe4ViewModel by viewModels()
+    override val viewModel: Pipe4UvViewModel by viewModels()
 
     companion object {
         val ID: String = Pipe4UVFragment::class.java.simpleName
@@ -159,7 +152,7 @@ class Pipe4UVFragment : UnitVentilatorFragment(), OnPairingCompleteListener {
     @Composable
     fun CoolingControl(viewModel: UnitVentilatorViewModel, modifier: Modifier = Modifier) {
         val key = when(viewModel){
-            is Pipe4ViewModel -> Pipe4UvAnalogOutControls.COOLING_WATER_MODULATING_VALVE.ordinal
+            is Pipe4UvViewModel -> Pipe4UvAnalogOutControls.COOLING_WATER_MODULATING_VALVE.ordinal
             else -> { Pipe4UvAnalogOutControls.COOLING_WATER_MODULATING_VALVE.ordinal}
         }
         Column(modifier = modifier) {
@@ -258,7 +251,7 @@ class Pipe4UVFragment : UnitVentilatorFragment(), OnPairingCompleteListener {
     fun HeatingControl(viewModel: UnitVentilatorViewModel, modifier: Modifier = Modifier) {
 
         val key = when(viewModel){
-            is Pipe4ViewModel -> Pipe4UvAnalogOutControls.HEATING_WATER_MODULATING_VALVE.ordinal
+            is Pipe4UvViewModel -> Pipe4UvAnalogOutControls.HEATING_WATER_MODULATING_VALVE.ordinal
             else -> { Pipe4UvAnalogOutControls.HEATING_WATER_MODULATING_VALVE.ordinal}
         }
         Column(modifier = modifier) {

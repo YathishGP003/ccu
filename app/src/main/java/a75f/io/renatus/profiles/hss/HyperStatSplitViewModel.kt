@@ -6,12 +6,18 @@ import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender
 import a75f.io.device.serial.MessageType
 import a75f.io.domain.api.Domain.getListByDomainName
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.config.ProfileConfiguration
+import a75f.io.domain.equips.HyperStatSplitEquip
+import a75f.io.domain.logic.DeviceBuilder
+import a75f.io.domain.logic.EntityMapper
+import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.CpuEconSensorBusTempAssociation
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.EconSensorBusTempAssociation
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitProfile
@@ -25,8 +31,10 @@ import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventil
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVRelayControls
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UvAnalogOutControls
+import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
+import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.getDomainHyperStatSplitDevice
-import a75f.io.logic.getSchedule
+import a75f.io.logic.bo.building.statprofiles.util.getPossibleFanModeSettings
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.formattedToastMessage
@@ -42,7 +50,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -106,6 +113,19 @@ open class HyperStatSplitViewModel : ViewModel() {
         floorRef = bundle.getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
         profileType = ProfileType.values()[bundle.getInt(FragmentCommonBundleArgs.PROFILE_TYPE)]
         nodeType = NodeType.values()[bundle.getInt(FragmentCommonBundleArgs.NODE_TYPE)]
+    }
+
+
+    fun getEquipDis() = "${hayStack.siteName}-${equipModel.name}-${profileConfiguration.nodeAddress}"
+    fun getDeviceDis() = "${hayStack.siteName}-${deviceModel.name}-${profileConfiguration.nodeAddress}"
+
+    fun addEquipment(config: ProfileConfiguration, equipModel: SeventyFiveFProfileDirective, deviceModel: SeventyFiveFDeviceDirective): String {
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val entityMapper = EntityMapper(equipModel)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+        val equipId = equipBuilder.buildEquipAndPoints(config, equipModel, hayStack.site!!.id, getEquipDis())
+        deviceBuilder.buildDeviceAndPoints(config, deviceModel, equipId, hayStack.site!!.id, getDeviceDis())
+        return equipId
     }
 
     /**
@@ -393,7 +413,7 @@ open class HyperStatSplitViewModel : ViewModel() {
         return nInstances > 1
     }
 
-     fun isAnySensorBusMapped(type: CpuEconSensorBusTempAssociation): Boolean {
+     fun isAnySensorBusMapped(type: EconSensorBusTempAssociation): Boolean {
         return (
                 (this.viewState.value.sensorAddress0.enabled && this.viewState.value.sensorAddress0.association == type.ordinal) ||
                         (this.viewState.value.sensorAddress1.enabled && this.viewState.value.sensorAddress1.association == type.ordinal) ||
@@ -401,7 +421,7 @@ open class HyperStatSplitViewModel : ViewModel() {
                 )
     }
 
-     fun isSensorBusDuplicated(type: CpuEconSensorBusTempAssociation): Boolean {
+     fun isSensorBusDuplicated(type: EconSensorBusTempAssociation): Boolean {
         var nInstances = 0
 
         if (this.viewState.value.sensorAddress0.enabled && this.viewState.value.sensorAddress0.association == type.ordinal) nInstances++
@@ -498,14 +518,85 @@ open class HyperStatSplitViewModel : ViewModel() {
         }
     }
 
-     fun setScheduleType(config: HyperStatSplitConfiguration) {
-        hayStack.readEntity("point and domainName == \"" + DomainName.scheduleType + "\" and group == \"" + config.nodeAddress + "\"")["id"]?.let { scheduleTypeId ->
-            val roomSchedule = getSchedule(zoneRef, floorRef)
-            if(roomSchedule.isZoneSchedule) {
-                hayStack.writeDefaultValById(scheduleTypeId.toString(), 1.0)
-            } else {
-                hayStack.writeDefaultValById(scheduleTypeId.toString(), 2.0)
+    fun updateFanMode(isReconfigure: Boolean, equip: HyperStatSplitEquip, fanLevel: Int) {
+        fun resetFanToOff() = equip.fanOpMode.writePointValue(StandaloneFanStage.OFF.ordinal.toDouble())
+        val possibleFanMode = getPossibleFanModeSettings(fanLevel)
+        val cacheStorage = FanModeCacheStorage.getHyperStatSplitFanModeCache()
+        if (possibleFanMode == PossibleFanMode.OFF) {
+            resetFanToOff()
+            cacheStorage.removeFanModeFromCache(equip.equipRef)
+            return
+        }
+        if (possibleFanMode == PossibleFanMode.AUTO) {
+            cacheStorage.removeFanModeFromCache(equip.equipRef)
+            equip.fanOpMode.writePointValue(StandaloneFanStage.AUTO.ordinal.toDouble())
+            return
+        }
+
+
+        if (isReconfigure) {
+            val currentFanMode = StandaloneFanStage.values()[equip.fanOpMode.readPriorityVal().toInt()]
+            fun isWithinLow(): Boolean {
+                return (currentFanMode.ordinal in listOf(
+                    StandaloneFanStage.LOW_ALL_TIME.ordinal,
+                    StandaloneFanStage.LOW_OCC.ordinal,
+                    StandaloneFanStage.LOW_CUR_OCC.ordinal))
             }
+            fun isWithinMedium(): Boolean {
+                return (currentFanMode.ordinal in listOf(
+                    StandaloneFanStage.MEDIUM_ALL_TIME.ordinal,
+                    StandaloneFanStage.MEDIUM_OCC.ordinal,
+                    StandaloneFanStage.MEDIUM_CUR_OCC.ordinal))
+            }
+            fun isWithinHigh(): Boolean {
+                return (currentFanMode.ordinal in listOf(
+                    StandaloneFanStage.HIGH_ALL_TIME.ordinal,
+                    StandaloneFanStage.HIGH_OCC.ordinal,
+                    StandaloneFanStage.HIGH_CUR_OCC.ordinal))
+            }
+            if (currentFanMode != StandaloneFanStage.AUTO) {
+                when (possibleFanMode) {
+                    PossibleFanMode.LOW -> {
+                        if (!isWithinLow()) {
+                            resetFanToOff()
+                        }
+                    }
+
+                    PossibleFanMode.MED -> {
+                        if (!isWithinMedium()) {
+                            resetFanToOff()
+                        }
+                    }
+
+                    PossibleFanMode.HIGH -> {
+                        if (!isWithinHigh()) {
+                            resetFanToOff()
+                        }
+                    }
+
+                    PossibleFanMode.LOW_MED -> {
+                        if (isWithinHigh()) {
+                            resetFanToOff()
+                        }
+                    }
+
+                    PossibleFanMode.LOW_HIGH -> {
+                        if (isWithinMedium()) {
+                            resetFanToOff()
+                        }
+                    }
+
+                    PossibleFanMode.MED_HIGH -> {
+                        if (isWithinLow()) {
+                            resetFanToOff()
+                        }
+                    }
+
+                    else -> {}
+                }
+            }
+        } else {
+            equip.fanOpMode.writePointValue(StandaloneFanStage.AUTO.ordinal.toDouble())
         }
     }
 

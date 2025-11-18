@@ -5,11 +5,13 @@ import a75f.io.device.HyperStat
 import a75f.io.device.mesh.hyperstat.HyperStatMessageGenerator
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender
 import a75f.io.device.mesh.hyperstat.getHyperStatDomainDevice
-import a75f.io.device.mesh.mystat.getMyStatDomainDevice
 import a75f.io.device.serial.MessageType
 import a75f.io.domain.api.Domain.getStringFormat
-import a75f.io.domain.api.DomainName
+import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
+import a75f.io.domain.logic.DeviceBuilder
+import a75f.io.domain.logic.EntityMapper
+import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
@@ -26,7 +28,6 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configur
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
-import a75f.io.logic.bo.haystack.device.ControlMote.getAnalogOut
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.formattedToastMessage
@@ -103,6 +104,15 @@ open class HyperStatViewModel(application: Application) : AndroidViewModel(appli
     }
 
     open fun saveConfiguration() {}
+
+    fun addEquipment(config: ProfileConfiguration, equipModel: SeventyFiveFProfileDirective, deviceModel: SeventyFiveFDeviceDirective): String {
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val entityMapper = EntityMapper(equipModel)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+        val equipId = equipBuilder.buildEquipAndPoints(config, equipModel, hayStack.site!!.id, getEquipDis())
+        deviceBuilder.buildDeviceAndPoints(config, deviceModel, equipId, hayStack.site!!.id, getDeviceDis())
+        return equipId
+    }
 
     fun getAllowedValues(domainName: String, model: SeventyFiveFProfileDirective): List<Option> {
         val pointDef = getPointByDomainName(model, domainName) ?: return emptyList()

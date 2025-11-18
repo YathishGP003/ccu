@@ -32,7 +32,7 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 
 
-fun reconfigureHSV2(msgObject: JsonObject, configPoint: Point) {
+fun reconfigureHyperstatEquips(msgObject: JsonObject, configPoint: Point) {
 
     val hayStack = CCUHsApi.getInstance()
     
@@ -44,7 +44,7 @@ fun reconfigureHSV2(msgObject: JsonObject, configPoint: Point) {
         return
     }
 
-    val config = getHsConfiguration(configPoint.equipRef)?.getActiveConfiguration()
+    val config = getHsConfiguration(configPoint.equipRef)
     val equipBuilder = ProfileEquipBuilder(hayStack)
     val deviceModel = ModelLoader.getHyperStatDeviceModel() as SeventyFiveFDeviceDirective
     val entityMapper = EntityMapper(model as SeventyFiveFProfileDirective)
@@ -201,7 +201,7 @@ private fun writePointFromJson(configPoint: Point, msgObject: JsonObject, haySta
             hayStack.writeHisValById(configPoint.id, HSUtil.getPriorityVal(configPoint.id))
             return
         }
-        val durationDiff = returnDurationDiff(msgObject);
+        val durationDiff = returnDurationDiff(msgObject)
         hayStack.writePointLocal(configPoint.id, level, who, value.toDouble(), durationDiff)
         hayStack.writeHisValById(configPoint.id, value.toDouble())
         CcuLog.d(

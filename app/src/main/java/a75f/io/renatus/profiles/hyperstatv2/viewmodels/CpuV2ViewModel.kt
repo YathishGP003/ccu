@@ -23,6 +23,8 @@ import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.logic.util.modifyConditioningMode
+import a75f.io.logic.util.modifyFanMode
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.hyperstatv2.util.HyperStatViewStateUtil
@@ -30,15 +32,12 @@ import a75f.io.renatus.profiles.hyperstatv2.viewstates.CpuViewState
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.HyperStatV2ViewState
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
-import a75f.io.logic.util.modifyConditioningMode
-import a75f.io.logic.util.modifyFanMode
 import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -105,7 +104,6 @@ class CpuV2ViewModel(application: Application) : HyperStatViewModel(application)
         }
     }
 
-
     private fun setUpCpuProfile() {
         HyperStatViewStateUtil.cpuStateToConfig(viewState.value as CpuViewState, profileConfiguration as CpuConfiguration)
         profileConfiguration.nodeType = nodeType.name
@@ -145,7 +143,6 @@ class CpuV2ViewModel(application: Application) : HyperStatViewModel(application)
     }
 
     private fun setConditioningMode(equip: CpuV2Equip) {
-
         val possible = getPossibleConditionMode(profileConfiguration)
         var newMode = StandaloneConditioningMode.OFF
         if (possible == PossibleConditioningMode.BOTH) newMode = StandaloneConditioningMode.AUTO
@@ -158,35 +155,16 @@ class CpuV2ViewModel(application: Application) : HyperStatViewModel(application)
         val currentMode = equip.conditioningMode.readPriorityVal().toInt()
         val possible = getPossibleConditionMode(profileConfiguration)
 
-        if (possible == PossibleConditioningMode.OFF) {
-            equip.conditioningMode.writePointValue(PossibleConditioningMode.OFF.ordinal.toDouble())
-            return
-        }
+        val offValue = StandaloneConditioningMode.OFF.ordinal.toDouble()
 
-        if(currentMode == StandaloneConditioningMode.AUTO.ordinal
-                && (possible == PossibleConditioningMode.HEATONLY || possible == PossibleConditioningMode.COOLONLY)) {
-            equip.conditioningMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
-            return
+        if (possible == PossibleConditioningMode.OFF ||
+            (currentMode == StandaloneConditioningMode.AUTO.ordinal &&
+                    (possible == PossibleConditioningMode.HEATONLY || possible == PossibleConditioningMode.COOLONLY)) ||
+            (currentMode == StandaloneConditioningMode.HEAT_ONLY.ordinal && possible == PossibleConditioningMode.COOLONLY) ||
+            (currentMode == StandaloneConditioningMode.COOL_ONLY.ordinal && possible == PossibleConditioningMode.HEATONLY)
+        ) {
+            equip.conditioningMode.writePointValue(offValue)
         }
-
-        if (currentMode == StandaloneConditioningMode.HEAT_ONLY.ordinal && possible == PossibleConditioningMode.COOLONLY) {
-            equip.conditioningMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
-            return
-        }
-
-        if (currentMode == StandaloneConditioningMode.COOL_ONLY.ordinal && possible == PossibleConditioningMode.HEATONLY) {
-            equip.conditioningMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
-            return
-        }
-    }
-
-    private fun addEquipment(config: CpuConfiguration, equipModel: SeventyFiveFProfileDirective, deviceModel: SeventyFiveFDeviceDirective): String {
-        val equipBuilder = ProfileEquipBuilder(hayStack)
-        val entityMapper = EntityMapper(equipModel)
-        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
-        val equipId = equipBuilder.buildEquipAndPoints(config, equipModel, hayStack.site!!.id, getEquipDis())
-        deviceBuilder.buildDeviceAndPoints(config, deviceModel, equipId, hayStack.site!!.id, getDeviceDis())
-        return equipId
     }
 
     fun isAnyRelayMappedToStage(mapping: HsCpuRelayMapping): Boolean {

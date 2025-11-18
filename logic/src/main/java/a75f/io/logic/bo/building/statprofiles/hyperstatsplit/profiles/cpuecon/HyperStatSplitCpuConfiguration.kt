@@ -3,12 +3,13 @@ package a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig
+import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ValueConfig
-import a75f.io.domain.devices.HyperStatDevice
 import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
+import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
 import java.util.Collections
@@ -332,144 +333,112 @@ class HyperStatSplitCpuConfiguration (nodeAddress: Int, nodeType: String, priori
                 "\nanalogOut4Voltage $analogOut4Voltage"
     }
 
-    override fun analogOut1TypeToString(): String {
-        return when (analogOut1Association.associationVal) {
-            CpuAnalogControlType.COOLING.ordinal -> {
-                analogOut1Voltage.coolingMinVoltage.currentVal.toInt().toString() + "-" + analogOut1Voltage.coolingMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.HEATING.ordinal -> {
-                analogOut1Voltage.heatingMinVoltage.currentVal.toInt().toString() + "-" + analogOut1Voltage.heatingMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.LINEAR_FAN.ordinal -> {
-                analogOut1Voltage.linearFanMinVoltage.currentVal.toInt().toString() + "-" + analogOut1Voltage.linearFanMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.OAO_DAMPER.ordinal -> {
-                analogOut1Voltage.oaoDamperMinVoltage.currentVal.toInt().toString() + "-" + analogOut1Voltage.oaoDamperMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.RETURN_DAMPER.ordinal -> {
-                analogOut1Voltage.returnDamperMinVoltage.currentVal.toInt().toString() + "-" + analogOut1Voltage.returnDamperMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.COMPRESSOR_SPEED.ordinal -> {
-                analogOut1Voltage.compressorMinVoltage.currentVal.toInt().toString() + "-" + analogOut1Voltage.compressorMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.DCV_MODULATING_DAMPER.ordinal -> {
-                analogOut1Voltage.dcvModulationMinVoltage.currentVal.toInt().toString() + "-" + analogOut1Voltage.dcvModulationMaxVoltage.currentVal.toInt().toString() + "v"
-            }
+    fun isCompressorAvailable(): Boolean {
+        return (isAnyRelayEnabledAndMapped(this, CpuRelayType.COMPRESSOR_STAGE1.name)
+                || isAnyRelayEnabledAndMapped(this, CpuRelayType.COMPRESSOR_STAGE2.name)
+                || isAnyRelayEnabledAndMapped(this, CpuRelayType.COMPRESSOR_STAGE3.name)
+                || isAnyAnalogEnabledAndMapped(this, CpuAnalogControlType.COMPRESSOR_SPEED.name)
+                )
+    }
+    override fun isCoolingAvailable(): Boolean {
+        return (isAnyRelayEnabledAndMapped(this, CpuRelayType.COOLING_STAGE1.name)
+                || isAnyRelayEnabledAndMapped(this, CpuRelayType.COOLING_STAGE2.name)
+                || isAnyRelayEnabledAndMapped(this, CpuRelayType.COOLING_STAGE2.name)
+                || isAnyAnalogEnabledAndMapped(this, CpuAnalogControlType.COOLING.name)
+                || isCompressorAvailable()
+                )
+    }
 
-            else -> super.analogOut1TypeToString()
+    override fun isHeatingAvailable(): Boolean {
+        return (isAnyRelayEnabledAndMapped(this, CpuRelayType.HEATING_STAGE1.name)
+                || isAnyRelayEnabledAndMapped(this, CpuRelayType.HEATING_STAGE2.name)
+                || isAnyRelayEnabledAndMapped(this, CpuRelayType.HEATING_STAGE3.name)
+                || isAnyAnalogEnabledAndMapped(this, CpuAnalogControlType.HEATING.name)
+                || isCompressorAvailable()
+                )
+    }
+
+
+
+    override fun getRelayMap(): Map<String, Boolean> {
+        val relays = mutableMapOf<String, Boolean>()
+        relays[DomainName.relay1] = isRelayExternalMapped(relay1Enabled,relay1Association)
+        relays[DomainName.relay2] = isRelayExternalMapped(relay2Enabled,relay2Association)
+        relays[DomainName.relay3] = isRelayExternalMapped(relay3Enabled,relay3Association)
+        relays[DomainName.relay4] = isRelayExternalMapped(relay4Enabled,relay4Association)
+        relays[DomainName.relay5] = isRelayExternalMapped(relay5Enabled,relay5Association)
+        relays[DomainName.relay6] = isRelayExternalMapped(relay6Enabled,relay6Association)
+        relays[DomainName.relay7] = isRelayExternalMapped(relay7Enabled,relay7Association)
+        relays[DomainName.relay8] = isRelayExternalMapped(relay8Enabled,relay8Association)
+        return relays
+    }
+
+    override fun getAnalogMap(): Map<String, Pair<Boolean, String>> {
+        val analogOuts = mutableMapOf<String, Pair<Boolean, String>>()
+        analogOuts[DomainName.analog1Out] = Pair(isAnalogOutExternallyMapped(analogOut1Enabled,analogOut1Association), analogType(analogOut1Enabled))
+        analogOuts[DomainName.analog2Out] = Pair(isAnalogOutExternallyMapped(analogOut2Enabled,analogOut2Association), analogType(analogOut2Enabled))
+        analogOuts[DomainName.analog3Out] = Pair(isAnalogOutExternallyMapped(analogOut3Enabled,analogOut3Association), analogType(analogOut3Enabled))
+        analogOuts[DomainName.analog4Out] = Pair(isAnalogOutExternallyMapped(analogOut4Enabled,analogOut4Association), analogType(analogOut4Enabled))
+        return analogOuts
+    }
+
+    private fun analogType(analogOutPort : EnableConfig):String{
+        return when(analogOutPort) {
+            analogOut1Enabled -> getPortType(analogOut1Association, analogOut1Voltage)
+            analogOut2Enabled -> getPortType(analogOut2Association, analogOut2Voltage)
+            analogOut3Enabled -> getPortType(analogOut3Association, analogOut3Voltage)
+            analogOut4Enabled -> getPortType(analogOut4Association, analogOut4Voltage)
+            else -> "2-10v"
         }
     }
 
-    override fun analogOut2TypeToString(): String {
-        return when (analogOut2Association.associationVal) {
+    private fun getPortType(
+        association: AssociationConfig,
+        minMaxConfig: AnalogOutVoltage
+    ): String {
+        val portType = when (association.associationVal) {
             CpuAnalogControlType.COOLING.ordinal -> {
-                analogOut2Voltage.coolingMinVoltage.currentVal.toInt().toString() + "-" + analogOut2Voltage.coolingMaxVoltage.currentVal.toInt().toString() + "v"
+                "${minMaxConfig.coolingMinVoltage.currentVal.toInt()}-${minMaxConfig.coolingMaxVoltage.currentVal.toInt()}v"
             }
+
             CpuAnalogControlType.HEATING.ordinal -> {
-                analogOut2Voltage.heatingMinVoltage.currentVal.toInt().toString() + "-" + analogOut2Voltage.heatingMaxVoltage.currentVal.toInt().toString() + "v"
+                "${minMaxConfig.heatingMinVoltage.currentVal.toInt()}-${minMaxConfig.heatingMaxVoltage.currentVal.toInt()}v"
             }
+
             CpuAnalogControlType.LINEAR_FAN.ordinal -> {
-                analogOut2Voltage.linearFanMinVoltage.currentVal.toInt().toString() + "-" + analogOut2Voltage.linearFanMaxVoltage.currentVal.toInt().toString() + "v"
+                "${minMaxConfig.linearFanMinVoltage.currentVal.toInt()}-${minMaxConfig.linearFanMaxVoltage.currentVal.toInt()}v"
             }
+
             CpuAnalogControlType.OAO_DAMPER.ordinal -> {
-                analogOut2Voltage.oaoDamperMinVoltage.currentVal.toInt().toString() + "-" + analogOut2Voltage.oaoDamperMaxVoltage.currentVal.toInt().toString() + "v"
+                "${minMaxConfig.oaoDamperMinVoltage.currentVal.toInt()}-${minMaxConfig.oaoDamperMaxVoltage.currentVal.toInt()}v"
             }
+
             CpuAnalogControlType.RETURN_DAMPER.ordinal -> {
-                analogOut2Voltage.returnDamperMinVoltage.currentVal.toInt().toString() + "-" + analogOut2Voltage.returnDamperMaxVoltage.currentVal.toInt().toString() + "v"
+                "${minMaxConfig.returnDamperMinVoltage.currentVal.toInt()}-${minMaxConfig.returnDamperMaxVoltage.currentVal.toInt()}v"
+
             }
             CpuAnalogControlType.COMPRESSOR_SPEED.ordinal -> {
-                analogOut2Voltage.compressorMinVoltage.currentVal.toInt().toString() + "-" + analogOut2Voltage.compressorMaxVoltage.currentVal.toInt().toString() + "v"
+                "${minMaxConfig.compressorMinVoltage.currentVal.toInt()}-${minMaxConfig.compressorMaxVoltage.currentVal.toInt()}v"
             }
+
             CpuAnalogControlType.DCV_MODULATING_DAMPER.ordinal -> {
-                analogOut2Voltage.dcvModulationMinVoltage.currentVal.toInt().toString() + "-" + analogOut2Voltage.dcvModulationMaxVoltage.currentVal.toInt().toString() + "v"
+                "${minMaxConfig.dcvModulationMinVoltage.currentVal.toInt()}-${minMaxConfig.oaoDamperMaxVoltage.currentVal.toInt()}v"
             }
-            else -> super.analogOut2TypeToString()
+
+            else -> {
+                "2-10v"
+            }
         }
+        return portType
     }
 
-    override fun analogOut3TypeToString(): String {
-        return when (analogOut3Association.associationVal) {
-            CpuAnalogControlType.COOLING.ordinal -> {
-                analogOut3Voltage.coolingMinVoltage.currentVal.toInt().toString() + "-" + analogOut3Voltage.coolingMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.HEATING.ordinal -> {
-                analogOut3Voltage.heatingMinVoltage.currentVal.toInt().toString() + "-" + analogOut3Voltage.heatingMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.LINEAR_FAN.ordinal -> {
-                analogOut3Voltage.linearFanMinVoltage.currentVal.toInt().toString() + "-" + analogOut3Voltage.linearFanMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.OAO_DAMPER.ordinal -> {
-                analogOut3Voltage.oaoDamperMinVoltage.currentVal.toInt().toString() + "-" + analogOut3Voltage.oaoDamperMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.RETURN_DAMPER.ordinal -> {
-                analogOut3Voltage.returnDamperMinVoltage.currentVal.toInt().toString() + "-" + analogOut3Voltage.returnDamperMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.COMPRESSOR_SPEED.ordinal -> {
-                analogOut3Voltage.compressorMinVoltage.currentVal.toInt().toString() + "-" + analogOut3Voltage.compressorMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.DCV_MODULATING_DAMPER.ordinal -> {
-                analogOut3Voltage.dcvModulationMinVoltage.currentVal.toInt().toString() + "-" + analogOut3Voltage.dcvModulationMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            else -> super.analogOut3TypeToString()
-        }
-    }
 
-    override fun analogOut4TypeToString(): String {
-        return when (analogOut4Association.associationVal) {
-            CpuAnalogControlType.COOLING.ordinal -> {
-                analogOut4Voltage.coolingMinVoltage.currentVal.toInt().toString() + "-" + analogOut4Voltage.coolingMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.HEATING.ordinal -> {
-                analogOut4Voltage.heatingMinVoltage.currentVal.toInt().toString() + "-" + analogOut4Voltage.heatingMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.LINEAR_FAN.ordinal -> {
-                analogOut4Voltage.linearFanMinVoltage.currentVal.toInt().toString() + "-" + analogOut4Voltage.linearFanMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.OAO_DAMPER.ordinal -> {
-                analogOut4Voltage.oaoDamperMinVoltage.currentVal.toInt().toString() + "-" + analogOut4Voltage.oaoDamperMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.RETURN_DAMPER.ordinal -> {
-                analogOut4Voltage.returnDamperMinVoltage.currentVal.toInt().toString() + "-" + analogOut4Voltage.returnDamperMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.COMPRESSOR_SPEED.ordinal -> {
-                analogOut4Voltage.compressorMinVoltage.currentVal.toInt().toString() + "-" + analogOut4Voltage.compressorMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            CpuAnalogControlType.DCV_MODULATING_DAMPER.ordinal -> {
-                analogOut4Voltage.dcvModulationMinVoltage.currentVal.toInt().toString() + "-" + analogOut4Voltage.dcvModulationMaxVoltage.currentVal.toInt().toString() + "v"
-            }
-            else -> super.analogOut4TypeToString()
-        }
-    }
+    private fun isRelayExternalMapped(enabled: EnableConfig, association: AssociationConfig) =
+        (enabled.enabled && association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal)
 
-    fun isCoolingStagesAvailable(): Boolean {
-        return (isCoolStage1Enabled() || isCoolStage2Enabled() || isCoolStage3Enabled())
-    }
+    private  fun isAnalogOutExternallyMapped(enabled: EnableConfig, association: AssociationConfig) =
+        (enabled.enabled && association.associationVal == CpuAnalogControlType.EXTERNALLY_MAPPED.ordinal)
 
-    fun isHeatingStagesAvailable():Boolean{
-        return (isHeatStage1Enabled() || isHeatStage2Enabled() || isHeatStage3Enabled())
-    }
-
-    fun isCompressorStagesAvailable(): Boolean {
-        return (isCompressorStage1Enabled() || isCompressorStage2Enabled() || isCompressorStage3Enabled())
-    }
-
-    fun isAnyRelayEnabledAndMapped(mapping: CpuRelayType): Boolean {
-        return this.relay1Enabled.enabled && this.relay1Association.associationVal == mapping.ordinal ||
-                this.relay2Enabled.enabled && this.relay2Association.associationVal == mapping.ordinal ||
-                this.relay3Enabled.enabled && this.relay3Association.associationVal == mapping.ordinal ||
-                this.relay4Enabled.enabled && this.relay4Association.associationVal == mapping.ordinal ||
-                this.relay5Enabled.enabled && this.relay5Association.associationVal == mapping.ordinal ||
-                this.relay6Enabled.enabled && this.relay6Association.associationVal == mapping.ordinal ||
-                this.relay7Enabled.enabled && this.relay7Association.associationVal == mapping.ordinal ||
-                this.relay8Enabled.enabled && this.relay8Association.associationVal == mapping.ordinal
-    }
-
-    private fun isAnyAnalogEnabledAndMapped(mapping: CpuAnalogControlType): Boolean {
-        return this.analogOut1Enabled.enabled && this.analogOut1Association.associationVal == mapping.ordinal ||
-                this.analogOut2Enabled.enabled && this.analogOut2Association.associationVal == mapping.ordinal ||
-                this.analogOut3Enabled.enabled && this.analogOut3Association.associationVal == mapping.ordinal ||
-                this.analogOut4Enabled.enabled && this.analogOut4Association.associationVal == mapping.ordinal
-    }
 
     //Function which checks the Relay is Associated  to Fan or Not
     fun isRelayAssociatedToFan(relayConfig: AssociationConfig): Boolean {
@@ -493,29 +462,6 @@ class HyperStatSplitCpuConfiguration (nodeAddress: Int, nodeType: String, priori
                 || relayConfig.associationVal == CpuRelayType.HEATING_STAGE3.ordinal)
 
     }
-
-    fun isCoolStage1Enabled() = isAnyRelayEnabledAndMapped(CpuRelayType.COOLING_STAGE1)
-    fun isCoolStage2Enabled() = isAnyRelayEnabledAndMapped(CpuRelayType.COOLING_STAGE2)
-    fun isCoolStage3Enabled() = isAnyRelayEnabledAndMapped(CpuRelayType.COOLING_STAGE3)
-
-    fun isHeatStage1Enabled() = isAnyRelayEnabledAndMapped(CpuRelayType.HEATING_STAGE1)
-    fun isHeatStage2Enabled() = isAnyRelayEnabledAndMapped(CpuRelayType.HEATING_STAGE2)
-    fun isHeatStage3Enabled() = isAnyRelayEnabledAndMapped(CpuRelayType.HEATING_STAGE3)
-
-    fun isCompressorStage1Enabled() = isAnyRelayEnabledAndMapped(CpuRelayType.COMPRESSOR_STAGE1)
-    fun isCompressorStage2Enabled() = isAnyRelayEnabledAndMapped(CpuRelayType.COMPRESSOR_STAGE2)
-    fun isCompressorStage3Enabled() = isAnyRelayEnabledAndMapped(CpuRelayType.COMPRESSOR_STAGE3)
-
-    fun isFanLowEnabled() = isAnyRelayEnabledAndMapped(CpuRelayType.FAN_LOW_SPEED)
-    fun isFanMediumEnabled() = isAnyRelayEnabledAndMapped(CpuRelayType.FAN_MEDIUM_SPEED)
-    fun isFanHighEnabled() = isAnyRelayEnabledAndMapped(CpuRelayType.FAN_HIGH_SPEED)
-    fun isFanEnabled() = isAnyRelayEnabledAndMapped(CpuRelayType.FAN_ENABLED)
-
-    fun isAnalogCoolingEnabled() = isAnyAnalogEnabledAndMapped(CpuAnalogControlType.COOLING)
-    fun isAnalogCompressorEnabled() = isAnyAnalogEnabledAndMapped(CpuAnalogControlType.COMPRESSOR_SPEED)
-    fun isAnalogHeatingEnabled() = isAnyAnalogEnabledAndMapped(CpuAnalogControlType.HEATING)
-    fun isLinearFanEnabled() = isAnyAnalogEnabledAndMapped(CpuAnalogControlType.LINEAR_FAN)
-    fun isStagedFanEnabled() = isAnyAnalogEnabledAndMapped(CpuAnalogControlType.STAGED_FAN)
 
     fun getHighestCoolingStageCount(): Int {
         val stage = getHighestStage(

@@ -13,7 +13,6 @@ import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.util.CCUUtils
-import a75f.io.logic.ccu.restore.CCU
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -111,10 +110,10 @@ fun getAirEnthalpy(temp: Double, humidity: Double): Double {
 }
 
 fun fetchUserIntents(equip: DomainEquip): UserIntents {
-    var haystack = CCUHsApi.getInstance()
+    val haystack = CCUHsApi.getInstance()
     var coolingDesiredTemp = 0.0
     var heatingDesiredTemp = 0.0
-    var desiredTemp: Double
+    val desiredTemp: Double
 
     val isScheduleSlotsAvailable = haystack.isScheduleSlotExitsForRoom(equip.equipRef)
     if (isScheduleSlotsAvailable) {

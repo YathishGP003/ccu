@@ -27,7 +27,6 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.DomainName;
-import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip;
 import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -38,9 +37,7 @@ import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitEquip;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitLogicalMap;
 import a75f.io.logic.bo.building.sscpu.SmartStatAssociationUtil;
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfiguration;
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HyperStatSplitAssociationUtil;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration;
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorConfiguration;
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration;
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4Configuration;
@@ -366,35 +363,12 @@ public class DesiredTempDisplayMode {
     }
 
     private static TemperatureMode getTemperatureModeForHSSplitCPUEcon(Equip mEquip) {
-        boolean heating = false;
-        boolean cooling = false;
-
-        HyperStatSplitCpuEconProfile profile = (HyperStatSplitCpuEconProfile) (L.getProfile(Short.parseShort(mEquip.getGroup())));
-
-        if (profile == null) {
-            // This is a fallback for when this method is called before profiles are loaded
-            HsSplitCpuEquip hssEquip = new HsSplitCpuEquip(mEquip.getId());
-            if (hssEquip.getCoolingSignal().pointExists() || hssEquip.getCoolingStage1().pointExists() ||
-                    hssEquip.getCoolingStage2().pointExists() || hssEquip.getCoolingStage3().pointExists()) {
-                cooling = true;
-            }
-            if (hssEquip.getHeatingSignal().pointExists() || hssEquip.getHeatingStage1().pointExists() ||
-                    hssEquip.getHeatingStage2().pointExists() || hssEquip.getHeatingStage3().pointExists()) {
-                heating = true;
-            }
-        } else {
-            HyperStatSplitCpuConfiguration config = (HyperStatSplitCpuConfiguration) getSplitConfiguration(mEquip.getId());
-            if (HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling(config) ||
-                    HyperStatSplitAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToCooling(config)) {
-                cooling = true;
-            }
-            if (HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating(config) ||
-                    HyperStatSplitAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToHeating(config)) {
-                heating = true;
-            }
-
+        HyperStatSplitCpuConfiguration config = (HyperStatSplitCpuConfiguration) getSplitConfiguration(mEquip.getId());
+        if (config == null) {
+            CcuLog.w(L.TAG_CCU, "Configuration is null for equip: " + mEquip.getId());
+            return DUAL;
         }
-        return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(heating, cooling), mEquip);
+        return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(config.isHeatingAvailable(), config.isCoolingAvailable()), mEquip);
     }
 
     public static void setSystemModeForVav(CCUHsApi ccuHsApi) {

@@ -4,9 +4,6 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
-import a75f.io.domain.api.DomainName.fanRunSensorNC
-import a75f.io.domain.api.DomainName.fanRunSensorNO
-import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
@@ -29,10 +26,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
-import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
-import io.seventyfivef.domainmodeler.common.point.PointConfiguration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -116,7 +110,8 @@ class MonitoringModel(application: Application) : HyperStatViewModel(application
         val equipBuilder = ProfileEquipBuilder(hayStack)
 
         if (profileConfiguration.isDefault) {
-            addEquipAndPoints(profileConfiguration, hayStack, equipModel, deviceModel)
+            val equipId = addEquipment(profileConfiguration, equipModel, deviceModel)
+            monitoringProfile = HyperStatV2MonitoringProfile(equipId, profileConfiguration.nodeAddress.toShort())
             setScheduleType(profileConfiguration as MonitoringConfiguration)
             L.ccu().zoneProfiles.add(monitoringProfile)
         } else {
@@ -145,34 +140,7 @@ class MonitoringModel(application: Application) : HyperStatViewModel(application
         } else ""
     }
 
-    private fun addEquipAndPoints(
-        config: ProfileConfiguration,
-        hayStack: CCUHsApi,
-        equipModel: SeventyFiveFProfileDirective?,
-        deviceModel: SeventyFiveFDeviceDirective?
-    ) {
-        requireNotNull(equipModel)
-        requireNotNull(deviceModel)
-        val equipBuilder = ProfileEquipBuilder(hayStack)
-        CcuLog.i(Domain.LOG_TAG, " build Equip And Points ${equipModel.domainName} profileType ${config.profileType}" )
-        val equipId = equipBuilder.buildEquipAndPoints(
-            config, equipModel, hayStack.site!!
-                .id, getEquipDis()
-        )
-        val entityMapper = EntityMapper(equipModel)
-        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
-        CcuLog.i(Domain.LOG_TAG, " build Device And Points")
-        deviceBuilder.buildDeviceAndPoints(
-            config,
-            deviceModel,
-            equipId,
-            hayStack.site!!.id,
-            getDeviceDis()
-        )
-        CcuLog.i(Domain.LOG_TAG, " add Profile")
-        monitoringProfile = HyperStatV2MonitoringProfile(equipId, config.nodeAddress.toShort())
 
-    }
     private fun setScheduleType(config: MonitoringConfiguration) {
         val scheduleTypePoint = hayStack.readEntity("point and domainName == \"" + DomainName.scheduleType + "\" and group == \"" + config.nodeAddress + "\"")
         val scheduleTypeId = scheduleTypePoint["id"].toString()

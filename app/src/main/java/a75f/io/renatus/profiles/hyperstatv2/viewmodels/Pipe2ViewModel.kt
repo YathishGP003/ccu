@@ -136,14 +136,4 @@ class Pipe2ViewModel(application: Application) : HyperStatViewModel(application)
             setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap())
         }
     }
-
-    private fun addEquipment(config: Pipe2Configuration, equipModel: SeventyFiveFProfileDirective, deviceModel: SeventyFiveFDeviceDirective): String {
-        val equipBuilder = ProfileEquipBuilder(hayStack)
-        val entityMapper = EntityMapper(equipModel)
-        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
-        val equipId = equipBuilder.buildEquipAndPoints(config, equipModel, hayStack.site!!.id, getEquipDis())
-        deviceBuilder.buildDeviceAndPoints(config, deviceModel, equipId, hayStack.site!!.id, getDeviceDis())
-        return equipId
-    }
-
 }

@@ -2,6 +2,7 @@ package a75f.io.renatus.registration;
 
 import static a75f.io.logic.L.TAG_CCU_REPLACE;
 import static a75f.io.logic.util.backupfiles.FileConstants.CCU_REPLACE_BACNET_CONFIG;
+import static a75f.io.renatus.UtilityApplication.context;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -54,6 +55,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.RetryCountCallback;
+import a75f.io.logic.L;
 import a75f.io.logic.util.bacnet.BacnetConfigConstants;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -71,13 +73,17 @@ import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.messaging.handler.DashboardHandlerKt;
 import a75f.io.renatus.R;
+import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.CCUListAdapter;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.sitesequencer.SequenceManager;
+import a75f.io.usbserial.UsbModbusService;
+import a75f.io.usbserial.UsbModbusServiceCom2;
 import a75f.io.usbserial.UsbPrefHelper;
+import a75f.io.usbserial.UsbService;
 import a75f.io.util.DashboardUtilKt;
 import a75f.io.util.ExecutorTask;
 
@@ -527,12 +533,28 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                 MessagingClient.getInstance().init();
                 UtilityApplication.scheduleMessagingAckJob();
                 CCUHsApi.getInstance().updateLocalTimeZone();
+                restartSerialServices();
                 RenatusServicesUrls renatusServicesUrls = RenatusServicesEnvironment.getInstance().getUrls();
                 SequenceManager.getInstance(Globals.getInstance().getApplicationContext(), renatusServicesUrls.getSequencerUrl())
                         .fetchPredefinedSequencesIfEmpty();
             }
         });
         return equipResponseCallback;
+    }
+
+    private void restartSerialServices(){
+        Intent intentCm = new Intent(context, UsbService.class);
+        boolean stopStatus = context.stopService(intentCm);
+        CcuLog.i(L.TAG_USB_MANAGER, "Replace Complete : Stop UsbService: "+stopStatus);
+
+        Intent intentModbusCom1 = new Intent(context, UsbModbusService.class);
+        boolean stopStatusCom1 = context.stopService(intentModbusCom1);
+        CcuLog.i(L.TAG_USB_MANAGER, "Replace Complete : Stop UsbModbusService: "+stopStatusCom1);
+        Intent intentCom2 = new Intent(context, UsbModbusServiceCom2.class);
+        boolean stopStatusCom2 = context.stopService(intentCom2);
+        CcuLog.i(L.TAG_USB_MANAGER, "Replace Complete : Stop UsbModbusServiceCom2: "+stopStatusCom2);
+
+        RenatusApp.backgroundServiceInitiator.initServices();
     }
 
     @NonNull

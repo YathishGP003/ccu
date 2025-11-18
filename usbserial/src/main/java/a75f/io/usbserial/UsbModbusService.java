@@ -115,7 +115,8 @@ public class UsbModbusService extends Service {
                 }
             } else if (arg1.getAction().equals(ACTION_USB_ATTACHED)) {
                 UsbDevice attachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                if (UsbSerialUtil.isModbusDevice(attachedDevice, UsbPrefHelper.getUsbDeviceList(context)) && !serialPortConnected) {
+                if (UsbSerialUtil.getModbusDeviceCom1(attachedDevice, UsbPrefHelper.getUsbDeviceList(context)) != null
+                                            && !serialPortConnected) {
                     CcuLog.d(TAG,"Modbus Serial device connected "+attachedDevice.toString());
                     scheduleUsbConnectedEvent();
                     UsbUtil.writeUsbEvent(attachedDevice, "Attached");
@@ -123,7 +124,7 @@ public class UsbModbusService extends Service {
             } else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
                 // Usb device was disconnected. send an intent to the Main Activity
                 UsbDevice detachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                if (UsbSerialUtil.isModbusDevice(detachedDevice, UsbPrefHelper.getUsbDeviceList(context))) {
+                if (UsbSerialUtil.getModbusDeviceCom1(detachedDevice, UsbPrefHelper.getUsbDeviceList(context)) != null) {
                     usbPortScanTimer.cancel();
                     CcuLog.d(TAG,"Modbus Serial device disconnected "+detachedDevice.toString());
                     if (serialPortConnected && serialPort != null) {

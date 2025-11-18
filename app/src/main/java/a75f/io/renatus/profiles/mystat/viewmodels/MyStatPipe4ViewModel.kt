@@ -161,6 +161,7 @@ class MyStatPipe4ViewModel(application: Application) : MyStatViewModel(applicati
                 allStandaloneProfileConditions
             )
             setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap())
+            updateEnumConfigs(equip, devicesVersion)
         }
         DesiredTempDisplayMode.setModeTypeOnUserIntentChange(zoneRef, CCUHsApi.getInstance())
     }

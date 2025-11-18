@@ -16,6 +16,7 @@ import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
+import a75f.io.domain.equips.mystat.MyStatPipe4Equip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
@@ -285,7 +286,12 @@ abstract class MyStatConfiguration(
                 relayEnum = "Fan Low Speed=0,Fan High Speed=1,Aux Heating=2,Water Valve=3,Fan Enable=4,Occupied Enable=5,Humidifier=6,Dehumidifier=7,Externally Mapped - Relay=8,DCV Damper=9,Fan Low Speed - Ventilation=10,NA=11,NA=12,NA=13,NA=14"
                 analogEnum = "NA=0,NA=1,NA=2,NA=3,NA=4,NA=5,NA=6,NA=7,NA=8,NA=9,NA=10,Water Modulating Valve=11,Fan Speed=12,Externally Mapped - Analog=13,DCV Modulating Damper=14"
             }
+            is MyStatPipe4Equip -> {
+                relayEnum = "Fan Low Speed=0,Fan High Speed=1,Aux Heating=2,Cooling Water Valve=3,Heating Water Valve=4,Fan Enable=5,Occupied Enable=6,Humidifier=7,Dehumidifier=8,Externally Mapped - Relay=9,DCV Damper=10,Fan Low Speed - Ventilation=11,NA=12,NA=13,NA=14,NA=15,NA"
+                analogEnum = "NA=0,NA=1,NA=2,NA=3,NA=4,NA=5,NA=6,NA=7,NA=8,NA=9,DCV Damper=10,NA=11,Cooling Modulating Valve=12,Heating Modulating Valve=13,Fan Speed=14,Externally Mapped - Analog=15,DCV Modulating Damper=16"
+            }
         }
+
         if (equip.universalOut2Association.pointExists() && relayEnum.isNotEmpty()) {
             updateEnum(relayEnum, equip.universalOut2Association)
         }

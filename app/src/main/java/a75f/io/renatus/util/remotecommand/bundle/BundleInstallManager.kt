@@ -87,7 +87,7 @@ class BundleInstallManager: BundleInstallListener {
         private set
 
     private val bundleInstallListeners: MutableList<BundleInstallListener> = mutableListOf()
-    private val vmAPI = VersionManagementService(CCUHsApi.getInstance().getJwt())
+
     private var cancelPending = false
 
     // Singleton management
@@ -427,6 +427,7 @@ class BundleInstallManager: BundleInstallListener {
 
         try {
             // Retrieve the recommended bundle version from the cloud
+            val vmAPI = VersionManagementService(CCUHsApi.getInstance().getJwt())
             val recommendedBundleDTO = vmAPI.retrieveBundleByIdRetro(bundleId) ?: return null
 
             return evaluateUpgradeBundle(recommendedBundleDTO, "id: $bundleId")
@@ -449,6 +450,7 @@ class BundleInstallManager: BundleInstallListener {
 
         try {
             // Retrieve the recommended bundle version from the cloud
+            val vmAPI = VersionManagementService(CCUHsApi.getInstance().getJwt())
             val recommendedBundleDTO = vmAPI.retrieveBundleByName(bundleName) ?: return null
 
             return evaluateUpgradeBundle(recommendedBundleDTO, "name: $bundleName", isReplace = isReplace)
@@ -478,6 +480,7 @@ class BundleInstallManager: BundleInstallListener {
 
         try {
             // Retrieve the recommended bundle version from the cloud
+            val vmAPI = VersionManagementService(CCUHsApi.getInstance().getJwt())
             val recommendedBundleDTO = vmAPI.retrieveRecommendedBundleRetro() ?: return null
 
             return evaluateUpgradeBundle(recommendedBundleDTO, "recommended", isFreshCCU = isFreshCCU)

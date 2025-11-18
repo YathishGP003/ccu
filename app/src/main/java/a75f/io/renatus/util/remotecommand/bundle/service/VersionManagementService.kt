@@ -28,7 +28,6 @@ interface VersionManagementServiceInterface {
 }
 
 class VersionManagementService(private var bearerToken: String) {
-    private val retrofit: Retrofit = getVersionManagementRetrofit()
 
     private fun getVersionManagementRetrofit(): Retrofit {
         val logging = HttpLoggingInterceptor()

@@ -163,7 +163,7 @@ fun ExternalPointsList(
             val detailedViewItem = nonTempProfileViewModel.detailedViewPoints.firstOrNull()
 
             if (detailedViewItem != null &&
-                detailedViewItem.profileType != "connectModule" && ( connectNodeDeviceName.isNullOrEmpty() || !connectNodeDeviceName.contains("External Equip" ))
+                detailedViewItem.profileType != "connectModule" && ( connectNodeDeviceName.isNullOrEmpty() || !connectNodeDeviceName.contains("External Equip" ) || nonTempProfileViewModel.profile == "modbus")
             ) {
                 Box(modifier = Modifier.wrapContentSize()) {
                     HeartBeatCompose(

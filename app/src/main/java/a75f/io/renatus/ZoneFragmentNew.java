@@ -21,12 +21,6 @@ import static a75f.io.logic.bo.building.definitions.ProfileType.VAV_REHEAT;
 import static a75f.io.logic.bo.building.definitions.ProfileType.VAV_SERIES_FAN;
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.disconnectedIntervals;
-import static a75f.io.logic.bo.util.CCUUtils.getTruncatedString;
-import static a75f.io.logic.bo.util.CustomScheduleUtilKt.isPointFollowingScheduleOrEvent;
-import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_COOLING_DESIRED;
-import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_HEATING_DESIRED;
-import static a75f.io.logic.bo.util.CCUUtils.getTruncatedString;
-import static a75f.io.logic.bo.util.CustomScheduleUtilKt.isPointFollowingScheduleOrEvent;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
@@ -305,7 +299,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
 
     private Equip visibleEquip;
 
-    ZoneViewModel zoneViewModel = null;
+    ZoneViewModel nonTempZoneViewModel = null;
 
     public ZoneFragmentNew() {
     }
@@ -332,6 +326,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
         //useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
         View rootView = inflater.inflate(R.layout.fragment_zones, container, false);
         parentRootView = rootView.findViewById(R.id.zone_fragment_temp);
+        nonTempZoneViewModel = new ZoneViewModel();
         return rootView;
     }
 
@@ -479,6 +474,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
 
 
     HashMap<String, View> zoneStatus = new HashMap<>();
+    HashMap<String, ZoneEquip> roomEquips = new HashMap<>();
 
     public void refreshHeartBeatStatus(String nodeAddress) {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.refreshHeartBeatStatus zoneOpen "+zoneOpen);
@@ -845,6 +841,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                                 CcuLog.d(TAG_CCU_INIT, "Loading Zone Completed");
                                 setCcuReady();
                             }
+                            nonTempZoneViewModel.setRoomEquips(roomEquips);
+                            nonTempZoneViewModel.observeZoneHealth();
                         } catch (Exception e) {
                             CcuLog.e(TAG_CCU_INIT, "Loading Zone failed");
                             e.printStackTrace();
@@ -1032,10 +1030,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
         double buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
         cleanUpTempViewModel(tempProfileViewModels);
         tempProfileViewModels.clear();
-        if(zoneViewModel != null){
-            zoneViewModel.stopObservingZoneHealth();
-            zoneViewModel = null;
-        }
         for (int i = 0; i < zoneMap.size(); i++) {
             Equip avgTempEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
             double avgTemp = CCUHsApi.getInstance()
@@ -1109,7 +1103,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
         View status_view = arcView.findViewById(R.id.status_view);
         HeartBeatUtil.zoneStatus(textViewModule, isZoneAlive);
         zoneStatus.put(zoneTitle, textViewModule);
-
+        if (!zoneMap.isEmpty()) {
+            String roomId = zoneMap.get(0).get("roomRef").toString();
+            roomEquips.put(roomId, new ZoneEquip(textViewModule, true));
+        }
         seekArc.scaletoNormal(260, 210);
 
         float heatUpperLimitVal;
@@ -1251,10 +1248,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                         // clicked on another zone when one zone is already opened
                         cleanUpTempViewModel(tempProfileViewModels);
                         tempProfileViewModels.clear();
-                        if(zoneViewModel != null){
-                            zoneViewModel.stopObservingZoneHealth();
-                            zoneViewModel = null;
-                        }
                         int tableRowCount = tableLayout.getChildCount();
                         if (tableLayout.getChildCount() > 1) {
                             boolean viewFound = false;
@@ -1324,10 +1317,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                     } else if (clickposition == clickedView) {
                         cleanUpTempViewModel(tempProfileViewModels);
                         tempProfileViewModels.clear();
-                        if(zoneViewModel != null){
-                            zoneViewModel.stopObservingZoneHealth();
-                            zoneViewModel = null;
-                        }
                         v.setBackgroundColor(getResources().getColor(R.color.white));
                         textEquipment.setTextAppearance(getActivity(), R.style.label_black);
                         textEquipment.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
@@ -1756,17 +1745,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                         schedulerFragment.setTempProfileViewModels(tempProfileViewModels);
                         schedulerFragment.show(childFragmentManager, "dialog");
                     };
-
-                    // below code is to observe zone health
-                    if (!zoneMap.isEmpty() && zoneMap.get(0) != null && zoneMap.contains("domainName")) {
-                        zoneViewModel = ZoneViewModel.Companion.create(
-                                zoneMap.get(0).get("roomRef").toString()
-                        );
-                        zoneViewModel.setHeartbeatView(textViewModule);
-                        zoneViewModel.setSeekArc(seekArcOpen);
-                        zoneViewModel.setEquip(equipOpen);
-                        zoneViewModel.observeZoneHealth();
-                    }
 
                     {
                         boolean showSchedule;
@@ -2579,10 +2557,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
         cleanUpNonTempViewModel(nonTempProfileViewModels);
         nonTempProfileViewModels.clear();
         zoneDataForUi = null;
-        if(zoneViewModel != null){
-            zoneViewModel.stopObservingZoneHealth();
-            zoneViewModel = null;
-        }
         CCUHsApi.getInstance().registerPointScheduleUpdateInf(this);
         Equip p = null;
         int i = gridPosition;
@@ -2611,6 +2585,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
         View status_view = arcView.findViewById(R.id.status_view);
         HeartBeatUtil.zoneStatus(textViewModule, isZoneAlive);
         zoneStatus.put(zoneTitle, textViewModule);
+        if (!zoneMap.isEmpty()) {
+            String roomId = zoneMap.get(0).get("roomRef").toString();
+            roomEquips.put(roomId, new ZoneEquip(textViewModule, false));
+        }
+
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         arcView.setPadding(48, 56, 0, 0);
         try {
@@ -2725,10 +2704,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                         cleanUpNonTempViewModel(nonTempProfileViewModels);
                         nonTempProfileViewModels.clear();
                         zoneDataForUi = null;
-                        if(zoneViewModel != null){
-                            zoneViewModel.stopObservingZoneHealth();
-                            zoneViewModel = null;
-                        }
                         int tableRowCount = tableLayout.getChildCount();
                         if (tableLayout.getChildCount() > 1) {
                             boolean viewFound = false;
@@ -2801,10 +2776,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                         cleanUpNonTempViewModel(nonTempProfileViewModels);
                         zoneDataForUi = null;
                         nonTempProfileViewModels.clear();
-                        if(zoneViewModel != null){
-                            zoneViewModel.stopObservingZoneHealth();
-                            zoneViewModel = null;
-                        }
                         v.setBackgroundColor(getResources().getColor(R.color.white));
                         status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                         textEquipment.setTextAppearance(getActivity(), R.style.label_black);
@@ -2844,17 +2815,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
 
                 if (isExpanded) {
                     linearLayoutZonePoints.removeAllViews();
-                    // below code is to observe zone health
-                    if (!zoneMap.isEmpty() && zoneMap.get(0) != null && zoneMap.contains("domainName")) {
-                        zoneViewModel = ZoneViewModel.Companion.create(
-                                zoneMap.get(0).get("roomRef").toString()
-                        );
-                        zoneViewModel.setHeartbeatView(textViewModule);
-                        zoneViewModel.setSeekArc(seekArcOpen);
-                        zoneViewModel.setEquip(equipOpen);
-                        zoneViewModel.setExternalEquip(true);
-                        zoneViewModel.observeZoneHealth();
-                    }
 
                     if (ConnectNodeUtil.Companion.isConnectNodePaired(roomRef)) {
                         HashMap<Object, Object> connectNodeDevice = ConnectNodeUtil.Companion.getConnectNodeForZone(roomRef, CCUHsApi.getInstance());
@@ -4347,6 +4307,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
         }
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onResume Done");
         HttpServer.Companion.setCurrentTempInterface(this);
+        if (nonTempZoneViewModel != null) {
+            nonTempZoneViewModel.setRoomEquips(roomEquips);
+            nonTempZoneViewModel.observeZoneHealth();
+        }
     }
 
     private void setListeners() {
@@ -4388,6 +4352,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
         UpdateEntityHandler.setZoneDataInterface(null);
         HttpServer.Companion.setModbusDataInterface(null);
         HttpServer.Companion.setCurrentTempInterface(null);
+        nonTempZoneViewModel.stopObservingZoneHealth();
     }
 
     @Override
@@ -4558,6 +4523,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
         TextView textViewModule = arcView.findViewById(R.id.module_status);
         HeartBeatUtil.zoneStatus(textViewModule, isZoneAlive);
         zoneStatus.put(zoneTitle, textViewModule);
+        if (!zoneMap.isEmpty()) {
+            String roomId = zoneMap.get(0).get("roomRef").toString();
+            roomEquips.put(roomId, new ZoneEquip(textViewModule, false));
+        }
         LinearLayout linearLayoutZonePoints = zoneDetails.findViewById(R.id.lt_profilepoints);
         LinearLayout linearLayoutschedulePoints = zoneDetails.findViewById(R.id.lt_schedule);
         LinearLayout linearLayoutstatusPoints = zoneDetails.findViewById(R.id.lt_status);

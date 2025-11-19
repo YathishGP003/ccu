@@ -67,6 +67,8 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.observer.HisWriteObservable;
+import a75f.io.api.haystack.observer.PointWriteObservable;
 import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
@@ -278,6 +280,8 @@ public class FloorPlanFragment extends Fragment {
         SuccessToast.setTextColor(getResources().getColor(R.color.success_status));
         toastImage.setImageResource(R.drawable.font_awesome_custom_check_mark);
         toastImage.setColorFilter(getResources().getColor(R.color.success_status));
+        PointWriteObservable.INSTANCE.clear();
+        HisWriteObservable.INSTANCE.clear();
     }
 
 

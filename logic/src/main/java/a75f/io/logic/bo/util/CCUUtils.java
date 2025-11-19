@@ -533,4 +533,22 @@ public class CCUUtils
         HisItem hisItem = CCUHsApi.getInstance().curRead(point.get("id").toString());
         return (hisItem == null) ? null : hisItem.getDate();
     }
+
+    public static Boolean isModbusEquip(String roomRef) {
+        return !CCUHsApi.getInstance().readAllEntities(
+                "not bacnet and modbus and equip and roomRef == \"" + roomRef +"\""
+        ).isEmpty();
+    }
+
+    public static Boolean isEMREquip(String roomRef) {
+        return !CCUHsApi.getInstance().readAllEntities(
+                "not bacnet and emr and equip and roomRef == \"" + roomRef +"\""
+        ).isEmpty();
+    }
+
+    public static Boolean isPIDEquip(String roomRef) {
+        return !CCUHsApi.getInstance().readAllEntities(
+                "not bacnet and not modbus and pid and equip and roomRef == \"" + roomRef +"\""
+        ).isEmpty();
+    }
 }

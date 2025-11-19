@@ -74,7 +74,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import a75f.io.api.haystack.bacnet.parser.BacnetRequestProcessor;
 import a75f.io.api.haystack.util.DatabaseAction;
 import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.api.haystack.util.DbStrings;
@@ -1784,9 +1783,11 @@ public class CCUTagsDb extends HServer {
         saveHisItems(rec,items, false);
     }
 
-    private boolean isDiagPoint(String id) {
+    // added the occupancy tag also ,if the point is occupancy point was not synced ,
+    // adding it in local db not to lose the data
+    private boolean isDiagPointOrOccupancyPoint(String id) {
         HDict entity = tagsMap.get(id.replace("@",""));
-        return entity != null && entity.has("diag");
+        return entity != null && (entity.has("diag") || entity.has(Tags.OCCUPANCY));
     }
     public void saveHisItems(HDict rec, HHisItem[] items, boolean syncStatus) {
         //DateTime now = new DateTime();
@@ -1797,7 +1798,7 @@ public class CCUTagsDb extends HServer {
             hisItem.setVal(Double.parseDouble(item.val.toString()));
             hisItem.setSyncStatus(syncStatus);
 
-            if (isDiagPoint(rec.id().toString())) {
+            if (isDiagPointOrOccupancyPoint(rec.id().toString())) {
                 HisItem curCacheItem = HisItemCache.getInstance().get(rec.id().toString());
                 if (curCacheItem != null && curCacheItem.syncStatus == false) {
                     CcuLog.d(TAG_CCU_HS,"Write historized value to local DB for point ID " + rec.get("id").toString()+"; hisItem:- "+curCacheItem);
@@ -1869,7 +1870,7 @@ public class CCUTagsDb extends HServer {
         hisItem.setDate(new Date(System.currentTimeMillis()));
         hisItem.setRec(id);
         hisItem.setVal(val);
-        if (isDiagPoint(id)) {
+        if (isDiagPointOrOccupancyPoint(id)) {
             HisItem curCacheItem = HisItemCache.getInstance().get(id);
             if (curCacheItem != null && curCacheItem.syncStatus == false) {
                 CcuLog.d(TAG_CCU_HS, "Write historized value to local DB for point ID " + id + "; value "  + val+"; hisItem: "+curCacheItem);

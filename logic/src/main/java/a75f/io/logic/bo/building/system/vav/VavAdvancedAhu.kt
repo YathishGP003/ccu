@@ -525,7 +525,9 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 if (staticPressureLoopOutput < (spSpMax - spSpMin) * smartPurgeConnectFanLoopOp) {
                     tempLoopOp = (spSpMax - spSpMin) * smartPurgeConnectFanLoopOp
                 }
-                minOf(tempLoopOp, 100.0)
+                if(tempLoopOp > 100.0) tempLoopOp = 100.0
+                // If existing cooling loop op is higher, retain that value
+                maxOf(tempLoopOp, coolingLoopOp)
             }else if (VavSystemController.getInstance().getSystemState() == SystemController.State.HEATING
                 && (conditioningMode == SystemMode.HEATONLY || conditioningMode == SystemMode.AUTO)) {
                 (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier).toInt().toDouble().coerceAtLeast(smartPurgeConnectFanLoopOp)

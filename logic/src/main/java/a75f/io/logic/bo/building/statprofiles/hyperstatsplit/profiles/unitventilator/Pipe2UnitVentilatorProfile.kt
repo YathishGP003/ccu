@@ -38,6 +38,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getUnitVentilatorTuners
 import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
+import a75f.io.logic.bo.building.statprofiles.util.isSupplyOppositeToConditioning
 import a75f.io.logic.bo.building.statprofiles.util.milliToMin
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.handlers.doAnalogOperation
@@ -508,7 +509,12 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
 
 
                     Pipe2UvAnalogOutControls.WATER_MODULATING_VALVE -> {
-                        if (waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
+                        if (waterSamplingStartTime == 0L && canWeDoConditioning(basicSettings)
+                            && isSupplyOppositeToConditioning(
+                                basicSettings.conditioningMode, supplyWaterTemp,
+                                heatingThreshold, coolingThreshold
+                            ).not()
+                        ) {
                             if (canWeDoConditioning(basicSettings) && canWeRunFan(basicSettings)) {
                                 var modulationValue = waterValveLoop.data
                                 if (controlVia != ControlVia.FULLY_MODULATING_VALVE ||
@@ -539,69 +545,33 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         }
     }
 
-    private fun isSupplyInHeatingMode(): Boolean {
-        return (supplyWaterTemp > heatingThreshold || supplyWaterTemp in coolingThreshold..heatingThreshold)
-    }
-
     private fun runAlgorithm(
         equip: Pipe2UVEquip,
         basicSettings: BasicSettings,
-        configuration: Pipe2UVConfiguration
+        config: Pipe2UVConfiguration
     ) {
-
-        if ((currentTemp > 0) && (basicSettings.fanMode != StandaloneFanStage.OFF)) {
-            when (basicSettings.conditioningMode) {
-                StandaloneConditioningMode.AUTO -> {
-                    if (isSupplyInHeatingMode())
-                        doHeatOnly(basicSettings, configuration, equip)
-                    else if (supplyWaterTemp < coolingThreshold)
-                        doCoolOnly(basicSettings, configuration, equip)
+        if ((currentTemp > 0) && canWeRunFan(basicSettings)) {
+            if (canWeDoConditioning(basicSettings)) {
+                if (isSupplyOppositeToConditioning(
+                        basicSettings.conditioningMode,
+                        supplyWaterTemp,
+                        heatingThreshold,
+                        coolingThreshold
+                    )
+                ) {
+                    resetWaterValve(equip)
                 }
-
-                StandaloneConditioningMode.COOL_ONLY -> {
-                    doCoolOnly(basicSettings, configuration, equip)
-                }
-
-                StandaloneConditioningMode.HEAT_ONLY -> {
-                    doHeatOnly(basicSettings, configuration, equip)
-                }
-
-                else -> {
-                    logIt( "Conditioning mode is OFF")
-                    resetAllLogicalPointValues()
-
-                }
+                val analogFanType = operateAuxBasedFan(hssEquip, basicSettings)
+                runSpecifiedAnalogFanSpeed(analogFanType, config)
+            } else {
+                logIt("Conditioning mode is OFF")
+                resetAllLogicalPointValues()
             }
         } else {
             resetAllLogicalPointValues()
         }
     }
 
-
-    private fun doCoolOnly(
-        basicSettings: BasicSettings, config: Pipe2UVConfiguration, equip: Pipe2UVEquip
-    ) {
-        logIt("doCoolOnly: mode ")
-
-        if (supplyWaterTemp > heatingThreshold) {
-            resetWaterValve(equip)
-        }
-
-        val analogFanType = operateAuxBasedFan(hssEquip, basicSettings)
-        runSpecifiedAnalogFanSpeed(analogFanType, config)
-    }
-
-    private fun doHeatOnly(
-        basicSettings: BasicSettings, config: Pipe2UVConfiguration, equip: Pipe2UVEquip
-    ) {
-        logIt("doHeatOnly: mode ")
-        if (supplyWaterTemp < coolingThreshold) {
-            resetWaterValve(equip)
-        }
-        operateAuxBasedFan(equip, basicSettings)
-        val analogFanType = operateAuxBasedFan(hssEquip, basicSettings)
-        runSpecifiedAnalogFanSpeed(analogFanType, config)
-    }
 
     private fun runTitle24Rule(config: Pipe2UVConfiguration) {
         resetFanStatus()
@@ -775,6 +745,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
             hssEquip.waterModulatingValve.writeHisVal(0.0)
             equip.relayStages.remove(StatusMsgKeys.WATER_VALVE.name)
             equip.analogOutStages.remove(StatusMsgKeys.WATER_VALVE.name)
+            isWaterValveActiveDueToLoop = false
             logIt( "Resetting WATER_VALVE to OFF")
         }
     }

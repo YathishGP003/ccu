@@ -29,6 +29,8 @@ import a75f.io.logic.bo.building.statprofiles.util.MyStatBasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
 import a75f.io.logic.bo.building.statprofiles.util.MyStatTuners
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
+import a75f.io.logic.bo.building.statprofiles.util.canWeDoConditioning
+import a75f.io.logic.bo.building.statprofiles.util.canWeRunFan
 import a75f.io.logic.bo.building.statprofiles.util.fetchMyStatBasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.fetchMyStatTuners
 import a75f.io.logic.bo.building.statprofiles.util.fetchUserIntents
@@ -38,6 +40,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getMyStatLogicalPointList
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatRelayOutputPoints
 import a75f.io.logic.bo.building.statprofiles.util.isMyStatHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMyStatLowUserIntentFanMode
+import a75f.io.logic.bo.building.statprofiles.util.isSupplyOppositeToConditioning
 import a75f.io.logic.bo.building.statprofiles.util.logMsResults
 import a75f.io.logic.bo.building.statprofiles.util.milliToMin
 import a75f.io.logic.bo.building.statprofiles.util.updateLogicalPoint
@@ -279,7 +282,14 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         when (controllerName) {
 
             ControllerNames.WATER_VALVE_CONTROLLER -> {
-                if (waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
+                if (waterSamplingStartTime == 0L && canWeDoConditioning(basicSettings.conditioningMode)
+                    && isSupplyOppositeToConditioning(
+                        basicSettings.conditioningMode,
+                        supplyWaterTempTh2,
+                        heatingThreshold,
+                        coolingThreshold
+                    ).not()
+                ) {
                     updateStatus(
                         equip.waterValve,
                         result as Boolean,
@@ -392,7 +402,6 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         return 0
     }
 
-
     private fun handleAnalogOutState(
         config: MyStatPipe2Configuration,
         equip: MyStatPipe2Equip,
@@ -417,13 +426,17 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
                     .find { it.ordinal == universalOut.second.associationVal }
                 when (analogMapping) {
                     MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE -> {
-                        if (waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
+                        if (waterSamplingStartTime == 0L && canWeDoConditioning(basicSettings.conditioningMode)
+                            && isSupplyOppositeToConditioning(
+                                basicSettings.conditioningMode,
+                                supplyWaterTempTh2,
+                                heatingThreshold,
+                                coolingThreshold
+                            ).not()
+                        ) {
                             waterValveLoop.data = waterValveLoop(userIntents).toDouble()
                             if (basicSettings.fanMode != MyStatFanStages.OFF) {
-                                updateLogicalPoint(
-                                    logicalPointsList[port]!!,
-                                    waterValveLoop.data
-                                )
+                                updateLogicalPoint(logicalPointsList[port]!!, waterValveLoop.data)
                                 if (waterValveLoop.data > 0) {
                                     analogOutStages[StatusMsgKeys.WATER_VALVE.name] = 1
                                     isWaterValveActiveDueToLoop = true
@@ -461,7 +474,6 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         }
     }
 
-
     private fun runAlgorithm(
         equip: MyStatPipe2Equip,
         basicSettings: MyStatBasicSettings,
@@ -470,59 +482,26 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         configuration: MyStatPipe2Configuration
     ) {
 
-        if ((currentTemp > 0) && (basicSettings.fanMode != MyStatFanStages.OFF)) {
-            when (basicSettings.conditioningMode) {
-                StandaloneConditioningMode.AUTO -> {
-                    if (supplyWaterTempTh2 > heatingThreshold || supplyWaterTempTh2 in coolingThreshold..heatingThreshold)
-                        doHeatOnly(basicSettings, configuration, equip)
-                    else if (supplyWaterTempTh2 < coolingThreshold)
-                        doCoolOnly(basicSettings, configuration, equip)
+        if ((currentTemp > 0) && canWeRunFan(basicSettings)) {
+            if (canWeDoConditioning(basicSettings.conditioningMode)) {
+                if (isSupplyOppositeToConditioning(
+                        basicSettings.conditioningMode,
+                        supplyWaterTempTh2,
+                        heatingThreshold,
+                        coolingThreshold
+                    )
+                ) {
+                    resetWaterValve(equip)
                 }
-
-                StandaloneConditioningMode.COOL_ONLY -> {
-                    doCoolOnly(basicSettings, configuration, equip)
-                }
-
-                StandaloneConditioningMode.HEAT_ONLY -> {
-                    doHeatOnly(basicSettings, configuration, equip)
-                }
-
-                else -> {
-                    logIt("Conditioning mode is OFF")
-                    resetConditioning(relayStages, analogOutStages, basicSettings, equip)
-                }
+                triggerFanForAuxIfRequired(basicSettings, configuration, equip)
+            } else {
+                logIt("Conditioning mode is OFF")
+                resetConditioning(relayStages, analogOutStages, basicSettings, equip)
             }
         } else {
             resetConditioning(relayStages, analogOutStages, basicSettings, equip)
         }
     }
-
-
-    private fun doHeatOnly(
-        basicSettings: MyStatBasicSettings,
-        configuration: MyStatPipe2Configuration,
-        equip: MyStatPipe2Equip
-    ) {
-        logIt("doHeatOnly: mode ")
-        if (supplyWaterTempTh2 < coolingThreshold) {
-            resetWaterValve(equip)
-        }
-        triggerFanForAuxIfRequired(basicSettings, configuration, equip)
-    }
-
-    private fun doCoolOnly(
-        basicSettings: MyStatBasicSettings,
-        configuration: MyStatPipe2Configuration,
-        equip: MyStatPipe2Equip
-    ) {
-        logIt("doCoolOnly: mode ")
-
-        if (supplyWaterTempTh2 > heatingThreshold) {
-            resetWaterValve(equip)
-        }
-        triggerFanForAuxIfRequired(basicSettings, configuration, equip)
-    }
-
 
     private fun triggerFanForAuxIfRequired(
         basicSettings: MyStatBasicSettings,
@@ -699,6 +678,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
             }
             equip.relayStages.remove(StatusMsgKeys.WATER_VALVE.name)
             equip.analogOutStages.remove(StatusMsgKeys.WATER_VALVE.name)
+            isWaterValveActiveDueToLoop = false
             logIt( "Resetting WATER_VALVE to OFF")
         }
     }

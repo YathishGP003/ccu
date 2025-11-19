@@ -35,6 +35,8 @@ import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.FanSpeed
 import a75f.io.logic.bo.building.statprofiles.util.HyperStatProfileTuners
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
+import a75f.io.logic.bo.building.statprofiles.util.canWeDoConditioning
+import a75f.io.logic.bo.building.statprofiles.util.canWeRunFan
 import a75f.io.logic.bo.building.statprofiles.util.fetchBasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.fetchHyperStatTuners
 import a75f.io.logic.bo.building.statprofiles.util.fetchUserIntents
@@ -45,6 +47,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
+import a75f.io.logic.bo.building.statprofiles.util.isSupplyOppositeToConditioning
 import a75f.io.logic.bo.building.statprofiles.util.logResults
 import a75f.io.logic.bo.building.statprofiles.util.milliToMin
 import a75f.io.logic.bo.building.statprofiles.util.updateLoopOutputs
@@ -170,7 +173,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
         dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
 
         operateRelays(config as Pipe2Configuration, basicSettings, equip, userIntents, controllerFactory)
-        operateAnalogOutputs(config, equip, basicSettings, equip.analogOutStages, userIntents)
+        operateAnalogOutputs(config, equip, basicSettings, equip.analogOutStages)
         processForWaterSampling(equip, hyperStatTuners, config, equip.relayStages, basicSettings)
         runAlgorithm(equip, basicSettings, equip.relayStages, equip.analogOutStages, config)
 
@@ -236,27 +239,22 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
         configuration: Pipe2Configuration
     ) {
 
-        if ((currentTemp > 0) && (basicSettings.fanMode != StandaloneFanStage.OFF)) {
-            when (basicSettings.conditioningMode) {
-                StandaloneConditioningMode.AUTO -> {
-                    if (supplyWaterTempTh2 > heatingThreshold || supplyWaterTempTh2 in coolingThreshold..heatingThreshold)
-                        doHeatOnly(basicSettings, configuration, equip)
-                    else if (supplyWaterTempTh2 < coolingThreshold)
-                        doCoolOnly(basicSettings, configuration, equip)
-                }
+        if ((currentTemp > 0) && canWeRunFan(basicSettings)) {
 
-                StandaloneConditioningMode.COOL_ONLY -> {
-                    doCoolOnly(basicSettings, configuration, equip)
+            if (canWeDoConditioning(basicSettings)) {
+                if (isSupplyOppositeToConditioning(
+                        basicSettings.conditioningMode,
+                        supplyWaterTempTh2,
+                        heatingThreshold,
+                        coolingThreshold
+                    )
+                ) {
+                    resetWaterValve(equip)
                 }
-
-                StandaloneConditioningMode.HEAT_ONLY -> {
-                    doHeatOnly(basicSettings, configuration, equip)
-                }
-
-                else -> {
-                    logIt( "Conditioning mode is OFF")
-                    resetConditioning(relayStages, analogOutStages, basicSettings, equip)
-                }
+                triggerFanForAuxIfRequired(basicSettings, configuration, equip)
+            } else {
+                logIt("Conditioning mode is OFF")
+                resetConditioning(relayStages, analogOutStages, basicSettings, equip)
             }
         } else {
             resetConditioning(relayStages, analogOutStages, basicSettings, equip)
@@ -311,31 +309,6 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
                 runSpecificAnalogFanSpeed(configuration, FanSpeed.HIGH, equip.analogOutStages)
             }
         }
-    }
-
-    private fun doCoolOnly(
-        basicSettings: BasicSettings,
-        configuration: Pipe2Configuration,
-        equip: Pipe2V2Equip
-    ) {
-        logIt("doCoolOnly: mode ")
-
-        if (supplyWaterTempTh2 > heatingThreshold) {
-            resetWaterValve(equip)
-        }
-        triggerFanForAuxIfRequired(basicSettings, configuration, equip)
-    }
-
-    private fun doHeatOnly(
-        basicSettings: BasicSettings,
-        configuration: Pipe2Configuration,
-        equip: Pipe2V2Equip
-    ) {
-        logIt("doHeatOnly: mode ")
-        if (supplyWaterTempTh2 < coolingThreshold) {
-            resetWaterValve(equip)
-        }
-        triggerFanForAuxIfRequired(basicSettings, configuration, equip)
     }
 
 
@@ -635,7 +608,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
 
     private fun operateAnalogOutputs(
         config: Pipe2Configuration, equip: Pipe2V2Equip, basicSettings: BasicSettings,
-        analogOutStages: HashMap<String, Int>, userIntents: UserIntents
+        analogOutStages: HashMap<String, Int>
     ) {
         config.apply {
             listOf(
@@ -738,8 +711,19 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
         when (controllerName) {
 
             ControllerNames.WATER_VALVE_CONTROLLER -> {
-                if (waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
-                    updateStatus(equip.waterValve, result as Boolean, StatusMsgKeys.WATER_VALVE.name)
+                if (waterSamplingStartTime == 0L && canWeDoConditioning(basicSettings)
+                    && isSupplyOppositeToConditioning(
+                        basicSettings.conditioningMode,
+                        supplyWaterTempTh2,
+                        heatingThreshold,
+                        coolingThreshold
+                    ).not()
+                ) {
+                    updateStatus(
+                        equip.waterValve,
+                        result as Boolean,
+                        StatusMsgKeys.WATER_VALVE.name
+                    )
                     if (result) {
                         isWaterValveActiveDueToLoop = true
                         lastWaterValveTurnedOnTime = System.currentTimeMillis()
@@ -917,13 +901,22 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
             equip.relayStages.remove(StatusMsgKeys.WATER_VALVE.name)
             equip.analogOutStages.remove(StatusMsgKeys.WATER_VALVE.name)
             logIt( "Resetting WATER_VALVE to OFF")
+            isWaterValveActiveDueToLoop = false
         }
     }
 
     private fun doAnalogWaterValveAction(
         port: Port, basicSettings: BasicSettings, analogOutStages: HashMap<String, Int>
     ) {
-        if (basicSettings.conditioningMode != StandaloneConditioningMode.OFF && basicSettings.fanMode != StandaloneFanStage.OFF) {
+
+        if (waterSamplingStartTime == 0L && canWeDoConditioning(basicSettings) && canWeRunFan(basicSettings)
+            && isSupplyOppositeToConditioning(
+                basicSettings.conditioningMode,
+                supplyWaterTempTh2,
+                heatingThreshold,
+                coolingThreshold
+            ).not()
+        ) {
             updateLogicalPoint(logicalPointsList[port]!!, waterValveLoop.data)
             if (waterValveLoop.data > 0) {
                 analogOutStages[StatusMsgKeys.WATER_VALVE.name] = 1

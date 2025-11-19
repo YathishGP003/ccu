@@ -68,10 +68,26 @@ fun canWeDoHeating(conditioningMode: StandaloneConditioningMode): Boolean {
 fun canWeDoConditioning(basicSettings: BasicSettings): Boolean {
     return (basicSettings.conditioningMode != StandaloneConditioningMode.OFF)
 }
+fun canWeDoConditioning(mode: StandaloneConditioningMode): Boolean {
+    return (mode != StandaloneConditioningMode.OFF)
+}
 fun canWeRunFan(basicSettings: BasicSettings): Boolean {
     return (basicSettings.fanMode != StandaloneFanStage.OFF)
 }
+fun canWeRunFan(basicSettings: MyStatBasicSettings): Boolean {
+    return (basicSettings.fanMode != MyStatFanStages.OFF)
+}
 
+fun isSupplyOppositeToConditioning(
+    conditioningMode: StandaloneConditioningMode,
+    supplyWaterTemp: Double, heatingThreshold: Double, coolingThreshold: Double
+): Boolean {
+    return when (conditioningMode) {
+        StandaloneConditioningMode.OFF, StandaloneConditioningMode.AUTO -> false
+        StandaloneConditioningMode.HEAT_ONLY -> (supplyWaterTemp < coolingThreshold)
+        StandaloneConditioningMode.COOL_ONLY -> (supplyWaterTemp > heatingThreshold)
+    }
+}
 fun canWeOperate(basicSettings: BasicSettings) = canWeDoConditioning(basicSettings)
 
 fun isUserIntentFanMode(fanOpMode: Point): Boolean {

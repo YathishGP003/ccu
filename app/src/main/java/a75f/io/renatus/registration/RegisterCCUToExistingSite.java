@@ -115,7 +115,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
 
         toastWarning = getLayoutInflater().inflate(R.layout.custom_toast_layout_warning, rootView.findViewById(R.id.custom_toast_layout_warning));
 
-        for (int addr = 1000; addr <= 10900; addr+=100) {
+        for (int addr = 1000; addr <= 11900; addr+=100) {
             addressBand.add(String.valueOf(addr));
         }
         ArrayAdapter<String> analogAdapter = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_dropdown_item, addressBand);

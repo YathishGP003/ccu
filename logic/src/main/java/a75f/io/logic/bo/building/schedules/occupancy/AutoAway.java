@@ -54,7 +54,9 @@ public class AutoAway implements OccupancyTrigger {
         if (occupancyMode == Occupancy.FORCEDOCCUPIED ||
                 occupancyMode == Occupancy.AUTOFORCEOCCUPIED ||
                 occupancyMode == Occupancy.UNOCCUPIED ||
-                occupancyMode == Occupancy.VACATION) {
+                occupancyMode == Occupancy.VACATION ||
+                occupancyMode == Occupancy.PRECONDITIONING) {
+            CcuLog.d( L.TAG_CCU_SCHEDULER, "AutoAway not applicable for occupancyMode : "+occupancyMode + " equipRef : "+occupancyUtil.getEquipRef());
             return false;
         }
 

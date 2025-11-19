@@ -668,7 +668,7 @@ fun heartBeatStatus(
     nodeAddress: String,
     equipRef: String = ""
 ): Boolean {
-    return HeartBeatUtil.isModbusModuleAlive(nodeAddress, equipRef)
+    return HeartBeatUtil.isModuleAlive(nodeAddress)
 }
 
 

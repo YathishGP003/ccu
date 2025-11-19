@@ -26,6 +26,7 @@ fun loadModbusZone(
     externalEquipsLayoutSetup(linearLayoutZonePoints, zoneDetailsView)
 
     val viewModel = NonTempProfileViewModel()
+    viewModel.profile = "modbus"
     nonTempProfileViewModels.add(viewModel)
     val points: List<ExternalPointItem>
     showExternalEquipPointsUI(composeView, viewModel, equipId, null)

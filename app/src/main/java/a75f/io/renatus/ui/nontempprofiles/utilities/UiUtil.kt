@@ -37,13 +37,15 @@ fun showExternalEquipPointsUI(
     connectNodeName: String?,
     remotePointUpdateInterface: RemotePointUpdateInterface? = null,
     rs485Text: String? = null,
-    address: Int? = null
+    address: Int? = null,
+    bacnetEquipTypeString: String = ""
 ) {
     composeView
         .showExternalPointsList(
             nonTempProfileViewModel,
             connectNodeName,
-            rs485Text = rs485Text
+            rs485Text = rs485Text,
+            bacnetEquipTypeString = bacnetEquipTypeString
         ) { selectedIndex: Int, point: Any ->
             backgroundExecutor.execute {
                 val externalPointItem = point as ExternalPointItem

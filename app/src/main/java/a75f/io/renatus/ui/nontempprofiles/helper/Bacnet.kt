@@ -31,13 +31,14 @@ fun loadBacnetZone(
     zoneDetailsView: View,
     linearLayoutZonePoints: LinearLayout,
     bacnetPointsList: List<BacnetZoneViewItem>,
+    bacnetEquipTypeString : String,
     remotePointUpdateInterface: RemotePointUpdateInterface
 ) {
     val composeView = zoneDetailsView.findViewById<ComposeView>(R.id.detailedComposeView)
     externalEquipsLayoutSetup(linearLayoutZonePoints, zoneDetailsView)
     val viewModel = NonTempProfileViewModel()
     nonTempProfileViewModels.add(viewModel)
-    showExternalEquipPointsUI(composeView, viewModel, equipId, null, remotePointUpdateInterface)
+    showExternalEquipPointsUI(composeView, viewModel, equipId, null, remotePointUpdateInterface,bacnetEquipTypeString = bacnetEquipTypeString)
 
     val bacnetDevice = externalEquipDevice as HashMap<*, *>
     val address = bacnetDevice["addr"].toString()

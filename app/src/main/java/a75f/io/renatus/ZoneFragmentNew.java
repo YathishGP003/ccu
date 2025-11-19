@@ -3105,6 +3105,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                             zoneDataForUi = new ZoneData(zoneDetails, nonTempEquip, true);
                             HashMap<Object,Object> bacnetDevice = CCUHsApi.getInstance().readEntity("device and equipRef == \"" + nonTempEquip.getId() + "\"");
                             visibleEquip = nonTempEquip;
+                            String bacnetEquipTypeString = "";
+                            if (nonTempEquip.getMarkers().contains(Tags.BACNET_MSTP)) {
+                                bacnetEquipTypeString = getString(R.string.bacnetMstpDevice);
+                            } else {
+                                bacnetEquipTypeString = getString(R.string.bacnetIpDevice);
+                            }
                             loadBacnetZone(
                                     nonTempProfileViewModels,
                                     nonTempEquip.getId(),
@@ -3114,6 +3120,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                                     inflater.inflate(R.layout.item_modbus_detail_view, null),
                                     linearLayoutZonePoints,
                                     bacNetPointsList,
+                                    bacnetEquipTypeString,
                                     remotePointUpdateInterface
                             );
                         }

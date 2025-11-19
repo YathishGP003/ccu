@@ -68,6 +68,7 @@ fun ComposeView.showExternalPointsList(
     nonTempProfileViewModel: NonTempProfileViewModel,
     connectNodeDeviceName: String?,
     rs485Text : String? = null,
+    bacnetEquipTypeString : String = "",
     onValueChange: (selectedIndex: Int, point: Any) -> Unit,
 
 ) {
@@ -77,7 +78,7 @@ fun ComposeView.showExternalPointsList(
             connectNodeDeviceName,
             onValueChange = { selectedIndex, point ->
                 onValueChange(selectedIndex, point)
-            }, rs485Text)
+            }, rs485Text,bacnetEquipTypeString = bacnetEquipTypeString)
     }
 }
 
@@ -87,7 +88,8 @@ fun ExternalPointsList(
     nonTempProfileViewModel: NonTempProfileViewModel,
     connectNodeDeviceName: String?,
     onValueChange: (selectedIndex: Int, point: ExternalPointItem) -> Unit,
-    rs485Text : String? = null
+    rs485Text : String? = null,
+    bacnetEquipTypeString : String = ""
 ) {
     val lastUpdatedTime = nonTempProfileViewModel.lastUpdated.value
     val pointList = nonTempProfileViewModel.detailedViewPoints
@@ -132,7 +134,6 @@ fun ExternalPointsList(
                     fontWeight = FontWeight.Normal,
                 )
             }
-        }
             Spacer(modifier = Modifier.height(16.dp))
             if (!lastUpdatedTime.id.isNullOrEmpty()) {
                 Box(modifier = Modifier.padding(bottom = 12.dp)) {
@@ -142,6 +143,7 @@ fun ExternalPointsList(
                     )
                 }
             }
+         }
         }
 
         Row(
@@ -153,8 +155,7 @@ fun ExternalPointsList(
                     color = Color.Black,
                     fontSize = 24.sp,
                     lineHeight = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.width(4.dp))
             }
@@ -162,7 +163,7 @@ fun ExternalPointsList(
             val detailedViewItem = nonTempProfileViewModel.detailedViewPoints.firstOrNull()
 
             if (detailedViewItem != null &&
-                detailedViewItem.profileType != "connectModule" && connectNodeDeviceName?.contains("External Equip" ) == false
+                detailedViewItem.profileType != "connectModule" && ( connectNodeDeviceName.isNullOrEmpty() || !connectNodeDeviceName.contains("External Equip" ))
             ) {
                 Box(modifier = Modifier.wrapContentSize()) {
                     HeartBeatCompose(
@@ -174,8 +175,20 @@ fun ExternalPointsList(
             }
         }
         val detailedViewItem = nonTempProfileViewModel.detailedViewPoints.firstOrNull()
+        if (detailedViewItem != null && detailedViewItem.profileType == "bacnet" && bacnetEquipTypeString.isNotEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    text = bacnetEquipTypeString,
+                    color = Color.DarkGray,
+                    fontSize = 18.sp,
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
         if (detailedViewItem != null &&
-            detailedViewItem.profileType != "connectModule" && connectNodeDeviceName?.contains("External Equip" ) == false
+            detailedViewItem.profileType != "connectModule" && ( connectNodeDeviceName.isNullOrEmpty() || !connectNodeDeviceName.contains("External Equip" ))
         ) {
             if (lastUpdatedTime.id != null) {
                 Box(modifier = Modifier.padding(bottom = 12.dp)) {

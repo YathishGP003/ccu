@@ -683,6 +683,7 @@ public class CreateNewSite extends Fragment {
                     CcuLog.d(TAG, "Registration operation started.");
                     CCUUtils.updateCcuSpecificEntitiesWithCcuRef(CCUHsApi.getInstance(), true);
                     CCUHsApi.getInstance().registerCcu(installerEmail, billingAdminEmail);
+                    CCUHsApi.getInstance().syncEntityWithPointWrite();
                     CCUHsApi.getInstance().resyncSiteTree();
                     Globals.getInstance().copyModels();
                     CcuLog.d(TAG, "Reregistration operation completed. Closing down progress dialog.");

@@ -62,9 +62,19 @@ class SQMetaDataHandler {
         val signature = sequenceMetaData.signature
         val lowcodeLength = sequenceMetaData.sizeInBytes
 
-        val addedDeviceList = appliedDetails["entitiesAdded"].asJsonArray.map { it.asString }
-        val finalDeviceList = appliedDetails["finalEntities"].asJsonArray.map { it.asString }
-        val removedDeviceList = appliedDetails["entitiesRemoved"].asJsonArray.map { it.asString }
+        val addedDeviceListRaw = appliedDetails["entitiesAdded"].asJsonArray.map { it.asString }
+        val finalDeviceListRaw = appliedDetails["finalEntities"].asJsonArray.map { it.asString }
+        val removedDeviceListRaw = appliedDetails["entitiesRemoved"].asJsonArray.map { it.asString }
+
+        val addedDeviceList = addedDeviceListRaw.filter { deviceId ->
+            hayStack.readMapById(deviceId).isNotEmpty()
+        }
+        val finalDeviceList = finalDeviceListRaw.filter { deviceId ->
+            hayStack.readMapById(deviceId).isNotEmpty()
+        }
+        val removedDeviceList = removedDeviceListRaw.filter { deviceId ->
+            hayStack.readMapById(deviceId).isNotEmpty()
+        }
 
         /*
         * Get device list where sequence version is greater than local version

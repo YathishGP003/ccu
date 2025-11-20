@@ -493,42 +493,6 @@ public class TestTagsDb extends CCUTagsDb {
         return ref.toCode();
     }
 
-    public String updateSettingPoint(SettingPoint p, String i) {
-        HDictBuilder b = new HDictBuilder()
-                .add("id", HRef.copy(i))
-                .add("dis", p.getDisplayName())
-                .add("point", HMarker.VAL)
-                .add("setting", HMarker.VAL)
-                .add("deviceRef", p.getDeviceRef())
-                .add("siteRef", p.getSiteRef())
-                .add("val", p.getVal())
-                .add("kind", p.getKind() == null ? "Str" : p.getKind());
-
-        if (p.getUnit() != null) b.add("unit", p.getUnit());
-        if(p.getCcuRef() != null){
-            b.add("ccuRef", p.getCcuRef());
-        }
-        if(p.getCreatedDateTime() != null){
-            b.add("createdDateTime", p.getCreatedDateTime());
-        }
-        if(p.getLastModifiedDateTime() != null){
-            b.add("lastModifiedDateTime", p.getLastModifiedDateTime());
-        }
-        if(p.getLastModifiedBy() != null){
-            b.add("lastModifiedBy", p.getLastModifiedBy());
-        }
-        if (p.getDomainName() != null) {
-            b.add("domainName", p.getDomainName());
-        }
-        for (String m : p.getMarkers()) {
-            b.add(m);
-        }
-
-        HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b.toDict());
-        return id.toCode();
-    }
-
     public String addDevice(Device d) {
         return addDeviceWithId(d, UUID.randomUUID().toString());
     }

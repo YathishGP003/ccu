@@ -3,6 +3,7 @@ package a75f.io.messaging.handler;
 import static a75f.io.api.haystack.CCUHsApi.INTENT_POINT_DELETED;
 import static a75f.io.api.haystack.CCUTagsDb.BROADCAST_BACNET_POINT_ADDED;
 import static a75f.io.logic.L.TAG_CCU_BACNET;
+import static a75f.io.logic.L.TAG_CCU_MESSAGING;
 import static a75f.io.logic.bo.util.CustomScheduleUtilKt.updateWritableDataUponCustomControlChanges;
 import static a75f.io.messaging.handler.DataSyncHandler.isCloudEntityHasLatestValue;
 import android.content.Context;
@@ -129,6 +130,11 @@ public class UpdateEntityHandler implements MessageHandler {
         while (it.hasNext()) {
             HRow row = (HRow) it.next();
             String entityId = row.get("id").toString();
+
+            if(!CCUHsApi.getInstance().isIdValid(entityId)) {
+                CcuLog.d(TAG_CCU_MESSAGING, "Skipping update entity for invalid id");
+                continue;
+            }
 
             if (isModbusInputOrDiscreteInput(row)) {
                 CcuLog.e(L.TAG_CCU_MESSAGING, "Ignore Message !"+ entityId);

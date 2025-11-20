@@ -165,8 +165,10 @@ import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.tuners.TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL
 import a75f.io.logic.util.PreferenceUtil
+import a75f.io.logic.util.PreferenceUtil.getClearInvalidWritableData
 import a75f.io.logic.util.PreferenceUtil.getMigrateDeleteRedundantOaoPointsBySystemEquip
 import a75f.io.logic.util.PreferenceUtil.getModbusKvtagsDataTypeUpdated
+import a75f.io.logic.util.PreferenceUtil.setClearInvalidWritableData
 import a75f.io.logic.util.PreferenceUtil.setMigrateDeleteRedundantOaoPointsBySystemEquip
 import a75f.io.logic.util.PreferenceUtil.setModbusKvtagsDataTypeUpdate
 import a75f.io.logic.util.addEquipScheduleStatusPoint
@@ -577,6 +579,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if (!PreferenceUtil.getMonitorCo2Migration()) {
             migrateMonitorCo2ProfilePoints()
             PreferenceUtil.setMonitorCo2Migration()
+        }
+        if(!getClearInvalidWritableData()) {
+            removeNullablePriorityData()
+            setClearInvalidWritableData()
         }
 
         hayStack.scheduleSync()
@@ -3924,7 +3930,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                                     "Deleting DAB based OAO point: ${oaoDabPointHDict.dis()} for id: ${oaoDabPointHDict.id()}"
                                 )
                                 hayStack.deleteEntityItem(oaoDabPointHDict.id().toString())
-                                hayStack.deleteWritableArray(oaoDabPointHDict.id().toString())
+                                hayStack.deletePointArray(oaoDabPointHDict.id().toString())
                             }
                     } else if (systemEquipDict.has(Tags.DAB)) {
                         CcuLog.d(TAG_CCU_MIGRATION_UTIL, "DAB System Equip found")
@@ -3935,7 +3941,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                                     "Deleting VAV based OAO point: ${oaoVavPointHDict.dis()} for id: ${oaoVavPointHDict.id()}"
                                 )
                                 hayStack.deleteEntityItem(oaoVavPointHDict.id().toString())
-                                hayStack.deleteWritableArray(oaoVavPointHDict.id().toString())
+                                hayStack.deletePointArray(oaoVavPointHDict.id().toString())
                             }
                     } else {
                         CcuLog.d(
@@ -4602,5 +4608,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 "Error during migration for Monitor Co2 Humidity Equips: ${e.message}"
             )
         }
+    }
+
+    private fun removeNullablePriorityData() {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Removing nullable priority andy entity data")
+        hayStack.deletePointArray("@null")
+        hayStack.deleteEntityLocally("@null")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Nullable priority data and entity removed")
     }
 }

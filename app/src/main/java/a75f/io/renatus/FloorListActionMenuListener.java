@@ -168,7 +168,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 				ArrayList<HashMap<Object, Object>> schedulablePoints = CCUHsApi.getInstance().readAllEntities("schedulable and zone and roomRef == \"" + sZone.getId()+"\"");
 				for (HashMap<Object, Object> point : schedulablePoints) {
 					if (point.get("writable") != null) {
-						CCUHsApi.getInstance().deleteWritableArray(point.get("id").toString());
+						CCUHsApi.getInstance().deletePointArray(point.get("id").toString());
 					}
 					CCUHsApi.getInstance().deleteEntityItem(point.get("id").toString());
 				}

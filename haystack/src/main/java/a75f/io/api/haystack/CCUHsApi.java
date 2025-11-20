@@ -546,13 +546,6 @@ public class CCUHsApi
         return pointId;
     }
 
-    public void updateSettingPoint(SettingPoint p, String id) {
-        p.setCcuRef(getCcuId());
-        p.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
-        String pointId = tagsDb.updateSettingPoint(p,id);
-        syncStatusService.addUnSyncedEntity(pointId);
-    }
-
     private boolean isDeviceNotCCU(Device device){
         return !device.getMarkers().contains("ccu");
     }
@@ -578,6 +571,11 @@ public class CCUHsApi
     }
 
     public void updateDevice(Device d, String id) {
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS, "Skipping update device for invalid id");
+            return;
+        }
+
         if(isDeviceNotCCU(d)){
             d.setCcuRef(getCcuId());
         }
@@ -657,6 +655,11 @@ public class CCUHsApi
     }
 
     public void updateSite(Site s, String id) {
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS, "Skipping update site for invalid id");
+            return;
+        }
+
         s.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
         s.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         s.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
@@ -669,6 +672,11 @@ public class CCUHsApi
 
     //Local site entity may be updated on pubnub notification which does not need to be synced back.
     public void updateSiteLocal(Site s, String id) {
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS, "Skipping update site for invalid id");
+            return;
+        }
+
         tagsDb.updateSite(s, id);
         updateLocationDataForWeatherUpdate(s);
     }
@@ -691,6 +699,12 @@ public class CCUHsApi
         }
         q.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         CcuLog.d(Tags.ADD_REMOVE_PROFILE, "updateEquip--->"+id+"<-->"+q);
+
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS, "Skipping update equip for invalid id");
+            return;
+        }
+
         tagsDb.updateEquip(q, id);
         if(!isBuildingTunerEquip(q)){
             if (syncStatusService.hasEntitySynced(id)) {
@@ -702,6 +716,12 @@ public class CCUHsApi
     public void updateBuildingTunerEquip(Equip q, String id, boolean syncToServer)
     {
         CcuLog.e(TAG_CCU_DOMAIN, "invoking updateBuildingTunerEquip");
+
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS, "Skipping update equip for invalid id");
+            return;
+        }
+
         q.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.updateEquip(q, id);
         if(syncToServer){
@@ -712,11 +732,21 @@ public class CCUHsApi
     }
 
     public void updateEquipLocally(Equip q, String id) {
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS, "Skipping update equip for invalid id");
+            return;
+        }
+
         tagsDb.updateEquip(q, id);
     }
 
     public void updatePoint(RawPoint r, String id)
     {
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS, "Skipping update rawPoint for invalid id");
+            return;
+        }
+
         r.setCcuRef(getCcuId());
         r.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.updatePoint(r, id);
@@ -727,6 +757,11 @@ public class CCUHsApi
 
     public void updatePoint(Point point, String id)
     {
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS, "Skipping update point for invalid id");
+            return;
+        }
+
         if(!isBuildingTunerPoint(point)){
             point.setCcuRef(getCcuId());
         }
@@ -741,6 +776,11 @@ public class CCUHsApi
     }
 
     public void updateBuildingTunerPoint(Point point, String id, boolean syncToServer) {
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS, "Skipping update point for invalid id");
+            return;
+        }
+
         point.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.updatePoint(point, id);
         if (syncToServer) {
@@ -754,6 +794,11 @@ public class CCUHsApi
 
     public void updateFloor(Floor r, String id)
     {
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS, "Skipping update floor for invalid id");
+            return;
+        }
+
         r.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.updateFloor(r, id);
         if (syncStatusService.hasEntitySynced(id)) {
@@ -763,11 +808,21 @@ public class CCUHsApi
     
     public void updateFloorLocally(Floor r, String id)
     {
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS, "Skipping update floor for invalid id");
+            return;
+        }
+
         tagsDb.updateFloor(r, id);
     }
 
     public void updateZone(Zone z, String id)
     {
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS, "Skipping update zone for invalid id");
+            return;
+        }
+
         z.setCcuRef(getCcuId());
         z.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.updateZone(z, id);
@@ -778,6 +833,11 @@ public class CCUHsApi
 
     public void updateZoneLocally(Zone z, String id)
     {
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS, "Skipping update zone for invalid id");
+            return;
+        }
+
         CcuLog.i("ccu_read_changes","updateZoneLocally  "+z.getScheduleRef());
         z.setCcuRef(getCcuId());
         tagsDb.updateZone(z, id);
@@ -1534,19 +1594,13 @@ public class CCUHsApi
         }
     }
 
-    public void deleteWritableArray(String id)
-    {
-        CcuLog.d(TAG_CCU_HS, "deleteWritableArray: " + id);
-        tagsDb.writeArrays.remove(id.replace("@", ""));
-    }
-
     public void deleteWritablePoint(String id) {
-        deleteWritableArray(id);
+        deletePointArray(id);
         deleteEntity(id);
     }
 
     public void deleteWritablePointLocally(String id) {
-        deleteWritableArray(id);
+        deletePointArray(id);
         deleteEntityLocally(id);
     }
 
@@ -1614,7 +1668,7 @@ public class CCUHsApi
             ArrayList<HashMap<Object, Object>> schedulablePoints = readAllEntities("schedulable and zone and roomRef == \"" + id+"\"");
             for (HashMap<Object, Object> point : schedulablePoints) {
                 if (point.get("writable") != null) {
-                    deleteWritableArray(point.get("id").toString());
+                    deletePointArray(point.get("id").toString());
                 }
                 deleteEntityItem(point.get("id").toString());
             }
@@ -1630,7 +1684,7 @@ public class CCUHsApi
             ArrayList<HashMap<Object, Object>> points = readAllEntities("point and equipRef == \"" + id + "\"");
             for (HashMap<Object, Object> point : points) {
                 if (point.get("writable") != null) {
-                    deleteWritableArray(point.get("id").toString());
+                    deletePointArray(point.get("id").toString());
                 }
                 deleteEntityItem(point.get("id").toString());
                 if(isBacNetEnabled()) {
@@ -1644,7 +1698,7 @@ public class CCUHsApi
             ArrayList<HashMap<Object, Object>> points = readAllEntities("point and deviceRef == \"" + id + "\"");
             for (HashMap<Object, Object> point : points) {
                 if (point.get("writable") != null) {
-                    deleteWritableArray(point.get("id").toString());
+                    deletePointArray(point.get("id").toString());
                 }
                 deleteEntityItem(point.get("id").toString());
             }
@@ -1654,7 +1708,7 @@ public class CCUHsApi
             }
         } else if (entity.get("point") != null) {
             if (entity.get("writable") != null) {
-                deleteWritableArray(entity.get("id").toString());
+                deletePointArray(entity.get("id").toString());
             }
             deleteEntityItem(entity.get("id").toString());
             hsClient.clearPointFromWatch(HRef.copy(entity.get("id").toString()));
@@ -3424,6 +3478,11 @@ public class CCUHsApi
     }
 
     public void updatePointWithoutUpdatingLastModifiedTime(Point point, String id) {
+        if(!isIdValid(id)) {
+            CcuLog.d(TAG_CCU_HS, "Skipping update point for invalid id");
+            return;
+        }
+
         if(!isBuildingTunerPoint(point)){
             point.setCcuRef(getCcuId());
         }
@@ -3634,7 +3693,7 @@ public class CCUHsApi
         return CCUHsApi.getInstance().readAllHDictByQuery(query);
     }
 
-    private boolean isIdValid(Object id) {
+    public boolean isIdValid(Object id) {
        return id != null && !id.toString().toLowerCase().contains("null");
     }
 

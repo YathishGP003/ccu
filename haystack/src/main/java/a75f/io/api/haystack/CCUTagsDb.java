@@ -1143,60 +1143,6 @@ public class CCUTagsDb extends HServer {
         return ref.toCode();
     }
 
-    public String updateSettingPoint(SettingPoint p, String i) {
-        HDictBuilder b = new HDictBuilder()
-                .add("id", HRef.copy(i))
-                .add("dis", p.getDisplayName())
-                .add("point", HMarker.VAL)
-                .add("setting", HMarker.VAL)
-                .add("siteRef", p.getSiteRef())
-                .add("val", Integer.parseInt(p.getVal()))
-                .add("kind", p.getKind() == null ? "Str" : p.getKind());
-
-        if (p.getUnit() != null) b.add("unit", p.getUnit());
-        if(p.getCcuRef() != null){
-            b.add("ccuRef", p.getCcuRef());
-        }
-        if(p.getCreatedDateTime() != null){
-            b.add("createdDateTime", p.getCreatedDateTime());
-        }
-        if(p.getLastModifiedDateTime() != null){
-            b.add("lastModifiedDateTime", p.getLastModifiedDateTime());
-        }
-        if(p.getLastModifiedBy() != null){
-            b.add("lastModifiedBy", p.getLastModifiedBy());
-        }
-        if (p.getDomainName() != null) {
-            b.add("domainName", p.getDomainName());
-        }
-        if(p.getIncrementVal() != null){
-            b.add("incrementVal", Integer.parseInt(p.getIncrementVal()));
-        }
-        if(p.getMinVal() != null){
-            b.add("minVal", Integer.parseInt(p.getMinVal()));
-        }
-        if(p.getMaxVal() != null){
-            b.add("maxVal", Integer.parseInt(p.getMaxVal()));
-        }
-        if(p.getEquipRef() != null){
-            b.add("equipRef", p.getEquipRef());
-        }
-        if(p.getDeviceRef() != null){
-            b.add("deviceRef", p.getDeviceRef());
-        }
-        for (String m : p.getMarkers()) {
-            b.add(m);
-        }
-        HRef id = (HRef) b.get("id");
-        HDict hDict = b.toDict();
-
-        if (!updateEntity(hDict, i)) {
-            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
-        }
-        tagsMap.put(id.toVal(), hDict);
-        return id.toCode();
-    }
-
     public String addDevice(Device d) {
         return addDeviceWithId(d, UUID.randomUUID().toString());
     }
@@ -1663,7 +1609,7 @@ public class CCUTagsDb extends HServer {
     public void deletePointArray(HRef id) {
         CcuLog.i("CCU_HAYSTACK","deletePointArray "+id.val);
         writeArrays.remove(id.toVal());
-        WritableArrayDBUtilKt.deleteEntitywithId(id.toString(), this.appContext);
+        WritableArrayDBUtilKt.deleteEntitywithId(id.toVal(), this.appContext);
     }
     
     public void deletePointArrayLevel(HRef id, int level) {
@@ -2052,11 +1998,6 @@ public class CCUTagsDb extends HServer {
 
 
         }
-    }
-
-    public void updateHDict(String localId, HDict hDict) {//rename
-        updateEntity(hDict,localId);
-
     }
 
     // This is an overridden to clear out his data for a specific id without

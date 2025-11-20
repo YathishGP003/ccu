@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import a75f.io.api.haystack.CCUHsApi;
+
 /**
  * HServer is the interface between HServlet and a database of
  * tag based entities.  All methods on HServer must be thread safe.
@@ -261,6 +263,11 @@ public abstract class HServer extends HProj
    */
   public final HGrid pointWriteArray(HRef id)
   {
+    if(!CCUHsApi.getInstance().isIdValid(id.val)) {
+        Log.d("HServer", "pointWriteArray - Invalid id: " + id.val);
+        throw new IllegalArgumentException("Invalid id: " + id.val);
+    }
+
     // lookup entity
     HDict rec = readById(id);
 
@@ -276,6 +283,10 @@ public abstract class HServer extends HProj
    */
   public final void pointWrite(HRef id, int level, HVal val, String who, HNum dur, HDict opts, HDateTime lastModifiedDateTime)
   {
+    if(!CCUHsApi.getInstance().isIdValid(id.val)) {
+      throw new IllegalArgumentException("Invalid id: " + id.val);
+    }
+
     // argument checks
     if (level < 1 || level > 17) throw new IllegalArgumentException("Invalid level 1-17: " + level);
     if (who == null) throw new IllegalArgumentException("who is null");

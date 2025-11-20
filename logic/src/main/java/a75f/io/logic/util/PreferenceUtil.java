@@ -147,6 +147,8 @@ public class PreferenceUtil {
     private static final String MIGRATE_AO_RELAY_MS_STATUS = "migrateAO&RelayEnumMS";
     private static final String MIGRATE_MONITOR_CO2_MAPPING = "MIGRATE_MONITOR_CO2_MAPPING";
 
+    private static final String MIGRATION_CLEAR_INVALID_WRITABLE_DATA = "migrationClearInvalidPriorityData";
+
     public static void setContext(Context c) {
         context= c;
     }
@@ -1113,5 +1115,13 @@ public class PreferenceUtil {
     }
     public static void setMonitorCo2Migration() {
         setBooleanPreference(MIGRATE_MONITOR_CO2_MAPPING, true);
+    }
+
+    public static boolean getClearInvalidWritableData() {
+        return getBooleanPreference(MIGRATION_CLEAR_INVALID_WRITABLE_DATA);
+    }
+
+    public static void setClearInvalidWritableData() {
+        setBooleanPreference(MIGRATION_CLEAR_INVALID_WRITABLE_DATA, true);
     }
 }

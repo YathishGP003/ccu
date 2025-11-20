@@ -18,6 +18,7 @@ import a75f.io.domain.api.Domain.createDomainDevicePoint
 import a75f.io.domain.api.Domain.createDomainPoint
 import a75f.io.domain.api.Domain.writeValAtLevelByDomain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.DomainName.migrationVersion
 import a75f.io.domain.config.DefaultProfileConfiguration
 import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.config.ProfileConfiguration
@@ -224,6 +225,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
          * Individual migration handlers should have proper check in place to avoid creating duplicate
          * entities during version downgrades.
          */
+        MyStatV2Migration.migrationVersion = migrationVersion
         CcuLog.i(L.TAG_CCU_SCHEDULER," isMigrationRequired $appVersion $migrationVersion")
         return appVersion != migrationVersion
     }

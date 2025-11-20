@@ -4,10 +4,10 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.devices.MyStatDevice
 import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
-import a75f.io.domain.devices.MyStatDevice
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
@@ -40,6 +40,7 @@ class MyStatV2Migration {
 
     companion object {
         const val MYSTAT_V2_MIGRATION = "MYSTAT_V2_MIGRATION_2.0"
+        lateinit var migrationVersion:String
         val cpuDynamicValues = listOf(
             DomainName.analog1MinCooling,
             DomainName.analog1MinHeating,
@@ -120,8 +121,11 @@ class MyStatV2Migration {
             if (relay4Enabled.pointExists().not() && relay4Association.pointExists().not()) {
                 CcuLog.d(
                     MYSTAT_V2_MIGRATION,
-                    "Skipping migration for equipId: $equipId as it is already MyStat V2 device"
+                    "migration version : $migrationVersion  Skipping migration for equipId: $equipId as it is already MyStat V2 device"
                 )
+                //if the version > 4.4.2 , we have already in correct enum value not no need to update the version
+                if(migrationVersion > "4.4.2") return@forEach
+
                 if (device.mystatDeviceVersion.readPointValue() > 1) {
                     device.mystatDeviceVersion.writePointValue(1.0)
                 } else {

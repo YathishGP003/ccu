@@ -16,11 +16,11 @@ jobs:
   pool:
     name: $(agentPool)
   steps:
-  # - task: JavaToolInstaller@0
-  #   inputs:
-  #     versionSpec: '11'
-  #     jdkArchitectureOption: 'x64'
-  #     jdkSourceOption: 'PreInstalled'
+  - task: Gradle@4
+    displayName: 'gradlew clean'
+    inputs:
+      gradleWrapperFile: 'gradlew'
+      tasks: 'clean'
   - task: Gradle@3
     displayName: 'gradlew assembleQA'
     inputs:
@@ -37,11 +37,11 @@ jobs:
   pool:
     name: $(agentPool)
   steps:
-  # - task: JavaToolInstaller@0
-  #   inputs:
-  #     versionSpec: '11'
-  #     jdkArchitectureOption: 'x64'
-  #     jdkSourceOption: 'PreInstalled'      
+  - task: Gradle@4
+    displayName: 'gradlew clean'
+    inputs:
+      gradleWrapperFile: 'gradlew'
+      tasks: 'clean'
   - task: Gradle@3
     displayName: 'gradlew assembleStaging'
     inputs:
@@ -58,11 +58,11 @@ jobs:
   pool:
     name: $(agentPool)
   steps:
-  # - task: JavaToolInstaller@0
-  #   inputs:
-  #     versionSpec: '11'
-  #     jdkArchitectureOption: 'x64'
-  #     jdkSourceOption: 'PreInstalled'       
+  - task: Gradle@4
+    displayName: 'gradlew clean'
+    inputs:
+      gradleWrapperFile: 'gradlew'
+      tasks: 'clean'
   - task: Gradle@3
     displayName: 'gradlew assembleProd'
     inputs:
@@ -79,11 +79,11 @@ jobs:
   pool:
     name: $(agentPool)
   steps:
-  # - task: JavaToolInstaller@0
-  #   inputs:
-  #     versionSpec: '11'
-  #     jdkArchitectureOption: 'x64'
-  #     jdkSourceOption: 'PreInstalled'       
+  - task: Gradle@4
+    displayName: 'gradlew clean'
+    inputs:
+      gradleWrapperFile: 'gradlew'
+      tasks: 'clean'
   - task: Gradle@3
     displayName: 'gradlew assembleCarrier_prod'
     inputs:
@@ -100,11 +100,11 @@ jobs:
   pool:
     name: $(agentPool)
   steps:
-  # - task: JavaToolInstaller@0
-  #   inputs:
-  #     versionSpec: '11'
-  #     jdkArchitectureOption: 'x64'
-  #     jdkSourceOption: 'PreInstalled'       
+  - task: Gradle@4
+    displayName: 'gradlew clean'
+    inputs:
+      gradleWrapperFile: 'gradlew'
+      tasks: 'clean'
   - task: Gradle@3
     displayName: 'gradlew assembleAiroverse_prod'
     inputs:

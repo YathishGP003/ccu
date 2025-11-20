@@ -566,8 +566,8 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
         if (association == mapping) {
             if (isAnalogType) {
                 MinMaxConfiguration(
-                    minLabel = "${getString(R.string.analog_Out)} ${getString(R.string.at)}  ${getString(R.string.min)} \n${displayName}",
-                    maxLabel = "${getString(R.string.analog_Out)}  ${getString(R.string.at)} ${getString(R.string.max)} \n${displayName}",
+                    minLabel = "${getString(R.string.analog_Out)} ${getString(R.string.at)} ${getString(R.string.min)} \n${displayName}",
+                    maxLabel = "${getString(R.string.analog_Out)} ${getString(R.string.at)} ${getString(R.string.max)} \n${displayName}",
                     itemList = minMaxVoltage,
                     unit = "V",
                     minDefault = minMax.min.toString(),
@@ -579,7 +579,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
 
             } else {
                 MinMaxConfiguration(
-                    minLabel = "${getString(R.string.universal_Out)} $index ${getString(R.string.at)}  ${getString(R.string.min)} \n${displayName}",
+                    minLabel = "${getString(R.string.universal_Out)} $index ${getString(R.string.at)} ${getString(R.string.min)} \n${displayName}",
                     maxLabel = "${getString(R.string.universal_Out)} $index ${getString(R.string.at)} ${getString(R.string.max)} \n${displayName}",
                     itemList = minMaxVoltage,
                     unit = "V",

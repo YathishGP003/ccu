@@ -2170,7 +2170,7 @@
     <string name="at">at</string>
     <string name="error_msg_device">"Please select a device type"</string>
     <string name="universal_out1_Fan_high">Universal-Out 1 \n at Fan High</string>
-    <string name="universal_out2_Fan_high">Universal-Out 1 \n at Fan High</string>
+    <string name="universal_out2_Fan_high">Universal-Out 2 \n at Fan High</string>
     <string name="learn_more">\u00A0Learn\u00A0More</string>
     <string name="universal_out_error_msg">Please check Universal-Out 1, Universal-Out 2 and CO2 is supported/configured correctly via jumpers on the MyStat device.</string>
     <string name ="analog_fan_low">Analog-Out \n at Fan Low</string>

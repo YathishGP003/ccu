@@ -173,7 +173,16 @@
         <item>  Fan Stage 5 </item>
         <item>  Humidifier </item>
         <item>  Dehumidifier </item>
-
+        <item>  Compressor Stage 1 </item>
+        <item>  Compressor Stage 2 </item>
+        <item>  Compressor Stage 3 </item>
+        <item>  Compressor Stage 4 </item>
+        <item>  Compressor Stage 5 </item>
+        <item>  O - Energize in Cooling </item>
+        <item>  B - Energize in Heating </item>
+        <item>  Fan Enable </item>
+        <item>  Occupied Enable</item>
+        <item>  DCV Damper</item>
 
     </string-array>
 

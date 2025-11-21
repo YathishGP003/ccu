@@ -424,10 +424,6 @@ public class RestoreCCU {
                             getDeviceAndPoints(zoneDeviceRow, retryCountCallback);
                         }
                     }
-                }
-                else if (equipRow.has(Tags.BACNET)) { // For Bacnet Client Equipment we have device entity added. We needs fetch device entity
-                    replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.COMPLETED.toString());
-                    equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
                 } else if((equipRow.has(Tags.CONNECTMODULE) ||  equipRow.has(Tags.PCN)) && equipRow.has(Tags.ZONE)) {
                     CcuLog.i(TAG, "Connect Node device already downloaded for : " + equipRow.get(Tags.DIS).toString());
                     replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.COMPLETED.toString());

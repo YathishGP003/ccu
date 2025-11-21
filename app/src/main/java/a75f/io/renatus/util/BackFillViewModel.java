@@ -82,10 +82,6 @@ public class BackFillViewModel {
         }
     }
 
-    public static int getBackFillDuration() {
-        return backfillPref.getBackFillTimeDuration();
-    }
-
     public static void generateToastMessage(View toastLayout) {
         Toast toast = new Toast(Globals.getInstance().getApplicationContext());
         toast.setGravity(Gravity.BOTTOM, 50, 50);

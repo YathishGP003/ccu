@@ -37,7 +37,9 @@
                     android:nextFocusDown="@+id/timeZoneSelector"
                     android:singleLine="true"
                     android:textColor="@color/input_textcolor"
-                    android:textSize="19.5dp" />
+                    android:inputType="text|textNoSuggestions"
+                    android:textSize="19.5sp" />
+
             </com.google.android.material.textfield.TextInputLayout>
 
 

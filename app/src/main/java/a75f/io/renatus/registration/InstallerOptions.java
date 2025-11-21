@@ -15,7 +15,6 @@ import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
 import static a75f.io.renatus.util.BackFillViewModel.BackFillDuration;
 import static a75f.io.renatus.util.BackFillViewModel.backfieldTimeSelectedValue;
 import static a75f.io.renatus.util.BackFillViewModel.generateToastMessage;
-import static a75f.io.renatus.util.BackFillViewModel.getBackFillDuration;
 import static a75f.io.renatus.util.BackFillViewModel.getBackFillTimeArrayAdapter;
 import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationErrorDialog;
 import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterVal;
@@ -441,7 +440,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
             linearLayout.setVisibility(View.INVISIBLE);
         });
 
-        buttonCancel.setOnClickListener(view -> backFillTimeSpinner.setSelection(BackFillDuration.getIndex(BackFillDuration.toIntArray(), getBackFillDuration(), 24)));
+        buttonCancel.setOnClickListener(view -> backFillTimeSpinner.setSelection(BackFillDuration.getIndex(BackFillDuration.toIntArray(), (int) Domain.ccuEquip.getBackFillDuration().readDefaultVal(), 24)));
 
         return rootView;
     }

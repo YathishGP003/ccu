@@ -34,10 +34,9 @@ public class UsbSerialUtil {
     public static boolean isBiskitDevice(UsbDevice device, Context context) {
         List<UsbDeviceItem> configs = UsbPrefHelper.getUsbDeviceList(context);
         for (UsbDeviceItem config : configs) {
-            if (config.getVendor().equals(String.valueOf(device.getVendorId())) &&
-                    config.getProductId().equals(String.valueOf(device.getProductId())) &&
+            if (config.getSerial().equalsIgnoreCase(device.getSerialNumber()) &&
                     config.getProtocol().equalsIgnoreCase("Biskit")) {
-                CcuLog.i("USB_MANAGER","isBiskitDevice: true for "+device.getVendorId()+"-"+device.getProductId());
+                CcuLog.i("USB_MANAGER","isBiskitDevice: true for "+device.getDeviceName()+":"+device.getSerialNumber());
                 return true;
             }
         }

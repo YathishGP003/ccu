@@ -613,6 +613,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
                 humidifierEnable,
                 dehumidifierEnable
             ).forEach { resetPoint(it) }
+            hssEquip.relayStages.remove(StatusMsgKeys.FAN_ENABLED.name)
         }
     }
 

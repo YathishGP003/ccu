@@ -163,7 +163,7 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
                 )
             }
         } else {
-            resetLogicalPoints()
+            resetLogicalPoints(equip)
         }
 
         updateOperatingMode(

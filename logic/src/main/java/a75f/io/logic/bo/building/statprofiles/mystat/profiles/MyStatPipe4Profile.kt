@@ -171,18 +171,21 @@ class MyStatPipe4Profile : MyStatProfile(L.TAG_CCU_MSPIPE4) {
         heatingLoopOutput = equip.heatingLoopOutput.readHisVal().toInt()
         fanLoopOutput = equip.fanLoopOutput.readHisVal().toInt()
         dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
-
-        operateRelays(
-            config as MyStatPipe4Configuration,
-            basicSettings,
-            equip,
-            userIntents,
-            controllerFactory
-        )
-        handleAnalogOutState(config, equip, basicSettings, equip.analogOutStages)
+        if (basicSettings.fanMode != MyStatFanStages.OFF) {
+            operateRelays(
+                config as MyStatPipe4Configuration,
+                basicSettings,
+                equip,
+                userIntents,
+                controllerFactory
+            )
+            handleAnalogOutState(config, equip, basicSettings, equip.analogOutStages)
+        } else {
+            resetLogicalPoints(equip)
+        }
 
         // Run the title 24 fan operation after the reset of all PI output is done
-        doFanOperationTitle24(basicSettings, equip, config)
+        doFanOperationTitle24(basicSettings, equip, config as MyStatPipe4Configuration)
         triggerFanForAuxIfRequired(basicSettings, config, equip)
         updateOperatingMode(
             currentTemp,

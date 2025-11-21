@@ -148,7 +148,7 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
         fanLoopCounter = 0
         hasZeroFanLoopBeenHandled = false
         resetLoopOutputs()
-        resetLogicalPoints()
+        resetLogicalPoints(statEquip)
         statEquip.analogOutStages.clear()
         statEquip.relayStages.clear()
 
@@ -257,8 +257,10 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
         return haystack.readHisValById(pointId)
     }
 
-    fun resetLogicalPoints() {
+    fun resetLogicalPoints(equip: HyperStatEquip) {
         logicalPointsList.forEach { (_, pointId) -> haystack.writeHisValById(pointId, 0.0) }
+        equip.relayStages.remove(StatusMsgKeys.FAN_ENABLED.name)
+
     }
 
     fun fallBackFanMode(
@@ -363,7 +365,7 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
             compressorLoopOutput = equip.compressorLoopOutput.readHisVal().toInt()
         }
 
-        resetLogicalPoints()
+        resetLogicalPoints(equip)
         resetEquip(equip)
         HyperStatUserIntentHandler.updateHyperStatStatus(ZoneTempState.TEMP_DEAD, equip, logTag)
     }

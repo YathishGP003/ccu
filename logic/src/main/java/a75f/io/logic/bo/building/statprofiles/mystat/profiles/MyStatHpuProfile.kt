@@ -151,7 +151,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
                 runFanOperationBasedOnAuxStages(equip, config)
             }
         } else {
-            resetLogicalPoints()
+            resetLogicalPoints(equip)
         }
 
         equip.equipStatus.writeHisVal(curState.ordinal.toDouble())
@@ -488,7 +488,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
         logIt( " is Door Open ? $isDoorOpen")
         if (isDoorOpen) {
             resetLoopOutputs()
-            resetLogicalPoints()
+            resetLogicalPoints(equip)
             equip.analogOutStages.clear()
             equip.relayStages.clear()
         }

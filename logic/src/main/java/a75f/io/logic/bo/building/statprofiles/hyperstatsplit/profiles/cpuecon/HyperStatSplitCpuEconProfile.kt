@@ -339,6 +339,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
                 compressorStage2, compressorStage3, auxHeatingStage1, auxHeatingStage2,
                 changeOverCooling, changeOverHeating
             ).forEach { resetPoint(it) }
+            hssEquip.relayStages.remove(StatusMsgKeys.FAN_ENABLED.name)
         }
     }
 

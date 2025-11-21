@@ -842,9 +842,10 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
         resetWaterValve(equip)
         resetAux(relayStages)
 
-        if (isConfigPresent(HsPipe2RelayMapping.FAN_ENABLED)) resetLogicalPoint(
-            relayLogicalPoints[HsPipe2RelayMapping.FAN_ENABLED.ordinal]!!
-        )
+        if (isConfigPresent(HsPipe2RelayMapping.FAN_ENABLED)) {
+            resetLogicalPoint(relayLogicalPoints[HsPipe2RelayMapping.FAN_ENABLED.ordinal]!!)
+            relayStages.remove(StatusMsgKeys.FAN_ENABLED.name)
+        }
         if (isConfigPresent(HsPipe2RelayMapping.OCCUPIED_ENABLED)) resetLogicalPoint(
             relayLogicalPoints[HsPipe2RelayMapping.OCCUPIED_ENABLED.ordinal]!!
         )
@@ -882,6 +883,10 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
             if (isConfigPresent(HsPipe2RelayMapping.FAN_HIGH_SPEED)) {
                 resetLogicalPoint(relayLogicalPoints[HsPipe2RelayMapping.FAN_HIGH_SPEED.ordinal]!!)
                 relayStages.remove(Stage.FAN_3.displayName)
+            }
+            if (isConfigPresent(HsPipe2RelayMapping.FAN_ENABLED)) {
+                resetLogicalPoint(relayLogicalPoints[HsPipe2RelayMapping.FAN_ENABLED.ordinal]!!)
+                relayStages.remove(StatusMsgKeys.FAN_ENABLED.name)
             }
             if (analogLogicalPoints.containsKey(HsPipe2AnalogOutMapping.FAN_SPEED.ordinal)) {
                 resetLogicalPoint(analogLogicalPoints[HsPipe2AnalogOutMapping.FAN_SPEED.ordinal]!!)

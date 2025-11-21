@@ -229,7 +229,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                 SubTitle(getString(R.string.enable))
             }
             Box(modifier = Modifier.weight(3.0f), contentAlignment = Alignment.Center) {
-                SubTitle(getString(R.string.enable))
+                SubTitle(getString(R.string.mapping))
             }
             Box(modifier = Modifier.weight(1.4f), contentAlignment = Alignment.Center) {
                 SubTitle(getString(R.string.test_signal))

@@ -140,7 +140,7 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
         previousFanLoopValStaged = 0
         fanLoopCounter = 0
         resetLoopOutputs()
-        resetLogicalPoints()
+        resetLogicalPoints(myStatEquip)
         myStatEquip.analogOutStages.clear()
         myStatEquip.relayStages.clear()
     }
@@ -285,8 +285,9 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
 
     fun getCurrentLogicalPointStatus(pointId: String): Double = haystack.readHisValById(pointId)
 
-    fun resetLogicalPoints() {
+    fun resetLogicalPoints(equip: MyStatEquip) {
         logicalPointsList.forEach { (_, pointId) -> haystack.writeHisValById(pointId, 0.0) }
+        equip.relayStages.remove(StatusMsgKeys.FAN_ENABLED.name)
     }
 
     fun fallBackFanMode(
@@ -371,7 +372,7 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
 
     private fun resetPoints(equip: MyStatEquip) {
         this.resetLoopOutputs()
-        resetLogicalPoints()
+        resetLogicalPoints(equip)
         MyStatUserIntentHandler.updateMyStatStatus(
             ZoneTempState.TEMP_DEAD,
             equip, L.TAG_CCU_MSHST
@@ -445,7 +446,7 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
             " is Door Open ? $isDoorOpen")
         if (isDoorOpen) {
             resetLoopOutputs()
-            resetLogicalPoints()
+            resetLogicalPoints(equip)
             analogOutStages.clear()
             relayStages.clear()
         }

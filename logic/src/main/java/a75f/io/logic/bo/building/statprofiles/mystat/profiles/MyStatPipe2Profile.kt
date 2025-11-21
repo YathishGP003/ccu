@@ -749,9 +749,12 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         resetWaterValve(equip)
         resetAux(relayStages)
 
-        if (isConfigPresent(MyStatPipe2RelayMapping.FAN_ENABLED)) resetLogicalPoint(
-            relayLogicalPoints[MyStatPipe2RelayMapping.FAN_ENABLED.ordinal]!!
-        )
+        if (isConfigPresent(MyStatPipe2RelayMapping.FAN_ENABLED)) {
+            resetLogicalPoint(
+                relayLogicalPoints[MyStatPipe2RelayMapping.FAN_ENABLED.ordinal]!!
+            )
+            relayStages.remove(StatusMsgKeys.FAN_ENABLED.name)
+        }
         if (isConfigPresent(MyStatPipe2RelayMapping.OCCUPIED_ENABLED)) resetLogicalPoint(
             relayLogicalPoints[MyStatPipe2RelayMapping.OCCUPIED_ENABLED.ordinal]!!
         )

@@ -136,7 +136,7 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
             operateRelays(config, basicSettings, equip, controllerFactory)
             operateAnalogOutputs(config, basicSettings, equip.analogOutStages, equip)
         } else {
-            resetLogicalPoints()
+            resetLogicalPoints(equip)
         }
         equip.equipStatus.writeHisVal(curState.ordinal.toDouble())
         var temperatureState = ZoneTempState.NONE

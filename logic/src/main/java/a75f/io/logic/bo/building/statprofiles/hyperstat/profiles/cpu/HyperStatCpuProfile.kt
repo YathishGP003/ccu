@@ -356,7 +356,7 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
             operateRelays(config as CpuConfiguration, basicSettings, equip, controllerFactory)
             operateAnalogOutputs(config, equip, basicSettings)
         } else {
-            resetLogicalPoints()
+            resetLogicalPoints(equip)
         }
 
         equip.equipStatus.writeHisVal(curState.ordinal.toDouble())

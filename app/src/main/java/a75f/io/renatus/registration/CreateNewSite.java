@@ -8,6 +8,8 @@ import static a75f.io.constants.SiteFieldConstants.GEOPOSTALCODE;
 import static a75f.io.constants.SiteFieldConstants.GEOSTATE;
 import static a75f.io.constants.SiteFieldConstants.ORGANIZATION;
 import static a75f.io.logic.UtilKt.getMigrationVersion;
+import static a75f.io.logic.bo.util.CCUUtils.isRecommendedVersionCheckIsNotFalse;
+import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_CONFIG_CHANGE;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.DAYLIGHT_SAVING_STATUS;
@@ -16,9 +18,6 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.UTC_OFFSET;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.getDayLightSavingStatus;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.getUtcOffset;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.sendBroadCast;
-import static a75f.io.logic.bo.util.CCUUtils.isRecommendedVersionCheckIsNotFalse;
-import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
-import static a75f.io.renatus.util.CCUUtils.updateMigrationDiagWithAppVersion;
 
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
@@ -87,9 +86,8 @@ import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.devices.CCUDevice;
 import a75f.io.domain.logic.CCUBaseConfigurationBuilder;
-import a75f.io.domain.logic.DiagEquipConfigurationBuilder;
 import a75f.io.domain.logic.CCUDeviceBuilder;
-import a75f.io.domain.logic.DomainManager;
+import a75f.io.domain.logic.DiagEquipConfigurationBuilder;
 import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
@@ -109,8 +107,8 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.util.DashboardUtilKt;
-import io.seventyfivef.domainmodeler.client.ModelDirective;
 import a75f.io.util.ExecutorTask;
+import io.seventyfivef.domainmodeler.client.ModelDirective;
 
 public class CreateNewSite extends Fragment {
     private static final String TAG = CreateNewSite.class.getSimpleName();
@@ -484,50 +482,59 @@ public class CreateNewSite extends Fragment {
                     String installerOrg = mSiteOrg.getText().toString().trim();
                     String ccuName = mSiteCCU.getText().toString().trim();
 
-                    if (!site.isEmpty()) {
-                        String siteId = site.get("id").toString();
-                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState,
-                                siteCountry, siteId, installerOrg, installerEmail,
-                                facilityManagerEmail, billingAdminEmail);
-                    } else {
-                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry,
-                                installerOrg, installerEmail, facilityManagerEmail, billingAdminEmail);
-                    }
 
-                    Intent locationUpdateIntent = new Intent(RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED);
-                    getContext().sendBroadcast(locationUpdateIntent);
-                    boolean isCCUDeviceExists = !CCUHsApi.getInstance().readEntity("ccu and device").isEmpty();
-                    CCUDevice ccuDevice = Domain.INSTANCE.checkCCUDeviceInitialisedAndGet();
+                    ExecutorTask.executeAsync(
+                            () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Saving details..."),
+                            () -> {
+                                CCUDevice ccuDevice = Domain.INSTANCE.checkCCUDeviceInitialisedAndGet();
+                                if (!site.isEmpty()) {
+                                    String siteId = site.get("id").toString();
+                                    updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId, installerOrg, installerEmail, facilityManagerEmail, billingAdminEmail);
+                                } else {
+                                    saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail, facilityManagerEmail, billingAdminEmail);
+                                }
 
-                    if (ccuDevice != null && isCCUDeviceExists) {
-                        if (!ccuDevice.getCcuDisName().equals(ccuName) ||
-                                !ccuDevice.getInstallerEmail().equals(installerEmail) ||
-                                !ccuDevice.getManagerEmail().equals(facilityManagerEmail)) {
+                                Intent locationUpdateIntent = new Intent(RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED);
+                                getContext().sendBroadcast(locationUpdateIntent);
+                                boolean isCCUDeviceExists = !CCUHsApi.getInstance().readEntity("ccu and device").isEmpty();
 
-                            CcuLog.d(TAG, "Update CCU " + ccuDevice.getCcuDisName());
-                            CCUDeviceBuilder ccuDeviceBuilder = new CCUDeviceBuilder();
-                            ccuDeviceBuilder.buildCCUDevice(Domain.ccuDevice.getEquipRef(),
-                                    site.get("id").toString(), ccuName, installerEmail,
-                                    Domain.ccuDevice.getManagerEmail(),
-                                    Domain.INSTANCE.checkSystemEquipInitialisedAndGetId()
-                            );
-                            L.ccu().setCCUName(ccuName);
-                        }
+                                if (ccuDevice != null && isCCUDeviceExists) {
+                                    if (!ccuDevice.getCcuDisName().equals(ccuName) ||
+                                            !ccuDevice.getInstallerEmail().equals(installerEmail) ||
+                                            !ccuDevice.getManagerEmail().equals(facilityManagerEmail)) {
 
-                    } else {
-                        String ccuRef = getCcuRef(ccuName, installerEmail, facilityManagerEmail, billingAdminEmail);
-                        L.ccu().setCCUName(ccuName);
-                        CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuRef));
-                    }
-                    L.saveCCUState();
-                    CCUHsApi.getInstance().syncEntityTree();
-                    Toast.makeText(getActivity(), requireContext().getString(R.string.edited_details_saved_successfully_toast), Toast.LENGTH_LONG).show();
-                    enableViews(false);
-                    btnEditSite.setText(getResources().getString(R.string.title_edit));
-                    ControlMote.updateOnSiteNameChange();
-                    updateBacnetConfig(siteName, ccuName);
+                                        CcuLog.d(TAG, "Update CCU " + ccuDevice.getCcuDisName());
+                                        CCUDeviceBuilder ccuDeviceBuilder = new CCUDeviceBuilder();
+                                        ccuDeviceBuilder.buildCCUDevice(Domain.ccuDevice.getEquipRef(),
+                                                site.get("id").toString(), ccuName, installerEmail,
+                                                Domain.ccuDevice.getManagerEmail(),
+                                                Domain.INSTANCE.checkSystemEquipInitialisedAndGetId()
+                                        );
+                                        L.ccu().setCCUName(ccuName);
+
+                                    }
+
+                                } else {
+                                    String ccuRef = getCcuRef(ccuName, installerEmail, facilityManagerEmail, billingAdminEmail);
+                                    L.ccu().setCCUName(ccuName);
+                                    CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuRef));
+                                }
+
+                                L.saveCCUState();
+                                CCUHsApi.getInstance().syncEntityTree();
+                                ControlMote.updateOnSiteNameChange();
+                                updateBacnetConfig(siteName, ccuName);
+                            },
+                            () -> {
+                                ProgressDialogUtils.hideProgressDialog();
+                                Toast.makeText(getActivity(), "Edited details saved successfully", Toast.LENGTH_LONG).show();
+                                enableViews(false);
+                                btnEditSite.setText(getResources().getString(R.string.title_edit));
+                            }
+                    );
                 } else {
-                    Toast.makeText(getActivity(), requireContext().getString(R.string.please_fill_proper_details), Toast.LENGTH_LONG).show();
+                    ProgressDialogUtils.hideProgressDialog();
+                    Toast.makeText(getActivity(), "Please fill proper details", Toast.LENGTH_LONG).show();
                 }
             }
         };

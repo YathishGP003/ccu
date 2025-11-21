@@ -2856,35 +2856,40 @@ public class CCUHsApi
     }
 
     public void updateTimeZone(String newTz) {
-        ArrayList<HashMap<Object, Object>> allPoints = readAllEntities("point");
-        for (HashMap<Object, Object> point : allPoints ) {
-            if (point.containsKey("physical")) {
-                RawPoint updatedPoint = new RawPoint.Builder().setHashMap(point).setTz(newTz).build();
-                updatePoint(updatedPoint, updatedPoint.getId());
-            } else {
-                if (point.containsKey("schedule")
-                        && point.containsKey("point")) {
-                    HDict recurringScheduleDict = CCUHsApi.getInstance().readHDictById(point.get("id").toString());
-                    CcuLog.d(TAG_CCU_HS, "updateTimeZone: Recurring Schedule Dict: " + recurringScheduleDict);
-                    CCUHsApi.getInstance().updateRecurringSchedule(point.get("id").toString(), recurringScheduleDict);
-                } else if (point.containsKey("event")
-                        && point.containsKey("point")) {
-                    HDict eventDict = CCUHsApi.getInstance().readHDictById(point.get("id").toString());
-                    CcuLog.d(TAG_CCU_HS, "updateTimeZone: Event Dict: " + eventDict);
-                    CCUHsApi.getInstance().updateEventSchedule(point.get("id").toString(), eventDict);
-                } else {
-                    Point updatedPoint = new Point.Builder().setHashMap(point).setTz(newTz).build();
+       // running this on background thread as it may take time to update all points and equips
+        ExecutorTask.executeBackground(() -> {
+            List<HDict> allPoints = readAllHDictByQuery("point");
+            for (HDict point : allPoints) {
+                if (point.has("physical")) {
+                    RawPoint updatedPoint = new RawPoint.Builder().setHDict(point).setTz(newTz).build();
                     updatePoint(updatedPoint, updatedPoint.getId());
+                } else {
+                    if (point.has("schedule")
+                            && point.has("point")) {
+                        HDict recurringScheduleDict = CCUHsApi.getInstance().readHDictById(point.get("id").toString());
+                        CcuLog.d(TAG_CCU_HS, "updateTimeZone: Recurring Schedule Dict: " + recurringScheduleDict);
+                        CCUHsApi.getInstance().updateRecurringSchedule(point.get("id").toString(), recurringScheduleDict);
+                    } else if (point.has("event")
+                            && point.has("point")) {
+                        HDict eventDict = CCUHsApi.getInstance().readHDictById(point.get("id").toString());
+                        CcuLog.d(TAG_CCU_HS, "updateTimeZone: Event Dict: " + eventDict);
+                        CCUHsApi.getInstance().updateEventSchedule(point.get("id").toString(), eventDict);
+                    } else {
+                        Point updatedPoint = new Point.Builder().setHDict(point).setTz(newTz).build();
+                        updatePoint(updatedPoint, updatedPoint.getId());
+                    }
                 }
+
             }
 
-        }
+            List<HDict> allEquips = readAllHDictByQuery("equip");
 
-        ArrayList<HashMap<Object, Object>> allEquips = readAllEntities("equip");
-        for(HashMap<Object, Object> equip : allEquips) {
-            Equip updatedEquip = new Equip.Builder().setHashMap(equip).setTz(newTz).build();
-            updateEquip(updatedEquip, updatedEquip.getId());
-        }
+            for (HDict equip : allEquips) {
+                Equip updatedEquip = new Equip.Builder().setHDict(equip).setTz(newTz).build();
+                updateEquip(updatedEquip, updatedEquip.getId());
+            }
+            CCUHsApi.getInstance().syncEntityTree();
+        });
     }
 
     public String getCCUUserName() {

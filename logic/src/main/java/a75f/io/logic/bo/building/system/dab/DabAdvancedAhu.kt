@@ -147,10 +147,11 @@ class DabAdvancedAhu : DabSystemProfile() {
         currentOccupancy.data =
             ScheduleManager.getInstance().systemOccupancy.ordinal.toDouble()
         var economization = 0.0
-        if (systemCoolingLoopOp > 0) {
+        if (systemCoolingLoopOp > 0 || systemSatCoolingLoopOp > 0) {
             economization =
                 if ((L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable) || AdvAhuEconAlgoHandler.isFreeCoolingOn()) 1.0 else 0.0
         }
+        CcuLog.d(L.TAG_CCU_SYSTEM, "economization:active $economization")
         economizationAvailable.data = economization
         systemStatusHandler = SystemStageHandler(systemEquip.cmEquip.conditioningStages)
         connectStatusHandler = SystemStageHandler(systemEquip.connectEquip1.conditioningStages)
@@ -649,8 +650,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.connectEquip1,
             advancedAhuImpl,
             systemCoolingLoopOp,
-            cnAnalogControlsEnabled,
-            ahuSettings
+            cnAnalogControlsEnabled
         )
         val scheduleStatus = ScheduleManager.getInstance().systemStatusString
         CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: $systemStatus")
@@ -673,7 +673,6 @@ class DabAdvancedAhu : DabSystemProfile() {
     override fun getStatusMessage(): String {
         cmAnalogControlsEnabled = advancedAhuImpl.getEnabledAnalogControls(systemEquip.cmEquip)
         val systemStages = systemEquip.cmEquip.conditioningStages
-        val economizerActive = isOaEconActive() || isConnectEconActive()
         if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(systemEquip.cmEquip, systemEquip.connectEquip1)) return "Emergency Shut Off mode is active"
         val systemStatus = StringBuilder().apply {
             append(if (systemStages.loadFanStage1.readHisVal() > 0 ||systemEquip.cmEquip.fanPressureStage1Feedback.readHisVal() > 0) "1" else "")
@@ -723,7 +722,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             heatingStatus.append(" ON ")
         }
 
-        if (economizerActive && !(!isSystemOccupied && isLockoutActiveDuringUnoccupied)) {
+        if (economizationAvailable.data > 0 && !(!isSystemOccupied && isLockoutActiveDuringUnoccupied)) {
             systemStatus.insert(0, "Free Cooling Used | ")
         }
 
@@ -740,7 +739,7 @@ class DabAdvancedAhu : DabSystemProfile() {
         }
         // 1. When the economizer from OAO system profile is active, then cooling status is on only if the cooling loop output is greater than economizingToMainCoolingLoopMap
         // 2. When the economizer from OAO system profile is not active, then cooling status is on only if the cooling loop output is greater than 0
-        if (economizerActive) {
+        if (economizationAvailable.data > 0) {
             // Only if te systemCoolingLoopOp greater than economizingToMainCoolingLoopMap, update the analog cooling status
             var economizingToMainCoolingLoopMap = 30.0
             if (isOaEconActive()) {

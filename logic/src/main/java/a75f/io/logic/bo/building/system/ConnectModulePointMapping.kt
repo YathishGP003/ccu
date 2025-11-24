@@ -16,7 +16,7 @@ enum class AdvancedAhuAnalogOutAssociationTypeConnect {
 }
 
 fun getConnectRelayAssociationMap(connectEquip1: ConnectModuleEquip) : Map<Point, Point> {
-    val associations: MutableMap<Point, Point> = HashMap()
+    val associations: MutableMap<Point, Point> = LinkedHashMap()
     if (connectEquip1.equipRef.contentEquals("null")) {
         return associations
     }
@@ -34,7 +34,7 @@ fun getConnectRelayAssociationMap(connectEquip1: ConnectModuleEquip) : Map<Point
 
 
 fun getConnectAnalogAssociationMap(connectEquip1: ConnectModuleEquip): Map<Point, Point> {
-    val associations: MutableMap<Point, Point> = HashMap()
+    val associations: MutableMap<Point, Point> = LinkedHashMap()
 
     if (connectEquip1.equipRef.contentEquals("null")) {
         return associations

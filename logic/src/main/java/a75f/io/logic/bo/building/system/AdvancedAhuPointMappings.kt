@@ -10,9 +10,6 @@ import a75f.io.logic.bo.building.system.util.DuctPressureSensorSource
 enum class AdvancedAhuRelayAssociationType {
     LOAD_COOLING, LOAD_HEATING, LOAD_FAN, HUMIDIFIER, DEHUMIDIFIER, SAT_COOLING, SAT_HEATING, FAN_PRESSURE, OCCUPIED_ENABLE, FAN_ENABLE, AHU_FRESH_AIR_FAN_COMMAND, EXHAUST_FAN, COMPRESSOR_SPEED,CHANGE_OVER_O_COOLING, CHANGE_OVER_B_HEATING ;
 
-    fun isConditioningStage() = this == LOAD_COOLING || this == SAT_COOLING || this == LOAD_HEATING || this == SAT_HEATING
-    fun isSatStage() = this == SAT_COOLING || this == SAT_HEATING
-    fun isLoadStage() = this == LOAD_COOLING || this == LOAD_HEATING
 }
 
 enum class AdvancedAhuAnalogOutAssociationType {
@@ -20,7 +17,7 @@ enum class AdvancedAhuAnalogOutAssociationType {
 }
 
 fun getCMRelayAssociationMap(systemEquip: AdvancedHybridSystemEquip): Map<Point, Point> {
-    val associations: MutableMap<Point, Point> = HashMap()
+    val associations: MutableMap<Point, Point> = LinkedHashMap()
     associations[systemEquip.relay1OutputEnable] = systemEquip.relay1OutputAssociation
     associations[systemEquip.relay2OutputEnable] = systemEquip.relay2OutputAssociation
     associations[systemEquip.relay3OutputEnable] = systemEquip.relay3OutputAssociation
@@ -33,7 +30,7 @@ fun getCMRelayAssociationMap(systemEquip: AdvancedHybridSystemEquip): Map<Point,
 }
 
 fun getCMAnalogAssociationMap(systemEquip: AdvancedHybridSystemEquip): Map<Point, Point> {
-    val associations: MutableMap<Point, Point> = HashMap()
+    val associations: MutableMap<Point, Point> = LinkedHashMap()
     associations[systemEquip.analog1OutputEnable] = systemEquip.analog1OutputAssociation
     associations[systemEquip.analog2OutputEnable] = systemEquip.analog2OutputAssociation
     associations[systemEquip.analog3OutputEnable] = systemEquip.analog3OutputAssociation

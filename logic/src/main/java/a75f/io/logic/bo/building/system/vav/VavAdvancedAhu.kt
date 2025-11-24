@@ -139,10 +139,11 @@ open class VavAdvancedAhu : VavSystemProfile() {
         currentOccupancy.data =
             ScheduleManager.getInstance().systemOccupancy.ordinal.toDouble()
         var economization = 0.0
-        if (systemCoolingLoopOp > 0) {
+        if (systemCoolingLoopOp > 0 || systemSatCoolingLoopOp > 0) {
             economization =
                 if ((L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable) || AdvAhuEconAlgoHandler.isFreeCoolingOn()) 1.0 else 0.0
         }
+        CcuLog.d(L.TAG_CCU_SYSTEM, "economization:active $economization")
         economizationAvailable.data = economization
         systemStatusHandler = SystemStageHandler(systemEquip.cmEquip.conditioningStages)
         connectStatusHandler = SystemStageHandler(systemEquip.connectEquip1.conditioningStages)
@@ -682,8 +683,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.connectEquip1,
             advancedAhuImpl,
             systemCoolingLoopOp,
-            cnAnalogControlsEnabled,
-            ahuSettings
+            cnAnalogControlsEnabled
         )
         val scheduleStatus = ScheduleManager.getInstance().systemStatusString
         CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: $systemStatus")
@@ -705,7 +705,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
     override fun getStatusMessage(): String {
         cmAnalogControlsEnabled = advancedAhuImpl.getEnabledAnalogControls(systemEquip.cmEquip)
-        val economizerActive = isOaEconActive() || isConnectEconActive()
         if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(systemEquip = systemEquip.cmEquip))
             return "Emergency Shut Off mode is active"
         val systemStatus = StringBuilder().apply {
@@ -756,7 +755,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             heatingStatus.append(" ON ")
         }
 
-        if (economizerActive && !(!isSystemOccupied && isLockoutActiveDuringUnoccupied)) {
+        if (economizationAvailable.data > 0 && !(!isSystemOccupied && isLockoutActiveDuringUnoccupied)) {
             systemStatus.insert(0, "Free Cooling Used | ")
         }
 
@@ -771,7 +770,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         ) {
             analogStatus.append("| Fan ON ")
         }
-        if(economizerActive) {
+        if(economizationAvailable.data > 0) {
             var economizingToMainCoolingLoopMap = 30.0
 
             // Only if te systemCoolingLoopOp greater than economizingToMainCoolingLoopMap, update the analog cooling status

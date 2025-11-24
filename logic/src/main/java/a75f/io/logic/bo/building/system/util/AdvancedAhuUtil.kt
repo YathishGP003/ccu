@@ -247,8 +247,7 @@ fun isConnectModuleExist(): Boolean {
 
  fun getConnectModuleSystemStatus(
      connectEquip: ConnectModuleEquip, advancedAhuImpl: AdvancedAhuAlgoHandler,
-     coolingLoopOutput: Double, analogControlsEnabled: Set<AdvancedAhuAnalogOutAssociationType>,
-     ahuSettings: AhuSettings
+     coolingLoopOutput: Double, analogControlsEnabled: Set<AdvancedAhuAnalogOutAssociationType>
  ): String {
     val systemEquip = getAdvancedAhuSystemEquip()
     if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(systemEquip = systemEquip, connectEquip1 = connectEquip)) {
@@ -309,7 +308,7 @@ fun isConnectModuleExist(): Boolean {
         heatingStatus.insert(0, "Heating Stage ")
         heatingStatus.append(" ON ")
     }
-    val isEconActive = AdvAhuEconAlgoHandler.isFreeCoolingOn() || (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable)
+    val isEconActive = L.ccu().systemProfile.coolingLoopOp > 0 &&(AdvAhuEconAlgoHandler.isFreeCoolingOn() || (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable))
     if (isEconActive && !needToShowFreeCooling()) {
         connectModuleSystemStatus.insert(0, "Free Cooling Used | ")
     }

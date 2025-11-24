@@ -652,7 +652,7 @@ public class Globals {
                         case MODBUS_EMR_ZONE:
                         case MODBUS_DEFAULT:
                             ModbusProfile mbProfile = new ModbusProfile();
-                            mbProfile.addMbEquip(Short.parseShort(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
+                            mbProfile.addMbEquip(Short.parseShort(eq.getGroup()), ProfileType.valueOf(eq.getProfile()), eq.getRoomRef());
                             L.ccu().zoneProfiles.add(mbProfile);
                             break;
                         case BACNET_DEFAULT:
@@ -691,7 +691,7 @@ public class Globals {
         for (HashMap<Object, Object> m : equips) {
             ModbusProfile mbProfile = new ModbusProfile();
             short address = Short.parseShort(m.get("group").toString());
-            mbProfile.addMbEquip(address, ProfileType.MODBUS_BTU);
+            mbProfile.addMbEquip(address, ProfileType.MODBUS_BTU, m.get("roomRef").toString());
             L.ccu().zoneProfiles.add(mbProfile);
         }
 
@@ -704,7 +704,7 @@ public class Globals {
         for (HashMap<Object, Object> m : emEquips) {
             ModbusProfile mbProfile = new ModbusProfile();
             short address = Short.parseShort(m.get("group").toString());
-            mbProfile.addMbEquip(address, ProfileType.MODBUS_EMR);
+            mbProfile.addMbEquip(address, ProfileType.MODBUS_EMR, m.get("roomRef").toString());
             L.ccu().zoneProfiles.add(mbProfile);
         }
 

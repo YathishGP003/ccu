@@ -310,6 +310,12 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
         }
         CcuLog.i(Domain.LOG_TAG, "Check modbus slave ${equipModel.value.slaveId.value} " +
                 "exists on ${equipModel.value.port.value}")
+
+        if (L.modbusSlaveIdExistsInTheRoom(equipModel.value.slaveId.value.toShort(), zoneRef)) {
+            showToast("Slave Id " + equipModel.value.slaveId.value + " already exists in the zone, choose " +
+                    "another slave id to proceed",context)
+            return false
+        }
         if (L.isModbusSlaveIdExists(equipModel.value.slaveId.value.toShort(), equipModel.value.port.value)) {
             showToast("Slave Id " + equipModel.value.slaveId.value + " already exists, choose " +
                     "another slave id to proceed",context)

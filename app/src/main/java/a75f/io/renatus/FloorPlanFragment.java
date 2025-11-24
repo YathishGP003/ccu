@@ -239,7 +239,7 @@ public class FloorPlanFragment extends Fragment {
     }
 
 
-    private Zone getSelectedZone() {
+    public Zone getSelectedZone() {
         selectedZone = roomList.get(mRoomListAdapter.getSelectedPostion());
         return selectedZone;
     }

@@ -113,7 +113,7 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 			for (Device d : HSUtil.getDevices(sZone.getId())) {
 
 				//Todo Notifies to BACnet Data Layer
-				L.removeHSDeviceEntities(Long.parseLong(d.getAddr()));
+				L.removeHSDeviceEntities(Long.parseLong(d.getAddr()), sZone.getId());
 			}
 			CCUHsApi.getInstance().deleteEntityTree(sZone.getId());
 			CCUHsApi.getInstance().saveTagsData();

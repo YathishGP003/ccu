@@ -127,7 +127,7 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 	{
 		for(Long selectedModule : seletedModules)
 		{
-			L.removeHSDeviceEntities(selectedModule);
+			L.removeHSDeviceEntities(selectedModule, floorPlanActivity.getSelectedZone().getId());
 		}
 
 		ExecutorTask.executeBackground( () -> {

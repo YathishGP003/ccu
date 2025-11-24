@@ -157,6 +157,29 @@ public class L
         return EncryptionPrefs.getBLELinkKey();
     }
 
+    public static boolean modbusSlaveIdExistsInTheRoom(Short slaveId, String roomRef) {
+        CcuLog.d(TAG_CCU_MODBUS, "Checking Modbus slave ID existence: " + slaveId + " in room: " + roomRef);
+        CCUHsApi hsApi = CCUHsApi.getInstance();
+        ArrayList<HashMap<Object, Object>> nodes = hsApi.readAllEntities("device and modbus and roomRef == \"" + roomRef + "\"");
+        List<Integer> lowCodeSlaveIdList = LowCodeUtil.Companion.getLowCodeSlaveIdList(hsApi);
+        if(nodes.isEmpty() && lowCodeSlaveIdList.isEmpty()){
+            return false;
+        }
+
+        for (HashMap<Object,Object> node : nodes) {
+            if (node.get("addr").toString().equals(String.valueOf(slaveId))) {
+                return true;
+            }
+        }
+        for (Integer node : lowCodeSlaveIdList) {
+            if (node == slaveId.intValue()) {
+                return true;
+            }
+        }
+        CcuLog.d(TAG_CCU_MODBUS, "Modbus slave ID " + slaveId + " does not exist in room: " + roomRef);
+        return false;
+    }
+
 
     public static boolean isModbusSlaveIdExists(Short slaveId, String port) {
         CcuLog.d(TAG_CCU_MODBUS, "Checking Modbus slave ID existence: " + slaveId + " on port: " + port);
@@ -392,12 +415,12 @@ public class L
     }
 
 
-    public static void removeHSDeviceEntities(Long node) {
+    public static void removeHSDeviceEntities(Long node, String roomRef) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
         if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.getNodeAddress() == node) {
             L.ccu().oaoProfile = null;
         }
-        HashMap<Object, Object> equip = hsApi.readEntity("equip and group == \""+node+"\"");
+        HashMap<Object, Object> equip = hsApi.readEntity("equip and group == \""+node+"\" and roomRef == \""+roomRef+"\"");
         if (equip.get("id") != null)
         {
             hsApi.deleteEntityTree(equip.get("id").toString());
@@ -412,12 +435,12 @@ public class L
            ConnectNodeUtil.Companion.removeConnectNodeEquips(node.toString(), hsApi);
         }
 
-        HashMap<Object, Object> device = hsApi.readEntity("device and addr == \""+node+"\"");
+        HashMap<Object, Object> device = hsApi.readEntity("device and addr == \""+node+"\" and roomRef == \""+roomRef+"\"");
         if (device.get("id") != null)
         {
             hsApi.deleteEntityTree(device.get("id").toString());
         }
-        removeProfile(node);
+        removeProfile(node, roomRef);
     }
 
     public static ZoneProfile getProfile(short addr) {
@@ -468,23 +491,7 @@ public class L
         return null;
     }
 
-    public static void removeProfile(short addr) {
-        ZoneProfile deleteProfile = null;
-        for(ZoneProfile p : L.ccu().zoneProfiles) {
-            for (Short node : p.getNodeAddresses()) {
-                if (node == addr) {
-                    deleteProfile = p;
-                    break;
-                }
-            }
-        }
-        if (deleteProfile != null)
-        {
-            L.ccu().zoneProfiles.remove(deleteProfile);
-        }
-    }
-
-    public static void removeProfile(long addr) {
+    public static void removeProfile(long addr, String roomRef) {
         ZoneProfile deleteProfile = null;
         for(ZoneProfile p : L.ccu().zoneProfiles) {
             if(p instanceof BacnetProfile){
@@ -492,7 +499,14 @@ public class L
                     deleteProfile = p;
                     break;
                 }
-            }else{
+            } else if (p instanceof  ModbusProfile) {
+                ModbusProfile modbusProfile = (ModbusProfile) p;
+                if(modbusProfile.getSlaveId() == addr && modbusProfile.getRoomRef().equals(roomRef)){
+                    CcuLog.i(L.TAG_CCU_MODBUS, "Removing Modbus profile for addr: " + addr + " in room: " + roomRef);
+                    deleteProfile = p;
+                    break;
+                }
+            } else {
                 for (Short node : p.getNodeAddresses()) {
                     if (node == addr) {
                         deleteProfile = p;

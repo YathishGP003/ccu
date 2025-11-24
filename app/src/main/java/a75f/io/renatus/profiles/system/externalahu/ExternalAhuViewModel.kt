@@ -327,7 +327,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             configTypeRadioOption.value = ConfigType.MODBUS
             modbusProfile = ModbusProfile()
             val address: Short = modbusEquip["group"].toString().toShort()
-            modbusProfile.addMbEquip(address, profileType)
+            modbusProfile.addMbEquip(address, profileType, "SYSTEM")
             selectedSlaveId = modbusProfile.slaveId
             val equipmentDevice = buildModbusModel(selectedSlaveId.toInt(), "SYSTEM")
             val model = EquipModel()

@@ -18,11 +18,12 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 public class ModbusProfile extends ZoneProfile {
 
     ModbusEquip modBusEquip;
-
+    private String roomRef;
     public void addMbEquip(short slaveId, String floorRef, String roomRef, EquipmentDevice equipmentDevice,
                            List<Parameter> configParams, ProfileType profileType,
                            List<EquipmentDevice> subEquipmentDevices, String modbusLevel,String modelVersion, String port) {
         modBusEquip = new ModbusEquip(profileType, slaveId);
+        this.roomRef = roomRef;
         String equipRef = modBusEquip.createEntities(floorRef, roomRef, equipmentDevice, configParams,
                 null, false, modbusLevel, modelVersion, false,false, false,
                 null, false, "", null, null, null, port);
@@ -58,8 +59,9 @@ public class ModbusProfile extends ZoneProfile {
         equipmentDevice.setEquips(intermediateList);
     }
 
-    public void addMbEquip(short slaveId, ProfileType profileType) {
+    public void addMbEquip(short slaveId, ProfileType profileType, String roomRef) {
         modBusEquip = new ModbusEquip(profileType, slaveId);
+        this.roomRef = roomRef;
         modBusEquip.init(slaveId);
     }
 
@@ -104,6 +106,10 @@ public class ModbusProfile extends ZoneProfile {
                 "group == \"" + modBusEquip.slaveId + "\"");
         Object port = equip.get("port");
         return port != null ? port.toString() : "";
+    }
+
+    public String getRoomRef() {
+        return roomRef;
     }
 
 }

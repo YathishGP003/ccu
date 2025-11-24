@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.system
 
+import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.ConditioningStages
@@ -273,7 +274,9 @@ class SystemStageHandler(private var conditioningStages: ConditioningStages) {
                 updateStatus(DomainName.dehumidifierEnable, result)
             }
             ControllerNames.FAN_ENABLED -> {
-                updateStatus(DomainName.fanEnable, result as Boolean)
+                val isReheatActive = L.ccu().systemProfile.isReheatActive(Domain.hayStack)
+                logIt("Is any zone reheat is active $isReheatActive")
+                updateStatus(DomainName.fanEnable, (result as Boolean) || isReheatActive)
             }
             ControllerNames.OCCUPIED_ENABLED -> {
                 updateStatus(DomainName.occupiedEnable, result)

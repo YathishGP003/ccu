@@ -327,26 +327,7 @@ public abstract class VavSystemProfile extends SystemProfile
     public void reset() {
         getSystemController().reset();
     }
-    
-    /**
-     * Returns true if any of the VAV zones has reheat ON.
-     * @return
-     */
-    public boolean isReheatActive(CCUHsApi hayStack) {
-        ArrayList<HashMap<Object, Object>> reheatPoints = hayStack.readAllEntities("domainName == \"" + DomainName.reheatCmd + "\"");
-        for (HashMap<Object, Object> point : reheatPoints) {
-            if (point.isEmpty()) {
-                continue;
-            }
-            double reheatPos = hayStack.readHisValById(point.get("id").toString());
-            if (reheatPos > 0.01) {
-                CcuLog.i(L.TAG_CCU_SYSTEM,"Reheat Active and requires AHU Fan");
-                return true;
-            }
-        }
-        return false;
-    }
-    
+
     /**
      * Check whether system is operation without only TI/OTN zones.
      * @param hayStack

@@ -1065,6 +1065,25 @@ public abstract class SystemProfile
         return ccu().systemProfile.getProfileName().contains("VAV");
     }
 
+    /**
+     * Returns true if any of the VAV zones has reheat ON.
+     * @return
+     */
+    public boolean isReheatActive(CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> reheatPoints = hayStack.readAllEntities("domainName == \"" + DomainName.reheatCmd + "\"");
+        for (HashMap<Object, Object> point : reheatPoints) {
+            if (point.isEmpty()) {
+                continue;
+            }
+            double reheatPos = hayStack.readHisValById(point.get("id").toString());
+            if (reheatPos > 0.01) {
+                CcuLog.i(L.TAG_CCU_SYSTEM,"Reheat Active and requires AHU Fan");
+                return true;
+            }
+        }
+        return false;
+    }
+
     public HashMap<FanType, Set<Stage>> getFanTypeToStages() {
         return fanTypeToStages;
     }

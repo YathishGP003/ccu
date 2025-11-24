@@ -15,6 +15,7 @@ import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHA
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
+import static a75f.io.logic.bo.building.system.util.StatusMsgUtilKt.getSystemStatusMsg;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
 
 import android.content.Intent;
@@ -364,56 +365,13 @@ public class DabStagedRtu extends DabSystemProfile
     
     @Override
     public String getStatusMessage(){
-        StringBuilder status = new StringBuilder();
+        return getSystemStatusMsg(
+                this,
+                systemEquip.getConditioningStages(),
+                isCompressorActive(),
+                (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable())
 
-        ConditioningStages systemStages = systemEquip.getConditioningStages();
-        status.append(systemStages.getFanStage1().readHisVal() > 0 ? "1":"");
-        status.append(systemStages.getFanStage2().readHisVal() > 0 ? ",2":"");
-        status.append(systemStages.getFanStage3().readHisVal() > 0 ? ",3":"");
-        status.append(systemStages.getFanStage4().readHisVal() > 0 ? ",4":"");
-        status.append(systemStages.getFanStage5().readHisVal() > 0 ? ",5":"");
-        if (status.length() > 0) {
-            status.insert(0, "Fan Stages ");
-            status.append(" ON ");
-        }
-
-        if (isCoolingActive() || (DabSystemController.getInstance().systemState == SystemController.State.COOLING && isCompressorActive())) {
-            status.append("| Cooling Stage " + ((systemStages.getCoolingStage1().readHisVal() > 0) || (systemStages.getCompressorStage1().readHisVal() > 0) ? "1" : ""));
-            status.append((systemStages.getCoolingStage2().readHisVal() > 0 || systemStages.getCompressorStage2().readHisVal() > 0) ? ",2" : "");
-            status.append((systemStages.getCoolingStage3().readHisVal() > 0 || systemStages.getCompressorStage3().readHisVal() > 0) ? ",3" : "");
-            status.append((systemStages.getCoolingStage4().readHisVal() > 0 || systemStages.getCompressorStage4().readHisVal() > 0) ? ",4" : "");
-            status.append((systemStages.getCoolingStage5().readHisVal() > 0 || systemStages.getCompressorStage5().readHisVal() > 0) ? ",5 ON " : " ON ");
-
-        }
-
-        if (isHeatingActive() || (DabSystemController.getInstance().systemState == SystemController.State.HEATING && isCompressorActive())) {
-            status.append("| Heating Stage " + (((systemStages.getHeatingStage1().readHisVal() > 0) ||
-                    systemStages.getCompressorStage1().readHisVal() > 0) ? "1" : ""));
-            status.append((systemStages.getHeatingStage2().readHisVal() > 0 || systemStages.getCompressorStage2().readHisVal() > 0) ? ",2" : "");
-            status.append((systemStages.getHeatingStage3().readHisVal() > 0 || systemStages.getCompressorStage3().readHisVal() > 0) ? ",3" : "");
-            status.append((systemStages.getHeatingStage4().readHisVal() > 0 || systemStages.getCompressorStage4().readHisVal() > 0) ? ",4" : "");
-            status.append((systemStages.getHeatingStage5().readHisVal() > 0 || systemStages.getCompressorStage5().readHisVal() > 0) ? ",5 ON " : " ON ");
-        }
-        if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
-            status.insert(0, "Free Cooling Used | ");
-        }
-
-        if (!status.toString().contains("Fan Stages")&& systemEquip.getConditioningStages().getFanEnable().readHisVal() > 0) {
-            status.append("| Fan ON");
-        }
-
-        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU) {
-            return status.toString().isEmpty() ? "System OFF" + SystemProfileUtil.isDeHumidifierOn()
-                    + SystemProfileUtil.isHumidifierOn() : status + SystemProfileUtil.isDeHumidifierOn()
-                    + (SystemProfileUtil.isHumidifierOn());
-        }
-
-        String humidifierStatus = getRelayMappingForStage(HUMIDIFIER).isEmpty() ? "" :
-                systemStages.getHumidifierEnable().readHisVal() > 0 ? " | Humidifier ON " : " | Humidifier OFF ";
-        String dehumidifierStatus = getRelayMappingForStage(DEHUMIDIFIER).isEmpty() ? "" :
-                systemStages.getDehumidifierEnable().readHisVal() > 0 ? " | Dehumidifier ON " : " | Dehumidifier OFF ";
-
-        return status.toString().equals("")? "System OFF" + humidifierStatus + dehumidifierStatus : status + humidifierStatus + dehumidifierStatus;
+        );
     }
 
     public void addControllers() {

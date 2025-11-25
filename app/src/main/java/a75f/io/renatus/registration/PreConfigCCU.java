@@ -195,7 +195,12 @@ public class PreConfigCCU extends Fragment {
                         confirmSiteDetails(preconfigurationData, getActivity());
                     } else {
                         CcuLog.d(L.TAG_PRECONFIGURATION, "Preconfiguration data fetch failed");
-                        postMessage("Passcode validation Failed !!");
+                        if (PreconfigurationRepository.INSTANCE.getPassCodeResponse() != null) {
+                            postMessage(PreconfigurationRepository.INSTANCE.getPassCodeResponse());
+                        } else {
+                            postMessage("Passcode validation Failed !!");
+                        }
+
                     }
                 });
 

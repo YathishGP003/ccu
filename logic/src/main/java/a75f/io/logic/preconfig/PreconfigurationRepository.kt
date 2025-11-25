@@ -10,6 +10,8 @@ import retrofit2.Response
 
 object PreconfigurationRepository {
 
+    var passCodeResponse: String? = null
+
     @JvmOverloads
     fun getConfigurationData(data: String = "", context: Context) : PreconfigurationData? {
         val jsonData = data.ifEmpty {
@@ -22,14 +24,22 @@ object PreconfigurationRepository {
 
     fun fetchPreconfigurationData(passcode: String): String? {
         CcuLog.d(L.TAG_PRECONFIGURATION, "PreconfigurationRepository : fetchPreconfigurationData: $passcode")
-        val call = PreconfigurationRetrofitClient.apiService.validatePasscode(passcode)
-        val response: Response<ResponseBody> = call.execute() // blocking
-        return if (response.isSuccessful) {
-            val rawJson = response.body()?.string()
-            CcuLog.d(L.TAG_PRECONFIGURATION, "Raw JSON: $rawJson")
-            rawJson
-        } else {
-            CcuLog.e(L.TAG_PRECONFIGURATION, "Failed with code: ${response.code()}")
+        return try {
+            val call = PreconfigurationRetrofitClient.apiService.validatePasscode(passcode)
+            val response: Response<ResponseBody> = call.execute() // blocking
+            if (response.isSuccessful) {
+                val rawJson = response.body()?.string()
+                CcuLog.d(L.TAG_PRECONFIGURATION, "Raw JSON: $rawJson")
+                passCodeResponse = rawJson.toString()
+                rawJson
+            } else {
+                CcuLog.e(L.TAG_PRECONFIGURATION, "Failed with code: ${response.code()}")
+                passCodeResponse = null
+                null
+            }
+        } catch (e: Exception) {
+            CcuLog.e(L.TAG_PRECONFIGURATION, "error: ${e.message}")
+            passCodeResponse = e.message
             null
         }
     }

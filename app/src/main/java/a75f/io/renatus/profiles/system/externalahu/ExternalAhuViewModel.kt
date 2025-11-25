@@ -34,6 +34,7 @@ import a75f.io.logic.bo.building.system.dab.DabExternalAhu
 import a75f.io.logic.bo.building.system.getConfiguration
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.logic.service.FileBackupJobReceiver
 import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.bacnet.*
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_CONFIGURATION
@@ -77,6 +78,7 @@ import a75f.io.renatus.profiles.oao.updateOaoPoints
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
 import a75f.io.usbserial.UsbPrefHelper
+import a75f.io.util.ExecutorTask
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
@@ -258,11 +260,11 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         if(isBacnetIpEnabled.value || isBacnetMstpEnabled.value){
             // bacnet is enabled
             if(PreferenceUtil.getSelectedProfileWithAhu() != "") {
-                if(PreferenceUtil.getSelectedProfileWithAhu() == "bacnet" && iBacnetSystemProfileEnabled().size > 0){
+                if(PreferenceUtil.getSelectedProfileWithAhu() == "bacnet" || iBacnetSystemProfileEnabled().size > 0){
                     configTypeRadioOption.value = ConfigType.BACNET
                     CcuLog.d(TAG_BACNET, "-configType changed to bacnet--")
                     configType.value = ConfigType.BACNET
-                }else if(PreferenceUtil.getSelectedProfileWithAhu() == "modbus" && isModbusSystemProfileEnabled().size > 0){
+                }else if(PreferenceUtil.getSelectedProfileWithAhu() == "modbus" || isModbusSystemProfileEnabled().size > 0){
                     configTypeRadioOption.value = ConfigType.MODBUS
                     CcuLog.d(TAG_BACNET, "-configType changed to modbus--")
                     configType.value = ConfigType.MODBUS
@@ -275,11 +277,11 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         }else{
             // bacnet is disabled
             if(PreferenceUtil.getSelectedProfileWithAhu() != "") {
-                if(PreferenceUtil.getSelectedProfileWithAhu() == "bacnet" && iBacnetSystemProfileEnabled().size > 0){
+                if(PreferenceUtil.getSelectedProfileWithAhu() == "bacnet" || iBacnetSystemProfileEnabled().size > 0){
                     configTypeRadioOption.value = ConfigType.BACNET
                     CcuLog.d(TAG_BACNET, "-configType changed to bacnet--1")
                     configType.value = ConfigType.BACNET
-                }else if(PreferenceUtil.getSelectedProfileWithAhu() == "modbus" && isModbusSystemProfileEnabled().size > 0){
+                }else if(PreferenceUtil.getSelectedProfileWithAhu() == "modbus" || isModbusSystemProfileEnabled().size > 0){
                     configTypeRadioOption.value = ConfigType.MODBUS
                     CcuLog.d(TAG_BACNET, "-configType changed to modbus--2")
                     configType.value = ConfigType.MODBUS
@@ -436,6 +438,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                         CcuLog.d(TAG_BACNET, "saveConfiguration--this is profile update")
                         updateSystemProfile()
                     }
+                    ExecutorTask.executeBackground(FileBackupJobReceiver::performConfigFileBackup); // Backup config file after saving configuration
                 } else {
                     CcuLog.d(TAG_BACNET, "saveConfiguration--no system profile found this is the first time ")
                     addEquip()

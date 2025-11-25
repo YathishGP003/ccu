@@ -15,9 +15,11 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_FD_CONFIGUR
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_HEART_BEAT;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_MSTP_HEART_BEAT;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_START;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_STOP;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.getUpdatedExistingBacnetConfigDeviceData;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.populateBacnetConfigurationObject;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.sendBroadCast;
 import static a75f.io.renatus.CcuRefReceiver.REQUEST_CCU_REF_ACTION;
 import static a75f.io.renatus.Communication.isPortAvailable;
 import static a75f.io.renatus.UtilityApplication.context;
@@ -90,6 +92,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.interfaces.RemoteCommandHandleInterface;
+import a75f.io.logic.service.FileBackupJobReceiver;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
@@ -120,6 +123,7 @@ import a75f.io.restserver.server.HttpServer;
 import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbPortTrigger;
 import a75f.io.usbserial.UsbServiceActions;
+import a75f.io.util.ExecutorTask;
 import kotlin.Pair;
 
 public class
@@ -1050,6 +1054,8 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
             Pair<String, Boolean> updatedConfig = getUpdatedExistingBacnetConfigDeviceData(prefs.getString(BACNET_CONFIGURATION));
             if(updatedConfig.component2().equals(true)) {
                 prefs.setString(BACNET_CONFIGURATION, updatedConfig.component1().toString());
+                ExecutorTask.executeBackground(FileBackupJobReceiver::performConfigFileBackup); // Backup config file
+                sendBroadCast(context,BROADCAST_BACNET_APP_STOP,"Stop BACnet stack as config updated found","");
             }
         }
     }

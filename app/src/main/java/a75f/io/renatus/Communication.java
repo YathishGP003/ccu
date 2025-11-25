@@ -48,7 +48,6 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.ZONE_TO_VIRTUAL_DE
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.cancelScheduleJobToResubscribeBacnetMstpCOV;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.sendBroadCast;
 import static a75f.io.logic.L.TAG_CCU_BACNET;
-import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
 import static a75f.io.renatus.UtilityApplication.context;
 import static a75f.io.renatus.UtilityApplication.isBacnetMstpInitialized;
 import static a75f.io.renatus.UtilityApplication.startRestServer;
@@ -746,7 +745,7 @@ public class Communication extends Fragment implements MstpDataInterface {
                         context.sendBroadcast(intent);
                         spinnerBacnetConfigAdapter.setConfiguredIndex(BACnetConfigurationType.BBMD.ordinal());
                         updateBacnetConfigStateChanged(false);
-                        performConfigFileBackup();
+                        ExecutorTask.executeBackground(FileBackupJobReceiver::performConfigFileBackup);
                     } catch (NumberFormatException e) {
                         e.printStackTrace();
                     }
@@ -779,7 +778,7 @@ public class Communication extends Fragment implements MstpDataInterface {
 
                         spinnerBacnetConfigAdapter.setConfiguredIndex(BACnetConfigurationType.FD.ordinal());
                         updateBacnetConfigStateChanged(false);
-                        performConfigFileBackup();
+                        ExecutorTask.executeBackground(FileBackupJobReceiver::performConfigFileBackup);
                     } catch (NumberFormatException e) {
                         e.printStackTrace();
                     }
@@ -1016,7 +1015,7 @@ public class Communication extends Fragment implements MstpDataInterface {
             }
             sharedPreferences.edit().putBoolean(IS_BACNET_INITIALIZED, false).apply();
             sendBroadCast(context, BROADCAST_BACNET_APP_STOP, "Stop BACnet App");
-            performConfigFileBackup();
+            ExecutorTask.executeBackground(FileBackupJobReceiver::performConfigFileBackup);
         });
 
         toggleZoneToVirtualDeviceMapping.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -1419,7 +1418,7 @@ public class Communication extends Fragment implements MstpDataInterface {
                 CcuLog.d(TAG_CCU_BACNET, "Scheduling BacnetClientJob");
                 BacnetUtility.INSTANCE.checkAndScheduleJobForBacnetClient();
             }
-            performConfigFileBackup();
+            ExecutorTask.executeBackground(FileBackupJobReceiver::performConfigFileBackup);
         }
     }
 

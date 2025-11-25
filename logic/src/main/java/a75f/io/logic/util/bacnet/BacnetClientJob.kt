@@ -28,6 +28,7 @@ import a75f.io.logic.util.bacnet.BacnetConfigConstants.MAC_ADDRESS
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_DEVICE_ID
 import a75f.io.logic.util.bacnet.BacnetUtility.getNetworkDetails
 import a75f.io.logic.util.bacnet.BacnetUtility.isBacnetInitialized
+import a75f.io.logic.util.bacnet.BacnetUtility.isBacnetMstpInitialized
 import a75f.io.logic.util.bacnet.BacnetUtility.parseBacnetConfigData
 import a75f.io.logic.util.bacnet.BacnetUtility.updateBacnetHeartBeatPoint
 import android.annotation.SuppressLint
@@ -52,7 +53,7 @@ object BacnetClientJob : BaseJob() {
     override fun doJob() {
         logIt("BacnetClientJob is started... ${count++}")
 
-        if (isBacnetInitialized()) {
+        if (isBacnetInitialized() || isBacnetMstpInitialized()) {
 
             val listOfClient = CCUHsApi.getInstance().readAllHDictByQuery("point and bacnet and heartbeat")
             if (listOfClient.isNotEmpty()) {

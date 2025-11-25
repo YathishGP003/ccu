@@ -1361,13 +1361,16 @@ public class CCUHsApi
     {
         HGrid              resGrid = hsClient.hisRead(HRef.copy(id), range);
         ArrayList<HisItem> hisList = new ArrayList<>();
-        Iterator           it      = resGrid.iterator();
-        while (it.hasNext())
-        {
-            HRow      r    = (HRow) it.next();
-            HDateTime date = (HDateTime) r.get("ts");
-            HNum      val  = (HNum) r.get("val");
-            hisList.add(new HisItem("", new Date(date.millis()), Double.parseDouble(val.toString())));
+        try {
+            Iterator it = resGrid.iterator();
+            while (it.hasNext()) {
+                HRow r = (HRow) it.next();
+                HDateTime date = (HDateTime) r.get("ts");
+                HNum val = (HNum) r.get("val");
+                hisList.add(new HisItem("", new Date(date.millis()), Double.parseDouble(val.toString())));
+            }
+        } catch (Exception e) {
+            CcuLog.e(TAG_CCU_HS, "Error fetching history for id: " + id, e);
         }
         return hisList;
     }

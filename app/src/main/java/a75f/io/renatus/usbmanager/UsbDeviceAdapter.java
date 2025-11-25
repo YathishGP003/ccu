@@ -1,6 +1,7 @@
 package a75f.io.renatus.usbmanager;
 
 import static a75f.io.logic.L.TAG_CCU_BACNET_MSTP;
+import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_MSTP_CONFIGURATION;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_MSTP_SERIAL_DEVICE;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_START;
@@ -784,14 +785,6 @@ public class UsbDeviceAdapter extends RecyclerView.Adapter<UsbDeviceAdapter.UsbV
     private void prepareMstpInit(UsbDeviceItem device) {
         CcuLog.i(L.TAG_CCU_UI, "prepareMstpInit");
         ExecutorTask.executeBackground(() -> {
-            //RenatusApp.backgroundServiceInitiator.unbindServices();
-            //CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 1--unbind modbus service--");
-
-            //Intent intent = new Intent(context, UsbModbusService.class);
-            //context.stopService(intent);
-            //CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 2--stop modbus service--");
-
-            //CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 3--apply permissions--");
 
             UsbHelper.runChmodUsbDevices();
             UsbPortTrigger.triggerUsbSerialBinding(context);
@@ -799,15 +792,6 @@ public class UsbDeviceAdapter extends RecyclerView.Adapter<UsbDeviceAdapter.UsbV
             UsbHelper.runAsRoot("ls /dev/tty*");
 
             CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 4--update ui--");
-            /*updateMstpUi();
-
-            if(!isUSBSerialPortAvailable){
-                requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(requireContext(), "Check USB connection, MSTP can not initialized.", Toast.LENGTH_LONG).show();
-                });
-                CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 4--update ui Check USB connection, mstp can not initialized.--");
-                return;
-            }*/
 
             BacnetConfig bacnetConfig = device.getBacnetConfig();
             writeIntPref(PREF_MSTP_BAUD_RATE, bacnetConfig.getBaudRate());
@@ -844,8 +828,7 @@ public class UsbDeviceAdapter extends RecyclerView.Adapter<UsbDeviceAdapter.UsbV
 
             BacnetUtilKt.launchBacApp(context, BROADCAST_BACNET_APP_START, "Start BACnet App", "",true);
             CcuLog.d(TAG_CCU_BACNET_MSTP, "MSTP configuration initialized");
-            //RenatusApp.backgroundServiceInitiator.initServices();
-            //CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 6--init services--");
+            performConfigFileBackup();
 
         });
     }

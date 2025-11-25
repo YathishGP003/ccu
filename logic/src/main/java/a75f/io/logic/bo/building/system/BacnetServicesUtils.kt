@@ -94,7 +94,7 @@ class BacnetServicesUtils: BacnetRequestUtil {
       CcuLog.d(TAG, "sendCovSubscription called with request: $subscribeCovRequest")
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = service.subscribeCov(subscribeCovRequest)
+                val response = service.subscribeCovForMstp(subscribeCovRequest)
                 val resp = BaseResponse(response)
                 if (response.isSuccessful) {
                     val result = resp.data

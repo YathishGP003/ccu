@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.heartbeat;
 import static a75f.io.logic.BacnetUtilKt.BINARY_VALUE;
 import static a75f.io.logic.BacnetUtilKt.addBacnetTags;
 
+import org.projecthaystack.HNum;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.logic.BacnetIdKt;
@@ -34,6 +35,30 @@ public class HeartBeat {
         addBacnetTags(heartBeat, 29, BINARY_VALUE, nodeAddr);
 
     }
+
+    private HeartBeat(String equipDis, String equipRef, String siteRef, String room, String floor, int nodeAddr,
+                      String profile, String tz, int deviceId){
+        Point.Builder heartBeatBuilder = new Point.Builder()
+                .setDisplayName(equipDis+"-heartBeat")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("diag")
+                .addMarker("heartbeat")
+                .addMarker("zone").addMarker("standalone")
+                .addMarker(profile).addMarker("sensor")
+                .addMarker("his")
+                .setHisInterpolate("linear")
+                .addMarker("logical")
+                .setGroup(String.valueOf(nodeAddr))
+                .addTag("bacnetDeviceId", HNum.make(deviceId))
+                .setTz(tz);
+        heartBeat = heartBeatBuilder.build();
+        addBacnetTags(heartBeat, 29, BINARY_VALUE, nodeAddr);
+
+    }
+
     private HeartBeat(String equipDis, String equipRef, String siteRef, String room, String floor, int nodeAddr,
                       String profile, String tz, boolean isStandAlone){
         heartBeat = new Point.Builder()
@@ -94,6 +119,11 @@ public class HeartBeat {
     public static Point getHeartBeatPoint(String equipDis, String equipRef, String siteRef, String room, String floor,
                                           int nodeAddr, String profile, String tz){
         return new HeartBeat(equipDis, equipRef, siteRef, room, floor, nodeAddr, profile, tz).heartBeat;
+    }
+
+    public static Point getHeartBeatPointForBacnetClient(String equipDis, String equipRef, String siteRef, String room, String floor,
+                                          int nodeAddr, String profile, String tz, int deviceId){
+        return new HeartBeat(equipDis, equipRef, siteRef, room, floor, nodeAddr, profile, tz, deviceId).heartBeat;
     }
 
     public static Point getHeartBeatPoint(String equipDis, String equipRef, String siteRef, String room, String floor,

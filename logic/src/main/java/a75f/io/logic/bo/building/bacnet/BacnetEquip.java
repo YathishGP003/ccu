@@ -198,8 +198,8 @@ public class BacnetEquip {
         int totalNoOfPoints = points.size();
 
         if (isSystemEquip) {
-            Point heartBeatPoint = HeartBeat.getHeartBeatPoint(equipDis, equipmentRef,
-                    siteRef, roomRef, floorRef, (int) slaveId, "bacnet", tz);
+            Point heartBeatPoint = HeartBeat.getHeartBeatPointForBacnetClient(equipDis, equipmentRef,
+                    siteRef, roomRef, floorRef, (int) slaveId, "bacnet", tz, Integer.parseInt(deviceId));
             int uniqueIdHeatBeat = BACNET_RANGE_SYSTEM_POINT + totalNoOfPoints + 1;
             heartBeatPoint.setBacnetId(uniqueIdHeatBeat);
             if (configurationType.equals(IP_CONFIGURATION)) {
@@ -210,8 +210,8 @@ public class BacnetEquip {
             CCUHsApi.getInstance().addPoint(heartBeatPoint);
 
         } else {
-            Point heartBeat = HeartBeat.getHeartBeatPoint(equipDis, equipmentRef,
-                    siteRef, roomRef, floorRef, (int) slaveId, "bacnet", tz);
+            Point heartBeat = HeartBeat.getHeartBeatPointForBacnetClient(equipDis, equipmentRef,
+                    siteRef, roomRef, floorRef, (int) slaveId, "bacnet", tz, Integer.parseInt(deviceId));
             if (configurationType.equals(IP_CONFIGURATION)) {
                 heartBeat.getMarkers().add(CONST_BACNET_CUR);
             } else {

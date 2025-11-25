@@ -238,9 +238,29 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                     // Show the BACnet Title along with selected model and read only configuration details
                     Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp, top = 40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         BacnetTitleView()
+                    }
+                }
+                item {
+                    // Show the Model and Configuration Mode Selector
+                    Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         ModelAndConfigModeSelector(isEditable = false)
+                    }
+                }
+                item {
+                    // Show the Configuration Details Read Only
+                    Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         ConfigurationDetailsReadOnly(viewModel.configurationType.value)
+                    }
+                }
+                item {
+                    // Show the Bacnet Equip Title
+                    Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         BacnetEquipTitle()
+                    }
+                }
+                item {
+                    // Show the Bacnet Point Config Update Only
+                    Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         BacnetPointConfigUpdateOnly()
                     }
                 }
@@ -269,23 +289,39 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                             onClose = { viewModel.disablePasteConfiguration() }
                         )
                     }
-
-                    Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp, top = 40.dp).defaultMinSize(minHeight = 550.dp)) {
+                }
+                item {
+                    Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp)) {
                         BacnetTitleView()
+                    }
+                }
+                item {
+                    Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp)) {
                         ModelAndConfigModeSelector(isEditable = true)
-                        if(viewModel.modelName.value == SELECT_MODEL){
-                            Box(modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 96.dp), contentAlignment = Alignment.Center) {
+                    }
+                }
+
+                if (viewModel.modelName.value == SELECT_MODEL) {
+                    item {
+                        Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp)) {
+                            Box(modifier = Modifier.fillMaxWidth().padding(top = 96.dp), contentAlignment = Alignment.Center) {
                                 SaveTextView(getString(R.string.select_model_to_proceed), isChanged = false, onClick = {})
                             }
-                        } else {
-                                if (viewModel.deviceSelectionMode.value == 0 || viewModel.configurationType.value == MSTP_CONFIGURATION) {
-                                    // manual mode
-                                    ConfigurationDetailsEditable(viewModel.configurationType.value)
-                                } else {
-                                    ConfigurationDetailsReadOnly(viewModel.configurationType.value)
-                                }
+                        }
+                    }
+                } else {
+                    item {
+                        Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp)) {
+                            if (viewModel.deviceSelectionMode.value == 0 || viewModel.configurationType.value == MSTP_CONFIGURATION) {
+                                // manual mode
+                                ConfigurationDetailsEditable(viewModel.configurationType.value)
+                            } else {
+                                ConfigurationDetailsReadOnly(viewModel.configurationType.value)
+                            }
+                        }
+                    }
+                    item {
+                        Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp)) {
                             // Actual toast
                             if (viewModel.showToast.value) {
                                 ErrorToastMessage(
@@ -293,7 +329,15 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                                     onDismiss = { viewModel.showToast.value = false }
                                 )
                             }
+                        }
+                    }
+                    item {
+                        Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp)) {
                             BacnetEquipTitle()
+                        }
+                    }
+                    item {
+                        Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp)) {
                             BacnetPointConfigCreateOnly()
                         }
                     }

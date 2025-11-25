@@ -1,6 +1,6 @@
 package a75f.io.logic.bo.building.system.client
 
-import a75f.io.logic.bo.building.system.BacnetMstpSubscribeCov
+import a75f.io.logic.bo.building.system.BacnetIpSubscribeCov
 import a75f.io.logic.bo.building.system.BacnetMstpSubscribeCovForAllDevices
 import a75f.io.logic.bo.building.system.BacnetReadRequest
 import a75f.io.logic.bo.building.system.BacnetReadRequestMultiple
@@ -23,8 +23,11 @@ interface CcuService {
     @POST("/multireadAllDevices")
     suspend fun multireadAllDevices(@Body readRequest: BacnetReadRequestMultipleForAllDevices): Response<MultiReadResponse>
 
-    @POST("/subscribeCov")
-    suspend fun subscribeCov(@Body bacnetMstpSubscribeCovRequest: BacnetMstpSubscribeCovForAllDevices): Response<BacnetSubcribeCovResponse>
+    @POST("/subscribeCovForMstp")
+    suspend fun subscribeCovForMstp(@Body bacnetMstpSubscribeCovRequest: BacnetMstpSubscribeCovForAllDevices): Response<BacnetSubcribeCovResponse>
+
+    @POST("/subscribeCovForIp")
+    suspend fun subscribeCovForIp(@Body bacnetIpSubscribeCovRequest: BacnetIpSubscribeCov): Response<BacnetSubcribeCovResponse>
 
     @POST("/write")
     suspend fun write(@Body bacnetWriteRequest: BacnetWriteRequest): Response<WriteResponse>

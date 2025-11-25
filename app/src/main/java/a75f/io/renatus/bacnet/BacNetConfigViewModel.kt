@@ -21,18 +21,20 @@ import a75f.io.logic.bo.building.system.PropertyReference
 import a75f.io.logic.bo.building.system.ReadRequestMultiple
 import a75f.io.logic.bo.building.system.RpmRequest
 import a75f.io.logic.bo.building.system.WhoIsRequest
-import a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_DEVICE_ID
-import a75f.io.logic.util.bacnet.buildBacnetModel
-import a75f.io.renatus.BASE.FragmentCommonBundleArgs
-import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants
 import a75f.io.logic.bo.building.system.client.BaseResponse
 import a75f.io.logic.bo.building.system.client.CcuService
 import a75f.io.logic.bo.building.system.client.MultiReadResponse
 import a75f.io.logic.bo.building.system.client.RpResponseMultiReadItem
 import a75f.io.logic.bo.building.system.client.ServiceManager
 import a75f.io.logic.bo.building.system.client.WhoIsResponseItem
+import a75f.io.logic.util.bacnet.BacnetClientJob.isJobScheduled
+import a75f.io.logic.util.bacnet.BacnetClientJob.scheduleJob
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_DEVICE_ID
+import a75f.io.logic.util.bacnet.buildBacnetModel
 import a75f.io.logic.util.bacnet.getDetailsFromObjectLayout
 import a75f.io.logic.util.bacnet.isValidMstpMacAddress
+import a75f.io.renatus.BASE.FragmentCommonBundleArgs
+import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
 import a75f.io.renatus.bacnet.models.BacnetDevice
@@ -85,6 +87,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.internal.toImmutableList
 import java.net.ConnectException
 import java.net.SocketTimeoutException
+import java.util.concurrent.TimeUnit
 import kotlin.properties.Delegates
 
 
@@ -400,6 +403,11 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                         setUpBacnetProfile()
                         if (configurationType.value == MSTP_CONFIGURATION) {
                             sendCovSubscription()
+                        } else {
+                            if (!isJobScheduled()) {
+                                CcuLog.d(TAG, "scheduling bacnet client job")
+                                scheduleJob("BACnetClientJob", 60, 45, TimeUnit.SECONDS)
+                            }
                         }
                         L.saveCCUState()
                         CCUHsApi.getInstance().setCcuReady()
@@ -442,7 +450,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = service.subscribeCov(BacnetMstpSubscribeCovForAllDevices( subscribeCovRequest ))
+                val response = service.subscribeCovForMstp(BacnetMstpSubscribeCovForAllDevices( subscribeCovRequest ))
                 val resp = BaseResponse(response)
                 ProgressDialogUtils.hideProgressDialog()
                 if (response.isSuccessful) {
@@ -580,7 +588,8 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
             CcuLog.d(TAG, "--deviceId-->${it.deviceId}<--deviceIp-->${it.deviceIp}<--deviceName-->${it.deviceName}<--deviceMacAddress-->${it.deviceMacAddress}<--deviceNetwork-->${it.deviceNetwork}")
             var destinationMacAddress = ""
             if(it.deviceMacAddress != null && it.deviceMacAddress.trim().isNotEmpty()){
-                destinationMacAddress = macAddressToByteArray(it.deviceMacAddress)
+                destinationMacAddress = if(configurationType.value == IP_CONFIGURATION) macAddressToByteArray(it.deviceMacAddress)
+                                         else it.deviceMacAddress
             }
             service = if(configurationType.value == MSTP_CONFIGURATION) {
                 ServiceManager.makeCcuServiceForMSTP()
@@ -737,25 +746,17 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun populateBacnetDevices(whoIsResponseList: MutableList<WhoIsResponseItem>) {
-        val list = mutableListOf<BacnetDevice>()
-        whoIsResponseList.forEach { item ->
-            list.add(
-                BacnetDevice(
-                    item.deviceIdentifier,
-                    item.ipAddress,
-                    item.networkNumber,
-                    item.vendorIdentifier,
-                    item.portNumber,
-                    item.macAddress
-                )
-            )
-        }
+        val list = whoIsResponseList
+            .map { BacnetDevice(it.deviceIdentifier, it.ipAddress, it.networkNumber, it.vendorIdentifier, it.portNumber, it.macAddress) }
+            .distinctBy { it.deviceId to it.deviceMacAddress }
+            .toMutableList()
+
         connectedDevices = mutableStateOf(emptyList())
         connectedDevices.value = list
 
         if (connectedDevices.value.isEmpty() ) {
             ProgressDialogUtils.hideProgressDialog()
-            Toast.makeText(context, "No devices found", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.no_devices_found), Toast.LENGTH_SHORT).show()
         }
 
         fetchDeviceNames()
@@ -821,7 +822,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                                 isConnectedDevicesSearchFinished.value = true
                             }else{
                                 CcuLog.d(TAG, "no devices found")
-                                showToastMessage("No devices found check configuration and initialize bacnet again")
+                                showToastMessage(context.getString(R.string.no_devices_found))
                             }
                         }
                     } else {

@@ -5,6 +5,7 @@ import a75f.io.api.haystack.HisItem
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.util.LevelData
 import a75f.io.api.haystack.util.ReadAllResponse
+import a75f.io.api.haystack.util.StringUtil
 import a75f.io.api.haystack.util.hayStack
 import a75f.io.api.haystack.util.retrieveLevelValues
 import a75f.io.logger.CcuLog
@@ -303,6 +304,7 @@ class HttpServer {
                                     "BACnet MSTP Stack initialized successfully!!!. Sending COV Subscription...."
                                 )
                                 scheduleJobToResubscribeBacnetMstpCOV()
+                                updateBacnetMstpLinearAndCovSubscription(true)
                             } else {
                                 CcuLog.d(
                                     L.TAG_CCU_BACNET_MSTP,
@@ -420,22 +422,21 @@ class HttpServer {
 
                 //example call = http://127.0.0.1:5001/pointWrite?id=6a1f6539-86dd-48d3-be6c-0ae0b50fa388&level=1&val=7.5&who=bacnet&duration=200000
                 get("/pointWrite") {
-                    val id = call.parameters["id"]
+                    val pointId = call.parameters["id"]
                     var level = call.parameters["level"]
                     var value = call.parameters["val"]
                     val who = call.parameters["who"]
                     var duration: String? = call.parameters["duration"]
 
-                    CcuLog.i(
-                        HTTP_SERVER,
-                        "called API: /pointWrite-id->$id<--value-->$value<--level-->$level"
-                    )
+                    CcuLog.i(HTTP_SERVER, "called API: /pointWrite-id->$pointId<--value-->$value<--level-->$level")
 
-                    if (id == null || level == null || who == null || duration == null) {
-                        call.respond(HttpStatusCode.NotFound, BaseResponse("Invalid request"))
-                    } else {
+                    if(pointId == null || level == null || who == null || duration == null) {
+                        call.respond(HttpStatusCode.NotFound, BaseResponse( "Invalid request"))
+                    }else{
                         // if level is coming null ie. user wanted to reset level
-                        if (value == "null") {
+                        val id = StringUtil.addAtSymbolIfMissing(pointId)
+
+                        if(value == "null"){
                             value = "0"
                             duration = "1000"
                         }
@@ -452,28 +453,16 @@ class HttpServer {
                             )
                             return@get
                         } else {
-                            if (pointMap.containsKey(Tags.WRITABLE)) {
-                                val pointGrid = CCUHsApi.getInstance().writePoint(
-                                    id,
-                                    level!!.toInt(),
-                                    who,
-                                    value!!.toDouble(),
-                                    duration!!.toInt()
-                                )
-                                CCUHsApi.getInstance()
-                                    .writeHisValById(id, hayStack.readPointPriorityVal(id))
+                            updateHeartBeatPoint(id)
+                            if(pointMap.containsKey(Tags.WRITABLE)) {
+                                val pointGrid = CCUHsApi.getInstance().writePoint(id, level!!.toInt(), who, value!!.toDouble(), duration!!.toInt())
+                                CCUHsApi.getInstance().writeHisValById(id, hayStack.readPointPriorityVal(id))
                                 if (pointGrid != null) {
-                                    if (!pointGrid.isEmpty || !pointGrid.isErr) {
-                                        call.respond(
-                                            HttpStatusCode.OK,
-                                            BaseResponse(HttpStatusCode.OK)
-                                        )
-                                        updateHeartBeatPoint(id)
-                                    } else
-                                        call.respond(
-                                            HttpStatusCode.OK,
-                                            BaseResponse(HttpStatusCode.NoContent)
-                                        )
+                                    if(!pointGrid.isEmpty || !pointGrid.isErr){
+                                        call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK))
+                                    }
+                                    else
+                                        call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
                                 } else {
                                     call.respond(
                                         HttpStatusCode.OK,

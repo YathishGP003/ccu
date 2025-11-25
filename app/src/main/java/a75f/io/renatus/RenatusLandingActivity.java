@@ -12,12 +12,17 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_NORMAL;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_FD_AUTO_STATE;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_FD_CONFIGURATION;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_HEART_BEAT;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_MSTP_HEART_BEAT;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_START;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.getUpdatedExistingBacnetConfigDeviceData;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.populateBacnetConfigurationObject;
 import static a75f.io.renatus.CcuRefReceiver.REQUEST_CCU_REF_ACTION;
 import static a75f.io.renatus.Communication.isPortAvailable;
 import static a75f.io.renatus.UtilityApplication.context;
+import static a75f.io.renatus.UtilityApplication.isBACnetIntialized;
+import static a75f.io.renatus.UtilityApplication.isBacnetMstpInitialized;
 import static a75f.io.renatus.UtilityApplication.unRegisterEthernetListener;
 import static a75f.io.renatus.UtilityApplication.unRegisterWifiListener;
 import static a75f.io.renatus.bacnet.BacnetBackgroundTaskHandler.BACNET_FD_INTERVAL;
@@ -86,6 +91,7 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.interfaces.RemoteCommandHandleInterface;
 import a75f.io.logic.util.PreferenceUtil;
+import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.bacnet.BacnetBackgroundTaskHandler;
@@ -359,7 +365,7 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
         registerReceiver(mUsbEventReceiver, filter);
         CcuLog.e(L.TAG_CCU, "LifeCycleEvent LandingActivity Created");
         populateBACnetConfiguration();
-        intializeBACnet();
+        startServerToInitializeBACnet();
         ccuLaunched();
 
         // If we just restarted after a bundled install, we need to perform
@@ -405,6 +411,21 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
             });
         }else{
             CcuLog.i(TAG,"--no mstp dont check for serial ports--");
+        }
+
+        //Launch BacApp if either BACnet IP or MSTP initialized
+        boolean isBacnetMstpInitialized = isBacnetMstpInitialized();
+        boolean isBacnetIpInitialized = isBACnetIntialized();
+        if(isBacnetIpInitialized || isBacnetMstpInitialized) {
+            CcuLog.d(TAG," BACnet was initialized, launching Bacnet App!!!! ");
+            BacnetUtilKt.launchBacApp(context, BROADCAST_BACNET_APP_START, "Start BACnet App", "", isBacnetMstpInitialized);
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            if (isBacnetIpInitialized) {
+                sharedPreferences.edit().putLong(BACNET_HEART_BEAT, System.currentTimeMillis()).apply(); //Reset heart beat on app launch
+            }
+            if (isBacnetMstpInitialized) {
+                sharedPreferences.edit().putLong(BACNET_MSTP_HEART_BEAT, System.currentTimeMillis()).apply();
+            }
         }
     }
 
@@ -1033,8 +1054,8 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
         }
     }
 
-    private void intializeBACnet() {
-        if(UtilityApplication.isBACnetIntialized() || UtilityApplication.isBacnetMstpInitialized()) {
+    private void startServerToInitializeBACnet() {
+        if(isBACnetIntialized() || isBacnetMstpInitialized()) {
             executeTask();
         }
     }

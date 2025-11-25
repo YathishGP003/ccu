@@ -13,6 +13,8 @@ import a75f.io.logic.bo.building.system.client.CcuService
 import a75f.io.logic.bo.building.system.client.ServiceManager
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_JOB_TASK_TYPE
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_PERIODIC_RESUBSCRIBE_COV
+import a75f.io.logic.util.bacnet.BacnetUtility.getNetworkDetails
+import a75f.io.logic.util.bacnet.BacnetUtility.updateBacnetHeartBeatPoint
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_DEVICE_ID
 import android.content.Context
 import android.preference.PreferenceManager
@@ -83,7 +85,7 @@ class BacnetDeviceJob(appContext: Context, workerParams: WorkerParameters) :
                 val service = if (isMstp) ServiceManager.makeCcuServiceForMSTP() else ServiceManager.makeCcuService()
                 CcuLog.d(
                     Tags.BACNET_DEVICE_JOB,
-                    "--fetchConnectedDeviceGlobally for ip --> $serverIpAddress --- service--$service---devicePort-->$devicePort <--lowLimit-->$lowLimit<--highLimit-->$highLimit"
+                    "--fetchConnectedDeviceGlobally --- service--$service---devicePort-->$devicePort <--lowLimit-->$lowLimit<--highLimit-->$highLimit"
                 )
                 try {
 
@@ -109,6 +111,7 @@ class BacnetDeviceJob(appContext: Context, workerParams: WorkerParameters) :
         }
 
         private fun sendRequest(bacnetWhoIsRequest: BacnetWhoIsRequest, service: CcuService) {
+            val bacnetEquipId = bacnetEquip?.get("id").toString()
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val response = service.whois(bacnetWhoIsRequest)
@@ -121,59 +124,31 @@ class BacnetDeviceJob(appContext: Context, workerParams: WorkerParameters) :
                             CoroutineScope(Dispatchers.Main).launch {
                                 if (!readResponse?.whoIsResponseList.isNullOrEmpty()) {
                                     CcuLog.d(BACNET_DEVICE_JOB, "---device found---")
-                                    updateHeartBeatPoint(1.0)
+                                    updateBacnetHeartBeatPoint(1.0, bacnetEquipId)
                                 } else {
                                     CcuLog.d(BACNET_DEVICE_JOB, "no devices found")
-                                    updateHeartBeatPoint(0.0)
+                                    updateBacnetHeartBeatPoint(0.0, bacnetEquipId)
                                 }
                             }
                         } else {
                             CcuLog.d(BACNET_DEVICE_JOB, "--null response--")
-                            updateHeartBeatPoint(0.0)
+                            updateBacnetHeartBeatPoint(0.0, bacnetEquipId)
                         }
                     } else {
                         CcuLog.d(BACNET_DEVICE_JOB, "--error--${resp.error}")
-                        updateHeartBeatPoint(0.0)
+                        updateBacnetHeartBeatPoint(0.0, bacnetEquipId)
                     }
                 } catch (e: SocketTimeoutException) {
                     CcuLog.d(BACNET_DEVICE_JOB, "--SocketTimeoutException--${e.message}")
-                    updateHeartBeatPoint(0.0)
+                    updateBacnetHeartBeatPoint(0.0, bacnetEquipId)
                 } catch (e: ConnectException) {
                     CcuLog.d(BACNET_DEVICE_JOB, "--ConnectException--${e.message}")
-                    updateHeartBeatPoint(0.0)
+                    updateBacnetHeartBeatPoint(0.0, bacnetEquipId)
                 } catch (e: Exception) {
                     CcuLog.d(BACNET_DEVICE_JOB, "--connection time out--${e.message}")
-                    updateHeartBeatPoint(0.0)
+                    updateBacnetHeartBeatPoint(0.0, bacnetEquipId)
                 }
             }
-        }
-
-        private fun updateHeartBeatPoint(newValue: Double) {
-            val bacnetEquipId = bacnetEquip?.get("id").toString()
-            val heartBeatPointId = CCUHsApi.getInstance().readEntity("point and heartbeat and equipRef== \"${bacnetEquipId}\"")["id"]
-            CcuLog.d(
-                BACNET_DEVICE_JOB,
-                "--updateHeartBeatPoint--$newValue<--heartBeatPointId-->$heartBeatPointId <--bacnetEquipId-->$bacnetEquipId"
-            )
-            if (heartBeatPointId.toString().isNotEmpty()) {
-                CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(heartBeatPointId.toString(), newValue)
-                CcuLog.d(BACNET_DEVICE_JOB, "--updateHeartBeatPoint--updated successfully -->Value-->$newValue")
-            }
-        }
-
-        private fun getNetworkDetails(context: Context): JSONObject? {
-            val bacnetServerConfig =
-                PreferenceManager.getDefaultSharedPreferences(context)
-                    .getString(BacnetConfigConstants.BACNET_CONFIGURATION, null)
-            if (bacnetServerConfig != null) {
-                try {
-                    val config = JSONObject(bacnetServerConfig)
-                    return config.getJSONObject("network")
-                } catch (e: JSONException) {
-                    e.printStackTrace()
-                }
-            }
-            return null
         }
     }
 }

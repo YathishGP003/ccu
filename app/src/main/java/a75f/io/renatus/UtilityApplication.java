@@ -6,6 +6,7 @@ import static a75f.io.api.haystack.Constants.TWENTY_FOUR_HOURS;
 import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
 import static a75f.io.logic.util.PreferenceUtil.getSyncStartTime;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_START;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.ETHERNET;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_ADDRESS;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
@@ -85,6 +86,8 @@ import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.util.PreferenceUtil;
+import a75f.io.logic.util.bacnet.BacnetUtility;
+import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.messaging.MessageHandlerSubscriber;
 import a75f.io.messaging.client.MessagingClient;
@@ -229,6 +232,8 @@ public abstract class UtilityApplication extends Application implements Globals.
         CcuLog.i(L.TAG_CCU_INIT, "Initializing BacnetServicesUtils callback implementation");
         BacnetServicesUtils callbackImpl = new BacnetServicesUtils();
         BacnetRequestProcessor.setCallback(callbackImpl);
+
+        //Launch BacApp if BACnet is initialized
         if (isBacnetMstpInitialized()) {
             CcuLog.i(L.TAG_CCU_INIT, "Bacnet MSTP is initialized, scheduling job to resubscribe COV");
             scheduleJobToResubscribeBacnetMstpCOV();
@@ -236,6 +241,7 @@ public abstract class UtilityApplication extends Application implements Globals.
             CcuLog.i(L.TAG_CCU_INIT, "Bacnet MSTP is not initialized, skipping resubscribe job");
             cancelScheduleJobToResubscribeBacnetMstpCOV("Bacnet MSTP not initialized");
         }
+        BacnetUtility.INSTANCE.checkAndScheduleJobForBacnetClient();
 
         new SanityManager().scheduleAllSanityPeriodic(getApplicationContext(), TWENTY_FOUR_HOURS);
     }

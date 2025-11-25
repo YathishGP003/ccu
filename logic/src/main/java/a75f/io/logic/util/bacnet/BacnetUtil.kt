@@ -53,7 +53,6 @@ import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_ADDRESS_VAL
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED
-import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_MSTP_INITIALIZED
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_STACK_INITIALIZED
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_GLOBAL
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.LOCAL_NETWORK_NUMBER
@@ -76,6 +75,7 @@ import a75f.io.logic.util.bacnet.BacnetConfigConstants.VENDOR_NAME
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.VENDOR_NAME_VALUE
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.VIRTUAL_NETWORK_NUMBER
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.ZONE_TO_VIRTUAL_DEVICE_MAPPING
+import a75f.io.logic.util.bacnet.BacnetUtility.isBacnetMstpInitialized
 import a75f.io.util.getConfig
 import android.content.Context
 import android.content.Intent
@@ -92,15 +92,12 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
-import org.projecthaystack.HDict
 import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.InputStreamReader
-import java.lang.Thread.sleep
 import java.net.ConnectException
 import java.net.InetAddress
 import java.net.NetworkInterface
@@ -299,7 +296,7 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
             updateBacnetServerStatus(BacnetServerStatus.NOT_INITIALIZED.ordinal)
         }
 
-        val isBacnetMstpInitialized = preferences.getBoolean(IS_BACNET_MSTP_INITIALIZED, false)
+        val isBacnetMstpInitialized = isBacnetMstpInitialized()
         if (isBacnetMstpInitialized) {
             CcuLog.d(TAG_CCU_BACNET_MSTP, "BACnet MSTP stack is initialized")
             val bacnetMstpLastHeartBeatTime = preferences.getLong(BACNET_MSTP_HEART_BEAT, 0)
@@ -324,7 +321,7 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
         Globals.getInstance().applicationContext.sendBroadcast(intent)
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().applicationContext)
-        val isBacnetMstpInitialized = sharedPreferences.getBoolean(IS_BACNET_MSTP_INITIALIZED, false)
+        val isBacnetMstpInitialized = isBacnetMstpInitialized()
         launchBacApp(Globals.getInstance().applicationContext, BROADCAST_BACNET_APP_START, "Start BACnet App", "",isBacnetMstpInitialized)
     }
 
@@ -492,7 +489,7 @@ fun updateBacnetStackInitStatus(isStackInitSuccess: Boolean) {
 fun updateBacnetMstpLinearAndCovSubscription( isInitProcessRequired: Boolean = true ) {
     CcuLog.d(TAG_CCU_BACNET_MSTP, "--[1]-- mstp rpm inside updateBacnetMstpLinearAndCovSubscription ")
     val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().applicationContext)
-    val isBacnetMstpInitialized = sharedPreferences.getBoolean(IS_BACNET_MSTP_INITIALIZED, false)
+    val isBacnetMstpInitialized = isBacnetMstpInitialized()
 
     if (!isBacnetMstpInitialized) {
         CcuLog.d(TAG_CCU_BACNET_MSTP, "--[2]-- BACnet MSTP stack is not initialized, skipping Linear and COV Subscription")
@@ -509,7 +506,6 @@ fun updateBacnetMstpLinearAndCovSubscription( isInitProcessRequired: Boolean = t
     val serverIpAddress = serviceUtils.getServerIpAddress()
     CcuLog.d(TAG_CCU_BACNET_MSTP, "--[3]-- BACnet MSTP Subscription Server IP Address: $serverIpAddress")
     val bacnetMstpEquip = CCUHsApi.getInstance().readAllHDictByQuery("equip and bacnetMstp")
-    handleLinearPoints(bacnetMstpEquip)
     CcuLog.d(TAG_CCU_BACNET_MSTP, "BACnet MSTP Subscription for ${bacnetMstpEquip.size} devices")
     var subscribeCovForAllDevices = mutableListOf<BacnetMstpSubscribeCov>()
     bacnetMstpEquip.forEach { t1 ->
@@ -526,7 +522,7 @@ fun updateBacnetMstpLinearAndCovSubscription( isInitProcessRequired: Boolean = t
 
         points.forEach {
             try {
-                CcuLog.d(TAG_CCU_BACNET_MSTP, "Point: ${it.id()}")
+//                CcuLog.d(TAG_CCU_BACNET_MSTP, "Point: ${it.id()}")
                 val objectId = it[Tags.BACNET_OBJECT_ID]?.toString()?.toDouble()?.toInt()
                 val objectType =
                         it[Tags.BACNET_TYPE]?.toString()?.let { BacnetTypeMapper.getObjectType(it) }
@@ -536,7 +532,7 @@ fun updateBacnetMstpLinearAndCovSubscription( isInitProcessRequired: Boolean = t
                     CcuLog.e(TAG_CCU_BACNET_MSTP, "Object ID or Object Type is null for point: ${it.id()}")
 
                 } else {
-                    CcuLog.d(TAG_CCU_BACNET_MSTP, "Point: ${it.id()} with objectId: $objectId and objectType: $objectType")
+//                    CcuLog.d(TAG_CCU_BACNET_MSTP, "Point: ${it.id()} with objectId: $objectId and objectType: $objectType")
 
                     if (isInitProcessRequired) {
                         // Add to linear list to update the point present value
@@ -557,20 +553,15 @@ fun updateBacnetMstpLinearAndCovSubscription( isInitProcessRequired: Boolean = t
 
                         // if point hisInterpolate is cov then subscribe to COV
                         if (it["hisInterpolate"]?.toString() == Tags.COV) {
-
-                            CcuLog.d(TAG_CCU_BACNET_MSTP, "Point ${it.id()} is COV enabled")
                             val objectIdentifier =
                                     getDetailsFromObjectLayout(objectType, objectId.toString())
-                            CcuLog.d(TAG_CCU_BACNET_MSTP, "Object Identifier for Cov: $objectIdentifier")
+                            CcuLog.d(TAG_CCU_BACNET_MSTP, "Point ${it.id()} is Cov Enabled. Object Identifier for Cov: $objectIdentifier")
                             objectIdentifierListForCov.add(objectIdentifier)
-                            CcuLog.d(TAG_CCU_BACNET_MSTP, "Object Identifier List for Cov: $objectIdentifierListForCov")
                         }
                     } else {
-
-                        /*if ( it["hisInterpolate"]?.toString() == Tags.LINEAR ) {
-                            CcuLog.d(TAG_CCU_BACNET_MSTP, "Point ${it.id()} is Linear enabled")
+                        if ( it["hisInterpolate"]?.toString() == Tags.LINEAR ) {
                             val objectIdentifier = getDetailsFromObjectLayout(objectType, objectId.toString())
-                            CcuLog.d(TAG_CCU_BACNET_MSTP, "Object Identifier for Linear: $objectIdentifier")
+                            CcuLog.d(TAG_CCU_BACNET_MSTP, "Point ${it.id()} is Linear enabled. Object Identifier for Linear: $objectIdentifier")
                             val propertyReference = mutableListOf<PropertyReference>()
                             propertyReference.add(
                                 PropertyReference(
@@ -584,7 +575,7 @@ fun updateBacnetMstpLinearAndCovSubscription( isInitProcessRequired: Boolean = t
                                     propertyReference
                                 )
                             )
-                        }*/
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -603,12 +594,11 @@ fun updateBacnetMstpLinearAndCovSubscription( isInitProcessRequired: Boolean = t
             CcuLog.d(TAG_CCU_BACNET_MSTP, "No COV enabled points found for device: $deviceId")
         }
 
-        /*if (serverIpAddress != null && readAccessSpecification.isNotEmpty()) {
+        if (readAccessSpecification.isNotEmpty()) {
             CcuLog.d(TAG_CCU_BACNET_MSTP, "Sending RPM for device: $deviceId with mac address: $deviceMacAddress and read access specification: $readAccessSpecification")
             val rpmRequest = RpmRequest(readAccessSpecification)
-            sendRequestMultipleRead(BacnetReadRequestMultiple(destination, rpmRequest), serverIpAddress , deviceId, t1.id().toString())
-        }*/
-
+            sendRequestMultipleRead(BacnetReadRequestMultiple(destination, rpmRequest) , deviceId, t1.id().toString())
+        }
     }
         if (subscribeCovForAllDevices.isEmpty()) {
             CcuLog.d(TAG_CCU_BACNET_MSTP, "No COV subscription found for any device")
@@ -651,97 +641,6 @@ private fun sendRequestMultipleRead(
     }
 }
 
-var equipsToProcess = 0
-var equipProcessed = 0
-fun handleLinearPoints(bacnetMstpEquip: MutableList<HDict>) {
-    CcuLog.d(TAG_CCU_BACNET_MSTP, "--[4]-- mstp rpm handleLinearPoints called, check whether it needs to process or not")
-
-    // If all equips already processed, reset and start again
-    if (equipProcessed >= equipsToProcess && equipsToProcess > 0) {
-        CcuLog.d(TAG_CCU_BACNET_MSTP, "--[5]-- mstp rpm All $equipsToProcess equips processed. Resetting counters for next run...")
-        equipsToProcess = 0
-        equipProcessed = 0
-    }
-
-    if (equipProcessed < equipsToProcess || equipsToProcess == 0) {
-        equipsToProcess = bacnetMstpEquip.size
-        equipProcessed = 0
-        var equip : HDict
-        for (i in 0 until equipsToProcess) {
-            equip = bacnetMstpEquip[i]
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "--[6]-- mstp rpm Processing equip no-->$i <--id-->${equip.id()} <--dis-->${equip.dis()}")
-            fetchEquipLinearPoints(equip)
-            equipProcessed = i + 1
-        }
-    } else {
-        CcuLog.d(TAG_CCU_BACNET_MSTP, "--[7]-- mstp rpm Already processed all $equipsToProcess equipments. Skipping...")
-    }
-}
-
-fun fetchEquipLinearPoints(
-    t1: HDict
-) {
-    CcuLog.d(TAG_CCU_BACNET_MSTP, "--[8]-- mstp rpm --inside handlePointsWithDelay---checking if equip has linear points")
-    val points = CCUHsApi.getInstance()
-            .readAllHDictByQuery("hisInterpolate == \"linear\" and point and bacnetId and equipRef==\"${t1.id()}\"")
-
-    if (points.isEmpty()) {
-        CcuLog.d(TAG_CCU_BACNET_MSTP, "--[9]-- mstp rpm No linear points found for ${t1.id()}")
-        return
-    }else{
-        CcuLog.d(TAG_CCU_BACNET_MSTP, "--[9.1]-- mstp rpm points found for processing ${points.size}")
-    }
-
-    val deviceId = t1["bacnetDeviceId"]?.toString() ?: ""
-    val deviceMacAddress = t1["bacnetDeviceMacAddr"]?.toString() ?: "0"
-    val destination = DestinationMultiRead("", "0", deviceId, "", deviceMacAddress)
-
-    val readAccessSpecification = mutableListOf<ReadRequestMultiple>()
-
-    points.forEach { point ->
-        try {
-            val objectId = point[Tags.BACNET_OBJECT_ID]?.toString()?.toDouble()?.toInt()
-            val objectType = point[Tags.BACNET_TYPE]?.toString()?.let {
-                BacnetTypeMapper.getObjectType(it)
-            }
-
-            if (objectId != null && objectType != null) {
-                val objectIdentifier = getDetailsFromObjectLayout(objectType, objectId.toString())
-
-                val propertyReference = mutableListOf(
-                    PropertyReference(BacNetConstants.PropertyType.PROP_PRESENT_VALUE.value, -1)
-                )
-
-                readAccessSpecification.add(
-                    ReadRequestMultiple(objectIdentifier, propertyReference)
-                )
-            } else {
-                CcuLog.e(TAG_CCU_BACNET_MSTP, "--[10]-- mstp rpm Invalid point: ${point.id()}")
-            }
-        } catch (e: Exception) {
-            CcuLog.e(
-                TAG_CCU_BACNET_MSTP,
-                "--[11]-- mstp rpm Error processing point: ${point.id()} - ${e.message}"
-            )
-        }
-    }
-
-    if (readAccessSpecification.isNotEmpty()) {
-        val rpmRequest = RpmRequest(readAccessSpecification)
-        CcuLog.d(TAG_CCU_BACNET_MSTP, "--[12]-- mstp rpm Sending combined RPM request for device $deviceId")
-
-        sendRequestMultipleRead(
-            BacnetReadRequestMultiple(destination, rpmRequest),
-            deviceId,
-            t1.id().toString()
-        )
-    } else {
-        CcuLog.d(TAG_CCU_BACNET_MSTP, "--[12]-- mstp rpm destination null or empty specification list")
-    }
-
-}
-
-
 fun updateHeartBeatPoint(id: String, isEquipId: Boolean = false) {
     var pointId = id
     if(!pointId.startsWith("@")){
@@ -779,31 +678,35 @@ private fun updatePointPresentValue(readResponse: MultiReadResponse?,deviceId: S
         }else if(readResponse.errorASide != null){
             CcuLog.d(TAG_CCU_BACNET_MSTP, "RPM abort reason->${readResponse.errorASide!!.abortReason}")
         }else {
-            if(readResponse.rpResponse != null){
+            if(readResponse.rpResponse != null && readResponse.rpResponse.listOfItems.isNotEmpty()){
+                var responseEquipId = equipId
                 for (item in readResponse.rpResponse.listOfItems) {
-
+                     val macAddress = readResponse.let { it.source?.macAddress }
                     item.results.forEach {
                           it.propertyValue?.value?.let { value ->
                               var updatedObjectType = getBacNetType( ObjectType.values()[item.objectIdentifier.objectType.toInt()].key.replace("OBJECT_", ""))
                               CcuLog.i(TAG_CCU_BACNET_MSTP, "MSTP -> updatedObjectType: $updatedObjectType")
                               CcuLog.i(TAG_CCU_BACNET_MSTP, "MSTP -> objectId: ${item.objectIdentifier.objectInstance}")
-                              val query = "point and bacnetDeviceId == $deviceId and bacnetObjectId==${item.objectIdentifier.objectInstance} and bacnetType==\"$updatedObjectType\""
+                              val query = if (macAddress.isNullOrEmpty())
+                                  "point and bacnetMstp and bacnetDeviceId == $deviceId and bacnetObjectId==${item.objectIdentifier.objectInstance} and bacnetType==\"$updatedObjectType\""
+                                  else "point and bacnetMstp and bacnetDeviceMacAddr ==\"$macAddress\" and bacnetObjectId==${item.objectIdentifier.objectInstance} and bacnetType==\"$updatedObjectType\""
                               CcuLog.i(TAG_CCU_BACNET_MSTP, "MSTP -> query: $query")
                               val point = CCUHsApi.getInstance().read(query)
-                              if (point.isEmpty()) {
+                              if (point.isNullOrEmpty()) {
                                   CcuLog.d(TAG_CCU_BACNET_MSTP, "RPM response for point ${item.objectIdentifier.objectInstance} is not found")
                                   return@forEach
                               }
-                              val id = point?.get("id")?.toString()
+                              val id = point["id"]?.toString()
+                              responseEquipId = point["equipRef"]?.toString() ?: responseEquipId
                               CcuLog.d(TAG_CCU_BACNET_MSTP, "RPM response for point $id is $value")
                               // Update the point present value in the database
                               CCUHsApi.getInstance().writePointValue(point,value.toDouble())
+                              updateHeartBeatPoint(responseEquipId,true)
                           }
                     }
                 }
-                updateHeartBeatPoint(equipId,true)
             }else{
-                CcuLog.d(TAG_CCU_BACNET_MSTP," RPM response is null")
+                CcuLog.d(TAG_CCU_BACNET_MSTP," RPM response is null or empty" )
             }
         }
     }
@@ -881,7 +784,7 @@ fun initializeMSTPStack(isStackInitSuccess: Boolean) {
     val context = Globals.getInstance().applicationContext
     val sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().applicationContext)
 
-    val isMstpInitialized = sharedPreferences.getBoolean(IS_BACNET_MSTP_INITIALIZED, false)
+    val isMstpInitialized = isBacnetMstpInitialized()
 
     if (isStackInitSuccess && isMstpInitialized) {
         val mstpConfig = sharedPreferences.getString(BACNET_MSTP_CONFIGURATION, "")

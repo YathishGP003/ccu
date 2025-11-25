@@ -583,6 +583,11 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                 return false
             }
 
+            if (destinationMacAddress.value.isEmpty()) {
+                showToast(context.getString(R.string.macAddressValidation), context)
+                return false
+            }
+
             // check for valid mac address
             if(deviceSelectionMode.value == 0){
                 // this is slave device
@@ -1215,7 +1220,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = service.subscribeCov(BacnetMstpSubscribeCovForAllDevices( subscribeCovRequest ))
+                val response = service.subscribeCovForMstp(BacnetMstpSubscribeCovForAllDevices( subscribeCovRequest ))
                 val resp = BaseResponse(response)
                 ProgressDialogUtils.hideProgressDialog()
                 if (response.isSuccessful) {
@@ -1532,7 +1537,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                                 isConnectedDevicesSearchFinished.value = true
                             }else{
                                 CcuLog.d(TAG_BACNET, "no devices found")
-                                showToastMessage("No devices found check configuration and initialize bacnet again")
+                                showToastMessage(context.getString(R.string.no_devices_found))
                             }
                         }
                     } else {

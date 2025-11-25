@@ -120,10 +120,12 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Ccu;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.MstpDataInterface;
+import a75f.io.logic.util.bacnet.BacnetClientJob;
 import a75f.io.logic.service.FileBackupJobReceiver;
 import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.util.bacnet.BacnetUtility;
 import a75f.io.renatus.bacnet.BacnetConfigChange;
 import a75f.io.renatus.usbmanager.UsbDeviceAdapter;
 import a75f.io.renatus.usbmanager.UsbManagerViewModel;
@@ -346,18 +348,6 @@ public class Communication extends Fragment implements MstpDataInterface {
         super.onViewCreated(view, savedInstanceState);
         HttpServer.Companion.setMstpDataInterface(this);
         this.rootView = view;
-        if(UtilityApplication.isBacnetMstpInitialized()) {
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "mstp config found prepare for mstp init");
-            executorService.submit(() -> {
-                UsbHelper.runChmodUsbDevices();
-                UsbPortTrigger.triggerUsbSerialBinding(requireContext());
-                UsbHelper.listUsbDevices(requireContext());
-                UsbHelper.runAsRoot("ls /dev/tty*");
-                updateMstpUi();
-            });
-        }else{
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "no mstp config found");
-        }
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
@@ -660,26 +650,6 @@ public class Communication extends Fragment implements MstpDataInterface {
         tvMstpMaxFrame.setVisibility(View.GONE);
         etMstpDeviceId.setVisibility(View.VISIBLE);
         tvMstpDeviceId.setVisibility(View.GONE);
-    }
-
-    private void updateMstpUi(){
-        String textMessage;
-        ArrayList<String> usbSerialPorts = getPortAddressMstpDevices();
-
-        if(!usbSerialPorts.isEmpty() && usbSerialPorts.get(0).contains("USB")) {
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "USB Serial Ports found: " + usbSerialPorts);
-            portAddress = usbSerialPorts.get(0);
-            isUSBSerialPortAvailable = true;
-            textMessage = "Connected";
-        } else {
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "No USB Serial Ports found");
-            usbSerial.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
-            isUSBSerialPortAvailable = false;
-            textMessage = "Not Connected";
-        }
-
-        String finalTextMessage = textMessage;
-        requireActivity().runOnUiThread(() -> usbSerial.setText(finalTextMessage));
     }
 
     private void hideMstpConfigView() {
@@ -1171,15 +1141,17 @@ public class Communication extends Fragment implements MstpDataInterface {
     @Override
     public void updateMstpBacnetUi(Boolean isInitSuccess, String message, String errorCode) {
         CcuLog.d(TAG_CCU_BACNET_MSTP, "updateMstpBacnetUi-->"+isInitSuccess);
-        requireActivity().runOnUiThread(() -> {
-            if(isInitSuccess){
-                displayCustomToastMessageOnSuccess("BACnet - MSTP Configuration initialized successfully");
-                hideMstpConfigView();
-            }else{
-                enableMstpConfigView();
-                Toast.makeText(requireContext(), "MSTP initialization Failed.", Toast.LENGTH_LONG).show();
-            }
-        });
+        if (requireContext() != null) {
+            requireActivity().runOnUiThread(() -> {
+                if (isInitSuccess) {
+                    displayCustomToastMessageOnSuccess("BACnet - MSTP Configuration initialized successfully");
+                    hideMstpConfigView();
+                } else {
+                    enableMstpConfigView();
+                    Toast.makeText(requireContext(), "MSTP initialization Failed.", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
     }
 
     private class EditTextWatcher implements TextWatcher {
@@ -1443,6 +1415,10 @@ public class Communication extends Fragment implements MstpDataInterface {
 
             sharedPreferences.edit().putBoolean(IS_BACNET_INITIALIZED, true).apply();
             BacnetUtilKt.launchBacApp(context, BROADCAST_BACNET_APP_START, "Start BACnet App", ipDeviceInstanceNumber.getText().toString(),false);
+            if (!BacnetClientJob.INSTANCE.isJobScheduled()) {
+                CcuLog.d(TAG_CCU_BACNET, "Scheduling BacnetClientJob");
+                BacnetUtility.INSTANCE.checkAndScheduleJobForBacnetClient();
+            }
             performConfigFileBackup();
         }
     }

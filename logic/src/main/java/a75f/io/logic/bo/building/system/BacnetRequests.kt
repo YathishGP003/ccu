@@ -36,6 +36,11 @@ data class BacnetMstpSubscribeCov(
     private val subscribeCovRequest: BacnetMstpSubscribeCovRequest
 )
 
+data class BacnetIpSubscribeCov(
+    @SerializedName("destination")
+    private val destination: DestinationMultiRead
+)
+
 data class BacnetMstpSubscribeCovRequest(
     @SerializedName("cov_function")
     private val covFunction: Int, // 0 for unsubscribe Cov, 1 for subscribe Cov

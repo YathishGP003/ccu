@@ -1651,25 +1651,21 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		if(heartBeatHisItem != null) {
 			Date updatedTime = heartBeatHisItem.getDate();
 			lastUpdatedTime = HeartBeatUtil.getLastUpdatedTimeBacnetSystem(updatedTime);
-			if (hisValue == 1.0) {
-				externalModbusStatus.setBackgroundResource(R.drawable.module_alive);
+
+			Date currTime = new Date();
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(updatedTime);
+			calendar.add(Calendar.MINUTE, 15);
+			Date currTimePlus15 = calendar.getTime();
+
+			CcuLog.d(TAG_BACNET_HEART_BEAT, "--heart beat point his value-->" + hisValue + "<--heartBeatHisItem time-->" + heartBeatHisItem.getDate() + "<----currTimePlus15-->" + currTimePlus15 + "<currTime>" + currTime);
+
+			if (currTime.after(currTimePlus15)) {
+				CcuLog.d(TAG_BACNET_HEART_BEAT, "givenTime is more than 15 minutes ahead of current time.");
+				externalModbusStatus.setBackgroundResource(R.drawable.module_dead);
 			} else {
-
-				Date currTime = new Date();
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTime(updatedTime);
-				calendar.add(Calendar.MINUTE, 15);
-				Date currTimePlus15 = calendar.getTime();
-
-				CcuLog.d(TAG_BACNET_HEART_BEAT, "--heart beat point his value-->" + hisValue + "<--heartBeatHisItem time-->" + heartBeatHisItem.getDate() + "<----currTimePlus15-->" + currTimePlus15 + "<currTime>" + currTime);
-
-				if (currTime.after(currTimePlus15)) {
-					CcuLog.d(TAG_BACNET_HEART_BEAT, "givenTime is more than 15 minutes ahead of current time.");
-					externalModbusStatus.setBackgroundResource(R.drawable.module_dead);
-				} else {
-					CcuLog.d(TAG_BACNET_HEART_BEAT, "givenTime is not more than 15 minutes ahead.");
-					externalModbusStatus.setBackgroundResource(R.drawable.module_alive);
-				}
+				CcuLog.d(TAG_BACNET_HEART_BEAT, "givenTime is not more than 15 minutes ahead.");
+				externalModbusStatus.setBackgroundResource(R.drawable.module_alive);
 			}
 		} else {
 			CcuLog.d(TAG_BACNET_HEART_BEAT, "givenTime not found");

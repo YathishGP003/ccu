@@ -39,6 +39,8 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.apache.commons.lang3.StringUtils
@@ -65,6 +67,9 @@ class NonTempProfileViewModel : ViewModel(), PointSubscriber {
     // handler for periodic equip health updates
     var handler = Handler(Looper.getMainLooper())
     var runnable: Runnable? = null
+    var showLoader = mutableStateOf(true)
+    var backgroundJob: Job? = null
+
 
     fun setEquipStatusPoint(item: HeaderViewItem) {
         equipStatusPoint.value = item
@@ -76,14 +81,14 @@ class NonTempProfileViewModel : ViewModel(), PointSubscriber {
     }
 
     fun initializeDetailedViewPoints(detailedViewItems: List<ExternalPointItem>) {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.IO) {
             val oldPoints = detailedViewPoints.toList()
             unSubscribeDetailedViewHisPoints(oldPoints)
             subscribeDetailedViewPoints(detailedViewItems)
-            withContext(Dispatchers.Main) {
-                detailedViewPoints.clear()
-                detailedViewPoints.addAll(detailedViewItems)
-            }
+            delay(500)
+            detailedViewPoints.clear()
+            detailedViewPoints.addAll(detailedViewItems)
+            showLoader.value = false
         }
     }
 
@@ -143,12 +148,14 @@ class NonTempProfileViewModel : ViewModel(), PointSubscriber {
         super.onCleared()
         unSubscribeDetailedViewHisPoints(detailedViewPoints)
         unSubscribeHeaderViewHisPoints(headerViewPoints)
+        cancelBackgroundJob()
     }
 
     fun cleanUp() {
         unSubscribeDetailedViewHisPoints(detailedViewPoints)
         unSubscribeHeaderViewHisPoints(headerViewPoints)
         stopObservingEquipHealth()
+        cancelBackgroundJob()
     }
 
     override fun onWritablePointChanged(pointId: String, value: Any) {
@@ -852,6 +859,11 @@ class NonTempProfileViewModel : ViewModel(), PointSubscriber {
         }
 
         initializeHeaderViewPoints(headerViewItems)
+    }
+
+    private fun cancelBackgroundJob() {
+        backgroundJob?.cancel()
+        backgroundJob = null
     }
 
 }

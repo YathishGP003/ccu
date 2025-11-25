@@ -368,27 +368,11 @@ fun DetailedViewDropDown(
             ).size.width
         }
 
-        // width for expanded (based on longest item in the list)
-        val maxItemWidth = remember(list) {
-            list.maxOfOrNull { item ->
-                textMeasurer.measure(
-                    text = item,
-                    style = TextStyle(fontSize = 22.sp)
-                ).size.width
-            } ?: 0
-        }
 
-        val collapsedWidthDp = with(LocalDensity.current) {
-            selectedWidth.toDp() + 40.dp
-        }.coerceIn(80.dp, 250.dp)
-
-        val expandedWidthDp = with(LocalDensity.current) {
-            maxItemWidth.toDp() + 40.dp
-        }.coerceIn(80.dp, 300.dp)
 
         Box(
             modifier = Modifier
-                .width(collapsedWidthDp)
+                .width(externalPoint!!.collapsedWidth)
         ) {
             Column {
                 Row {
@@ -396,7 +380,7 @@ fun DetailedViewDropDown(
                     Text(
                         selectedText,
                         modifier = Modifier
-                            .width(collapsedWidthDp - 30.dp) // minus icon width
+                            .width(externalPoint.collapsedWidth - 30.dp) // minus icon width
                             .clickable(onClick = {
                                 if (externalPoint?.canOverride == true) {
                                     canOpenUserIntentDialog = true
@@ -456,8 +440,8 @@ fun DetailedViewDropDown(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 modifier = Modifier
-                    .width(expandedWidthDp) // expanded width = longest item
-                    .height(customHeight.dp)
+                    .width(externalPoint.expandedWidth) // expanded width = longest item
+                    .height(customHeight.dp + 10.dp)
                     .background(Color.White)
                     .border(0.5.dp, Color.LightGray)
                     .shadow(1.dp, shape = RoundedCornerShape(2.dp))
@@ -466,7 +450,7 @@ fun DetailedViewDropDown(
                 LazyColumn(
                     state = lazyListState,
                     modifier = Modifier
-                        .width(expandedWidthDp)
+                        .width(externalPoint.expandedWidth)
                         .height(customHeight.dp)
                 ) {
                     itemsIndexed(list) { index, item ->
@@ -679,7 +663,7 @@ fun DetailedViewDropDownHeaderView(
                     onDismissRequest = { expanded = false },
                     modifier = Modifier
                         .width(expandedWidthDp) // expanded width = longest item
-                        .height(customHeight.dp)
+                        .height(customHeight.dp + 10.dp)
                         .background(Color.White)
                         .border(0.5.dp, Color.LightGray)
                         .shadow(1.dp, shape = RoundedCornerShape(2.dp))
@@ -830,7 +814,7 @@ fun TemperatureProfileDetailedViewDropDown(
                 onDismissRequest = { expanded = false },
                 modifier = Modifier
                     .width(expandedWidthDp) // expanded width = longest item
-                    .height(customHeight.dp)
+                    .height(customHeight.dp + 10.dp)
                     .background(Color.White)
                     .border(0.5.dp, Color.LightGray)
                     .shadow(1.dp, shape = RoundedCornerShape(2.dp))

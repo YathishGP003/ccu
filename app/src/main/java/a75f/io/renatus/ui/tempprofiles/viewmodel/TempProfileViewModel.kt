@@ -140,4 +140,8 @@ class TempProfileViewModel : ViewModel(), PointSubscriber {
             pointValueChangeListener?.updateWritePoint(pointId, value.toString())
         }
     }
+
+    override fun onCleared() {
+        cleanUp()
+    }
 }

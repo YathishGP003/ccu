@@ -150,34 +150,51 @@ fun readVal(id: String?): Double {
     return 0.0
 }
 
-fun getUserIntentsDoubleMap(parameter: Parameter): java.util.HashMap<String, java.util.ArrayList<Double>> {
-    val userIntentsMap = java.util.HashMap<String, java.util.ArrayList<Double>>()
+fun getUserIntentsDoubleMap(parameter: Parameter): HashMap<String, ArrayList<Double>> {
+    val userIntentsMap = HashMap<String, ArrayList<Double>>()
     val userIntentPointTags = parameter.getUserIntentPointTags()
-    val doubleArrayList = java.util.ArrayList<Double>()
+
     var minValue = 0.0
     var maxValue = 0.0
     var incValue = 0.0
     var unit = ""
 
-    for (i in userIntentPointTags.indices) {
-        val tagName = userIntentPointTags[i].tagName
-        val tagValue = userIntentPointTags[i].tagValue
-        when (tagName) {
-            "minVal" -> minValue = tagValue.toDouble()
-            "maxVal" -> maxValue = tagValue.toDouble()
-            "incrementVal" -> incValue = tagValue.toDouble()
-            "unit" -> unit = tagValue
+    for (tag in userIntentPointTags) {
+        when (tag.tagName) {
+            "minVal" -> minValue = tag.tagValue.toDouble()
+            "maxVal" -> maxValue = tag.tagValue.toDouble()
+            "incrementVal" -> incValue = tag.tagValue.toDouble()
+            "unit" -> unit = tag.tagValue
         }
     }
+
+    val doubleArrayList: ArrayList<Double>
+
     if (maxValue <= minValue || incValue <= 0) {
+        doubleArrayList = ArrayList(1)
         doubleArrayList.add(minValue)
         userIntentsMap[unit] = doubleArrayList
         return userIntentsMap
     }
+
+    val steps = ((maxValue - minValue) / incValue).toInt()
+
+    if (steps > 10000) {
+        doubleArrayList = ArrayList(1)
+        doubleArrayList.add(minValue)
+        userIntentsMap[unit] = doubleArrayList
+        return userIntentsMap
+    }
+
+    doubleArrayList = ArrayList(steps + 1)
+
     var pos = (100 * minValue).toInt()
-    while (pos <= (100 * maxValue)) {
+    val limit = (100 * maxValue).toInt()
+    val step = (100 * incValue).toInt()
+
+    while (pos <= limit) {
         doubleArrayList.add(pos / 100.0)
-        pos = (pos + (100 * incValue)).toInt()
+        pos += step
     }
     userIntentsMap[unit] = doubleArrayList
 

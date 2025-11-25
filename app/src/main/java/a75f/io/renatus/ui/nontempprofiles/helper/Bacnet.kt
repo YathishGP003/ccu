@@ -18,6 +18,10 @@ import android.util.Pair
 import android.view.View
 import android.widget.LinearLayout
 import androidx.compose.ui.platform.ComposeView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.DecimalFormat
 import java.util.function.Consumer
 
@@ -37,6 +41,7 @@ fun loadBacnetZone(
     val composeView = zoneDetailsView.findViewById<ComposeView>(R.id.detailedComposeView)
     externalEquipsLayoutSetup(linearLayoutZonePoints, zoneDetailsView)
     val viewModel = NonTempProfileViewModel()
+    viewModel.profile = "bacnet"
     nonTempProfileViewModels.add(viewModel)
     showExternalEquipPointsUI(composeView, viewModel, equipId, null, remotePointUpdateInterface,bacnetEquipTypeString = bacnetEquipTypeString)
 
@@ -48,15 +53,19 @@ fun loadBacnetZone(
         address
     ) // lastUpdate and heartbeat
     val bacnetPoints: List<BacnetZoneViewItem> = bacnetPointsList
-    val  points = getBacnetDetailedViewPoints(
-        Globals.getInstance().applicationContext,
-        bacnetPoints,
-        "bacnet"
-    )
     viewModel.setEquipStatusPoint(getPointScheduleHeaderViewItem(equipId))
     // status message
-
-    viewModel.initializeDetailedViewPoints(points)
+    viewModel.backgroundJob = CoroutineScope(Dispatchers.Default).launch {
+        val points = withContext(Dispatchers.IO) {
+            preparePoints(getBacnetDetailedViewPoints(
+                Globals.getInstance().applicationContext,
+                bacnetPoints,
+                "bacnet"
+            ))
+        }
+        viewModel.initializeDetailedViewPoints(points)
+        viewModel.showLoader.value = false
+    }
     viewModel.observeExternalEquipHealth(address)
 }
 

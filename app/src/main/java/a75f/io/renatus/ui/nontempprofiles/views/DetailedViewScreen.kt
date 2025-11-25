@@ -1,5 +1,6 @@
 package a75f.io.renatus.ui.nontempprofiles.views
 
+import a75f.io.logger.CcuLog
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.DetailedViewDropDown
 import a75f.io.renatus.composables.HeaderLabelView
@@ -17,6 +18,7 @@ import a75f.io.renatus.ui.screens.HeaderRow
 import a75f.io.renatus.ui.screens.HeartBeatCompose
 import a75f.io.renatus.ui.screens.TextAppearance
 import a75f.io.renatus.ui.tempprofiles.viewmodel.TempProfileViewModel
+import a75f.io.renatus.util.Gif75Loader
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -206,20 +208,15 @@ fun ExternalPointsList(
             )
         }
 
-        if (pointList.isEmpty()) {
-            // no need to show loading for connect module
-            if (!nonTempProfileViewModel.profile
-                    .equals("", ignoreCase = true)) {
+        if (nonTempProfileViewModel.showLoader.value) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    Gif75Loader()
                 }
-            }
         } else {
-
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 modifier = Modifier

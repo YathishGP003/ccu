@@ -3,7 +3,6 @@ package a75f.io.renatus.ui.nontempprofiles.helper
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.renatus.R
-import a75f.io.renatus.ui.model.HeaderViewItem
 import a75f.io.renatus.ui.nontempprofiles.utilities.externalEquipsLayoutSetup
 import a75f.io.renatus.ui.nontempprofiles.utilities.getPointScheduleHeaderViewItem
 import a75f.io.renatus.ui.nontempprofiles.utilities.showExternalEquipPointsUI
@@ -11,6 +10,10 @@ import a75f.io.renatus.ui.nontempprofiles.viewmodel.NonTempProfileViewModel
 import android.view.View
 import android.widget.LinearLayout
 import androidx.compose.ui.platform.ComposeView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 fun loadLowCodeModule(
@@ -31,7 +34,6 @@ fun loadLowCodeModule(
     val viewModel = NonTempProfileViewModel()
     var headerName: String? = null
     val address = lowCodeDevice["addr"].toString()
-
     if (showLastUpdatedTime) {
         headerName = when (equipType) {
             Tags.PCN -> {
@@ -70,11 +72,16 @@ fun loadLowCodeModule(
     }
     viewModel.setEquipStatusPoint(getPointScheduleHeaderViewItem(equipId))
 
-    viewModel.initializeDetailedViewPoints(
-        getModbusDetailedViewPoints(
-            equipmentDevice, equipType,
-            equipmentDevice.deviceEquipRef
-        )
-    )
+    viewModel.backgroundJob = CoroutineScope(Dispatchers.Default).launch {
+        val points = withContext(Dispatchers.IO) {
+            preparePoints(getModbusDetailedViewPoints(
+                equipmentDevice, equipType,
+                equipmentDevice.deviceEquipRef
+            ))
+        }
+        viewModel.initializeDetailedViewPoints(points)
+        viewModel.showLoader.value = false
+    }
+
     viewModel.observeConnectEquipHealthByGroupId(lowCodeDevice["id"].toString())
 }

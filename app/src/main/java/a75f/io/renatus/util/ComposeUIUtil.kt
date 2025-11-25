@@ -6,6 +6,8 @@ import a75f.io.renatus.modbus.util.ALERT
 import a75f.io.renatus.modbus.util.OK
 import android.content.Context
 import android.text.Spanned
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.background
@@ -13,9 +15,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -169,5 +174,43 @@ fun ErrorToastMessage(
     LaunchedEffect(Unit) {
         delay(2000)
         onDismiss()
+    }
+}
+
+@Composable
+fun Gif75Loader(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+            AndroidView(
+                factory = { context ->
+                    a75f.io.renatus.views.GifView(context, null).apply {
+                        id = View.generateViewId()
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                        )
+                        when {
+                            CCUUiUtil.isDaikinEnvironment(context) ->
+                                setImageResource(R.drawable.daikin_loader)
+                            CCUUiUtil.isCarrierThemeEnabled(context) ->
+                                setImageResource(R.drawable.carrier_loader)
+                            CCUUiUtil.isAiroverseThemeEnabled(context) ->
+                                setImageResource(R.drawable.airoverse_loader)
+                            else ->
+                                setImageResource(R.drawable.loader1)
+                        }
+                    }
+                },
+                modifier = Modifier.wrapContentSize()
+            )
+
+            Spacer(modifier = Modifier.height(30.dp))
+        }
     }
 }

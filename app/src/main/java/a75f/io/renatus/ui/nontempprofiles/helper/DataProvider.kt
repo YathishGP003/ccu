@@ -21,7 +21,10 @@ import a75f.io.renatus.ui.nontempprofiles.utilities.readVal
 import a75f.io.renatus.ui.nontempprofiles.utilities.searchIndexValue
 import a75f.io.renatus.ui.nontempprofiles.utilities.searchKeyForValue
 import android.content.Context
+import android.content.res.Resources
 import android.preference.PreferenceManager
+import android.text.TextPaint
+import androidx.compose.ui.unit.dp
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -37,9 +40,10 @@ fun getModbusDetailedViewPoints(
     }
     if (equipType == "modbus" || isLowCode) {
 
-        val externalPoints = mutableListOf<ExternalPointItem>()
+
         val modbusDevice = deviceObj as EquipmentDevice
         val parameters = getSortedParameterList(modbusDevice)
+        val externalPoints = ArrayList<ExternalPointItem>(parameters.size)
 
         parameters.forEach { parameter ->
             val viewItem = ExternalPointItem()
@@ -69,12 +73,16 @@ fun getModbusDetailedViewPoints(
                                 unit = key
                                 commands = value
                             }
-                            viewItem.dropdownOptions = commands
-                                .map { it.name }
-                                .toMutableList()
-                            viewItem.dropdownValues = commands
-                                .map { it.bitValues.toDouble().toString() }
-                                .toMutableList()
+                            viewItem.dropdownOptions = ArrayList<String>(commands.size).apply {
+                                for (cmd in commands) {
+                                    add(cmd.name)
+                                }
+                            }
+                            viewItem.dropdownValues = ArrayList<String>(commands.size).apply {
+                                for (cmd in commands) {
+                                    add(cmd.bitValues.toDouble().toString())
+                                }
+                            }
                             viewItem.usesDropdown = true
 
                             for (i in parameter.getCommands().indices) {
@@ -96,10 +104,12 @@ fun getModbusDetailedViewPoints(
                             }
                             if (doubleArrayList.isNotEmpty()) {
                                 viewItem.usesDropdown = true
-                                viewItem.dropdownOptions =
-                                    doubleArrayList.map { it.toString() }.toMutableList()
-                                viewItem.dropdownValues =
-                                    doubleArrayList.map { it.toString().toDouble().toString() }.toMutableList()
+                                viewItem.dropdownOptions = ArrayList<String>(doubleArrayList.size).apply {
+                                    for (it in doubleArrayList) add(it.toString())
+                                }
+                                viewItem.dropdownValues = ArrayList<String>(doubleArrayList.size).apply {
+                                    for (it in doubleArrayList) add(it.toString())
+                                }
                                 viewItem.currentValue =
                                     doubleArrayList.indexOf(readVal(pointObject?.id)).toString()
                                 viewItem.selectedIndex =
@@ -300,4 +310,30 @@ fun getBacnetDetailedViewPoints(
         )
     }
     return externalPointItems
+}
+
+fun preparePoints(rawList: List<ExternalPointItem>): List<ExternalPointItem> {
+
+    val metrics = Resources.getSystem().displayMetrics
+    val scaledDensity = metrics.scaledDensity
+
+    val paint = TextPaint().apply {
+        textSize = 22f * scaledDensity   // Convert 22sp to px
+    }
+
+    return rawList.map { point ->
+
+        val selectedText = point.dropdownOptions.getOrNull(point.selectedIndex) ?: ""
+
+        val collapsedPx = paint.measureText(selectedText)
+        val largestPx = point.dropdownOptions.maxOfOrNull { paint.measureText(it) } ?: 0f
+
+        val collapsed = (collapsedPx + 40).toInt().dp
+        val expanded = (largestPx + 40).toInt().dp
+
+        point.copy(
+            collapsedWidth = collapsed.coerceIn(100.dp, 250.dp),
+            expandedWidth = expanded.coerceIn(120.dp, 300.dp)
+        )
+    }
 }

@@ -48,14 +48,6 @@ fun deleteEntityTable(entitytable: HayStackEntity, context : Context) {
     }
 }
 
-fun updateEntityTable(entitytable: HayStackEntity) {
-    appScope.launch {
-        if (entitytable != null) {
-            entityDbHelper?.update(entitytable)
-        }
-    }
-}
-
 
 fun deleteEntitywithId(id: String, context : Context) {
     appScope.launch {

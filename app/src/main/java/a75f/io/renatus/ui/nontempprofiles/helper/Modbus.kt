@@ -1,9 +1,7 @@
 package a75f.io.renatus.ui.nontempprofiles.helper
 
 import a75f.io.api.haystack.modbus.EquipmentDevice
-import a75f.io.logger.CcuLog
 import a75f.io.renatus.R
-import a75f.io.renatus.ui.nontempprofiles.model.ExternalPointItem
 import a75f.io.renatus.ui.nontempprofiles.utilities.externalEquipsLayoutSetup
 import a75f.io.renatus.ui.nontempprofiles.utilities.getPointScheduleHeaderViewItem
 import a75f.io.renatus.ui.nontempprofiles.utilities.showExternalEquipPointsUI
@@ -11,6 +9,10 @@ import a75f.io.renatus.ui.nontempprofiles.viewmodel.NonTempProfileViewModel
 import android.view.View
 import android.widget.LinearLayout
 import androidx.compose.ui.platform.ComposeView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 fun loadModbusZone(
@@ -28,7 +30,6 @@ fun loadModbusZone(
     val viewModel = NonTempProfileViewModel()
     viewModel.profile = "modbus"
     nonTempProfileViewModels.add(viewModel)
-    val points: List<ExternalPointItem>
     showExternalEquipPointsUI(composeView, viewModel, equipId, null)
     val modbusDevice = externalEquipDevice as EquipmentDevice
     val deviceId = modbusDevice.slaveId.toString()
@@ -39,8 +40,18 @@ fun loadModbusZone(
         equipId
     ) // lastUpdate and heartbeat
     viewModel.setEquipStatusPoint(getPointScheduleHeaderViewItem(equipId)) // status message
-    points =
-        getModbusDetailedViewPoints(modbusDevice, "modbus", modbusDevice.deviceEquipRef)
-    viewModel.initializeDetailedViewPoints(points)
-    viewModel.observeExternalModbusEquipHealth(deviceId, equipId)
+
+    viewModel.backgroundJob = CoroutineScope(Dispatchers.Default).launch {
+        val points = withContext(Dispatchers.IO) {
+            preparePoints(
+                getModbusDetailedViewPoints(
+                    modbusDevice,
+                    "modbus",
+                    modbusDevice.deviceEquipRef
+                )
+            )
+        }
+        viewModel.initializeDetailedViewPoints(points)
+    }
+    viewModel.observeExternalEquipHealth(deviceId)
 }

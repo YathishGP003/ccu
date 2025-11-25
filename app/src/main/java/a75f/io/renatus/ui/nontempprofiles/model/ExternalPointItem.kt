@@ -1,6 +1,8 @@
 package a75f.io.renatus.ui.nontempprofiles.model
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 @Immutable
 data class ExternalPointItem(
@@ -15,4 +17,6 @@ data class ExternalPointItem(
     var canOverride: Boolean = false,
     var profileType: String? = null,
     var serverIpAddress: String? = null,
+    val collapsedWidth: Dp = 90.dp,   // this is required because to show exact width in dropdown based on the currentValue text size
+    val expandedWidth: Dp = 90.dp,
 )

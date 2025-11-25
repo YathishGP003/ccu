@@ -185,7 +185,7 @@ public class HaystackService {
         ids.close();
     }
 
-    public boolean hisWriteMany(Map<String, Double> mapOfPointIds, Object contextHelper) {
+    private boolean hisWriteMany(Map<String, Double> mapOfPointIds, Object contextHelper) {
         CcuLog.d(TAG, "---hisWriteMany##--id-" + mapOfPointIds.size());
         sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("HIS_WRITE_MANY"), mapOfPointIds.toString(), MSG_CALCULATING);
         if (!mapOfPointIds.isEmpty()) {
@@ -202,8 +202,12 @@ public class HaystackService {
         return false;
     }
 
-    public boolean hisWriteMany(String[] ids, Double value, Object contextHelper) {
-        Map<String, Double> idValueMap = Arrays.stream(ids).collect(Collectors.toMap(key -> key, key -> value, (a, b) -> b));
+    public boolean hisWriteMany(V8Array ids, double value, Object contextHelper) {
+        Map<String, Double> idValueMap = new HashMap<>();
+        for(int i = 0; i<ids.length(); i++) {
+            CcuLog.d(TAG, "---hisWriteMany##--id-"+ids.getString(i) + "<--value-->"+value);
+            idValueMap.put(ids.getString(i), value);
+        }
         return hisWriteMany(idValueMap, contextHelper);
     }
 
@@ -307,7 +311,7 @@ public class HaystackService {
         return list;
     }
 
-    public void hisWrite(String id, Double val, Object contextHelper) {
+    public void hisWrite(String id, double val, Object contextHelper) {
         sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("HIS_WRITE"), "id-->"+id+"<--val-->"+val, MSG_CALCULATING);
         CcuLog.d(TAG, "---hisWrite##--id-"+id+"<--val-->"+val);
         CCUHsApi.getInstance().writeHisValById(id, val);

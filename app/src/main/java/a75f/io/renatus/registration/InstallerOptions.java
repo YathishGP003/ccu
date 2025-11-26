@@ -291,7 +291,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
             ccuUid = ccuHsApi.getCcuRef().toString();
         }
 
-        for (int addr = 1000; addr <= 10900; addr += 100) {
+        for (int addr = 1000; addr <= 11900; addr += 100) {
             addressBand.add(String.valueOf(addr));
         }
         setNodeAddress();

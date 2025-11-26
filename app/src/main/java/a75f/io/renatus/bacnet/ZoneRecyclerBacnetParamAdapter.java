@@ -272,7 +272,10 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
 
         int dataType;
         String selectedValueAsPerType;
-        if(BacNetConstants.ObjectType.valueOf(objectType).getValue() == ObjectType.OBJECT_ANALOG_VALUE.getValue() ||
+        if (Objects.equals(selectedValue, "null")) {
+            dataType = BacNetConstants.DataTypes.BACNET_DT_NULL.ordinal() + 1;
+            selectedValueAsPerType = "null";
+        } else if(BacNetConstants.ObjectType.valueOf(objectType).getValue() == ObjectType.OBJECT_ANALOG_VALUE.getValue() ||
                 BacNetConstants.ObjectType.valueOf(objectType).getValue() == ObjectType.OBJECT_ANALOG_INPUT.getValue() ||
                 BacNetConstants.ObjectType.valueOf(objectType).getValue() == ObjectType.OBJECT_ANALOG_OUTPUT.getValue()) {
             dataType = BacNetConstants.DataTypes.BACNET_DT_REAL.ordinal()+1;

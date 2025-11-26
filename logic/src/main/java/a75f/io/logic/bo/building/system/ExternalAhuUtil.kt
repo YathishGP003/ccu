@@ -1195,7 +1195,11 @@ private fun generateWriteObject(
 
     val dataType: Int
     val selectedValueAsPerType: String
-    if (BacNetConstants.ObjectType.valueOf(objectType).value == 2) {
+
+    if (selectedValue == "null") {
+        dataType = BacNetConstants.DataTypes.BACNET_DT_NULL.ordinal + 1
+        selectedValueAsPerType = "null"
+    } else if (BacNetConstants.ObjectType.valueOf(objectType).value == 2) {
         dataType = BacNetConstants.DataTypes.BACNET_DT_REAL.ordinal + 1
         selectedValueAsPerType = selectedValue
     } else if (BacNetConstants.ObjectType.valueOf(objectType).value == 5) {

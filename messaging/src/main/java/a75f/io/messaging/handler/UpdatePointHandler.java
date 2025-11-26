@@ -102,7 +102,8 @@ public class UpdatePointHandler implements MessageHandler
         if (localPoint.getMarkers().contains("external") || localPoint.getMarkers().contains("bacnetCur")) {
             String value = msgObject.get(WRITABLE_ARRAY_VAL).getAsString();
             if (value.isEmpty()) {
-                value = String.valueOf(hayStack.readPointPriorityVal(localPoint.getId()));
+                CcuLog.d(L.TAG_CCU_BACNET, "Value is empty for BACnet IP point "+localPoint.getId()+" setting value to null");
+                value = "null";
             }
             CcuLog.d(L.TAG_CCU_BACNET, "Message Handler -> external bacnet point, share this with bacnet app id is ->"+localPoint.getId()+"<--level-->"+pointLevel+"<--value-->"+value);
             BacnetRequestProcessor.sendCallBackBacnetWriteRequest(localPoint.getId(), String.valueOf(pointLevel), value);
@@ -423,12 +424,12 @@ public class UpdatePointHandler implements MessageHandler
         boolean updateZoneUi = false;
         boolean isScheduleType = false;
 
-        if (p.getMarkers().contains("desired") && !p.getMarkers().contains("modbus")) {
+        if (p.getMarkers().contains(Tags.DESIRED) && !p.getMarkers().contains(Tags.MODBUS) && !p.getMarkers().contains(Tags.BACNET)) {
             SystemScheduleUtil.handleDesiredTempUpdate(p, false, 0);
             updateZoneUi = true;
         }
 
-        if (p.getMarkers().contains("scheduleType") && !p.getMarkers().contains("modbus")) {
+        if (p.getMarkers().contains(Tags.SCHEDULE_TYPE) && !p.getMarkers().contains(Tags.MODBUS) && !p.getMarkers().contains(Tags.BACNET)) {
             SystemScheduleUtil.handleScheduleTypeUpdate(p);
             updateZoneUi = true;
             isScheduleType = true;

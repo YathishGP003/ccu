@@ -74,6 +74,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import a75f.io.api.haystack.bacnet.parser.BacnetRequestProcessor;
 import a75f.io.api.haystack.util.DatabaseAction;
 import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.api.haystack.util.DbStrings;
@@ -1987,8 +1988,15 @@ public class CCUTagsDb extends HServer {
     }
     public void shareUpdatedPointWithBacApp(String id, int level, String val){
         // check if point has bacnet id
-        boolean isBacnetPoint = CCUHsApi.getInstance().readMapById(id.replace("@","")).containsKey("bacnetId");
-        if(isBacnetPoint){
+        HashMap<Object, Object> pointMap = CCUHsApi.getInstance().readMapById(id.replace("@",""));
+        boolean isBacnetPoint = pointMap.containsKey("bacnetId");
+        boolean isBacnetClientPoint = pointMap.containsKey("bacnetCur");
+
+        if (isBacnetClientPoint) {
+          CcuLog.d(TAG_CCU_BACNET, "Change of Value for bacnet client point id is ->"+id+"<--level-->"+level+"<--val-->"+val);
+          BacnetRequestProcessor.sendCallBackBacnetWriteRequest(id, String.valueOf(level), val);
+        }
+        else if(isBacnetPoint){
             CcuLog.d(TAG_CCU_BACNET, "there is a change in bacnet point, share this with bac app id is ->"+id+"<--level-->"+level+"<--val-->"+val);
             Intent intent = new Intent(BROADCAST_BACNET_POINT_UPDATED);
             intent.putExtra("pointId", id);

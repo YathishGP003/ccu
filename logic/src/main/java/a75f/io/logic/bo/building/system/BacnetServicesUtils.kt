@@ -154,7 +154,7 @@ class BacnetServicesUtils: BacnetRequestUtil {
 
         val objectTypeEnum = BacNetConstants.ObjectType.valueOf(objectType)
 
-         val dataType: Int = when (objectTypeEnum.value) {
+         var dataType: Int = when (objectTypeEnum.value) {
              ObjectType.OBJECT_ANALOG_VALUE.value,
              ObjectType.OBJECT_ANALOG_INPUT.value,
              ObjectType.OBJECT_ANALOG_OUTPUT.value -> {
@@ -174,7 +174,7 @@ class BacnetServicesUtils: BacnetRequestUtil {
              }
          }
 
-         val selectedValueAsPerType: String = if (
+         var selectedValueAsPerType: String = if (
             objectTypeEnum.value == ObjectType.OBJECT_ANALOG_VALUE.value ||
             objectTypeEnum.value == ObjectType.OBJECT_ANALOG_INPUT.value ||
             objectTypeEnum.value == ObjectType.OBJECT_ANALOG_OUTPUT.value ||
@@ -186,6 +186,10 @@ class BacnetServicesUtils: BacnetRequestUtil {
         } else {
             (selectedValue.toDouble().toInt()).toString()
         }
+         if (selectedValue == "null") {
+             dataType = BacNetConstants.DataTypes.BACNET_DT_NULL.ordinal + 1
+             selectedValueAsPerType = "null"
+         }
 
         val objectIdentifierBacNet = ObjectIdentifierBacNet(objectTypeEnum.value, objectId.toString())
         val propertyValueBacNet = PropertyValueBacNet(dataType, selectedValueAsPerType)

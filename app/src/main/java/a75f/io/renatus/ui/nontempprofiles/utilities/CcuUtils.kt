@@ -434,8 +434,8 @@ private fun generateWriteObject(
         macAddress
     )
 
-    val dataType: Int
-    val selectedValueAsPerType: String
+    var dataType: Int
+    var selectedValueAsPerType: String
 
     when (BacNetConstants.ObjectType.valueOf(objectType).value) {
         ObjectType.OBJECT_ANALOG_VALUE.value, ObjectType.OBJECT_ANALOG_INPUT.value, ObjectType.OBJECT_ANALOG_OUTPUT.value -> {
@@ -454,6 +454,11 @@ private fun generateWriteObject(
             }
             selectedValueAsPerType = Integer.parseInt(selectedValue).toString()
         }
+    }
+
+    if (selectedValue == "null") {
+        dataType = a75f.io.logic.bo.building.system.BacNetConstants.DataTypes.BACNET_DT_NULL.ordinal + 1
+        selectedValueAsPerType = "null"
     }
 
     val objectIdentifierBacNet = ObjectIdentifierBacNet(

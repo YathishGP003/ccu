@@ -1,5 +1,6 @@
 package a75f.io.renatus.views;
 
+import static org.javolution.lang.MathLib.abs;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
@@ -50,6 +51,8 @@ public class RangeBar extends View {
     private float upperHeatingTemp = 64;
     private float lowerCoolingTemp = 74;
     private float upperCoolingTemp = 79;
+    private float currentCoolingTemp = 75;
+    private float currentHeatingTemp = 70;
     //
     int mPaddingPX = 0;
     int mViewWidth = 0;
@@ -124,6 +127,22 @@ public class RangeBar extends View {
             mTempIconPaint.setColor(getResources().getColor(R.color.min_temp));
         }
 
+        // Change the position of label above red and green button dynamically if they are close to each other
+        float localXPos = xPos;
+        float differenceBetweenCoolingAndHeating = 4;
+        if(stateReflected == RangeBarState.LOWER_COOLING_LIMIT) {
+            currentHeatingTemp = temps[stateReflected.ordinal()]-unOccupiedSetBack;
+            differenceBetweenCoolingAndHeating = abs(currentHeatingTemp - currentCoolingTemp);
+            if(differenceBetweenCoolingAndHeating < 4) {
+                localXPos = xPos + 10 * (4 - differenceBetweenCoolingAndHeating);
+            }
+        } else {
+            currentCoolingTemp = temps[stateReflected.ordinal()]+unOccupiedSetBack;
+            differenceBetweenCoolingAndHeating = abs(currentHeatingTemp - currentCoolingTemp);
+            if(differenceBetweenCoolingAndHeating < 4) {
+                localXPos = xPos - 10 * (4 - differenceBetweenCoolingAndHeating);
+            }
+        }
         if(isCelsiusTunerAvailableStatus()) {
             if(isUnoccupiedSetBackFragment){
                 if (stateReflected == RangeBarState.LOWER_HEATING_LIMIT) {
@@ -139,7 +158,7 @@ public class RangeBar extends View {
             }
 
         } else {
-            canvas.drawText((roundToHalf(temps[stateReflected.ordinal()]))+"°F", xPos, (yPos - 10f), mTempIconPaint);
+            canvas.drawText((roundToHalf(temps[stateReflected.ordinal()]+unOccupiedSetBack))+"°F", localXPos, (yPos - 10f), mTempIconPaint);
         }
     }
 

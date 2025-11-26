@@ -684,12 +684,9 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         Dialog dialog = getDialog();
         if (dialog != null)
         {
-            int width = ViewGroup.LayoutParams.MATCH_PARENT;
-            int height = ViewGroup.LayoutParams.MATCH_PARENT;
-            dialog.getWindow().setLayout(width, height);
+            dialog.getWindow().setLayout(1265, 672);
         }
     }
-
 
     @Override
     public String getIdString()

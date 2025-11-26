@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import androidx.annotation.Nullable;
@@ -45,7 +44,7 @@ public class AlertsFragment extends Fragment implements AlertManager.AlertListLi
 	private static AlertAdapter adapter;
 	private Disposable alertDeleteDisposable;
 	private HashMap<Object, Object> useCelsius;
-
+	AlertDialog alert;
 	public static AlertsFragment newInstance()
 	{
 		return new AlertsFragment();
@@ -65,59 +64,53 @@ public class AlertsFragment extends Fragment implements AlertManager.AlertListLi
 		
 		listView= view.findViewById(R.id.alertList);
 		alertList=new ArrayList<>();
-		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				
-				Alert a = alertList.get(position);
-				String message = a.getmMessage();
+		listView.setOnItemClickListener((parent, view1, position, id) -> {
 
-				if (message.contains("75F")) {
-					String replacement = "75F";
+            Alert a = alertList.get(position);
+            String message = a.getmMessage();
 
-					if (CCUUiUtil.isDaikinThemeEnabled(getContext())) {
-						replacement = "SiteLine™";
-					} else if (CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
-						replacement = "ClimaVision";
-					} else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
-						replacement = "Airoverse for Facilities";
-					}
+            if (message.contains("75F")) {
+                String replacement = "75F";
 
-					message = message.replace("75F", replacement);
-				}
+                if (CCUUiUtil.isDaikinThemeEnabled(getContext())) {
+                    replacement = "SiteLine™";
+                } else if (CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
+                    replacement = "ClimaVision";
+                } else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
+                    replacement = "Airoverse for Facilities";
+                }
 
-				useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+                message = message.replace("75F", replacement);
+            }
 
-				if (message.contains("\u00B0")) {
-					message = formatMessageToCelsius(message);
+            useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
-				}
-				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-				builder.setMessage(a.getmTitle() + "\n\n" + message + "\n"
-				                   + getString(R.string.alert_generated_at) + getFormattedDate(a.getStartTime())
-				                   + getString(R.string.alert_fixed_at)+getFormattedDate(a.getEndTime()))
-				       .setCancelable(false)
-				       .setIcon(R.drawable.ic_dialog_alert)
-				       .setPositiveButton(getString(R.string.ok_button), new DialogInterface.OnClickListener() {
-					       public void onClick(DialogInterface dialog, int id) {
-						       //do things
-					       }
-				       });
-				
-				if (!a.isFixed()) {
-					builder.setNegativeButton(getString(R.string.mark_fixed), new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							AlertManager.getInstance().fixAlert(a);
-							getActivity().runOnUiThread(() -> adapter.notifyDataSetChanged());
-						}
-					});
-				}
-				
-				
-				AlertDialog alert = builder.create();
-				alert.show();
-			}
-		});
+            if (message.contains("°")) {
+                message = formatMessageToCelsius(message);
+
+            }
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage(a.getmTitle() + "\n\n" + message + "\n"
+                               + getString(R.string.alert_generated_at) + getFormattedDate(a.getStartTime())
+                               + getString(R.string.alert_fixed_at)+getFormattedDate(a.getEndTime()))
+                   .setCancelable(false)
+                   .setIcon(R.drawable.ic_dialog_alert)
+                   .setPositiveButton(getString(R.string.ok_button), (dialog, id1) -> {
+                   });
+
+            if (!a.isFixed()) {
+                builder.setNegativeButton(getString(R.string.mark_fixed), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        AlertManager.getInstance().fixAlert(a);
+                        getActivity().runOnUiThread(() -> adapter.notifyDataSetChanged());
+                    }
+                });
+            }
+
+
+            alert = builder.create();
+            alert.show();
+        });
 		
 		listView.setOnItemLongClickListener((arg0, v, position, arg3) -> {
 
@@ -158,10 +151,9 @@ public class AlertsFragment extends Fragment implements AlertManager.AlertListLi
 		strings = alertMessage.split(" ");
 		try {
 			for (int i = 0; i < strings.length; i++) {
-				//"\u00B0" is the unicode for °
-				if (strings[i].contains("\u00B0")) {
+				if (strings[i].contains("°")) {
 					if(useCelsius.containsKey("id") && MasterControlView.getTuner(useCelsius.get("id").toString()) == TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
-						strings[i] = "\u00B0C";
+						strings[i] = "°C";
 						strings[i - 1] = String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(strings[i - 1])));
 					} else {
 						DecimalFormat df = new DecimalFormat("#.#");
@@ -217,8 +209,10 @@ public class AlertsFragment extends Fragment implements AlertManager.AlertListLi
 	@Override
 	public void onStop() {
 		if (alertDeleteDisposable != null) {
-			// Common rxjava pattern to not execute call response if fragment is dead or shutting down.
 			alertDeleteDisposable.dispose();
+		}
+		if (alert != null && alert.isShowing()) {
+			alert.dismiss();
 		}
 		super.onStop();
 	}

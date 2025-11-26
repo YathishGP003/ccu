@@ -71,6 +71,7 @@ import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.util.CloudStatus;
 import a75f.io.renatus.util.CloudStatusAdapter;
+import a75f.io.renatus.util.DialogManager;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.remotecommand.bundle.BundleInstallListener;
@@ -547,6 +548,7 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
         alertDialog.setView(dialogView);
         alertDialog.setCancelable(false);
         alertDialog.show();
+        DialogManager.INSTANCE.register(alertDialog);
         TextView otpTimer = dialogView.findViewById(R.id.otptimer);
         EditText emailId = dialogView.findViewById(R.id.otpEmailId);
         emailId.setEnabled(false);
@@ -727,6 +729,7 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
         builder.setView(layout);
         builder.setCancelable(false);
         alertDialog = builder.create();
+        DialogManager.INSTANCE.register(alertDialog);
         alertDialog.show();
 
         mCCUAppDownloaded = false;
@@ -767,7 +770,7 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
         alertActivateSession.setView(dialogView);
         alertActivateSession.setCancelable(false);
         alertActivateSession.show();
-
+        DialogManager.INSTANCE.register(alertActivateSession);
         code1 =  dialogView.findViewById(R.id.code1);
         code2 =  dialogView.findViewById(R.id.code2);
         code3 =  dialogView.findViewById(R.id.code3);
@@ -844,6 +847,7 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
         View dialogView= LayoutInflater.from(getContext()).inflate(R.layout.layout_session_inprogress,null);
         alertInProgress.setView(dialogView);
         alertInProgress.setCancelable(false);
+        DialogManager.INSTANCE.register(alertInProgress);
         alertInProgress.show();
         ResponseCallback responseCallBack = new ResponseCallback() {
             @Override
@@ -867,7 +871,9 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
         okay.setOnClickListener(v -> alertSuccess.dismiss());
         alertSuccess.setView(dialogView);
         alertSuccess.setCancelable(false);
+        DialogManager.INSTANCE.register(alertSuccess);
         alertSuccess.show();
+
     }
 
 

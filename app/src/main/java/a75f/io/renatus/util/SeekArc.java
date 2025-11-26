@@ -536,10 +536,10 @@ public class SeekArc extends View
             String curString = "CURRENT";
             if( isCelsiusTunerAvailableStatus()) {
                  currentTempText = String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(getCurrentTemp()))));
-                 tempString = "TEMP"+" (\u00B0C )";
+                 tempString = "TEMP"+" (°C )";
             } else {
                  currentTempText = String.valueOf(getCurrentTemp());
-                 tempString = "TEMP"+" (\u00B0F )";
+                 tempString = "TEMP"+" (°F )";
             }
             mCurrentTemperatureTextPaint.getTextBounds(currentTempText, 0, currentTempText.length(), bounds);
 
@@ -582,12 +582,12 @@ public class SeekArc extends View
                  coolingDesiredText = String.valueOf(fahrenheitToCelsius(Double.parseDouble(String.valueOf(getCoolingDesiredTemp()))));
                  heatingDesiredText = String.valueOf(fahrenheitToCelsius(Double.parseDouble(String.valueOf(getHeatingDesiredTemp()))));
                  currentTempText = String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(getCurrentTemp()))));
-                 tempString = "TEMP"+" (\u00B0C )";
+                 tempString = "TEMP"+" (°C )";
             } else {
                  coolingDesiredText = String.valueOf(getCoolingDesiredTemp());
                  heatingDesiredText = String.valueOf(getHeatingDesiredTemp());
                  currentTempText = String.valueOf(getCurrentTemp());
-                 tempString = "TEMP"+" (\u00B0F )";
+                 tempString = "TEMP"+" (°F )";
             }
              mDesiredCoolingSmallTextPaint.getTextBounds(coolingDesiredText, 0, coolingDesiredText.length(), mCoolingTextBounds);
              mDesiredHeatingSmallTextPaint.getTextBounds(heatingDesiredText, 0, heatingDesiredText.length(), mHeatingTextBounds);

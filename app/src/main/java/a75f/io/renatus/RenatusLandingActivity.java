@@ -113,6 +113,7 @@ import a75f.io.renatus.schedules.ScheduleGroupFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.DataFdObj;
+import a75f.io.renatus.util.DialogManager;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
 import a75f.io.renatus.util.TestSignalManager;
@@ -120,7 +121,6 @@ import a75f.io.renatus.util.UsbHelper;
 import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
 import a75f.io.renatus.util.remotecommand.bundle.BundleInstallManager;
 import a75f.io.restserver.server.HttpServer;
-import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbPortTrigger;
 import a75f.io.usbserial.UsbServiceActions;
 import a75f.io.util.ExecutorTask;
@@ -134,7 +134,6 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
     private static final long DISCONNECT_TIMEOUT = 3000;
     private static final long INTERVAL = 1000;
     public static boolean isBacnetConfigStateChanged = false;
-    static final long SCREEN_SWITCH_TIMEOUT_MILLIS = 3600000;
 
     private ImageView logo_75f;
     private ImageView powerbylogo;
@@ -396,25 +395,17 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
         }
 
         checkBacnetDeviceType();
-        if(isDeviceReboot(context) && UtilityApplication.isBacnetMstpInitialized()) {
-            CcuLog.i(TAG_CCU_BACNET_MSTP,"--renatus landing act mstp is initialized check for serial ports--");
+        if (isDeviceReboot(context) && UtilityApplication.isBacnetMstpInitialized()) {
+            CcuLog.i(TAG_CCU_BACNET_MSTP, "--renatus landing act mstp is initialized check for serial ports--");
             executorService.submit(() -> {
                 RenatusApp.backgroundServiceInitiator.unbindServices();
-                CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 1--unbind modbus service--");
-
-                //Intent intent = new Intent(getApplicationContext(), UsbModbusService.class);
-                //getApplicationContext().stopService(intent);
-                CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 2--stop modbus service--");
-
-                CcuLog.d(TAG_CCU_BACNET_MSTP, "--step 3--apply permissions--");
                 UsbHelper.runChmodUsbDevices();
                 UsbPortTrigger.triggerUsbSerialBinding(getApplicationContext());
                 UsbHelper.listUsbDevices(getApplicationContext());
                 UsbHelper.runAsRoot("ls /dev/tty*");
-                //UsbHelper.getPortAddressMstpDevices(getApplicationContext());
             });
-        }else{
-            CcuLog.i(TAG,"--no mstp dont check for serial ports--");
+        } else {
+            CcuLog.i(TAG, "--no mstp dont check for serial ports--");
         }
 
         //Launch BacApp if either BACnet IP or MSTP initialized
@@ -434,25 +425,24 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
     }
 
     public void showFloorIcon() {
-         int tabPosition = btnTabs.getSelectedTabPosition();
-         if (tabPosition == 1) {
-             Fragment fragment = mStatusPagerAdapter.getItem(mViewPager.getCurrentItem());
-             menuToggle.setVisibility(View.GONE);
-             if (fragment instanceof ZoneFragmentNew) {
-                 floorMenu.setVisibility(View.VISIBLE);
-             } else {
-                 floorMenu.setVisibility(View.GONE);
-             }
-
-         } else {
-             Fragment fragment = mSettingPagerAdapter.getItem(mViewPager.getCurrentItem());
-             floorMenu.setVisibility(View.GONE);
-             if (fragment instanceof SettingsFragment || fragment instanceof SystemConfigFragment) {
-                 menuToggle.setVisibility(View.VISIBLE);
-             } else {
-                 menuToggle.setVisibility(View.GONE);
-             }
-         }
+        int tabPosition = btnTabs.getSelectedTabPosition();
+        if (tabPosition == 1) {
+            Fragment fragment = mStatusPagerAdapter.getItem(mViewPager.getCurrentItem());
+            menuToggle.setVisibility(View.GONE);
+            if (fragment instanceof ZoneFragmentNew) {
+                floorMenu.setVisibility(View.VISIBLE);
+            } else {
+                floorMenu.setVisibility(View.GONE);
+            }
+        } else {
+            Fragment fragment = mSettingPagerAdapter.getItem(mViewPager.getCurrentItem());
+            floorMenu.setVisibility(View.GONE);
+            if (fragment instanceof SettingsFragment || fragment instanceof SystemConfigFragment) {
+                menuToggle.setVisibility(View.VISIBLE);
+            } else {
+                menuToggle.setVisibility(View.GONE);
+            }
+        }
     }
 
     @Override
@@ -474,14 +464,16 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
         CcuLog.i(TAG,"startCountDownTimer ");
         if (countDownTimer != null)
             countDownTimer.cancel();
-
-        countDownTimer = new CountDownTimer(SCREEN_SWITCH_TIMEOUT_MILLIS, interval) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
+        int timeout = (preferences.getInt("screenTimeOut", 3600)) * 1000;
+        countDownTimer = new CountDownTimer(timeout, interval) {
             @Override
             public void onTick(long l) {
             }
             @Override
             public void onFinish() {
                 CcuLog.i(TAG,"onFinish ");
+                DialogManager.INSTANCE.dismissAll(getSupportFragmentManager());
                 launchZoneFragment();
                 stopCountdownTimer();
             }

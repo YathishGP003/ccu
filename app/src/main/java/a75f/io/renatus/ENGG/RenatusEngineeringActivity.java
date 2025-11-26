@@ -34,9 +34,9 @@ public class RenatusEngineeringActivity extends AppCompatActivity
 		setContentView(R.layout.activity_renatus_engineering);
 
 		mEnggPagerAdapter = new EngineeringPagerAdapter(getSupportFragmentManager());
-		mViewPager = (ViewPager) findViewById(R.id.container);
+		mViewPager = findViewById(R.id.container);
 
-		mTabLayout = (TabLayout) findViewById(R.id.tabs);
+		mTabLayout = findViewById(R.id.tabs);
 		mTabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
 
 		mViewPager.setAdapter(mEnggPagerAdapter);

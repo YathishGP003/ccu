@@ -32,13 +32,13 @@ public class MasterControlUtil {
     public static String getAdapterVal(double val, boolean isZone) {
         if (isCelsiusTunerAvailableStatus()) {
             if(isZone) {
-                return (fahrenheitToCelsius(val) + "\u00B0C");
+                return (fahrenheitToCelsius(val) + "°C");
             }else {
-                return ((int) val + "\u00B0F  (" + fahrenheitToCelsius(val) + "\u00B0C)" );
+                return ((int) val + "°F  (" + fahrenheitToCelsius(val) + "°C)" );
 
             }
         }  else
-            return ((int) val) + "\u00B0F";
+            return ((int) val) + "°F";
     }
 
     public static String getAdapterValDeadBand(double val, boolean isZone) {
@@ -47,25 +47,25 @@ public class MasterControlUtil {
             if (celsiusVal - (int) celsiusVal != 0)
                 celsiusVal = CCUUtils.roundToOneDecimal(celsiusVal);
             if(isZone){
-                return   celsiusVal + "\u00B0C";
+                return   celsiusVal + "°C";
             }else {
-                return (val) + "\u00B0F  (" + celsiusVal + "\u00B0C)";
+                return (val) + "°F  (" + celsiusVal + "°C)";
             }
 
         } else
-            return (val) + "\u00B0F";
+            return (val) + "°F";
     }
 
     public static String getAdapterValDiff(double val) {
         if (isCelsiusTunerAvailableStatus()) {
             double celsiusVal = fahrenheitToCelsiusRelative(val);
-            return ((int)val) + "\u00B0F  (" + celsiusVal + "\u00B0C)";
+            return ((int)val) + "°F  (" + celsiusVal + "°C)";
         } else
-            return ((int)val) + "\u00B0F";
+            return ((int)val) + "°F";
     }
 
     public static double getAdapterFarhenheitVal(String val) {
-        double fahrenheitVal = Double.parseDouble(StringUtils.substringBefore(val, "\u00B0F" ));
+        double fahrenheitVal = Double.parseDouble(StringUtils.substringBefore(val, "°F" ));
         if (fahrenheitVal - (int) fahrenheitVal != 0)
             fahrenheitVal = CCUUtils.roundToOneDecimal(fahrenheitVal);
         return fahrenheitVal;

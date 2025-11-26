@@ -85,19 +85,19 @@ public class NamedScheduleDialogFragment extends DialogFragment {
 
         day.setText(header);
         if(isCelsiusTunerAvailableStatus()){
-            heatingDesiredTemp.setText(UnitUtils.fahrenheitToCelsius(days.getHeatingVal()) + "\u00B0C");
-            coolingDesiredTemp.setText(UnitUtils.fahrenheitToCelsius(days.getCoolingVal()) + "\u00B0C");
-            heatinguserLimit.setText(UnitUtils.fahrenheitToCelsius(days.getHeatingUserLimitMin()) + "\u00B0C" + " / " + UnitUtils.fahrenheitToCelsius(days.getHeatingUserLimitMax()) + "\u00B0C");
-            coolingUserLimit.setText(UnitUtils.fahrenheitToCelsius(days.getCoolingUserLimitMin() )+ "\u00B0C" + " / " + UnitUtils.fahrenheitToCelsius(days.getCoolingUserLimitMax()) + "\u00B0C");
-            heatingDeadband.setText(UnitUtils.fahrenheitToCelsiusRelative(days.getHeatingDeadBand()) + "\u00B0C");
-            coolingDeadBand.setText(UnitUtils.fahrenheitToCelsiusRelative(days.getCoolingDeadBand()) + "\u00B0C");
+            heatingDesiredTemp.setText(UnitUtils.fahrenheitToCelsius(days.getHeatingVal()) + "°C");
+            coolingDesiredTemp.setText(UnitUtils.fahrenheitToCelsius(days.getCoolingVal()) + "°C");
+            heatinguserLimit.setText(UnitUtils.fahrenheitToCelsius(days.getHeatingUserLimitMin()) + "°C" + " / " + UnitUtils.fahrenheitToCelsius(days.getHeatingUserLimitMax()) + "°C");
+            coolingUserLimit.setText(UnitUtils.fahrenheitToCelsius(days.getCoolingUserLimitMin() )+ "°C" + " / " + UnitUtils.fahrenheitToCelsius(days.getCoolingUserLimitMax()) + "°C");
+            heatingDeadband.setText(UnitUtils.fahrenheitToCelsiusRelative(days.getHeatingDeadBand()) + "°C");
+            coolingDeadBand.setText(UnitUtils.fahrenheitToCelsiusRelative(days.getCoolingDeadBand()) + "°C");
         }else {
-            heatingDesiredTemp.setText(days.getHeatingVal().toString() + "\u00B0F");
-            coolingDesiredTemp.setText(days.getCoolingVal().toString() + "\u00B0F");
-            heatinguserLimit.setText(days.getHeatingUserLimitMin() + "\u00B0F" + " / " + days.getHeatingUserLimitMax() + "\u00B0F");
-            coolingUserLimit.setText(days.getCoolingUserLimitMin() + "\u00B0F" + " / " + days.getCoolingUserLimitMax() + "\u00B0F");
-            heatingDeadband.setText(days.getHeatingDeadBand().toString() + "\u00B0F");
-            coolingDeadBand.setText(days.getCoolingDeadBand().toString() + "\u00B0F");
+            heatingDesiredTemp.setText(days.getHeatingVal().toString() + "°F");
+            coolingDesiredTemp.setText(days.getCoolingVal().toString() + "°F");
+            heatinguserLimit.setText(days.getHeatingUserLimitMin() + "°F" + " / " + days.getHeatingUserLimitMax() + "°F");
+            coolingUserLimit.setText(days.getCoolingUserLimitMin() + "°F" + " / " + days.getCoolingUserLimitMax() + "°F");
+            heatingDeadband.setText(days.getHeatingDeadBand().toString() + "°F");
+            coolingDeadBand.setText(days.getCoolingDeadBand().toString() + "°F");
         }
 
 

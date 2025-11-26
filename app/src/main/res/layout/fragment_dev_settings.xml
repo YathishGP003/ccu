@@ -35,9 +35,9 @@
                 <LinearLayout
                     android:id="@+id/biskitModLayout"
                     android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_margin="10dp"
-                    android:visibility="gone"
-                    android:layout_height="match_parent">
+                    android:visibility="gone">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -46,6 +46,7 @@
                         android:text="Control loop frequncey"
                         android:textSize="20sp"
                         android:textStyle="bold" />
+
                     <Spinner
                         android:id="@+id/loopspinner"
                         android:layout_width="wrap_content"
@@ -130,10 +131,10 @@
             </LinearLayout>
 
             <LinearLayout
-                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -153,9 +154,9 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/EnableANRLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/EnableANRLayout"
                 android:orientation="horizontal">
 
                 <TextView
@@ -212,6 +213,7 @@
                     android:text="Clear" />
 
             </LinearLayout>
+
             <a75f.io.renatus.ENGG.LocalConnectionView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -251,7 +253,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
-                    android:text="Reset"/>
+                    android:text="Reset" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -574,75 +576,78 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:orientation="horizontal" >
+                android:orientation="horizontal">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
+                    android:text="Set serial comm timeout:"
                     android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:text="Set serial comm timeout:" />
+                    android:textStyle="bold" />
+
                 <EditText
                     android:id="@+id/serialCommTimeOut"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:text="300"
-                    android:padding="10dp"
                     android:inputType="number"
-                    />
+                    android:padding="10dp"
+                    android:text="300" />
 
                 <Button
                     android:id="@+id/saveSerialCommTimeOut"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
-                    android:textSize="20sp"
-                    android:text="Save" />
+                    android:text="Save"
+                    android:textSize="20sp" />
             </LinearLayout>
 
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_margin="10dp"
-                >
+                android:orientation="horizontal">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
+                    android:text="Register request count:"
                     android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:text="Register request count:" />
+                    android:textStyle="bold" />
+
                 <EditText
                     android:id="@+id/registerRequestCount"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:text="3"
                     android:inputType="number"
                     android:padding="10dp"
-                    />
+                    android:text="3" />
+
                 <Button
+                    android:id="@+id/saveRegisterRequestCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/saveRegisterRequestCount"
-                    android:textSize="20sp"
                     android:padding="10dp"
-                    android:text="Save" />
+                    android:text="Save"
+                    android:textSize="20sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_margin="10dp" >
+                android:layout_margin="10dp"
+                android:orientation="horizontal">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
+                    android:text="update loglevel:"
                     android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:text="update loglevel:" />
+                    android:textStyle="bold" />
 
 
                 <Spinner
@@ -654,19 +659,21 @@
                     android:minWidth="76dp"
                     tools:listitem="@layout/spinner_dropdown_item" />
             </LinearLayout>
+
             <LinearLayout
+                android:id="@+id/rebootLayout1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:id="@+id/rebootLayout1"
-                android:layout_margin="10dp" >
+                android:layout_margin="10dp"
+                android:orientation="horizontal">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
+                    android:text="Periodic reboot day on 2nd "
                     android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:text="Periodic reboot day on 2nd " />
+                    android:textStyle="bold" />
 
 
                 <Spinner
@@ -679,13 +686,13 @@
                     tools:listitem="@layout/spinner_dropdown_item" />
 
                 <TextView
+                    android:id="@+id/rebootDaysCountText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
+                    android:text="Number of Days"
                     android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:id="@+id/rebootDaysCountText"
-                    android:text="Number of Days" />
+                    android:textStyle="bold" />
 
 
                 <Spinner
@@ -696,20 +703,21 @@
                     android:minWidth="76dp"
                     tools:listitem="@layout/spinner_dropdown_item" />
             </LinearLayout>
+
             <LinearLayout
+                android:id="@+id/rebootLayout2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:id="@+id/rebootLayout2"
-                android:layout_margin="10dp" >
+                android:layout_margin="10dp"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
+                    android:text="Reboot Start Time : Hour - "
                     android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:text="Reboot Start Time : Hour - " />
+                    android:textStyle="bold" />
 
 
                 <Spinner
@@ -724,9 +732,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
+                    android:text=" Minute - "
                     android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:text=" Minute - " />
+                    android:textStyle="bold" />
+
                 <Spinner
                     android:id="@+id/rebootMinute"
                     style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -734,44 +743,47 @@
                     android:layout_height="50dp"
                     android:minWidth="76dp"
                     tools:listitem="@layout/spinner_dropdown_item" />
+
                 <Button
+                    android:id="@+id/initiateReboot"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
-                    android:id="@+id/initiateReboot"
-                    android:textSize="20sp"
                     android:padding="10dp"
-                    android:text="Initiate Reboot" />
+                    android:text="Initiate Reboot"
+                    android:textSize="20sp" />
             </LinearLayout>
 
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_margin="10dp"
-                >
+                android:orientation="horizontal">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
+                    android:text="Building Points Recovery:"
                     android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:text="Building Points Recovery:" />
+                    android:textStyle="bold" />
+
                 <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:id="@+id/recreateBuildingPoints"
-                    android:textSize="15sp"
-                    android:padding="10dp"
-                    android:text="Recreate Building Points and Sync From Cloud" />
-                <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/recreateAndSyncBuildingPointsToCloud"
-                    android:textSize="15sp"
                     android:padding="10dp"
-                    android:text="Recreate Building Points and Sync to Cloud" />
+                    android:text="Recreate Building Points and Sync From Cloud"
+                    android:textSize="15sp" />
+
+                <Button
+                    android:id="@+id/recreateAndSyncBuildingPointsToCloud"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:text="Recreate Building Points and Sync to Cloud"
+                    android:textSize="15sp" />
 
             </LinearLayout>
 
@@ -824,66 +836,99 @@
                     android:textSize="12sp" />
 
             </LinearLayout>
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:orientation="horizontal">
-            <TextView
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:text="Pull remote Entity : "
-                android:textSize="20sp"
-                android:textStyle="bold" />
-            <EditText
-                android:layout_width="500dp"
-                android:id="@+id/remoteId"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:text="Pull remote Entity : "
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/remoteId"
+                    android:layout_width="500dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+
+                <Button
+                    android:id="@+id/remoteBtn"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="Pull Entity" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:text="point schedule test"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
 
-            <Button
-                android:id="@+id/remoteBtn"
-                android:layout_width="150dp"
-                android:text="Pull Entity"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:gravity="center" />
-        </LinearLayout>
+                <ToggleButton
+                    android:id="@+id/test_point_schedule"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp" />
 
+                <Button
+                    android:id="@+id/cleanEvent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:text="Clean Event" />
+            </LinearLayout>
 
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:text="point schedule test"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:orientation="horizontal">
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:text="Screen Timeout for Home Screen (In Seconds):"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
-            <ToggleButton
-                android:id="@+id/test_point_schedule"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp" />
+                <EditText
+                    android:id="@+id/scrn_timeout"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:padding="10dp"
+                    android:text="3600" />
 
-            <Button
-                android:id="@+id/cleanEvent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:text="Clean Event" />
-        </LinearLayout>
-
+                <Button
+                    android:id="@+id/savescrn_timeout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:text="Save"
+                    android:textSize="20sp" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 

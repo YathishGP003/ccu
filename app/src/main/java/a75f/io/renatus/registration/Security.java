@@ -19,6 +19,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import a75f.io.logger.CcuLog;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.CustomCCUSwitch;
@@ -26,44 +27,35 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class Security extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     @BindView(R.id.textPassforZone)
-    TextView             mZonePass;
+    TextView mZonePass;
     @BindView(R.id.textTapZone)
-    TextView             mZoneTap;
+    TextView mZoneTap;
     @BindView(R.id.textPassforSystem)
-    TextView             mSystemPass;
+    TextView mSystemPass;
     @BindView(R.id.textTapSystem)
-    TextView             mSystemtap;
+    TextView mSystemtap;
     @BindView(R.id.textPassforBuild)
-    TextView             mBuildingPass;
+    TextView mBuildingPass;
     @BindView(R.id.textTapBuild)
-    TextView             mBuildingTap;
+    TextView mBuildingTap;
     @BindView(R.id.textPassforSetup)
-    TextView             mSetupPass;
+    TextView mSetupPass;
     @BindView(R.id.textTapSetup)
-    TextView             mSetupTap;
+    TextView mSetupTap;
     @BindView(R.id.toggleZonePass)
     CustomCCUSwitch mZonePassTb;
     @BindView(R.id.toggleSystemPass)
-    CustomCCUSwitch             mSystemPassTb;
+    CustomCCUSwitch mSystemPassTb;
     @BindView(R.id.toggleBuildingPass)
-    CustomCCUSwitch             mBuildingPassTb;
+    CustomCCUSwitch mBuildingPassTb;
     @BindView(R.id.toggleSetupPass)
-    CustomCCUSwitch             mSetupPassTb;
+    CustomCCUSwitch mSetupPassTb;
     @BindView(R.id.buttonNext)
-    Button             mNext;
-    Context              mContext;
-    Prefs                prefs;
-    private static final String TAG = Security.class.getSimpleName();
+    Button mNext;
+    Context mContext;
+    Prefs prefs;
 
     String mTitle;
     String mKey;
@@ -76,32 +68,11 @@ public class Security extends Fragment {
     public Security() {
         // Required empty public constructor
     }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment StartCCUFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static Security newInstance(String param1, String param2) {
-        Security fragment = new Security();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    Dialog alertDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
@@ -110,8 +81,6 @@ public class Security extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        //((FreshRegistration)getActivity()).showIcons(false);
         View rootView = inflater.inflate(R.layout.fragment_security, container, false);
         ButterKnife.bind(this, rootView);
 
@@ -121,34 +90,30 @@ public class Security extends Fragment {
 
 
         zonePassword = prefs.getString(getString(R.string.ZONE_SETTINGS_PASSWORD_KEY));
-        if(!zonePassword.isEmpty()) {
+        if (!zonePassword.isEmpty()) {
             mZoneTap.setText(getString(R.string.taptochange));
-        }else
-        {
+        } else {
             mZoneTap.setText(getString(R.string.taptoset));
         }
 
         systemPassword = prefs.getString(getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY));
-        if(!systemPassword.isEmpty()) {
+        if (!systemPassword.isEmpty()) {
             mSystemtap.setText(getString(R.string.taptochange));
-        }else
-        {
+        } else {
             mSystemtap.setText(getString(R.string.taptoset));
         }
 
         buildingPassword = prefs.getString(getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY));
-        if(!buildingPassword.isEmpty()) {
+        if (!buildingPassword.isEmpty()) {
             mBuildingTap.setText(getString(R.string.taptochange));
-        }else
-        {
+        } else {
             mBuildingTap.setText(getString(R.string.taptoset));
         }
 
         setupPassword = prefs.getString(getString(R.string.USE_SETUP_PASSWORD_KEY));
-        if(!setupPassword.isEmpty()) {
+        if (!setupPassword.isEmpty()) {
             mSetupTap.setText(getString(R.string.taptochange));
-        }else
-        {
+        } else {
             mSetupTap.setText(getString(R.string.taptoset));
         }
 
@@ -158,7 +123,6 @@ public class Security extends Fragment {
         mSetupPassTb.setChecked(prefs.getBoolean(getString(R.string.SET_SETUP_PASSWORD)));
 
         mZonePass.setOnClickListener(v -> {
-            // TODO Auto-generated method stub
             mTitle = getString(R.string.zonesettings);
             mKey = getString(R.string.ZONE_SETTINGS_PASSWORD_KEY);
             mSetKey = getString(R.string.SET_ZONE_PASSWORD);
@@ -166,7 +130,6 @@ public class Security extends Fragment {
         });
 
         mSystemPass.setOnClickListener(v -> {
-            // TODO Auto-generated method stub
             mTitle = getString(R.string.systemsettings);
             mKey = getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY);
             mSetKey = getString(R.string.SET_SYSTEM_PASSWORD);
@@ -175,7 +138,6 @@ public class Security extends Fragment {
 
 
         mBuildingPass.setOnClickListener(v -> {
-            // TODO Auto-generated method stub
             mTitle = getString(R.string.buildingchange);
             mKey = getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY);
             mSetKey = getString(R.string.SET_BUILDING_PASSWORD);
@@ -184,7 +146,6 @@ public class Security extends Fragment {
 
 
         mSetupPass.setOnClickListener(v -> {
-            // TODO Auto-generated method stub
             mTitle = getString(R.string.setupchange);
             mKey = getString(R.string.USE_SETUP_PASSWORD_KEY);
             mSetKey = getString(R.string.SET_SETUP_PASSWORD);
@@ -197,19 +158,16 @@ public class Security extends Fragment {
             mKey = getString(R.string.ZONE_SETTINGS_PASSWORD_KEY);
             mSetKey = getString(R.string.SET_ZONE_PASSWORD);
             zonePassword = prefs.getString(mKey);
-            if(isChecked){
-                if(!zonePassword.isEmpty())
-                {
+            if (isChecked) {
+                if (!zonePassword.isEmpty()) {
                     prefs.setBoolean(mSetKey, true);
                     mZoneTap.setText(getString(R.string.taptochange));
-                }
-                else {
+                } else {
                     mTitle = getString(R.string.zonesettings);
                     mKey = getString(R.string.ZONE_SETTINGS_PASSWORD_KEY);
-                    showCustomDialog(mTitle,mKey,mSetKey,mZonePassTb,mZoneTap);
+                    showCustomDialog(mTitle, mKey, mSetKey, mZonePassTb, mZoneTap);
                 }
-            }
-            else{
+            } else {
                 prefs.setBoolean(mSetKey, false);
             }
         });
@@ -220,19 +178,16 @@ public class Security extends Fragment {
             mKey = getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY);
             mSetKey = getString(R.string.SET_SYSTEM_PASSWORD);
             systemPassword = prefs.getString(mKey);
-            if(isChecked){
-                if(!systemPassword.isEmpty())
-                {
+            if (isChecked) {
+                if (!systemPassword.isEmpty()) {
                     prefs.setBoolean(mSetKey, true);
                     mSystemtap.setText(getString(R.string.taptochange));
-                }
-                else {
+                } else {
                     mTitle = getString(R.string.systemsettings);
                     mKey = getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY);
-                    showCustomDialog(mTitle,mKey,mSetKey,mSystemPassTb,mSystemtap);
+                    showCustomDialog(mTitle, mKey, mSetKey, mSystemPassTb, mSystemtap);
                 }
-            }
-            else{
+            } else {
                 prefs.setBoolean(mSetKey, false);
             }
         });
@@ -243,19 +198,16 @@ public class Security extends Fragment {
             mKey = getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY);
             mSetKey = getString(R.string.SET_BUILDING_PASSWORD);
             buildingPassword = prefs.getString(mKey);
-            if(isChecked){
-                if(!buildingPassword.isEmpty())
-                {
+            if (isChecked) {
+                if (!buildingPassword.isEmpty()) {
                     prefs.setBoolean(mSetKey, true);
                     mBuildingTap.setText(getString(R.string.taptochange));
-                }
-                else {
+                } else {
                     mTitle = getString(R.string.buildingchange);
                     mKey = getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY);
-                    showCustomDialog(mTitle,mKey,mSetKey,mBuildingPassTb,mBuildingTap);
+                    showCustomDialog(mTitle, mKey, mSetKey, mBuildingPassTb, mBuildingTap);
                 }
-            }
-            else{
+            } else {
                 prefs.setBoolean(mSetKey, false);
             }
         });
@@ -266,32 +218,27 @@ public class Security extends Fragment {
             mKey = getString(R.string.USE_SETUP_PASSWORD_KEY);
             mSetKey = getString(R.string.SET_SETUP_PASSWORD);
             setupPassword = prefs.getString(mKey);
-            if(isChecked){
-                if(!setupPassword.isEmpty())
-                {
+            if (isChecked) {
+                if (!setupPassword.isEmpty()) {
                     prefs.setBoolean(mSetKey, true);
                     mSetupTap.setText(getString(R.string.taptochange));
-                }
-                else {
+                } else {
                     mTitle = getString(R.string.setupchange);
                     mKey = getString(R.string.USE_SETUP_PASSWORD_KEY);
-                    showCustomDialog(mTitle,mKey,mSetKey,mSetupPassTb,mSetupTap);
+                    showCustomDialog(mTitle, mKey, mSetKey, mSetupPassTb, mSetupTap);
                 }
-            }
-            else{
+            } else {
                 prefs.setBoolean(mSetKey, false);
             }
         });
 
-
-
         mNext.setOnClickListener(v -> {
-            // TODO Auto-generated method stub
             mNext.setEnabled(false);
             goTonext();
         });
 
-        if (isFreshRegister)  mNext.setVisibility(View.VISIBLE); else mNext.setVisibility(View.GONE);
+        if (isFreshRegister) mNext.setVisibility(View.VISIBLE);
+        else mNext.setVisibility(View.GONE);
 
 
         return rootView;
@@ -302,7 +249,7 @@ public class Security extends Fragment {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
         View layoutView = getLayoutInflater().inflate(R.layout.dialog_password, null);
         dialogBuilder.setView(layoutView);
-        Dialog alertDialog = dialogBuilder.create();
+        alertDialog = dialogBuilder.create();
 
 
         TextView mTitlePass = layoutView.findViewById(R.id.textPasswordFor);
@@ -423,5 +370,13 @@ public class Security extends Fragment {
 
     private void goTonext() {
         ((FreshRegistration)getActivity()).selectItem(9);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (alertDialog != null && alertDialog.isShowing()) {
+            alertDialog.dismiss();
+        }
     }
 }

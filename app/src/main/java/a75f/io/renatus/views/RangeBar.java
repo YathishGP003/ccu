@@ -127,14 +127,14 @@ public class RangeBar extends View {
         if(isCelsiusTunerAvailableStatus()) {
             if(isUnoccupiedSetBackFragment){
                 if (stateReflected == RangeBarState.LOWER_HEATING_LIMIT) {
-                    canvas.drawText((fahrenheitToCelsius(Double.parseDouble(String.valueOf(roundToHalf(temps[stateReflected.ordinal()] + unOccupiedSetBack)))) - unOccupiedSetBack) + "\u00B0C",
+                    canvas.drawText((fahrenheitToCelsius(Double.parseDouble(String.valueOf(roundToHalf(temps[stateReflected.ordinal()] + unOccupiedSetBack)))) - unOccupiedSetBack) + "°C",
                             xPos, (yPos - 10f), mTempIconPaint);
                 } else {
-                    canvas.drawText((fahrenheitToCelsius(Double.parseDouble(String.valueOf(roundToHalf(temps[stateReflected.ordinal()] - unOccupiedSetBack)))) + unOccupiedSetBack) + "\u00B0C",
+                    canvas.drawText((fahrenheitToCelsius(Double.parseDouble(String.valueOf(roundToHalf(temps[stateReflected.ordinal()] - unOccupiedSetBack)))) + unOccupiedSetBack) + "°C",
                             xPos, (yPos - 10f), mTempIconPaint);
                 }
             }else {
-                canvas.drawText((fahrenheitToCelsius(Double.parseDouble(String.valueOf(roundToHalf(temps[stateReflected.ordinal()])))))+"\u00B0C",
+                canvas.drawText((fahrenheitToCelsius(Double.parseDouble(String.valueOf(roundToHalf(temps[stateReflected.ordinal()])))))+"°C",
                         xPos, (yPos - 10f), mTempIconPaint);
             }
 

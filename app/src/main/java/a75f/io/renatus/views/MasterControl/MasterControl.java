@@ -152,7 +152,7 @@ public class MasterControl extends View {
         //The 2 and 1.5 are used to slide the number on the bitmap image.
         //Text centered left to right and 1/3 the way down the icon.
         if(isCelsiusTunerAvailableStatus()) {
-            canvas.drawText(Math.round(temps[stateReflected.ordinal()]) + "\u00B0F  (" + fahrenheitToCelsius(Math.round(temps[stateReflected.ordinal()])) + "\u00B0C)",
+            canvas.drawText(Math.round(temps[stateReflected.ordinal()]) + "°F  (" + fahrenheitToCelsius(Math.round(temps[stateReflected.ordinal()])) + "°C)",
                     xPos +  bitmaps[stateReflected.ordinal()].getWidth() / 2,
                     (yPos +  bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
         } else {
@@ -736,9 +736,9 @@ public class MasterControl extends View {
             mDebugTextPaint.setTextSize(mArrowTextSize);
             mDebugTextPaint.getTextBounds(temp, 0, temp.length(), bounds);
             if(isCelsiusTunerAvailableStatus()) {
-                canvas.drawText(temp + "\u00B0F ("+fahrenheitToCelsius((Double.parseDouble(temp)))+"\u00B0C )", getPXForTemp(i) - mSetBack, getTempLineYLocation() + (float) mEnergySavingsSpacing, mDebugTextPaint);
+                canvas.drawText(temp + "°F ("+fahrenheitToCelsius((Double.parseDouble(temp)))+"°C )", getPXForTemp(i) - mSetBack, getTempLineYLocation() + (float) mEnergySavingsSpacing, mDebugTextPaint);
             } else {
-                canvas.drawText(temp+ " \u00B0F" , getPXForTemp(i) - mSetBack, getTempLineYLocation() + (float) mEnergySavingsSpacing, mDebugTextPaint);
+                canvas.drawText(temp+ " °F" , getPXForTemp(i) - mSetBack, getTempLineYLocation() + (float) mEnergySavingsSpacing, mDebugTextPaint);
 
             }
         }

@@ -46,16 +46,9 @@ import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
-public class WifiFragment extends Fragment /*implements InstallType */  implements WifiListAdapter.ItemClickListener {
-    // TODO: Rename parameter arguments, choose names that match
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    private static final int WAIT_TIME = 2000;
+public class WifiFragment extends Fragment  implements WifiListAdapter.ItemClickListener {
     private String TAG = "Wifi Fragment";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
     ImageView imageGoback;
     RecyclerView recyclerWifi;
     WifiManager mainWifiObj;
@@ -72,7 +65,6 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
     TextView mTurnonwifi;
     RelativeLayout layoutConnectWifi;
     private SwitchFragment switchFragment;
-    int goToNext = 0;
     Prefs prefs;
     String INSTALL_TYPE = "";
     private boolean isFreshRegister;
@@ -86,31 +78,9 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment StartCCUFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static WifiFragment newInstance(String param1, String param2) {
-        WifiFragment fragment = new WifiFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
         mNetworkReceiver = new NetworkChangeReceiver();
         mWifiReceiver = new WifiStateReceiver();
         getActivity().registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
@@ -144,8 +114,7 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
             switchFragment.Switch(3);
         });
         progressbar.setVisibility(View.VISIBLE);
-        imageRefresh.setOnLongClickListener(v ->
-        {
+        imageRefresh.setOnLongClickListener(v -> {
             System.out.println("Image Refresh 2");
             switchFragment.Switch(3);
             return false;
@@ -153,7 +122,8 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
 
         mContext = getContext().getApplicationContext();
         wifinetworks = new ArrayList<>();
-        if (!isFreshRegister) layoutConnectWifi.setVisibility(View.VISIBLE); else layoutConnectWifi.setVisibility(View.GONE);
+        if (!isFreshRegister) layoutConnectWifi.setVisibility(View.VISIBLE);
+        else layoutConnectWifi.setVisibility(View.GONE);
 
         prefs = new Prefs(mContext);
         INSTALL_TYPE = prefs.getString("INSTALL_TYPE");
@@ -169,17 +139,13 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
 
         Animation animation = new RotateAnimation(0.0f, 360.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         animation.setDuration(1200);
-        //imageRefresh.setAnimation(animation);
 
         imageGoback.setOnClickListener(v -> {
             mHandler.removeCallbacks(mRunable);
-            // TODO Auto-generated method stub
-            //((FreshRegistration)getActivity()).selectItem(1);
             switchFragment.Switch(1);
         });
 
         imageRefresh.setOnClickListener(v -> {
-            // TODO Auto-generated method stub
             if (mainWifiObj.isWifiEnabled()) {
                 animation.setRepeatCount(0);
                 animation.setDuration(1200);
@@ -199,7 +165,7 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
             if (getUserVisibleHint()) {
                 mainWifiObj = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
                 if (isChecked) {
-                    if(alertDialog!=null && alertDialog.isShowing()) {
+                    if (alertDialog != null && alertDialog.isShowing()) {
                         alertDialog.dismiss();
                     }
                     progressbar.setVisibility(View.VISIBLE);
@@ -213,9 +179,9 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
                         mainWifiObj.setWifiEnabled(true);
                     }
                 } else {
-                    boolean tunerSyncStatus = Globals.getInstance().getApplicationContext().getSharedPreferences(Globals.getInstance().getDefaultSharedPreferencesName(), Context.MODE_PRIVATE).getBoolean("Tuner_Sync_Status",false);
+                    boolean tunerSyncStatus = Globals.getInstance().getApplicationContext().getSharedPreferences(Globals.getInstance().getDefaultSharedPreferencesName(), Context.MODE_PRIVATE).getBoolean("Tuner_Sync_Status", false);
 
-                    if(!tunerSyncStatus) {
+                    if (!tunerSyncStatus) {
                         AlertDialog.Builder AlertBuilder = new AlertDialog.Builder(getActivity());
                         AlertBuilder.setTitle(requireContext().getString(R.string.sync_failed));
                         AlertBuilder.setIcon(R.drawable.ic_alert);
@@ -267,12 +233,10 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
         filterWifi.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         filterWifi.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         filterWifi.addAction(WifiManager.ACTION_PICK_WIFI_NETWORK);
-
         requireActivity().registerReceiver(mWifiReceiver, filterWifi);
     }
 
     public void showScanResult() {
-
         try {
             ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfoForEthernet = connManager.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET);
@@ -321,7 +285,7 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
             wifiListAdapter.updateData(wifinetworks);
             recyclerWifi.setAdapter(wifiListAdapter);
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 
@@ -347,11 +311,9 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
         if (getActivity() != null && mNetworkReceiver != null) {
             getActivity().unregisterReceiver(mNetworkReceiver);
         }
-
         if (getActivity() != null && mWifiReceiver != null) {
             getActivity().unregisterReceiver(mWifiReceiver);
         }
-
     }
 
     @Override
@@ -363,30 +325,24 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
         TextView tvisConnected = view.findViewById(R.id.textisConnected);
         final EditText editText_Password = alertview.findViewById(R.id.editPassword);
         builder.setPositiveButton("Connect", (dialog, which) -> {
-       if (TextUtils.isEmpty(editText_Password.getText().toString())) {
-            Toast.makeText(getActivity(), "Please enter password", Toast.LENGTH_SHORT).show();
-            return;
-          }
-          ProgressDialogUtils.showProgressDialog(getActivity(),"Connecting...");
-
-          disposable.add(RxjavaUtil.executeBackgroundWithDisposable(() ->connectWifi(ssid, editText_Password.getText().toString())));
-
+            if (TextUtils.isEmpty(editText_Password.getText().toString())) {
+                Toast.makeText(getActivity(), "Please enter password", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            ProgressDialogUtils.showProgressDialog(getActivity(), "Connecting...");
+            disposable.add(RxjavaUtil.executeBackgroundWithDisposable(() -> connectWifi(ssid, editText_Password.getText().toString())));
             new Handler().postDelayed(() -> {
-                if(getActivity()!= null && isAdded() && !isOnline(getActivity())){
+                if (getActivity() != null && isAdded() && !isOnline(getActivity())) {
                     Toast.makeText(getActivity(), "Incorrect password", Toast.LENGTH_SHORT).show();
                     ProgressDialogUtils.hideProgressDialog();
                 }
             }, 30000);
 
-          dialog.dismiss();
+            dialog.dismiss();
         });
 
-
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-
-
-        AlertDialog alertDialog = builder.create();
-
+        alertDialog = builder.create();
         if (!tvisConnected.getText().toString().equals("CONNECTED")) {
             alertDialog.show();
         }
@@ -424,10 +380,8 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
     }
 
     public class NetworkChangeReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(Context context, Intent intent) {
-
             if (isOnline(context)) {
                 showScanResult();
                 ProgressDialogUtils.hideProgressDialog();
@@ -436,7 +390,6 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
     }
 
     public class WifiStateReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(Context context, Intent intent) {
             if (getUserVisibleHint()) {
@@ -444,7 +397,6 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
                 results = mainWifiObj.getScanResults();
                 CcuLog.i(TAG, "Scan Result Action:" + action + " Result:" + results.toString());
                 if (action.equals("android.net.wifi.STATE_CHANGE") || action.equals("android.net.wifi.WIFI_STATE_CHANGED")) {
-                    //toggleWifi.setChecked(mainWifiObj.isWifiEnabled());
                     if (mainWifiObj.isWifiEnabled()) {
                         mTurnonwifi.setVisibility(View.GONE);
                         toggleWifi.setChecked(true);
@@ -459,21 +411,25 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
                         imageRefresh.setImageResource(R.drawable.ic_refresh_disable);
                         recyclerWifi.setVisibility(View.GONE);
                     }
-
                     showScanResult();
                 }
             }
         }
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        CcuLog.d("Security", "onStop: Security Fragment");
+        if (alertDialog != null && alertDialog.isShowing()) {
+            alertDialog.dismiss();
+        }
+    }
 
     private boolean isOnline(Context context) {
-
         try {
             ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo netInfo = cm.getActiveNetworkInfo();
-
-            //should check null because in airplane mode it will be null
             return (netInfo != null && netInfo.isConnected());
         } catch (NullPointerException e) {
             e.printStackTrace();

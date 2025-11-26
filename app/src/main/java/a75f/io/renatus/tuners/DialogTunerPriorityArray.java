@@ -49,18 +49,11 @@ import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.DialogManager;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.TunerNumberPicker;
 import butterknife.ButterKnife;
 
-import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
-import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueFtoC;
-import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
-import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeConversion;
-import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeDeadBandConversion;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTuner;
-import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
 
 public class DialogTunerPriorityArray extends BaseDialogFragment implements PriorityItemClickListener, TunerUndoClickListener {
     public static final String ID = DialogTunerPriorityArray.class.getSimpleName();
@@ -462,6 +455,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             dialog.setView(dialogView);
             AlertDialog valueDialog = dialog.show();
             valueDialog.getWindow().setLayout(500, 380);
+            DialogManager.INSTANCE.register(valueDialog);
             valueDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
             TunerNumberPicker npTunerRange = dialogView.findViewById(R.id.npTunerValue);
             TextView textViewLevel = dialogView.findViewById(R.id.textLevelLabel);
@@ -470,10 +464,9 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             ImageButton buttonUndo = dialogView.findViewById(R.id.imgBtnUndo);
             buttonUndo.setVisibility(View.GONE);
             buttonSaveAlert.setEnabled(false);
-            String levelName = "Building";
+            String levelName;
             prefs = new Prefs(getContext().getApplicationContext());
-            int level;
-            String currentTunerValue = EMPTY_STRING;
+            String currentTunerValue;
             if (position == 15) {
                 levelName = "Building";
                 currentTunerValue = getTunerValue(tunerItemSelected.get("id").toString(), "16");
@@ -677,7 +670,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     }
 
     public boolean isTunerTemperatureRelated() {
-        return tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C");
+        return tunerItemSelected.get("unit").toString().equals("°F") || tunerItemSelected.get("unit").toString().equals("°C");
     }
     public boolean doesTunerContainUnit() {
         return tunerItemSelected.containsKey("unit") && !tunerItemSelected.containsKey("displayUnit");

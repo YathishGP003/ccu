@@ -84,7 +84,6 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BackfillUtilKt;
@@ -95,7 +94,6 @@ import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.interfaces.MasterControlLimitListener;
 import a75f.io.logic.tuners.TunerConstants;
-import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.messaging.exceptions.ScheduleMigrationNotComplete;
@@ -119,14 +117,7 @@ import a75f.io.renatus.views.TempLimit.TempLimitView;
 import a75f.io.util.ExecutorTask;
 
 public class InstallerOptions extends Fragment implements MasterControlLimitListener {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     ImageView imageGoback;
     TempLimitView imageTemp;
@@ -153,7 +144,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
     //BACnet Setup
     CustomCCUSwitch toggleCelsius;
     TextView textCelsiusEnable;
-
+    Dialog dialog;
     CustomCCUSwitch toggleOfflineMode;
     TextView textOfflineMode;
     TextView descOfflineMode;
@@ -219,39 +210,15 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
         return instance;
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment StartCCUFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static InstallerOptions newInstance(String param1, String param2) {
-        InstallerOptions fragment = new InstallerOptions();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @SuppressLint("MissingInflatedId")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        //((FreshRegistration)getActivity()).showIcons(false);
         View rootView = inflater.inflate(R.layout.fragment_installeroption, container, false);
 
         mContext = getContext().getApplicationContext();
@@ -424,7 +391,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
 
         setBackFillTimeSpinner(rootView);
         setUpDREnrollmentMode(ccuHsApi);
-        setUpTemperatureModeSpinner(rootView, ccuHsApi);
+        setUpTemperatureModeSpinner(rootView);
 
         buttonApply.setOnClickListener(view -> {
             int selectedSpinnerItem = backFillTimeSpinner.getSelectedItemPosition();
@@ -454,7 +421,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
         }
     }
 
-    private void setUpTemperatureModeSpinner(View rootView, CCUHsApi ccuHsApi) {
+    private void setUpTemperatureModeSpinner(View rootView) {
         this.temperatureModeSpinner = rootView.findViewById(R.id.spinnerTemperatureMode);
         CCUUiUtil.setSpinnerDropDownColor(temperatureModeSpinner,this.getContext());
         ArrayAdapter<String> temperatureModeAdapter = getAdapterValue(new TemperatureModeUtil().getTemperatureModeArray());
@@ -631,17 +598,14 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
 
     }
 
-    //custom dialog to control building temperature
     private void openMasterControllerDialog() throws ScheduleMigrationNotComplete {
         if (isAdded()) {
 
-            final Dialog dialog = new Dialog(getActivity());
+            dialog = new Dialog(getActivity());
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             dialog.setCancelable(false);
             dialog.setContentView(R.layout.dialog_master_control);
             MasterControlView masterControlView = dialog.findViewById(R.id.masterControlView);
-
-            //12950- New User limits UI
 
             double heatDBVal;
             double coolDBVal;
@@ -705,45 +669,45 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
             double minDeadBandVal = Double.parseDouble(Domain.readPointForEquip(DomainName.coolingDeadband,Domain.buildingEquip.getEquipRef()).get("minVal").toString());
             double maxDeadBandVal = Double.parseDouble(Domain.readPointForEquip(DomainName.coolingDeadband,Domain.buildingEquip.getEquipRef()).get("maxVal").toString());
 
-            if(isCelsiusTunerAvailableStatus()){
-                for (int val = 32;  val <= 140; val += 1) {
-                    list.add(val+"\u00B0F  (" + fahrenheitToCelsius(val) + "\u00B0C)");
+            if (isCelsiusTunerAvailableStatus()) {
+                for (int val = 32; val <= 140; val += 1) {
+                    list.add(val + "°F  (" + fahrenheitToCelsius(val) + "°C)");
                 }
-                for (double val = 0;  val <= 60; val += 1) {
-                    zoneSetBack.add(val+"\u00B0F  (" + CCUUtils.roundToOneDecimal(fahrenheitToCelsiusRelative(val)) + "\u00B0C)");
+                for (double val = 0; val <= 60; val += 1) {
+                    zoneSetBack.add(val + "°F  (" + CCUUtils.roundToOneDecimal(fahrenheitToCelsiusRelative(val)) + "°C)");
                 }
-                for (int val = 50;  val <= 100; val += 1) {
-                    heatingLimit.add(val+"\u00B0F  (" + fahrenheitToCelsius(val) + "\u00B0C)");
+                for (int val = 50; val <= 100; val += 1) {
+                    heatingLimit.add(val + "°F  (" + fahrenheitToCelsius(val) + "°C)");
                 }
-                for (int val = 50;  val <= 100; val += 1) {
-                    coolingLimit.add(val+"\u00B0F  (" + fahrenheitToCelsius(val) + "\u00B0C)");
+                for (int val = 50; val <= 100; val += 1) {
+                    coolingLimit.add(val + "°F  (" + fahrenheitToCelsius(val) + "°C)");
                 }
-                for (double val = minDeadBandVal;  val <= maxDeadBandVal; val += 0.5) {
-                    deadBand.add(val+"\u00B0F  (" + (fahrenheitToCelsiusRelative(val)) + "\u00B0C)");
+                for (double val = minDeadBandVal; val <= maxDeadBandVal; val += 0.5) {
+                    deadBand.add(val + "°F  (" + (fahrenheitToCelsiusRelative(val)) + "°C)");
                 }
-                for (int val = 0;  val <= 20; val += 1) {
-                    zonediff.add(val+"\u00B0F  (" + (fahrenheitToCelsiusRelative(val)) + "\u00B0C)");
+                for (int val = 0; val <= 20; val += 1) {
+                    zonediff.add(val + "°F  (" + (fahrenheitToCelsiusRelative(val)) + "°C)");
                 }
 
-            }else{
+            } else {
 
-                for (int val = 32;  val <= 140; val += 1) {
-                    list.add(val+"\u00B0F");
+                for (int val = 32; val <= 140; val += 1) {
+                    list.add(val + "°F");
                 }
-                for (double val = 0;  val <= 60; val += 1) {
-                    zoneSetBack.add(val+"\u00B0F");
+                for (double val = 0; val <= 60; val += 1) {
+                    zoneSetBack.add(val + "°F");
                 }
-                for (int val = 50;  val <= 100; val += 1) {
-                    heatingLimit.add(val+"\u00B0F");
+                for (int val = 50; val <= 100; val += 1) {
+                    heatingLimit.add(val + "°F");
                 }
-                for (int val = 50;  val <= 100; val += 1) {
-                    coolingLimit.add(val+"\u00B0F");
+                for (int val = 50; val <= 100; val += 1) {
+                    coolingLimit.add(val + "°F");
                 }
-                for (double val = minDeadBandVal;  val <= maxDeadBandVal; val += 0.5) {
-                    deadBand.add(val+"\u00B0F");
+                for (double val = minDeadBandVal; val <= maxDeadBandVal; val += 0.5) {
+                    deadBand.add(val + "°F");
                 }
-                for (int val = 0;  val <= 20; val += 1) {
-                    zonediff.add(val+"\u00B0F");
+                for (int val = 0; val <= 20; val += 1) {
+                    zonediff.add(val + "°F");
                 }
             }
 
@@ -805,16 +769,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
             dialog.findViewById(R.id.btnClose).setOnClickListener(view -> dialog.dismiss());
 
 
-            dialog.findViewById(R.id.btnSet).setOnClickListener(view ->
-
-                    /*
-                    LOWER_BUILDING_LIMIT,
-                    UPPER_BUILDING_LIMIT,
-                    LOWER_HEATING_LIMIT,
-                    UPPER_HEATING_LIMIT,
-                    LOWER_COOLING_LIMIT,
-                    UPPER_COOLING_LIMIT
-                     */{
+            dialog.findViewById(R.id.btnSet).setOnClickListener(view -> {
                 ProgressDialogUtils.showProgressDialog(getContext(), "Validating...");
 
                 ArrayList<Schedule> scheduleList = new ArrayList<>();
@@ -914,9 +869,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
                                 masterControlView.updateUnoccupiedZoneSetBack(unoccupiedZoneSetback.getSelectedItem().toString());
                                 masterControlView.setTuner(dialog);
                             } else {
-
-                                android.app.AlertDialog.Builder builder =
-                                        new android.app.AlertDialog.Builder(getActivity());
+                                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                                 builder.setMessage(warning[0]);
                                 builder.setCancelable(false);
                                 builder.setTitle(R.string.schedule_error);
@@ -965,28 +918,6 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
     @Override
     public void onDetach() {
         super.onDetach();
-    }
-
-    private void goToNext() {
-        ExecutorTask.executeAsync(
-                () -> {
-                    if (!Globals.getInstance().siteAlreadyCreated()) {
-                        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
-                        //BuildingTuners.getInstance();
-                        //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
-                        DefaultSchedules.setDefaultCoolingHeatingTemp();
-                    }
-
-                    L.saveCCUState();
-                    CCUHsApi.getInstance().log();
-                    CCUHsApi.getInstance().syncEntityTree();
-                },
-                () -> {
-                    prefs.setBoolean("PROFILE_SETUP", false);
-                    prefs.setBoolean("CCU_SETUP", true);
-                    ((FreshRegistration) getActivity()).selectItem(5);
-                }
-        );
     }
 
     @Override
@@ -1081,16 +1012,16 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
                 " and siteRef == " + CCUHsApi.getInstance().getSiteIdRef().toString() +
                 " and ccuRef != " + CCUHsApi.getInstance().getCcuId();
         List<HDict> addressPointsDictList = CCUHsApi.getInstance().readRemoteEntitiesByQuery(addressPointQuery);
-        if(addressPointsDictList == null || addressPointsDictList.isEmpty()) {
+        if (addressPointsDictList == null || addressPointsDictList.isEmpty()) {
             showUnableToFindAddressBandToast();
             CcuLog.d(TAG, "No address points found for the query: " + addressPointQuery);
         } else {
             CcuLog.d(TAG, "Address points fetched: " + addressPointsDictList.size());
             HGrid remoteAddressBandsDefaultVal = CCUHsApi.getInstance().readPointArrRemote(getAddressBandPointsIdList(addressPointsDictList));
-            if(remoteAddressBandsDefaultVal == null) {
-                CcuLog.w(TAG,"HGrid(addressPointPriorityArray) is null.");
+            if (remoteAddressBandsDefaultVal == null) {
+                CcuLog.w(TAG, "HGrid(addressPointPriorityArray) is null.");
             } else {
-                CcuLog.i(TAG,"Address bands fetched successfully.");
+                CcuLog.i(TAG, "Address bands fetched successfully.");
                 updateRegisteredAddressBands(remoteAddressBandsDefaultVal);
             }
         }
@@ -1150,5 +1081,14 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
                         + " or " +
                         "(" + Tags.DEVICE + " and (" + Tags.CONNECTMODULE + " or " + Tags.PCN + "))";
         return CCUHsApi.getInstance().readAllEntities(equipOrDeviceUsingAddressBandQuery).isEmpty();
+    }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
     }
 }

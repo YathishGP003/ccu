@@ -50,10 +50,10 @@ public class NamedScheduleUnoccupiedDailog extends DialogFragment {
         Schedule schedule = CCUHsApi.getInstance().getScheduleById(getArguments().getString(PARAM_SCHEDULE_ID));
 
         if(isCelsiusTunerAvailableStatus()){
-            unOccupied.setText((int)UnitUtils.fahrenheitToCelsiusRelative(schedule.getUnoccupiedZoneSetback()) + "\u00B0C");
+            unOccupied.setText((int)UnitUtils.fahrenheitToCelsiusRelative(schedule.getUnoccupiedZoneSetback()) + "°C");
         }else {
             long value= Math.round(schedule.getUnoccupiedZoneSetback());
-            unOccupied.setText(value + "\u00B0F");
+            unOccupied.setText(value + "°F");
         }
 
         return new AlertDialog.Builder(requireActivity(), R.style.NewDialogStyle)

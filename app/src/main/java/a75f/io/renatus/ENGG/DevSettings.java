@@ -78,8 +78,6 @@ import a75f.io.renatus.anrwatchdog.ANRHandler;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.ProgressDialogUtils;
-import a75f.io.sanity.framework.SanityManager;
-import a75f.io.sanity.framework.SanityRunner;
 import a75f.io.sanity.ui.SanityResultsFragment;
 import a75f.io.usbserial.UsbSerialUtil;
 import a75f.io.util.ExecutorTask;
@@ -216,7 +214,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
 
     public @BindView(R.id.remoteId) TextView remoteEntity;
     public @BindView(R.id.remoteBtn) Button remoteBtn;
-
+    public @BindView(R.id.scrn_timeout) EditText scrn_timeout;
+    public @BindView(R.id.savescrn_timeout) Button savescrn_timeout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -506,14 +505,21 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         etRegisterRequestCount.setText(String.valueOf(spDefaultPrefs.getInt("registerRequestCount", 3)));
         etSerialCommTimeOut.setText(String.valueOf(spDefaultPrefs.getInt("serialCommTimeOut", 300)));
 
+        scrn_timeout.setText(String.valueOf(spDefaultPrefs.getInt("screenTimeOut", 3600)));
+
         etRegisterRequestCount.setOnClickListener(view110 -> {
             etRegisterRequestCount.setCursorVisible(true);
             etRegisterRequestCount.requestFocus();
         });
 
-        etSerialCommTimeOut.setOnClickListener(view19 -> {
-            etSerialCommTimeOut.setCursorVisible(true);
-            etSerialCommTimeOut.requestFocus();
+        scrn_timeout.setOnClickListener(view19 -> {
+            scrn_timeout.setCursorVisible(true);
+            scrn_timeout.requestFocus();
+        });
+
+        savescrn_timeout.setOnClickListener(view19 -> {
+            savescrn_timeout.setCursorVisible(true);
+            savescrn_timeout.requestFocus();
         });
 
         btnregisterRequestCount.setOnClickListener(view18 -> {
@@ -528,6 +534,14 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             spDefaultPrefs.edit().putInt("serialCommTimeOut",
                     Integer.parseInt(etSerialCommTimeOut.getText().toString())).apply();
             etSerialCommTimeOut.setCursorVisible(false);
+            hideKeyboard(view17);
+            Toast.makeText(getActivity(), "Saved.", Toast.LENGTH_SHORT).show();
+        });
+
+        savescrn_timeout.setOnClickListener(view17 -> {
+            spDefaultPrefs.edit().putInt("screenTimeOut",
+                    Integer.parseInt(scrn_timeout.getText().toString())).apply();
+            scrn_timeout.setCursorVisible(false);
             hideKeyboard(view17);
             Toast.makeText(getActivity(), "Saved.", Toast.LENGTH_SHORT).show();
         });

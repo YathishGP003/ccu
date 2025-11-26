@@ -232,7 +232,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
 
         if(isCelsiusTunerAvailableStatus()){
             for (int val = 50;  val <= 100; val += 1) {
-                heatingAndCoolingLimit.add( fahrenheitToCelsius(val) + "\u00B0C");
+                heatingAndCoolingLimit.add( fahrenheitToCelsius(val) + "°C");
             }
 
             double minVal = convertingRelativeValueFtoC(minDeadBandVal);
@@ -241,7 +241,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
             }
             double maxVal = convertingRelativeValueFtoC(maxDeadBandVal);
             for (double val = minVal;  val <= maxVal; val += 0.5) {
-                deadBand.add( ((val)) + "\u00B0C");
+                deadBand.add( ((val)) + "°C");
             }
 
         }else{
@@ -402,12 +402,12 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
             double heatingDeadBandVal;
             double coolingDeadBandVal;
             if(isCelsiusTunerAvailableStatus()) {
-                heatingUserLimitMaxVal = celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingUserLimitMax.getSelectedItem().toString(), "\u00B0C" )));
-                heatingUserLimitMinVal = celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingUserLimitMin.getSelectedItem().toString(), "\u00B0C" )));
-                coolingUserLimitMaxVal = celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingUserLimitMax.getSelectedItem().toString(), "\u00B0C" )));
-                coolingUserLimitMinVal = celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingUserLimitMin.getSelectedItem().toString(), "\u00B0C" )));
-                heatingDeadBandVal = roundToPointFive(convertingDeadBandValueCtoF(Double.parseDouble(StringUtils.substringBefore(heatingDeadBand.getSelectedItem().toString(), "\u00B0C" ))));
-                coolingDeadBandVal = roundToPointFive(convertingDeadBandValueCtoF(Double.parseDouble(StringUtils.substringBefore(coolingDeadBand.getSelectedItem().toString(), "\u00B0C" ))));
+                heatingUserLimitMaxVal = celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingUserLimitMax.getSelectedItem().toString(), "°C" )));
+                heatingUserLimitMinVal = celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingUserLimitMin.getSelectedItem().toString(), "°C" )));
+                coolingUserLimitMaxVal = celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingUserLimitMax.getSelectedItem().toString(), "°C" )));
+                coolingUserLimitMinVal = celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingUserLimitMin.getSelectedItem().toString(), "°C" )));
+                heatingDeadBandVal = roundToPointFive(convertingDeadBandValueCtoF(Double.parseDouble(StringUtils.substringBefore(heatingDeadBand.getSelectedItem().toString(), "°C" ))));
+                coolingDeadBandVal = roundToPointFive(convertingDeadBandValueCtoF(Double.parseDouble(StringUtils.substringBefore(coolingDeadBand.getSelectedItem().toString(), "°C" ))));
 
             }else{
                 heatingUserLimitMaxVal = MasterControlUtil.getAdapterFarhenheitVal(heatingUserLimitMax.getSelectedItem().toString());
@@ -500,7 +500,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 if (isCelsiusTunerAvailableStatus()) {
-                    rangeSeekBarView.setHeatingLimitMin(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingUserLimitMin.getSelectedItem().toString(), "\u00B0C"))));
+                    rangeSeekBarView.setHeatingLimitMin(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingUserLimitMin.getSelectedItem().toString(), "°C"))));
                 } else {
                     rangeSeekBarView.setHeatingLimitMin(MasterControlUtil.getAdapterFarhenheitVal(heatingUserLimitMin.getSelectedItem().toString()));
                 }
@@ -516,7 +516,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
 
                 if (isCelsiusTunerAvailableStatus()) {
-                    rangeSeekBarView.setCoolingLimitMax(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingUserLimitMax.getSelectedItem().toString(), "\u00B0C"))));
+                    rangeSeekBarView.setCoolingLimitMax(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingUserLimitMax.getSelectedItem().toString(), "°C"))));
                 } else {
                     rangeSeekBarView.setCoolingLimitMax(MasterControlUtil.getAdapterFarhenheitVal(coolingUserLimitMax.getSelectedItem().toString()));
                 }
@@ -530,7 +530,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 if (isCelsiusTunerAvailableStatus()) {
-                    rangeSeekBarView.setHeatingLimitMax(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingUserLimitMax.getSelectedItem().toString(), "\u00B0C"))));
+                    rangeSeekBarView.setHeatingLimitMax(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingUserLimitMax.getSelectedItem().toString(), "°C"))));
                 } else {
                     rangeSeekBarView.setHeatingLimitMax(MasterControlUtil.getAdapterFarhenheitVal(heatingUserLimitMax.getSelectedItem().toString()));
                 }
@@ -546,7 +546,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
 
                 if (isCelsiusTunerAvailableStatus()) {
-                    rangeSeekBarView.setCoolingLimitMin(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingUserLimitMin.getSelectedItem().toString(), "\u00B0C"))));
+                    rangeSeekBarView.setCoolingLimitMin(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingUserLimitMin.getSelectedItem().toString(), "°C"))));
                 } else {
                     rangeSeekBarView.setCoolingLimitMin(MasterControlUtil.getAdapterFarhenheitVal(coolingUserLimitMin.getSelectedItem().toString()));
                 }
@@ -559,7 +559,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (isCelsiusTunerAvailableStatus()) {
-                    rangeSeekBarView.setHeatingDeadBand(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingDeadBand.getSelectedItem().toString(), "\u00B0C"))));
+                    rangeSeekBarView.setHeatingDeadBand(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingDeadBand.getSelectedItem().toString(), "°C"))));
                 } else {
                     rangeSeekBarView.setHeatingDeadBand(MasterControlUtil.getAdapterFarhenheitVal(heatingDeadBand.getSelectedItem().toString()));
                 }
@@ -573,7 +573,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (isCelsiusTunerAvailableStatus()) {
-                    rangeSeekBarView.setCoolingDeadBand(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingDeadBand.getSelectedItem().toString(), "\u00B0C"))));
+                    rangeSeekBarView.setCoolingDeadBand(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingDeadBand.getSelectedItem().toString(), "°C"))));
                 } else {
                     rangeSeekBarView.setCoolingDeadBand(MasterControlUtil.getAdapterFarhenheitVal(coolingDeadBand.getSelectedItem().toString()));
                 }
@@ -659,13 +659,13 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
     private void resetRangeBarLimits() {
         if (isCelsiusTunerAvailableStatus()) {
             rangeSeekBarView.setHeatingLimitMinForced(celsiusToFahrenheitTuner(Double.parseDouble(
-                    StringUtils.substringBefore(heatingUserLimitMin.getSelectedItem().toString(), "\u00B0C"))));
+                    StringUtils.substringBefore(heatingUserLimitMin.getSelectedItem().toString(), "°C"))));
             rangeSeekBarView.setHeatingLimitMaxForced(celsiusToFahrenheitTuner(Double.parseDouble(
-                    StringUtils.substringBefore(heatingUserLimitMax.getSelectedItem().toString(), "\u00B0C"))));
+                    StringUtils.substringBefore(heatingUserLimitMax.getSelectedItem().toString(), "°C"))));
             rangeSeekBarView.setCoolingLimitMaxForced(celsiusToFahrenheitTuner(Double.parseDouble(
-                    StringUtils.substringBefore(coolingUserLimitMax.getSelectedItem().toString(), "\u00B0C"))));
+                    StringUtils.substringBefore(coolingUserLimitMax.getSelectedItem().toString(), "°C"))));
             rangeSeekBarView.setCoolingLimitMinForced(celsiusToFahrenheitTuner(Double.parseDouble(
-                    StringUtils.substringBefore(coolingUserLimitMin.getSelectedItem().toString(), "\u00B0C"))));
+                    StringUtils.substringBefore(coolingUserLimitMin.getSelectedItem().toString(), "°C"))));
         } else {
             rangeSeekBarView.setHeatingLimitMinForced(MasterControlUtil.getAdapterFarhenheitVal(heatingUserLimitMin.getSelectedItem().toString()));
             rangeSeekBarView.setHeatingLimitMaxForced(MasterControlUtil.getAdapterFarhenheitVal(heatingUserLimitMax.getSelectedItem().toString()));
@@ -721,7 +721,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
 
         if(isCelsiusTunerAvailableStatus()){
             for (int val = 50;  val <= 100; val += 1) {
-                heatingAndCoolingLimit.add(fahrenheitToCelsius(val) + "\u00B0C");
+                heatingAndCoolingLimit.add(fahrenheitToCelsius(val) + "°C");
             }
 
             double minVal = convertingRelativeValueFtoC(minDeadBandVal);
@@ -730,16 +730,16 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
             }
             double maxVal = convertingRelativeValueFtoC(maxDeadBandVal);
             for (double val = minVal;  val <= maxVal; val += 0.5) {
-                deadBand.add( ((val)) + "\u00B0C");
+                deadBand.add( ((val)) + "°C");
             }
 
         }else{
             for (int val = 50;  val <= 100; val += 1) {
-                heatingAndCoolingLimit.add(val+"\u00B0F");
+                heatingAndCoolingLimit.add(val+"°F");
             }
 
             for (double val = minDeadBandVal;  val <= maxDeadBandVal; val += 0.5) {
-                deadBand.add(val+"\u00B0F");
+                deadBand.add(val+"°F");
             }
         }
 

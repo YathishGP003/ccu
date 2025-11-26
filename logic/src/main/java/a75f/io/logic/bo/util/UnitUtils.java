@@ -140,12 +140,12 @@ public class UnitUtils {
                 if(myDoubles.size() > 3) {
                     return (f + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0))))
                             + "-" + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1))))
-                            + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + timeFormatter.format(myDoubles.get(3).intValue()));
+                            + " °C" + " at " + (myDoubles.get(2).intValue()) + ":" + timeFormatter.format(myDoubles.get(3).intValue()));
                 }else {
                     // When refresh screen is called then status is fetched from haystack there we
                     // have single temperature so my doubles size will be only 3.
                     return (f + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0))))
-                            + " \u00B0C" + " at " + (myDoubles.get(1).intValue()) + ":" +
+                            + " °C" + " at " + (myDoubles.get(1).intValue()) + ":" +
                             timeFormatter.format(myDoubles.get(2).intValue()));
                 }
             }else {
@@ -156,12 +156,12 @@ public class UnitUtils {
             if (!myDoubles.isEmpty()) {
                 if(myDoubles.size() > 3) {
                     return (f + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0))))
-                            + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" +
+                            + " °C" + " at " + (myDoubles.get(2).intValue()) + ":" +
                             timeFormatter.format(myDoubles.get(3).intValue()));
                 }else {
                     // When refresh screen is called then status is fetched from haystack there we have single temperature so mydoubles size will be only 3.
                     return (f + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0))))
-                            + " \u00B0C" + " at " + (myDoubles.get(1).intValue()) + ":" +
+                            + " °C" + " at " + (myDoubles.get(1).intValue()) + ":" +
                             timeFormatter.format(myDoubles.get(2).intValue()));
                 }
             }else {
@@ -172,14 +172,14 @@ public class UnitUtils {
             if (!myDoubles.isEmpty()) {
                 if (myDoubles.size() > 3) {
                     CcuLog.d("fatal", "return  " + (f + (CCUUtils.roundToOneDecimal(
-                            fahrenheitToCelsius(myDoubles.get(1)))) + " \u00B0C" + " at " +
+                            fahrenheitToCelsius(myDoubles.get(1)))) + " °C" + " at " +
                             (myDoubles.get(2).intValue()) + ":" + timeFormatter.format(myDoubles.get(3).intValue())));
                     return (f + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1))))
-                            + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + timeFormatter.format
+                            + " °C" + " at " + (myDoubles.get(2).intValue()) + ":" + timeFormatter.format
                             (myDoubles.get(3).intValue()));
                 }else {
                     return (f + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0))))
-                            + " \u00B0C" + " at " + (myDoubles.get(1).intValue()) + ":" + myDoubles.get(2).intValue());
+                            + " °C" + " at " + (myDoubles.get(1).intValue()) + ":" + myDoubles.get(2).intValue());
                 }
             }else {
                 return temp;

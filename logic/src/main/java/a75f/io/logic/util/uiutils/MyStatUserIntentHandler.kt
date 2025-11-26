@@ -2,7 +2,6 @@ package a75f.io.logic.util.uiutils
 
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.logger.CcuLog
-import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.interfaces.ZoneDataInterface
 import kotlin.collections.set
@@ -30,10 +29,7 @@ class MyStatUserIntentHandler {
                 getStatusMsg(equip.relayStages, equip.analogOutStages, temperatureState)
             equipStatusMsg = equipStatusMsg.replace("Aux Heating 1 ON", "Aux Heating ON")
 
-            if (!myStatStatus.containsKey(equip.equipRef) || !getMyStatStatusString(equip.equipRef).contentEquals(
-                    equipStatusMsg
-                )
-            ) {
+            if (!myStatStatus.containsKey(equip.equipRef) || !getMyStatStatusString(equip.equipRef).contentEquals(equipStatusMsg)) {
                 if (myStatStatus.containsKey(equip.equipRef)) myStatStatus.remove(equip.equipRef)
                 myStatStatus[equip.equipRef] = equipStatusMsg
 

@@ -69,6 +69,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.DialogManager;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
@@ -324,8 +325,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                         if (newTunerValueItem.containsKey("unit")
                                 && !val.equals("-")
                                 && !newTunerValueItem.containsKey("displayUnit")
-                                && (newTunerValueItem.get("unit").toString().equals("\u00B0F")
-                                || newTunerValueItem.get("unit").toString().equals("\u00B0C"))){
+                                && (newTunerValueItem.get("unit").toString().equals("°F")
+                                || newTunerValueItem.get("unit").toString().equals("°C"))){
                             if (isCelsiusTunerAvailableStatus()) {
                                 if (doesPointNeedRelativeConversion(newTunerValueItem)) {
                                     val = String.valueOf(convertingRelativeValueFtoC(Double.parseDouble(val)));
@@ -360,8 +361,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     if ((newTunerValueItem.containsKey("unit")
                             && !val.equals("-"))
                             && !newTunerValueItem.containsKey("displayUnit")
-                            && (newTunerValueItem.get("unit").toString().equals("\u00B0F")
-                            || newTunerValueItem.get("unit").toString().equals("\u00B0C"))){
+                            && (newTunerValueItem.get("unit").toString().equals("°F")
+                            || newTunerValueItem.get("unit").toString().equals("°C"))){
                         if (isCelsiusTunerAvailableStatus()) {
                             if (doesPointNeedRelativeConversion(newTunerValueItem)) {
                                 val = String.valueOf(convertingRelativeValueFtoC(Double.parseDouble(val)));
@@ -404,8 +405,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     try {
                         if (newTunerValueItem.containsKey("unit") && !newTunerValueItem.containsKey("displayUnit") && tunerVal != null) {
                             if (isCelsiusTunerAvailableStatus()) {
-                                if (newTunerValueItem.get("unit").toString().equals("\u00B0F")
-                                        || newTunerValueItem.get("unit").toString().equals("\u00B0C")) {
+                                if (newTunerValueItem.get("unit").toString().equals("°F")
+                                        || newTunerValueItem.get("unit").toString().equals("°C")) {
                                     if (doesPointNeedRelativeConversion(newTunerValueItem)) {
                                         tunerVal = convertingRelativeValueCtoF(Double.parseDouble(String.valueOf(tunerVal)));
                                     } else if (doesPointNeedRelativeDeadBandConversion(newTunerValueItem)) {
@@ -791,6 +792,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
             DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(item, tunerGroupType, tunerGroupOpened);
             tunerPriorityArray.setTargetFragment(this, DIALOG_TUNER_PRIORITY);
+            DialogManager.INSTANCE.register(tunerPriorityArray);
             showDialogFragment(tunerPriorityArray, DialogTunerPriorityArray.ID);
         }
     }

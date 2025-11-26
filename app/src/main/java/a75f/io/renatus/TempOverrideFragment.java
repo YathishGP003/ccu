@@ -1,6 +1,5 @@
 package a75f.io.renatus;
 
-import static a75f.io.renatus.RenatusLandingActivity.SCREEN_SWITCH_TIMEOUT_MILLIS;
 import static a75f.io.renatus.RenatusLandingActivity.btnTabs;
 import static a75f.io.renatus.RenatusLandingActivity.mTabLayout;
 import static a75f.io.renatus.RenatusLandingActivity.mViewPager;
@@ -127,7 +126,7 @@ public class TempOverrideFragment extends Fragment {
     }
 
     private void startCountDownTimer() {
-        countDownTimer = new CountDownTimer(SCREEN_SWITCH_TIMEOUT_MILLIS, 1000) {
+        countDownTimer = new CountDownTimer((3600000), 1000) {
             @Override
             public void onTick(long l) {
                 long millis = l;

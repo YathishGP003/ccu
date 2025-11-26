@@ -56,10 +56,10 @@ import a75f.io.renatus.buildingoccupancy.BuildingOccupancyDialogFragment.Buildin
 import a75f.io.renatus.buildingoccupancy.viewmodels.BuildingOccupancyViewModel;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment;
 import a75f.io.renatus.schedules.ScheduleImpactDialogFragment;
+import a75f.io.renatus.util.DialogManager;
 import a75f.io.renatus.util.NetworkUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
-import a75f.io.util.ExecutorTask;
 
 
 public class BuildingOccupancyFragment extends DialogFragment implements BuildingOccupancyDialogListener,
@@ -179,6 +179,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
             BuildingOccupancyDialogFragment buildingOccupancyDialogFragment =
                     new BuildingOccupancyDialogFragment(BuildingOccupancyFragment.this);
             buildingOccupancyDialogFragment.show(fragmentTransaction, "popup");
+            DialogManager.INSTANCE.register(buildingOccupancyDialogFragment);
         });
 
         //Measure the amount of pixels between an hour after the constraintScheduler layout draws the bars for the first time.
@@ -540,6 +541,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
             BuildingOccupancyDialogFragment buildingOccupancyDialogFragment =
                     new BuildingOccupancyDialogFragment(BuildingOccupancyFragment.this,
                             clickedPosition, days.get(clickedPosition));
+            DialogManager.INSTANCE.register(buildingOccupancyDialogFragment);
             buildingOccupancyDialogFragment.show(fragmentTransaction, "popup");
         });
     }
@@ -619,6 +621,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
         BuildingOccupancyDialogFragment buildingOccupancyDialogFragment =
                 new BuildingOccupancyDialogFragment(BuildingOccupancyFragment.this,
                         position, allDays.get(position));
+        DialogManager.INSTANCE.register(buildingOccupancyDialogFragment);
         buildingOccupancyDialogFragment.show(fragmentTransaction, "popup");
     }
 

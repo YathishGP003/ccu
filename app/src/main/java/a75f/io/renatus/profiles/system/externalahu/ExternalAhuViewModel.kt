@@ -514,7 +514,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                 updatePortIfChanged(slaveId = equipModel.value.slaveId.value)
             } else {
                 CcuLog.i(Domain.LOG_TAG, "Modbus Equip port not changed for slave id ${equipModel.value.slaveId.value}")
-                formattedToastMessage("Port not updated", context)
+                //formattedToastMessage("Port not updated", context)
             }
         }
         PreferenceUtil.setSelectedProfileWithAhu("modbus")

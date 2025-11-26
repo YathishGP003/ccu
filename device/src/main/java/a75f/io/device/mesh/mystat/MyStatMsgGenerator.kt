@@ -319,7 +319,8 @@ private fun setLinearFanSpeedDetails(equip: MyStatEquip): MyStat.MyStatLinearFan
             val association = universalOut1Association.readDefaultVal().toInt()
             if (this is MyStatCpuEquip && association == MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal ||
                 this is MyStatHpuEquip && association == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal ||
-                this is MyStatPipe2Equip && association == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
+                this is MyStatPipe2Equip && association == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal ||
+                this is MyStatPipe4Equip && association == MyStatPipe4AnalogOutMapping.FAN_SPEED.ordinal) {
                 linearFanSpeedBuilder.linearFanLowSpeedLevel = analog1FanLow.readPriorityVal().toInt()
                 linearFanSpeedBuilder.linearFanHighSpeedLevel = analog1FanHigh.readPriorityVal().toInt()
 
@@ -329,7 +330,8 @@ private fun setLinearFanSpeedDetails(equip: MyStatEquip): MyStat.MyStatLinearFan
             val association = universalOut2Association.readDefaultVal().toInt()
             if (this is MyStatCpuEquip && association == MyStatCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal ||
                 this is MyStatHpuEquip && association == MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal ||
-                this is MyStatPipe2Equip && association == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
+                this is MyStatPipe2Equip && association == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal ||
+                this is MyStatPipe4Equip && association == MyStatPipe4AnalogOutMapping.FAN_SPEED.ordinal) {
                 linearFanSpeedBuilder.linearFanLowSpeedLevel = analog2FanLow.readPriorityVal().toInt()
                 linearFanSpeedBuilder.linearFanHighSpeedLevel = analog2FanHigh.readPriorityVal().toInt()
 

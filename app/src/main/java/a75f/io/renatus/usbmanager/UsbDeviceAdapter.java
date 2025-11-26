@@ -66,6 +66,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -242,6 +243,14 @@ public class UsbDeviceAdapter extends RecyclerView.Adapter<UsbDeviceAdapter.UsbV
         } else {
             entries = context.getResources().getStringArray(R.array.usb_protocol_options);
         }
+
+        List<String> filtered = new ArrayList<>();
+        for (String s : entries) {
+            if (!s.contains("MSTP")) {
+                filtered.add(s);
+            }
+        }
+        entries = filtered.toArray(new String[0]);
 
         ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(
                 context,

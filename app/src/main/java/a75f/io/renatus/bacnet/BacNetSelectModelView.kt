@@ -1182,7 +1182,7 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
     @Composable
     private fun ShowDropdownList(expanded: MutableState<Boolean>) {
         val configurationTypes = listOf(
-            MSTP_CONFIGURATION,
+            //MSTP_CONFIGURATION,
             IP_CONFIGURATION
         )
 

@@ -27,7 +27,7 @@ object PreConfigZoneUtil {
         val jobs = preConfigData.zones.map { zone ->
             async(Dispatchers.IO) {
                 semaphore.withPermit {
-                    val nodeAddress = nodeAddressCounter.getAndIncrement()
+                    val nodeAddress = nodeAddressCounter.incrementAndGet()
                     createZones(zone, floorId, siteId, ccuHsApi, nodeAddress)
                 }
             }

@@ -85,6 +85,7 @@ fun reconfigureHyperstatEquips(msgObject: JsonObject, configPoint: Point) {
     }
 
     // Update fan/conditioning mode enums for HS Domain Equip
+    if (configPoint.domainName != DomainName.fanOpMode && configPoint.domainName != DomainName.conditioningMode) {
         val hsDomainEquip = getHSDomainEquipByEquipRef(configPoint.equipRef)
         hsDomainEquip?.let { equip ->
             config.apply {
@@ -100,7 +101,7 @@ fun reconfigureHyperstatEquips(msgObject: JsonObject, configPoint: Point) {
                 CcuLog.i(L.TAG_CCU_PUBNUB, "updated ConfigPoint for HS fan/cond mode")
             }
         }
-
+    }
     CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for CPU Reconfiguration $config")
 
 }

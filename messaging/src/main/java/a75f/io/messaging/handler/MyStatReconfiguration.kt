@@ -12,7 +12,6 @@ import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.allStandaloneProfileConditions
 import a75f.io.logger.CcuLog
-import a75f.io.logic.L
 import a75f.io.logic.L.TAG_CCU_PUBNUB
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
@@ -44,10 +43,10 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
     val myStatDomainEquip = getMyStatDomainEquipByEquipRef(configPoint.equipRef)
     val myStatDomainDevice = getMyStatDomainDeviceByEquipRef(configPoint.equipRef)
     val myStatDeviceVersion = if(myStatDomainDevice.mystatDeviceVersion.readPointValue().toInt() ==1) MyStatDeviceType.MYSTAT_V2 else MyStatDeviceType.MYSTAT_V1
-    CcuLog.d(L.TAG_CCU_PUBNUB,"reconfigureMyStat: myStatDeviceVersion : ${myStatDeviceVersion.name} for equipRef: ${configPoint.group} domain Name : ${configPoint.domainName}")
+    CcuLog.d(TAG_CCU_PUBNUB,"reconfigureMyStat: myStatDeviceVersion : ${myStatDeviceVersion.name} for equipRef: ${configPoint.group} domain Name : ${configPoint.domainName}")
 
     if (model == null) {
-        CcuLog.e(L.TAG_CCU_PUBNUB, "model is null for $configPoint")
+        CcuLog.e(TAG_CCU_PUBNUB, "model is null for $configPoint")
         return
     }
 
@@ -61,7 +60,7 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
 
     val pointNewValue = msgObject["val"]
     if(pointNewValue == null || pointNewValue.asString.isEmpty()){
-        CcuLog.e(L.TAG_CCU_PUBNUB, "point is null $config")
+        CcuLog.e(TAG_CCU_PUBNUB, "point is null $config")
     } else {
         // if it is myStat v1 device need to set the UOut 1 default value when UOut 1 was enabled at first time
         if (myStatDeviceVersion.name.equals(MyStatDeviceType.MYSTAT_V1.name) && config.universalOut1.enabled.not() && configPoint.domainName.equals(DomainName.universal1OutputEnable))
@@ -106,11 +105,11 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
     }
 
     // updating the fan/con mode eums
+    if (configPoint.domainName != DomainName.fanOpMode && configPoint.domainName != DomainName.conditioningMode) {
         config.apply {
-
             val possibleConditioningMode = getMyStatPossibleConditionMode(config)
             val possibleFanMode = getMyStatPossibleFanModeSettings(getMyStatFanLevel(config))
-            myStatDomainEquip?.let {
+            myStatDomainEquip.let {
                 modifyFanMode(possibleFanMode, it.fanOpMode)
                 modifyConditioningMode(
                     possibleConditioningMode.ordinal,
@@ -118,15 +117,18 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
                     allStandaloneProfileConditions
                 )
             }
-            CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for MyStat Reconfiguration fan / conditioning mode ")
+            CcuLog.i(
+                TAG_CCU_PUBNUB,
+                "updateConfigPoint for MyStat Reconfiguration fan / conditioning mode "
+            )
         }
-    
-    CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for MyStat  Reconfiguration $config")
+    }
+    CcuLog.i(TAG_CCU_PUBNUB, "updateConfigPoint for MyStat  Reconfiguration $config")
 
 }
 
 fun myStatupdateFanMode(equipRef: String, fanMode: Int) {
-    CcuLog.i(L.TAG_CCU_PUBNUB, "updateFanMode $fanMode")
+    CcuLog.i(TAG_CCU_PUBNUB, "updateFanMode $fanMode")
     val cache = FanModeCacheStorage.getMyStatFanModeCache()
     if (fanMode != 0  && (fanMode % 3 == 0 || isFanModeCurrentOccupied(fanMode)) ) {
         cache.saveFanModeInCache(equipRef, fanMode)
@@ -150,15 +152,15 @@ private fun writePointFromJson(configPoint: Point, msgObject: JsonObject, haySta
             hayStack.writeHisValById(configPoint.id, HSUtil.getPriorityVal(configPoint.id))
             return
         }
-        val durationDiff = returnDurationDiff(msgObject);
+        val durationDiff = returnDurationDiff(msgObject)
         hayStack.writePointLocal(configPoint.id, level, who, value.toDouble(), durationDiff)
         hayStack.writeHisValById(configPoint.id, value.toDouble())
         CcuLog.d(
-            L.TAG_CCU_PUBNUB,
+            TAG_CCU_PUBNUB,
             "MyStat: writePointFromJson - level: $level who: $who val: $value  durationDiff: $durationDiff"
         )
     } catch (e: Exception) {
-        CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to parse tuner value : " + msgObject + " ; " + e.message)
+        CcuLog.e(TAG_CCU_PUBNUB, "Failed to parse tuner value : " + msgObject + " ; " + e.message)
     }
 }
 

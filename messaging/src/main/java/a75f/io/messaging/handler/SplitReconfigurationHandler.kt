@@ -95,17 +95,18 @@ fun reconfigureHsSplitEquip(msgObject: JsonObject, configPoint: Point) {
 
     // Update fan/conditioning mode enums for Split Domain Equip
     val splitDomainEquip = getSplitDomainEquipByEquipRef(configPoint.equipRef)!!
-
-    config.apply {
-        val possibleConditioningMode = getHssProfileConditioningMode(this)
-        val possibleFanMode = getPossibleFanMode(splitDomainEquip)
-        modifyFanMode(possibleFanMode.ordinal, splitDomainEquip.fanOpMode)
-        modifyConditioningMode(
-            possibleConditioningMode.ordinal,
-            splitDomainEquip.conditioningMode,
-            allStandaloneProfileConditions
-        )
-        CcuLog.i(L.TAG_CCU_PUBNUB, "updated ConfigPoint for unit ventilator fan/cond mode")
+    if (configPoint.domainName != DomainName.fanOpMode && configPoint.domainName != DomainName.conditioningMode) {
+        config.apply {
+            val possibleConditioningMode = getHssProfileConditioningMode(this)
+            val possibleFanMode = getPossibleFanMode(splitDomainEquip)
+            modifyFanMode(possibleFanMode.ordinal, splitDomainEquip.fanOpMode)
+            modifyConditioningMode(
+                possibleConditioningMode.ordinal,
+                splitDomainEquip.conditioningMode,
+                allStandaloneProfileConditions
+            )
+            CcuLog.i(L.TAG_CCU_PUBNUB, "updated ConfigPoint for unit ventilator fan/cond mode")
+        }
     }
     CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for Unit ventilator Reconfiguration $config")
 }

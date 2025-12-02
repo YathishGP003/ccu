@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/custom_spinner_softedge"
+    android:elevation="6dp"
+    android:padding="8dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/editSearch"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@color/transparent"
+            android:drawableStart="@drawable/search_24"
+            android:drawablePadding="8dp"
+            android:fontFamily="@font/lato_regular"
+            android:hint="Search"
+            android:imeOptions="actionDone"
+            android:minWidth="90dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textColor="@color/input_textcolor"
+            android:textSize="19.5dp" />
+
+        <View
+            android:id="@+id/searchDivider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/editSearch"
+            android:layout_marginStart="40dp"
+            android:alpha="0.3"
+            android:background="@color/hint_color" />
+    </RelativeLayout>
+
+
+    <ListView
+        android:id="@+id/listCountries"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:fontFamily="@font/lato_regular"
+        android:dividerHeight="0dp"
+        android:divider="?android:attr/listDivider"
+        />
+</LinearLayout>

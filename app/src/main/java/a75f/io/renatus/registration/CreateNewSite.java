@@ -18,6 +18,8 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.UTC_OFFSET;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.getDayLightSavingStatus;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.getUtcOffset;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.sendBroadCast;
+import static a75f.io.logic.bo.util.CCUUtils.isRecommendedVersionCheckIsNotFalse;
+import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
 
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
@@ -29,22 +31,27 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Patterns;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,6 +62,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.joda.time.DateTimeZone;
 import org.json.JSONException;
@@ -70,6 +79,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -129,7 +140,7 @@ public class CreateNewSite extends Fragment {
     EditText mSiteState;
 
     TextInputLayout mTextInputCountry;
-    EditText mSiteCountry;
+    TextView mSiteCountry;
 
     TextInputLayout mTextInputZip;
     EditText mSiteZip;
@@ -164,6 +175,8 @@ public class CreateNewSite extends Fragment {
     Prefs prefs;
     private boolean isFreshRegister;
 
+    List<CountryItem> countryList = new ArrayList<>();
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -197,7 +210,6 @@ public class CreateNewSite extends Fragment {
                 updateCCUFragment.checkIsCCUHasRecommendedVersion(requireActivity(), getParentFragmentManager(), toastLayout, getContext(), requireActivity());
             }
         }
-
         mContext = getContext().getApplicationContext();
         isFreshRegister = getActivity() instanceof FreshRegistration;
 
@@ -258,6 +270,17 @@ public class CreateNewSite extends Fragment {
             enableViews(false);
         }
         populateAndUpdateTimeZone();
+
+        if (site.isEmpty()) {
+            countryList.clear();
+            loadCountries(true, () -> {
+                View popupView = inflater.inflate(R.layout.popup_country_dropdown, null);
+                populateCountryDropDown(popupView, mSiteCountry);
+            });
+        } else {
+            View popupView = inflater.inflate(R.layout.popup_country_dropdown, null);
+            populateCountryDropDown(popupView, mSiteCountry);
+        }
 
         mSiteName.setHint(getHTMLCodeForHints(R.string.input_sitename));
         mStreetAdd.setHint(getHTMLCodeForHints(R.string.input_streetadd));
@@ -339,6 +362,10 @@ public class CreateNewSite extends Fragment {
         });
 
         mNext.setOnClickListener(v -> {
+            if(mSiteCountry.getText().toString().isEmpty()){
+                Toast.makeText(requireContext(), "please select country.", Toast.LENGTH_SHORT).show();
+                return;
+            }
             mNext.setEnabled(false);
             int[] mandatoryIds = new int[]
                     {
@@ -346,7 +373,6 @@ public class CreateNewSite extends Fragment {
                             R.id.editStreetAdd,
                             R.id.editCity,
                             R.id.editState,
-                            R.id.editCountry,
                             R.id.editZip,
                             R.id.editCCU,
                             R.id.editFacilityEmail,
@@ -360,6 +386,7 @@ public class CreateNewSite extends Fragment {
                     && Patterns.EMAIL_ADDRESS.matcher(mSiteBillingAdminEmailId.getText().toString()).matches()
                     && !CCUUiUtil.isInvalidName(mSiteName.getText().toString()) && !CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())
                     && CCUUiUtil.isValidOrgName(mSiteOrg.getText().toString())
+                    && !mSiteCountry.getText().toString().isEmpty()
             ) {
                 CcuLog.i("UI_PROFILING","Add Site Begin");
                 ProgressDialogUtils.showProgressDialog(getActivity(),requireContext().getString(R.string.adding_new_site_progress_dialog));
@@ -445,6 +472,16 @@ public class CreateNewSite extends Fragment {
         });
 
         View.OnClickListener editSiteOnClickListener = v -> {
+            if(mSiteCountry.getText().toString().isEmpty()){
+                Toast.makeText(requireContext(), "please select country.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            countryList.clear();
+            loadCountries(true, () -> {
+                View popupView = inflater.inflate(R.layout.popup_country_dropdown, null);
+                populateCountryDropDown(popupView, mSiteCountry);
+            });
+
             if (btnEditSite.getText().toString().equals(getResources().getString(R.string.title_edit))) {
                 enableViews(true);
                 btnEditSite.setText(getResources().getString(R.string.title_save));
@@ -455,7 +492,6 @@ public class CreateNewSite extends Fragment {
                                 R.id.editStreetAdd,
                                 R.id.editCity,
                                 R.id.editState,
-                                R.id.editCountry,
                                 R.id.editZip,
                                 R.id.editCCU,
                                 R.id.editFacilityEmail,
@@ -467,6 +503,7 @@ public class CreateNewSite extends Fragment {
                         && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()
                         && Patterns.EMAIL_ADDRESS.matcher(mSiteBillingAdminEmailId.getText().toString()).matches()
                         && !CCUUiUtil.isInvalidName(mSiteName.getText().toString()) && !CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())
+                        && !mSiteCountry.getText().toString().isEmpty()
                 ) {
 
                     String siteName = mSiteName.getText().toString().trim();
@@ -1217,5 +1254,91 @@ public class CreateNewSite extends Fragment {
         }
         L.ccu().systemProfile = new DefaultSystem().createDefaultSystemEquip();
         CcuLog.d(TAG, "RegisterCcuToExistingSite postSiteCreationSetup() complete");
+    }
+
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private void loadCountries(boolean shouldFetch, CountryCallback callback) {
+
+        Context context = requireActivity();
+        ProgressDialogUtils.showProgressDialog(context, "loading countries...");
+        executor.execute(() -> {
+            ArrayList<CountryItem> list =
+                    CountryCacheManager.Companion.getCountries(context, shouldFetch);
+            mainHandler.post(() -> {
+                ProgressDialogUtils.hideProgressDialog();
+                countryList.addAll(list);
+                callback.onResult();
+            });
+        });
+    }
+
+    private void populateCountryDropDown(View popupView,
+                                         TextView textSelectedCountry) {
+        PopupWindow popupWindow = new PopupWindow(
+                popupView,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                true
+        );
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.setElevation(8);
+
+
+        EditText editSearch = popupView.findViewById(R.id.editSearch);
+        ListView listCountries = popupView.findViewById(R.id.listCountries);
+
+        textSelectedCountry.setOnClickListener(v -> {
+            editSearch.setText("");
+            if (!popupWindow.isShowing()) {
+                popupWindow.setWidth(textSelectedCountry.getWidth());
+
+                popupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
+                popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+                int[] location = new int[2];
+                v.getLocationOnScreen(location);
+                popupWindow.showAtLocation(
+                        v,
+                        Gravity.NO_GRAVITY,
+                        location[0],
+                        location[1] - popupWindow.getHeight()
+                );
+                editSearch.requestFocus();
+            } else {
+                popupWindow.dismiss();
+            }
+        });
+
+        ArrayList<CountryItem> filteredList = new ArrayList<>(countryList);
+        CountryAdapter adapter = new CountryAdapter(requireContext(), filteredList);
+        adapter.setSelectedCountry(textSelectedCountry.getText().toString());
+        listCountries.setAdapter(adapter);
+        listCountries.setDivider(null);
+        listCountries.setDividerHeight(0);
+
+        listCountries.post(() -> {
+            int selectedPos = adapter.getSelectedPosition();
+            if (selectedPos >= 0) {
+                listCountries.setSelectionFromTop(selectedPos, 0);
+            }
+        });
+
+        editSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapter.filter(s.toString());
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
+
+        listCountries.setOnItemClickListener((parent, view, position, id) -> {
+            CountryItem selected = adapter.getItem(position);
+            if (selected != null) {
+                textSelectedCountry.setText(selected.getLabel());
+                adapter.setSelectedCountry(selected.getLabel());
+            }
+            popupWindow.dismiss();
+        });
     }
 }

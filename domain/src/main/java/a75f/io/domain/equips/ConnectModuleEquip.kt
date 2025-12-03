@@ -341,4 +341,5 @@ class ConnectModuleEquip (equipRef : String) : DomainEquip(equipRef) {
     val systemPostPurgeFanSpeedTuner = Point(DomainName.systemPostPurgeFanSpeedTuner, equipRef)
     val oaoDamper = Point(DomainName.oaoDamper,equipRef)
     val compressorLoopOutput = Point(DomainName.compressorLoopOutput, equipRef)
+    val otaStatus = Point(DomainName.otaStatus, equipRef)
 }

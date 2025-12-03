@@ -427,8 +427,8 @@ private fun isCompressorActive(systemStages: ConditioningStages): Boolean {
  fun getAdvAhuConnectModule(
     nodeAddress: String,
     hayStack: CCUHsApi = CCUHsApi.getInstance()): HashMap<Any, Any> {
-    val connectModuleEquip = hayStack.readEntity("domainName == \"${ModelNames.dabAdvancedHybridAhuV2_connectModule}\" or domainName == \"${ModelNames.vavAdvancedHybridAhuV2_connectModule}\" " +
-            "and addr == \"$nodeAddress\"")
+    val connectModuleEquip = hayStack.readEntity("(domainName == \"${ModelNames.dabAdvancedHybridAhuV2_connectModule}\" or domainName == \"${ModelNames.vavAdvancedHybridAhuV2_connectModule}\" )" +
+            "and group == \"$nodeAddress\"")
     return connectModuleEquip
  }
 

@@ -115,8 +115,11 @@ private fun getRegister(rawMap: HashMap<Any, Any>): BacnetPoint {
 
     var incrementStep = ""
     var valueConstraints: ValueConstraint? = null
-    if (physicalPoint.incrementVal != null) {
-        incrementStep = physicalPoint.incrementVal
+    if ( physicalPoint.incrementVal != null ||
+        ( physicalPoint.tags.contains("incrementStep") && physicalPoint.tags["incrementStep"] != null
+                && physicalPoint.tags["incrementStep"].toString().isNotEmpty() ) ) {
+        incrementStep = if (physicalPoint.incrementVal != null ) physicalPoint.incrementVal
+                        else physicalPoint.tags["incrementStep"].toString()
         try {
             val min  = physicalPoint.minVal.toDouble()
             val max  = physicalPoint.maxVal.toDouble()

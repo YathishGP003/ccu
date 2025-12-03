@@ -22,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.util.function.Consumer
 
@@ -74,15 +75,16 @@ fun generateValuesForSpinner(
     maxValue: Double,
     step: Double
 ): MutableList<Pair<String, Int>> {
-    val arrayList: MutableList<Pair<String, Int>> = java.util.ArrayList()
+    val result = mutableListOf<Pair<String, Int>>()
+    var min = BigDecimal.valueOf(minValue)
+    val max = BigDecimal.valueOf(maxValue)
+    val increment = BigDecimal.valueOf(step)
     val df = DecimalFormat("#.##")
-    var value = minValue
-    while (value <= maxValue) {
-        val formattedValue = df.format(value)
-        arrayList.add(Pair(formattedValue, 0))
-        value += step
+    while (min <= max) {
+        result.add(Pair(df.format(min), 0))
+        min = min.add(increment)
     }
-    return arrayList
+    return result
 }
 
 fun fetchZoneDataForBacnet(
@@ -160,7 +162,7 @@ fun fetchZoneDataForBacnet(
                         generateValuesForSpinner(minValue.toDouble(), maxValue.toDouble(), step)
                     CcuLog.d(
                         Tags.BACNET,
-                        "For point id--> " + bacnetPoint.id + " MinValue: " + minValue + " MaxValue: " + maxValue + " Increment Value: " + step
+                        "For point id--> " + bacnetPoint.id + " MinValue: " + minValue + " MaxValue: " + maxValue + " Increment Value: " + step+"\n Spinner values: "+spinnerValues.toString()
                     )
                 } else {
                     CcuLog.d(

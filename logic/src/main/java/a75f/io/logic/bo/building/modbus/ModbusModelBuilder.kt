@@ -392,5 +392,5 @@ private fun getModelName(name: String,slaveId: String): String {
 
 fun getParentEquipMapBySlaveAndZone(slaveId: Int, roomRef: String): HashMap<Any, Any> {
     return CCUHsApi.getInstance()
-        .readEntity("equip and modbus and not equipRef and group == \"$slaveId\" and roomRef == \"$roomRef\"")
+        .readEntity("equip and modbus and not equipRef and group == \"$slaveId\" and ( roomRef == \"$roomRef\" or roomRef == \"@$roomRef\" )")
 }

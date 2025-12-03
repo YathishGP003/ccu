@@ -508,6 +508,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                 equipModel.value.version.value,
                 equipModel.value.port.value
             )
+            isNewModbusProfile = false
         } else {
             updateModbusProfile()
             if (!L.isModbusSlaveIdExists(equipModel.value.slaveId.value.toShort(), equipModel.value.port.value)) {
@@ -517,6 +518,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                 //formattedToastMessage("Port not updated", context)
             }
         }
+        getModbusConfiguration(profileType)
         PreferenceUtil.setSelectedProfileWithAhu("modbus")
     }
 
@@ -1783,11 +1785,11 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     fun getExternalProfileSelected(){
-        if(PreferenceUtil.getSelectedProfileWithAhu() == "bacnet"){
+        if(PreferenceUtil.getSelectedProfileWithAhu() == "bacnet" || iBacnetSystemProfileEnabled().size > 0){
             CcuLog.d(TAG_BACNET, "-configType changed to bacnet--8")
             configType.value = ConfigType.BACNET
             configTypeRadioOption.value = ConfigType.BACNET
-        }else if(PreferenceUtil.getSelectedProfileWithAhu() == "modbus"){
+        }else if(PreferenceUtil.getSelectedProfileWithAhu() == "modbus" || isModbusSystemProfileEnabled().size > 0){
             CcuLog.d(TAG_BACNET, "-configType changed to modbus--9")
             configType.value = ConfigType.MODBUS
             configTypeRadioOption.value = ConfigType.MODBUS

@@ -1171,7 +1171,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                 onDismissRequest = { expanded.value = false },
                 modifier = Modifier
                         .width(280.dp)
-                        .height(120.dp)
+                        .height(60.dp)
                         .background(Color.White)
                         .border(0.5.dp, Color.LightGray)
                         .shadow(1.dp, shape = RoundedCornerShape(2.dp))
@@ -1179,7 +1179,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
         ) {
             LazyColumn(modifier = Modifier
                     .width(280.dp)
-                    .height(120.dp)) {
+                    .height(60.dp)) {
 
                 itemsIndexed(configurationTypes) { index, s ->
                     DropdownMenuItem(onClick = {

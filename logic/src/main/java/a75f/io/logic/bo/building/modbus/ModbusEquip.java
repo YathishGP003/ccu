@@ -628,6 +628,10 @@ public class ModbusEquip {
 
     public void updateHaystackPoints(String equipRef, List<Parameter> configuredParams) {
         for (Parameter configParams : configuredParams) {
+               if (configParams.getLogicalId() == null || configParams.getLogicalId().isEmpty()) {
+                   CcuLog.e("Modbus", "UpdateHaystackPoints: Logical ID is null or empty for parameter " + configParams.getName());
+                   continue;
+               }
                 HDict pointRead = hayStack.readHDictById(configParams.getLogicalId());
             if(pointRead != null) {
                 Point logicalPoint = new Point.Builder().setHDict(pointRead).build();

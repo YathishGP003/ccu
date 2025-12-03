@@ -413,7 +413,7 @@ class HttpServer {
                     if(HZincReader(response).readGrid().numRows() == 0){
                         CcuLog.i(HTTP_SERVER, "pointWrite response is empty add min value at level 16: $response")
                         val entity: HashMap<Any, Any> = CCUHsApi.getInstance().readEntity("id == @$id")
-                        val minVal: Double = entity["minVal"].toString().toDouble()
+                        val minVal: Double = entity["minVal"]?.toString()?.toDoubleOrNull() ?: 0.0
                         response = createRowWithMinValue(minVal)
                     }
                     CcuLog.i(HTTP_SERVER, " response: $response<---")

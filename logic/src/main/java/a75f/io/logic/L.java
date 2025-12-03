@@ -423,6 +423,7 @@ public class L
         HashMap<Object, Object> equip = hsApi.readEntity("equip and group == \""+node+"\" and roomRef == \""+roomRef+"\"");
         if (equip.get("id") != null)
         {
+            CcuLog.d("CCU","equip to be deleted - Node address: "+node+", id: "+equip.get("id").toString());
             hsApi.deleteEntityTree(equip.get("id").toString());
             
             if(equip.containsKey(Tags.OAO) &&

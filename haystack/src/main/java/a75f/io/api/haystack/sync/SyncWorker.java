@@ -153,6 +153,7 @@ public class SyncWorker extends Worker {
     }
     
     public static boolean isSyncWorkInProgress() {
+        CcuLog.d(TAG, "isSyncWorkInProgress : "+isSyncWorkInProgress);
         return isSyncWorkInProgress;
     }
     private static boolean syncUnSyncedEntities(SyncStatusService syncStatusService) {

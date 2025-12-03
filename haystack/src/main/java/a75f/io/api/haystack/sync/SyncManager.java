@@ -1,6 +1,8 @@
 package a75f.io.api.haystack.sync;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -24,7 +26,7 @@ public class SyncManager {
     public static final long SYNC_SCHEDULE_INTERVAL_MILLIS = 30000;
 
     public static final String SYNC_WORK_TAG = "SYNC_WORK";
-    public static final String POINT_WRITE_WORK_TAG = "SYNC_WORK";
+    public static final String POINT_WRITE_WORK_TAG = "POINT_WRITE_SYNC_WORK";
 
     Timer     mSyncTimer     = new Timer();
     TimerTask mSyncTimerTask = null;
@@ -65,14 +67,7 @@ public class SyncManager {
             return;
         }
 
-        WorkManager.getInstance(CCUHsApi.getInstance()
-                    .getContext())
-                    .cancelUniqueWork(SYNC_WORK_TAG);
-
-        WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
-                        workPolicyKeep ? ExistingWorkPolicy.KEEP : ExistingWorkPolicy.REPLACE,
-                        getSyncWorkRequest())
-                .enqueue();
+        restartSync(workPolicyKeep);
     }
 
     public void syncPointArray() {
@@ -141,10 +136,9 @@ public class SyncManager {
     private OneTimeWorkRequest.Builder getSyncWorkRequestBuilder() {
         return new OneTimeWorkRequest.Builder(SyncWorker.class)
                    .setConstraints(getSyncConstraints())
-                   .setInitialDelay(5, TimeUnit.SECONDS)
                    .setBackoffCriteria(
                        BackoffPolicy.LINEAR,
-                       OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
+                       OneTimeWorkRequest.DEFAULT_BACKOFF_DELAY_MILLIS,
                        TimeUnit.MILLISECONDS)
                    .addTag(SYNC_WORK_TAG);
     }
@@ -191,5 +185,18 @@ public class SyncManager {
     public void syncNow() {
         CcuLog.d(TAG, "syncNow called on invoked on thread");
         ExecutorTask.executeBackground(() -> SyncWorker.performSyncWork(SyncStatusService.getInstance(appContext)));
+    }
+
+    public void restartSync(boolean workPolicyKeep) {
+        WorkManager wm = WorkManager.getInstance(appContext);
+        wm.cancelUniqueWork(SYNC_WORK_TAG);
+        new Handler(Looper.getMainLooper()).postDelayed(() ->
+                        wm.beginUniqueWork(
+                                SYNC_WORK_TAG,
+                                ExistingWorkPolicy.KEEP,
+                                getSyncWorkRequest()
+                        ).enqueue(),
+                500
+        );
     }
 }

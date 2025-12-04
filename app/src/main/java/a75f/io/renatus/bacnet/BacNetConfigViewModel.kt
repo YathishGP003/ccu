@@ -12,6 +12,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.system.BacnetMstpSubscribeCov
 import a75f.io.logic.bo.building.system.BacnetMstpSubscribeCovForAllDevices
 import a75f.io.logic.bo.building.system.BacnetMstpSubscribeCovRequest
+import a75f.io.logic.bo.building.system.BacnetObjectRef
 import a75f.io.logic.bo.building.system.BacnetReadRequestMultiple
 import a75f.io.logic.bo.building.system.BacnetWhoIsRequest
 import a75f.io.logic.bo.building.system.BroadCast
@@ -21,20 +22,19 @@ import a75f.io.logic.bo.building.system.PropertyReference
 import a75f.io.logic.bo.building.system.ReadRequestMultiple
 import a75f.io.logic.bo.building.system.RpmRequest
 import a75f.io.logic.bo.building.system.WhoIsRequest
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_DEVICE_ID
+import a75f.io.logic.util.bacnet.buildBacnetModel
+import a75f.io.renatus.BASE.FragmentCommonBundleArgs
+import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants
 import a75f.io.logic.bo.building.system.client.BaseResponse
 import a75f.io.logic.bo.building.system.client.CcuService
 import a75f.io.logic.bo.building.system.client.MultiReadResponse
+import a75f.io.logic.bo.building.system.client.ObjectIdentifierBacNetResp
 import a75f.io.logic.bo.building.system.client.RpResponseMultiReadItem
 import a75f.io.logic.bo.building.system.client.ServiceManager
 import a75f.io.logic.bo.building.system.client.WhoIsResponseItem
-import a75f.io.logic.util.bacnet.BacnetClientJob.isJobScheduled
-import a75f.io.logic.util.bacnet.BacnetClientJob.scheduleJob
-import a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_DEVICE_ID
-import a75f.io.logic.util.bacnet.buildBacnetModel
 import a75f.io.logic.util.bacnet.getDetailsFromObjectLayout
 import a75f.io.logic.util.bacnet.isValidMstpMacAddress
-import a75f.io.renatus.BASE.FragmentCommonBundleArgs
-import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
 import a75f.io.renatus.bacnet.models.BacnetDevice
@@ -42,6 +42,7 @@ import a75f.io.renatus.bacnet.models.BacnetModel
 import a75f.io.renatus.bacnet.models.BacnetPointState
 import a75f.io.renatus.bacnet.util.IP_CONFIGURATION
 import a75f.io.renatus.bacnet.util.MSTP_CONFIGURATION
+import a75f.io.renatus.bacnet.util.convertToSmartMapData
 import a75f.io.renatus.compose.ModelMetaData
 import a75f.io.renatus.compose.getModelListFromJson
 import a75f.io.renatus.modbus.util.BACNET_DEVICE_LIST_NOT_FOUND
@@ -87,8 +88,11 @@ import kotlinx.coroutines.withContext
 import okhttp3.internal.toImmutableList
 import java.net.ConnectException
 import java.net.SocketTimeoutException
-import java.util.concurrent.TimeUnit
 import kotlin.properties.Delegates
+import a75f.io.renatus.bacnet.util.objectListValueParser
+import com.google.gson.GsonBuilder
+
+var selectedDeviceObjects =  mutableListOf<BacnetObjectRef>()
 
 
 class BacNetConfigViewModel(application: Application) : AndroidViewModel(application) {
@@ -166,8 +170,11 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
             deviceId.value = item.deviceId
             destinationPort.value = item.devicePort
             destinationMacAddress.value = if(configurationType.value == IP_CONFIGURATION) item.deviceMacAddress?.let { macAddressToByteArray(it) } ?: ""
-                                          else item.deviceMacAddress?:""
+            else item.deviceMacAddress?:""
             dnet.value = item.deviceNetwork
+
+            //fetch object-list
+            fetchDeviceObjectList(item)
         }
     }
 
@@ -178,7 +185,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         return byteArray.joinToString(".") { (it.toInt() and 0xFF).toString() }
 
     }
-    
+
     fun configModelDefinition(context: Context) {
         this.context = context
 
@@ -403,11 +410,6 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                         setUpBacnetProfile()
                         if (configurationType.value == MSTP_CONFIGURATION) {
                             sendCovSubscription()
-                        } else {
-                            if (!isJobScheduled()) {
-                                CcuLog.d(TAG, "scheduling bacnet client job")
-                                scheduleJob("BACnetClientJob", 60, 45, TimeUnit.SECONDS)
-                            }
                         }
                         L.saveCCUState()
                         CCUHsApi.getInstance().setCcuReady()
@@ -429,7 +431,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-     fun sendCovSubscription() {
+    fun sendCovSubscription() {
 
         val destination = DestinationMultiRead(destinationIp.value, destinationPort.value, deviceId.value, dnet.value, destinationMacAddress.value)
 
@@ -497,18 +499,18 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         val groupId = L.generateBacnetNodeAddres()
         CcuLog.d(TAG, "setUpBacnetProfile node address $groupId")
 
-            bacnetProfile = BacnetProfile()
-            val deviceID = deviceId.value.ifEmpty { 0 }
-            val configParam = "deviceId:${deviceID},destinationIp:${destinationIp.value},destinationPort:${destinationPort.value},macAddress:${destinationMacAddress.value},deviceNetwork:${dnet.value}"
-            val modelConfig = "modelName:${modelName.value},modelId:${getModelIdByName(modelName.value)},version:${bacnetModel.value.version.value}"
-            bacnetProfile.addBacAppEquip(configParam, modelConfig, deviceID.toString(),
-                groupId.toString(), floorRef, zoneRef,
-                bacnetModel.value.equipDevice.value,
-                profileType,moduleLevel,bacnetModel.value.version.value,configurationType.value, destinationMacAddress.value, false)
+        bacnetProfile = BacnetProfile()
+        val deviceID = deviceId.value.ifEmpty { 0 }
+        val configParam = "deviceId:${deviceID},destinationIp:${destinationIp.value},destinationPort:${destinationPort.value},macAddress:${destinationMacAddress.value},deviceNetwork:${dnet.value}"
+        val modelConfig = "modelName:${modelName.value},modelId:${getModelIdByName(modelName.value)},version:${bacnetModel.value.version.value}"
+        bacnetProfile.addBacAppEquip(configParam, modelConfig, deviceID.toString(),
+            groupId.toString(), floorRef, zoneRef,
+            bacnetModel.value.equipDevice.value,
+            profileType,moduleLevel,bacnetModel.value.version.value,configurationType.value, destinationMacAddress.value, false)
 
-            L.ccu().zoneProfiles.add(bacnetProfile)
-            L.saveCCUState()
-            CcuLog.d(TAG, "setUpBacnetProfile completed")
+        L.ccu().zoneProfiles.add(bacnetProfile)
+        L.saveCCUState()
+        CcuLog.d(TAG, "setUpBacnetProfile completed")
     }
 
     //Todo will require in future
@@ -540,12 +542,12 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                 return
             }
         } else if (configurationType.value == MSTP_CONFIGURATION) {
-               if (destinationMacAddress.value.trim().isEmpty() || destinationMacAddress.value.trim() == "0") {
-                   CcuLog.d(TAG,"Mac Address is empty or invalid")
-                   return
-               } else {
+            if (destinationMacAddress.value.trim().isEmpty() || destinationMacAddress.value.trim() == "0") {
+                CcuLog.d(TAG,"Mac Address is empty or invalid")
+                return
+            } else {
                 destinationIp.value = destinationMacAddress.value.trim() + ".00.00.00"
-               }
+            }
 
         } else {
             showToastMessage("Please select configuration type")
@@ -588,8 +590,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
             CcuLog.d(TAG, "--deviceId-->${it.deviceId}<--deviceIp-->${it.deviceIp}<--deviceName-->${it.deviceName}<--deviceMacAddress-->${it.deviceMacAddress}<--deviceNetwork-->${it.deviceNetwork}")
             var destinationMacAddress = ""
             if(it.deviceMacAddress != null && it.deviceMacAddress.trim().isNotEmpty()){
-                destinationMacAddress = if(configurationType.value == IP_CONFIGURATION) macAddressToByteArray(it.deviceMacAddress)
-                                         else it.deviceMacAddress
+                destinationMacAddress = macAddressToByteArray(it.deviceMacAddress)
             }
             service = if(configurationType.value == MSTP_CONFIGURATION) {
                 ServiceManager.makeCcuServiceForMSTP()
@@ -670,7 +671,8 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    private fun sendRequestMultipleReadDeviceName(rpmRequest: BacnetReadRequestMultiple) {
+    private fun
+            sendRequestMultipleReadDeviceName(rpmRequest: BacnetReadRequestMultiple) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response = service.multiread(rpmRequest)
@@ -683,7 +685,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                         if (readResponse != null && readResponse.rpResponse.listOfItems.size > 0) {
                             try {
                                 val objectInstance = readResponse.rpResponse.listOfItems[0].objectIdentifier.objectInstance
-                                val deviceName = readResponse.rpResponse.listOfItems[0].results[0].propertyValue.value
+                                val deviceName = readResponse.rpResponse.listOfItems[0].results[0].propertyValue.value.toString()
                                 CcuLog.d(TAG, "deviceName->${deviceName} ---->objectInstance<--$objectInstance")
                                 updateDeviceNameOnUi(deviceName, objectInstance)
                             }catch (e : Exception){
@@ -745,17 +747,25 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun populateBacnetDevices(whoIsResponseList: MutableList<WhoIsResponseItem>) {
-        val list = whoIsResponseList
-            .map { BacnetDevice(it.deviceIdentifier, it.ipAddress, it.networkNumber, it.vendorIdentifier, it.portNumber, it.macAddress) }
-            .distinctBy { it.deviceId to it.deviceMacAddress }
-            .toMutableList()
-
+        val list = mutableListOf<BacnetDevice>()
+        whoIsResponseList.forEach { item ->
+            list.add(
+                BacnetDevice(
+                    item.deviceIdentifier,
+                    item.ipAddress,
+                    item.networkNumber,
+                    item.vendorIdentifier,
+                    item.portNumber,
+                    item.macAddress
+                )
+            )
+        }
         connectedDevices = mutableStateOf(emptyList())
         connectedDevices.value = list
 
         if (list.isEmpty()) {
             ProgressDialogUtils.hideProgressDialog()
-            Toast.makeText(context, context.getString(R.string.no_devices_found), Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "No devices found", Toast.LENGTH_SHORT).show()
         }
 
         fetchDeviceNames()
@@ -772,7 +782,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         try {
             val broadCastValue = "global"
 
-           val srcDeviceID = PreferenceManager.getDefaultSharedPreferences(context).getInt(PREF_MSTP_DEVICE_ID,0).toString()
+            val srcDeviceID = PreferenceManager.getDefaultSharedPreferences(context).getInt(PREF_MSTP_DEVICE_ID,0).toString()
             val bacnetWhoIsRequest = if(configurationType.value == IP_CONFIGURATION) {
                 BacnetWhoIsRequest(
                     WhoIsRequest(
@@ -821,7 +831,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                                 isConnectedDevicesSearchFinished.value = true
                             }else{
                                 CcuLog.d(TAG, "no devices found")
-                                showToastMessage(context.getString(R.string.no_devices_found))
+                                showToastMessage("No devices found check configuration and initialize bacnet again")
                             }
                         }
                     } else {
@@ -920,7 +930,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
             point.bacnetProperties?.forEach { bacnetProperty ->
                 val key = "${point.protocolData?.bacnet?.objectId}-${BacNetConstants.ObjectType.valueOf("OBJECT_"+point.protocolData?.bacnet?.objectType).value}-${bacnetProperty.id}"
                 bacnetProperty.fetchedValue =
-                    bacNetItemsMap[key]?.results?.get(0)?.propertyValue?.value ?: "-"
+                    bacNetItemsMap[key]?.results?.get(0)?.propertyValue?.value.toString() ?: "-"
                 CcuLog.d(TAG, "Fetching key is -->$key and value is -->${bacNetItemsMap[key]} and fetched value is ${bacnetProperty.fetchedValue} and default value is ${bacnetProperty.defaultValue}")
                 if(bacnetProperty.defaultValue != bacnetProperty.fetchedValue && !isChangeInProperty){
                     point.displayInEditor.value = true
@@ -1033,7 +1043,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
             val keyFromPoint = "${point.id}-${point.protocolData?.bacnet?.objectId}"
             val keyFromUpdate = "${pointId}-${objectId}"
             if (keyFromPoint == keyFromUpdate) {
-            //if (point.id == pointId) {
+                //if (point.id == pointId) {
                 val updatedProperties = point.bacnetProperties.map { bacnetProp ->
                     if (bacnetProp.id == bacnetProperty.value.id) {
                         bacnetProp.copy(selectedValue = i)
@@ -1081,7 +1091,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         if(getSelectedBacNetModel() != null && moduleLevel!="system" && (bacnetModel.value.isDevicePaired == false || bacnetModel.value.isDevicePaired == true) && modelName.value.equals(getSelectedBacNetModel(),true)){
             enablePasteConfiguration()
         }
-      else{
+        else{
             disablePasteConfiguration()
         }
     }
@@ -1104,6 +1114,207 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                 CcuLog.d(TAG, "update SchedulableEnable State --${bacnetPoint.id}--${item.id} value== $b")
                 bacnetPoint.isSchedulable  = b
             }
+    }
+
+
+    fun fetchDeviceObjectList(device: BacnetDevice) {
+        service = if (configurationType.value == MSTP_CONFIGURATION) {
+            ServiceManager.makeCcuServiceForMSTP()
+        } else {
+            ServiceManager.makeCcuService()
+        }
+
+        // Build Destination
+        val macDotBytes = device.deviceMacAddress?.let { macAddressToByteArray(it) } ?: ""
+        val destination = DestinationMultiRead(
+            device.deviceIp,
+            device.devicePort,
+            device.deviceId,
+            device.deviceNetwork,
+            if (configurationType.value == IP_CONFIGURATION) macDotBytes else (device.deviceMacAddress ?: "")
+        )
+
+        // Build ReadAccess
+        val deviceObjectIdentifier = getDetailsFromObjectLayout("DEVICE", device.deviceId)
+        val objectListProp = mutableListOf(
+            PropertyReference(BacNetConstants.PropertyType.PROP_OBJECT_LIST.value, -1) // 76
+        )
+        val readSpec = mutableListOf(
+            ReadRequestMultiple(deviceObjectIdentifier, objectListProp)
+        )
+
+        val rpmRequest = BacnetReadRequestMultiple(destination, RpmRequest(readSpec))
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                CcuLog.d(TAG, "Fetching object-list for deviceId: ${device.deviceId} at IP: ${device.deviceIp}")
+                val response = service.multiread(rpmRequest)
+                //print response
+                CcuLog.d(TAG, "object-list raw response -> $response")
+                val resp = BaseResponse(response)
+                CcuLog.d(TAG, "object-list base response -> $resp")
+                if (response.isSuccessful) {
+                    val body = resp.data?.body()
+                    CcuLog.d(TAG, "object-list response -> $body")
+                    withContext(Dispatchers.Main) {
+                        parseAndStoreObjectList(body,destination)
+                    }
+
+                } else {
+                    CcuLog.d(TAG, "--error--${resp.error}")
+                }
+            } catch (e: SocketTimeoutException) {
+                showToastMessage("SocketTimeoutException")
+            } catch (e: ConnectException) {
+                showToastMessage("ConnectException")
+            } catch (e: Exception) {
+                CcuLog.d(TAG, "--connection time out--${e.message}")
+                showToastMessage("connection time out")
+            }
+        }
+    }
+
+    private fun parseAndStoreObjectList(readResponse: MultiReadResponse?,destination : DestinationMultiRead) {
+        CcuLog.d(TAG, "Parsing object-list from response Started!!!")
+        if (readResponse?.rpResponse == null) {
+            bacnetRequestFailed.value = true
+            return
+        }
+
+        var result = mutableListOf<BacnetObjectRef>()
+
+        try {
+
+            readResponse.rpResponse.listOfItems.forEach { item ->
+                item.results.forEach { res ->
+                    val isObjectList =
+                        res.propertyIdentifier == BacNetConstants.PropertyType.PROP_OBJECT_LIST.value.toString() ||
+                                res.propertyIdentifier == "76"
+
+                    if (isObjectList) {
+                        val raw = res.propertyValue.value.toString()
+                        result = objectListValueParser(raw)
+                    }
+                }
+            }
+
+        } catch (e: Exception) {
+            CcuLog.d(TAG, "Error parsing object-list: ${e.message}")
+            bacnetRequestFailed.value = true
+            return
+        }
+
+        selectedDeviceObjects = result
+        CcuLog.d(TAG, "Discovered ${result.size} objects: $result")
+        fetchAndAutoMapSelectedObjects(result,destination)
+    }
+
+
+    private fun fetchAndAutoMapSelectedObjects(selectedDeviceObjects: List<BacnetObjectRef>,destination: DestinationMultiRead) {
+        CcuLog.d(TAG, "fetchAndAutoMapSelectedObjects started for ${selectedDeviceObjects.size} objects")
+
+        fun isAnalog(t: String) = t in listOf("AI","AO","AV","0","1","2")
+        fun isBinary(t: String) = t in listOf("BI","BO","BV","3","4","5")
+        fun isMultiState(t: String) = t in listOf("MSI","MSO","MSV","13","14","19")
+        fun isDevice(t: String) = t in listOf("DEVICE","8")
+
+        // Property constants
+        val propObjectName = BacNetConstants.PropertyType.valueOf("PROP_OBJECT_NAME").value
+        val propType = BacNetConstants.PropertyType.valueOf("PROP_OBJECT_TYPE").value
+        val propPresentValue = BacNetConstants.PropertyType.valueOf("PROP_PRESENT_VALUE").value
+        val propUnits = BacNetConstants.PropertyType.valueOf("PROP_UNITS").value
+        val propMinPresValue = BacNetConstants.PropertyType.valueOf("PROP_MIN_PRES_VALUE").value
+        val propMaxPresValue = BacNetConstants.PropertyType.valueOf("PROP_MAX_PRES_VALUE").value
+        val propStateText = BacNetConstants.PropertyType.valueOf("PROP_STATE_TEXT").value
+        val propVendorName = BacNetConstants.PropertyType.valueOf("PROP_VENDOR_NAME").value
+        val propVendorId = BacNetConstants.PropertyType.valueOf("PROP_VENDOR_IDENTIFIER").value
+        val propModelName = BacNetConstants.PropertyType.valueOf("PROP_MODEL_NAME").value
+        val propDescription = BacNetConstants.PropertyType.valueOf("PROP_DESCRIPTION").value
+
+
+        // Build the RPM ReadAccessSpecification
+        val readSpecs = mutableListOf<ReadRequestMultiple>()
+
+        selectedDeviceObjects.forEach { ref ->
+            val objTypeStr = ref.objectType.toInt()
+            val objInstStr = ref.objectInstance
+
+            //  helper builds ObjectIdentifier
+            val objectIdentifier = ObjectIdentifierBacNet(objTypeStr, objInstStr)
+
+            val props = mutableListOf<PropertyReference>().apply {
+
+                when {
+                    isAnalog(objTypeStr.toString()) -> {
+                        add(PropertyReference(propType, -1))
+                        add(PropertyReference(propPresentValue, -1))
+                        add(PropertyReference(propMinPresValue, -1))
+                        add(PropertyReference(propMaxPresValue, -1))
+                        add(PropertyReference(propUnits, -1))
+                        add(PropertyReference(propDescription, -1))
+                    }
+                    isMultiState(objTypeStr.toString()) -> {
+                        add(PropertyReference(propType, -1))
+                        add(PropertyReference(propPresentValue, -1))
+                        add(PropertyReference(propStateText, -1))
+                        add(PropertyReference(propDescription, -1))
+                    }
+                    isBinary(objTypeStr.toString()) -> {
+                        add(PropertyReference(propType, -1))
+                        add(PropertyReference(propPresentValue, -1))
+                        add(PropertyReference(propDescription, -1))
+                    }
+                    isDevice(objTypeStr.toString()) -> {
+                        add(PropertyReference(propVendorName,-1))
+                        add(PropertyReference(propVendorId,-1))
+                        add(PropertyReference(propModelName,-1))
+                        add(PropertyReference(propObjectName, -1))
+                    }
+                    else -> {
+                        // Safe defaults presentValue
+                        add(PropertyReference(propPresentValue, -1))
+                    }
+                }
+            }
+
+            readSpecs += ReadRequestMultiple(objectIdentifier, props)
+        }
+
+        val rpmRequest = RpmRequest(readSpecs)
+        val rpmEnvelope = BacnetReadRequestMultiple(destination, rpmRequest)
+
+        // Hit RPM and parse
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val rpmResp = service.multiread(rpmEnvelope)
+                val base = BaseResponse(rpmResp)
+                if (!rpmResp.isSuccessful) {
+                    CcuLog.d(TAG, "RPM failed: ${base.error}")
+                    showToastMessage("RPM failed: ${base.error}")
+                    return@launch
+                }
+
+                CcuLog.d(TAG, "RPM json body: $rpmResp")
+
+                CcuLog.d(TAG, "RPM body: $base")
+                val body = base.data?.body()
+                if (body?.rpResponse == null) {
+                    showToastMessage("Empty RPM response")
+                    return@launch
+                }
+                val bacnetData = convertToSmartMapData(body)
+                CcuLog.d(TAG, "Converted Automap format : $bacnetData")
+
+                val gson: Gson = GsonBuilder().setPrettyPrinting().create()
+                val jsonOutput = gson.toJson(bacnetData)
+
+                CcuLog.d(TAG, jsonOutput)
+
+            } catch (e: Exception) {
+                CcuLog.d(TAG, "Exception in auto-map flow: ${e.message}")
+                showToastMessage("Exception in auto-map flow: ${e.message}")
+            }
+        }
     }
 
     fun clearConfigFieldData() {

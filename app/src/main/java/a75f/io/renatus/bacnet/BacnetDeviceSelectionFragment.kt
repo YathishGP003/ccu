@@ -4,9 +4,6 @@ import a75f.io.renatus.R
 import a75f.io.renatus.bacnet.models.BacnetDevice
 import a75f.io.renatus.composables.VerticalScrollbar
 import a75f.io.renatus.compose.ComposeUtil
-import a75f.io.renatus.compose.ComposeUtil.Companion.greyColor
-import a75f.io.renatus.compose.ComposeUtil.Companion.greyDropDownScrollBarColor
-import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.modbus.util.DEVICE_ID
 import a75f.io.renatus.modbus.util.DEVICE_IP
 import a75f.io.renatus.modbus.util.DEVICE_MAC_ADDRESS
@@ -19,54 +16,43 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
+import android.view.WindowManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.DialogFragment
-import java.lang.Float.max
 
 class BacnetDeviceSelectionFragment : DialogFragment() {
 
@@ -107,7 +93,6 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
     @Composable
     fun ShowOptions(
         items: List<BacnetDevice>
@@ -121,74 +106,99 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
                 it.deviceId.contains(searchText, ignoreCase = true)
             }
         }
-        FlowRow(modifier = Modifier.padding(20.dp)) {
-            Row {
-                TextField(
-                    value = searchText,
-                    onValueChange = { searchText = it },
-                    placeholder = { Text(placeholder) },
-                    singleLine = true,
-                    colors = TextFieldDefaults.textFieldColors(
-                        focusedIndicatorColor = primaryColor,
-                        unfocusedIndicatorColor = greyColor,
-                        containerColor = Color.White
 
-                    ),
-                    modifier = Modifier
-                        .width(900.dp)
-                        .background(Color.Red),
-
-                    textStyle = TextStyle(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(24.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Select Device",
+                    style = TextStyle(
                         fontFamily = ComposeUtil.myFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 22.sp,
                         color = Color.Black
                     )
                 )
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .clickable(onClick = { dialog!!.dismiss() }),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_baseline_close_24),
-                        contentDescription = "Custom Icon",
-                        modifier = Modifier.size(32.dp)
+
+                Spacer(modifier = Modifier.width(24.dp))
+
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search",
+                    tint = Color.DarkGray,
+                    modifier = Modifier.size(24.dp)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Box(modifier = Modifier.weight(1f)) {
+                    if (searchText.isEmpty()) {
+                        Text(
+                            text = "Search for Device",
+                            color = Color.Gray,
+                            fontSize = 18.sp,
+                            fontFamily = ComposeUtil.myFontFamily
+                        )
+                    }
+                    BasicTextField(
+                        value = searchText,
+                        onValueChange = { searchText = it },
+                        textStyle = TextStyle(
+                            fontSize = 18.sp,
+                            color = Color.Black,
+                            fontFamily = ComposeUtil.myFontFamily
+                        ),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
+
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_baseline_close_24),
+                    contentDescription = "Close",
+                    tint = Color(0xFFFF6600), // Orange
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clickable { dialog!!.dismiss() }
+                )
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Divider(color = Color.LightGray, thickness = 1.dp)
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight()
-                    .padding(top = 20.dp)
+                    .weight(1f)
             ) {
-
                 LazyColumn(
                     state = listState,
-                    contentPadding = PaddingValues(bottom = 40.dp)
+                    contentPadding = PaddingValues(bottom = 20.dp)
                 ) {
                     if (isMstpView) {
-                        item {
-                            MstpDeviceListItemHeader()
-                        }
+                        item { MstpDeviceListItemHeader() }
                         items(filteredItems.size) { index ->
                             MstpDeviceListItem(
                                 device = filteredItems[index],
-                                isEven = index % 2 == 0, index
+                                isEven = index % 2 == 0,
+                                index = index
                             )
                         }
                     } else {
-                        item {
-                            DeviceListItemHeader()
-                        }
+                        item { DeviceListItemHeader() }
                         items(filteredItems.size) { index ->
                             DeviceListItem(
                                 device = filteredItems[index],
-                                isEven = index % 2 == 0, index
+                                isEven = index % 2 == 0,
+                                index = index
                             )
                         }
                     }
@@ -197,12 +207,11 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
                         .fillMaxHeight()
-                        .width(10.dp)
-                        .padding(2.dp),
+                        .width(6.dp)
+                        .padding(vertical = 4.dp),
                     listState = listState
                 )
             }
-
         }
     }
 
@@ -212,77 +221,84 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        if (dialog != null)
-            dialog!!.window!!.setLayout(1200, 700)
+        dialog?.window?.apply {
+            setLayout(1200, 700)
+            addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            setDimAmount(0.5f)
+        }
     }
-
 
     @Composable
     fun DeviceListItem(device: BacnetDevice, isEven: Boolean, index: Int) {
         val backgroundColor = if (isEven) Color(0xFFF9F9F9) else Color.White
         Row(
             modifier = Modifier
-                //.padding(16.dp)
                 .fillMaxWidth()
                 .background(backgroundColor)
                 .clickable(onClick = {
                     onItemSelect.onItemSelected(index, device)
                     dismiss()
-                }),
+                })
+                .padding(vertical = 12.dp, horizontal = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "${device.deviceId}",
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(16.dp),
+                modifier = Modifier.weight(0.7f).padding(start = 16.dp),
+                textAlign = TextAlign.Start,
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = Color.Black
                 )
             )
             Text(
                 text = "${device.deviceIp}/${device.devicePort}",
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(16.dp),
+                modifier = Modifier.weight(1.5f).padding(start = 16.dp),
+                textAlign = TextAlign.Start,
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = Color.Black
                 )
             )
             Text(
                 text = "${device.deviceNetwork}",
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(16.dp),
+                modifier = Modifier.weight(0.8f).padding(start = 16.dp),
+                textAlign = TextAlign.Start,
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = Color.Black
                 )
             )
             Text(
                 text = "${device.deviceName}",
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(16.dp),
+                modifier = Modifier.weight(2f).padding(start = 16.dp),
+                textAlign = TextAlign.Start,
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = Color.Black
                 ),
             )
+
+            Box(
+                modifier = Modifier.width(30.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_arrow_right),
+                    contentDescription = "Navigate",
+                    tint = Color(0xFFFF6600),
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 
@@ -290,63 +306,57 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
     fun DeviceListItemHeader() {
         Row(
             modifier = Modifier
-                //.padding(16.dp)
                 .fillMaxWidth()
-                .background(Color(0xFFEBECED)),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .background(Color(0xFFEBECED))
+                .padding(vertical = 12.dp, horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = DEVICE_ID,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(16.dp),
+                modifier = Modifier.weight(0.7f).padding(start = 16.dp),
+                textAlign = TextAlign.Start,
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = Color.Black
                 )
             )
             Text(
                 text = DEVICE_IP,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(16.dp),
+                modifier = Modifier.weight(1.5f).padding(start = 16.dp),
+                textAlign = TextAlign.Start,
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = Color.Black
                 )
             )
             Text(
                 text = DEVICE_NETWORK,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(16.dp),
+                modifier = Modifier.weight(0.8f).padding(start = 16.dp),
+                textAlign = TextAlign.Start,
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = Color.Black
                 )
             )
             Text(
                 text = DEVICE_NAME,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(16.dp),
+                modifier = Modifier.weight(2f).padding(start = 16.dp),
+                textAlign = TextAlign.Start,
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = Color.Black
                 ),
             )
+            Spacer(modifier = Modifier.width(30.dp))
         }
     }
 
@@ -355,55 +365,61 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
         val backgroundColor = if (isEven) Color(0xFFF9F9F9) else Color.White
         Row(
             modifier = Modifier
-                //.padding(16.dp)
                 .fillMaxWidth()
                 .background(backgroundColor)
                 .clickable(onClick = {
                     onItemSelect.onItemSelected(index, device)
                     dismiss()
-                }),
+                })
+                .padding(vertical = 12.dp, horizontal = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "${device.deviceId}",
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(16.dp),
+                modifier = Modifier.weight(0.8f).padding(start = 16.dp),
+                textAlign = TextAlign.Start,
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 22.sp,
+                    fontSize = 18.sp,
                     color = Color.Black
                 )
             )
             Text(
                 text = "${device.deviceMacAddress}",
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(16.dp),
+                modifier = Modifier.weight(1.5f).padding(start = 16.dp),
+                textAlign = TextAlign.Start,
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 22.sp,
+                    fontSize = 18.sp,
                     color = Color.Black
                 )
             )
 
             Text(
                 text = "${device.deviceName}",
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(16.dp),
+                modifier = Modifier.weight(2f).padding(start = 16.dp),
+                textAlign = TextAlign.Start,
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 22.sp,
+                    fontSize = 18.sp,
                     color = Color.Black
                 ),
             )
+            Box(
+                modifier = Modifier.width(30.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_arrow_right),
+                    contentDescription = "Navigate",
+                    tint = Color(0xFFFF6600), // Orange
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 
@@ -411,52 +427,46 @@ class BacnetDeviceSelectionFragment : DialogFragment() {
     fun MstpDeviceListItemHeader() {
         Row(
             modifier = Modifier
-                //.padding(16.dp)
                 .fillMaxWidth()
                 .background(Color(0xFFEBECED)),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = DEVICE_ID,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(16.dp),
+                modifier = Modifier.weight(0.8f).padding(vertical = 12.dp, horizontal = 8.dp).padding(start = 16.dp),
+                textAlign = TextAlign.Start,
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = Color.Black
                 )
             )
             Text(
                 text = DEVICE_MAC_ADDRESS,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(16.dp),
+                modifier = Modifier.weight(1.5f).padding(start = 16.dp),
+                textAlign = TextAlign.Start,
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = Color.Black
                 )
             )
 
             Text(
                 text = DEVICE_NAME,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(16.dp),
+                modifier = Modifier.weight(2f).padding(start = 16.dp),
+                textAlign = TextAlign.Start,
                 style = TextStyle(
                     fontFamily = ComposeUtil.myFontFamily,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = Color.Black
                 ),
             )
+            Spacer(modifier = Modifier.width(30.dp))
         }
     }
 }
-

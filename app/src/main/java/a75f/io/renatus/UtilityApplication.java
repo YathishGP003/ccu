@@ -6,7 +6,6 @@ import static a75f.io.api.haystack.Constants.TWENTY_FOUR_HOURS;
 import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
 import static a75f.io.logic.util.PreferenceUtil.getSyncStartTime;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
-import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_START;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.ETHERNET;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_ADDRESS;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
@@ -18,6 +17,7 @@ import static a75f.io.renatus.util.CCUUiUtil.UpdateAppRestartCause;
 
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.cancelScheduleJobToResubscribeBacnetMstpCOV;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.scheduleJobToResubscribeBacnetMstpCOV;
+import static a75f.io.util.UtilKt.triggerRebirth;
 
 import android.app.Application;
 import android.content.Context;
@@ -87,7 +87,6 @@ import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.util.bacnet.BacnetUtility;
-import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.messaging.MessageHandlerSubscriber;
 import a75f.io.messaging.client.MessagingClient;
@@ -498,7 +497,7 @@ public abstract class UtilityApplication extends Application implements Globals.
                     //An exception here could lead to ANR, so catch it and let the app get relaunched.
                     e.printStackTrace();
                     CcuLog.e(L.TAG_CCU, "Exception while handling safe mode");
-                    RenatusApp.triggerRebirth(RenatusApp.getAppContext());
+                    triggerRebirth(RenatusApp.getAppContext());
                 }
             });
         }

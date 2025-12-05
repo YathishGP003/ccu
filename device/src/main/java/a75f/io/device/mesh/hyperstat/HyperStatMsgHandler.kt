@@ -184,7 +184,10 @@ private fun updateConditioningMode(
         PossibleConditioningMode.BOTH -> true // anything is fine
     }
 
-    if (!isValidMode) {
+    if (!isValidMode ||
+        (mode.ordinal < HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_OFF.ordinal ||
+                mode.ordinal > HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_COOLING.ordinal)
+    ) {
         CcuLog.i(L.TAG_CCU_DEVICE, "Invalid selected $mode possibleMode $possibleMode Invalid conditioning mode ")
         return
     }

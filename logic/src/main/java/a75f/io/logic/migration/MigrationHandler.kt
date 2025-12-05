@@ -18,7 +18,6 @@ import a75f.io.domain.api.Domain.createDomainDevicePoint
 import a75f.io.domain.api.Domain.createDomainPoint
 import a75f.io.domain.api.Domain.writeValAtLevelByDomain
 import a75f.io.domain.api.DomainName
-import a75f.io.domain.api.DomainName.migrationVersion
 import a75f.io.domain.config.DefaultProfileConfiguration
 import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.config.ProfileConfiguration
@@ -4542,6 +4541,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         // Read all MyStat v1 requipment
         hayStack.readAllEntities(CommonQueries.MYSTAT_EQUIP).forEach { entity ->
             val myStatDevice = MyStatDevice(entity["id"].toString())
+            if(myStatDevice.mystatDeviceVersion.readPointMap().isEmpty()) {
+                CcuLog.d("TAG_CCU_MIGRATION_UTIL", "Skipping MyStat Equip: ${entity["id"]} as deviceVersion point is missing")
+                return@forEach
+            }
             val isV1 = myStatDevice.mystatDeviceVersion.readPointValue().toInt() == 0
             CcuLog.d("TAG_CCU_MIGRATION_UTIL", "Updating AO and relay ports for MyStat Equip: ${entity["id"]} isV1 device : $isV1  deviceVersion: ${myStatDevice.mystatDeviceVersion.readPointValue()}")
             if (!isV1) return@forEach

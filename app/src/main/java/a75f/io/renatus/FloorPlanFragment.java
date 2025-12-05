@@ -644,7 +644,7 @@ public class FloorPlanFragment extends Fragment {
                 for (Floor floor : siteFloorList) {
                     if (floor.getDisplayName().equals(addFloorEdit.getText().toString().trim())) {
                         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
-                        adb.setMessage(getString(R.string.floor_name_should_have_less_chars) + floorToRename.getDisplayName() + getString(R.string.to_string) + hsFloor.getDisplayName() + "?");
+                        adb.setMessage(getString(R.string.floor_name_already_exists) + floorToRename.getDisplayName() + getString(R.string.to_string) + hsFloor.getDisplayName() + "?");
                         adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
                             if (!CCUHsApi.getInstance().isEntityExisting(floor.getId())) {
                                 hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor,

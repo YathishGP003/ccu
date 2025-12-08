@@ -71,6 +71,7 @@ import org.json.JSONObject;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
+import org.projecthaystack.HTimeZone;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.io.HZincReader;
 
@@ -1074,10 +1075,18 @@ public class CreateNewSite extends Fragment {
     public String saveSite(String siteName, String siteCity, String siteZip, String geoAddress,
                            String siteState, String siteCountry, String org, String installer,
                            String fcManager, String billingAdminEmail) {
+
         String tzID = mTimeZoneSelector.getSelectedItem().toString();
 
         AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         am.setTimeZone(tzID);
+        String[] tzIds = TimeZone.getAvailableIDs();
+               for (String timeZone : tzIds) {
+                   if (timeZone.contains(tzID)) {
+                       DateTimeZone.setDefault(DateTimeZone.forTimeZone(TimeZone.getTimeZone(timeZone)));
+                   }
+               }
+        HTimeZone.handleTimeZoneChange();
 
         Site s75f = new Site.Builder()
                 .setDisplayName(siteName)
@@ -1157,6 +1166,7 @@ public class CreateNewSite extends Fragment {
         ccuHsApi.updateSite(s75f, siteId);
         CcuLog.d(TAG, "Update Site curTz "+curTz+" newTz "+s75f.getTz());
         if (!curTz.equals(s75f.getTz())) {
+            HTimeZone.handleTimeZoneChange();
             CCUHsApi.getInstance().updateTimeZone(s75f.getTz());
             String[] tzIds = TimeZone.getAvailableIDs();
             for (String timeZone : tzIds) {

@@ -23,6 +23,7 @@ import a75f.io.logger.CcuLog;
  */
 public final class HTimeZone
 {
+  private static HTimeZone def;
   /** Convenience for make(name, true) */
   public static HTimeZone make(String name) { return make(name, true); }
 
@@ -174,7 +175,7 @@ public final class HTimeZone
   public static final HTimeZone REL;
 
   /** Default timezone for VM */
-  public static final HTimeZone DEFAULT;
+  public static HTimeZone DEFAULT;
 
   static
   {
@@ -198,7 +199,7 @@ public final class HTimeZone
       e.printStackTrace();
     }
 
-    HTimeZone def = null;
+    def = null;
     try
     {
       // check if configured with system property
@@ -226,9 +227,23 @@ public final class HTimeZone
       e.printStackTrace();
       def = utc;
     }
-
     DEFAULT = def;
     UTC = utc;
     REL = rel;
+  }
+
+  public static void handleTimeZoneChange(){
+    try {
+      if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
+        def = HTimeZone.make(TimeZone.getDefault());
+      } else {
+        def = HTimeZone.make(TimeZone.getTimeZone("UTC"));
+        CcuLog.w("CCU_HTimeZone", "Default is : " + def.name);
+      }
+    }catch (Exception e){
+      e.printStackTrace();
+    }
+
+    DEFAULT = def;
   }
 }

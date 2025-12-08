@@ -186,8 +186,7 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/rl_pcn_equipment"
-                    android:visibility="gone">
+                    android:id="@+id/rl_pcn_equipment">
 
                 <LinearLayout
                     android:layout_width="wrap_content"

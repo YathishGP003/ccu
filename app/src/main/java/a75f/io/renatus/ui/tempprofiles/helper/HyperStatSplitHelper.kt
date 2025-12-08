@@ -3,10 +3,10 @@ package a75f.io.renatus.ui.tempprofiles.helper
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Schedule
 import a75f.io.domain.api.Domain
-import a75f.io.domain.equips.HyperStatSplitEquip
-import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
-import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
-import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
+import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
+import a75f.io.domain.equips.hyperstatsplit.HsSplitCpuEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe2UVEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe4UVEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -484,7 +484,7 @@ class HyperStatSplitHelper(
 
     private fun getVacationSchedule(): HeaderViewItem {
         val zoneId = Schedule.getZoneIdByEquipId(equip.getId())
-        val specialScheduleStatus = ScheduleManager.getInstance().getVacationStateString(zoneId);
+        val specialScheduleStatus = ScheduleManager.getInstance().getVacationStateString(zoneId)
 
         return HeaderViewItem(
             id = "vacationSchedule",

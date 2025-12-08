@@ -2,11 +2,7 @@ package a75f.io.renatus.profiles.hss.unitventilator.viewstate
 
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UVConfiguration
 import a75f.io.renatus.profiles.hss.HyperStatSplitState
-import a75f.io.renatus.profiles.hss.configMisc
-import a75f.io.renatus.profiles.hss.configRelay
-import a75f.io.renatus.profiles.hss.configSensorAddress
-import a75f.io.renatus.profiles.hss.configUniversalIn
-import a75f.io.renatus.profiles.hss.updateHyperStatSplitConfigFromState
+import a75f.io.renatus.profiles.viewstates.updateConfigFromState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -89,7 +85,7 @@ class Pipe4UvViewState : HyperStatSplitState() {
     }
 
     fun updateConfigFromViewState (config: Pipe4UVConfiguration) {
-        return updateHyperStatSplitConfigFromState(config, this@Pipe4UvViewState).apply {
+        updateConfigFromState(config, this@Pipe4UvViewState).apply {
             updateDynamicPoints(config,this@Pipe4UvViewState)
             updateGenericConfigState(config,this@Pipe4UvViewState)
 

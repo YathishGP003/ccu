@@ -38,6 +38,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getMyStatAnalogOutputPoints
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatLogicalPointList
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatRelayOutputPoints
+import a75f.io.logic.bo.building.statprofiles.util.isFanGoodRun
 import a75f.io.logic.bo.building.statprofiles.util.isMyStatHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMyStatLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isSupplyOppositeToConditioning
@@ -149,7 +150,9 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         evaluateLoopOutputs(userIntents, basicSettings, myStatTuners, config, equip)
         updateOccupancyDetection(equip)
 
-        doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip, equip.analogOutStages, equip.relayStages)
+        doorWindowSensorOpenStatus = runForDoorWindowSensor(
+            equip
+        )
         runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(userIntents)
         supplyWaterTempTh2 = equip.leavingWaterTemperature.readHisVal()
         isWaterValveActiveDueToLoop = false
@@ -179,7 +182,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         equip.equipStatus.writeHisVal(curState.ordinal.toDouble())
         logIt(
             "Fan speed multiplier:  ${myStatTuners.analogFanSpeedMultiplier} " +
-                    "AuxHeating1Activate: ${myStatTuners.auxHeating1Activate} " +
+                    "AuxHeating1Activate: ${myStatTuners.myStatAuxHeating1Activate} " +
                     "waterValveSamplingOnTime: ${myStatTuners.waterValveSamplingOnTime}  waterValveSamplingWaitTime : ${myStatTuners.waterValveSamplingWaitTime} \n" +
                     "waterValveSamplingDuringLoopDeadbandOnTime: ${myStatTuners.waterValveSamplingDuringLoopDeadbandOnTime}  waterValveSamplingDuringLoopDeadbandWaitTime : ${myStatTuners.waterValveSamplingDuringLoopDeadbandWaitTime} \n" +
                     "Current Occupancy: ${Occupancy.values()[equip.occupancyMode.readHisVal().toInt()]} \n" +
@@ -312,7 +315,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
                         else -> false
                     }
                 }
-                val isFanGoodToRun = isFanGoodRun(doorWindowSensorOpenStatus, equip)
+                val isFanGoodToRun = isFanGoodRun(doorWindowSensorOpenStatus, equip, heatingLoopOutput, coolingLoopOutput, fanLowVentilationAvailable)
 
                 fun isStageActive(
                     stage: Int, currentState: Boolean, isLowestStageActive: Boolean
@@ -365,18 +368,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         }
     }
 
-    private fun isFanGoodRun(isDoorWindowOpen: Boolean, equip: MyStatPipe2Equip): Boolean {
-        return if (fanLowVentilationAvailable.readHisVal() > 0) true
-        else if (isDoorWindowOpen || heatingLoopOutput > 0) {
-            // If current direction is heating then check allow only when valve or heating is available
-            (isConfigPresent(MyStatPipe2RelayMapping.WATER_VALVE) || equip.modulatingWaterValve.pointExists()
-                    || isConfigPresent(MyStatPipe2RelayMapping.AUX_HEATING_STAGE1))
-        } else if (isDoorWindowOpen || coolingLoopOutput > 0) {
-            (isConfigPresent(MyStatPipe2RelayMapping.WATER_VALVE) || equip.modulatingWaterValve.pointExists())
-        } else {
-            false
-        }
-    }
+
 
     private fun waterValveLoop(userIntents: UserIntents): Int {
         val supplyWaterTempTh2AboveHeating = supplyWaterTempTh2 > heatingThreshold
@@ -450,8 +442,8 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
 
                     MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION -> {
                         doAnalogDCVAction(
-                            port, analogOutStages, config.co2Threshold.currentVal,
-                            config.co2DamperOpeningRate.currentVal, equip
+                            port, analogOutStages, config.zoneCO2Threshold.currentVal,
+                            config.zoneCO2DamperOpeningRate.currentVal, equip
                         )
                     }
 
@@ -464,7 +456,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
                             basicSettings.conditioningMode,
                             fanLoopOutput,
                             analogOutStages,
-                            isFanGoodRun(doorWindowSensorOpenStatus, equip)
+                            isFanGoodRun(doorWindowSensorOpenStatus, equip, heatingLoopOutput, coolingLoopOutput, fanLowVentilationAvailable)
                         )
                     }
 
@@ -510,6 +502,7 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
     ) {
         if (basicSettings.fanMode == MyStatFanStages.AUTO) {
             resetFanIfRequired(equip, basicSettings)
+
             if (isAux1Exists() && aux1Active(equip)) {
                 resetFan(equip.relayStages, equip.analogOutStages, basicSettings)
                 val isRelayActive = operateAuxBasedOnFan(equip)
@@ -774,10 +767,6 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         } else {
             "Cooling"
         }
-    }
-    
-    override fun isDoorOpenState(config: MyStatConfiguration, equip: MyStatEquip): Boolean {
-        return (equip.doorWindowSensorInput.readHisVal() == 1.0)
     }
 
     override fun <T : BaseProfileConfiguration?> getProfileConfiguration(address: Short): T {

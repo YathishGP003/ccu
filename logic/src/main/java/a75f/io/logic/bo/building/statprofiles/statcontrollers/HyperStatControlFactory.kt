@@ -1,9 +1,10 @@
 package a75f.io.logic.bo.building.statprofiles.statcontrollers
 
 import a75f.io.domain.api.Point
-import a75f.io.domain.equips.hyperstat.HpuV2Equip
+import a75f.io.domain.equips.hyperstat.HsHpuEquip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
-import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
+import a75f.io.domain.equips.hyperstat.HsPipe2Equip
+import a75f.io.domain.equips.hyperstat.HsPipe4Equip
 import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZoneProfile
@@ -11,6 +12,7 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfigurat
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HyperStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe4Configuration
 import a75f.io.logic.bo.building.statprofiles.util.StagesCounts
 import a75f.io.logic.controlcomponents.controls.ControllerFactory
 import a75f.io.logic.controlcomponents.handlers.StageControlHandler
@@ -26,10 +28,10 @@ class HyperStatControlFactory(
 ) {
     private val controllerFactory = ControllerFactory()
 
-    fun addHsCpuControllers(config: CpuConfiguration) {
+    fun addHsCpuControllers(config: CpuConfiguration, fanLowVentilation: CalibratedPoint) {
         addCoolingController(config)
         addHeatingControllers(config)
-        addFanSpeedControllers(config, L.TAG_CCU_HSCPU)
+        addFanSpeedControllers(config, L.TAG_CCU_HSCPU,derivedFanLoopOutput, fanLowVentilation)
         addFanEnableIfRequired(L.TAG_CCU_HSCPU)
         addOccupiedEnabledIfRequired(L.TAG_CCU_HSCPU)
         addHumidifierIfRequired(L.TAG_CCU_HSCPU)
@@ -37,16 +39,12 @@ class HyperStatControlFactory(
         addDcvDamperIfRequired(L.TAG_CCU_HSCPU)
     }
 
-    fun addHpuControllers(config: HpuConfiguration) {
-        val hpuEquip = equip as HpuV2Equip
+    fun addHpuControllers(config: HpuConfiguration, fanLowVentilation: CalibratedPoint) {
+        val hpuEquip = equip as HsHpuEquip
         addCompressorControllers(config)
-        addFanSpeedControllers(config, L.TAG_CCU_HSHPU)
-        addAuxStage1Controller(
-            L.TAG_CCU_HSHPU, hpuEquip.auxHeatingStage1, hpuEquip.auxHeating1Activate
-        )
-        addAuxStage2Controller(
-            L.TAG_CCU_HSHPU, hpuEquip.auxHeatingStage2, hpuEquip.auxHeating2Activate
-        )
+        addFanSpeedControllers(config, L.TAG_CCU_HSHPU, equip.fanLoopOutput, fanLowVentilation)
+        addAuxStage1Controller(L.TAG_CCU_HSHPU, hpuEquip.auxHeatingStage1, hpuEquip.auxHeating1Activate)
+        addAuxStage2Controller(L.TAG_CCU_HSHPU, hpuEquip.auxHeatingStage2, hpuEquip.auxHeating2Activate)
         addChangeOverCoolingIfRequired()
         addChangeOverHeatingIfRequired()
         addFanEnableIfRequired(L.TAG_CCU_HSHPU)
@@ -56,15 +54,11 @@ class HyperStatControlFactory(
         addDcvDamperIfRequired(L.TAG_CCU_HSHPU)
     }
 
-    fun addPipe2Controllers(config: Pipe2Configuration, waterValveLoop: CalibratedPoint) {
-        val pipe2Equip = equip as Pipe2V2Equip
-        addFanSpeedControllers(config, L.TAG_CCU_HSPIPE2)
-        addAuxStage1Controller(
-            L.TAG_CCU_HSPIPE2, pipe2Equip.auxHeatingStage1, pipe2Equip.auxHeating1Activate
-        )
-        addAuxStage2Controller(
-            L.TAG_CCU_HSPIPE2, pipe2Equip.auxHeatingStage2, pipe2Equip.auxHeating2Activate
-        )
+    fun addPipe2Controllers(config: Pipe2Configuration, waterValveLoop: CalibratedPoint, fanLowVentilation: CalibratedPoint) {
+        val pipe2Equip = equip as HsPipe2Equip
+        addFanSpeedControllers(config, L.TAG_CCU_HSPIPE2, pipe2Equip.fanLoopOutput, fanLowVentilation)
+        addAuxStage1Controller(L.TAG_CCU_HSPIPE2, pipe2Equip.auxHeatingStage1, pipe2Equip.auxHeating1Activate)
+        addAuxStage2Controller(L.TAG_CCU_HSPIPE2, pipe2Equip.auxHeatingStage2, pipe2Equip.auxHeating2Activate)
         addWaterValveControllerIfRequired(waterValveLoop)
         addFanEnableIfRequired(L.TAG_CCU_HSPIPE2)
         addOccupiedEnabledIfRequired(L.TAG_CCU_HSPIPE2)
@@ -72,6 +66,21 @@ class HyperStatControlFactory(
         addDehumidifierIfRequired(L.TAG_CCU_HSPIPE2)
         addDcvDamperIfRequired(L.TAG_CCU_HSPIPE2)
     }
+
+    fun addPipe4Controllers(config: HsPipe4Configuration, fanLowVentilation: CalibratedPoint) {
+        val pipe4Equip = equip as HsPipe4Equip
+        addFanSpeedControllers(config, L.TAG_CCU_HSPIPE4, pipe4Equip.fanLoopOutput, fanLowVentilation)
+        addAuxStage1Controller(L.TAG_CCU_HSPIPE4, pipe4Equip.auxHeatingStage1, pipe4Equip.auxHeating1Activate)
+        addAuxStage2Controller(L.TAG_CCU_HSPIPE4, pipe4Equip.auxHeatingStage2, pipe4Equip.auxHeating2Activate)
+        addCoolingValveController()
+        addHeatingValveController()
+        addFanEnableIfRequired(L.TAG_CCU_HSPIPE4)
+        addOccupiedEnabledIfRequired(L.TAG_CCU_HSPIPE4)
+        addHumidifierIfRequired(L.TAG_CCU_HSPIPE4)
+        addDehumidifierIfRequired(L.TAG_CCU_HSPIPE4)
+        addDcvDamperIfRequired(L.TAG_CCU_HSPIPE4)
+    }
+
 
     private fun addCoolingController(config: CpuConfiguration) {
         counts.coolingStages.data = config.getHighestCoolingStageCount().toDouble()
@@ -109,18 +118,20 @@ class HyperStatControlFactory(
         }
     }
 
-    private fun addFanSpeedControllers(config: HyperStatConfiguration, tag: String) {
+    private fun addFanSpeedControllers(config: HyperStatConfiguration, tag: String, loopOutput: Point, fanLowVentilation: CalibratedPoint) {
         counts.fanStages.data = config.getHighestFanStageCount().toDouble()
         if (counts.fanStages.data > 0) {
             controllerFactory.addStageController(
                 ControllerNames.FAN_SPEED_CONTROLLER,
                 controllers,
-                derivedFanLoopOutput,
+                loopOutput,
                 counts.fanStages,
                 equip.standaloneRelayActivationHysteresis,
                 stageDownTimer = equip.hyperstatStageDownTimerCounter,
                 stageUpTimer = equip.hyperstatStageUpTimerCounter,
-                logTag = tag
+                logTag = tag,
+                fanLowVentilation = fanLowVentilation,
+                occupancyPoint = zoneOccupancyState
             )
         } else {
             removeController(ControllerNames.FAN_SPEED_CONTROLLER)
@@ -133,7 +144,7 @@ class HyperStatControlFactory(
             controllerFactory.addStageController(
                 ControllerNames.COMPRESSOR_RELAY_CONTROLLER,
                 controllers,
-                loopOutput = (equip as HpuV2Equip).compressorLoopOutput,
+                loopOutput = (equip as HsHpuEquip).compressorLoopOutput,
                 activationHysteresis = equip.standaloneRelayActivationHysteresis,
                 totalStages = counts.compressorStages,
                 stageDownTimer = equip.hyperstatStageDownTimerCounter,
@@ -242,7 +253,7 @@ class HyperStatControlFactory(
     }
 
     private fun addChangeOverCoolingIfRequired() {
-        if ((equip as HpuV2Equip).changeOverCooling.pointExists()) {
+        if ((equip as HsHpuEquip).changeOverCooling.pointExists()) {
             controllerFactory.addChangeOverCoolingController(
                 controllers, equip.coolingLoopOutput, logTag = L.TAG_CCU_HSHPU
             )
@@ -252,7 +263,7 @@ class HyperStatControlFactory(
     }
 
     private fun addChangeOverHeatingIfRequired() {
-        if ((equip as HpuV2Equip).changeOverHeating.pointExists()) {
+        if ((equip as HsHpuEquip).changeOverHeating.pointExists()) {
             controllerFactory.addChangeOverHeatingController(
                 controllers, equip.heatingLoopOutput, logTag = L.TAG_CCU_HSHPU
             )
@@ -262,7 +273,7 @@ class HyperStatControlFactory(
     }
 
     private fun addWaterValveControllerIfRequired(waterValveLoop: CalibratedPoint) {
-        if ((equip as Pipe2V2Equip).waterValve.pointExists()) {
+        if ((equip as HsPipe2Equip).waterValve.pointExists()) {
             controllerFactory.addWaterValveController(
                 controllers,
                 waterValveLoop = waterValveLoop,
@@ -271,6 +282,33 @@ class HyperStatControlFactory(
             )
         } else {
             removeController(ControllerNames.WATER_VALVE_CONTROLLER)
+        }
+    }
+
+
+    private fun addCoolingValveController() {
+        if ((equip as HsPipe4Equip).chilledWaterCoolValve.pointExists()) {
+            controllerFactory.addCoolingValveController(
+                controllers,
+                equip.coolingLoopOutput,
+                logTag = L.TAG_CCU_MSPIPE4,
+                equip.standaloneRelayActivationHysteresis,
+            )
+        } else {
+            removeController(ControllerNames.COOLING_VALVE_CONTROLLER)
+        }
+    }
+
+    private fun addHeatingValveController() {
+        if ((equip as HsPipe4Equip).hotWaterHeatValve.pointExists()) {
+            controllerFactory.addHeatingValveController(
+                controllers,
+                equip.heatingLoopOutput,
+                logTag = L.TAG_CCU_MSPIPE4,
+                equip.standaloneRelayActivationHysteresis,
+            )
+        } else {
+            removeController(ControllerNames.HEATING_VALVE_CONTROLLER)
         }
     }
 

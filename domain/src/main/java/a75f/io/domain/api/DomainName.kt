@@ -1055,7 +1055,6 @@ object DomainName {
     const val outsideAirFinalLoopOutput = "outsideAirFinalLoopOutput"
 
     const val enableHumidityDisplay = "enableHumidityDisplay"
-    const val enableCO2Display = "enableCo2Display"
     const val enableVOCDisplay = "enableVocDisplay"
     const val enablePm25Display = "enablePm25Display"
 
@@ -1524,7 +1523,6 @@ object DomainName {
     const val doorWindowSensorNOTitle24 = "doorWindowSensorNOTitle24"
     const val doorWindowSensorNC = "doorWindowSensorNC"
     const val doorWindowSensor = "doorWindowSensor"
-    const val fanOutSaTempering = "fanOutSaTempering"
     const val universal1OutputEnable = "universal1OutputEnable"
     const val universal2OutputEnable = "universal2OutputEnable"
     const val saTemperingLoopOutput = "saTemperingLoopOutput"

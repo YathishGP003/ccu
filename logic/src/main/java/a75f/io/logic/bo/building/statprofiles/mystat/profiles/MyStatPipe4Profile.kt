@@ -28,8 +28,10 @@ import a75f.io.logic.bo.building.statprofiles.util.MyStatBasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
 import a75f.io.logic.bo.building.statprofiles.util.MyStatTuners
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
+import a75f.io.logic.bo.building.statprofiles.util.canWeDoConditioning
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoCooling
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoHeating
+import a75f.io.logic.bo.building.statprofiles.util.canWeRunFan
 import a75f.io.logic.bo.building.statprofiles.util.fetchMyStatBasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.fetchMyStatTuners
 import a75f.io.logic.bo.building.statprofiles.util.fetchUserIntents
@@ -156,7 +158,9 @@ class MyStatPipe4Profile : MyStatProfile(L.TAG_CCU_MSPIPE4) {
         evaluateLoopOutputs(userIntents, basicSettings, myStatTuners, config, equip)
         updateOccupancyDetection(equip)
 
-        doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip, equip.analogOutStages, equip.relayStages)
+        doorWindowSensorOpenStatus = runForDoorWindowSensor(
+            equip
+        )
         runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(userIntents)
         if (occupancyStatus == Occupancy.WINDOW_OPEN) resetLoopOutputs()
         fanLowVentilationAvailable.data = if (equip.fanLowSpeedVentilation.pointExists()) 1.0 else 0.0
@@ -171,12 +175,11 @@ class MyStatPipe4Profile : MyStatProfile(L.TAG_CCU_MSPIPE4) {
         heatingLoopOutput = equip.heatingLoopOutput.readHisVal().toInt()
         fanLoopOutput = equip.fanLoopOutput.readHisVal().toInt()
         dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
-        if (basicSettings.fanMode != MyStatFanStages.OFF) {
+        if (canWeRunFan(basicSettings) && canWeDoConditioning(basicSettings)) {
             operateRelays(
                 config as MyStatPipe4Configuration,
                 basicSettings,
                 equip,
-                userIntents,
                 controllerFactory
             )
             handleAnalogOutState(config, equip, basicSettings, equip.analogOutStages)
@@ -196,7 +199,7 @@ class MyStatPipe4Profile : MyStatProfile(L.TAG_CCU_MSPIPE4) {
         equip.equipStatus.writeHisVal(curState.ordinal.toDouble())
         logIt(
             "Fan speed multiplier:  ${myStatTuners.analogFanSpeedMultiplier} " +
-                    "AuxHeating1Activate: ${myStatTuners.auxHeating1Activate} " +
+                    "AuxHeating1Activate: ${myStatTuners.myStatAuxHeating1Activate} " +
                     "Current Occupancy: ${Occupancy.values()[equip.occupancyMode.readHisVal().toInt()]} \n" +
                     "Fan Mode : ${basicSettings.fanMode} Conditioning Mode ${basicSettings.conditioningMode} \n" +
                     "Current Temp : $currentTemp Desired (Heating: ${userIntents.heatingDesiredTemp}" +
@@ -280,8 +283,8 @@ class MyStatPipe4Profile : MyStatProfile(L.TAG_CCU_MSPIPE4) {
 
                     MyStatPipe4AnalogOutMapping.DCV_DAMPER_MODULATION -> {
                         doAnalogDCVAction(
-                            port, analogOutStages, config.co2Threshold.currentVal,
-                            config.co2DamperOpeningRate.currentVal, equip
+                            port, analogOutStages, config.zoneCO2Threshold.currentVal,
+                            config.zoneCO2DamperOpeningRate.currentVal, equip
                         )
                     }
 
@@ -299,7 +302,7 @@ class MyStatPipe4Profile : MyStatProfile(L.TAG_CCU_MSPIPE4) {
                     }
                     MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE -> {
                         doAnalogOperation(
-                            canWeDoCooling(basicSettings.conditioningMode),
+                            (canWeDoCooling(basicSettings.conditioningMode) && (basicSettings.fanMode != MyStatFanStages.OFF)),
                             analogOutStages,
                             StatusMsgKeys.COOLING.name,
                             coolingLoopOutput,
@@ -343,8 +346,6 @@ class MyStatPipe4Profile : MyStatProfile(L.TAG_CCU_MSPIPE4) {
 
 
     private fun resetAux(relayStages: HashMap<String, Int>) {
-        logIt( "Resetting Aux")
-        Thread.dumpStack()
         if (isConfigPresent(MyStatPipe4RelayMapping.AUX_HEATING_STAGE1)) {
             resetLogicalPoint(relayLogicalPoints[MyStatPipe4RelayMapping.AUX_HEATING_STAGE1.ordinal]!!)
         }
@@ -453,19 +454,14 @@ class MyStatPipe4Profile : MyStatProfile(L.TAG_CCU_MSPIPE4) {
 
     private fun operateRelays(
         config: MyStatPipe4Configuration, basicSettings: MyStatBasicSettings,
-        equip: MyStatPipe4Equip, userIntents: UserIntents,
-        controllerFactory: MyStatControlFactory
+        equip: MyStatPipe4Equip, controllerFactory: MyStatControlFactory
     ) {
-        controllerFactory.addPipe4Controllers(
-            config,
-            fanLowVentilationAvailable
-        )
-        runControllers(equip, basicSettings, config, userIntents)
+        controllerFactory.addPipe4Controllers(config, fanLowVentilationAvailable)
+        runControllers(equip, basicSettings)
     }
 
     private fun runControllers(
-        equip: MyStatPipe4Equip, basicSettings: MyStatBasicSettings,
-        config: MyStatPipe4Configuration, userIntents: UserIntents
+        equip: MyStatPipe4Equip, basicSettings: MyStatBasicSettings
     ) {
         zoneOccupancyState.data = occupancyStatus.ordinal.toDouble()
         controllers.forEach { (controllerName, value) ->
@@ -512,6 +508,9 @@ class MyStatPipe4Profile : MyStatProfile(L.TAG_CCU_MSPIPE4) {
             }
 
             ControllerNames.FAN_SPEED_CONTROLLER -> {
+
+                runTitle24Rule(equip)
+
                 fun checkUserIntentAction(stage: Int): Boolean {
                     val mode = equip.fanOpMode
                     return when (stage) {
@@ -565,8 +564,7 @@ class MyStatPipe4Profile : MyStatProfile(L.TAG_CCU_MSPIPE4) {
 
             ControllerNames.AUX_HEATING_STAGE1 -> {
                 var status = result as Boolean
-                if (basicSettings.conditioningMode != StandaloneConditioningMode.AUTO
-                    && basicSettings.conditioningMode != StandaloneConditioningMode.HEAT_ONLY) {
+                if (canWeDoHeating(basicSettings.conditioningMode).not()) {
                     status = false
                 }
                 updateStatus(equip.auxHeatingStage1, status, StatusMsgKeys.AUX_HEATING_STAGE1.name)

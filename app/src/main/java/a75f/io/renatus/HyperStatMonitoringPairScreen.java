@@ -16,12 +16,11 @@ import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
-import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
+import a75f.io.renatus.profiles.hyperstat.ui.HyperStatMonitoringFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;

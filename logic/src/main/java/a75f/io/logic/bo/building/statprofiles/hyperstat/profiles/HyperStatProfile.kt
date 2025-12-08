@@ -2,7 +2,7 @@ package a75f.io.logic.bo.building.statprofiles.hyperstat.profiles
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.DomainName
-import a75f.io.domain.equips.hyperstat.HpuV2Equip
+import a75f.io.domain.equips.hyperstat.HsHpuEquip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logger.CcuLog
@@ -10,18 +10,23 @@ import a75f.io.logic.bo.building.ZoneProfile
 import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.bo.building.definitions.Port
+import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.schedules.Occupancy
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe4AnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HyperStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.statcontrollers.HyperStatControlFactory
+import a75f.io.logic.bo.building.statprofiles.util.AuxActiveStages
 import a75f.io.logic.bo.building.statprofiles.util.BasicSettings
+import a75f.io.logic.bo.building.statprofiles.util.FanConfig
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.HyperStatProfileTuners
 import a75f.io.logic.bo.building.statprofiles.util.StagesCounts
 import a75f.io.logic.bo.building.statprofiles.util.StatLoopController
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
+import a75f.io.logic.bo.building.statprofiles.util.doorWindowIsOpen
 import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
@@ -60,12 +65,16 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
     var curState = ZoneState.DEADBAND
     val derivedFanLoopOutput = CalibratedPoint(DomainName.fanLoopOutput ,"",0.0)
     var zoneOccupancyState = CalibratedPoint(DomainName.zoneOccupancy, "", 0.0)
-
+    val fanLowVentilationAvailable: CalibratedPoint = CalibratedPoint("fanLowVentilation", "", 0.0)
     var logicalPointsList = HashMap<Port, String>()
     var occupancyStatus: Occupancy = Occupancy.NONE
 
+    var isAuxStage1Active = false
+    var isAuxStage2Active = false
+
     var doorWindowSensorOpenStatus = false
     var runFanLowDuringDoorWindow = false
+    private var isDoorOpenFromTitle24 = false
 
     var fanEnabledStatus = false
     var lowestStageFanLow = false
@@ -74,16 +83,34 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
 
     val loopController = StatLoopController()
 
-    fun evaluateCoolingLoop(userIntents: UserIntents) {
+    private fun evaluateCoolingLoop(userIntents: UserIntents) {
         coolingLoopOutput = loopController.calculateCoolingLoopOutput(
             currentTemp, userIntents.coolingDesiredTemp
         ).toInt().coerceAtLeast(0)
     }
 
-    fun evaluateHeatingLoop(userIntents: UserIntents) {
+    private fun evaluateHeatingLoop(userIntents: UserIntents) {
         heatingLoopOutput = loopController.calculateHeatingLoopOutput(
             userIntents.heatingDesiredTemp, currentTemp
         ).toInt().coerceAtLeast(0)
+    }
+
+    fun evaluateLoopOutputs(
+        userIntents: UserIntents,
+        basicSettings: BasicSettings,
+        hyperStatTuners: HyperStatProfileTuners,
+        config: HyperStatConfiguration,
+        equip: HyperStatEquip
+    ) {
+        resetLoopOutputs()
+
+        when (state) {
+            ZoneState.COOLING -> evaluateCoolingLoop(userIntents)
+            ZoneState.HEATING -> evaluateHeatingLoop(userIntents)
+            else -> logIt("Zone is in deadband")
+        }
+        evaluateFanOutput(basicSettings, hyperStatTuners)
+        evaluateDcvLoop(equip, config)
     }
 
     open fun evaluateFanOutput(
@@ -110,13 +137,13 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
         }
     }
 
-    fun evaluateDcvLoop(equip: HyperStatEquip, config: HyperStatConfiguration) {
+    private fun evaluateDcvLoop(equip: HyperStatEquip, config: HyperStatConfiguration) {
         val rawCo2 = equip.zoneCo2.readHisVal().toInt()
         val deltaCo2 = rawCo2 - config.zoneCO2Threshold.currentVal
         dcvLoopOutput = (deltaCo2 / config.zoneCO2DamperOpeningRate.currentVal).toInt().coerceIn(0, 100)
     }
 
-    fun resetFanLowestFanStatus() {
+    private fun resetFanLowestFanStatus() {
         lowestStageFanLow = false
         lowestStageFanMedium = false
         lowestStageFanHigh = false
@@ -223,23 +250,7 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
         }
     }
 
-    fun doorWindowIsOpen(
-        doorWindowEnabled: Double,
-        doorWindowSensor: Double,
-        equip: HyperStatEquip
-    ) {
-        equip.doorWindowSensingEnable.writePointValue(doorWindowEnabled)
-        equip.doorWindowSensorInput.writePointValue(doorWindowSensor)
-    }
 
-    fun keyCardIsInSlot(
-        keycardEnabled: Double,
-        keycardSensor: Double,
-        equip: HyperStatEquip
-    ) {
-        equip.keyCardSensingEnable.writePointValue(keycardEnabled)
-        equip.keyCardSensorInput.writePointValue(keycardSensor)
-    }
 
     fun updateLogicalPoint(pointId: String?, value: Double) {
         if (pointId != null) {
@@ -354,20 +365,134 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
             0, equip.heatingLoopOutput,
             0, equip.fanLoopOutput,
             0, equip.dcvLoopOutput,
-            (equip is HpuV2Equip), 0, if (equip is HpuV2Equip) equip.compressorLoopOutput else null,
+            (equip is HsHpuEquip), 0, if (equip is HsHpuEquip) equip.compressorLoopOutput else null,
         )
 
         coolingLoopOutput = equip.coolingLoopOutput.readHisVal().toInt()
         heatingLoopOutput = equip.heatingLoopOutput.readHisVal().toInt()
         fanLoopOutput = equip.fanLoopOutput.readHisVal().toInt()
         dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
-        if (equip is HpuV2Equip) {
+        if (equip is HsHpuEquip) {
             compressorLoopOutput = equip.compressorLoopOutput.readHisVal().toInt()
         }
 
         resetLogicalPoints(equip)
         resetEquip(equip)
         HyperStatUserIntentHandler.updateHyperStatStatus(ZoneTempState.TEMP_DEAD, equip, logTag)
+    }
+
+    fun runForDoorWindowSensor(equip: HyperStatEquip): Boolean {
+        val (isDoorWindowOpen, isDueToTitle24) = doorWindowIsOpen(equip)
+        isDoorOpenFromTitle24 = isDueToTitle24
+        doorWindowSensorOpenStatus =  (isDoorWindowOpen && occupancyStatus == Occupancy.WINDOW_OPEN)
+        logIt(" is Door Open ? $doorWindowSensorOpenStatus")
+        if (doorWindowSensorOpenStatus) {
+            if (occupancyStatus == Occupancy.WINDOW_OPEN) {
+                resetLoopOutputs()
+                resetLogicalPoints(equip)
+                equip.analogOutStages.clear()
+                equip.relayStages.clear()
+            }
+        }
+        return doorWindowSensorOpenStatus
+    }
+
+    fun checkFanOperationAllowedDoorWindow(userIntents: UserIntents): Boolean {
+        return if (currentTemp < userIntents.coolingDesiredTemp && currentTemp > userIntents.heatingDesiredTemp) {
+            doorWindowSensorOpenStatus && isDoorOpenFromTitle24 &&
+                    occupancyBeforeDoorWindow != Occupancy.UNOCCUPIED &&
+                    occupancyBeforeDoorWindow != Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
+                    occupancyBeforeDoorWindow != Occupancy.VACATION
+        } else {
+            doorWindowSensorOpenStatus && isDoorOpenFromTitle24
+        }
+    }
+
+
+    fun runTitle24Rule(equip: HyperStatEquip) {
+        resetFanLowestFanStatus()
+        fanEnabledStatus = equip.fanEnable.pointExists()
+        equip.apply {
+            if (fanLowSpeedVentilation.pointExists() || fanLowSpeed.pointExists()) lowestStageFanLow = true
+            else if (fanMediumSpeed.pointExists()) lowestStageFanMedium = true
+            else if (fanHighSpeed.pointExists()) lowestStageFanHigh = true
+        }
+    }
+
+    fun operateAuxBasedFan(equip: HyperStatEquip, basicSettings: BasicSettings): AuxActiveStages? {
+        if (basicSettings.fanMode == StandaloneFanStage.AUTO) {
+            val auxType = if (isAuxStage1Active && isAuxStage2Active) {
+                AuxActiveStages.BOTH
+            } else if (isAuxStage2Active) {
+                AuxActiveStages.AUX2
+            } else if (isAuxStage1Active) {
+                AuxActiveStages.AUX1
+            } else {
+                AuxActiveStages.NONE
+            }
+            if (auxType != AuxActiveStages.NONE) {
+                val sequenceMap = when (auxType) {
+                    AuxActiveStages.BOTH, AuxActiveStages.AUX2 -> mutableMapOf(
+                        equip.fanHighSpeed to Stage.FAN_3.displayName,
+                        equip.fanMediumSpeed to Stage.FAN_2.displayName,
+                        equip.fanLowSpeed to Stage.FAN_1.displayName,
+                        equip.fanLowSpeedVentilation to Stage.FAN_1.displayName,
+                        equip.fanEnable to StatusMsgKeys.FAN_ENABLED.name,
+                        equip.occupiedEnable to StatusMsgKeys.EQUIP_ON.name
+
+                    )
+
+                    AuxActiveStages.AUX1 -> mutableMapOf(
+                        equip.fanMediumSpeed to Stage.FAN_2.displayName,
+                        equip.fanHighSpeed to Stage.FAN_3.displayName,
+                        equip.fanLowSpeed to Stage.FAN_1.displayName,
+                        equip.fanLowSpeedVentilation to Stage.FAN_1.displayName,
+                        equip.fanEnable to StatusMsgKeys.FAN_ENABLED.name,
+                        equip.occupiedEnable to StatusMsgKeys.EQUIP_ON.name
+                    )
+
+                    else -> emptyMap()
+                }
+                // Before operating AUX based fan reset all points except fanEnable
+                sequenceMap.forEach { (point, statusMsg) ->
+                    if ((point.domainName != DomainName.fanEnable && point.domainName != DomainName.occupiedEnable) && point.pointExists()) {
+                        point.writeHisVal(0.0)
+                    }
+                    equip.relayStages.remove(statusMsg)
+                }
+                sequenceMap.forEach { (point, statusMsg) ->
+                    if (point.pointExists()) {
+                        point.writeHisVal(1.0)
+                        equip.relayStages[statusMsg] = 1
+                        logIt("Operating AUX based fan: ${point.domainName}")
+                        return auxType
+                    }
+                }
+            }
+        }
+        return null
+    }
+
+    fun runSpecifiedAnalogFanSpeed(
+        equip: HyperStatEquip, auxType: AuxActiveStages?,
+        mappings: List<Triple<Boolean, Int, Port>>,
+        minMax:HashMap<Port, FanConfig>) {
+        if (auxType != null) {
+
+            mappings.forEach { (enabled, association, port) ->
+                if (enabled && HsPipe4AnalogOutMapping.values()[association] == HsPipe4AnalogOutMapping.FAN_SPEED) {
+                    val voltage = minMax[port]!!
+                    val fanSignal = when (auxType) {
+                        AuxActiveStages.AUX2, AuxActiveStages.BOTH -> voltage.high.currentVal.toInt()
+                        AuxActiveStages.AUX1 -> voltage.medium.currentVal.toInt()
+                        else -> fanLoopOutput
+                    }
+                    if (fanSignal > 0) equip.analogOutStages[StatusMsgKeys.FAN_SPEED.name] =
+                        fanSignal
+                    equip.fanSignal.writeHisVal(fanSignal.toDouble())
+                }
+            }
+        }
     }
 
     fun resetEquip(equip: HyperStatEquip) {

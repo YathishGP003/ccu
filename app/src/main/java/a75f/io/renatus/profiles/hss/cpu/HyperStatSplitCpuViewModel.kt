@@ -3,7 +3,8 @@ package a75f.io.renatus.profiles.hss.cpu
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
-import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
+import a75f.io.domain.config.ProfileConfiguration
+import a75f.io.domain.equips.hyperstatsplit.HsSplitCpuEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder

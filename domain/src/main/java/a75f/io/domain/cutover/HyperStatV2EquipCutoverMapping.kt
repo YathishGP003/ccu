@@ -66,7 +66,7 @@ object HyperStatV2EquipCutoverMapping {
             "targetHumidifier" to DomainName.targetHumidifier,
             "targetDehumidifier" to DomainName.targetDehumidifier,
             "humidityDisplayEnabled" to DomainName.enableHumidityDisplay,
-            "co2DisplayEnabled" to DomainName.enableCO2Display,
+            "co2DisplayEnabled" to DomainName.enableCo2Display,
             "pm25DisplayEnabled" to DomainName.enablePm25Display,
             "heartBeat" to DomainName.heartBeat,
             "scheduleType" to DomainName.scheduleType,

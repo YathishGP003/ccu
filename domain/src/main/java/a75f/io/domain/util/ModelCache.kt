@@ -209,6 +209,7 @@ object ModelCache {
         modelContainer[MODEL_HYPERSTAT_CPU] = getModelById(MODEL_HYPERSTAT_CPU)
         modelContainer[MODEL_HYPERSTAT_PIPE2] = getModelById(MODEL_HYPERSTAT_PIPE2)
         modelContainer[MODEL_HYPERSTAT_HPU] = getModelById(MODEL_HYPERSTAT_HPU)
+        modelContainer[MODEL_HYPERSTAT_PIPE4] = getModelById(MODEL_HYPERSTAT_PIPE4)
 
         modelContainer[MODEL_MYSTAT_CPU] = getModelById(MODEL_MYSTAT_CPU)
         modelContainer[MODEL_MYSTAT_PIPE2] = getModelById(MODEL_MYSTAT_PIPE2)

@@ -162,6 +162,9 @@ object ModelLoader {
     fun getHyperStatPipe2Model() : ModelDirective {
         return ModelCache.getModelById(MODEL_HYPERSTAT_PIPE2)
     }
+    fun getHyperStatPipe4Model() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_PIPE4)
+    }
 
     fun getHyperStatMonitoringModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_HYPERSTAT_MONITORING)

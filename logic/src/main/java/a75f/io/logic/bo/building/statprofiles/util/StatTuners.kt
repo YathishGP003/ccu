@@ -33,8 +33,7 @@ data class HyperStatProfileTuners(
 data class MyStatTuners(
     var heatingThreshold: Double = 85.0, // (°F)
     var coolingThreshold: Double = 65.0, // (°F)
-    var auxHeating1Activate: Double = 3.0,      // (°F)
-    var auxHeating2Activate: Double = 4.0,      // (°F)
+    var myStatAuxHeating1Activate: Double = 3.0,      // (°F)
     var waterValveSamplingOnTime: Int = 2,   // min
     var waterValveSamplingWaitTime: Int = 3, // min
     var waterValveSamplingDuringLoopDeadbandOnTime: Int = 2,   // min

@@ -44,15 +44,18 @@ import a75f.io.logic.bo.building.sensors.SensorType
 import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.cpu.HyperStatCpuProfile
 import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.hpu.HyperStatHpuProfile
 import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.pipe2.HyperStatPipe2Profile
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.pipe4.HyperStatPipe4Profile
 
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe4Configuration
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
 import a75f.io.logic.bo.building.statprofiles.util.PossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.getCpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getHSPipe2FanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getHSPipe4FanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getHpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
@@ -120,16 +123,16 @@ private fun updateDesiredTemp(equip: HyperStatEquip, message: HyperStatLocalCont
     var heatingDesiredTemp = message.setTempHeating.toDouble() / 2
     when (temperatureMode.name) {
         TemperatureMode.COOLING.name -> {
-            coolingDesiredTemp = validatingCoolingDesiredTemp(coolingDesiredTemp,equip.roomRef.toString());
+            coolingDesiredTemp = validatingCoolingDesiredTemp(coolingDesiredTemp,equip.roomRef.toString())
             equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
         }
         TemperatureMode.HEATING.name -> {
-            heatingDesiredTemp = validatingHeatingDesiredTemp(heatingDesiredTemp,equip.roomRef.toString());
+            heatingDesiredTemp = validatingHeatingDesiredTemp(heatingDesiredTemp,equip.roomRef.toString())
             equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
         }
         else -> {
-            heatingDesiredTemp = validatingHeatingDesiredTemp(heatingDesiredTemp,equip.roomRef.toString());
-            coolingDesiredTemp = validatingCoolingDesiredTemp(coolingDesiredTemp,equip.roomRef.toString());
+            heatingDesiredTemp = validatingHeatingDesiredTemp(heatingDesiredTemp,equip.roomRef.toString())
+            coolingDesiredTemp = validatingCoolingDesiredTemp(coolingDesiredTemp,equip.roomRef.toString())
             equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
             equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
         }
@@ -164,6 +167,11 @@ private fun updateModes(equip: HyperStatEquip, message: HyperStatLocalControlsOv
         is HyperStatPipe2Profile -> {
             val configs = getHsConfiguration(equip.equipRef) as Pipe2Configuration
             possibleFanMode = getHsPossibleFanModeSettings(getHSPipe2FanLevel(configs))
+            possibleMode = getPossibleConditionMode(configs)
+        }
+        is HyperStatPipe4Profile -> {
+            val configs = getHsConfiguration(equip.equipRef) as HsPipe4Configuration
+            possibleFanMode = getHsPossibleFanModeSettings(getHSPipe4FanLevel(configs))
             possibleMode = getPossibleConditionMode(configs)
         }
     }
@@ -270,11 +278,12 @@ private fun updateThermistor(logicalPointId: String, value: Double, equipRef: St
     val logicalDomainName = logicalPoint[Tags.DOMAIN_NAME].toString()
     val logicalValue = when (logicalDomainName) {
         DomainName.doorWindowSensorNCTitle24, DomainName.genericAlarmNC,
-        DomainName.genericAlarmNC_th1, DomainName.genericAlarmNC_th2, DomainName.fanRunSensorNC -> {
+        DomainName.fanRunSensorNC, DomainName.doorWindowSensorNC, DomainName.keyCardSensorNC -> {
             if ((value * 10) >= 10000) 1.0 else 0.0
         }
 
-        DomainName.genericAlarmNO, DomainName.genericAlarmNO_th1, DomainName.genericAlarmNO_th2, DomainName.fanRunSensorNO -> {
+        DomainName.doorWindowSensorNOTitle24,DomainName.genericAlarmNO,
+        DomainName.fanRunSensorNO, DomainName.doorWindowSensorNO, DomainName.keyCardSensorNO  -> {
             if ((value * 10) <= 10000) 1.0 else 0.0
         }
         /*For Generic(1-100)kohms, CCU just need to convert kOhms*/
@@ -433,6 +442,9 @@ fun runProfileAlgo(nodeAddress: Short) {
 
         is HyperStatPipe2Profile -> {
             profile.processHyperStatPipeProfile(profile.getProfileDomainEquip(nodeAddress.toInt()))
+        }
+        is HyperStatPipe4Profile -> {
+            profile.processHyperStatPipe4Profile(profile.getProfileDomainEquip(nodeAddress.toInt()))
         }
     }
 }

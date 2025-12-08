@@ -3,10 +3,11 @@ package a75f.io.renatus.ui.tempprofiles.helper
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Schedule
 import a75f.io.domain.api.Domain
-import a75f.io.domain.equips.hyperstat.CpuV2Equip
-import a75f.io.domain.equips.hyperstat.HpuV2Equip
+import a75f.io.domain.equips.hyperstat.HsCpuEquip
+import a75f.io.domain.equips.hyperstat.HsHpuEquip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
-import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
+import a75f.io.domain.equips.hyperstat.HsPipe2Equip
+import a75f.io.domain.equips.hyperstat.HsPipe4Equip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -18,10 +19,12 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfigurat
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HyperStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Pipe2Configuration
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe4Configuration
 import a75f.io.logic.bo.building.statprofiles.util.HYPERSTAT
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
 import a75f.io.logic.bo.building.statprofiles.util.getCpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getHSPipe2FanLevel
+import a75f.io.logic.bo.building.statprofiles.util.getHSPipe4FanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getHSSelectedFanMode
 import a75f.io.logic.bo.building.statprofiles.util.getHpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
@@ -32,6 +35,7 @@ import a75f.io.renatus.R
 import a75f.io.renatus.profiles.mystat.CPU
 import a75f.io.renatus.profiles.mystat.HPU
 import a75f.io.renatus.profiles.mystat.PIPE2
+import a75f.io.renatus.profiles.mystat.PIPE4
 import a75f.io.renatus.ui.AUTO
 import a75f.io.renatus.ui.CONDITIONING_MODE
 import a75f.io.renatus.ui.COOL_ONLY
@@ -101,6 +105,9 @@ class HyperStatHelper(
             ProfileType.HYPERSTAT_TWO_PIPE_FCU -> {
                 HYPERSTAT + "-" + PIPE2.uppercase() + " ( " + equipMap.group + " )"
             }
+            ProfileType.HYPERSTAT_FOUR_PIPE_FCU -> {
+                HYPERSTAT + "-" + PIPE4.uppercase() + " ( " + equipMap.group + " )"
+            }
 
             else -> {
                 "No Profile Type Found"
@@ -150,13 +157,16 @@ class HyperStatHelper(
     private fun loadDetailedViewDefaultValues() {
         when (profileType) {
             ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT -> {
-                loadHyperStatDefaults(equip as CpuV2Equip)
+                loadHyperStatDefaults(equip as HsCpuEquip)
             }
             ProfileType.HYPERSTAT_HEAT_PUMP_UNIT -> {
-                loadHyperStatDefaults(equip as HpuV2Equip)
+                loadHyperStatDefaults(equip as HsHpuEquip)
             }
             ProfileType.HYPERSTAT_TWO_PIPE_FCU -> {
-                loadHyperStatDefaults(equip as Pipe2V2Equip)
+                loadHyperStatDefaults(equip as HsPipe2Equip)
+            }
+            ProfileType.HYPERSTAT_FOUR_PIPE_FCU -> {
+                loadHyperStatDefaults(equip as HsPipe4Equip)
             }
 
             else -> {}
@@ -172,22 +182,24 @@ class HyperStatHelper(
         val fanOpMode = getFanOpModeView()
         detailViewItems[fanOpMode.id.toString()] = fanOpMode
 
-        if ((equip as? CpuV2Equip)?.humidifierEnable?.pointExists() == true ||
-            (equip as? Pipe2V2Equip)?.humidifierEnable?.pointExists() == true ||
-            (equip as? HpuV2Equip)?.humidifierEnable?.pointExists() == true) {
+        if ((equip as? HsCpuEquip)?.humidifierEnable?.pointExists() == true ||
+            (equip as? HsPipe2Equip)?.humidifierEnable?.pointExists() == true ||
+            (equip as? HsPipe4Equip)?.humidifierEnable?.pointExists() == true ||
+            (equip as? HsHpuEquip)?.humidifierEnable?.pointExists() == true) {
             val humidifierView = getHumidifierView()
             detailViewItems[humidifierView.id.toString()] = humidifierView
         }
 
-        if ((equip as? CpuV2Equip)?.dehumidifierEnable?.pointExists() == true ||
-            (equip as? Pipe2V2Equip)?.dehumidifierEnable?.pointExists() == true ||
-            (equip as? HpuV2Equip)?.dehumidifierEnable?.pointExists() == true) {
+        if ((equip as? HsCpuEquip)?.dehumidifierEnable?.pointExists() == true ||
+            (equip as? HsPipe2Equip)?.dehumidifierEnable?.pointExists() == true ||
+            (equip as? HsPipe4Equip)?.dehumidifierEnable?.pointExists() == true ||
+            (equip as? HsHpuEquip)?.dehumidifierEnable?.pointExists() == true) {
             val deHumidifierView = getDeHumidifierView()
             detailViewItems[deHumidifierView.id.toString()] = deHumidifierView
         }
 
         if (profileType == ProfileType.HYPERSTAT_TWO_PIPE_FCU) {
-            equip as Pipe2V2Equip
+            equip as HsPipe2Equip
             if (equip.dischargeAirTemperature.pointExists()) {
                 val supplyWaterTemp = getSupplyWaterTempView(false)
                 detailViewItems[supplyWaterTemp.id.toString()] = supplyWaterTemp
@@ -200,13 +212,19 @@ class HyperStatHelper(
 
         } else {
             if (profileType == ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT) {
-                equip as CpuV2Equip
+                equip as HsCpuEquip
                 if (equip.dischargeAirTemperature.pointExists()) {
                     val dischargeAirFlow = getDischargeAirTempView()
                     detailViewItems[dischargeAirFlow.id.toString()] = dischargeAirFlow
                 }
             } else if(profileType == ProfileType.HYPERSTAT_HEAT_PUMP_UNIT) {
-                equip as HpuV2Equip
+                equip as HsHpuEquip
+                if (equip.dischargeAirTemperature.pointExists()) {
+                    val dischargeAirFlow = getDischargeAirTempView()
+                    detailViewItems[dischargeAirFlow.id.toString()] = dischargeAirFlow
+                }
+            } else if(profileType == ProfileType.HYPERSTAT_FOUR_PIPE_FCU) {
+                equip as HsPipe4Equip
                 if (equip.dischargeAirTemperature.pointExists()) {
                     val dischargeAirFlow = getDischargeAirTempView()
                     detailViewItems[dischargeAirFlow.id.toString()] = dischargeAirFlow
@@ -393,6 +411,22 @@ class HyperStatHelper(
                 }
 
             }
+            ProfileType.HYPERSTAT_FOUR_PIPE_FCU -> {
+                configuration as HsPipe4Configuration
+                selectedFanMode = getHSSelectedFanMode(
+                    getHSPipe4FanLevel(configuration),
+                    equip.fanOpMode.readPriorityVal().toInt()
+                )
+                val fanSpinnerSelectionValues =
+                    RelayUtil.getFanOptionByLevel(getHSPipe4FanLevel(configuration))
+                fanOptions =
+                    context.resources.getStringArray(fanSpinnerSelectionValues).toList()
+                if (selectedFanMode > fanOptions.size) {
+                    selectedFanMode = 0
+                    CcuLog.e(L.TAG_CCU_ZONE, "Fan Mode is not in the range falling back to off")
+                }
+
+            }
 
             else -> {}
         }
@@ -413,7 +447,7 @@ class HyperStatHelper(
 
     @SuppressLint("DefaultLocale")
     private fun getSupplyWaterTempView(shouldTakeFullRow: Boolean = true): DetailedViewItem {
-        equip as Pipe2V2Equip
+        equip as HsPipe2Equip
         var supplyTemp = equip.leavingWaterTemperature.readHisVal().toString()
         if (UnitUtils.isCelsiusTunerAvailableStatus()) {
             val converted =

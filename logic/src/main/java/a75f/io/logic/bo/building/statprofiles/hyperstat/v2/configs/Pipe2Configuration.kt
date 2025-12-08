@@ -5,8 +5,7 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ValueConfig
-import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
-import a75f.io.domain.util.ModelNames
+import a75f.io.domain.equips.hyperstat.HsPipe2Equip
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.util.FanConfig
 import a75f.io.logic.bo.building.statprofiles.util.MinMaxConfig
@@ -27,29 +26,26 @@ class Pipe2Configuration(
     lateinit var analogOut2MinMaxConfig: Pipe2MinMaxConfig
     lateinit var analogOut3MinMaxConfig: Pipe2MinMaxConfig
 
-    lateinit var analogOut1FanSpeedConfig: FanConfig
-    lateinit var analogOut2FanSpeedConfig: FanConfig
-    lateinit var analogOut3FanSpeedConfig: FanConfig
-
     lateinit var thermistor2EnableConfig: EnableConfig
-    override fun getActiveConfiguration(): Pipe2Configuration {
 
-        var pipe2RawEquip = Domain.hayStack.readEntity("domainName == \"${ModelNames.hyperStatPipe2}\" and group == \"$nodeAddress\"")
-        // Remove the bellow code after migration all the hyperstat pipe2 modules
-        if (pipe2RawEquip.isEmpty()) {
-            pipe2RawEquip = Domain.hayStack.readEntity("equip and group == \"$nodeAddress\"")
-        }
-        if (pipe2RawEquip.isEmpty()) {
+
+    override fun getActiveConfiguration() : Pipe2Configuration {
+        val equip = Domain.hayStack.readEntity("equip and group == \"$nodeAddress\"")
+        if (equip.isEmpty()) {
             return this
         }
-
-        val pipe2Equip = Pipe2V2Equip(pipe2RawEquip[Tags.ID].toString())
-        val configuration = this.getDefaultConfiguration()
-        configuration.getActiveConfiguration(pipe2Equip)
-        readPipe2ActiveConfiguration(pipe2Equip)
+        val hssEquip = HsPipe2Equip(equip[Tags.ID].toString())
+        getDefaultConfiguration()
+        getActiveEnableConfigs(hssEquip)
+        getActiveAssociationConfigs(hssEquip)
+        getGenericZoneConfigs(hssEquip)
+        getActiveDynamicConfigs(hssEquip)
+        equipId = hssEquip.equipRef
+        isDefault = false
         return this
     }
-    private fun readPipe2ActiveConfiguration(equip: Pipe2V2Equip) {
+
+    private fun getActiveDynamicConfigs(equip: HsPipe2Equip) {
 
         analogOut1MinMaxConfig.apply {
             waterModulatingValue.min.currentVal = getActivePointValue(equip.analog1MinWaterValve, waterModulatingValue.min)
@@ -79,7 +75,6 @@ class Pipe2Configuration(
             dcvDamperConfig.max.currentVal = getActivePointValue(equip.analog3MaxDCVDamper, dcvDamperConfig.max)
         }
 
-
         analogOut1FanSpeedConfig.apply {
             low.currentVal = getActivePointValue(equip.analog1FanLow, low)
             medium.currentVal = getActivePointValue(equip.analog1FanMedium, medium)
@@ -100,7 +95,7 @@ class Pipe2Configuration(
     }
 
     override fun getDefaultConfiguration(): HyperStatConfiguration {
-        val configuration = super.getDefaultConfiguration()
+        val configuration = super.getDefaultConfiguration() as HyperStatConfiguration
         configuration.apply {
             analogOut1MinMaxConfig =
                 Pipe2MinMaxConfig(
@@ -142,8 +137,6 @@ class Pipe2Configuration(
 
                 )
             thermistor2EnableConfig = EnableConfig(DomainName.thermistor2InputEnable, true)
-
-
         }
 
         return configuration
@@ -267,23 +260,30 @@ class Pipe2Configuration(
         }
     }
 
-    fun getLowestFanStage(): HsPipe2RelayMapping? {
-        val lowestSelected = getLowestStage(HsPipe2RelayMapping.FAN_LOW_SPEED.ordinal, HsPipe2RelayMapping.FAN_MEDIUM_SPEED.ordinal, HsPipe2RelayMapping.FAN_HIGH_SPEED.ordinal)
-        if (lowestSelected == -1) return null
-        return HsPipe2RelayMapping.values()[lowestSelected]
-    }
-
     private fun getHighestFanSelected(): HsPipe2RelayMapping? {
-        val highestSelected = getHighestStage(HsPipe2RelayMapping.FAN_LOW_SPEED.ordinal, HsPipe2RelayMapping.FAN_MEDIUM_SPEED.ordinal, HsPipe2RelayMapping.FAN_HIGH_SPEED.ordinal)
-        if (highestSelected == -1) return null
-        return HsPipe2RelayMapping.values()[highestSelected]
+        if(isAnyRelayEnabledAssociated(association = HsPipe2RelayMapping.FAN_LOW_VENTILATION.ordinal)) {
+            val highestSelected = getHighestStage(HsPipe2RelayMapping.FAN_LOW_VENTILATION.ordinal, HsPipe2RelayMapping.FAN_MEDIUM_SPEED.ordinal, HsPipe2RelayMapping.FAN_HIGH_SPEED.ordinal)
+            if (highestSelected == -1) return null
+            return HsPipe2RelayMapping.values()[highestSelected]
+        } else {
+            val highestSelected = getHighestStage(HsPipe2RelayMapping.FAN_LOW_SPEED.ordinal, HsPipe2RelayMapping.FAN_MEDIUM_SPEED.ordinal, HsPipe2RelayMapping.FAN_HIGH_SPEED.ordinal)
+            if (highestSelected == -1) return null
+            return HsPipe2RelayMapping.values()[highestSelected]
+        }
     }
-
 
     override fun getHighestFanStageCount(): Int {
-        if (getHighestFanSelected() == null) return 0
-        return getHighestFanSelected()!!.ordinal + 1
+       return when(getHighestFanSelected()) {
+            HsPipe2RelayMapping.FAN_HIGH_SPEED -> 3
+            HsPipe2RelayMapping.FAN_MEDIUM_SPEED -> 2
+            HsPipe2RelayMapping.FAN_LOW_SPEED, HsPipe2RelayMapping.FAN_LOW_VENTILATION -> 1
+            else -> 0
+        }
     }
+
+    override fun isCoolingAvailable() = true
+
+    override fun isHeatingAvailable() = true
 }
 
 data class Pipe2MinMaxConfig (
@@ -312,9 +312,8 @@ enum class HsPipe2RelayMapping(val displayName: String) {
     DEHUMIDIFIER("Dehumidifier"),
     EXTERNALLY_MAPPED("Externally Mapped"),
     DCV_DAMPER("Dcv Damper"),
+    FAN_LOW_VENTILATION("Fan Low Ventilation Speed"),
 }
-
-
 
 data class Pipe2AnalogOutConfigs(
     val enabled: Boolean,
@@ -322,5 +321,6 @@ data class Pipe2AnalogOutConfigs(
     val minMax: Pipe2MinMaxConfig,
     val fanSpeed: FanConfig
 )
+
 
 

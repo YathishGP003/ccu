@@ -6,10 +6,10 @@ import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
-import a75f.io.domain.equips.HyperStatSplitEquip
-import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
-import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
-import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
+import a75f.io.domain.equips.hyperstatsplit.HsSplitCpuEquip
+import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe2UVEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe4UVEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder

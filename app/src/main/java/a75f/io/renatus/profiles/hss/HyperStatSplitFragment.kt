@@ -44,6 +44,7 @@ import a75f.io.renatus.profiles.system.UNIVERSAL_IN5
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN6
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN7
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN8
+import a75f.io.renatus.profiles.viewstates.ConfigState
 import a75f.io.renatus.util.TestSignalManager
 import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
@@ -180,8 +181,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 }
                 Box(modifier = Modifier.weight(1f)) {
                     ToggleButtonStateful(
-                        defaultSelection = viewModel.viewState.value.autoForceOccupied,
-                        onEnabled = { viewModel.viewState.value.autoForceOccupied = it }
+                        defaultSelection = viewModel.viewState.value.isEnableAutoForceOccupied,
+                        onEnabled = { viewModel.viewState.value.isEnableAutoForceOccupied = it }
                     )
                 }
                 Spacer(modifier = Modifier.width(375.dp))
@@ -192,8 +193,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 }
                 Box(modifier = Modifier.weight(1f)) {
                     ToggleButtonStateful(
-                        defaultSelection = viewModel.viewState.value.autoAway,
-                        onEnabled = { viewModel.viewState.value.autoAway = it }
+                        defaultSelection = viewModel.viewState.value.isEnableAutoAway,
+                        onEnabled = { viewModel.viewState.value.isEnableAutoAway = it }
                     )
                 }
             }
@@ -2574,9 +2575,9 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     )
                 }
                 Box(modifier = Modifier.weight(1f)) {
-                    SpinnerElementString(defaultSelection = viewModel.viewState.value.zoneCO2DamperOpeningRate.toInt().toString(),
+                    SpinnerElementString(defaultSelection = viewModel.viewState.value.zoneCO2DamperOpeningRate.toString(),
                         items = viewModel.zoneCO2DamperOpeningRateList, unit = "%",
-                        itemSelected = { viewModel.viewState.value.zoneCO2DamperOpeningRate = it.toDouble() }, previewWidth = 70)
+                        itemSelected = { viewModel.viewState.value.zoneCO2DamperOpeningRate = it.toInt() }, previewWidth = 70)
                 }
 
                 if (viewModel.isPrePurgeEnabled()) {

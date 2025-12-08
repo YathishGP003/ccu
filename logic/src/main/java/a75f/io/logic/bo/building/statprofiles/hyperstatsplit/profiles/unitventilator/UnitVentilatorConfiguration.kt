@@ -2,7 +2,7 @@ package a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventi
 
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ValueConfig
-import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
+import a75f.io.domain.equips.hyperstatsplit.UnitVentilatorEquip
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective

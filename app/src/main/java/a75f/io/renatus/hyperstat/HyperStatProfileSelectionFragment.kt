@@ -87,6 +87,7 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
       hpuCell.setOnClickListener { showHPUConfigFragment() }
       twoPipeCell.setOnClickListener { showPipe2ConfigFragment() }
       monitoringCell.setOnClickListener{ showMonitoringConfigFragment() }
+      fourPipeCell.setOnClickListener{ showPipe4ConfigFragment() }
       vrvCell.setOnClickListener{ showVrvConfigFragment() }
    }
 
@@ -119,6 +120,17 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
             mRoomName,
             mFloorName,
             ProfileType.HYPERSTAT_TWO_PIPE_FCU,
+            NodeType.HYPER_STAT
+         ), FragmentBLEInstructionScreen.ID
+      )
+   }
+   private fun showPipe4ConfigFragment() {
+      showDialogFragment(
+         FragmentBLEInstructionScreen.getInstance(
+            mNodeAddress,
+            mRoomName,
+            mFloorName,
+            ProfileType.HYPERSTAT_FOUR_PIPE_FCU,
             NodeType.HYPER_STAT
          ), FragmentBLEInstructionScreen.ID
       )

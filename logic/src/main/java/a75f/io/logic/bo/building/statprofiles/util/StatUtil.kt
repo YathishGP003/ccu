@@ -1,10 +1,11 @@
 package a75f.io.logic.bo.building.statprofiles.util
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
-import a75f.io.domain.equips.DomainEquip
-import a75f.io.domain.equips.HyperStatSplitEquip
+import a75f.io.domain.equips.StandAloneEquip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
+import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logger.CcuLog
@@ -71,6 +72,11 @@ fun canWeDoConditioning(basicSettings: BasicSettings): Boolean {
 fun canWeDoConditioning(mode: StandaloneConditioningMode): Boolean {
     return (mode != StandaloneConditioningMode.OFF)
 }
+
+fun canWeDoConditioning(basicSettings: MyStatBasicSettings): Boolean {
+    return (basicSettings.conditioningMode != StandaloneConditioningMode.OFF)
+}
+
 fun canWeRunFan(basicSettings: BasicSettings): Boolean {
     return (basicSettings.fanMode != StandaloneFanStage.OFF)
 }
@@ -125,10 +131,76 @@ fun getAirEnthalpy(temp: Double, humidity: Double): Double {
     return CCUUtils.roundToTwoDecimal(h)
 }
 
-fun fetchUserIntents(equip: DomainEquip): UserIntents {
+fun doorWindowIsOpen(equip: StandAloneEquip): Pair<Boolean, Boolean> {
+
+    var doorWindowEnabled = 0.0
+    var doorWindowSensor = 0.0
+    var isDoorOpenFromTitle24 = false
+    listOf(
+        equip.doorWindowSensorNCTitle24,
+        equip.doorWindowSensorTitle24,
+        equip.doorWindowSensorNOTitle24,
+        equip.doorWindowSensorNC,
+        equip.doorWindowSensor,
+        equip.doorWindowSensorNO,
+    ).forEach {
+        if (it.pointExists()) {
+            if (doorWindowEnabled != 1.0) {
+                doorWindowEnabled = 1.0
+            }
+            if (it.readHisVal() > 0) {
+                doorWindowSensor = 1.0
+                if (it == equip.doorWindowSensorNCTitle24 ||
+                    it == equip.doorWindowSensorTitle24 ||
+                    it == equip.doorWindowSensorNOTitle24
+                ) {
+                    isDoorOpenFromTitle24 = true
+                }
+            }
+        }
+    }
+    equip.doorWindowSensingEnable.writePointValue(doorWindowEnabled)
+    equip.doorWindowSensorInput.writePointValue(doorWindowSensor)
+    return Pair(doorWindowSensor > 0, isDoorOpenFromTitle24)
+}
+
+fun keyCardIsInSlot(
+    equip: StandAloneEquip
+) {
+    equip.apply {
+        val enabled = (keyCardSensorNC.pointExists() ||
+                keyCardSensorNO.pointExists() ||
+                keyCardSensor.pointExists())
+
+        val active = (keyCardSensorNC.readHisVal() > 0 ||
+                keyCardSensorNO.readHisVal() > 0 ||
+                keyCardSensor.readHisVal() > 0)
+        keyCardSensingEnable.writePointValue(if (enabled) 1.0 else 0.0)
+        keyCardSensorInput.writePointValue(if (active) 1.0 else 0.0)
+    }
+}
+
+fun isFanGoodRun(
+    isDoorWindowOpen: Boolean, equip: StandAloneEquip,
+    heatingLoopOutput: Int, coolingLoopOutput: Int, lowVentilationExist: CalibratedPoint
+): Boolean {
+    return if (lowVentilationExist.data > 0) true
+    else if (isDoorWindowOpen || heatingLoopOutput > 0) {
+        equip.waterValve.pointExists() || equip.modulatingWaterValve.pointExists() || equip.auxHeatingStage1.pointExists() || equip.auxHeatingStage2.pointExists()
+    } else if (isDoorWindowOpen || coolingLoopOutput > 0) {
+        equip.waterValve.pointExists() || equip.modulatingWaterValve.pointExists()
+    } else {
+        false
+    }
+}
+fun getHyperStatDevice(nodeAddress: Int): HashMap<Any, Any> {
+    return CCUHsApi.getInstance().readEntity("domainName == \"${DomainName.hyperstatDevice}\" and addr == \"$nodeAddress\"")
+}
+
+fun fetchUserIntents(equip: StandAloneEquip): UserIntents {
     val haystack = CCUHsApi.getInstance()
-    var coolingDesiredTemp = 0.0
-    var heatingDesiredTemp = 0.0
+    val coolingDesiredTemp: Double
+    val heatingDesiredTemp: Double
     val desiredTemp: Double
 
     val isScheduleSlotsAvailable = haystack.isScheduleSlotExitsForRoom(equip.equipRef)
@@ -141,51 +213,17 @@ fun fetchUserIntents(equip: DomainEquip): UserIntents {
             L.TAG_CCU_HSSPLIT_CPUECON,
             "Schedule Slots found for ${equip.equipRef}, using schedule setpoints with setback $unoccupiedSetback"
         )
-        when (equip) {
-            is HyperStatEquip -> {
-                equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
-                equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
-                equip.desiredTemp.writePointValue(desiredTemp)
-            }
+        equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
+        equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
+        equip.desiredTemp.writePointValue(desiredTemp)
 
-            is HyperStatSplitEquip -> {
-                equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
-                equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
-                equip.desiredTemp.writePointValue(desiredTemp)
-            }
-
-            is MyStatEquip -> {
-                equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
-                equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
-                equip.desiredTemp.writePointValue(desiredTemp)
-            }
-
-            else -> {}
-        }
         CcuLog.d(
             L.TAG_CCU_HSSPLIT_CPUECON,
             "No Schedule Slots found for ${equip.equipRef}, using default setpoints with setback $unoccupiedSetback"
         )
     } else {
-        when (equip) {
-            is HyperStatEquip -> {
-                coolingDesiredTemp = equip.desiredTempCooling.readPriorityVal()
-                heatingDesiredTemp = equip.desiredTempHeating.readPriorityVal()
-            }
-
-            is HyperStatSplitEquip -> {
-
-                coolingDesiredTemp = equip.desiredTempCooling.readPriorityVal()
-                heatingDesiredTemp = equip.desiredTempHeating.readPriorityVal()
-            }
-
-            is MyStatEquip -> {
-                coolingDesiredTemp = equip.desiredTempCooling.readPriorityVal()
-                heatingDesiredTemp = equip.desiredTempHeating.readPriorityVal()
-            }
-
-            else -> {}
-        }
+        coolingDesiredTemp = equip.desiredTempCooling.readPriorityVal()
+        heatingDesiredTemp = equip.desiredTempHeating.readPriorityVal()
     }
 
     return when (equip) {

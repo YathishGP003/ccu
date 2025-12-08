@@ -2,7 +2,7 @@ package a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon
 
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Point
-import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
+import a75f.io.domain.equips.hyperstatsplit.HsSplitCpuEquip
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoConditioning
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoCooling
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoHeating
+import a75f.io.logic.bo.building.statprofiles.util.canWeRunFan
 import a75f.io.logic.bo.building.statprofiles.util.fetchUserIntents
 import a75f.io.logic.bo.building.statprofiles.util.getPercentFromVolt
 import a75f.io.logic.bo.building.statprofiles.util.getSplitConfiguration
@@ -30,6 +31,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getSplitTuners
 import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
+import a75f.io.logic.bo.building.statprofiles.util.keyCardIsInSlot
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.handlers.doAnalogOperation
 import a75f.io.logic.controlcomponents.util.ControllerNames
@@ -95,7 +97,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         loopController.initialise(tuners = hyperStatSplitTuners)
         loopController.dumpLogs()
         handleChangeOfDirection(userIntents, controllerFactory, hssEquip)
-        doorWindowIsOpen(hssEquip)
+        checkDoorWindowSensorStatus(hssEquip)
         keyCardIsInSlot(hssEquip)
         prePurgeEnabled = hssEquip.prePurgeEnable.readDefaultVal() > 0.0
         prePurgeOpeningValue = hssEquip.standalonePrePurgeFanSpeedTuner.readPriorityVal()
@@ -115,7 +117,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         }
         updateTitle24LoopCounter(hyperStatSplitTuners, basicSettings)
         if (isEmergencyShutoffActive(hssEquip).not() && isDoorOpen.not() && isCondensateTripped.not()) {
-            if (basicSettings.fanMode != StandaloneFanStage.OFF) {
+            if (canWeDoConditioning(basicSettings) && canWeRunFan(basicSettings)) {
                 runRelayOperations(config, basicSettings)
                 runAnalogOutOperations(config, basicSettings, hssEquip.analogOutStages)
             } else {
@@ -474,7 +476,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         basicSettings: BasicSettings
     ) {
         updatePrerequisite(config)
-        runControllers(hssEquip, basicSettings, config)
+        runControllers(hssEquip, basicSettings)
     }
 
     private fun updatePrerequisite(config: HyperStatSplitCpuConfiguration) {
@@ -504,11 +506,11 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
                 "zoneOccupancyState : ${zoneOccupancyState.data}")
     }
 
-    private fun runControllers(equip: HsSplitCpuEquip, basicSettings: BasicSettings, config: HyperStatSplitCpuConfiguration) {
+    private fun runControllers(equip: HsSplitCpuEquip, basicSettings: BasicSettings) {
         controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             val result = controller.runController()
-            updateRelayStatus(controllerName, result, equip, basicSettings, config)
+            updateRelayStatus(controllerName, result, equip, basicSettings)
         }
     }
 
@@ -626,7 +628,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
 
     private fun updateRelayStatus(
         controllerName: String, result: Any, equip: HsSplitCpuEquip,
-        basicSettings: BasicSettings, config: HyperStatSplitCpuConfiguration
+        basicSettings: BasicSettings
     ) {
 
         fun updateStatus(point: Point, result: Any, status: String? = null) {
@@ -676,7 +678,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
             }
 
             ControllerNames.FAN_SPEED_CONTROLLER -> {
-                runTitle24Rule(config)
+                runTitle24Rule(hssEquip)
                 fun checkUserIntentAction(stage: Int): Boolean {
                     val mode = equip.fanOpMode
                     return when (stage) {

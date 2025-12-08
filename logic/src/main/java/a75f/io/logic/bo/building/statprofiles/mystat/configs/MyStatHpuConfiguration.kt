@@ -6,7 +6,6 @@ import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
-import a75f.io.domain.util.ModelNames
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.util.MinMaxConfig
 import a75f.io.logic.bo.building.statprofiles.util.MyStatHpuMinMaxConfig
@@ -40,23 +39,26 @@ class MyStatHpuConfiguration(
     lateinit var analogOut2MinMaxConfig: MyStatHpuMinMaxConfig
     lateinit var analogOut2FanSpeedConfig: MyStatFanConfig
 
-    override fun getActiveConfiguration(): MyStatConfiguration {
-        val hpuEquip =
-            Domain.hayStack.readEntity("domainName == \"${ModelNames.myStatHpu}\" and group == \"$nodeAddress\"")
-        if (hpuEquip.isEmpty()) {
+    override fun getActiveConfiguration() : MyStatConfiguration {
+        val equip = Domain.hayStack.readEntity("equip and group == \"$nodeAddress\"")
+        if (equip.isEmpty()) {
             return this
         }
-
-        val myStatHpuEquip = MyStatHpuEquip(hpuEquip[Tags.ID].toString())
-        val configuration = this.getDefaultConfiguration()
-        configuration.getActiveConfiguration(myStatHpuEquip)
-        readHpuActiveConfig(myStatHpuEquip)
+        val msEquip = MyStatHpuEquip(equip[Tags.ID].toString())
+        getDefaultConfiguration()
+        getActiveEnableConfigs(msEquip)
+        getActiveAssociationConfigs(msEquip)
+        getGenericZoneConfigs(msEquip)
+        getActiveDynamicConfig(msEquip)
+        equipId = msEquip.equipRef
+        isDefault = false
         return this
     }
 
+
     override fun getAnalogStartIndex() = MyStatHpuRelayMapping.values().size
 
-    private fun readHpuActiveConfig(equip: MyStatHpuEquip) {
+    private fun getActiveDynamicConfig(equip: MyStatHpuEquip) {
         analogOut1MinMaxConfig.apply {
             compressorSpeed.min.currentVal =
                 getActivePointValue(equip.analog1MinCompressorSpeed, compressorSpeed.min)
@@ -281,6 +283,10 @@ class MyStatHpuConfiguration(
             else -> 0
         }
     }
+
+    override fun isCoolingAvailable() = true
+
+    override fun isHeatingAvailable() = true
 
     fun getHighestCompressorStages(): Int {
         return try {

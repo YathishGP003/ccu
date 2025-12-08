@@ -10,17 +10,21 @@ import a75f.io.device.mesh.getCoolingDeadBand
 import a75f.io.device.mesh.getCoolingUserLimit
 import a75f.io.device.mesh.getHeatingDeadBand
 import a75f.io.device.mesh.getHeatingUserLimit
+import a75f.io.device.mesh.getPin
 import a75f.io.device.util.DeviceConfigurationUtil.Companion.getUserConfiguration
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.readValAtLevelByDomain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
-import a75f.io.domain.equips.hyperstat.CpuV2Equip
-import a75f.io.domain.equips.hyperstat.HpuV2Equip
+import a75f.io.domain.equips.hyperstat.HsCpuEquip
+import a75f.io.domain.equips.hyperstat.HsHpuEquip
+import a75f.io.domain.equips.hyperstat.HsPipe2Equip
+import a75f.io.domain.equips.hyperstat.HsPipe4Equip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.hyperstat.MonitoringEquip
-import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsCpuAnalogOutMapping
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Th1InputAssociation
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Th2InputAssociation
 import a75f.io.logic.bo.util.TemperatureMode
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.tuners.TunerUtil
@@ -51,9 +55,16 @@ private fun getTempMode(): HyperStat.HyperStatTemperatureMode_e {
 }
 
 private fun getMiscSettings(equip: HyperStatEquip): Int {
-    val disableTouch = equip.disableTouch.readDefaultVal().toInt()
-    val enableBrightness = equip.enableBrightness.readDefaultVal().toInt()
-    return (disableTouch shl 1) or (enableBrightness shl 2)  // bit 0: enableExternal10kTemperatureSensor sending always 0
+    val disableTouch = equip.disableTouch.readDefaultVal().toInt() > 0
+    val enableBrightness = equip.enableBrightness.readDefaultVal().toInt() > 0
+    val desiredTempDisplay = equip.enableDesiredTempDisplay.isEnabled()
+
+    var miscSettings = 0
+    if (disableTouch) miscSettings = miscSettings or (1 shl 1)
+    if (enableBrightness) miscSettings = miscSettings or (1 shl 2)
+    if (desiredTempDisplay) miscSettings = miscSettings or (1 shl 3)
+
+    return miscSettings
 }
 
 private fun isAnalogOutEnabledAndIsMapped(enablePoint: Point, association: Point, mapping: Int): Boolean {
@@ -87,7 +98,7 @@ private fun setLinearFanSpeedDetails(equip: HyperStatEquip): HyperStat.Hyperstat
 private fun setStagedFanSpeedDetails(equip: HyperStatEquip): HyperStat.HyperstatStagedFanSpeeds_t {
     val stagedFanSpeedBuilder = HyperStat.HyperstatStagedFanSpeeds_t.newBuilder()
     equip.apply {
-        if (this is CpuV2Equip) {
+        if (this is HsCpuEquip) {
             if (isAnalogOutEnabledAndIsMapped(analog1OutputEnable, analog1OutputAssociation, HsCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
                 stagedFanSpeedBuilder.stagedFanLowSpeedLevel = analog1FanLow.readPriorityVal().toInt()
                 stagedFanSpeedBuilder.stagedFanMediumSpeedLevel = analog1FanMedium.readPriorityVal().toInt()
@@ -208,6 +219,9 @@ fun getHyperStatSettingsMessage(equipRef: String, zone: String): HyperStatSettin
             .setVocAlertTarget(4000)
             .setHyperstatLinearFanSpeeds(setLinearFanSpeedDetails(hyperStatEquip))
             .setHyperstatStagedFanSpeeds(setStagedFanSpeedDetails(hyperStatEquip))
+            .setMiscSettings1(getMiscSettings(hyperStatEquip))
+            .setInstallerLockPin(getPin(hyperStatEquip.pinLockInstallerAccess))
+            .setUserLockPin(getPin(hyperStatEquip.pinLockConditioningModeFanAccess))
             .setTemperatureMode(getTempMode())
             .setMiscSettings1(getMiscSettings(hyperStatEquip))
 
@@ -254,8 +268,6 @@ fun getHyperStatSettings2Message(equipRef: String): HyperStatSettingsMessage2_t 
         hyperstatRelayConfig = getRelayConfigs(hyperStatEquip)
         hyperstatAnalogOutConfig = getAnalogOutConfigs(hyperStatEquip)
         hyperstatAnalogInConfig = getAnalogInputConfigs(hyperStatEquip)
-        thermistor1Enable = hyperStatEquip.thermistor1InputEnable.readDefaultVal() == 1.0
-        thermistor2Enable = hyperStatEquip.thermistor2InputEnable.readDefaultVal() == 1.0
         zoneCO2Target = hyperStatEquip.co2Target.readDefaultVal().toInt()
         zoneCO2Threshold = hyperStatEquip.co2Threshold.readDefaultVal().toInt()
         zoneCO2DamperOpeningRate = hyperStatEquip.co2DamperOpeningRate.readDefaultVal().toInt()
@@ -266,15 +278,84 @@ fun getHyperStatSettings2Message(equipRef: String): HyperStatSettingsMessage2_t 
     }
 
     when (hyperStatEquip) {
-        is CpuV2Equip -> settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_CONVENTIONAL_PACKAGE_UNIT
-        is HpuV2Equip -> settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_HEAT_PUMP_UNIT
-        is Pipe2V2Equip -> settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_2_PIPE_FANCOIL_UNIT
-
+        is HsCpuEquip -> settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_CONVENTIONAL_PACKAGE_UNIT
+        is HsHpuEquip -> settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_HEAT_PUMP_UNIT
+        is HsPipe2Equip -> settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_2_PIPE_FANCOIL_UNIT
+        is HsPipe4Equip -> settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_4_PIPE_FANCOIL_UNIT
     }
+    configureThermistorMapping(settings2, hyperStatEquip) // TODO check  this properly
     return settings2.build()
 }
 
-private fun getStagedFanDetails(equip: CpuV2Equip): HyperStat.HyperStatConfigsCpu_t {
+private fun configureThermistorMapping(
+    settings2: HyperStatSettingsMessage2_t.Builder,
+    equip: HyperStatEquip
+) {
+
+    settings2.apply {
+        if (equip.thermistor1InputEnable.readDefaultVal() == 1.0) {
+            val th1Mapping = equip.thermistor1InputAssociation.readDefaultVal().toInt()
+            thermistor1Enable = false
+            thermistor1Mapping = 0
+            thermistor1Mapping = when (Th1InputAssociation.values()[th1Mapping]) {
+                Th1InputAssociation.DISCHARGE_AIR_TEMPERATURE -> {
+                    thermistor1Enable = true
+                    1
+                }
+                Th1InputAssociation.GENERIC_ALARM_NC -> 2
+                Th1InputAssociation.GENERIC_ALARM_N0 -> 3
+                Th1InputAssociation.FAN_RUN_STATUS_NO -> 4
+
+                Th1InputAssociation.FAN_RUN_STATUS_NC -> 5
+                Th1InputAssociation.DOOR_WINDOW_SENSOR_NO_TITLE24 -> 6
+                Th1InputAssociation.DOOR_WINDOW_SENSOR_NC_TITLE24 -> 7
+                Th1InputAssociation.DOOR_WINDOW_SENSOR_NO -> 8
+                Th1InputAssociation.DOOR_WINDOW_SENSOR_NC -> 9
+                Th1InputAssociation.KEYCARD_SENSOR_NO -> 10
+                Th1InputAssociation.KEYCARD_SENSOR_NC -> 11
+                Th1InputAssociation.GENERIC_THERMISTOR_INPUT -> 12
+                Th1InputAssociation.CHILLED_WATER_SUPPLY_TEMPERATURE -> 14
+                Th1InputAssociation.HOT_WATER_SUPPLY_TEMPERATURE -> 15
+            }
+        } else {
+            thermistor1Enable = false
+            thermistor1Mapping = 0
+        }
+        if (equip is HsPipe2Equip) {
+            thermistor2Enable = true
+            thermistor2Mapping = 0
+        } else {
+            if (equip.thermistor2InputEnable.readDefaultVal() == 1.0) {
+                val th2Mapping = equip.thermistor2InputAssociation.readDefaultVal().toInt()
+                thermistor2Enable = false
+                thermistor2Mapping = 0
+                thermistor2Mapping = when (Th2InputAssociation.values()[th2Mapping]) {
+                    Th2InputAssociation.DOOR_WINDOW_SENSOR_NC_TITLE24 -> {
+                        thermistor2Enable = true
+                        1
+                    }
+                    Th2InputAssociation.GENERIC_ALARM_NC -> 2
+                    Th2InputAssociation.GENERIC_ALARM_N0 -> 3
+                    Th2InputAssociation.FAN_RUN_STATUS_NO -> 4
+                    Th2InputAssociation.FAN_RUN_STATUS_NC -> 5
+                    Th2InputAssociation.DOOR_WINDOW_SENSOR_NO_TITLE24 -> 6
+                    Th2InputAssociation.DISCHARGE_AIR_TEMPERATURE -> 7
+                    Th2InputAssociation.DOOR_WINDOW_SENSOR_NO -> 8
+                    Th2InputAssociation.DOOR_WINDOW_SENSOR_NC -> 9
+                    Th2InputAssociation.KEYCARD_SENSOR_NO -> 10
+                    Th2InputAssociation.KEYCARD_SENSOR_NC -> 11
+                    Th2InputAssociation.GENERIC_THERMISTOR_INPUT -> 12
+                    Th2InputAssociation.CHILLED_WATER_SUPPLY_TEMPERATURE -> 14
+                    Th2InputAssociation.HOT_WATER_SUPPLY_TEMPERATURE -> 15
+                }
+            } else {
+                thermistor2Enable = false
+            }
+        }
+    }
+}
+
+private fun getStagedFanDetails(equip: HsCpuEquip): HyperStat.HyperStatConfigsCpu_t {
     return HyperStat.HyperStatConfigsCpu_t.newBuilder().apply {
         coolingStage1FanAnalogVoltage = (equip.fanOutCoolingStage1.readPriorityVal() * 10).toInt()
         coolingStage2FanAnalogVoltage = (equip.fanOutCoolingStage2.readPriorityVal() * 10).toInt()
@@ -293,22 +374,12 @@ fun getHyperStatSettings3Message(equipRef: String): HyperStatSettingsMessage3_t 
     return HyperStatSettingsMessage3_t.newBuilder().apply {
         genertiTuners = getCommonTuners(equipRef)
         when (hyperStatEquip) {
-            is CpuV2Equip -> hyperStatConfigsCpu = getStagedFanDetails(hyperStatEquip)
-            is HpuV2Equip -> fcuTuners = getHpuTunerDetails(equipRef)
-            is Pipe2V2Equip -> fcuTuners = getFcuTunerDetails(equipRef)
+            is HsCpuEquip -> hyperStatConfigsCpu = getStagedFanDetails(hyperStatEquip)
+            is HsHpuEquip -> fcuTuners = getHpuTunerDetails(equipRef)
+            is HsPipe2Equip,is HsPipe4Equip  -> fcuTuners = getFcuTunerDetails(equipRef)
         }
-        if (hyperStatEquip.thermistor1InputEnable.readDefaultVal() == 1.0) {
-            thermistor1 = hyperStatEquip.thermistor1InputAssociation.readDefaultVal().toInt()
-        }
-        if (hyperStatEquip is Pipe2V2Equip) {
-            if (hyperStatEquip.thermistor2InputEnable.readDefaultVal() == 1.0) {
-                thermistor2 = 1 // it is always mapped to supply watter temperature
-            }
-        } else {
-            if (hyperStatEquip.thermistor2InputEnable.readDefaultVal() == 1.0) {
-                thermistor2 = hyperStatEquip.thermistor2InputAssociation.readDefaultVal().toInt()
-            }
-        }
+        stageUpTimer = hyperStatEquip.hyperstatStageUpTimerCounter.readPriorityVal().toInt()
+        stageDownTimer = hyperStatEquip.hyperstatStageDownTimerCounter.readPriorityVal().toInt()
     }.build()
 }
 
@@ -340,8 +411,8 @@ private fun getFcuTunerDetails(equipRef: String): HyperStat.HyperStatTunersFcu_t
     return HyperStat.HyperStatTunersFcu_t.newBuilder().apply {
         auxHeating1Activate = getTunerByDomain(DomainName.auxHeating1Activate, equipRef).toInt()
         auxHeating2Activate = getTunerByDomain(DomainName.auxHeating2Activate, equipRef).toInt()
-        twoPipeHeatingThreshold = getTunerByDomain(DomainName.hyperstatPipe2FancoilCoolingThreshold, equipRef).toInt()
-        twoPipeCoolingThreshold = getTunerByDomain(DomainName.hyperstatPipe2FancoilHeatingThreshold, equipRef).toInt()
+        twoPipeHeatingThreshold = getTunerByDomain(DomainName.hyperstatPipe2FancoilHeatingThreshold, equipRef).toInt()
+        twoPipeCoolingThreshold = getTunerByDomain(DomainName.hyperstatPipe2FancoilCoolingThreshold, equipRef).toInt()
         waterValueSamplingOnTime = getTunerByDomain(DomainName.waterValveSamplingOnTime, equipRef).toInt()
         watreValueSamplingWaitTime = getTunerByDomain(DomainName.waterValveSamplingWaitTime, equipRef).toInt()
         waterValveSamplingDuringLoopDeadbandOnTime = getTunerByDomain(DomainName.waterValveSamplingLoopDeadbandOnTime, equipRef).toInt()

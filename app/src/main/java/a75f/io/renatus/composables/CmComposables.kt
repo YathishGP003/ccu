@@ -5,6 +5,7 @@ import a75f.io.logic.L
 import a75f.io.renatus.R
 import a75f.io.renatus.compose.CombinationSpinner
 import a75f.io.renatus.compose.ComposeUtil
+import a75f.io.renatus.compose.ComposeUtil.Companion.myFontFamily
 import a75f.io.renatus.compose.SaveTextView
 import a75f.io.renatus.compose.SearchSpinnerElement
 import a75f.io.renatus.compose.SpinnerElementOption
@@ -18,6 +19,7 @@ import a75f.io.renatus.profiles.system.advancedahu.Option
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +29,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -47,9 +50,15 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.lang.Float.max
@@ -64,24 +73,24 @@ fun EnableCompose(
 ) {
     Row(modifier = Modifier.width(375.dp)) {
         Box(modifier = Modifier
-                .weight(3f)
-                .align(Alignment.CenterVertically)
-                .padding(start = 15.dp)) {
+            .weight(3f)
+            .align(Alignment.CenterVertically)
+            .padding(start = 15.dp)) {
             StyledTextView(
                 sensorAddress, fontSize = 20
             )
         }
         Box(modifier = Modifier
-                .weight(4f)
-                .align(Alignment.CenterVertically)) {
+            .weight(4f)
+            .align(Alignment.CenterVertically)) {
             if (!hide) {
                 Image(
                     painter = painterResource(id = R.drawable.map),
                     contentDescription = "Mapping",
                     modifier = Modifier
-                            .width(150.dp)
-                            .padding(start = 10.dp)
-                            .align(Alignment.Center)
+                        .width(150.dp)
+                        .padding(start = 10.dp)
+                        .align(Alignment.Center)
                 )
             }
         }
@@ -102,8 +111,8 @@ fun ConfigCompose(
 ) {
     Row(
         modifier = Modifier
-                .wrapContentWidth()
-                .padding(10.dp)
+            .wrapContentWidth()
+            .padding(10.dp)
     ) {
         Box(modifier = Modifier
                 .weight(1.5f)
@@ -276,7 +285,7 @@ fun RelayConfiguration(
                             false -> "OFF"
                         },
                         fontSize = 20.sp,
-                        fontFamily = ComposeUtil.myFontFamily,
+                        fontFamily = myFontFamily,
                         fontWeight = FontWeight.Normal,
                         textAlign = TextAlign.Left,
                         modifier = Modifier.wrapContentSize(Alignment.Center)
@@ -385,7 +394,7 @@ fun UniversalOutConfiguration(
                             false -> "OFF"
                         },
                         fontSize = 20.sp,
-                        fontFamily = ComposeUtil.myFontFamily,
+                        fontFamily = myFontFamily,
                         fontWeight = FontWeight.Normal,
                         textAlign = TextAlign.Left,
                         modifier = Modifier.wrapContentSize(Alignment.Center)
@@ -585,6 +594,43 @@ fun DependentPointMappingView(toggleName : String, toggleState :Boolean = false,
     }
 }
 
+@Composable
+fun ShowTestSignalBanner() {
+    Box(
+        modifier = Modifier
+            .background(color = Color(0xFFEBECED))
+            .fillMaxWidth()
+           .padding(horizontal = 10.dp, vertical = 10.dp)
+    ) {
+        Row(modifier = Modifier.align(Alignment.Center)) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_warning),
+                contentDescription = "Warning",
+                colorFilter = ColorFilter.tint(ComposeUtil.primaryColor),
+                modifier = Modifier.size(30.dp).padding(end = 10.dp)
+            )
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append(" Test Signal is active. ")
+                    }
+                    append("The CCU algorithm is disabled, and manual overrides are in effect.")
+                },
+                style = TextStyle(
+                    fontFamily = myFontFamily,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center,
+                    fontSize = 22.sp
+                ),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                //modifier = Modifier.fillMaxWidth(0.80f)
+            )
+        }
+    }
+}
+
+
 
 @Composable
 fun VerticalScrollbar(
@@ -605,7 +651,7 @@ fun VerticalScrollbar(
         val contentHeight = (totalItems * (listState.layoutInfo.visibleItemsInfo.firstOrNull()?.size ?: 0)).toFloat()
 
 
-        var thumbHeight = viewportHeight * (viewportHeight / max(contentHeight, viewportHeight))
+        val thumbHeight = viewportHeight * (viewportHeight / max(contentHeight, viewportHeight))
         val thumbHeightPx = max(thumbHeight, thumbMinHeight.toPx())
 
 

@@ -19,9 +19,9 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.NO_MAT_SENSOR
 import a75f.io.renatus.modbus.util.getAppResourceString
-import a75f.io.renatus.profiles.hss.ConfigState
 import a75f.io.renatus.profiles.hss.HyperStatSplitState
 import a75f.io.renatus.profiles.hss.HyperStatSplitViewModel
+import a75f.io.renatus.profiles.viewstates.ConfigState
 import android.content.Context
 import android.os.Bundle
 import android.text.Html

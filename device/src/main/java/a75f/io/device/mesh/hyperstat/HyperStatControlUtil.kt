@@ -8,7 +8,6 @@ import a75f.io.device.HyperStat.HyperStatControlsMessage_t
 import a75f.io.device.HyperStat.HyperStatFanSpeed_e
 import a75f.io.device.HyperStat.HyperStatOperatingMode_e
 import a75f.io.device.mesh.DeviceUtil.mapAnalogOut
-import a75f.io.device.mesh.DeviceUtil.mapDigitalOut
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getEquipDevices
 import a75f.io.domain.api.DomainName
@@ -46,7 +45,7 @@ fun getHyperStatControlMessage(deviceMap: HashMap<Any, Any>): HyperStatControlsM
 }
 
 private fun fillHyperStatControls(buildr: HyperStatControlsMessage_t.Builder, equipRef: String, deviceRef: String): HyperStatControlsMessage_t.Builder {
-
+    val hayStack = CCUHsApi.getInstance()
     val device = getHyperStatDomainDevice(deviceRef, equipRef)
     fun getAnalogOutValue(value: Double): HyperStatAnalogOutputControl_t {
         return HyperStatAnalogOutputControl_t.newBuilder().setPercent(value.toInt()).build()
@@ -54,29 +53,32 @@ private fun fillHyperStatControls(buildr: HyperStatControlsMessage_t.Builder, eq
 
     fun getPortValue(port: PhysicalPoint, isRelay: Boolean): Double {
         val logicalPointRef = port.readPoint().pointRef
-        if (logicalPointRef == null) {
-            CcuLog.e(L.TAG_CCU_DEVICE, "Logical point ref is missing for ${port.domainName}")
-            port.writePointValue(0.0)
-        } else {
-            val actualPhysicalValue: Double = if (isRelay) {
-                mapDigitalOut(port.readPoint().type, CCUHsApi.getInstance().readHisValById(logicalPointRef) > 0.0).toDouble()
+        if (!Globals.getInstance().isTestMode) {
+            if (logicalPointRef == null) {
+                CcuLog.e(L.TAG_CCU_DEVICE, "Logical point ref is missing for ${port.domainName}")
+                port.writePointValue(0.0)
             } else {
-                mapAnalogOut(port.readPoint().type,
-                    CCUHsApi.getInstance().readHisValById(logicalPointRef).toInt().toShort()
-                ).toDouble()
+                // For Relay we have Relay N/O and for analog we have 0-10V (configured)
+                if (isRelay.not()) {
+                    val logicalValue = hayStack.readHisValById(logicalPointRef).toInt().toShort()
+                    val voltage = mapAnalogOut(port.readPoint().type, logicalValue)
+                    port.writePointValue(voltage.toDouble())
+                } else {
+                    // it is relay
+                    port.writePointValue(hayStack.readHisValById(logicalPointRef))
+                }
             }
-            port.writePointValue(actualPhysicalValue)
         }
+
         val isWritable = port.isWritable()
-        val logicalVal = if (isWritable) {
-            port.readPriorityVal()
-        } else {
-            port.readHisVal()
-        }
-        val mappedVal = if (Globals.getInstance().isTemporaryOverrideMode) {
-            port.readHisVal()
-        } else {
-            logicalVal
+        var mappedVal = port.readHisVal()
+
+        if (isWritable) {
+            mappedVal = port.readPriorityVal()
+            port.writeHisVal(mappedVal)
+            if (Globals.getInstance().isTemporaryOverrideMode) {
+                return mappedVal
+            }
         }
         return mappedVal
     }

@@ -5,10 +5,10 @@ import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.devices.HyperStatSplitDevice
-import a75f.io.domain.equips.HyperStatSplitEquip
-import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
-import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
-import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
+import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
+import a75f.io.domain.equips.hyperstatsplit.HsSplitCpuEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe2UVEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe4UVEquip
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.ZonePriority
@@ -119,7 +119,6 @@ fun getSplitConfiguration(equipRef: String): HyperStatSplitConfiguration? {
             ).getActiveConfiguration()
 
         }
-
 
         is Pipe2UVEquip -> {
             val pipe2Model = ModelLoader.getSplitPipe2Model() as SeventyFiveFProfileDirective

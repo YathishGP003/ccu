@@ -6,7 +6,6 @@ import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.mystat.MyStatPipe4Equip
-import a75f.io.domain.util.ModelNames
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.util.MinMaxConfig
 import a75f.io.logic.bo.building.statprofiles.util.MyStatPipe4MinMaxConfig
@@ -21,17 +20,19 @@ class MyStatPipe4Configuration(nodeAddress: Int, nodeType: String, priority: Int
     lateinit var analogOut2MinMaxConfig: MyStatPipe4MinMaxConfig
     lateinit var analogOut2FanSpeedConfig: MyStatFanConfig
 
-    override fun getActiveConfiguration(): MyStatConfiguration {
-        val pipe4RawEquip =
-            Domain.hayStack.readEntity("domainName == \"${ModelNames.myStatPipe4}\" and group == \"$nodeAddress\"")
-        if (pipe4RawEquip.isEmpty()) {
+    override fun getActiveConfiguration() : MyStatConfiguration {
+        val equip = Domain.hayStack.readEntity("equip and group == \"$nodeAddress\"")
+        if (equip.isEmpty()) {
             return this
         }
-
-        val myStatPipe4Equip = MyStatPipe4Equip(pipe4RawEquip[Tags.ID].toString())
-        val configuration = this.getDefaultConfiguration()
-        configuration.getActiveConfiguration(myStatPipe4Equip)
-        readPipe4ActiveConfig(myStatPipe4Equip)
+        val msEquip = MyStatPipe4Equip(equip[Tags.ID].toString())
+        getDefaultConfiguration()
+        getActiveEnableConfigs(msEquip)
+        getActiveAssociationConfigs(msEquip)
+        getGenericZoneConfigs(msEquip)
+        getActiveDynamicConfig(msEquip)
+        equipId = msEquip.equipRef
+        isDefault = false
         return this
     }
 
@@ -106,11 +107,11 @@ class MyStatPipe4Configuration(nodeAddress: Int, nodeType: String, priority: Int
             }
         }
     }
+
     override fun getAnalogStartIndex(): Int = MyStatPipe4RelayMapping.values().size
 
     private fun isRelayExternalMapped(enabled: EnableConfig, association: AssociationConfig) =
         (enabled.enabled && association.associationVal == MyStatPipe4RelayMapping.EXTERNALLY_MAPPED.ordinal)
-
 
     override fun getRelayMap(): Map<String, Boolean> {
         val relayStatus = mutableMapOf<String, Boolean>()
@@ -247,7 +248,7 @@ class MyStatPipe4Configuration(nodeAddress: Int, nodeType: String, priority: Int
 
     }
 
-    private fun readPipe4ActiveConfig(equip: MyStatPipe4Equip) {
+    private fun getActiveDynamicConfig(equip: MyStatPipe4Equip) {
 
         analogOut1MinMaxConfig.apply {
             hotWaterValve.min.currentVal = getActivePointValue(
@@ -336,13 +337,13 @@ class MyStatPipe4Configuration(nodeAddress: Int, nodeType: String, priority: Int
         }
     }
 
-    fun isCoolingAvailable(): Boolean {
+    override fun isCoolingAvailable(): Boolean {
         val relays = getRelayEnabledAssociations()
         return (isAnyRelayEnabledAssociated(relays, MyStatPipe4RelayMapping.CHILLED_WATER_VALVE.ordinal)
                 || isAnalogEnabledAssociated(association = MyStatPipe4AnalogOutMapping.CHILLED_MODULATING_VALUE.ordinal))
     }
 
-    fun isHeatingAvailable(): Boolean {
+    override fun isHeatingAvailable(): Boolean {
         val relays = getRelayEnabledAssociations()
         return ((isAnyRelayEnabledAssociated(relays, MyStatPipe4RelayMapping.HOT_WATER_VALVE.ordinal) ||
                 isAnyRelayEnabledAssociated(relays, MyStatPipe4RelayMapping.AUX_HEATING_STAGE1.ordinal))

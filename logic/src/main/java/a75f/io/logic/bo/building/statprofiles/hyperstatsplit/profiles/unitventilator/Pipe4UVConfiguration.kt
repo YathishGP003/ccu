@@ -5,7 +5,7 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ValueConfig
-import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe4UVEquip
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -146,13 +146,13 @@ class Pipe4UVConfiguration(
     private fun getAnalogOutConfigs(equip: Pipe4UVEquip) {
         analogOut1Voltage.apply {
             oaoDamperMinVoltage.currentVal =
-                getDefault(equip.analog1AtMinOAODamper, equip, oaoDamperMinVoltage)
+                getDefault(equip.analog1MinOAODamper, equip, oaoDamperMinVoltage)
             oaoDamperMaxVoltage.currentVal =
-                getDefault(equip.analog1AtMaxOAODamper, equip, oaoDamperMaxVoltage)
+                getDefault(equip.analog1MaxOAODamper, equip, oaoDamperMaxVoltage)
             dcvModulationMinVoltage.currentVal =
-                getDefault(equip.analog1AtMinDcvModulation, equip, dcvModulationMinVoltage)
+                getDefault(equip.analog1MinDCVDamper, equip, dcvModulationMinVoltage)
             dcvModulationMaxVoltage.currentVal =
-                getDefault(equip.analog1AtMaxDcvModulation, equip, dcvModulationMaxVoltage)
+                getDefault(equip.analog1MaxDCVDamper, equip, dcvModulationMaxVoltage)
             fanMin.currentVal = getDefault(equip.analog1MinFanSpeed, equip, fanMin)
             fanMax.currentVal = getDefault(equip.analog1MaxFanSpeed, equip, fanMax)
             faceAndBypassDamperMin.currentVal =
@@ -174,13 +174,13 @@ class Pipe4UVConfiguration(
 
         analogOut2Voltage.apply {
             oaoDamperMinVoltage.currentVal =
-                getDefault(equip.analog2AtMinOAODamper, equip, oaoDamperMinVoltage)
+                getDefault(equip.analog2MinOAODamper, equip, oaoDamperMinVoltage)
             oaoDamperMaxVoltage.currentVal =
-                getDefault(equip.analog2AtMaxOAODamper, equip, oaoDamperMaxVoltage)
+                getDefault(equip.analog2MaxOAODamper, equip, oaoDamperMaxVoltage)
             dcvModulationMinVoltage.currentVal =
-                getDefault(equip.analog2AtMinDcvModulation, equip, dcvModulationMinVoltage)
+                getDefault(equip.analog2MinDCVDamper, equip, dcvModulationMinVoltage)
             dcvModulationMaxVoltage.currentVal =
-                getDefault(equip.analog2AtMaxDcvModulation, equip, dcvModulationMaxVoltage)
+                getDefault(equip.analog2MaxDCVDamper, equip, dcvModulationMaxVoltage)
             fanMin.currentVal = getDefault(equip.analog2MinFanSpeed, equip, fanMin)
             fanMax.currentVal = getDefault(equip.analog2MaxFanSpeed, equip, fanMax)
             faceAndBypassDamperMin.currentVal =
@@ -202,13 +202,13 @@ class Pipe4UVConfiguration(
 
         analogOut3Voltage.apply {
             oaoDamperMinVoltage.currentVal =
-                getDefault(equip.analog3AtMinOAODamper, equip, oaoDamperMinVoltage)
+                getDefault(equip.analog3MinOAODamper, equip, oaoDamperMinVoltage)
             oaoDamperMaxVoltage.currentVal =
-                getDefault(equip.analog3AtMaxOAODamper, equip, oaoDamperMaxVoltage)
+                getDefault(equip.analog3MaxOAODamper, equip, oaoDamperMaxVoltage)
             dcvModulationMinVoltage.currentVal =
-                getDefault(equip.analog3AtMinDcvModulation, equip, dcvModulationMinVoltage)
+                getDefault(equip.analog3MinDCVDamper, equip, dcvModulationMinVoltage)
             dcvModulationMaxVoltage.currentVal =
-                getDefault(equip.analog3AtMaxDcvModulation, equip, dcvModulationMaxVoltage)
+                getDefault(equip.analog3MaxDCVDamper, equip, dcvModulationMaxVoltage)
             fanMin.currentVal = getDefault(equip.analog3MinFanSpeed, equip, fanMin)
             fanMax.currentVal = getDefault(equip.analog3MaxFanSpeed, equip, fanMax)
             faceAndBypassDamperMin.currentVal =
@@ -230,13 +230,13 @@ class Pipe4UVConfiguration(
 
         analogOut4Voltage.apply {
             oaoDamperMinVoltage.currentVal =
-                getDefault(equip.analog4AtMinOAODamper, equip, oaoDamperMinVoltage)
+                getDefault(equip.analog4MinOAODamper, equip, oaoDamperMinVoltage)
             oaoDamperMaxVoltage.currentVal =
-                getDefault(equip.analog4AtMaxOAODamper, equip, oaoDamperMaxVoltage)
+                getDefault(equip.analog4MaxOAODamper, equip, oaoDamperMaxVoltage)
             dcvModulationMinVoltage.currentVal =
-                getDefault(equip.analog4AtMinDcvModulation, equip, dcvModulationMinVoltage)
+                getDefault(equip.analog4MinDCVDamper, equip, dcvModulationMinVoltage)
             dcvModulationMaxVoltage.currentVal =
-                getDefault(equip.analog4AtMaxDcvModulation, equip, dcvModulationMaxVoltage)
+                getDefault(equip.analog4MaxDCVDamper, equip, dcvModulationMaxVoltage)
             fanMin.currentVal = getDefault(equip.analog4MinFanSpeed, equip, fanMin)
             fanMax.currentVal = getDefault(equip.analog4MaxFanSpeed, equip, fanMax)
             faceAndBypassDamperMin.currentVal =

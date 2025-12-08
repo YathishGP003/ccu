@@ -9,10 +9,10 @@ import a75f.io.device.HyperSplit.HyperSplitSettingsMessage4_t
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
-import a75f.io.domain.equips.HyperStatSplitEquip
-import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
-import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
-import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
+import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
+import a75f.io.domain.equips.hyperstatsplit.HsSplitCpuEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe2UVEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe4UVEquip
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.CpuSensorBusType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.UniversalInputs

@@ -35,7 +35,7 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 fun reconfigureHyperstatEquips(msgObject: JsonObject, configPoint: Point) {
 
     val hayStack = CCUHsApi.getInstance()
-    
+    CcuLog.e(L.TAG_CCU_PUBNUB, " reconfigureHyperstatEquips")
     val hyperStatEquip = hayStack.readEntity("equip and id == "+configPoint.equipRef)
     val model = getHSModelByEquipRef(configPoint.equipRef)
 
@@ -53,26 +53,38 @@ fun reconfigureHyperstatEquips(msgObject: JsonObject, configPoint: Point) {
 
 
     val pointNewValue = msgObject["val"]
-    if(pointNewValue == null || pointNewValue.asString.isEmpty()){
+    if (pointNewValue == null || pointNewValue.asString.isEmpty()) {
         CcuLog.e(L.TAG_CCU_PUBNUB, "point is null $config")
     } else {
         updateConfiguration(configPoint.domainName, pointNewValue.asDouble, config)
-        equipBuilder.updateEquipAndPoints(config, model , hayStack.getSite()!!.id, hyperStatEquip["dis"].toString(), true)
+        equipBuilder.updateEquipAndPoints(
+            config,
+            model,
+            hayStack.getSite()!!.id,
+            hyperStatEquip["dis"].toString(),
+            true
+        )
         if (configPoint.domainName == DomainName.fanOpMode) {
             updateFanModeCache(configPoint.equipRef, pointNewValue.asInt)
         }
-        deviceBuilder.updateDeviceAndPoints(config, deviceModel, hyperStatEquip["id"].toString(), hayStack.site!!.id, deviceDis)
+        deviceBuilder.updateDeviceAndPoints(
+            config,
+            deviceModel,
+            hyperStatEquip["id"].toString(),
+            hayStack.site!!.id,
+            deviceDis
+        )
         // Not need to check the fan mode when we updated the fan mode in portal
         // we will received two message for level 8 clearing the value and level 10 for updating the value
         // 1. clearing the value while getting the fan mode priority array we do not have any value ,so it will return 0 at this time our fan mode is off
-        if(configPoint.domainName != DomainName.fanOpMode) {
-            updateFanMode(configPoint.equipRef, config)
-        }
+
     }
     writePointFromJson(configPoint, msgObject, hayStack)
     config.apply { setPortConfiguration( nodeAddress, getRelayMap(), getAnalogMap()) }
     DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance())
-
+    if (configPoint.domainName != DomainName.fanOpMode) {
+        updateFanMode(configPoint.equipRef, config)
+    }
     /*
     - If we do reconfiguration from portal for fanMode, level 10 updated as ( val = 9)
     - Now if user change the fanMode from CCU, it will update the level 8 as 1

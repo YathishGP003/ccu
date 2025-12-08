@@ -34,17 +34,18 @@ import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.equips.VavModulatingRtuSystemEquip
 import a75f.io.domain.equips.VavStagedSystemEquip
 import a75f.io.domain.equips.VavStagedVfdSystemEquip
-import a75f.io.domain.equips.hyperstat.CpuV2Equip
-import a75f.io.domain.equips.hyperstat.HpuV2Equip
+import a75f.io.domain.equips.hyperstat.HsCpuEquip
+import a75f.io.domain.equips.hyperstat.HsHpuEquip
+import a75f.io.domain.equips.hyperstat.HsPipe2Equip
+import a75f.io.domain.equips.hyperstat.HsPipe4Equip
 import a75f.io.domain.equips.hyperstat.MonitoringEquip
-import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
+import a75f.io.domain.equips.hyperstatsplit.HsSplitCpuEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe2UVEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe4UVEquip
 import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
 import a75f.io.domain.equips.mystat.MyStatPipe4Equip
-import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
-import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
-import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
 import a75f.io.domain.util.CommonQueries
 import a75f.io.logger.CcuLog
 import io.seventyfivef.ph.core.Tags
@@ -127,9 +128,10 @@ object DomainManager {
                     }
                     it.contains("dab") -> Domain.equips[it["id"].toString()] = DabEquip(it["id"].toString())
                     it.contains("sse") -> Domain.equips[it["id"].toString()] = SseEquip(it["id"].toString())
-                    (it.contains("hyperstat") && it.contains("cpu")) -> Domain.equips[it["id"].toString()] = CpuV2Equip(it["id"].toString())
-                    (it.contains("hyperstat") && it.contains("hpu")) -> Domain.equips[it["id"].toString()] = HpuV2Equip(it["id"].toString())
-                    (it.contains("hyperstat") && it.contains("pipe2")) -> Domain.equips[it["id"].toString()] = Pipe2V2Equip(it["id"].toString())
+                    (it.contains("hyperstat") && it.contains("cpu")) -> Domain.equips[it["id"].toString()] = HsCpuEquip(it["id"].toString())
+                    (it.contains("hyperstat") && it.contains("hpu")) -> Domain.equips[it["id"].toString()] = HsHpuEquip(it["id"].toString())
+                    (it.contains("hyperstat") && it.contains("pipe2")) -> Domain.equips[it["id"].toString()] = HsPipe2Equip(it["id"].toString())
+                    (it.contains("hyperstat") && it.contains("pipe4")) -> Domain.equips[it["id"].toString()] = HsPipe4Equip(it["id"].toString())
                     (it.contains("domainName") && it["domainName"].toString() == DomainName.hyperstatMonitoring) -> Domain.equips[it["id"].toString()] = MonitoringEquip(it["id"].toString())
                     it.contains("otn") -> Domain.equips[it["id"].toString()] = OtnEquip(it["id"].toString())
                     it.contains("pid") -> Domain.equips[it["id"].toString()] = PlcEquip(it["id"].toString())
@@ -269,7 +271,7 @@ object DomainManager {
             val deviceMap = hayStack.readEntity("domainName and device and equipRef == \"${equip["id"]}\"")
             if (deviceMap.isNotEmpty()) {
                 when {
-                    (equip.contains("hyperstat") && (equip.contains("cpu") || equip.contains("hpu") || equip.contains("pipe2") ||
+                    (equip.contains("hyperstat") && (equip.contains("cpu") || equip.contains("hpu") || equip.contains("pipe2") || equip.contains("pipe4") ||
                             equip.contains(a75f.io.api.haystack.Tags.MONITORING))) -> Domain.devices[equip["id"].toString()] = HyperStatDevice(deviceMap["id"].toString())
                     (equip.contains("mystat") && (equip.contains("cpu") || equip.contains("hpu") || equip.contains("pipe2") || equip.contains("pipe4"))) -> Domain.devices[equip["id"].toString()] = MyStatDevice(deviceMap["id"].toString())
                     (deviceMap.contains("domainName") && deviceMap["domainName"].toString() == DomainName.hyperstatSplitDevice) -> {
@@ -310,9 +312,10 @@ object DomainManager {
             equip.markers.contains("otn") -> Domain.equips[equip.id] = OtnEquip(equip.id)
             equip.markers.contains("hyperstat") -> {
                 when {
-                    equip.markers.contains("cpu") -> Domain.equips[equip.id] = CpuV2Equip(equip.id)
-                    equip.markers.contains("hpu") -> Domain.equips[equip.id] = HpuV2Equip(equip.id)
-                    equip.markers.contains("pipe2") -> Domain.equips[equip.id] = Pipe2V2Equip(equip.id)
+                    equip.markers.contains("cpu") -> Domain.equips[equip.id] = HsCpuEquip(equip.id)
+                    equip.markers.contains("hpu") -> Domain.equips[equip.id] = HsHpuEquip(equip.id)
+                    equip.markers.contains("pipe2") -> Domain.equips[equip.id] = HsPipe2Equip(equip.id)
+                    equip.markers.contains("pipe4") -> Domain.equips[equip.id] = HsPipe4Equip(equip.id)
                     equip.markers.contains(a75f.io.api.haystack.Tags.MONITORING) ->
                         Domain.equips[equip.id] = MonitoringEquip(equip.id)
                 }

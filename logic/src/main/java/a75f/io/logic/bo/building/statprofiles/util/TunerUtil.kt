@@ -1,18 +1,18 @@
 package a75f.io.logic.bo.building.statprofiles.util
 
 import a75f.io.domain.api.DomainName
-import a75f.io.domain.equips.HyperStatSplitEquip
-import a75f.io.domain.equips.hyperstat.CpuV2Equip
-import a75f.io.domain.equips.hyperstat.HpuV2Equip
+import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
+import a75f.io.domain.equips.hyperstat.HsCpuEquip
+import a75f.io.domain.equips.hyperstat.HsHpuEquip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
-import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
+import a75f.io.domain.equips.hyperstat.HsPipe2Equip
 import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
 import a75f.io.domain.equips.mystat.MyStatPipe4Equip
-import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
-import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe2UVEquip
+import a75f.io.domain.equips.hyperstatsplit.UnitVentilatorEquip
 import a75f.io.logic.tuners.TunerUtil
 
 /**
@@ -48,17 +48,17 @@ fun fetchHyperStatTuners(equip: HyperStatEquip): BaseStatTuners {
     // These are specific tuners
     when (equip) {
 
-        is CpuV2Equip -> {
+        is HsCpuEquip -> {
             tuners.minFanRuntimePostConditioning =
                 getTuner(DomainName.minFanRuntimePostConditioning, equip.equipRef).toInt()
         }
 
-        is HpuV2Equip -> {
+        is HsHpuEquip -> {
             tuners.auxHeating1Activate = getTuner(DomainName.auxHeating1Activate, equip.equipRef)
             tuners.auxHeating2Activate = getTuner(DomainName.auxHeating2Activate, equip.equipRef)
         }
 
-        is Pipe2V2Equip -> {
+        is HsPipe2Equip -> {
             tuners.auxHeating1Activate = getTuner(DomainName.auxHeating1Activate, equip.equipRef)
             tuners.auxHeating2Activate = getTuner(DomainName.auxHeating2Activate, equip.equipRef)
             tuners.heatingThreshold =
@@ -92,12 +92,12 @@ fun fetchMyStatTuners(equip: MyStatEquip): BaseStatTuners {
         }
 
         is MyStatHpuEquip -> {
-            tuners.auxHeating1Activate =
+            tuners.myStatAuxHeating1Activate =
                 getTuner(DomainName.mystatAuxHeating1Activate, equip.equipRef)
         }
 
         is MyStatPipe2Equip -> {
-            tuners.auxHeating1Activate =
+            tuners.myStatAuxHeating1Activate =
                 getTuner(DomainName.mystatAuxHeating1Activate, equip.equipRef)
             tuners.heatingThreshold =
                 getTuner(DomainName.mystatPipe2FancoilHeatingThreshold, equip.equipRef)

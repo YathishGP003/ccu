@@ -60,6 +60,7 @@ public class L
     public static final String TAG_CCU_HSHST = "CCU_HST";
     public static final String TAG_CCU_HSCPU = "CCU_HSCPU";
     public static final String TAG_CCU_HSPIPE2 = "CCU_HSPIPE2";
+    public static final String TAG_CCU_HSPIPE4 = "CCU_HSPIPE4";
     public static final String TAG_CCU_MSPIPE2 = "CCU_MSPIPE2";
     public static final String TAG_CCU_MSCPU = "CCU_MSCPU";
     public static final String TAG_CCU_MSHPU = "CCU_MSHPU";

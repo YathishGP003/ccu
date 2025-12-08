@@ -58,7 +58,7 @@ class MyStatControlFactory(
     fun addPipe2Controllers(config: MyStatPipe2Configuration, waterValveLoop: CalibratedPoint, fanLowVentilation: CalibratedPoint) {
         val pipe2Equip = equip as MyStatPipe2Equip
         addFanSpeedControllers(config, L.TAG_CCU_MSPIPE2, pipe2Equip.fanLoopOutput, fanLowVentilation)
-        addAuxStage1Controller(L.TAG_CCU_MSPIPE2, pipe2Equip.auxHeatingStage1, pipe2Equip.auxHeating1Activate)
+        addAuxStage1Controller(L.TAG_CCU_MSPIPE2, pipe2Equip.auxHeatingStage1, pipe2Equip.mystatAuxHeating1Activate)
         addWaterValveControllerIfRequired(waterValveLoop)
         addFanEnableIfRequired(L.TAG_CCU_MSPIPE2)
         addOccupiedEnabledIfRequired(L.TAG_CCU_MSPIPE2)
@@ -69,7 +69,7 @@ class MyStatControlFactory(
     fun addPipe4Controllers(config: MyStatPipe4Configuration, fanLowVentilation: CalibratedPoint) {
         val pipe4Equip = equip as MyStatPipe4Equip
         addFanSpeedControllers(config, L.TAG_CCU_MSPIPE4, pipe4Equip.fanLoopOutput, fanLowVentilation)
-        addAuxStage1Controller(L.TAG_CCU_MSPIPE4, pipe4Equip.auxHeatingStage1, pipe4Equip.auxHeating1Activate)
+        addAuxStage1Controller(L.TAG_CCU_MSPIPE4, pipe4Equip.auxHeatingStage1, pipe4Equip.mystatAuxHeating1Activate)
         addCoolingValveController()
         addHeatingValveController()
         addFanEnableIfRequired(L.TAG_CCU_MSPIPE4)

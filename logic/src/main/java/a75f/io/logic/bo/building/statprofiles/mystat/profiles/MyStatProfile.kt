@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.statprofiles.util.MyStatTuners
 import a75f.io.logic.bo.building.statprofiles.util.StagesCounts
 import a75f.io.logic.bo.building.statprofiles.util.StatLoopController
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
+import a75f.io.logic.bo.building.statprofiles.util.doorWindowIsOpen
 import a75f.io.logic.bo.building.statprofiles.util.updateLogicalPoint
 import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.controlcomponents.util.ControllerNames
@@ -105,8 +106,8 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
 
     fun evaluateDcvLoop(equip: MyStatEquip, config: MyStatConfiguration) {
         val rawCo2 = equip.zoneCo2.readHisVal().toInt()
-        val deltaCo2 = rawCo2 - config.co2Threshold.currentVal
-        dcvLoopOutput = (deltaCo2 / config.co2DamperOpeningRate.currentVal).toInt().coerceIn(0, 100)
+        val deltaCo2 = rawCo2 - config.zoneCO2Threshold.currentVal
+        dcvLoopOutput = (deltaCo2 / config.zoneCO2DamperOpeningRate.currentVal).toInt().coerceIn(0, 100)
     }
 
     fun resetLoopOutputs() {
@@ -143,6 +144,16 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
         resetLogicalPoints(myStatEquip)
         myStatEquip.analogOutStages.clear()
         myStatEquip.relayStages.clear()
+    }
+
+
+    fun runTitle24Rule(equip: MyStatEquip) {
+        resetFanLowestFanStatus()
+        equip.apply {
+            fanEnabledStatus = equip.fanEnable.pointExists()
+            if (fanLowSpeedVentilation.pointExists() || fanLowSpeed.pointExists()) lowestStageFanLow = true
+            else if (fanHighSpeed.pointExists()) lowestStageFanHigh = true
+        }
     }
 
     fun handleChangeOfDirection(
@@ -265,18 +276,6 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
         }
     }
 
-
-    fun doorWindowIsOpen(doorWindowEnabled: Double, doorWindowSensor: Double, equip: MyStatEquip) {
-        equip.doorWindowSensingEnable.writePointValue(doorWindowEnabled)
-        equip.doorWindowSensorInput.writePointValue(doorWindowSensor)
-    }
-
-    fun keyCardIsInSlot(keycardEnabled: Double, keycardSensor: Double, equip: MyStatEquip) {
-        equip.keyCardSensingEnable.writePointValue(keycardEnabled)
-        equip.keyCardSensorInput.writePointValue(keycardSensor)
-    }
-
-
     fun resetLogicalPoint(pointId: String?) {
         if (pointId != null) {
             updateLogicalPoint(pointId, 0.0)
@@ -294,7 +293,7 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
         equip: MyStatEquip, equipRef: String, fanModeSaved: Int, basicSettings: MyStatBasicSettings
     ): MyStatFanStages {
         logIt("FanModeSaved in Shared Preference $fanModeSaved")
-        val currentOccupancy = equip.occupancyMode.readHisVal().toInt()
+
         // If occupancy is unoccupied and the fan mode is current occupied then remove the fan mode from cache
         if ((occupancyStatus == Occupancy.UNOCCUPIED || occupancyStatus == Occupancy.DEMAND_RESPONSE_UNOCCUPIED) && isFanModeCurrentOccupied(
                 fanModeSaved
@@ -397,36 +396,6 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
         }
     }
 
-    open fun isDoorOpenState(config: MyStatConfiguration, equip: MyStatEquip): Boolean {
-        var isDoorWindowMapped = 0.0
-        var doorWindowSensorValue = 0.0
-
-        if (config.universalIn1Enabled.enabled) {
-            val universalMapping = MyStatConfiguration.UniversalMapping.values()
-                .find { it.ordinal == config.universalIn1Association.associationVal }
-            when (universalMapping) {
-                MyStatConfiguration.UniversalMapping.TH_DOOR_WINDOW_SENSOR_NC_TITLE24 -> {
-                    isDoorWindowMapped = 1.0
-                    doorWindowSensorValue = equip.doorWindowSensorNCTitle24.readHisVal()
-                }
-
-                MyStatConfiguration.UniversalMapping.AN_DOOR_WINDOW_SENSOR_TITLE24 -> {
-                    isDoorWindowMapped = 1.0
-                    doorWindowSensorValue = equip.doorWindowSensorTitle24.readHisVal()
-                }
-
-                else -> {}
-            }
-        }
-        doorWindowIsOpen(isDoorWindowMapped, doorWindowSensorValue, equip)
-        return isDoorWindowMapped == 1.0 && doorWindowSensorValue > 0
-    }
-
-
-    enum class MyStatFanSpeed {
-        OFF, LOW, HIGH
-    }
-
     fun logIt(msg: String) {
         CcuLog.d(logTag, msg)
     }
@@ -436,21 +405,15 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
         equip.analogOutStages.clear()
     }
 
-    fun runForDoorWindowSensor(
-        config: MyStatConfiguration, equip: MyStatEquip,
-        analogOutStages: HashMap<String, Int>, relayStages: HashMap<String, Int>
-    ): Boolean {
-
-        val isDoorOpen = isDoorOpenState(config, equip)
-        logIt(
-            " is Door Open ? $isDoorOpen")
-        if (isDoorOpen) {
+    fun runForDoorWindowSensor(equip: MyStatEquip): Boolean {
+        val isDoorOpen = doorWindowIsOpen(equip)
+        logIt(" is Door Open ? $isDoorOpen")
+        if (isDoorOpen.first) {
             resetLoopOutputs()
             resetLogicalPoints(equip)
-            analogOutStages.clear()
-            relayStages.clear()
+            resetEquip(equip)
         }
-        return isDoorOpen
+        return isDoorOpen.first
     }
 }
 

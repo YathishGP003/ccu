@@ -5,8 +5,7 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ValueConfig
-import a75f.io.domain.equips.hyperstat.CpuV2Equip
-import a75f.io.domain.util.ModelNames
+import a75f.io.domain.equips.hyperstat.HsCpuEquip
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.util.FanConfig
 import a75f.io.logic.bo.building.statprofiles.util.MinMaxConfig
@@ -24,10 +23,6 @@ class CpuConfiguration(
     lateinit var analogOut1MinMaxConfig: CpuMinMaxConfig
     lateinit var analogOut2MinMaxConfig: CpuMinMaxConfig
     lateinit var analogOut3MinMaxConfig: CpuMinMaxConfig
-
-    lateinit var analogOut1FanSpeedConfig: FanConfig
-    lateinit var analogOut2FanSpeedConfig: FanConfig
-    lateinit var analogOut3FanSpeedConfig: FanConfig
 
     lateinit var coolingStageFanConfig: CpuStagedConfig
     lateinit var heatingStageFanConfig: CpuStagedConfig
@@ -102,57 +97,79 @@ class CpuConfiguration(
         }
     }
 
-    override fun getActiveConfiguration(): CpuConfiguration {
-
-        var cpuRawEquip = Domain.hayStack.readEntity("domainName == \"${ModelNames.hyperStatCpu}\" and group == \"$nodeAddress\"")
-        // Remove the bellow code after migration all the hyperStat cpu modules
-        if (cpuRawEquip.isEmpty()) {
-            cpuRawEquip = Domain.hayStack.readEntity("equip and group == \"$nodeAddress\"")
-        }
-        if (cpuRawEquip.isEmpty()) {
+    override fun getActiveConfiguration() : CpuConfiguration {
+        val equip = Domain.hayStack.readEntity("equip and group == \"$nodeAddress\"")
+        if (equip.isEmpty()) {
             return this
         }
-
-        val cpuEquip = CpuV2Equip(cpuRawEquip[Tags.ID].toString())
-        val configuration = this.getDefaultConfiguration()
-        configuration.getActiveConfiguration(cpuEquip)
-        readCpuActiveConfiguration(cpuEquip)
+        val hssEquip = HsCpuEquip(equip[Tags.ID].toString())
+        getDefaultConfiguration()
+        getActiveEnableConfigs(hssEquip)
+        getActiveAssociationConfigs(hssEquip)
+        getGenericZoneConfigs(hssEquip)
+        getActiveDynamicConfigs(hssEquip)
+        equipId = hssEquip.equipRef
+        isDefault = false
         return this
     }
 
-    private fun readCpuActiveConfiguration(equip: CpuV2Equip) {
 
+    private fun getActiveDynamicConfigs(equip: HsCpuEquip) {
         analogOut1MinMaxConfig.apply {
-            coolingConfig.min.currentVal = getActivePointValue(equip.analog1MinCooling, coolingConfig.min)
-            coolingConfig.max.currentVal = getActivePointValue(equip.analog1MaxCooling, coolingConfig.max)
-            linearFanSpeedConfig.min.currentVal = getActivePointValue(equip.analog1MinLinearFanSpeed, linearFanSpeedConfig.min)
-            linearFanSpeedConfig.max.currentVal = getActivePointValue(equip.analog1MaxLinearFanSpeed, linearFanSpeedConfig.max)
-            heatingConfig.min.currentVal = getActivePointValue(equip.analog1MinHeating, heatingConfig.min)
-            heatingConfig.max.currentVal = getActivePointValue(equip.analog1MaxHeating, heatingConfig.max)
-            dcvDamperConfig.min.currentVal = getActivePointValue(equip.analog1MinDCVDamper, dcvDamperConfig.min)
-            dcvDamperConfig.max.currentVal = getActivePointValue(equip.analog1MaxDCVDamper, dcvDamperConfig.max)
+            coolingConfig.min.currentVal =
+                getActivePointValue(equip.analog1MinCooling, coolingConfig.min)
+            coolingConfig.max.currentVal =
+                getActivePointValue(equip.analog1MaxCooling, coolingConfig.max)
+            linearFanSpeedConfig.min.currentVal =
+                getActivePointValue(equip.analog1MinLinearFanSpeed, linearFanSpeedConfig.min)
+            linearFanSpeedConfig.max.currentVal =
+                getActivePointValue(equip.analog1MaxLinearFanSpeed, linearFanSpeedConfig.max)
+            heatingConfig.min.currentVal =
+                getActivePointValue(equip.analog1MinHeating, heatingConfig.min)
+            heatingConfig.max.currentVal =
+                getActivePointValue(equip.analog1MaxHeating, heatingConfig.max)
+            dcvDamperConfig.min.currentVal =
+                getActivePointValue(equip.analog1MinDCVDamper, dcvDamperConfig.min)
+            dcvDamperConfig.max.currentVal =
+                getActivePointValue(equip.analog1MaxDCVDamper, dcvDamperConfig.max)
         }
 
         analogOut2MinMaxConfig.apply {
-            coolingConfig.min.currentVal = getActivePointValue(equip.analog2MinCooling, coolingConfig.min)
-            coolingConfig.max.currentVal = getActivePointValue(equip.analog2MaxCooling, coolingConfig.max)
-            linearFanSpeedConfig.min.currentVal = getActivePointValue(equip.analog2MinLinearFanSpeed, linearFanSpeedConfig.min)
-            linearFanSpeedConfig.max.currentVal = getActivePointValue(equip.analog2MaxLinearFanSpeed, linearFanSpeedConfig.max)
-            heatingConfig.min.currentVal = getActivePointValue(equip.analog2MinHeating, heatingConfig.min)
-            heatingConfig.max.currentVal = getActivePointValue(equip.analog2MaxHeating, heatingConfig.max)
-            dcvDamperConfig.min.currentVal = getActivePointValue(equip.analog2MinDCVDamper, dcvDamperConfig.min)
-            dcvDamperConfig.max.currentVal = getActivePointValue(equip.analog2MaxDCVDamper, dcvDamperConfig.max)
+            coolingConfig.min.currentVal =
+                getActivePointValue(equip.analog2MinCooling, coolingConfig.min)
+            coolingConfig.max.currentVal =
+                getActivePointValue(equip.analog2MaxCooling, coolingConfig.max)
+            linearFanSpeedConfig.min.currentVal =
+                getActivePointValue(equip.analog2MinLinearFanSpeed, linearFanSpeedConfig.min)
+            linearFanSpeedConfig.max.currentVal =
+                getActivePointValue(equip.analog2MaxLinearFanSpeed, linearFanSpeedConfig.max)
+            heatingConfig.min.currentVal =
+                getActivePointValue(equip.analog2MinHeating, heatingConfig.min)
+            heatingConfig.max.currentVal =
+                getActivePointValue(equip.analog2MaxHeating, heatingConfig.max)
+            dcvDamperConfig.min.currentVal =
+                getActivePointValue(equip.analog2MinDCVDamper, dcvDamperConfig.min)
+            dcvDamperConfig.max.currentVal =
+                getActivePointValue(equip.analog2MaxDCVDamper, dcvDamperConfig.max)
         }
 
         analogOut3MinMaxConfig.apply {
-            coolingConfig.min.currentVal = getActivePointValue(equip.analog3MinCooling, coolingConfig.min)
-            coolingConfig.max.currentVal = getActivePointValue(equip.analog3MaxCooling, coolingConfig.max)
-            linearFanSpeedConfig.min.currentVal = getActivePointValue(equip.analog3MinLinearFanSpeed, linearFanSpeedConfig.min)
-            linearFanSpeedConfig.max.currentVal = getActivePointValue(equip.analog3MaxLinearFanSpeed, linearFanSpeedConfig.max)
-            heatingConfig.min.currentVal = getActivePointValue(equip.analog3MinHeating, heatingConfig.min)
-            heatingConfig.max.currentVal = getActivePointValue(equip.analog3MaxHeating, heatingConfig.max)
-            dcvDamperConfig.min.currentVal = getActivePointValue(equip.analog3MinDCVDamper, dcvDamperConfig.min)
-            dcvDamperConfig.max.currentVal = getActivePointValue(equip.analog3MaxDCVDamper, dcvDamperConfig.max)
+            coolingConfig.min.currentVal =
+                getActivePointValue(equip.analog3MinCooling, coolingConfig.min)
+            coolingConfig.max.currentVal =
+                getActivePointValue(equip.analog3MaxCooling, coolingConfig.max)
+            linearFanSpeedConfig.min.currentVal =
+                getActivePointValue(equip.analog3MinLinearFanSpeed, linearFanSpeedConfig.min)
+            linearFanSpeedConfig.max.currentVal =
+                getActivePointValue(equip.analog3MaxLinearFanSpeed, linearFanSpeedConfig.max)
+            heatingConfig.min.currentVal =
+                getActivePointValue(equip.analog3MinHeating, heatingConfig.min)
+            heatingConfig.max.currentVal =
+                getActivePointValue(equip.analog3MaxHeating, heatingConfig.max)
+            dcvDamperConfig.min.currentVal =
+                getActivePointValue(equip.analog3MinDCVDamper, dcvDamperConfig.min)
+            dcvDamperConfig.max.currentVal =
+                getActivePointValue(equip.analog3MaxDCVDamper, dcvDamperConfig.max)
         }
 
         analogOut1FanSpeedConfig.apply {
@@ -194,7 +211,7 @@ class CpuConfiguration(
     }
 
     override fun getDefaultConfiguration(): HyperStatConfiguration {
-        val configuration = super.getDefaultConfiguration()
+        val configuration = super.getDefaultConfiguration() as HyperStatConfiguration
         configuration.apply {
             analogOut1MinMaxConfig = CpuMinMaxConfig(
                     getMinMax(DomainName.analog1MinCooling, DomainName.analog1MaxCooling),
@@ -342,11 +359,11 @@ class CpuConfiguration(
                 || isAnyRelayEnabledAssociated(relays, HsCpuRelayMapping.HEATING_STAGE_3.ordinal))
     }
 
-    fun isCoolingAvailable(): Boolean {
+    override fun isCoolingAvailable(): Boolean {
         return (isCoolingStageAvailable() || isAnyAnalogOutEnabledAssociated(association = HsCpuAnalogOutMapping.COOLING.ordinal))
     }
 
-    fun isHeatingAvailable(): Boolean {
+    override fun isHeatingAvailable(): Boolean {
         return (isHeatingStageAvailable() || isAnyAnalogOutEnabledAssociated(association = HsCpuAnalogOutMapping.HEATING.ordinal))
     }
 
@@ -423,20 +440,6 @@ enum class HsCpuRelayMapping(val displayName: String) {
     DEHUMIDIFIER("Dehumidifier"),
     EXTERNALLY_MAPPED("Externally Mapped"),
     DCV_DAMPER("Dcv Damper"),
-}
-
-enum class Th2InputAssociation {
-    DOOR_WINDOW_SENSOR_NC_TITLE_24,
-    GENERIC_FAULT_NC,
-    GENERIC_FAULT_NO
-}
-
-enum class AnalogInputAssociation {
-    CURRENT_TX_0_10,
-    CURRENT_TX_0_20,
-    CURRENT_TX_0_50,
-    KEY_CARD_SENSOR,
-    DOOR_WINDOW_SENSOR_TITLE_24,
 }
 
 data class CpuMinMaxConfig(

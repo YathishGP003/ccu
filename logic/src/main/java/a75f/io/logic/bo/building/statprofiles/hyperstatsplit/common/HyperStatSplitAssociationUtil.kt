@@ -2,10 +2,10 @@ package a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common
 
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
-import a75f.io.domain.equips.HyperStatSplitEquip
-import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
-import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
-import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
+import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
+import a75f.io.domain.equips.hyperstatsplit.HsSplitCpuEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe2UVEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe4UVEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
@@ -22,10 +22,27 @@ import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.Hy
 class HyperStatSplitAssociationUtil {
     companion object {
 
-
         //Function which checks the Sensor bus address is Associated  to OUTSIDE_AIR_TEMPERATURE_HUMIDITY
         private fun isSensorBusAddressAssociatedToOutsideAir(association: SensorTempHumidityAssociationConfig): Boolean {
             return (association.temperatureAssociation.associationVal == CpuSensorBusType.OUTSIDE_AIR.ordinal)
+        }
+
+        fun isAnyRelayAssociatedToFanEnabled(config: HyperStatSplitCpuConfiguration): Boolean {
+            return isAnyRelayEnabledMapped(config, CpuRelayType.FAN_ENABLED)
+        }
+
+        private fun isAnyRelayEnabledMapped(config: HyperStatSplitCpuConfiguration, association: CpuRelayType): Boolean{
+            return when {
+                (config.relay1Enabled.enabled && config.relay1Association.associationVal == association.ordinal) -> true
+                (config.relay2Enabled.enabled && config.relay2Association.associationVal == association.ordinal) -> true
+                (config.relay3Enabled.enabled && config.relay3Association.associationVal == association.ordinal) -> true
+                (config.relay4Enabled.enabled && config.relay4Association.associationVal == association.ordinal) -> true
+                (config.relay5Enabled.enabled && config.relay5Association.associationVal == association.ordinal) -> true
+                (config.relay6Enabled.enabled && config.relay6Association.associationVal == association.ordinal) -> true
+                (config.relay7Enabled.enabled && config.relay7Association.associationVal == association.ordinal) -> true
+                (config.relay8Enabled.enabled && config.relay8Association.associationVal == association.ordinal) -> true
+                else -> false
+            }
         }
 
         fun isAnySensorBusAddressMappedToOutsideAir(
@@ -97,8 +114,6 @@ class HyperStatSplitAssociationUtil {
                 return association.associationVal
             return lowestValue
         }
-
-
 
         fun getSelectedFanModeByLevel(fanLevel: Int, selectedFan: Int): StandaloneFanStage {
             try {

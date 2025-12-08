@@ -143,9 +143,10 @@ public class UpdatePointHandler implements MessageHandler
         }
 
         if ((HSUtil.isHsCPUEquip(pointUid, CCUHsApi.getInstance())
-        || HSUtil.isHSPipe2Equip(pointUid, CCUHsApi.getInstance())
-        || HSUtil.isHSHpuEquip(pointUid, CCUHsApi.getInstance()))
-        && !isReconfigurationPoint(localPoint)){
+                || HSUtil.isHSPipe2Equip(pointUid, CCUHsApi.getInstance())
+                || HSUtil.isHSPipe4Equip(pointUid, CCUHsApi.getInstance())
+                || HSUtil.isHSHpuEquip(pointUid, CCUHsApi.getInstance()))
+                && !isReconfigurationPoint(localPoint)) {
             reconfigureHyperstatEquips(msgObject, localPoint);
             updatePoints(localPoint);
             hayStack.scheduleSync();

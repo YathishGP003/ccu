@@ -45,6 +45,7 @@ object ModelNames {
     const val connectNodeDevice = "connectNodeDevice"
     const val hyperStatCpu = "hyperstatCPU"
     const val hyperStatPipe2 = "hyperstat2PFCU"
+    const val hyperStatPipe4 = "hyperstat4PFCU"
     const val hyperStatHpu = "hyperstatHPU"
     const val ti = "ccuTemperatureInfluence"
 

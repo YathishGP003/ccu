@@ -668,17 +668,17 @@ class NonTempProfileViewModel : ViewModel(), PointSubscriber {
         monitoringPoints["Profile"] = "MONITORING"
 
         val currentTemp = monitoringEquip.currentTemp.readHisVal()
-        val tempOffset = monitoringEquip.tempOffset.readHisVal()
+        val tempOffset = monitoringEquip.temperatureOffset.readHisVal()
 
-        val analogIn1Association = monitoringEquip.analogIn1Association.readDefaultVal()
-        val analogIn2Association = monitoringEquip.analogIn2Association.readDefaultVal()
-        val thermistor1Association = monitoringEquip.thermistor1Association.readDefaultVal()
-        val thermistor2Association = monitoringEquip.thermistor2Association.readDefaultVal()
+        val analogIn1Association = monitoringEquip.analog1InputAssociation.readDefaultVal()
+        val analogIn2Association = monitoringEquip.analog2InputAssociation.readDefaultVal()
+        val thermistor1Association = monitoringEquip.thermistor1InputAssociation.readDefaultVal()
+        val thermistor2Association = monitoringEquip.thermistor2InputAssociation.readDefaultVal()
 
-        val isAnalog1Enable = monitoringEquip.analogIn1Enabled.readDefaultVal() > 0
-        val isAnalog2Enable = monitoringEquip.analogIn2Enabled.readDefaultVal() > 0
-        val isTh1Enable = monitoringEquip.thermistor1Enabled.readDefaultVal() > 0
-        val isTh2Enable = monitoringEquip.thermistor2Enabled.readDefaultVal() > 0
+        val isAnalog1Enable = monitoringEquip.analog1InputEnable.readDefaultVal() > 0
+        val isAnalog2Enable = monitoringEquip.analog2InputEnable.readDefaultVal() > 0
+        val isTh1Enable = monitoringEquip.thermistor1InputEnable.readDefaultVal() > 0
+        val isTh2Enable = monitoringEquip.thermistor2InputEnable.readDefaultVal() > 0
 
         fun getHistoricalValue(pointRef: String?) = pointRef?.let { hayStack.readHisValById(it) } ?: 0.0
 

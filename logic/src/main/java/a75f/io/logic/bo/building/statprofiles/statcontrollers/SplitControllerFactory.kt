@@ -1,10 +1,10 @@
 package a75f.io.logic.bo.building.statprofiles.statcontrollers
 
-import a75f.io.domain.equips.HyperStatSplitEquip
-import a75f.io.domain.equips.unitVentilator.HsSplitCpuEquip
-import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
-import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
-import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
+import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
+import a75f.io.domain.equips.hyperstatsplit.HsSplitCpuEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe2UVEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe4UVEquip
+import a75f.io.domain.equips.hyperstatsplit.UnitVentilatorEquip
 import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
@@ -162,6 +162,8 @@ class SplitControllerFactory(
                 activationHysteresis = equip.standaloneRelayActivationHysteresis,
                 totalStages = counts.heatingStages,
                 offConstrains = additionalOffConstraints,
+                stageDownTimer = equip.hyperstatStageDownTimerCounter,
+                stageUpTimer = equip.hyperstatStageUpTimerCounter,
                 logTag = tag
             )
         } else {

@@ -20,7 +20,6 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
-import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuAnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuRelayMapping
@@ -30,6 +29,8 @@ import a75f.io.logic.bo.building.statprofiles.util.MyStatBasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
 import a75f.io.logic.bo.building.statprofiles.util.MyStatTuners
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
+import a75f.io.logic.bo.building.statprofiles.util.canWeDoConditioning
+import a75f.io.logic.bo.building.statprofiles.util.canWeRunFan
 import a75f.io.logic.bo.building.statprofiles.util.fetchMyStatBasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.fetchMyStatTuners
 import a75f.io.logic.bo.building.statprofiles.util.fetchUserIntents
@@ -39,6 +40,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getMyStatHpuRelayOutputPoints
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatLogicalPointList
 import a75f.io.logic.bo.building.statprofiles.util.isMyStatHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMyStatLowUserIntentFanMode
+import a75f.io.logic.bo.building.statprofiles.util.keyCardIsInSlot
 import a75f.io.logic.bo.building.statprofiles.util.logMsResults
 import a75f.io.logic.bo.building.statprofiles.util.updateLogicalPoint
 import a75f.io.logic.bo.building.statprofiles.util.updateLoopOutputs
@@ -125,10 +127,10 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
         updateOccupancyDetection(equip)
 
 
-        doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip)
+        doorWindowSensorOpenStatus = runForDoorWindowSensor(equip)
         runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(userIntents)
         if (occupancyStatus == Occupancy.WINDOW_OPEN) resetLoopOutputs()
-        runForKeyCardSensor(config, equip)
+        keyCardIsInSlot(equip)
 
         updateLoopOutputs(
             coolingLoopOutput, equip.coolingLoopOutput,
@@ -144,7 +146,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
         dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
         compressorLoopOutput = equip.compressorLoopOutput.readHisVal().toInt()
 
-        if (basicSettings.fanMode != MyStatFanStages.OFF) {
+        if (canWeRunFan(basicSettings) && canWeDoConditioning(basicSettings)) {
             operateRelays(config,  basicSettings, equip, controllerFactory)
             operateAnalogOutputs(config, equip, basicSettings, equip.analogOutStages, relayLogicalPoints)
             if (basicSettings.fanMode == MyStatFanStages.AUTO) {
@@ -157,7 +159,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
         equip.equipStatus.writeHisVal(curState.ordinal.toDouble())
         logIt(
             "Fan speed multiplier:  ${myStatTuners.analogFanSpeedMultiplier} " +
-                    "AuxHeating1Activate: ${myStatTuners.auxHeating1Activate} " +
+                    "AuxHeating1Activate: ${myStatTuners.myStatAuxHeating1Activate} " +
                     "waterValveSamplingOnTime: ${myStatTuners.waterValveSamplingOnTime}" +
                     "  waterValveSamplingWaitTime : ${myStatTuners.waterValveSamplingWaitTime} \n" +
                     "waterValveSamplingDuringLoopDeadbandOnTime: ${myStatTuners.waterValveSamplingDuringLoopDeadbandOnTime} " +
@@ -204,16 +206,16 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
         equip: MyStatHpuEquip, controllerFactory: MyStatControlFactory
     ) {
         controllerFactory.addHpuControllers(config, fanLowVentilationAvailable)
-        runControllers(equip, basicSettings, config)
+        runControllers(equip, basicSettings)
     }
 
-    private fun runControllers(equip: MyStatHpuEquip, basicSettings: MyStatBasicSettings, config: MyStatHpuConfiguration) {
+    private fun runControllers(equip: MyStatHpuEquip, basicSettings: MyStatBasicSettings) {
         derivedFanLoopOutput.data = equip.fanLoopOutput.readHisVal()
 
         controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             val result = controller.runController()
-            updateRelayStatus(controllerName, result, equip, basicSettings, config)
+            updateRelayStatus(controllerName, result, equip, basicSettings)
         }
     }
 
@@ -221,8 +223,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
         controllerName: String,
         result: Any,
         equip: MyStatHpuEquip,
-        basicSettings: MyStatBasicSettings,
-        config: MyStatHpuConfiguration
+        basicSettings: MyStatBasicSettings
     ) {
 
         fun updateStatus(point: Point, result: Any, status: String? = null) {
@@ -262,7 +263,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
                 }
             }
             ControllerNames.FAN_SPEED_CONTROLLER -> {
-                runTitle24Rule(config)
+                runTitle24Rule(equip)
 
                 fun checkUserIntentAction(stage: Int): Boolean {
                     val mode = equip.fanOpMode
@@ -346,18 +347,6 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
         ) == 1.0)
     }
 
-    private fun runTitle24Rule(config: MyStatHpuConfiguration) {
-        resetFanLowestFanStatus()
-        fanEnabledStatus =
-            config.isAnyRelayEnabledAssociated(association = MyStatCpuRelayMapping.FAN_ENABLED.ordinal)
-        val lowestStage = config.getLowestFanSelected()
-        when (lowestStage) {
-            MyStatHpuRelayMapping.FAN_LOW_SPEED -> lowestStageFanLow = true
-            MyStatHpuRelayMapping.FAN_HIGH_SPEED -> lowestStageFanHigh = true
-            else -> {}
-        }
-    }
-
     private fun operateAnalogOutputs(
         config: MyStatHpuConfiguration,
         equip: MyStatHpuEquip,
@@ -394,8 +383,8 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
 
                         MyStatHpuAnalogOutMapping.DCV_DAMPER_MODULATION -> {
                             doAnalogDCVAction(
-                                port, analogOutStages, config.co2Threshold.currentVal,
-                                co2DamperOpeningRate.currentVal, equip
+                                port, analogOutStages, config.zoneCO2Threshold.currentVal,
+                                zoneCO2DamperOpeningRate.currentVal, equip
                             )
                         }
                         else -> {}
@@ -480,25 +469,6 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
             (heatingLoopOutput > 0) -> ZoneState.HEATING
             else -> ZoneState.TEMPDEAD
         }
-    }
-
-    private fun runForDoorWindowSensor(config: MyStatConfiguration, equip: MyStatEquip): Boolean {
-
-        val isDoorOpen = isDoorOpenState(config, equip)
-        logIt( " is Door Open ? $isDoorOpen")
-        if (isDoorOpen) {
-            resetLoopOutputs()
-            resetLogicalPoints(equip)
-            equip.analogOutStages.clear()
-            equip.relayStages.clear()
-        }
-        return isDoorOpen
-    }
-
-    private fun runForKeyCardSensor(config: MyStatConfiguration, equip: MyStatEquip) {
-        val isKeyCardEnabled = (config.universalIn1Enabled.enabled
-                && config.universalIn1Association.associationVal == MyStatConfiguration.UniversalMapping.AN_KEY_CARD_SENSOR.ordinal)
-        keyCardIsInSlot((if (isKeyCardEnabled) 1.0 else 0.0), if (equip.keyCardSensor.readHisVal() > 0) 1.0 else 0.0, equip)
     }
 
     fun addEquip(equipRef: String) {

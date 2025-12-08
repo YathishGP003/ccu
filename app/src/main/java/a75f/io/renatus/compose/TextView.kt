@@ -359,6 +359,7 @@ fun StyledTextView(text: String, fontSize : Int,modifier: Modifier = Modifier, t
         text = text,
     )
 }
+
 @Composable
 fun GrayLabelTextColor(text: String,widthValue:Int =200, textAlignment: TextAlign = TextAlign.Left) {
     Text(
@@ -375,6 +376,7 @@ fun GrayLabelTextColor(text: String,widthValue:Int =200, textAlignment: TextAlig
         text = text
     )
 }
+
 @Composable
 fun BoldStyledTextView(text: String, fontSize : Int, textAlignment: TextAlign = TextAlign.Center) {
     Text(
@@ -388,6 +390,7 @@ fun BoldStyledTextView(text: String, fontSize : Int, textAlignment: TextAlign = 
         text = text,
     )
 }
+
 @Composable
 fun BoldStyledGreyTextView(text: String, fontSize : Int, textAlignment: TextAlign = TextAlign.Center) {
     Text(

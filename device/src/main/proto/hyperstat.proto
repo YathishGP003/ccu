@@ -43,7 +43,8 @@ enum HyperstatAnalogInMapping_t {
   HYPERSTAT_AIN_CURRENT_0_50 = 2;
   HYPERSTAT_AIN_KEYCARD = 3;
   HYPERSTAT_AIN_DOORWINDOW = 4;
-  HYPERSTAT_AIN_NUM_OF = 5;
+  GENERIC_VOLTAGE_INPUT = 5;
+  HYPERSTAT_AIN_NUM_OF = 6;
 }
 
 message HyperstatRelay_t {
@@ -139,7 +140,8 @@ message HyperStatSettingsMessage_t {
   /* miscSettings
        bit 0: enableExternal10kTemperatureSensor(1 if external sensor is enabled
        bit 1: disableTouch(1 will disable touch)
-       bit 2: brightnessVariationEnable (1 will enable automatic brightness control) */
+       bit 2: brightnessVariationEnable (1 will enable automatic brightness control)
+       bit 3: display Space temp / desired temp (1 will enable display desired temp) */
   uint32 miscSettings1 =18;
   bool beaconingEnabled = 19; // 0 if beaconing disabled, 1 if beaconing enabled
   uint32 humidityMinSetpoint = 20; // Minimum humidity setpont 0-100% in which Hyperstat will set system to Humidify if humidity level is less than
@@ -147,6 +149,8 @@ message HyperStatSettingsMessage_t {
   uint32 occupancySensorSensitivityLevel = 22; // Sensitivity level setting for the motion sensor 1-10, one being the most sensitive
   HyperstatLinearFanSpeeds_t hyperstatLinearFanSpeeds = 23; // When linear fan is enabled these voltages provide user intent
   HyperstatStagedFanSpeeds_t hyperstatStagedFanSpeeds = 24;   // When staged fan is enabled these voltages provide user intent
+  optional uint32 installerLockPin = 25; // 4 digits - (No LOCK = 0000)
+  optional uint32 userLockPin = 26; // 4 digits - (No LOCK = 0000)
 }
 
 message HyperStatSettingsMessage2_t {
@@ -165,6 +169,8 @@ message HyperStatSettingsMessage2_t {
   uint32 integralConstant = 13; // default 50 - k constant for Integral in 1/100
   uint32 proportionalTemperatureRange = 14; // default 15 - temp range in 1/10 deg that the proportional control will apply
   uint32 integrationTime = 15; // default 30 - time in  minutes the integration takes to max out
+  uint32 thermistor1Mapping = 16;
+  uint32 thermistor2Mapping = 17;
 }
 
 message HyperStatConfigsCpu_t {
@@ -183,8 +189,8 @@ message HyperStatSettingsMessage3_t {
     HyperStatTunersFcu_t  fcuTuners = 2;
     HyperStatConfigsCpu_t hyperStatConfigsCpu = 3; // When staged fan is enabled in CPU profile these voltages provide the fan speed control
   }
-  uint32 thermistor1 = 4;
-  uint32 thermistor2 = 5;
+  optional uint32 stageUpTimer = 4; // min
+  optional uint32 stageDownTimer = 5;  // min
 }
 
 

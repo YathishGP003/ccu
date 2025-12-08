@@ -7,7 +7,7 @@ import a75f.io.device.serial.MessageType
 import a75f.io.domain.api.Domain.getListByDomainName
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.ProfileConfiguration
-import a75f.io.domain.equips.HyperStatSplitEquip
+import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
@@ -44,6 +44,7 @@ import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuState
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe2UvViewState
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe4UvViewState
+import a75f.io.renatus.profiles.viewstates.ConfigState
 import android.content.Context
 import android.os.Bundle
 import androidx.compose.runtime.MutableState

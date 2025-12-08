@@ -1,10 +1,11 @@
 package a75f.io.renatus.profiles.mystat.viewstates
 
-import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4Configuration
-import a75f.io.renatus.profiles.hyperstatv2.util.ConfigState
+import a75f.io.renatus.profiles.viewstates.updateConfigFromState
+import a75f.io.renatus.profiles.viewstates.updateStateFromConfig
 
 /**
  * Created by Manjunath K on 17-01-2025.
@@ -14,83 +15,8 @@ class MyStatViewStateUtil {
 
     companion object {
 
-        private fun configToState(config: MyStatConfiguration, viewState: MyStatViewState): MyStatViewState {
-            return viewState.apply {
-                temperatureOffset = config.temperatureOffset.currentVal
-                isEnableAutoForceOccupied = config.autoForceOccupied.enabled
-                isEnableAutoAway = config.autoAway.enabled
-                co2Control = config.enableCo2Display.enabled
-                co2Threshold = config.co2Threshold.currentVal
-                co2Target = config.co2Target.currentVal
-                co2DamperOperatingRate = config.co2DamperOpeningRate.currentVal
-
-                installerPinEnable = config.installerPinEnable.enabled
-                conditioningModePinEnable = config.conditioningModePinEnable.enabled
-
-                spaceTemp = config.spaceTemp.enabled
-                desiredTemp = config.desiredTemp.enabled
-
-                installerPassword = config.installerPassword.currentVal
-                conditioningModePassword = config.conditioningModePassword.currentVal
-
-                relay1Config = ConfigState(
-                    config.relay1Enabled.enabled, config.relay1Association.associationVal
-                )
-                relay2Config = ConfigState(
-                    config.relay2Enabled.enabled, config.relay2Association.associationVal
-                )
-                relay3Config = ConfigState(
-                    config.relay3Enabled.enabled, config.relay3Association.associationVal
-                )
-                universalOut1 = ConfigState(
-                    config.universalOut1.enabled, config.universalOut1Association.associationVal
-                )
-                universalOut2 = ConfigState(
-                    config.universalOut2.enabled, config.universalOut2Association.associationVal
-                )
-
-                universalIn1 = ConfigState(
-                    config.universalIn1Enabled.enabled, config.universalIn1Association.associationVal
-                )
-            }
-        }
-
-        private fun stateToConfig(state: MyStatViewState, configuration: MyStatConfiguration) {
-            configuration.apply {
-                temperatureOffset.currentVal = state.temperatureOffset
-                autoForceOccupied.enabled = state.isEnableAutoForceOccupied
-                autoAway.enabled = state.isEnableAutoAway
-                enableCo2Display.enabled = state.co2Control
-                co2Threshold.currentVal = state.co2Threshold
-                co2Target.currentVal = state.co2Target
-                co2DamperOpeningRate.currentVal = state.co2DamperOperatingRate
-
-                installerPassword.currentVal = state.installerPassword
-                conditioningModePassword.currentVal = state.conditioningModePassword
-                installerPinEnable.enabled = state.installerPinEnable
-                conditioningModePinEnable.enabled = state.conditioningModePinEnable
-
-                desiredTemp.enabled = state.desiredTemp
-                spaceTemp.enabled = state.spaceTemp
-
-                relay1Enabled.enabled = state.relay1Config.enabled
-                relay2Enabled.enabled = state.relay2Config.enabled
-                relay3Enabled.enabled = state.relay3Config.enabled
-                universalOut1.enabled = state.universalOut1.enabled
-                universalOut2.enabled = state.universalOut2.enabled
-
-                relay1Association.associationVal = state.relay1Config.association
-                relay2Association.associationVal = state.relay2Config.association
-                relay3Association.associationVal = state.relay3Config.association
-                universalOut1Association.associationVal = state.universalOut1.association
-                universalOut2Association.associationVal = state.universalOut2.association
-                universalIn1Enabled.enabled = state.universalIn1.enabled
-                universalIn1Association.associationVal = state.universalIn1.association
-            }
-        }
-
         fun pipe2ConfigToState(config: MyStatPipe2Configuration, viewState: MyStatPipe2ViewState): MyStatPipe2ViewState {
-            configToState(config, viewState) as MyStatPipe2ViewState
+            updateStateFromConfig(viewState,config)
             viewState.analogOut1MinMax.apply {
                 waterModulatingValue.min =
                     config.analogOut1MinMaxConfig.waterModulatingValue.min.currentVal.toInt()
@@ -132,7 +58,7 @@ class MyStatViewStateUtil {
         }
 
         fun pipe2StateToConfig(state: MyStatPipe2ViewState, configuration: MyStatPipe2Configuration) {
-            stateToConfig(state, configuration)
+            updateConfigFromState(configuration,state)
             configuration.analogOut1MinMaxConfig.apply {
                 waterModulatingValue.min.currentVal = state.analogOut1MinMax.waterModulatingValue.min.toDouble()
                 waterModulatingValue.max.currentVal = state.analogOut1MinMax.waterModulatingValue.max.toDouble()
@@ -159,8 +85,8 @@ class MyStatViewStateUtil {
             }
         }
 
-        fun cpuConfigToState(config: a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration, viewState: MyStatCpuViewState): MyStatCpuViewState {
-            configToState(config, viewState) as MyStatCpuViewState
+        fun cpuConfigToState(config: MyStatCpuConfiguration, viewState: MyStatCpuViewState): MyStatCpuViewState {
+            updateStateFromConfig(viewState, config)
             viewState.analogOut1MinMax.apply {
                 coolingConfig.min =
                     config.analogOut1MinMaxConfig.cooling.min.currentVal.toInt()
@@ -221,7 +147,7 @@ class MyStatViewStateUtil {
         }
 
         fun hpuConfigToState(config: MyStatHpuConfiguration, viewState: MyStatHpuViewState): MyStatHpuViewState {
-            configToState(config, viewState) as MyStatHpuViewState
+            updateStateFromConfig(viewState, config)
             viewState.analogOut1MinMax.apply {
                 compressorConfig.min =
                     config.analogOut1MinMaxConfig.compressorSpeed.min.currentVal.toInt()
@@ -263,7 +189,7 @@ class MyStatViewStateUtil {
         }
 
         fun hpuStateToConfig(state: MyStatHpuViewState, configuration: MyStatHpuConfiguration) {
-            stateToConfig(state, configuration)
+            updateConfigFromState(configuration, state)
             configuration.analogOut1MinMaxConfig.apply {
                 compressorSpeed.min.currentVal = state.analogOut1MinMax.compressorConfig.min.toDouble()
                 compressorSpeed.max.currentVal = state.analogOut1MinMax.compressorConfig.max.toDouble()
@@ -290,8 +216,8 @@ class MyStatViewStateUtil {
             }
         }
 
-        fun cpuStateToConfig(state: MyStatCpuViewState, configuration: a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration) {
-            stateToConfig(state, configuration)
+        fun cpuStateToConfig(state: MyStatCpuViewState, configuration: MyStatCpuConfiguration) {
+            updateConfigFromState(configuration, state)
             configuration.analogOut1MinMaxConfig.apply {
                 cooling.min.currentVal = state.analogOut1MinMax.coolingConfig.min.toDouble()
                 cooling.max.currentVal = state.analogOut1MinMax.coolingConfig.max.toDouble()
@@ -334,7 +260,7 @@ class MyStatViewStateUtil {
 
         fun pipe4StateToConfig(state: MyStatPipe4ViewState, configuration: MyStatPipe4Configuration
         ) {
-            stateToConfig(state, configuration)
+            updateConfigFromState(configuration, state)
 
             configuration.analogOut1MinMaxConfig.apply {
                 hotWaterValve.min.currentVal = state.analogOut1MinMax.hotWaterValve.min.toDouble()
@@ -379,7 +305,7 @@ class MyStatViewStateUtil {
         }
 
         fun pipe4ConfigToState(config: MyStatPipe4Configuration, viewState: MyStatPipe4ViewState): MyStatPipe4ViewState {
-            configToState(config, viewState) as MyStatPipe4ViewState
+            updateStateFromConfig(viewState, config)
 
             viewState.analogOut1MinMax.apply {
                 hotWaterValve.min =

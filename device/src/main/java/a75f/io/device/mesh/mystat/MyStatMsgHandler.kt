@@ -377,9 +377,7 @@ private fun updateUniversalInput(point: PhysicalPoint, value: Int) {
 private fun updateDoorWindowStatus(address: Int, value: Int) {
     val profile = L.getProfile(address.toShort())
     if (profile is MyStatPipe2Profile && value == 1) {
-        val myStatEquip = profile.getProfileDomainEquip(address)
-        // TODO check what will be the actual values
-        profile.doorWindowIsOpen(1.0, 1.0, myStatEquip)
+        // it is yet to be implemented
     }
 
 }

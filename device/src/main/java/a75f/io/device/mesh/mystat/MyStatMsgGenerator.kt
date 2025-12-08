@@ -107,7 +107,7 @@ private fun fillMyStatControls(
 
     fun getPortValue(port: PhysicalPoint, isRelay: Boolean, isWritable: Boolean): Double {
         val logicalPointRef = port.readPoint().pointRef
-
+        val hayStack = CCUHsApi.getInstance()
         if (!Globals.getInstance().isTestMode) {  // Skip logical point ref update when test mode is on
             if (logicalPointRef == null) {
                 CcuLog.e(L.TAG_CCU_DEVICE, "Logical point ref is missing for ${port.domainName}")
@@ -115,12 +115,12 @@ private fun fillMyStatControls(
             } else {
                 // For Relay we have Relay N/O and for analog we have 0-10V (configured)
                 if (isRelay.not()) {
-                    val logicalValue = CCUHsApi.getInstance().readHisValById(logicalPointRef).toInt().toShort()
+                    val logicalValue = hayStack.readHisValById(logicalPointRef).toInt().toShort()
                     val voltage = mapAnalogOut(port.readPoint().type, logicalValue)
                     port.writePointValue(voltage.toDouble())
                 } else {
                     // it is relay
-                    port.writePointValue(CCUHsApi.getInstance().readHisValById(logicalPointRef))
+                    port.writePointValue(hayStack.readHisValById(logicalPointRef))
                 }
             }
         }
@@ -361,55 +361,53 @@ private fun setStagedFanSpeedDetails(equip: MyStatEquip): MyStat.MyStatStagedFan
 fun getRelayConfig(enable: Point, association: Point, equip: MyStatEquip): MyStat.MyStatRelay_t {
     val relayConfig = MyStat.MyStatRelay_t.newBuilder()
 
-
-    val associationVal = association.readDefaultVal().toInt()
-    when (equip) {
-        is MyStatCpuEquip -> {
-            if (associationVal < MyStatCpuRelayMapping.values().size) {
-                relayConfig.cpuRelay = when (associationVal) {
-                    MyStatCpuRelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.CpuRelayMappings_e.CPU_NONE
-                    MyStatCpuRelayMapping.DCV_DAMPER.ordinal -> MyStat.CpuRelayMappings_e.CPU_DCV_DAMPER
-                    else -> MyStat.CpuRelayMappings_e.values()[associationVal + 1]
+    relayConfig.relayEnable = enable.readDefaultVal() == 1.0
+    if (relayConfig.relayEnable) {
+        val associationVal = association.readDefaultVal().toInt()
+        when (equip) {
+            is MyStatCpuEquip -> {
+                if (associationVal < MyStatCpuRelayMapping.values().size) {
+                    relayConfig.cpuRelay = when (associationVal) {
+                        MyStatCpuRelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.CpuRelayMappings_e.CPU_NONE
+                        MyStatCpuRelayMapping.DCV_DAMPER.ordinal -> MyStat.CpuRelayMappings_e.CPU_DCV_DAMPER
+                        else -> MyStat.CpuRelayMappings_e.values()[associationVal + 1]
+                    }
                 }
-                relayConfig.relayEnable = enable.readDefaultVal() == 1.0
             }
-        }
 
-        is MyStatHpuEquip -> {
-            if (associationVal < MyStatHpuRelayMapping.values().size) {
-                relayConfig.hpuRelay = when (associationVal) {
-                    MyStatHpuRelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.HpuRelayMappings_e.HPU_NONE
-                    MyStatHpuRelayMapping.DCV_DAMPER.ordinal -> MyStat.HpuRelayMappings_e.HPU_DCV_DAMPER
-                    else -> MyStat.HpuRelayMappings_e.values()[associationVal + 1]
+            is MyStatHpuEquip -> {
+                if (associationVal < MyStatHpuRelayMapping.values().size) {
+                    relayConfig.hpuRelay = when (associationVal) {
+                        MyStatHpuRelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.HpuRelayMappings_e.HPU_NONE
+                        MyStatHpuRelayMapping.DCV_DAMPER.ordinal -> MyStat.HpuRelayMappings_e.HPU_DCV_DAMPER
+                        else -> MyStat.HpuRelayMappings_e.values()[associationVal + 1]
+                    }
                 }
-                relayConfig.relayEnable = enable.readDefaultVal() == 1.0
             }
-        }
 
-        is MyStatPipe2Equip -> {
-            if (associationVal < MyStatPipe2RelayMapping.values().size) {
-                relayConfig.twoPipeRelay = when (associationVal) {
-                    MyStatPipe2RelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.TwoPipeRelayMappings_e.P2_NONE
-                    MyStatPipe2RelayMapping.DCV_DAMPER.ordinal -> MyStat.TwoPipeRelayMappings_e.P2_DCV_DAMPER
-                    MyStatPipe2RelayMapping.FAN_LOW_VENTILATION.ordinal -> MyStat.TwoPipeRelayMappings_e.P2_FAN_LOW_VENTILATION
-                    else -> MyStat.TwoPipeRelayMappings_e.values()[associationVal + 1]
+            is MyStatPipe2Equip -> {
+                if (associationVal < MyStatPipe2RelayMapping.values().size) {
+                    relayConfig.twoPipeRelay = when (associationVal) {
+                        MyStatPipe2RelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.TwoPipeRelayMappings_e.P2_NONE
+                        MyStatPipe2RelayMapping.DCV_DAMPER.ordinal -> MyStat.TwoPipeRelayMappings_e.P2_DCV_DAMPER
+                        MyStatPipe2RelayMapping.FAN_LOW_VENTILATION.ordinal -> MyStat.TwoPipeRelayMappings_e.P2_FAN_LOW_VENTILATION
+                        else -> MyStat.TwoPipeRelayMappings_e.values()[associationVal + 1]
+                    }
                 }
-                relayConfig.relayEnable = enable.readDefaultVal() == 1.0
             }
-        }
 
-        is MyStatPipe4Equip -> {
-            if (associationVal < MyStatPipe4RelayMapping.values().size) {
-                relayConfig.fourPipeRelay = when (associationVal) {
-                    MyStatPipe4RelayMapping.HOT_WATER_VALVE.ordinal -> MyStat.FourPipeRelayMappings_e.P4_WATER_VALVE_HEAT
-                    MyStatPipe4RelayMapping.CHILLED_WATER_VALVE.ordinal -> MyStat.FourPipeRelayMappings_e.P4_WATER_VALVE_COOL
-                    MyStatPipe4RelayMapping.AUX_HEATING_STAGE1.ordinal-> MyStat.FourPipeRelayMappings_e.P4_AUX_HEAT_1
-                    MyStatPipe4RelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.FourPipeRelayMappings_e.P4_NONE
-                    MyStatPipe4RelayMapping.DCV_DAMPER.ordinal -> MyStat.FourPipeRelayMappings_e.P4_DCV_DAMPER
-                    MyStatPipe4RelayMapping.FAN_LOW_VENTILATION.ordinal -> MyStat.FourPipeRelayMappings_e.P4_FAN_LOW_VENTILATION
-                    else -> MyStat.FourPipeRelayMappings_e.values()[associationVal + 1]
+            is MyStatPipe4Equip -> {
+                if (associationVal < MyStatPipe4RelayMapping.values().size) {
+                    relayConfig.fourPipeRelay = when (associationVal) {
+                        MyStatPipe4RelayMapping.HOT_WATER_VALVE.ordinal -> MyStat.FourPipeRelayMappings_e.P4_WATER_VALVE_HEAT
+                        MyStatPipe4RelayMapping.CHILLED_WATER_VALVE.ordinal -> MyStat.FourPipeRelayMappings_e.P4_WATER_VALVE_COOL
+                        MyStatPipe4RelayMapping.AUX_HEATING_STAGE1.ordinal -> MyStat.FourPipeRelayMappings_e.P4_AUX_HEAT_1
+                        MyStatPipe4RelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.FourPipeRelayMappings_e.P4_NONE
+                        MyStatPipe4RelayMapping.DCV_DAMPER.ordinal -> MyStat.FourPipeRelayMappings_e.P4_DCV_DAMPER
+                        MyStatPipe4RelayMapping.FAN_LOW_VENTILATION.ordinal -> MyStat.FourPipeRelayMappings_e.P4_FAN_LOW_VENTILATION
+                        else -> MyStat.FourPipeRelayMappings_e.values()[associationVal + 1]
+                    }
                 }
-                relayConfig.relayEnable = enable.readDefaultVal() == 1.0
             }
         }
     }

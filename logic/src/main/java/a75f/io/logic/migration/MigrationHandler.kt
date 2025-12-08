@@ -43,20 +43,21 @@ import a75f.io.domain.cutover.getDomainNameForMonitoringProfile
 import a75f.io.domain.devices.MyStatDevice
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.DabEquip
-import a75f.io.domain.equips.HyperStatSplitEquip
+import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
 import a75f.io.domain.equips.OtnEquip
 import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.TIEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavEquip
-import a75f.io.domain.equips.hyperstat.CpuV2Equip
-import a75f.io.domain.equips.hyperstat.HpuV2Equip
+import a75f.io.domain.equips.hyperstat.HsCpuEquip
+import a75f.io.domain.equips.hyperstat.HsHpuEquip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
-import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
+import a75f.io.domain.equips.hyperstat.HsPipe2Equip
 import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
+import a75f.io.domain.equips.hyperstatsplit.HsSplitCpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe4Equip
 import a75f.io.domain.logic.CCUBaseConfigurationBuilder
 import a75f.io.domain.logic.DeviceBuilder
@@ -668,7 +669,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 Triple(
                     config,
                     getHsPossibleFanModeSettings(getCpuFanLevel(config)),
-                    CpuV2Equip(equipIdStr)
+                    HsCpuEquip(equipIdStr)
                 )
             }
 
@@ -678,7 +679,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 Triple(
                     config,
                     getHsPossibleFanModeSettings(getHsFanLevel(config)),
-                    Pipe2V2Equip(equipIdStr)
+                    HsPipe2Equip(equipIdStr)
                 )
             }
 
@@ -688,7 +689,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 Triple(
                     config,
                     getHsPossibleFanModeSettings(getHpuFanLevel(config)),
-                    HpuV2Equip(equipIdStr)
+                    HsHpuEquip(equipIdStr)
                 )
             }
 

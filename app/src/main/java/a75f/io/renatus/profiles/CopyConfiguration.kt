@@ -203,7 +203,8 @@ class CopyConfiguration {
                 ProfileType.HYPERSTAT_MONITORING,
                 ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT,
                 ProfileType.HYPERSTAT_HEAT_PUMP_UNIT ,
-                ProfileType.HYPERSTAT_TWO_PIPE_FCU -> loadActiveHyperStatProfilesConfiguration(address,equip)
+                ProfileType.HYPERSTAT_FOUR_PIPE_FCU ,
+                ProfileType.HYPERSTAT_TWO_PIPE_FCU -> loadActiveHyperStatProfilesConfiguration(equip)
 
                 ProfileType.HYPERSTATSPLIT_CPU -> loadActiveHyperStatSplitConfiguration(address, equip)
 
@@ -214,7 +215,7 @@ class CopyConfiguration {
                 ProfileType.MYSTAT_HPU,
                 ProfileType.MYSTAT_CPU,
                 ProfileType.MYSTAT_PIPE2,
-                ProfileType.MYSTAT_PIPE4 -> loadActiveMStatProfilesConfiguration(address, equip)
+                ProfileType.MYSTAT_PIPE4 -> loadActiveMStatProfilesConfiguration(equip)
 
                 ProfileType.CONNECTNODE -> loadConnectNodeConfiguration(address)
 
@@ -343,11 +344,11 @@ class CopyConfiguration {
             config = getSplitConfiguration(equip["id"].toString()) as UnitVentilatorConfiguration
         }
 
-        private fun loadActiveHyperStatProfilesConfiguration(address: Int, equip: HashMap<Any, Any>) {
+        private fun loadActiveHyperStatProfilesConfiguration(equip: HashMap<Any, Any>) {
             config = getHsConfiguration(equip["id"].toString()) as HyperStatConfiguration
         }
 
-        private fun loadActiveMStatProfilesConfiguration(address: Int, equip: HashMap<Any, Any>) {
+        private fun loadActiveMStatProfilesConfiguration(equip: HashMap<Any, Any>) {
             config = getMyStatConfiguration(equip["id"].toString()) as MyStatConfiguration
         }
 

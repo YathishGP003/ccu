@@ -945,6 +945,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                             profileType.contains(ProfileType.HYPERSTATSPLIT_CPU.name())||
                             profileType.contains(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())||
                             profileType.contains(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())||
+                            profileType.contains(ProfileType.HYPERSTAT_FOUR_PIPE_FCU.name())||
                             profileType.contains(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())||
                             profileType.contains(ProfileType.HYPERSTATSPLIT_CPU.name())||
                             profileType.contains(ProfileType.MYSTAT_CPU.name())||
@@ -1965,6 +1966,24 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Poin
                                 disableVisibiltyForZoneScheduleUI(zoneDetails);
                                 HyperStatHelper.Companion.create(p,
                                                 ProfileType.HYPERSTAT_TWO_PIPE_FCU,
+                                                getContext())
+                                        .loadDetailedView(
+                                                inflater,
+                                                tempProfileViewModels,
+                                                linearLayoutZonePoints,
+                                                showSchedule,
+                                                (position, point) -> {
+                                                    doCallBack(point, position, scheduleChangeListener,
+                                                            scheduleViewClickListener, scheduleEditClickListener,
+                                                            specialScheduleEditClickListener, vacationScheduleEditClickListener);
+                                                    return Unit.INSTANCE;
+                                                }
+                                        );
+                            }
+                            if (p.getProfile().startsWith(ProfileType.HYPERSTAT_FOUR_PIPE_FCU.name())) {
+                                disableVisibiltyForZoneScheduleUI(zoneDetails);
+                                HyperStatHelper.Companion.create(p,
+                                                ProfileType.HYPERSTAT_FOUR_PIPE_FCU,
                                                 getContext())
                                         .loadDetailedView(
                                                 inflater,

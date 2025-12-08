@@ -5,8 +5,7 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ValueConfig
-import a75f.io.domain.equips.hyperstat.HpuV2Equip
-import a75f.io.domain.util.ModelNames
+import a75f.io.domain.equips.hyperstat.HsHpuEquip
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.util.FanConfig
 import a75f.io.logic.bo.building.statprofiles.util.MinMaxConfig
@@ -25,11 +24,6 @@ class HpuConfiguration(
     lateinit var analogOut1MinMaxConfig: HpuMinMaxConfig
     lateinit var analogOut2MinMaxConfig: HpuMinMaxConfig
     lateinit var analogOut3MinMaxConfig: HpuMinMaxConfig
-
-    lateinit var analogOut1FanSpeedConfig: FanConfig
-    lateinit var analogOut2FanSpeedConfig: FanConfig
-    lateinit var analogOut3FanSpeedConfig: FanConfig
-
 
     override fun getDependencies(): List<ValueConfig> {
         return mutableListOf<ValueConfig>().apply {
@@ -74,28 +68,23 @@ class HpuConfiguration(
         }
     }
 
-
-
-    override fun getActiveConfiguration(): HpuConfiguration {
-
-        var hpuRawEquip = Domain.hayStack.readEntity("domainName == \"${ModelNames.hyperStatHpu}\" and group == \"$nodeAddress\"")
-        // Remove the bellow code after migration all the hyperstat hpu modules
-        if (hpuRawEquip.isEmpty()) {
-            hpuRawEquip = Domain.hayStack.readEntity("equip and group == \"$nodeAddress\"")
-        }
-        if (hpuRawEquip.isEmpty()) {
+    override fun getActiveConfiguration() : HpuConfiguration {
+        val equip = Domain.hayStack.readEntity("equip and group == \"$nodeAddress\"")
+        if (equip.isEmpty()) {
             return this
         }
-
-
-        val hpuEquip = HpuV2Equip(hpuRawEquip[Tags.ID].toString())
-        val configuration = this.getDefaultConfiguration()
-        configuration.getActiveConfiguration(hpuEquip)
-        readHpuActiveConfiguration(hpuEquip)
+        val hssEquip = HsHpuEquip(equip[Tags.ID].toString())
+        getDefaultConfiguration()
+        getActiveEnableConfigs(hssEquip)
+        getActiveAssociationConfigs(hssEquip)
+        getGenericZoneConfigs(hssEquip)
+        getActiveDynamicConfigs(hssEquip)
+        equipId = hssEquip.equipRef
+        isDefault = false
         return this
     }
 
-    private fun readHpuActiveConfiguration(equip: HpuV2Equip) {
+    private fun getActiveDynamicConfigs(equip: HsHpuEquip) {
 
         analogOut1MinMaxConfig.apply {
             compressorConfig.min.currentVal = getActivePointValue(equip.analog1MinCompressorSpeed, compressorConfig.min)
@@ -145,7 +134,7 @@ class HpuConfiguration(
     }
 
     override fun getDefaultConfiguration(): HyperStatConfiguration {
-        val configuration = super.getDefaultConfiguration()
+        val configuration = super.getDefaultConfiguration() as HyperStatConfiguration
         configuration.apply {
             analogOut1MinMaxConfig = HpuMinMaxConfig(
                 getMinMax(DomainName.analog1MinCompressorSpeed, DomainName.analog1MaxCompressorSpeed),
@@ -256,11 +245,6 @@ class HpuConfiguration(
         return HsHpuRelayMapping.values()[highestSelected]
     }
 
-    fun getLowestFanStage(): HsHpuRelayMapping {
-        val highestSelected = getLowestStage(HsHpuRelayMapping.FAN_LOW_SPEED.ordinal, HsHpuRelayMapping.FAN_MEDIUM_SPEED.ordinal, HsHpuRelayMapping.FAN_HIGH_SPEED.ordinal)
-        return HsHpuRelayMapping.values()[highestSelected]
-    }
-
     override fun getHighestFanStageCount(): Int {
         return try {
             getHighestFanStage().ordinal - 4
@@ -268,6 +252,10 @@ class HpuConfiguration(
             0
         }
     }
+
+    override fun isCoolingAvailable() = true
+
+    override fun isHeatingAvailable() = true
 
     fun getHighestCompressorStages(): Int {
         return try {

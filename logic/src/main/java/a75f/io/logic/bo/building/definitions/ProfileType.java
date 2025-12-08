@@ -79,6 +79,8 @@ public enum ProfileType
                 return "HeatPumpUnit";
             case HYPERSTAT_TWO_PIPE_FCU:
                 return "2PipeFCU";
+            case HYPERSTAT_FOUR_PIPE_FCU:
+                return "4PipeFCU";
             case MYSTAT_CPU:
                 return "MyStat Conventional Package Unit";
             case MYSTAT_HPU:

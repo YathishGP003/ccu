@@ -19,6 +19,7 @@ import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfigurat
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4Configuration
+import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe2Profile
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatCpuFanLevel
@@ -35,7 +36,6 @@ import a75f.io.renatus.profiles.mystat.HPU
 import a75f.io.renatus.profiles.mystat.MYSTAT
 import a75f.io.renatus.profiles.mystat.PIPE2
 import a75f.io.renatus.profiles.mystat.PIPE4
-import a75f.io.renatus.profiles.mystat.ui.getSupplyDirection
 import a75f.io.renatus.ui.AUTO
 import a75f.io.renatus.ui.CONDITIONING_MODE
 import a75f.io.renatus.ui.COOL_ONLY
@@ -194,8 +194,8 @@ class MyStatHelper(
             val supplyWaterTemp = getSupplyWaterTempView()
             detailViewItems[supplyWaterTemp.id.toString()] = supplyWaterTemp
         } else {
-            if (configuration.universalIn1Enabled.enabled &&
-                configuration.universalIn1Association.associationVal.toDouble() == 0.0
+            if (configuration.universal1InEnabled.enabled &&
+                configuration.universal1InAssociation.associationVal.toDouble() == 0.0
             ) {
                 val dischargeAirFloe = getDischargeAirTempView()
                 detailViewItems[dischargeAirFloe.id.toString()] = dischargeAirFloe
@@ -551,4 +551,8 @@ class MyStatHelper(
         }
     }
 
+    private fun getSupplyDirection(nodeAddress: String): String {
+        val profile = L.getProfile(nodeAddress.toLong()) as MyStatPipe2Profile
+        return profile.supplyDirection()
+    }
 }

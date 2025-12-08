@@ -38,7 +38,7 @@ class MonitoringConfiguration(
         zonePM10Target = getDefaultValConfig(DomainName.pm10Target, model)
 
         displayHumidity = getDefaultEnableConfig(DomainName.enableHumidityDisplay, model)
-        displayCO2 = getDefaultEnableConfig(DomainName.enableCO2Display, model)
+        displayCO2 = getDefaultEnableConfig(DomainName.enableCo2Display, model)
         displayPM2p5 = getDefaultEnableConfig(DomainName.enablePm25Display, model)
 
         disableTouch = getDefaultEnableConfig(DomainName.disableTouch, model)
@@ -53,7 +53,8 @@ class MonitoringConfiguration(
     override fun getAnalogMap(): Map<String, Pair<Boolean, String>> = mutableMapOf()
 
     override fun getHighestFanStageCount() = 0
-
+    override fun isCoolingAvailable() = false
+    override fun isHeatingAvailable() = false
 
     override fun getDependencies(): List<ValueConfig> {
         return mutableListOf()
@@ -67,20 +68,20 @@ class MonitoringConfiguration(
         val monitoringEquip = MonitoringEquip(equipMap[Tags.ID].toString())
         getDefaultConfiguration()
 
-        temperatureOffset.currentVal = monitoringEquip.tempOffset.readDefaultVal()
-        thermistor1Enabled.enabled = monitoringEquip.thermistor1Enabled.readDefaultVal() > 0
-        thermistor2Enabled.enabled = monitoringEquip.thermistor2Enabled.readDefaultVal() > 0
-        analogIn1Enabled.enabled = monitoringEquip.analogIn1Enabled.readDefaultVal() > 0
-        analogIn2Enabled.enabled = monitoringEquip.analogIn2Enabled.readDefaultVal() > 0
+        temperatureOffset.currentVal = monitoringEquip.temperatureOffset.readDefaultVal()
+        thermistor1Enabled.enabled = monitoringEquip.thermistor1InputEnable.readDefaultVal() > 0
+        thermistor2Enabled.enabled = monitoringEquip.thermistor2InputEnable.readDefaultVal() > 0
+        analogIn1Enabled.enabled = monitoringEquip.analog1InputEnable.readDefaultVal() > 0
+        analogIn2Enabled.enabled = monitoringEquip.analog2InputEnable.readDefaultVal() > 0
 
         thermistor1Association.associationVal =
-            monitoringEquip.thermistor1Association.readDefaultVal().toInt()
+            monitoringEquip.thermistor1InputAssociation.readDefaultVal().toInt()
         thermistor2Association.associationVal =
-            monitoringEquip.thermistor2Association.readDefaultVal().toInt()
+            monitoringEquip.thermistor2InputAssociation.readDefaultVal().toInt()
         analogIn1Association.associationVal =
-            monitoringEquip.analogIn1Association.readDefaultVal().toInt()
+            monitoringEquip.analog1InputAssociation.readDefaultVal().toInt()
         analogIn2Association.associationVal =
-            monitoringEquip.analogIn2Association.readDefaultVal().toInt()
+            monitoringEquip.analog2InputAssociation.readDefaultVal().toInt()
 
         zoneCO2Target.currentVal = monitoringEquip.co2Target.readDefaultVal()
         zonePM2p5Target.currentVal = monitoringEquip.pm25Target.readDefaultVal()

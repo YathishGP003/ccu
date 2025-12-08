@@ -5,9 +5,10 @@ import a75f.io.domain.api.Domain.hayStack
 import a75f.io.domain.api.Point
 import a75f.io.domain.devices.HyperStatDevice
 import a75f.io.domain.devices.MyStatDevice
-import a75f.io.domain.equips.hyperstat.HpuV2Equip
+import a75f.io.domain.equips.hyperstat.HsHpuEquip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
-import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
+import a75f.io.domain.equips.hyperstat.HsPipe2Equip
+import a75f.io.domain.equips.hyperstat.HsPipe4Equip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
@@ -30,6 +31,8 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsHpuAnalogOu
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsHpuRelayMapping
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2AnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe2RelayMapping
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe4AnalogOutMapping
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe4RelayMapping
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HyperStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuAnalogOutMapping
@@ -44,7 +47,7 @@ import org.projecthaystack.UnknownRecException
  * Created by Manjunath K on 28-04-2025.
  */
 
-fun getHSRelayOutputPoints(equip: Pipe2V2Equip): HashMap<Int, String> {
+fun getHSRelayOutputPoints(equip: HsPipe2Equip): HashMap<Int, String> {
     val relayStatus: HashMap<Int, String> = HashMap()
 
     putPointToMap(equip.fanLowSpeed, relayStatus, HsPipe2RelayMapping.FAN_LOW_SPEED.ordinal)
@@ -60,16 +63,41 @@ fun getHSRelayOutputPoints(equip: Pipe2V2Equip): HashMap<Int, String> {
     return relayStatus
 }
 
-fun getHSAnalogOutputPoints(equip: Pipe2V2Equip): HashMap<Int, String> {
+fun getHSAnalogOutputPoints(equip: HsPipe2Equip): HashMap<Int, String> {
     val outputPoints: HashMap<Int, String> = HashMap()
     putPointToMap(equip.dcvDamperModulating, outputPoints, HsPipe2AnalogOutMapping.DCV_DAMPER.ordinal)
     putPointToMap(equip.fanSignal, outputPoints, HsPipe2AnalogOutMapping.FAN_SPEED.ordinal)
     putPointToMap(equip.modulatingWaterValve, outputPoints, HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal)
     return outputPoints
 }
+fun getHSRelayOutputPoints(equip: HsPipe4Equip): HashMap<Int, String> {
+    val relayStatus: HashMap<Int, String> = HashMap()
+    putPointToMap(equip.fanLowSpeed, relayStatus, HsPipe4RelayMapping.FAN_LOW_VENTILATION.ordinal)
+    putPointToMap(equip.fanLowSpeed, relayStatus, HsPipe4RelayMapping.FAN_LOW_SPEED.ordinal)
+    putPointToMap(equip.fanMediumSpeed, relayStatus, HsPipe4RelayMapping.FAN_MEDIUM_SPEED.ordinal)
+    putPointToMap(equip.fanHighSpeed, relayStatus, HsPipe4RelayMapping.FAN_HIGH_SPEED.ordinal)
+    putPointToMap(equip.auxHeatingStage1, relayStatus, HsPipe4RelayMapping.AUX_HEATING_STAGE1.ordinal)
+    putPointToMap(equip.auxHeatingStage2, relayStatus, HsPipe4RelayMapping.AUX_HEATING_STAGE2.ordinal)
+    putPointToMap(equip.chilledWaterCoolValve, relayStatus, HsPipe4RelayMapping.COOLING_VALVE.ordinal)
+    putPointToMap(equip.hotWaterHeatValve, relayStatus, HsPipe4RelayMapping.HEATING_VALVE.ordinal)
+    putPointToMap(equip.fanEnable, relayStatus, HsPipe4RelayMapping.FAN_ENABLED.ordinal)
+    putPointToMap(equip.occupiedEnable, relayStatus, HsPipe4RelayMapping.OCCUPIED_ENABLED.ordinal)
+    putPointToMap(equip.humidifierEnable, relayStatus, HsPipe4RelayMapping.HUMIDIFIER.ordinal)
+    putPointToMap(equip.dehumidifierEnable, relayStatus, HsPipe4RelayMapping.DEHUMIDIFIER.ordinal)
+    putPointToMap(equip.dehumidifierEnable, relayStatus, HsPipe4RelayMapping.DCV_DAMPER.ordinal)
+    return relayStatus
+}
 
+fun getHSAnalogOutputPoints(equip: HsPipe4Equip): HashMap<Int, String> {
+    val outputPoints: HashMap<Int, String> = HashMap()
+    putPointToMap(equip.dcvDamperModulating, outputPoints, HsPipe4AnalogOutMapping.COOLING_MODULATING_VALUE.ordinal)
+    putPointToMap(equip.dcvDamperModulating, outputPoints, HsPipe4AnalogOutMapping.HEATING_MODULATING_VALUE.ordinal)
+    putPointToMap(equip.fanSignal, outputPoints, HsPipe4AnalogOutMapping.FAN_SPEED.ordinal)
+    putPointToMap(equip.dcvDamperModulating, outputPoints, HsPipe4AnalogOutMapping.DCV_DAMPER.ordinal)
+    return outputPoints
+}
 
-fun getHSRelayStatus(equip: HpuV2Equip): HashMap<Int, String> {
+fun getHSRelayStatus(equip: HsHpuEquip): HashMap<Int, String> {
     val relayStatus: HashMap<Int, String> = HashMap()
     putPointToMap(equip.compressorStage1, relayStatus, HsHpuRelayMapping.COMPRESSOR_STAGE1.ordinal)
     putPointToMap(equip.compressorStage2, relayStatus, HsHpuRelayMapping.COMPRESSOR_STAGE2.ordinal)
@@ -88,7 +116,7 @@ fun getHSRelayStatus(equip: HpuV2Equip): HashMap<Int, String> {
     return relayStatus
 }
 
-fun getHSAnalogOutputPoints(equip: HpuV2Equip): HashMap<Int, String> {
+fun getHSAnalogOutputPoints(equip: HsHpuEquip): HashMap<Int, String> {
     val analogOutputPoints: HashMap<Int, String> = HashMap()
     putPointToMap(equip.compressorSpeed, analogOutputPoints, HsHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal)
     putPointToMap(equip.fanSignal, analogOutputPoints, HsHpuAnalogOutMapping.FAN_SPEED.ordinal)
@@ -128,14 +156,8 @@ fun getHSLogicalPointList(
     return logicalPoints
 }
 
-
-/**
- * MyStat logical points
- */
-
 fun getMyStatHpuRelayOutputPoints(equip: MyStatHpuEquip): HashMap<Int, String> {
     val relayStatus: HashMap<Int, String> = HashMap()
-
     putPointToMap(equip.compressorStage1, relayStatus, MyStatHpuRelayMapping.COMPRESSOR_STAGE1.ordinal)
     putPointToMap(equip.compressorStage2, relayStatus, MyStatHpuRelayMapping.COMPRESSOR_STAGE2.ordinal)
     putPointToMap(equip.auxHeatingStage1, relayStatus, MyStatHpuRelayMapping.AUX_HEATING_STAGE1.ordinal)
@@ -148,7 +170,6 @@ fun getMyStatHpuRelayOutputPoints(equip: MyStatHpuEquip): HashMap<Int, String> {
     putPointToMap(equip.changeOverCooling, relayStatus, MyStatHpuRelayMapping.CHANGE_OVER_O_COOLING.ordinal)
     putPointToMap(equip.changeOverHeating, relayStatus, MyStatHpuRelayMapping.CHANGE_OVER_B_HEATING.ordinal)
     putPointToMap(equip.dcvDamper, relayStatus, MyStatHpuRelayMapping.DCV_DAMPER.ordinal)
-
     return relayStatus
 }
 
@@ -159,7 +180,6 @@ fun getMyStatHpuAnalogOutputPoints(equip: MyStatHpuEquip): HashMap<Int, String> 
     putPointToMap(equip.fanSignal, analogOutputPoints, MyStatHpuAnalogOutMapping.FAN_SPEED.ordinal)
     return analogOutputPoints
 }
-
 
 fun getMyStatLogicalPointList(
     equip: MyStatEquip,
@@ -190,10 +210,8 @@ fun getMyStatLogicalPointList(
     return logicalPoints
 }
 
-
 fun getMyStatRelayOutputPoints(equip: MyStatPipe2Equip): HashMap<Int, String> {
     val relayStatus: HashMap<Int, String> = HashMap()
-
     putPointToMap(equip.fanLowSpeed, relayStatus, MyStatPipe2RelayMapping.FAN_LOW_SPEED.ordinal)
     putPointToMap(equip.fanHighSpeed, relayStatus, MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal)
     putPointToMap(equip.fanEnable, relayStatus, MyStatPipe2RelayMapping.FAN_ENABLED.ordinal)
@@ -215,7 +233,6 @@ fun getMyStatAnalogOutputPoints(equip: MyStatPipe2Equip): HashMap<Int, String> {
     return analogOutputPoints
 }
 
-
 fun getMyStatPipe4AnalogOutputPoints(equip: MyStatPipe4Equip): HashMap<Int, String> {
     val analogOutputPoints: HashMap<Int, String> = HashMap()
     putPointToMap(equip.hotWaterModulatingHeatValve, analogOutputPoints, MyStatPipe4AnalogOutMapping.HOT_MODULATING_VALUE.ordinal)
@@ -227,7 +244,6 @@ fun getMyStatPipe4AnalogOutputPoints(equip: MyStatPipe4Equip): HashMap<Int, Stri
 
 fun getMyStatPipe4RelayOutputPoints(equip: MyStatPipe4Equip): HashMap<Int, String> {
     val relayStatus: HashMap<Int, String> = HashMap()
-
     putPointToMap(equip.fanLowSpeed, relayStatus, MyStatPipe4RelayMapping.FAN_LOW_SPEED.ordinal)
     putPointToMap(equip.fanHighSpeed, relayStatus, MyStatPipe4RelayMapping.FAN_HIGH_SPEED.ordinal)
     putPointToMap(equip.fanEnable, relayStatus, MyStatPipe4RelayMapping.FAN_ENABLED.ordinal)

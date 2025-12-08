@@ -2,7 +2,7 @@ package a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventi
 
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Point
-import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe4UVEquip
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
@@ -13,7 +13,6 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hvac.StatusMsgKeys
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitControlType
 import a75f.io.logic.bo.building.statprofiles.statcontrollers.SplitControllerFactory
 import a75f.io.logic.bo.building.statprofiles.util.AuxActiveStages
 import a75f.io.logic.bo.building.statprofiles.util.BasicSettings
@@ -23,19 +22,21 @@ import a75f.io.logic.bo.building.statprofiles.util.FAN_LOWEST_STAGE
 import a75f.io.logic.bo.building.statprofiles.util.FAN_MEDIUM_STAGE
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.UvTuners
+import a75f.io.logic.bo.building.statprofiles.util.canWeDoConditioning
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoCooling
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoHeating
 import a75f.io.logic.bo.building.statprofiles.util.canWeOperate
+import a75f.io.logic.bo.building.statprofiles.util.canWeRunFan
 import a75f.io.logic.bo.building.statprofiles.util.fetchUserIntents
 import a75f.io.logic.bo.building.statprofiles.util.getSplitConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getUnitVentilatorTuners
 import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
+import a75f.io.logic.bo.building.statprofiles.util.keyCardIsInSlot
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.handlers.doAnalogOperation
 import a75f.io.logic.controlcomponents.util.ControllerNames
-import a75f.io.logic.controlcomponents.util.isSoftOccupied
 import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler
 
 /**
@@ -98,7 +99,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         loopController.dumpLogs()
         handleChangeOfDirection(userIntents, controllerFactory, hssEquip)
         calculateSaTemperingLoop(pipe4Tuners, hssEquip, basicSettings)
-        doorWindowIsOpen(hssEquip)
+        checkDoorWindowSensorStatus(hssEquip)
         keyCardIsInSlot(hssEquip)
         prePurgeEnabled = hssEquip.prePurgeEnable.readDefaultVal() > 0.0
         prePurgeOpeningValue = hssEquip.standalonePrePurgeFanSpeedTuner.readPriorityVal()
@@ -125,7 +126,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         }
 
         if (isEmergencyShutoffActive(hssEquip).not() && (isDoorOpen.not()) && isCondensateTripped.not()) {
-            if (basicSettings.fanMode != StandaloneFanStage.OFF) {
+            if (canWeDoConditioning(basicSettings) && canWeRunFan(basicSettings)) {
                 runRelayOperations(config, basicSettings, pipe4Tuners)
                 runAnalogOutOperations(config, basicSettings, pipe4Tuners, hssEquip.analogOutStages)
                 operateSaTempering(hssEquip, pipe4Tuners, basicSettings)
@@ -188,7 +189,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         config: Pipe4UVConfiguration, basicSettings: BasicSettings, tuners: UvTuners
     ) {
         updatePrerequisite(config)
-        runControllers(hssEquip, basicSettings, config, tuners)
+        runControllers(hssEquip, basicSettings, tuners)
     }
 
     private fun updatePrerequisite(config: Pipe4UVConfiguration) {
@@ -224,13 +225,12 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
     private fun runControllers(
         equip: Pipe4UVEquip,
         basicSettings: BasicSettings,
-        config: Pipe4UVConfiguration,
         tuners: UvTuners
     ) {
         controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             val result = controller.runController()
-            updateRelayStatus(controllerName, result, equip, basicSettings, config, tuners)
+            updateRelayStatus(controllerName, result, equip, basicSettings, tuners)
         }
     }
 
@@ -239,7 +239,6 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         result: Any,
         equip: Pipe4UVEquip,
         basicSettings: BasicSettings,
-        config: Pipe4UVConfiguration,
         tuners: UvTuners
     ) {
 
@@ -258,7 +257,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         when (controllerName) {
             ControllerNames.FAN_SPEED_CONTROLLER -> {
 
-                runTitle24Rule(config)
+                runTitle24Rule(hssEquip)
 
                 fun checkUserIntentAction(stage: Int): Boolean {
                     val mode = equip.fanOpMode
@@ -318,7 +317,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
 
             ControllerNames.COOLING_VALVE_CONTROLLER -> {
                 var status = result as Boolean
-                if (canWeDoCooling(basicSettings.conditioningMode).not() || (economizingAvailable
+                if (canWeDoCooling(basicSettings.conditioningMode).not() || canWeRunFan(basicSettings).not() || (economizingAvailable
                             && coolingLoopOutput <= tuners.economizingToMainCoolingLoopMap)) {
                     status = false
                 }
@@ -327,7 +326,7 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
 
             ControllerNames.HEATING_VALVE_CONTROLLER -> {
                 var status = result as Boolean
-                if (canWeDoHeating(basicSettings.conditioningMode).not()) {
+                if (canWeDoHeating(basicSettings.conditioningMode).not() || canWeRunFan(basicSettings).not()) {
                     status = false
                 }
                 updateStatus(equip.hotWaterHeatValve, status, StatusMsgKeys.HEATING_VALVE.name)
@@ -489,20 +488,6 @@ class Pipe4UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
                     Pipe4UvAnalogOutControls.EXTERNALLY_MAPPED -> {}
                 }
             }
-        }
-    }
-
-    private fun runTitle24Rule(config: Pipe4UVConfiguration) {
-        resetFanStatus()
-        fanEnabledStatus = config.isFanEnabled(
-            config, HyperStatSplitControlType.FAN_ENABLED.name
-        )
-        when (config.getLowestFanSelected()) {
-            Pipe4UVRelayControls.FAN_LOW_SPEED_VENTILATION.ordinal -> lowestStageFanLow = true
-            Pipe4UVRelayControls.FAN_LOW_SPEED.ordinal -> lowestStageFanLow = true
-            Pipe4UVRelayControls.FAN_MEDIUM_SPEED.ordinal -> lowestStageFanMedium = true
-            Pipe4UVRelayControls.FAN_HIGH_SPEED.ordinal -> lowestStageFanHigh = true
-            else -> {}
         }
     }
 

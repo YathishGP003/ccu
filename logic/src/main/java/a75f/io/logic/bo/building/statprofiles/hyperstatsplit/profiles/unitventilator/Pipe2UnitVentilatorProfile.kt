@@ -3,7 +3,7 @@ package a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
-import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe2UVEquip
 import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logic.Globals
 import a75f.io.logic.L
@@ -16,7 +16,6 @@ import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hvac.StatusMsgKeys
-import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitControlType
 import a75f.io.logic.bo.building.statprofiles.statcontrollers.SplitControllerFactory
 import a75f.io.logic.bo.building.statprofiles.util.AuxActiveStages
 import a75f.io.logic.bo.building.statprofiles.util.BasicSettings
@@ -38,6 +37,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getUnitVentilatorTuners
 import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
+import a75f.io.logic.bo.building.statprofiles.util.keyCardIsInSlot
 import a75f.io.logic.bo.building.statprofiles.util.isSupplyOppositeToConditioning
 import a75f.io.logic.bo.building.statprofiles.util.milliToMin
 import a75f.io.logic.controlcomponents.controls.Controller
@@ -115,7 +115,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         loopController.dumpLogs()
         handleChangeOfDirection(userIntents, controllerFactory, hssEquip)
         calculateSaTemperingLoop(pipe2Tuners, hssEquip, basicSettings)
-        doorWindowIsOpen(hssEquip)
+        checkDoorWindowSensorStatus(hssEquip)
         keyCardIsInSlot(hssEquip)
         prePurgeEnabled = hssEquip.prePurgeEnable.readDefaultVal() > 0.0
         prePurgeOpeningValue = hssEquip.standalonePrePurgeFanSpeedTuner.readPriorityVal()
@@ -143,7 +143,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         }
 
         if (isEmergencyShutoffActive(hssEquip).not() && (isDoorOpen.not()) && isCondensateTripped.not()) {
-            if (canWeRunFan(basicSettings)) {
+            if (canWeDoConditioning(basicSettings) && canWeRunFan(basicSettings)) {
                 runRelayOperations(config, basicSettings, pipe2Tuners)
                 runAnalogOutOperations(config, basicSettings, pipe2Tuners, hssEquip.analogOutStages)
                 runAlgorithm(hssEquip, basicSettings, config)
@@ -207,7 +207,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
     private fun runRelayOperations(
         config: Pipe2UVConfiguration, basicSettings: BasicSettings, tuners: UvTuners) {
         updatePrerequisite(config)
-        runControllers(hssEquip, basicSettings, config, tuners)
+        runControllers(hssEquip, basicSettings, tuners)
     }
 
     private fun updatePrerequisite(config: Pipe2UVConfiguration) {
@@ -262,13 +262,12 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
     private fun runControllers(
         equip: Pipe2UVEquip,
         basicSettings: BasicSettings,
-        config: Pipe2UVConfiguration,
         tuners: UvTuners
     ) {
         controllers.forEach { (controllerName, value) ->
             val controller = value as Controller
             val result = controller.runController()
-            updateRelayStatus(controllerName, result, equip, basicSettings, config, tuners)
+            updateRelayStatus(controllerName, result, equip, basicSettings, tuners)
         }
     }
 
@@ -280,7 +279,6 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         result: Any,
         equip: Pipe2UVEquip,
         basicSettings: BasicSettings,
-        config: Pipe2UVConfiguration,
         tuners: UvTuners
     ) {
 
@@ -299,7 +297,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         when (controllerName) {
             ControllerNames.FAN_SPEED_CONTROLLER -> {
 
-                runTitle24Rule(config)
+                runTitle24Rule(hssEquip)
 
                 fun checkUserIntentAction(stage: Int): Boolean {
                     val mode = equip.fanOpMode
@@ -527,14 +525,14 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
                                     modulationValue = 0.0
                                 }
 
-                                hssEquip.waterModulatingValve.writeHisVal(modulationValue)
+                                hssEquip.modulatingWaterValve.writeHisVal(modulationValue)
                                 if (modulationValue > 0) {
                                     hssEquip.analogOutStages[StatusMsgKeys.WATER_VALVE.name] = 1
                                     isWaterValveActiveDueToLoop = true
                                     lastWaterValveTurnedOnTime = System.currentTimeMillis()
                                 }
                             } else {
-                                hssEquip.waterModulatingValve.writeHisVal(0.0)
+                                hssEquip.modulatingWaterValve.writeHisVal(0.0)
                                 hssEquip.analogOutStages.remove(StatusMsgKeys.WATER_VALVE.name)
                             }
                         }
@@ -572,21 +570,6 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         }
     }
 
-
-    private fun runTitle24Rule(config: Pipe2UVConfiguration) {
-        resetFanStatus()
-        fanEnabledStatus = config.isFanEnabled(
-            config, HyperStatSplitControlType.FAN_ENABLED.name
-        )
-        when (config.getLowestFanSelected()) {
-            Pipe2UVRelayControls.FAN_LOW_SPEED_VENTILATION.ordinal -> lowestStageFanLow = true
-            Pipe2UVRelayControls.FAN_LOW_SPEED.ordinal -> lowestStageFanLow = true
-            Pipe2UVRelayControls.FAN_MEDIUM_SPEED.ordinal -> lowestStageFanMedium = true
-            Pipe2UVRelayControls.FAN_HIGH_SPEED.ordinal -> lowestStageFanHigh = true
-            else -> {}
-        }
-    }
-
     private fun logResults(config: Pipe2UVConfiguration) {
         val mappings = config.getRelayConfigurationMapping()
         mappings.forEach { (enabled, association, port) ->
@@ -619,7 +602,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
             if (enabled) {
                 val mapping = Pipe2UvAnalogOutControls.values()[association]
                 val modulation = when (mapping) {
-                    Pipe2UvAnalogOutControls.WATER_MODULATING_VALVE -> hssEquip.waterModulatingValve
+                    Pipe2UvAnalogOutControls.WATER_MODULATING_VALVE -> hssEquip.modulatingWaterValve
                     Pipe2UvAnalogOutControls.FACE_DAMPER_VALVE -> hssEquip.faceBypassDamperModulatingCmd
                     Pipe2UvAnalogOutControls.FAN_SPEED -> hssEquip.fanSignal
                     Pipe2UvAnalogOutControls.OAO_DAMPER -> hssEquip.oaoDamper
@@ -672,7 +655,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
             return
         }
 
-        if (equip.waterValve.pointExists().not() && equip.waterModulatingValve.pointExists().not()
+        if (equip.waterValve.pointExists().not() && equip.modulatingWaterValve.pointExists().not()
         ) {
             logIt( "No mapping for water value")
             return
@@ -680,7 +663,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
 
         fun resetIsRequired(): Boolean {
             return (hssEquip.waterValve.readHisVal().toInt() != 0
-                    || hssEquip.waterModulatingValve.readHisVal().toInt() != 0)
+                    || hssEquip.modulatingWaterValve.readHisVal().toInt() != 0)
         }
 
         logIt("waterSamplingStarted Time $waterSamplingStartTime")
@@ -734,7 +717,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
     ) {
         waterSamplingStartTime = System.currentTimeMillis()
         hssEquip.waterValve.writeHisVal(1.0)
-        hssEquip.waterModulatingValve.writeHisVal(100.0)
+        hssEquip.modulatingWaterValve.writeHisVal(100.0)
         relayStages[StatusMsgKeys.WATER_VALVE.name] = 1
         logIt( "Turned ON water valve ")
     }
@@ -742,7 +725,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
     private fun resetWaterValve(equip: Pipe2UVEquip) {
         if (waterSamplingStartTime == 0L) {
             hssEquip.waterValve.writeHisVal(0.0)
-            hssEquip.waterModulatingValve.writeHisVal(0.0)
+            hssEquip.modulatingWaterValve.writeHisVal(0.0)
             equip.relayStages.remove(StatusMsgKeys.WATER_VALVE.name)
             equip.analogOutStages.remove(StatusMsgKeys.WATER_VALVE.name)
             isWaterValveActiveDueToLoop = false
@@ -806,7 +789,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
     override fun resetAnalogOutLogicalPoints() {
         hssEquip.apply {
             listOf(
-                waterModulatingValve,
+                modulatingWaterValve,
                 faceBypassDamperModulatingCmd,
                 fanSignal,
                 oaoDamper,

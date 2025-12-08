@@ -1,10 +1,10 @@
 package a75f.io.renatus.ui.tempprofiles.view
 
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HyperStatConfiguration
-import a75f.io.renatus.profiles.hyperstatv2.util.handleConditionMode
-import a75f.io.renatus.profiles.hyperstatv2.util.handleDeHumidityMode
-import a75f.io.renatus.profiles.hyperstatv2.util.handleFanMode
-import a75f.io.renatus.profiles.hyperstatv2.util.handleHumidityMode
+import a75f.io.renatus.profiles.hyperstat.util.handleConditionMode
+import a75f.io.renatus.profiles.hyperstat.util.handleDeHumidityMode
+import a75f.io.renatus.profiles.hyperstat.util.handleFanMode
+import a75f.io.renatus.profiles.hyperstat.util.handleHumidityMode
 import a75f.io.renatus.ui.CONDITIONING_MODE
 import a75f.io.renatus.ui.DEHUMIDIFIER
 import a75f.io.renatus.ui.FAN_MODE

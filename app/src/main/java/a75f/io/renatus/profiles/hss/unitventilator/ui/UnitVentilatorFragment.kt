@@ -437,12 +437,10 @@ open class UnitVentilatorFragment : HyperStatSplitFragment() {
                         }
                         Box(modifier = Modifier.weight(1f)) {
                             SpinnerElementString(
-                                defaultSelection = viewModel.viewState.value.zoneCO2DamperOpeningRate.toInt()
-                                    .toString(),
+                                defaultSelection = viewModel.viewState.value.zoneCO2DamperOpeningRate.toString(),
                                 items = viewModel.zoneCO2DamperOpeningRateList, unit = "%",
                                 itemSelected = {
-                                    viewModel.viewState.value.zoneCO2DamperOpeningRate =
-                                        it.toDouble()
+                                    viewModel.viewState.value.zoneCO2DamperOpeningRate = it.toInt()
                                 },previewWidth = 70)
                         }
 

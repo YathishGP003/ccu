@@ -6,7 +6,6 @@ import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.mystat.MyStatCpuEquip
-import a75f.io.domain.util.ModelNames
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.util.MinMaxConfig
 import a75f.io.logic.bo.building.statprofiles.util.MyStatCpuMinMaxConfig
@@ -142,23 +141,25 @@ class MyStatCpuConfiguration(nodeAddress: Int, nodeType: String, priority: Int, 
         }
     }
 
-    override fun getActiveConfiguration(): MyStatConfiguration {
-        val cpuEquip =
-            Domain.hayStack.readEntity("domainName == \"${ModelNames.myStatCpu}\" and group == \"$nodeAddress\"")
-        if (cpuEquip.isEmpty()) {
+    override fun getActiveConfiguration() : MyStatConfiguration {
+        val equip = Domain.hayStack.readEntity("equip and group == \"$nodeAddress\"")
+        if (equip.isEmpty()) {
             return this
         }
-
-        val myStatCpuEquip = MyStatCpuEquip(cpuEquip[Tags.ID].toString())
-        val configuration = this.getDefaultConfiguration()
-        configuration.getActiveConfiguration(myStatCpuEquip)
-        readCpuActiveConfig(myStatCpuEquip)
+        val msEquip = MyStatCpuEquip(equip[Tags.ID].toString())
+        getDefaultConfiguration()
+        getActiveEnableConfigs(msEquip)
+        getActiveAssociationConfigs(msEquip)
+        getGenericZoneConfigs(msEquip)
+        getActiveDynamicConfig(msEquip)
+        equipId = msEquip.equipRef
+        isDefault = false
         return this
     }
 
     override fun getAnalogStartIndex() = MyStatCpuRelayMapping.values().size
 
-    private fun readCpuActiveConfig(equip: MyStatCpuEquip) {
+    private fun getActiveDynamicConfig(equip: MyStatCpuEquip) {
         analogOut1MinMaxConfig.apply {
             cooling.min.currentVal =
                 getActivePointValue(equip.analog1MinCooling, cooling.min)
@@ -339,14 +340,14 @@ class MyStatCpuConfiguration(nodeAddress: Int, nodeType: String, priority: Int, 
         }
     }
 
-    fun isCoolingAvailable(): Boolean {
+    override fun isCoolingAvailable(): Boolean {
         val relays = getRelayEnabledAssociations()
         return (isAnyRelayEnabledAssociated(relays, MyStatCpuRelayMapping.COOLING_STAGE_1.ordinal)
                 || isAnyRelayEnabledAssociated(relays, MyStatCpuRelayMapping.COOLING_STAGE_2.ordinal)
                 || isAnalogEnabledAssociated(association = MyStatCpuAnalogOutMapping.COOLING.ordinal))
     }
 
-    fun isHeatingAvailable(): Boolean {
+    override fun isHeatingAvailable(): Boolean {
         val relays = getRelayEnabledAssociations()
         return (isAnyRelayEnabledAssociated(relays, MyStatCpuRelayMapping.HEATING_STAGE_1.ordinal)
                 || isAnyRelayEnabledAssociated(relays, MyStatCpuRelayMapping.HEATING_STAGE_2.ordinal)

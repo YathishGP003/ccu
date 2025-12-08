@@ -20,7 +20,7 @@ import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.device.util.DeviceConfigurationUtil;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
-import a75f.io.domain.equips.HyperStatSplitEquip;
+import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -97,7 +97,7 @@ public class HyperSplitMessageGenerator {
                 .setHumidityMaxSetpoint((int)(equip.getTargetDehumidifier().readDefaultVal()))
                 .setShowCentigrade(DeviceConfigurationUtil.Companion.getUserConfiguration() == 1)
                 .setDisplayHumidity(equip.getEnableHumidityDisplay().readDefaultVal() > 0)
-                .setDisplayCO2(equip.getEnableCO2Display().readDefaultVal() > 0)
+                .setDisplayCO2(equip.getEnableCo2Display().readDefaultVal() > 0)
                 .setDisplayPM25(equip.getEnablePm25Display().readDefaultVal() > 0)
                 .setCo2AlertTarget((int)equip.getCo2Threshold().readDefaultVal())
                 .setPm25AlertTarget((int)equip.getPm25Target().readDefaultVal())

@@ -4,7 +4,6 @@ import static a75f.io.logic.bo.building.NodeType.CONNECTNODE;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.addBacnetTags;
 import static a75f.io.logic.bo.building.NodeType.PCN;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.generateBacnetIdForRoom;
-import static a75f.io.logic.util.bacnet.BacnetUtilKt.updateBacnetMstpLinearAndCovSubscription;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -95,10 +94,11 @@ import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe2UVFragment;
 import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe4UVFragment;
-import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
-import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
-import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
-import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2Pipe2Fragment;
+import a75f.io.renatus.profiles.hyperstat.ui.HyperStatMonitoringFragment;
+import a75f.io.renatus.profiles.hyperstat.ui.HyperStatPipe4Fragment;
+import a75f.io.renatus.profiles.hyperstat.ui.HyperStatCpuFragment;
+import a75f.io.renatus.profiles.hyperstat.ui.HyperStatHpuFragment;
+import a75f.io.renatus.profiles.hyperstat.ui.HyperStatPipe2Fragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatCpuFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatHpuFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatPipe2Fragment;
@@ -1238,19 +1238,25 @@ public class FloorPlanFragment extends Fragment {
                             , zone.getId(), floor.getId()), HyperStatVrvFragment.ID);
                     break;
                 case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
-                    showDialogFragment(HyperStatV2CpuFragment.newInstance(Short.parseShort(nodeAddress)
+                    showDialogFragment(HyperStatCpuFragment.newInstance(Short.parseShort(nodeAddress)
                                     , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()),
-                            HyperStatV2CpuFragment.ID);
+                            HyperStatCpuFragment.ID);
                     break;
                 case HYPERSTAT_TWO_PIPE_FCU:
-                    showDialogFragment(HyperStatV2Pipe2Fragment.Companion.newInstance(Short.parseShort(nodeAddress),
+                    showDialogFragment(HyperStatPipe2Fragment.Companion.newInstance(Short.parseShort(nodeAddress),
                                     zone.getId(), floor.getId(), NodeType.HYPER_STAT, ProfileType.HYPERSTAT_TWO_PIPE_FCU),
-                            HyperStatV2Pipe2Fragment.ID);
+                            HyperStatPipe2Fragment.ID);
+                    break;
+
+                case HYPERSTAT_FOUR_PIPE_FCU:
+                    showDialogFragment(HyperStatPipe4Fragment.Companion.newInstance(Short.parseShort(nodeAddress),
+                                    zone.getId(), floor.getId(), NodeType.HYPER_STAT, ProfileType.HYPERSTAT_FOUR_PIPE_FCU),
+                            HyperStatPipe4Fragment.ID);
                     break;
                 case HYPERSTAT_HEAT_PUMP_UNIT:
-                    showDialogFragment(HyperStatV2HpuFragment.newInstance(Short.parseShort(nodeAddress)
+                    showDialogFragment(HyperStatHpuFragment.newInstance(Short.parseShort(nodeAddress)
                             , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()),
-                            HyperStatV2HpuFragment.ID);
+                            HyperStatHpuFragment.ID);
                     break;
                 case HYPERSTATSPLIT_CPU:
                     showDialogFragment(HyperStatSplitCpuFragment.Companion.newInstance(Short.parseShort(nodeAddress)

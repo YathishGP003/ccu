@@ -46,7 +46,6 @@ import a75f.io.renatus.FragmentDABDualDuctConfiguration;
 import a75f.io.renatus.FragmentEMRConfiguration;
 import a75f.io.renatus.FragmentHMPConfiguration;
 import a75f.io.renatus.FragmentHeatPumpConfiguration;
-import a75f.io.renatus.FragmentPLCConfiguration;
 import a75f.io.renatus.R;
 import a75f.io.renatus.bluetooth.BLEAction;
 import a75f.io.renatus.bluetooth.BLEProvisionService;
@@ -56,7 +55,8 @@ import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe2UVFragment;
 import a75f.io.renatus.profiles.hss.unitventilator.ui.Pipe4UVFragment;
-import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
+import a75f.io.renatus.profiles.hyperstat.ui.HyperStatMonitoringFragment;
+import a75f.io.renatus.profiles.hyperstat.ui.HyperStatPipe4Fragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatCpuFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatHpuFragment;
 import a75f.io.renatus.profiles.mystat.ui.MyStatPipe2Fragment;
@@ -64,9 +64,9 @@ import a75f.io.renatus.profiles.mystat.ui.MyStatPipe4Fragment;
 import a75f.io.renatus.profiles.ti.TIFragment;
 import a75f.io.renatus.profiles.oao.OAOProfileFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
-import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
-import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
-import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2Pipe2Fragment;
+import a75f.io.renatus.profiles.hyperstat.ui.HyperStatCpuFragment;
+import a75f.io.renatus.profiles.hyperstat.ui.HyperStatHpuFragment;
+import a75f.io.renatus.profiles.hyperstat.ui.HyperStatPipe2Fragment;
 import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
@@ -492,17 +492,21 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                         showDialogFragment(HyperStatVrvFragment.newInstance(mPairingAddress, mName, mFloorName), HyperStatVrvFragment.ID);
                         break;
                     case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
-                        showDialogFragment(HyperStatV2CpuFragment.newInstance(mPairingAddress, mName, mFloorName,
+                        showDialogFragment(HyperStatCpuFragment.newInstance(mPairingAddress, mName, mFloorName,
                                         mNodeType, ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT),
-                                HyperStatV2CpuFragment.ID);
+                                HyperStatCpuFragment.ID);
                         break;
                     case HYPERSTAT_HEAT_PUMP_UNIT:
-                        showDialogFragment(HyperStatV2HpuFragment.newInstance(mPairingAddress, mName, mFloorName,
+                        showDialogFragment(HyperStatHpuFragment.newInstance(mPairingAddress, mName, mFloorName,
                                         mNodeType, ProfileType.HYPERSTAT_HEAT_PUMP_UNIT),
-                                HyperStatV2HpuFragment.ID);
+                                HyperStatHpuFragment.ID);
                         break;
                     case HYPERSTAT_TWO_PIPE_FCU:
-                        showDialogFragment(HyperStatV2Pipe2Fragment.newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType), HyperStatV2Pipe2Fragment.ID);
+                        showDialogFragment(HyperStatPipe2Fragment.newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType), HyperStatPipe2Fragment.ID);
+
+                        break;
+                     case HYPERSTAT_FOUR_PIPE_FCU:
+                        showDialogFragment(HyperStatPipe4Fragment.newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType), HyperStatPipe4Fragment.ID);
 
                         break;
                     case HYPERSTATSPLIT_CPU:

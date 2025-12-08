@@ -5,7 +5,7 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
-import a75f.io.domain.equips.HyperStatSplitEquip
+import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
 import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.statprofiles.util.StatLoopController
 import a75f.io.logic.bo.building.statprofiles.util.UserIntents
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoCooling
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoHeating
+import a75f.io.logic.bo.building.statprofiles.util.doorWindowIsOpen
 import a75f.io.logic.bo.building.statprofiles.util.getAirEnthalpy
 import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
@@ -191,6 +192,16 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
         outsideAirCalculatedMinDamper = 0
         outsideAirLoopOutput = 0
         outsideAirFinalLoopOutput = 0
+    }
+
+    fun runTitle24Rule(equip: HyperStatSplitEquip) {
+        resetFanStatus()
+        equip.apply {
+            fanEnabledStatus = fanEnable.pointExists()
+            if (fanLowSpeedVentilation.pointExists() || fanLowSpeed.pointExists()) lowestStageFanLow = true
+            else if (fanMediumSpeed.pointExists()) lowestStageFanMedium = true
+            else if (fanHighSpeed.pointExists()) lowestStageFanHigh = true
+        }
     }
 
     fun handleChangeOfDirection(userIntents: UserIntents, factory: SplitControllerFactory, equip: HyperStatSplitEquip) {
@@ -597,7 +608,7 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
         dcvAvailable = false
 
         if (isSoftOccupied(zoneOccupancyState)) {
-            val zoneSensorCO2 = hssEquip.zoneCO2.readHisVal()
+            val zoneSensorCO2 = hssEquip.zoneCo2.readHisVal()
             val zoneCO2Threshold = hssEquip.co2Threshold.readDefaultVal()
             val co2DamperOpeningRate = hssEquip.co2DamperOpeningRate.readDefaultVal()
             logIt(
@@ -975,55 +986,10 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
                 || hssEquip.emergencyShutoffNO.pointExists() && hssEquip.emergencyShutoffNO.readHisVal() > 0.0)
     }
 
-    fun doorWindowIsOpen(equip: HyperStatSplitEquip) {
-        var doorWindowEnabled = 0.0
-        var doorWindowSensor = 0.0
-        isDoorOpenFromTitle24 = false
-        isDoorOpen = false
-        listOf(
-            equip.doorWindowSensorNCTitle24,
-            equip.doorWindowSensorTitle24,
-            equip.doorWindowSensorNOTitle24,
-            equip.doorWindowSensorNC,
-            equip.doorWindowSensor,
-            equip.doorWindowSensorNO,
-        ).forEach {
-            if (it.pointExists()) {
-                if (doorWindowEnabled != 1.0) {
-                    doorWindowEnabled = 1.0
-                }
-                if (it.readHisVal() > 0) {
-                    doorWindowSensor = 1.0
-                    if (it == equip.doorWindowSensorNCTitle24 ||
-                        it == equip.doorWindowSensorTitle24 ||
-                        it == equip.doorWindowSensorNOTitle24
-                    ) {
-                        isDoorOpenFromTitle24 = true
-                    }
-                }
-            }
-        }
-        equip.doorWindowSensingEnable.writePointValue(doorWindowEnabled)
-        equip.doorWindowSensorInput.writePointValue(doorWindowSensor)
-        isDoorOpen =  (doorWindowSensor == 1.0 && occupancyStatus == Occupancy.WINDOW_OPEN)
-    }
-
-    fun keyCardIsInSlot(
-        equip: HyperStatSplitEquip
-    ) {
-        var keycardEnabled = 0.0
-        var keycardSensor = 0.0
-        if (equip.keyCardSensorNO.pointExists() || equip.keyCardSensorNC.pointExists()) {
-            keycardEnabled = 1.0
-            if (equip.keyCardSensorNO.readHisVal() > 0) {
-                keycardSensor = 1.0
-            }
-            if (equip.keyCardSensorNC.readHisVal() > 0) {
-                keycardSensor = 1.0
-            }
-        }
-        equip.keyCardSensingEnable.writePointValue(keycardEnabled)
-        equip.keyCardSensorInput.writePointValue(keycardSensor)
+    fun checkDoorWindowSensorStatus(equip: HyperStatSplitEquip) {
+       val (isDoorWindowOpen, isDueToTitle24) = doorWindowIsOpen(equip)
+        isDoorOpenFromTitle24 = isDueToTitle24
+        isDoorOpen =  (isDoorWindowOpen && occupancyStatus == Occupancy.WINDOW_OPEN)
     }
 
     fun doDcvAnalogAction (analogOutStages: HashMap<String, Int>, equip: HyperStatSplitEquip) {

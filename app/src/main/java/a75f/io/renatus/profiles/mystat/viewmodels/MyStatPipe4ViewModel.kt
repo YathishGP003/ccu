@@ -3,6 +3,7 @@ package a75f.io.renatus.profiles.mystat.viewmodels
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
+import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatPipe4Equip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
@@ -13,9 +14,12 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4Configuration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4RelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe4Profile
+import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe4FanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode
@@ -121,7 +125,7 @@ class MyStatPipe4ViewModel(application: Application) : MyStatViewModel(applicati
             (myStatProfile as MyStatPipe4Profile).addEquip(equipId)
             L.ccu().zoneProfiles.add(myStatProfile)
             val equip = MyStatPipe4Equip(equipId)
-            equip.conditioningMode.writePointValue(StandaloneConditioningMode.AUTO.ordinal.toDouble())
+            setConditioningMode(profileConfiguration, equip)
             updateFanMode(
                 false,
                 equip,
@@ -165,4 +169,44 @@ class MyStatPipe4ViewModel(application: Application) : MyStatViewModel(applicati
         }
         DesiredTempDisplayMode.setModeTypeOnUserIntentChange(zoneRef, CCUHsApi.getInstance())
     }
+
+    private fun setConditioningMode(config: MyStatConfiguration, equip: MyStatEquip) {
+
+        val possible = getMyStatPossibleConditionMode(config)
+        var newMode = StandaloneConditioningMode.OFF
+        if (possible == PossibleConditioningMode.BOTH) newMode = StandaloneConditioningMode.AUTO
+        if (possible == PossibleConditioningMode.HEATONLY) newMode =
+            StandaloneConditioningMode.HEAT_ONLY
+        if (possible == PossibleConditioningMode.COOLONLY) newMode =
+            StandaloneConditioningMode.COOL_ONLY
+        equip.conditioningMode.writePointValue(newMode.ordinal.toDouble())
+    }
+
+    private fun updateConditioningMode(config: MyStatConfiguration, equip: MyStatEquip) {
+
+        val currentMode =
+            StandaloneConditioningMode.values()[equip.conditioningMode.readPriorityVal().toInt()]
+        val possibleMode = getMyStatPossibleConditionMode(config)
+
+        if (possibleMode == PossibleConditioningMode.OFF) {
+            equip.conditioningMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
+            return
+        }
+
+        if (currentMode == StandaloneConditioningMode.AUTO && (possibleMode == PossibleConditioningMode.HEATONLY || possibleMode == PossibleConditioningMode.COOLONLY)) {
+            equip.conditioningMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
+            return
+        }
+
+        if (currentMode == StandaloneConditioningMode.HEAT_ONLY && possibleMode == PossibleConditioningMode.COOLONLY) {
+            equip.conditioningMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
+            return
+        }
+
+        if (currentMode == StandaloneConditioningMode.COOL_ONLY && possibleMode == PossibleConditioningMode.HEATONLY) {
+            equip.conditioningMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
+            return
+        }
+    }
+
 }

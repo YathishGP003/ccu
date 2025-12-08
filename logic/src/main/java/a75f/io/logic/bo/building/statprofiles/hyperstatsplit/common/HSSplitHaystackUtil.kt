@@ -1,6 +1,6 @@
 package a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common
 
-import a75f.io.domain.equips.HyperStatSplitEquip
+import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.HyperStatSplitConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration

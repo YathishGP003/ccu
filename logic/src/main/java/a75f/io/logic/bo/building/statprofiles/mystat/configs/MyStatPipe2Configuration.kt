@@ -6,7 +6,6 @@ import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
-import a75f.io.domain.util.ModelNames
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.util.MinMaxConfig
 import a75f.io.logic.bo.building.statprofiles.util.MyStatPipe2MinMaxConfig
@@ -25,23 +24,26 @@ class MyStatPipe2Configuration(nodeAddress: Int, nodeType: String, priority: Int
     lateinit var analogOut2MinMaxConfig: MyStatPipe2MinMaxConfig
     lateinit var analogOut2FanSpeedConfig: MyStatFanConfig
 
-    override fun getActiveConfiguration(): MyStatConfiguration {
-        val pipe2RawEquip =
-            Domain.hayStack.readEntity("domainName == \"${ModelNames.myStatPipe2}\" and group == \"$nodeAddress\"")
-        if (pipe2RawEquip.isEmpty()) {
+
+    override fun getActiveConfiguration() : MyStatConfiguration {
+        val equip = Domain.hayStack.readEntity("equip and group == \"$nodeAddress\"")
+        if (equip.isEmpty()) {
             return this
         }
-
-        val myStatPipe2Equip = MyStatPipe2Equip(pipe2RawEquip[Tags.ID].toString())
-        val configuration = this.getDefaultConfiguration()
-        configuration.getActiveConfiguration(myStatPipe2Equip)
-        readPipe2ActiveConfig(myStatPipe2Equip)
+        val msEquip = MyStatPipe2Equip(equip[Tags.ID].toString())
+        getDefaultConfiguration()
+        getActiveEnableConfigs(msEquip)
+        getActiveAssociationConfigs(msEquip)
+        getGenericZoneConfigs(msEquip)
+        getActiveDynamicConfig(msEquip)
+        equipId = msEquip.equipRef
+        isDefault = false
         return this
     }
 
     override fun getAnalogStartIndex() = MyStatPipe2RelayMapping.values().size
 
-    private fun readPipe2ActiveConfig(equip: MyStatPipe2Equip) {
+    private fun getActiveDynamicConfig(equip: MyStatPipe2Equip) {
         analogOut1MinMaxConfig.apply {
             waterModulatingValue.min.currentVal =
                 getActivePointValue(equip.analog1MinWaterValve, waterModulatingValue.min)
@@ -278,6 +280,10 @@ class MyStatPipe2Configuration(nodeAddress: Int, nodeType: String, priority: Int
             }
         }
     }
+
+    override fun isCoolingAvailable() = true
+
+    override fun isHeatingAvailable() = true
 }
 
 

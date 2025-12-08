@@ -10,7 +10,6 @@ import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.DependentPointMappingView
 import a75f.io.renatus.composables.MinMaxConfiguration
-import a75f.io.renatus.composables.PinPassword
 import a75f.io.renatus.composables.RelayConfiguration
 import a75f.io.renatus.composables.TempOffsetPicker
 import a75f.io.renatus.composables.UniversalOutConfiguration
@@ -29,8 +28,6 @@ import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hss.HyperStatSplitFragment.Companion.CONDITIONING_ACCESS
 import a75f.io.renatus.profiles.hss.HyperStatSplitFragment.Companion.INSTALLER_ACCESS
-import a75f.io.renatus.profiles.hyperstatv2.util.ConfigState
-import a75f.io.renatus.profiles.hyperstatv2.util.MinMaxConfig
 import a75f.io.renatus.profiles.mystat.getAllowedValues
 import a75f.io.renatus.profiles.mystat.minMaxVoltage
 import a75f.io.renatus.profiles.mystat.testVoltage
@@ -38,6 +35,9 @@ import a75f.io.renatus.profiles.mystat.viewmodels.MyStatHpuViewModel
 import a75f.io.renatus.profiles.mystat.viewmodels.MyStatPipe2ViewModel
 import a75f.io.renatus.profiles.mystat.viewmodels.MyStatViewModel
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment.Companion.DividerRow
+import a75f.io.renatus.profiles.viewstates.ConfigState
+import a75f.io.renatus.profiles.viewstates.MinMaxConfig
+import a75f.io.renatus.util.ShowPinDialog
 import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.compose.foundation.Image
@@ -57,9 +57,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -79,8 +77,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
 import androidx.fragment.app.viewModels
 import org.projecthaystack.util.Base64
@@ -424,8 +420,8 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                         Box(modifier = Modifier
                             .wrapContentWidth()
                             .padding(start = 5.dp, top = 8.dp)) {
-                            ToggleButtonStateful(defaultSelection = viewModel.viewState.value.universalIn1.enabled) {
-                                viewModel.viewState.value.universalIn1.enabled = it
+                            ToggleButtonStateful(defaultSelection = viewModel.viewState.value.universalIn1Config.enabled) {
+                                viewModel.viewState.value.universalIn1Config.enabled = it
                             }
                         }
 
@@ -438,12 +434,12 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                             .weight(4f)
                             .padding(start = 12.dp, end = 5.dp, top = 10.dp)) {
                             SearchSpinnerElement(
-                                default = universalOptions[viewModel.viewState.value.universalIn1.association],
+                                default = universalOptions[viewModel.viewState.value.universalIn1Config.association],
                                 allItems = universalOptions,
                                 unit = "",
-                                onSelect = { viewModel.viewState.value.universalIn1.association = it.index },
+                                onSelect = { viewModel.viewState.value.universalIn1Config.association = it.index },
                                 width = 400,
-                                isEnabled = viewModel.viewState.value.universalIn1.enabled
+                                isEnabled = viewModel.viewState.value.universalIn1Config.enabled
                             )
                         }
                     }
@@ -534,10 +530,10 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
             Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {
                 MinMaxConfiguration(
                     getString(R.string.cO2_Threshold), getString(R.string.cO2_Target),
-                    itemList = co2ThresholdOptions, co2Unit, minDefault = viewModel.viewState.value.co2Threshold.toInt().toString(),
-                    maxDefault = viewModel.viewState.value.co2Target.toInt().toString(),
-                    onMinSelected = { viewModel.viewState.value.co2Threshold = it.value.toDouble() },
-                    onMaxSelected = { viewModel.viewState.value.co2Target = it.value.toDouble() }
+                    itemList = co2ThresholdOptions, co2Unit, minDefault = viewModel.viewState.value.zoneCO2Threshold.toInt().toString(),
+                    maxDefault = viewModel.viewState.value.zoneCO2Target.toInt().toString(),
+                    onMinSelected = { viewModel.viewState.value.zoneCO2Threshold = it.value.toDouble() },
+                    onMaxSelected = { viewModel.viewState.value.zoneCO2Target = it.value.toDouble() }
                 )
 
                 Row(modifier = Modifier
@@ -552,8 +548,9 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                     Box(modifier = Modifier
                         .weight(1f)
                         .padding(top = 5.dp)) {
-                        SpinnerElementOption(viewModel.viewState.value.co2DamperOperatingRate.toInt().toString(), viewModel.damperOpeningRate, "%",
-                            itemSelected = { viewModel.viewState.value.co2DamperOperatingRate = it.value.toDouble() }, viewModel = null)
+                        SpinnerElementOption(
+                            viewModel.viewState.value.zoneCO2DamperOpeningRate.toString(), viewModel.damperOpeningRate, "%",
+                            itemSelected = { viewModel.viewState.value.zoneCO2DamperOpeningRate = it.value.toInt() }, viewModel = null)
                     }
                 }
             }
@@ -618,11 +615,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                     .padding(vertical = 10.dp)
             ) {
 
-                Box(
-                    modifier = Modifier
-                        .weight(4f)
-                        .padding(top = 10.dp)
-                ) {
+                Box(modifier = Modifier.weight(4f).padding(top = 10.dp)) {
                     StyledTextView(
                         text = viewModel.profileConfiguration.spaceTemp.disName, fontSize = 20
                     )
@@ -665,7 +658,6 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
         DividerRow()
 
     }
-
 
     @SuppressLint("UnrememberedMutableState")
     @Composable
@@ -845,102 +837,5 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
             }
         }
     }
-
-    @Composable
-    fun ShowPinDialog(
-        onDismiss: () -> Unit,
-        selectedPinTitle: String,
-        pinDigits: MutableList<Int>,
-        onSave: () -> Unit
-    ) {
-        var saveState by remember { mutableStateOf(false) }
-        CcuLog.i(L.TAG_CCU_DOMAIN, "ShowPinDialog called with title: $selectedPinTitle and pinDigits: ${pinDigits.toList()}")
-
-
-        Dialog(
-            onDismissRequest = onDismiss,
-            properties = DialogProperties(dismissOnClickOutside = false, dismissOnBackPress = false)
-        ) {
-            Column(
-                modifier = Modifier
-                    .width(500.dp)
-                    .height(370.dp)
-                    .background(Color.White, RoundedCornerShape(4.dp))
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text("${getString(R.string.pin_lock)} $selectedPinTitle", fontSize = 23.sp, color = Color.Black, fontWeight = FontWeight.Bold,fontFamily = myFontFamily , modifier = Modifier.padding(start = 10.dp) )
-                Box(modifier = Modifier.padding(start = 20.dp)) {
-                    PinSection(
-                        onSaveState = { saveState = it },
-                        pinDigits = pinDigits
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(30.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-
-                    TextButton(onClick = onDismiss,modifier = Modifier.align(alignment = Alignment.CenterVertically)) {
-                        Text(getString(R.string.button_cancel), color = primaryColor, fontSize = 22.sp, fontFamily = myFontFamily)
-                    }
-
-                    Divider(
-                        modifier = Modifier
-                            .align(alignment = Alignment.CenterVertically)
-                            .height(20.dp)
-                            .width(2.dp),
-                        color = Color.LightGray
-                    )
-
-                    TextButton(onClick = { onSave() }, enabled = saveState, modifier = Modifier.align(alignment = Alignment.CenterVertically))
-                    {
-                        Text(
-                            getString(R.string.button_save),
-                            color = if (saveState) primaryColor else Color.Gray,
-                            fontSize = 22.sp, fontFamily = myFontFamily
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-
-    @Composable
-    fun PinSection(
-        onSaveState: (Boolean) -> Unit,
-        pinDigits: MutableList<Int>
-    ) {
-        // Store the original pin state for comparison
-        val originalPin = remember { mutableStateListOf(0, 0, 0, 0) }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            repeat(4) { index ->
-                PinPassword(
-                    items = (0..9).map { it.toString() },
-                    modifier = Modifier.weight(1f),
-                    textModifier = Modifier.width(30.dp),
-                    startIndex = pinDigits[index],
-                    onChanged = { selected ->
-                        val selectedInt = selected.toInt()
-                        // Update the pin digit
-                        pinDigits[index] = selectedInt
-                        // Compare current PIN with original PIN or the pin 0,0,0,0 making save btn to disable state
-                        val isChanged =  (pinDigits.toList()== listOf(0,0,0,0) || pinDigits.toList() != originalPin.toList())
-                        onSaveState(isChanged)
-                        originalPin[index]= selectedInt
-                    }
-                )
-            }
-        }
-    }
-
 
 }

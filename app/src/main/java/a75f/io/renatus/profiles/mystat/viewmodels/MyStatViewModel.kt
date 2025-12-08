@@ -19,15 +19,12 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
-import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
-import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuAnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
-import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2AnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2RelayMapping
-import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4AnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4Configuration
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4RelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatProfile
 import a75f.io.logic.bo.building.statprofiles.util.FanModeCacheStorage
 import a75f.io.logic.bo.building.statprofiles.util.MyStatDeviceType
@@ -344,6 +341,21 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         if (this is MyStatPipe2ViewModel) {
             if (viewState.value.isAnyRelayEnabledAndMapped(MyStatPipe2RelayMapping.FAN_LOW_VENTILATION.ordinal)
                 && viewState.value.isAnyRelayEnabledAndMapped(MyStatPipe2RelayMapping.FAN_LOW_SPEED.ordinal)) {
+
+                showErrorDialog(
+                    context,
+                    Html.fromHtml(
+                        "The profile must not have <b>Fan Low Speed - Ventilation and Fan Low Speed</b> mapped. Please remove any one  mapping from the mapping.",
+                        Html.FROM_HTML_MODE_LEGACY
+                    )
+                )
+                isValidConfig = false
+            }
+        }
+        if (this is MyStatPipe4ViewModel) {
+            if (viewState.value.isAnyRelayEnabledAndMapped(MyStatPipe4RelayMapping.FAN_LOW_VENTILATION.ordinal)
+                && viewState.value.isAnyRelayEnabledAndMapped(MyStatPipe4RelayMapping.FAN_LOW_SPEED.ordinal)) {
+
                 showErrorDialog(
                     context,
                     Html.fromHtml(

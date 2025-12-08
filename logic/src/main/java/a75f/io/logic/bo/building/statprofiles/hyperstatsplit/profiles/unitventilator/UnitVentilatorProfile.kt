@@ -2,9 +2,9 @@ package a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventi
 
 import a75.io.algos.ControlLoop
 import a75f.io.domain.api.DomainName
-import a75f.io.domain.equips.unitVentilator.Pipe2UVEquip
-import a75f.io.domain.equips.unitVentilator.Pipe4UVEquip
-import a75f.io.domain.equips.unitVentilator.UnitVentilatorEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe2UVEquip
+import a75f.io.domain.equips.hyperstatsplit.Pipe4UVEquip
+import a75f.io.domain.equips.hyperstatsplit.UnitVentilatorEquip
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hvac.StatusMsgKeys
@@ -115,8 +115,8 @@ abstract class UnitVentilatorProfile(equipRef: String, nodeAddress: Short, tag: 
                             lastWaterValveTurnedOnTime = System.currentTimeMillis()
                             relayStages[StatusMsgKeys.WATER_VALVE.name] = 1
                         }
-                        if (isPointExist(waterModulatingValve)) {
-                            waterModulatingValve.writeHisVal(saTemperingLoopOutput.toDouble())
+                        if (isPointExist(modulatingWaterValve)) {
+                            modulatingWaterValve.writeHisVal(saTemperingLoopOutput.toDouble())
                             lastWaterValveTurnedOnTime = System.currentTimeMillis()
                             relayStages[StatusMsgKeys.WATER_VALVE.name] = 1
                         }
@@ -147,8 +147,8 @@ abstract class UnitVentilatorProfile(equipRef: String, nodeAddress: Short, tag: 
 
                         is Pipe2UVEquip -> {
                             waterValve.writeHisVal(0.0)
-                            if (isPointExist(waterModulatingValve)) {
-                                waterModulatingValve.writeHisVal(0.0)
+                            if (isPointExist(modulatingWaterValve)) {
+                                modulatingWaterValve.writeHisVal(0.0)
                             }
                         }
                     }

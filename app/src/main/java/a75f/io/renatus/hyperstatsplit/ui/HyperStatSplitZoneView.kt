@@ -6,7 +6,7 @@ package a75f.io.renatus.hyperstatsplit.ui
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HSUtil
-import a75f.io.domain.equips.HyperStatSplitEquip
+import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getActualConditioningMode
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getActualFanMode

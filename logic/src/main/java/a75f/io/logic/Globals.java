@@ -65,6 +65,7 @@ import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.cpu.HyperStatCp
 import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.hpu.HyperStatHpuProfile;
 import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.monitoring.HyperStatV2MonitoringProfile;
 import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
+import a75f.io.logic.bo.building.statprofiles.hyperstat.profiles.pipe4.HyperStatPipe4Profile;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe2UnitVentilatorProfile;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.Pipe4UnitVentilatorProfile;
@@ -581,7 +582,11 @@ public class Globals {
                             pipe2Profile.addEquip(eq.getId());
                             L.ccu().zoneProfiles.add(pipe2Profile);
                             break;
-
+                        case HYPERSTAT_FOUR_PIPE_FCU:
+                            HyperStatPipe4Profile pipe4Profile = new HyperStatPipe4Profile();
+                            pipe4Profile.addEquip(eq.getId());
+                            L.ccu().zoneProfiles.add(pipe4Profile);
+                            break;
                         case HYPERSTAT_MONITORING:
                             HyperStatV2MonitoringProfile hyperStatMonitoringProfile = new HyperStatV2MonitoringProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             hyperStatMonitoringProfile.addHyperStatMonitoringEquip();

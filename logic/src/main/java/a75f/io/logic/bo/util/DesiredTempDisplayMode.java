@@ -27,6 +27,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.equips.hyperstatsplit.HsSplitCpuEquip;
 import a75f.io.domain.util.CommonQueries;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -37,6 +38,8 @@ import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitEquip;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitLogicalMap;
 import a75f.io.logic.bo.building.sscpu.SmartStatAssociationUtil;
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.CpuConfiguration;
+import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsPipe4Configuration;
+import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.common.HyperStatSplitAssociationUtil;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration;
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.unitventilator.UnitVentilatorConfiguration;
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration;
@@ -146,6 +149,9 @@ public class DesiredTempDisplayMode {
                 return DUAL;
             } else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
                 TemperatureMode temperatureMode = getTemperatureModeForHSCPU(mEquip);
+                temperatureModes.add(temperatureMode);
+            } else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTAT_FOUR_PIPE_FCU.name())) {
+                TemperatureMode temperatureMode = getTemperatureModeForHSPIPE4(mEquip);
                 temperatureModes.add(temperatureMode);
             } else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_CPU.name())) {
                 TemperatureMode temperatureMode = getTemperatureModeForHSSplitCPUEcon(mEquip);
@@ -335,6 +341,10 @@ public class DesiredTempDisplayMode {
         CpuConfiguration cpuConfiguration = (CpuConfiguration) getHsConfiguration(mEquip.getId());
         return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(cpuConfiguration.isHeatingAvailable(), cpuConfiguration.isCoolingAvailable()), mEquip);
     }
+    private static TemperatureMode getTemperatureModeForHSPIPE4(Equip mEquip) {
+        HsPipe4Configuration pipe4Configuration = (HsPipe4Configuration) getHsConfiguration(mEquip.getId());
+        return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(pipe4Configuration.isHeatingAvailable(), pipe4Configuration.isCoolingAvailable()), mEquip);
+    }
 
     private static TemperatureMode getTemperatureModeForMSCPU(Equip mEquip) {
         MyStatCpuConfiguration cpuConfiguration = (MyStatCpuConfiguration) getMyStatConfiguration(mEquip.getId());
@@ -512,8 +522,8 @@ public class DesiredTempDisplayMode {
 
         UnitVentilatorConfiguration pipeUVConfiguration = (UnitVentilatorConfiguration) getSplitConfiguration(equip.getId());
         assert pipeUVConfiguration != null;
-        Boolean coolingAvailable = false;
-        Boolean heatingAvailable = false;
+        boolean coolingAvailable = false;
+        boolean heatingAvailable = false;
         PossibleConditioningMode possibleConditioningMode = getUvPossibleConditioningMode(pipeUVConfiguration);
         if (PossibleConditioningMode.BOTH == possibleConditioningMode) {
             coolingAvailable = true;

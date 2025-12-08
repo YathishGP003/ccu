@@ -57,7 +57,6 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
     val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
     val deviceDis = "${hayStack.siteName}-${deviceModel.name}-${config!!.nodeAddress}"
 
-
     val pointNewValue = msgObject["val"]
     if(pointNewValue == null || pointNewValue.asString.isEmpty()){
         CcuLog.e(TAG_CCU_PUBNUB, "point is null $config")

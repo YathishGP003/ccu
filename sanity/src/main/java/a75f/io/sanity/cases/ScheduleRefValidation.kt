@@ -10,6 +10,7 @@ import a75f.io.api.haystack.util.retainAndRemove
 import a75f.io.logger.CcuLog
 import a75f.io.sanity.framework.SANITTY_TAG
 import a75f.io.sanity.framework.SanityCase
+import a75f.io.sanity.framework.SanityResultSeverity
 import org.projecthaystack.HDateTime
 import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
@@ -262,6 +263,10 @@ class ScheduleRefValidation : SanityCase {
     override fun correct(): Boolean {
         // Placeholder for correction logic
         return false
+    }
+
+    override fun getSeverity(): SanityResultSeverity {
+        return SanityResultSeverity.HIGH
     }
 
     override fun getDescription(): String {

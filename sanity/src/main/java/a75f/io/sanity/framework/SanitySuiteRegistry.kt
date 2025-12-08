@@ -1,7 +1,10 @@
 package a75f.io.sanity.framework
 
 import a75f.io.sanity.cases.DeviceEntityCheck
+import a75f.io.sanity.cases.DiagEquipCheck
 import a75f.io.sanity.cases.DuplicatePointCheck
+import a75f.io.sanity.cases.MissingDeviceBasePointCheck
+import a75f.io.sanity.cases.MissingEquipBasePointCheck
 import a75f.io.sanity.cases.NamedScheduleValidation
 import a75f.io.sanity.cases.PartialDeviceCreationCheck
 import a75f.io.sanity.cases.PartialEquipCreationCheck
@@ -28,9 +31,11 @@ object SanitySuiteRegistry {
         defaultSanitySuite.addCase(DeviceEntityCheck())
         defaultSanitySuite.addCase(DuplicatePointCheck())
         defaultSanitySuite.addCase(ScheduleRefValidation())
+        defaultSanitySuite.addCase(MissingDeviceBasePointCheck())
+        defaultSanitySuite.addCase(MissingEquipBasePointCheck())
         defaultSanitySuite.addCase(NamedScheduleValidation())
         defaultSanitySuite.addCase(PartialEquipCreationCheck())
-        defaultSanitySuite.addCase(PartialDeviceCreationCheck())
+        defaultSanitySuite.addCase(DiagEquipCheck())
         addSuite(defaultSanitySuite)
 
     }

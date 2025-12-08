@@ -257,7 +257,7 @@ public class Tags
 
     public static final String BACNET_POINT_UPDATE = "bacnetPointUpdate";
     public static final String CONNECT_ADDRESS  ="connectAddress";
-    public static final String AHU_REF = "AhuRef";
+    public static final String AHU_REF = "ahuRef";
     public static final String GATEWAY_REF = "gatewayRef";
 
     public static final String EVENT_REF = "eventRef";

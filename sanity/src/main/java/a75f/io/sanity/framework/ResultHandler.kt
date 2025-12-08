@@ -8,6 +8,8 @@ import android.util.Log
 object ResultHandler {
     fun handleResult(result: SanityResult) {
         if (result.result == SanityResultType.PASSED) {
+            // Fix only the specific alert for this sanity check if it exists and failed previously
+            AlertManager.getInstance().fixCCUSanityAlert(result.name)
             return
         }
 
@@ -22,9 +24,12 @@ object ResultHandler {
         val ccuName = CCUHsApi.getInstance().ccuName
         val alertMessage = String.format("%s Sanity check failed - %s",ccuName, result.name)
 
+        // Since the alert is specific to the failure name, pass it as a unique identifier and store it
+        // in the equip id field
         AlertManager.getInstance().generateAlert(
             SANITY_CHECK_STATUS,
             alertMessage,
+            result.name
         )
     }
 }

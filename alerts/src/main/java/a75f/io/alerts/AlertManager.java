@@ -299,6 +299,19 @@ public class AlertManager implements CCUHsApi.EntityDeletedListener
         }
     }
 
+    /**
+     * Fixing CCU Sanity Alerts explicitly
+     */
+    public void fixCCUSanityAlert(String sanityResultName){
+        if (! repoCheck()) return;
+
+        for (Alert a: repo.getActiveCCUSanityALerts()){
+            if(a.equipId != null && a.equipId.contains(sanityResultName)){
+                fixAlert(a);
+            }
+        }
+    }
+
     /**Fixing Safe mode explicitly
      * as this value is set and restarted immediately
      */

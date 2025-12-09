@@ -15,7 +15,7 @@ import a75f.io.renatus.composables.DropDownWithoutLabel
 import a75f.io.renatus.composables.HeaderView
 import a75f.io.renatus.compose.ToggleButton
 import a75f.io.renatus.modbus.util.formattedToastMessage
-import a75f.io.renatus.ui.model.HeaderViewItem
+import a75f.io.renatus.ui.zonescreen.model.HeaderViewItem
 import a75f.io.renatus.util.BackFillViewModel
 import a75f.io.renatus.util.TemperatureModeUtil
 import android.util.TypedValue

@@ -19,8 +19,8 @@ import a75f.io.logic.tuners.TunerUtil.getTuner
 import a75f.io.renatus.profiles.system.advancedahu.dab.DabAdvancedHybridAhuFragment
 import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuFragment
 import a75f.io.renatus.tuners.TunerFragment
-import a75f.io.renatus.ui.model.DetailedViewItem
-import a75f.io.renatus.ui.model.ToggleViewItem
+import a75f.io.renatus.ui.zonescreen.model.DetailedViewItem
+import a75f.io.renatus.ui.zonescreen.model.ToggleViewItem
 import a75f.io.renatus.util.BackFillViewModel
 import a75f.io.renatus.util.TemperatureModeUtil
 import androidx.compose.runtime.mutableStateOf

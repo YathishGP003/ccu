@@ -25,9 +25,3 @@ data class PlainTextView(
     var id: String? = null,
     var text: String = ""
 )
-
-
-data class ToggleViewItem(
-    var id: String? = null,
-    var state: Boolean = false
-)

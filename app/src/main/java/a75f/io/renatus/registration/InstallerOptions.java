@@ -6,16 +6,11 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_C
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.sendBroadCast;
 import static a75f.io.logic.L.ccu;
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
-import static a75f.io.renatus.util.BackFillViewModel.BackFillDuration;
-import static a75f.io.renatus.util.BackFillViewModel.backfieldTimeSelectedValue;
-import static a75f.io.renatus.util.BackFillViewModel.generateToastMessage;
-import static a75f.io.renatus.util.BackFillViewModel.getBackFillTimeArrayAdapter;
 import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationErrorDialog;
 import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterVal;
 import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterValDeadBand;
@@ -44,15 +39,15 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.compose.ui.platform.ComposeView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -86,15 +81,10 @@ import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.BackfillUtilKt;
-import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.interfaces.MasterControlLimitListener;
-import a75f.io.logic.tuners.TunerConstants;
-import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.messaging.exceptions.ScheduleMigrationNotComplete;
 import a75f.io.messaging.handler.UpdatePointHandler;
@@ -104,12 +94,10 @@ import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.buildingoccupancy.BuildingOccupancyFragment;
 import a75f.io.renatus.profiles.system.advancedahu.dab.DabAdvancedHybridAhuFragment;
 import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuFragment;
-import a75f.io.renatus.tuners.TunerFragment;
+import a75f.io.renatus.ui.InstallerOptionsViewModel;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
-import a75f.io.renatus.util.TemperatureModeUtil;
-import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
@@ -124,7 +112,6 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
     Button mNext;
     Context mContext;
     Spinner mAddressBandSpinner;
-    ToggleButton mToggleTempAll;
     String addressBandSelected = "1000";
     Prefs prefs;
     String CCU_ID = "";
@@ -142,29 +129,11 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
     float cdb, hdb;
 
     //BACnet Setup
-    CustomCCUSwitch toggleCelsius;
-    TextView textCelsiusEnable;
     Dialog dialog;
-    CustomCCUSwitch toggleOfflineMode;
-    TextView textOfflineMode;
-    TextView descOfflineMode;
 
     UtilityApplication utilityApplication;
     LinearLayout linearLayout;
     View toastLayout;
-
-    private CustomCCUSwitch toggleCoolingLockout;
-    private CustomCCUSwitch toggleHeatingLockout;
-    private TextView textCoolingLockoutTemp;
-    private Spinner spinnerCoolingLockoutTemp;
-    private TextView textHeatingLockoutTemp;
-    private Spinner spinnerHeatingLockoutTemp;
-
-
-    private TextView textCoolingLockout;
-    private TextView textUseCoolingLockoutDesc;
-    private TextView textHeatingLockout;
-    private TextView textHeatingLockoutDesc;
 
     private Spinner coolingLimitMin;
     private Spinner coolingLimitMax;
@@ -177,13 +146,14 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
     private Spinner unoccupiedZoneSetback;
     private Spinner buildingToZoneDiff;
 
-    private Spinner backFillTimeSpinner;
-    CustomCCUSwitch switchDREnrollment;
-    private Spinner temperatureModeSpinner;
     private static final String TAG = InstallerOptions.class.getSimpleName();
     ArrayList<String> regAddressBands = new ArrayList<>();
     ArrayList<String> addressBand = new ArrayList<>();
     private View toastWarning;
+
+    InstallerOptionsViewModel installerOptionsViewModel = null;
+    ComposeView installerOptionsComposeViewTop;
+    ComposeView installerOptionsComposeViewBottom;
     MasterControlView.OnClickListener onSaveChangeListener = (lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp, setBack, zoneDiff, hdb, cdb) -> {
         imageTemp.setTempControl(lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp);
 
@@ -234,58 +204,22 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
         imageGoback = rootView.findViewById(R.id.imageGoback);
         mAddressBandSpinner = rootView.findViewById(R.id.spinnerAddress);
         CCUUiUtil.setSpinnerDropDownColor(mAddressBandSpinner,getContext());
-        mToggleTempAll = rootView.findViewById(R.id.toggleTempAll);
         mNext = rootView.findViewById(R.id.buttonNext);
         imageTemp = rootView.findViewById(R.id.imageTemp);
 
-        //BACnet Setup UI Components
-        toggleCelsius= rootView.findViewById(R.id.toggleCelsius);
-        textCelsiusEnable = rootView.findViewById(R.id.textUseCelsius);
-
-        toggleOfflineMode = rootView.findViewById(R.id.offlineModetoggle);
-        textOfflineMode = rootView.findViewById(R.id.textofflineMode);
-        descOfflineMode = rootView.findViewById(R.id.textofflineModeDesc);
 
         linearLayout = rootView.findViewById(R.id.layoutFooterButtons);
-        Button buttonApply = rootView.findViewById(R.id.buttonApply);
         Button buttonCancel = rootView.findViewById(R.id.buttonCancel);
         linearLayout = rootView.findViewById(R.id.layoutFooterButtons);
         LayoutInflater li = getLayoutInflater();
         toastLayout = li.inflate(R.layout.custom_toast_layout_backfill, rootView.findViewById(R.id.custom_toast_layout_backfill));
-
-        toggleCoolingLockout = rootView.findViewById(R.id.toggleCoolingLockout);
-        toggleHeatingLockout = rootView.findViewById(R.id.toggleHeatingLockout);
-        textCoolingLockoutTemp = rootView.findViewById(R.id.textCoolingLockoutTemp);
-        spinnerCoolingLockoutTemp = rootView.findViewById(R.id.spinnerCoolingLockoutTemp);
-        textHeatingLockoutTemp = rootView.findViewById(R.id.textHeatingLockoutTemp);
-        spinnerHeatingLockoutTemp = rootView.findViewById(R.id.spinnerHeatingLockoutTemp);
-        textCoolingLockout = rootView.findViewById(R.id.textCoolingLockout);
-        textUseCoolingLockoutDesc = rootView.findViewById(R.id.textUseCoolingLockoutDesc);
-        textHeatingLockout = rootView.findViewById(R.id.textHeatingLockout);
-        textHeatingLockoutDesc = rootView.findViewById(R.id.textHeatingLockoutDesc);
-        switchDREnrollment = rootView.findViewById(R.id.switchDRMode);
-
-        initializeTempLockoutUI(ccuHsApi);
+        installerOptionsComposeViewTop = rootView.findViewById(R.id.installer_options_top);
+        installerOptionsComposeViewBottom = rootView.findViewById(R.id.installer_options_bottom);
 		HRef ccuId = ccuHsApi.getCcuRef();
         String ccuUid = null;
 
-        textCelsiusEnable.setVisibility(View.VISIBLE);
-        toggleCelsius.setVisibility(View.VISIBLE);
-
-        toggleOfflineMode.setVisibility(View.VISIBLE);
-        textOfflineMode.setVisibility(View.VISIBLE);
-        descOfflineMode.setVisibility(View.VISIBLE);
 
         toastWarning = getLayoutInflater().inflate(R.layout.custom_toast_layout_warning, rootView.findViewById(R.id.custom_toast_layout_warning));
-
-        setToggleCheck();
-
-        toggleOfflineMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            double offlineValue = isChecked ? 1.0 : 0.0;
-            ccuHsApi.writeDefaultVal("offline and mode ",offlineValue);
-            ccuHsApi.writeHisValByQuery("offline and mode ",offlineValue);
-            TunerUtil.updateDefault(offlineValue);
-        });
 
         if (ccuId != null) {
             ccuUid = ccuHsApi.getCcuRef().toString();
@@ -337,12 +271,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
-        mToggleTempAll.setChecked(prefs.getBoolean(getString(R.string.USE_SAME_TEMP_ALL_DAYS)));
-        mToggleTempAll.setOnCheckedChangeListener((compoundButton, isChecked) -> prefs.setBoolean(getString(R.string.USE_SAME_TEMP_ALL_DAYS), isChecked));
 
-
-        if (isFreshRegister) mNext.setVisibility(View.VISIBLE);
-        else mNext.setVisibility(View.GONE);
 
         if (!isFreshRegister) {
             mAddressBandSpinner.setEnabled(isNoEquipDeviceFoundUsingAddressBand());
@@ -361,54 +290,11 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
 
         getTempValues();
 
-        toggleCelsius.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            HashMap<Object, Object> useCelsius = ccuHsApi.readEntity("displayUnit");
-            intimateAdvanceAhu();
-            if (!useCelsius.isEmpty()) {
-                if (isChecked) {
-                    ccuHsApi.writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
-                            ccuHsApi.getCCUUserName(), 1.0, 0);
-                } else {
-                    ccuHsApi.writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
-                            ccuHsApi.getCCUUserName(), 0.0, 0);
-                }
-            } else {
-                Toast.makeText(getContext(), "To enable \"Use Celsius\" feature on this device upgrade Primary CCU.\nRestart app on this device after Primary CCU is Upgraded.", Toast.LENGTH_LONG).show();
-            }
-            getTempValues();
-            initializeTempLockoutUI(ccuHsApi);
-            if (TunerFragment.newInstance().tunerExpandableLayoutHelper != null) {
-                TunerFragment.newInstance().tunerExpandableLayoutHelper.notifyDataSetChanged();
-            }
-            toggleCelsius.setEnabled(false);
-            new Handler().postDelayed(() -> toggleCelsius.setEnabled(true),2000);
-        });
-
 
 
 
         getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_SETTING_SCREEN));
-
-        setBackFillTimeSpinner(rootView);
-        setUpDREnrollmentMode(ccuHsApi);
-        setUpTemperatureModeSpinner(rootView);
-
-        buttonApply.setOnClickListener(view -> {
-            int selectedSpinnerItem = backFillTimeSpinner.getSelectedItemPosition();
-            int[] durations = BackFillDuration.toIntArray();
-            int index = selectedSpinnerItem > 0 ? Math.min(selectedSpinnerItem , durations.length - 1) : 0;
-            int backFillDurationSelected = durations[index];
-
-            BackfillUtilKt.updateBackfillDuration(backFillDurationSelected);
-
-            if (!isFreshRegister) {
-                generateToastMessage(toastLayout);
-            }
-            linearLayout.setVisibility(View.INVISIBLE);
-        });
-
-        buttonCancel.setOnClickListener(view -> backFillTimeSpinner.setSelection(BackFillDuration.getIndex(BackFillDuration.toIntArray(), (int) Domain.ccuEquip.getBackFillDuration().readDefaultVal(), 24)));
-
+        initViewModel();
         return rootView;
     }
 
@@ -419,31 +305,6 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
         if (ccu().systemProfile instanceof DabAdvancedAhu && DabAdvancedHybridAhuFragment.Companion.getInstance() != null) {
             DabAdvancedHybridAhuFragment.Companion.getInstance().getViewModel().toggleChecked();
         }
-    }
-
-    private void setUpTemperatureModeSpinner(View rootView) {
-        this.temperatureModeSpinner = rootView.findViewById(R.id.spinnerTemperatureMode);
-        CCUUiUtil.setSpinnerDropDownColor(temperatureModeSpinner,this.getContext());
-        ArrayAdapter<String> temperatureModeAdapter = getAdapterValue(new TemperatureModeUtil().getTemperatureModeArray());
-        this.temperatureModeSpinner.setAdapter(temperatureModeAdapter);
-        this.temperatureModeSpinner.setSelection((int) new TemperatureModeUtil().getTemperatureMode());
-        this.temperatureModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                new TemperatureModeUtil().setTemperatureMode(position);
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-            }
-        });
-    }
-
-    private void setUpDREnrollmentMode(CCUHsApi ccuHsApi) {
-        switchDREnrollment.setChecked(DemandResponseMode.isDREnrollmentSelected());
-        switchDREnrollment.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            CcuLog.i(L.TAG_CCU_DR_MODE,"Demand response point status is : "+isChecked);
-            DemandResponseMode.handleDRActivationConfiguration(isChecked, ccuHsApi);
-        });
     }
 
     @Override
@@ -466,116 +327,6 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
         Fragment childFragment = new BuildingOccupancyFragment();
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.replace(R.id.buildingOccupancyFragmentContainer, childFragment).commit();
-    }
-
-
-    public void setToggleCheck() {
-        boolean newValue = isCelsiusTunerAvailableStatus();
-        if ( toggleCelsius != null && toggleCelsius.isChecked() != newValue) {
-            toggleCelsius.setChecked(newValue);
-        }
-
-        boolean isOfflineMode = CCUHsApi.getInstance().readDefaultVal("offline and mode") > 0;
-        if ( toggleOfflineMode != null && toggleOfflineMode.isChecked() != isOfflineMode) {
-            toggleOfflineMode.setChecked(isOfflineMode);
-        }
-    }
-
-    private void hideTempLockoutUI() {
-        toggleCoolingLockout.setVisibility(View.GONE);
-        toggleHeatingLockout.setVisibility(View.GONE);
-        textCoolingLockoutTemp.setVisibility(View.GONE);
-        spinnerCoolingLockoutTemp.setVisibility(View.GONE);
-        textHeatingLockoutTemp.setVisibility(View.GONE);
-        spinnerHeatingLockoutTemp.setVisibility(View.GONE);
-        textCoolingLockout.setVisibility(View.GONE);
-        textUseCoolingLockoutDesc.setVisibility(View.GONE);
-        textHeatingLockout.setVisibility(View.GONE);
-        textHeatingLockoutDesc.setVisibility(View.GONE);
-    }
-    private void initializeTempLockoutUI(CCUHsApi hayStack) {
-        
-        if (ccu().systemProfile == null || ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
-            hideTempLockoutUI();
-            return;
-        }
-
-        ArrayAdapter<Double> coolingLockoutAdapter;
-        double coolingVal = ccu().systemProfile.getCoolingLockoutVal();
-        if (isCelsiusTunerAvailableStatus()){
-            coolingLockoutAdapter = CCUUiUtil.getArrayAdapter(Math.round(fahrenheitToCelsius(0)),Math.round(fahrenheitToCelsius(70)),1, getActivity());
-            coolingVal =  Math.round(fahrenheitToCelsius(coolingVal));
-        } else {
-            coolingLockoutAdapter = CCUUiUtil.getArrayAdapter(0,70,1, getActivity());
-        }
-        spinnerCoolingLockoutTemp.setAdapter(coolingLockoutAdapter);
-        spinnerCoolingLockoutTemp.setSelection(coolingLockoutAdapter.getPosition(coolingVal),false);
-    
-        spinnerCoolingLockoutTemp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (isCelsiusTunerAvailableStatus()) {
-                    ccu().systemProfile.setCoolingLockoutVal(hayStack, Math.round(celsiusToFahrenheit(Double.parseDouble(spinnerCoolingLockoutTemp.getSelectedItem().toString()))));
-                } else {
-                    ccu().systemProfile.setCoolingLockoutVal(hayStack, Double.parseDouble(spinnerCoolingLockoutTemp.getSelectedItem().toString()));
-                }
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {
-                //Not handled
-            }
-        });
-
-
-        ArrayAdapter<Double> heatingLockoutAdapter;
-        double heatingVal = ccu().systemProfile.getHeatingLockoutVal();
-        if (isCelsiusTunerAvailableStatus()){
-            heatingLockoutAdapter = CCUUiUtil.getArrayAdapter(Math.round(fahrenheitToCelsius(50)),Math.round(fahrenheitToCelsius(100)),1, getActivity());
-            heatingVal =  Math.round(fahrenheitToCelsius(heatingVal));
-        } else {
-            heatingLockoutAdapter = CCUUiUtil.getArrayAdapter(50,100,1, getActivity());
-        }
-        spinnerHeatingLockoutTemp.setAdapter(heatingLockoutAdapter);
-        spinnerHeatingLockoutTemp.setSelection(heatingLockoutAdapter.getPosition(heatingVal), false);
-        spinnerHeatingLockoutTemp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (isCelsiusTunerAvailableStatus()) {
-                    ccu().systemProfile.setHeatingLockoutVal(hayStack,
-                            Math.round(celsiusToFahrenheit(Double.parseDouble(spinnerHeatingLockoutTemp.getSelectedItem().toString()))));
-                } else {
-                    ccu().systemProfile.setHeatingLockoutVal(hayStack,
-                            Double.parseDouble(spinnerHeatingLockoutTemp.getSelectedItem().toString()));
-                }
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {
-                //Not handled
-            }
-        });
-        boolean coolingLockoutConfig = ccu().systemProfile.isOutsideTempCoolingLockoutEnabled(hayStack);
-        toggleCoolingLockout.setChecked(coolingLockoutConfig);
-        updateCoolingLockoutUIVisibility(coolingLockoutConfig);
-        
-        toggleCoolingLockout.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(hayStack, isChecked);
-            updateCoolingLockoutUIVisibility(isChecked);
-        });
-    
-        boolean heatingLockoutConfig = ccu().systemProfile.isOutsideTempHeatingLockoutEnabled(hayStack);
-        toggleHeatingLockout.setChecked(heatingLockoutConfig);
-        updateHeatingLockoutUIVisibility(heatingLockoutConfig);
-
-        toggleHeatingLockout.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            ccu().systemProfile.setOutsideTempHeatingLockoutEnabled(hayStack, isChecked);
-            updateHeatingLockoutUIVisibility(isChecked);
-        });
-    }
-
-    private void updateCoolingLockoutUIVisibility(boolean isVisible) {
-        textCoolingLockoutTemp.setVisibility(isVisible ? View.VISIBLE:View.GONE);
-        spinnerCoolingLockoutTemp.setVisibility(isVisible ? View.VISIBLE:View.GONE);
-    }
-
-    private void updateHeatingLockoutUIVisibility(boolean isVisible) {
-        textHeatingLockoutTemp.setVisibility(isVisible ? View.VISIBLE:View.GONE);
-        spinnerHeatingLockoutTemp.setVisibility(isVisible ? View.VISIBLE:View.GONE);
     }
 
     // initial master control values
@@ -943,30 +694,6 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
         }
     };
 
-    private void setBackFillTimeSpinner(View rootView) {
-
-        this.backFillTimeSpinner = rootView.findViewById(R.id.spinnerBackfillTime);
-        CCUUiUtil.setSpinnerDropDownColor(backFillTimeSpinner,this.getContext());
-        this.backFillTimeSpinner.setAdapter(getBackFillTimeArrayAdapter(getContext()));
-        this.backFillTimeSpinner.setSelection(backfieldTimeSelectedValue(getBackFillTimeArrayAdapter(getContext())));
-        this.backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if (backfieldTimeSelectedValue(getBackFillTimeArrayAdapter(getContext())) == i) {
-                    linearLayout.setVisibility(View.INVISIBLE);
-                } else {
-                    if (!isFreshRegister) {
-                        linearLayout.setVisibility(View.VISIBLE);
-                    }
-                }
-                adapterView.setSelection(i);
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-            }
-        });
-    }
-
     private void getRegisteredAddressBand() {
         CcuLog.d(TAG, "getRegisteredAddressBand() called");
         ExecutorTask.executeAsync(
@@ -1090,5 +817,23 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadViewModel();
+    }
+
+    private void initViewModel() {
+        installerOptionsViewModel = new ViewModelProvider(requireActivity()).get(InstallerOptionsViewModel.class);
+    }
+
+    private void loadViewModel() {
+        if (installerOptionsViewModel == null)
+            installerOptionsViewModel = new ViewModelProvider(requireActivity()).get(InstallerOptionsViewModel.class);
+
+        installerOptionsViewModel.loadViews(installerOptionsComposeViewTop,
+                installerOptionsComposeViewBottom);
     }
 }

@@ -25,9 +25,9 @@ public class BackFillViewModel {
 
     static BackfillPref backfillPref = new BackfillPref();
 
-    private static final int BACKFIELD_DEFAULT_DURATION_INDEX = 6;
-    private static final int BACKFIELD_DEFAULT_DURATION = 24;
-    private static final int MAX_NUMBER_OF_EQUIP = 6;
+    public static final int BACKFIELD_DEFAULT_DURATION_INDEX = 6;
+    public static final int BACKFIELD_DEFAULT_DURATION = 24;
+    public static final int MAX_NUMBER_OF_EQUIP = 6;
 
     public static ArrayAdapter<String> getBackFillTimeArrayAdapter(Context context) {
         int equipCount = CCUHsApi.getInstance().readAllEntities("equip and (gatewayRef or ahuRef) and not diag").size();

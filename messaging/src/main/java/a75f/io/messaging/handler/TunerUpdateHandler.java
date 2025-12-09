@@ -3,6 +3,7 @@ package a75f.io.messaging.handler;
 import com.google.gson.JsonObject;
 
 import org.projecthaystack.HDict;
+import org.projecthaystack.HNum;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.observer.PointWriteObservable;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.TunerConstants;
@@ -111,6 +113,7 @@ class TunerUpdateHandler {
                                     CCUHsApi.getInstance().getCCUUserName(), value, duration);
             }
             hayStack.writeHisValById(id, HSUtil.getPriorityVal(id));
+            PointWriteObservable.INSTANCE.notifyWritableChange(id, HNum.make(value));
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to parse tuner value : "+msgObject+" ; "+e.getMessage());
         }

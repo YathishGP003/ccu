@@ -56,6 +56,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -181,11 +182,12 @@ fun DropDownWithLabel(
 fun DropDownWithoutLabel(
     list: List<String>, maxLengthString: String, maxContainerWidth: Dp,
     onSelected: (Int) -> Unit, defaultSelection: Int = 0,
-    isEnabled : Boolean = true, disabledIndices: List<Int> = emptyList()){
+    isEnabled : Boolean = true, disabledIndices: List<Int> = emptyList(), extraWidth: Int = 0){
 
     Row {
         var expanded by remember { mutableStateOf(false) }
-        var selectedIndex by remember { mutableIntStateOf(defaultSelection) }
+        //var selectedIndex by remember { mutableIntStateOf(defaultSelection) }
+        var selectedIndex = defaultSelection
         val lazyListState = rememberLazyListState()
         val noOfItemsDisplayInDropDown = 8  // This is the number of items to be displayed in the dropdown layout
         val dropDownHeight = 435 // This is the default height of the dropdown for 8 items
@@ -205,8 +207,8 @@ fun DropDownWithoutLabel(
             }
         }
 
-        val maxAvailableWidth = maxContainerWidth - 30.dp
-        val textWidth = (measuredTextWidthDp + 20.dp).coerceAtMost(maxAvailableWidth)
+        val maxAvailableWidth = maxContainerWidth - 30.dp + extraWidth.dp
+        val textWidth = (measuredTextWidthDp + 20.dp + extraWidth.dp).coerceAtMost(maxAvailableWidth)
 
         Box(modifier = Modifier
             .wrapContentWidth()
@@ -247,7 +249,7 @@ fun DropDownWithoutLabel(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 modifier = Modifier
-                    .width(measuredTextWidthDp + 50.dp)
+                    .width(measuredTextWidthDp + 50.dp + extraWidth.dp)
                     .height((customHeight).dp)
                     .background(Color.White)
                     .border(0.5.dp, Color.LightGray)
@@ -257,7 +259,7 @@ fun DropDownWithoutLabel(
             ) {
                 LazyColumn(state = lazyListState,
                     modifier = Modifier
-                        .width(measuredTextWidthDp + 50.dp)
+                        .width(measuredTextWidthDp + 50.dp + extraWidth.dp)
                         .height((customHeight).dp)) {
 
                     itemsIndexed(list) { index, s ->
@@ -857,6 +859,31 @@ fun TemperatureProfileDetailedViewDropDown(
             }
         }
     }
+}
+
+@Composable
+fun HeaderView(
+    label: String,
+    fontSize: Double = 25.0,
+    paddingTop: Dp = 0.dp,
+    onLabelClick: (String) -> Unit
+) {
+    Text(
+        modifier = Modifier
+            .clickable { onLabelClick(label) }
+            .wrapContentSize()
+            .padding(top = paddingTop)
+            .alpha(0.87f),
+
+        style = TextStyle(
+            fontStyle = FontStyle.Normal,
+            fontSize = fontSize.sp,
+            lineHeight = 29.sp,
+            color = Color.Black.copy(alpha = 0.87f)
+        ),
+
+        text = label
+    )
 }
 
 

@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.L.TAG_CCU_CLOUD_STATUS;
 import static a75f.io.renatus.util.CCUUiUtil.isCurrentVersionHigherOrEqualToRequired;
 
 import android.annotation.SuppressLint;
@@ -162,6 +163,7 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
     RecyclerView cloudStatusRecyclerView;
     @BindView(R.id.tvCloudStatus)
     TextView tvCloudStatus;
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     public AboutFragment() {
 
@@ -750,6 +752,7 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
             popupWindow.dismiss();
         }
         super.onPause();
+        handler.removeCallbacks(healthCheckTask);
     }
     private String otpWithDoubleSpaceBetween(String otp){
         StringBuilder otpwithSpace = new StringBuilder();
@@ -1023,10 +1026,23 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
         });
         CcuLog.i("AboutFragment", "onResume");
         super.onResume();
+        handler.post(healthCheckTask);
     }
 
     private void updateToUi(UpgradeBundle upgradeBundle, BundleInstallManager bundleInstallManager) {
         postToMainThread(() -> setupUpdateCCUButton(upgradeBundle, bundleInstallManager));
+    }
+
+    private final Runnable healthCheckTask = new Runnable() {
+        @Override
+        public void run() {
+            checkHealth();
+            handler.postDelayed(this, 60_000);
+        }
+    };
+
+    private void checkHealth() {
+        updateCloudStatusView();
     }
 }
 

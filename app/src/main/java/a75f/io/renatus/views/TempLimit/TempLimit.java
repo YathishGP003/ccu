@@ -112,11 +112,6 @@ public class TempLimit extends View {
                     xPos, yPos, mTempIconPaint);
         }
         invalidate();
-        try {
-            InstallerOptions.getInstance().setToggleCheck();
-        }  catch (NullPointerException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

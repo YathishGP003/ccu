@@ -106,275 +106,34 @@
                 android:layout_marginTop="42dp"
                 />
 
-            <TextView
-                android:id="@+id/textCoolingLockout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textPairingDesc"
-                android:layout_marginStart="76dp"
-                android:layout_marginTop="36dp"
-                android:layout_marginEnd="16dp"
-                android:alpha="0.87"
-                android:text="@string/use_outside_temp_lockout_cooling"
-                android:textColor="@color/black"
-                android:textSize="25sp" />
-
-
-            <TextView
-                android:id="@+id/textUseCoolingLockoutDesc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textCoolingLockout"
-                android:layout_marginStart="76dp"
-                android:alpha="0.60"
-                android:text="@string/cooling_lockout_desc"
-                android:textColor="@color/black"
-                android:textSize="19.5sp" />
-
-            <include
-                android:id="@+id/toggleCoolingLockout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textPairingDesc"
-                android:layout_alignParentEnd="true"
-                android:layout_marginTop="36dp"
-                layout="@layout/custom_ccu_switch"/>
-
-            <TextView
-                android:id="@+id/textCoolingLockoutTemp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textUseCoolingLockoutDesc"
-                android:layout_marginStart="76dp"
-                android:layout_marginTop="20dp"
-                android:alpha="0.87"
-                android:text="@string/no_mechanical_cooling_below"
-                android:textColor="@color/black"
-                android:textSize="24sp" />
-
-            <Spinner
-                android:id="@+id/spinnerCoolingLockoutTemp"
-                style="@style/customSpinnerDownArrow"
-                android:layout_width="120dp"
-                android:layout_height="42dp"
-                android:layout_below="@+id/toggleCoolingLockout"
-                android:layout_alignParentEnd="true"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="42dp" />
-
-            <TextView
-                android:id="@+id/textHeatingLockout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textCoolingLockoutTemp"
-                android:layout_alignParentStart="true"
-                android:layout_marginStart="76dp"
-                android:layout_marginTop="36dp"
-                android:alpha="0.87"
-                android:text="@string/use_outside_temp_lockout_heating"
-                android:textColor="@color/black"
-                android:textSize="25sp" />
-
-            <include
-                android:id="@+id/toggleHeatingLockout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textCoolingLockoutTemp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginTop="36dp"
-                layout="@layout/custom_ccu_switch"/>
-
-            <TextView
-                android:id="@+id/textHeatingLockoutDesc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textHeatingLockout"
-                android:layout_marginStart="76dp"
-                android:alpha="0.60"
-                android:text="@string/heating_lockout_desc"
-                android:textColor="@color/black"
-                android:textSize="19.5sp" />
-
-            <TextView
-                android:id="@+id/textHeatingLockoutTemp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textHeatingLockoutDesc"
-                android:layout_alignStart="@+id/textHeatingLockout"
-                android:layout_marginTop="16dp"
-                android:alpha="0.87"
-                android:text="@string/no_mechanical_heating_above"
-                android:textColor="@color/black"
-                android:textSize="24sp" />
-
-            <Spinner
-                android:id="@+id/spinnerHeatingLockoutTemp"
-                style="@style/customSpinnerDownArrow"
-                android:layout_width="120dp"
-                android:layout_height="42dp"
-                android:layout_below="@+id/toggleHeatingLockout"
-                android:layout_alignParentEnd="true"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="42dp" />
-
-
-                <TextView
-                    android:id="@+id/textofflineMode"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/textHeatingLockoutTemp"
-                    android:layout_alignParentStart="true"
-                    android:layout_marginStart="76dp"
-                    android:layout_marginTop="36dp"
-                    android:alpha="0.87"
-                    android:text= "@string/offlinemode"
-                    android:textColor="@color/black"
-                    android:textSize="25sp" />
-
-                <include
-                    android:id="@+id/offlineModetoggle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/textHeatingLockoutTemp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginTop="36dp"
-                    layout="@layout/custom_ccu_switch"/>
-
-                <TextView
-                    android:id="@+id/textofflineModeDesc"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/textofflineMode"
-                    android:layout_marginStart="76dp"
-                    android:alpha="0.60"
-                    android:text= "@string/offline_desc"
-                    android:textColor="@color/black"
-                    android:textSize="19.5sp" />
-            <TextView
-                android:id="@+id/textBackfillDurationTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/textofflineModeDesc"
-                android:layout_marginStart="76dp"
-                android:layout_marginTop="42dp"
-                android:alpha="0.87"
-                android:text="@string/backFill_duration"
-                android:textColor="@color/black"
-                android:textSize="25sp" />
-
-            <TextView
-                android:id="@+id/textBackfillTimeDesc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textBackfillDurationTime"
-                android:layout_marginStart="76dp"
-                android:alpha="0.60"
-                android:text="@string/backFill_duration_description"
-                android:textColor="@color/black"
-                android:textSize="19.5sp" />
-
-
-            <Spinner
-                android:id="@+id/spinnerBackfillTime"
-                style="@style/customSpinnerDownArrow"
-                android:layout_width="wrap_content"
-                android:layout_height="42dp"
-                android:layout_alignParentEnd="true"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="42dp"
-                android:layout_alignBaseline="@+id/textBackfillDurationTime" />
 
             <LinearLayout
-                android:id="@+id/layoutFooterButtons"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="20dp"
-                android:layout_below="@id/spinnerBackfillTime"
-                android:layout_alignEnd="@id/spinnerBackfillTime"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/buttonCancel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10sp"
-                    android:background="@null"
-                    android:fontFamily="@font/lato_regular"
-                    android:gravity="center_vertical|center_horizontal"
-                    android:padding="5sp"
-                    android:text="@string/cancel"
-                    android:textColor="?orange_75f"
-                    android:textSize="19.5sp" />
-
-                <View
-                    android:id="@+id/tunerDivider"
-                    android:layout_width="0.5sp"
-                    android:layout_height="25sp"
-                    android:layout_gravity="center_vertical|center_horizontal"
-                    android:background="@color/light_gray" />
-
-                <Button
-                    android:id="@+id/buttonApply"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10sp"
-                    android:background="@null"
-                    android:fontFamily="@font/lato_regular"
-                    android:gravity="center_vertical|center_horizontal"
-                    android:padding="5sp"
-                    android:text="@string/button_apply"
-                    android:textColor="?orange_75f"
-                    android:textSize="19.5sp" />
-            </LinearLayout>
-            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/ll"
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/drEnrollmentLayout"
-                android:layout_below="@+id/textBackfillTimeDesc">
-                <TextView
-                    android:id="@+id/dr_enrollment"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/layoutFooterButtons"
-                    android:layout_alignParentStart="true"
-                    android:layout_marginStart="76dp"
-                    android:layout_marginTop="36dp"
-                    android:alpha="0.87"
-                    android:text="@string/dr_enrollment"
-                    android:textColor="@color/black"
-                    android:textSize="25sp" />
+                android:layout_below = "@+id/textPairingAddress"
+                />
 
-                <include
-                    android:id="@+id/switchDRMode"
-                    android:layout_marginStart="720dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/toggleHeatingLockout"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginTop="36dp"
-                    layout="@layout/custom_ccu_switch"/>
-            </androidx.appcompat.widget.LinearLayoutCompat>
-
-
-            <TextView
-                android:id="@+id/dr_enrollment_description"
+            <FrameLayout
+                android:id="@+id/installer_options_top_frame"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/drEnrollmentLayout"
+                android:layout_below="@+id/ll"
                 android:layout_marginStart="76dp"
-                android:alpha="0.60"
-                android:text="@string/dr_enrollment_description"
-                android:textColor="@color/black"
-                android:textSize="19.5sp" />
+                android:layout_marginTop="36dp"
+                android:layout_marginEnd="16dp">
+
+                <androidx.compose.ui.platform.ComposeView
+                    android:id="@+id/installer_options_top"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
             <TextView
                 android:id="@+id/textBuilding"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/dr_enrollment_description"
+                android:layout_below="@+id/installer_options_top_frame"
                 android:layout_marginTop="36dp"
                 android:fontFamily="@font/lato_bold"
                 android:text="@string/title_building"
@@ -420,153 +179,21 @@
                 android:layout_marginStart="76dp"
                 android:layout_marginTop="36dp" />
 
-            <TextView
-                android:id="@+id/textUseCelsius"
+
+            <FrameLayout
+                android:id="@+id/installer_options_bottom_frame"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/imageTemp"
                 android:layout_marginStart="76dp"
                 android:layout_marginTop="36dp"
-                android:alpha="0.87"
-                android:text="@string/usecelsius"
-                android:textColor="@color/black"
-                android:textSize="25sp"
-                android:visibility="gone" />
+                android:layout_marginEnd="16dp">
 
-            <include
-                android:id="@+id/toggleCelsius"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/imageTemp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginTop="36dp"
-                android:visibility="gone"
-                layout="@layout/custom_ccu_switch"/>
-
-            <TextView
-                android:id="@+id/textTemperatureMode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/textUseCelsius"
-                android:layout_marginStart="76dp"
-                android:layout_marginTop="42dp"
-                android:alpha="0.87"
-                android:text="@string/temperature_mode_description"
-                android:textColor="@color/black"
-                android:textSize="25sp" />
-
-
-            <Spinner
-                android:id="@+id/spinnerTemperatureMode"
-                style="@style/customSpinnerDownArrow"
-                android:layout_width="wrap_content"
-                android:layout_height="42dp"
-                android:layout_alignParentEnd="true"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="42dp"
-                android:layout_alignBaseline="@+id/textTemperatureMode" />
-
-            <TextView
-                android:id="@+id/textUseMT"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textUseCelsius"
-                android:layout_marginStart="76dp"
-                android:layout_marginTop="36dp"
-                android:alpha="0.87"
-                android:text="@string/usemiltime"
-                android:textColor="@color/black"
-                android:textSize="25sp"
-                android:visibility="gone" />
-
-            <ToggleButton
-                android:id="@+id/toggleMT"
-                android:layout_width="47dp"
-                android:layout_height="28dp"
-                android:layout_below="@+id/textUseCelsius"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginTop="36dp"
-                android:background="@drawable/toggle_selector"
-                android:checked="true"
-                android:enabled="false"
-                android:textOff=""
-                android:textOn=""
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/textSingleTemp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textUseMT"
-                android:layout_marginStart="76dp"
-                android:layout_marginTop="36dp"
-                android:alpha="0.87"
-                android:text="@string/usesingletemp"
-                android:textColor="@color/black"
-                android:textSize="25sp"
-                android:visibility="gone" />
-
-
-            <ToggleButton
-                android:id="@+id/toggleSingleTemp"
-                android:layout_width="47dp"
-                android:layout_height="28dp"
-                android:layout_below="@+id/textUseMT"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginTop="36dp"
-                android:background="@drawable/toggle_selector"
-                android:checked="false"
-                android:enabled="false"
-                android:textOff=""
-                android:textOn=""
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/textTempforAll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textSingleTemp"
-                android:layout_marginStart="76dp"
-                android:layout_marginTop="36dp"
-                android:alpha="0.87"
-                android:text="@string/usetempforall"
-                android:textColor="@color/black"
-                android:textSize="25sp"
-                android:visibility="gone" />
-
-            <ToggleButton
-                android:id="@+id/toggleTempAll"
-                android:layout_width="47dp"
-                android:layout_height="28dp"
-                android:layout_below="@+id/textSingleTemp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginTop="36dp"
-                android:background="@drawable/toggle_selector"
-                android:checked="false"
-                android:enabled="false"
-                android:textOff=""
-                android:textOn=""
-                android:visibility="gone" />
-
-            <Button
-                android:layout_below="@+id/imageTemp"
-                android:id="@+id/buttonNext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="24dp"
-                android:background="@null"
-                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"
-                android:drawablePadding="5dp"
-                android:fontFamily="@font/lato_bold"
-                android:text="@string/button_next"
-                android:textColor="?orange_75f"
-                android:textSize="24sp" />
+                <androidx.compose.ui.platform.ComposeView
+                    android:id="@+id/installer_options_bottom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
         </RelativeLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

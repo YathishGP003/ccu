@@ -36,6 +36,7 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.bacnet.parser.BacnetRequestProcessor;
+import a75f.io.api.haystack.observer.PointWriteObservable;
 import a75f.io.api.haystack.sync.PointWriteCache;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -545,6 +546,7 @@ public class UpdatePointHandler implements MessageHandler
         double durationDiff = MessageUtil.Companion.returnDurationDiff(msgObject);
         hayStack.writePointLocal(id, level, who, val, durationDiff);
         CcuLog.d(L.TAG_CCU_PUBNUB, "updatePoint : writePointFromJson - level: " + level + " who: " + who + " val: " + val  + " durationDiff: " + durationDiff);
+        PointWriteObservable.INSTANCE.notifyWritableChange(id, HNum.make(val));
     }
 
     private static void clearPointArrayLevel(String id, int level, CCUHsApi hayStack) {

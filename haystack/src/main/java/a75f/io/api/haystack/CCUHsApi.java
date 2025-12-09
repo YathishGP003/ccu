@@ -7,7 +7,9 @@ import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_OAO;
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_ROOM_DB;
 import static a75f.io.api.haystack.Tags.DEVICE;
 import static a75f.io.api.haystack.Tags.MODBUS;
+import static a75f.io.api.haystack.Tags.SPECIAL_SCHEDULE_KEY;
 import static a75f.io.api.haystack.Tags.SYSTEM;
+import static a75f.io.api.haystack.Tags.VACATION_SCHEDULE_KEY;
 import static a75f.io.constants.CcuFieldConstants.BILLING_ADMIN_EMAIL;
 
 import android.annotation.SuppressLint;
@@ -2319,6 +2321,8 @@ public class CCUHsApi
         tagsDb.addHDict(localId, scheduleDict);
         syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(localId, "@"));
         HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
+        PointWriteObservable.INSTANCE.notifyWritableChange(SPECIAL_SCHEDULE_KEY);
+        PointWriteObservable.INSTANCE.notifyWritableChange(VACATION_SCHEDULE_KEY);
     }
 
     public void updateSchedule(String localId, HDict scheduleDict)
@@ -2328,6 +2332,8 @@ public class CCUHsApi
         CcuLog.i("CCH_HS", "updateScheduleDict: " + scheduleDict.toZinc());
         syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(localId, "@"));
         HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
+        PointWriteObservable.INSTANCE.notifyWritableChange(SPECIAL_SCHEDULE_KEY);
+        PointWriteObservable.INSTANCE.notifyWritableChange(VACATION_SCHEDULE_KEY);
     }
 
     public void updateSchedule(Schedule schedule)
@@ -2342,6 +2348,8 @@ public class CCUHsApi
         CcuLog.i("CCH_HS", "updateSchedule: " + schedule.getScheduleHDict().toZinc());
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(schedule.getId(), "@"));
         HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
+        PointWriteObservable.INSTANCE.notifyWritableChange(SPECIAL_SCHEDULE_KEY);
+        PointWriteObservable.INSTANCE.notifyWritableChange(VACATION_SCHEDULE_KEY);
     }
 
     public void updateBuildingOccupancy(BuildingOccupancy buildingOccupancy)
@@ -2380,6 +2388,7 @@ public class CCUHsApi
     public void updateSpecialScheduleNoSync(String entityId, HDict scheduleDict){
         tagsDb.addHDict(entityId, scheduleDict);
         HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
+        PointWriteObservable.INSTANCE.notifyWritableChange(SPECIAL_SCHEDULE_KEY);
     }
 
     public Schedule getScheduleById(String scheduleRef)

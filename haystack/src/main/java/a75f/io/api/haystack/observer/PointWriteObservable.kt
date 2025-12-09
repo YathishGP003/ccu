@@ -1,5 +1,6 @@
 package a75f.io.api.haystack.observer
 
+import org.projecthaystack.HStr
 import org.projecthaystack.HVal
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -22,6 +23,12 @@ object PointWriteObservable {
     fun notifyWritableChange(pointId: String, value: HVal) {
         listenersMap[pointId]?.forEach {
             it.onWritablePointChanged(pointId, value)
+        }
+    }
+
+    fun notifyWritableChange(pointId: String) {
+        listenersMap[pointId]?.forEach {
+            it.onWritablePointChanged(pointId, HStr.make(""))
         }
     }
 

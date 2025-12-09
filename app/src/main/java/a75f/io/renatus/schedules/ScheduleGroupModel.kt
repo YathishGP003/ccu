@@ -4,6 +4,9 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.DAYS
 import a75f.io.api.haystack.Schedule
 import a75f.io.api.haystack.Tags
+import a75f.io.api.haystack.Tags.SPECIAL_SCHEDULE_KEY
+import a75f.io.api.haystack.observer.PointSubscriber
+import a75f.io.api.haystack.observer.PointWriteObservable.subscribe
 import a75f.io.api.haystack.util.TimeUtil.getEndTimeHr
 import a75f.io.api.haystack.util.TimeUtil.getEndTimeMin
 import a75f.io.api.haystack.util.hayStack
@@ -31,6 +34,8 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,11 +44,16 @@ import org.joda.time.DateTime
 import org.joda.time.Interval
 import org.projecthaystack.HDict
 
-class ScheduleGroupModel (application: Application) : AndroidViewModel(application) {
+class ScheduleGroupModel (application: Application) : AndroidViewModel(application),
+    PointSubscriber {
     var mSchedule = Schedule()
     var mScheduleGroup = 0
     var mRoomRef = ""
     private val ccuHsApi: CCUHsApi = CCUHsApi.getInstance()
+
+    private val _reloadSchedule = MutableLiveData<Unit>()
+    val reloadSchedule: LiveData<Unit> = _reloadSchedule
+
     fun getUnOccupiedDays(
         days: List<Schedule.Days>,
         zoneScheduleViewModel: ZoneScheduleViewModel
@@ -786,6 +796,21 @@ class ScheduleGroupModel (application: Application) : AndroidViewModel(applicati
                     daysArrayList.addAll(mSchedule.days.filter { it.day == DAYS.SUNDAY.ordinal})
                 }
             }
+        }
+    }
+
+    fun subscribeScheduleEntities() {
+        subscribe(SPECIAL_SCHEDULE_KEY, this)
+        subscribe(Tags.VACATION_SCHEDULE_KEY, this)
+    }
+
+    override fun onHisPointChanged(pointId: String, value: Double) {}
+
+    override fun onWritablePointChanged(pointId: String, value: Any) {
+        if (pointId.equals(SPECIAL_SCHEDULE_KEY, ignoreCase = true)) {
+            _reloadSchedule.postValue(Unit)
+        } else {
+            _reloadSchedule.postValue(Unit)
         }
     }
 }

@@ -1,5 +1,7 @@
 package a75f.io.messaging.handler;
 
+import static a75f.io.api.haystack.Tags.SPECIAL_SCHEDULE_KEY;
+import static a75f.io.api.haystack.Tags.VACATION_SCHEDULE_KEY;
 import static a75f.io.messaging.handler.DataSyncHandler.isCloudScheduleHasLatestValue;
 
 import android.content.Context;
@@ -15,6 +17,7 @@ import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
+import org.projecthaystack.HStr;
 import org.projecthaystack.io.HZincReader;
 import org.projecthaystack.io.HZincWriter;
 
@@ -27,6 +30,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.observer.HisWriteObservable;
+import a75f.io.api.haystack.observer.PointWriteObservable;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -97,6 +101,7 @@ public class UpdateScheduleHandler implements MessageHandler
                 if(scheduleDict.has(Tags.SPECIAL)){
                     ccuHsApi.updateHDictNoSync(uid, scheduleDict);
                     HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
+                    PointWriteObservable.INSTANCE.notifyWritableChange(SPECIAL_SCHEDULE_KEY);
                     break;
                 }
                 final Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
@@ -106,6 +111,7 @@ public class UpdateScheduleHandler implements MessageHandler
                     ccuHsApi.updateScheduleNoSync(s, null);
                     if (s.getRoomRef()!= null)
                         ccuHsApi.updateScheduleNoSync(s, s.getRoomRef());
+                    PointWriteObservable.INSTANCE.notifyWritableChange(VACATION_SCHEDULE_KEY);
                 }
                 else if (s.getMarkers().contains("building") && !s.getMarkers().contains("zone"))
                 {
@@ -194,6 +200,8 @@ public class UpdateScheduleHandler implements MessageHandler
         if (jsonObject.get("command").getAsString().equals(DELETE_SCHEDULE) && jsonObject.get("id") != null) {
             CCUHsApi.getInstance().removeEntity(jsonObject.get("id").getAsString());
             HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
+            PointWriteObservable.INSTANCE.notifyWritableChange(SPECIAL_SCHEDULE_KEY);
+            PointWriteObservable.INSTANCE.notifyWritableChange(VACATION_SCHEDULE_KEY);
             return;
         }
         handleMessage(jsonObject);

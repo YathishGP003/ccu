@@ -271,7 +271,8 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
                 weekDaySaturdaySundayRadioButton, sevenDayRadioButton), resources, requireContext()
         )
         drawScheduleLayoutBasedOnGroup(scheduleGroupModel.mScheduleGroup)
-
+        scheduleGroupModel.subscribeScheduleEntities()
+        observeChanges()
         return rootView
     }
 
@@ -1724,5 +1725,18 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
         refreshSchedules(tempViewModels)
+    }
+
+    private fun observeChanges() {
+        scheduleGroupModel.reloadSchedule.observe(viewLifecycleOwner) {
+            loadSpecialSchedules()
+            loadVacations()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadSpecialSchedules()
+        loadVacations()
     }
 }

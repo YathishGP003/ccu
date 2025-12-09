@@ -255,7 +255,7 @@ public class ScheduleManager {
                 occupancyHandler.writeOccupancyMode(occupancyData.occupancy);
             }
         }
-        PointWriteObservable.INSTANCE.notifyWritableChange("systemSchedule", HStr.make(""));
+        PointWriteObservable.INSTANCE.notifyWritableChange("systemSchedule");
     }
     public void processSchedules() {
         try {

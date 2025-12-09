@@ -4,6 +4,8 @@ import static a75f.io.api.haystack.CCUHsApi.INTENT_POINT_DELETED;
 import static a75f.io.api.haystack.CCUTagsDb.BROADCAST_BACNET_POINT_ADDED;
 import static a75f.io.logic.L.TAG_CCU_BACNET;
 import static a75f.io.logic.L.TAG_CCU_MESSAGING;
+import static a75f.io.api.haystack.Tags.SPECIAL_SCHEDULE_KEY;
+import static a75f.io.api.haystack.Tags.VACATION_SCHEDULE_KEY;
 import static a75f.io.logic.bo.util.CustomScheduleUtilKt.updateWritableDataUponCustomControlChanges;
 import static a75f.io.messaging.handler.DataSyncHandler.isCloudEntityHasLatestValue;
 import android.content.Context;
@@ -23,6 +25,7 @@ import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
+import org.projecthaystack.HStr;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.io.HZincReader;
 import org.projecthaystack.io.HZincWriter;
@@ -45,6 +48,7 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.observer.HisWriteObservable;
+import a75f.io.api.haystack.observer.PointWriteObservable;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -76,6 +80,8 @@ public class UpdateEntityHandler implements MessageHandler {
             else if(entity.get("room") != null){
                 updateNamedSchedule(entity, uid, ccuHsApi);
                 HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
+                PointWriteObservable.INSTANCE.notifyWritableChange(SPECIAL_SCHEDULE_KEY);
+                PointWriteObservable.INSTANCE.notifyWritableChange(VACATION_SCHEDULE_KEY);
             }
             else if (entity.get("floor") != null) {
                 HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));

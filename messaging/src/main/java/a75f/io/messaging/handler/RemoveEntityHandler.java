@@ -1,5 +1,8 @@
 package a75f.io.messaging.handler;
 
+import static a75f.io.api.haystack.Tags.SPECIAL_SCHEDULE_KEY;
+import static a75f.io.api.haystack.Tags.VACATION_SCHEDULE_KEY;
+
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -9,6 +12,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import org.projecthaystack.HStr;
+
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,6 +21,7 @@ import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.observer.HisWriteObservable;
+import a75f.io.api.haystack.observer.PointWriteObservable;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.messaging.MessageHandler;
@@ -46,6 +52,8 @@ public class RemoveEntityHandler implements MessageHandler
                         UpdateScheduleHandler.refreshSchedulesScreen();
                         UpdateScheduleHandler.refreshIntrinsicSchedulesScreen();
                         HisWriteObservable.INSTANCE.notifyChange("schedule", 0);
+                        PointWriteObservable.INSTANCE.notifyWritableChange(SPECIAL_SCHEDULE_KEY);
+                        PointWriteObservable.INSTANCE.notifyWritableChange(VACATION_SCHEDULE_KEY);
                     }
                     CCUHsApi.getInstance().removeEntity(uuid);
                 } else if(CCUHsApi.getInstance().isEntityDeleted(uuid)) {

@@ -60,7 +60,6 @@ import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.tuners.TunerUtil
 import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.RxjavaUtil
-import a75f.io.logic.util.bacnet.BacnetConfigConstants
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.DESTINATION_IP
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.DESTINATION_PORT
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.DEVICE_ID
@@ -69,11 +68,8 @@ import a75f.io.logic.util.bacnet.BacnetConfigConstants.MAC_ADDRESS
 import a75f.io.logic.util.bacnet.BacnetTypeMapper
 import a75f.io.util.getConfig
 import android.content.Intent
-import android.preference.PreferenceManager
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
-import org.json.JSONException
-import org.json.JSONObject
 import java.util.Objects
 import kotlin.math.roundToInt
 

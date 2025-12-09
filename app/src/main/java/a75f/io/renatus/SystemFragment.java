@@ -14,21 +14,6 @@ import static a75f.io.domain.api.DomainName.systemPrePurgeEnable;
 import static a75f.io.logic.bo.building.bacnet.BacnetEquip.TAG_BACNET;
 import static a75f.io.logic.bo.building.bacnet.BacnetEquip.TAG_BACNET_HEART_BEAT;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
-import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.DISCHARGE_AIR_TEMP;
-import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.DUCT_STATIC_PRESSURE_SENSOR;
-import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getConfigValue;
-import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getModbusPointValue;
-import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getOperatingMode;
-import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getSetPoint;
-import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.getAdvancedAhuSystemEquip;
-import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.getConnectEquip;
-import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.isConnectModuleExist;
-import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
-import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.logic.util.bacnet.BacnetModelBuilderKt.buildBacnetModelSystem;
-import static a75f.io.messaging.handler.AdvanceAhuReconfigHandlerKt.isAdvanceAhuV2Profile;
-import static a75f.io.renatus.modbus.util.UtilSourceKt.BACNET;
 import static a75f.io.renatus.modbus.util.UtilSourceKt.isOaoPairedInConnectModule;
 
 import android.annotation.SuppressLint;
@@ -42,8 +27,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Html;
-import android.util.Pair;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.InflateException;
@@ -59,7 +42,6 @@ import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Space;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -69,24 +51,21 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.compose.ui.platform.ComposeView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.ViewCompat;
 import androidx.core.widget.TextViewCompat;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.tooltip.Tooltip;
 
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.jsoup.helper.StringUtil;
 import org.projecthaystack.HStr;
 
 import java.lang.ref.WeakReference;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -95,29 +74,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
-import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
-import a75f.io.api.haystack.bacnet.parser.BacnetModelDetailResponse;
-import a75f.io.api.haystack.bacnet.parser.BacnetPoint;
-import a75f.io.api.haystack.bacnet.parser.BacnetZoneViewItem;
-import a75f.io.api.haystack.bacnet.parser.PresentationData;
-import a75f.io.api.haystack.bacnet.parser.ValueConstraint;
-import a75f.io.api.haystack.modbus.EquipmentDevice;
-import a75f.io.api.haystack.modbus.Parameter;
-import a75f.io.domain.OAOEquip;
-import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
-import a75f.io.domain.util.ModelNames;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.TaskManager;
-import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.client.RemotePointUpdateInterface;
@@ -127,35 +93,23 @@ import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
-import a75f.io.logic.bo.building.system.util.UserIntentConfig;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
-import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
-import a75f.io.logic.bo.util.DemandResponseMode;
-import a75f.io.logic.bo.util.TemperatureMode;
-import a75f.io.logic.bo.util.UnitUtils;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
 import a75f.io.logic.interfaces.IntrinsicScheduleListener;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.schedule.IntrinsicScheduleCreator;
 import a75f.io.logic.tuners.TunerUtil;
-import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.messaging.handler.UpdateScheduleHandler;
-import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants;
-import a75f.io.renatus.bacnet.GridSpacingItemDecoration;
-import a75f.io.renatus.bacnet.ZoneRecyclerBacnetParamAdapter;
-import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
-import a75f.io.renatus.modbus.util.UtilSourceKt;
+import a75f.io.renatus.ui.systemscreen.viewmodel.SystemViewModel;
 import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.SystemProfileUtil;
-import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.OaoArc;
 import a75f.io.util.EntityKVStringParserUtilKt;
@@ -172,44 +126,14 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	SeekBar  sbComfortValue;
 	private static final long TOOLTIP_TIME = 3000;
 
-	Spinner targetMaxInsideHumidity;
-	Spinner targetMinInsideHumidity;
 	ToggleButton tbCompHumidity;
-	ToggleButton tbDemandResponse;
-	ToggleButton tbSmartPrePurge;
-	ToggleButton tbSmartPostPurge;
-	ToggleButton tbEnhancedVentilation;
-	LinearLayout purgeLayout,mainLayout;
-
-	TextView energyMeterModelDetails;
-	RecyclerView energyMeterParams;
-	private TextView moduleStatusEmr;
-	private TextView lastUpdatedEmr;
-
-	RecyclerView btuMeterParams;
-	TextView btuMeterModelDetails;
-	private TextView moduleStatusBtu;
-	private TextView lastUpdatedBtu;
-
-	private TextView updatedTimeOao;
-	private TextView cloudConnectivityUpdatedTime;
-
-	boolean minHumiditySpinnerReady = false;
-	boolean maxHumiditySpinnerReady = false;
+	LinearLayout mainLayout;
 
 	private Handler systemFragmentHandler;
 
 	View rootView;
-	TextView ccuName;
-	TextView profileTitle;
-	//TODO uncomment for acctuall prod releasee, commenting it out for Automation test
-	//SystemNumberPicker systemModePicker;
 	NumberPicker systemModePicker;
-	LinearLayout lastUpdated;
 	LinearLayout scheduleType;
-	
-	TextView occupancyStatus;
-	TextView equipmentStatus;
 	OaoArc oaoArc;
 	
 	boolean coolingAvailable = false;
@@ -217,9 +141,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	
 	ArrayList<String> modesAvailable = new ArrayList<>();
 	ArrayAdapter<Double> humidityAdapter;
-	private TextView IEGatewayOccupancyStatus;
-	private TextView GUIDDetails;
-	private LinearLayout IEGatewayDetail;
 	Prefs prefs;
 
 	private TextView textViewMonday;
@@ -263,40 +184,15 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	private Drawable mDrawableBreakLineLeft;
 	private Drawable mDrawableBreakLineRight;
-	CustomCCUSwitch switchActivation;
-	LinearLayout drActivationLayout;
 
 	Schedule schedule;
-	RecyclerView externalModbusParams;
-	TextView externalModbusModelDetails;
-	private TextView externalModbusStatus;
-	private TextView externalModbusLastUpdated;
-	private TextView external_last_updated;
-	private TextView external_device_type_text;
-	LinearLayout setPointConfig;
-	LinearLayout dcv_config;
-	LinearLayout dual_config;
-	LinearLayout singleSatConfig;
-	LinearLayout dualSatConfig;
-	LinearLayout dspConfig;
-	LinearLayout heatConfig;
-	LinearLayout coolConfig;
 
-	TextView satSetPoint;
-	TextView satCurrent;
-	TextView dualSatCurrent;
-	TextView dspSetPoint;
-	TextView EquipStatusForCn1;
-	TextView textViewCn1;
-	TextView textViewCM;
 
-	LinearLayout linearLayoutCn;
-	TextView dspCurrent;
-	TextView opMode;
-	TextView coolingSp;
-	TextView heatingSp;
-	TextView external_damper;
-	LinearLayout lastUpdatedStatusOao;
+	ComposeView headerComposeView;
+	ComposeView profilePointsComposeView;
+
+	ComposeView epidemicModeComposeView;
+	SystemViewModel systemViewModel = null;
 
 	public SystemFragment()
 	{
@@ -322,10 +218,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
                 if (!(L.ccu().systemProfile instanceof DefaultSystem)) {
                     checkForOao();
                     fetchPoints();
-                    if(rootView != null){
-                        configEnergyMeterDetails(rootView);
-                        configBTUMeterDetails(rootView);
-                    }
                 }
 
             });
@@ -348,6 +240,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	@Override
 	public void onResume() {
 		super.onResume();
+		loadViewModel();
 		checkForOao();
 		fetchPoints();
 
@@ -393,6 +286,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		NotificationHandler.setCloudConnectivityListener(this);
 		rootView = inflater.inflate(R.layout.fragment_system_setting, container, false);
 		constraintScheduler = rootView.findViewById(R.id.constraintLt_Scheduler);
+		headerComposeView = rootView.findViewById(R.id.systamHeader);
+		profilePointsComposeView = rootView.findViewById(R.id.profilePoints);
+		epidemicModeComposeView = rootView.findViewById(R.id.epidemic_mode_compose_view);
+
 
 		//Week Days
 		textViewMonday = rootView.findViewById(R.id.textViewMonday);
@@ -402,8 +299,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		textViewFriday = rootView.findViewById(R.id.textViewFriday);
 		textViewSaturday = rootView.findViewById(R.id.textViewSaturday);
 		textViewSunday = rootView.findViewById(R.id.textViewSunday);
-		drActivationLayout = rootView.findViewById(R.id.drActivationLayout);
-		switchActivation = rootView.findViewById(R.id.switchActivation);
 
 		//Time lines with 2 hrs Interval 00:00 to 24:00
 		view00 = rootView.findViewById(R.id.view00);
@@ -464,7 +359,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 		mDrawableBreakLineLeft = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_left_svg);
 		mDrawableBreakLineRight = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_right_svg);
-
 		}catch (InflateException inflateException){
 			CcuLog.d(L.TAG_CCU_UI," Problem when inflating the layout fragment_system_setting "+inflateException.getMessage());
 			inflateException.printStackTrace();
@@ -767,26 +661,14 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 
 		prefs = new Prefs(getActivity());
-		ccuName = view.findViewById(R.id.ccuName);
-		ccuName.setText(Domain.ccuDevice.getCcuDisName());
-		profileTitle = view.findViewById(R.id.profileTitle);
 		oaoArc = view.findViewById(R.id.oaoArc);
-		purgeLayout = view.findViewById(R.id.purgelayout);
 		systemModePicker = view.findViewById(R.id.systemModePicker);
 		mainLayout = view.findViewById(R.id.main_layout);
-		lastUpdated = view.findViewById(R.id.lastUpdated);
 		scheduleType = view.findViewById(R.id.scheduleType);
-		EquipStatusForCn1 = view.findViewById(R.id.equipmentStatusCN);
-		textViewCn1 =  view.findViewById(R.id.textview_CN);
-		textViewCM = view.findViewById(R.id.textviewCM);
-		linearLayoutCn = view.findViewById(R.id.linear_layout_cn);
-		bacnetRecyclerView = view.findViewById(R.id.external_bacnet_device);
 		if(prefs.getBoolean("REGISTRATION")){
-			lastUpdated.setVisibility(View.VISIBLE);
 			scheduleType.setVisibility(View.VISIBLE);
 			constraintScheduler.setVisibility(View.VISIBLE);
 		}else {
-			lastUpdated.setVisibility(View.GONE);
 			scheduleType.setVisibility(View.GONE);
 			constraintScheduler.setVisibility(View.GONE);
 		}
@@ -842,79 +724,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		});
 
-		occupancyStatus = view.findViewById(R.id.occupancyStatus);
-		equipmentStatus = view.findViewById(R.id.equipmentStatus);
-		IEGatewayOccupancyStatus = view.findViewById(R.id.IE_Gateway_Occupancy_Status);
-		GUIDDetails = view.findViewById(R.id.GUID_Details);
-		IEGatewayDetail = view.findViewById(R.id.ie_gateway_details);
-
 		sbComfortValue = view.findViewById(R.id.systemComfortValue);
-		
-		targetMaxInsideHumidity = view.findViewById(R.id.targetMaxInsideHumidity);
-		targetMinInsideHumidity = view.findViewById(R.id.targetMinInsideHumidity);
-		CCUUiUtil.setSpinnerDropDownColor(targetMaxInsideHumidity,getContext());
-		CCUUiUtil.setSpinnerDropDownColor(targetMinInsideHumidity,getContext());
-		targetMinInsideHumidity.setOnTouchListener((v, event) -> {
-			minHumiditySpinnerReady = true;
-			return false;
-		});
-		
-		targetMaxInsideHumidity.setOnTouchListener((v, event) -> {
-			maxHumiditySpinnerReady = true;
-			return false;
-		});
-		
 		tbCompHumidity = view.findViewById(R.id.tbCompHumidity);
-		tbDemandResponse = view.findViewById(R.id.tbDemandResponse);
-		tbSmartPrePurge = view.findViewById(R.id.tbSmartPrePurge);
-		tbSmartPostPurge = view.findViewById(R.id.tbSmartPostPurge);
-		tbEnhancedVentilation = view.findViewById(R.id.tbEnhancedVentilation);
-		updatedTimeOao = view.findViewById(R.id.last_updated_status_oao);
-		cloudConnectivityUpdatedTime = view.findViewById(R.id.last_updated_time_ccu_hb);
-
-		tbCompHumidity.setEnabled(false);
-		tbDemandResponse.setEnabled(false);
-
-		energyMeterParams = view.findViewById(R.id.energyMeterParams);
-		energyMeterModelDetails = view.findViewById(R.id.energyMeterModelDetails);
-		moduleStatusEmr = view.findViewById(R.id.module_status_emr);
-		lastUpdatedEmr = view.findViewById(R.id.last_updated_emr);
-		configEnergyMeterDetails(view);
-
-        btuMeterParams = view.findViewById(R.id.btuMeterParams);
-		btuMeterModelDetails = view.findViewById(R.id.btuMeterModelDetails);
-		moduleStatusBtu = view.findViewById(R.id.module_status_btu);
-		lastUpdatedBtu = view.findViewById(R.id.last_updated_btu);
-		configBTUMeterDetails(view);
-
-		setPointConfig = view.findViewById(R.id.setpoint_config);
-		satSetPoint = view.findViewById(R.id.sat_setpoint);
-		dspSetPoint = view.findViewById(R.id.dsp_setpoint);
-		satCurrent = view.findViewById(R.id.sat_current);
-		dualSatCurrent = view.findViewById(R.id.sat_dual_cur);
-		dspCurrent = view.findViewById(R.id.dsp_current);
-		external_damper = view.findViewById(R.id.external_damper);
-		dcv_config = view.findViewById(R.id.dcv_config);
-		singleSatConfig = view.findViewById(R.id.single_sat_config);
-		dualSatConfig = view.findViewById(R.id.dual_sat_config);
-		heatConfig = view.findViewById(R.id.heat_config);
-		coolConfig = view.findViewById(R.id.cool_config);
-		dual_config = view.findViewById(R.id.dual_config);
-		dspConfig = view.findViewById(R.id.dsp_config);
-		opMode = view.findViewById(R.id.sat_operatingmode);
-		coolingSp = view.findViewById(R.id.sat_coolingsp);
-		heatingSp = view.findViewById(R.id.sat_heatingsp);
-
-		externalModbusParams = view.findViewById(R.id.external_modbus_device);
-		externalModbusModelDetails = view.findViewById(R.id.external_device_details);
-		externalModbusStatus = view.findViewById(R.id.external_device_status);
-		externalModbusLastUpdated = view.findViewById(R.id.external_last_updated_status);
-		external_last_updated = view.findViewById(R.id.external_last_updated);
-		external_device_type_text = view.findViewById(R.id.extenal_bacnetDeviceType);
-		lastUpdatedStatusOao = view.findViewById(R.id.linear_layout_lastupdate);
-		showExternalModbusDevice();
-		setUpDRModeActivationLayout();
-
 
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
 			systemModePicker.setEnabled(false);
@@ -927,19 +738,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 			humidityAdapter = new CustomSpinnerDropDownAdapter(this.requireContext(),R.layout.spinner_dropdown_item, zoroToHundred);
 			humidityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-			targetMinInsideHumidity.setAdapter(humidityAdapter);
-			targetMinInsideHumidity.setSelection(0);
-			targetMaxInsideHumidity.setAdapter(humidityAdapter);
-			targetMaxInsideHumidity.setSelection(0);
 
-			targetMaxInsideHumidity.setEnabled(false);
-			targetMinInsideHumidity.setEnabled(false);
-			tbCompHumidity.setEnabled(false);
-			tbDemandResponse.setEnabled(false);
-			tbSmartPrePurge.setEnabled(false);
-			tbSmartPostPurge.setEnabled(false);
-			tbEnhancedVentilation.setEnabled(false);
-			purgeLayout.setVisibility(View.GONE);
 			return;
 		}
 		
@@ -965,57 +764,19 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		
 		humidityAdapter = new CustomSpinnerDropDownAdapter(this.requireContext(), R.layout.spinner_dropdown_item, zoroToHundred);
 		humidityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+
 		
-		
-		targetMinInsideHumidity.setAdapter(humidityAdapter);
-		targetMaxInsideHumidity.setAdapter(humidityAdapter);
-		
-		targetMinInsideHumidity.setOnItemSelectedListener(this);
-		targetMaxInsideHumidity.setOnItemSelectedListener(this);
-		
+
+
 		tbCompHumidity.setOnCheckedChangeListener((compoundButton, b) -> {
 			if (compoundButton.isPressed()) {
 				SystemProfileUtil.setUserIntentBackground("compensate and humidity", b ? 1 : 0);
 			}
 		});
-
-		tbDemandResponse.setOnCheckedChangeListener((compoundButton, b) -> {
-			if (compoundButton.isPressed()) {
-				SystemProfileUtil.setUserIntentBackground("demand and response", b ? 1 : 0);
-			}
-		});
-		tbSmartPrePurge.setOnCheckedChangeListener((compoundButton, b) -> {
-			if (compoundButton.isPressed()) {
-				if (isDMSupportProfile()) {
-					SystemProfileUtil.setUserIntentByDomain(systemPrePurgeEnable, b ? 1 : 0);
-				} else {
-					SystemProfileUtil.setUserIntentBackground("prePurge and enabled", b ? 1 : 0);
-				}
-			}
-		});
-		tbSmartPostPurge.setOnCheckedChangeListener((compoundButton, b) -> {
-			if (compoundButton.isPressed()) {
-				if (isDMSupportProfile()) {
-					SystemProfileUtil.setUserIntentByDomain(systemPostPurgeEnable, b ? 1 : 0);
-				} else {
-					SystemProfileUtil.setUserIntentBackground("postPurge and enabled", b ? 1 : 0);
-				}
-
-			}
-		});
-		tbEnhancedVentilation.setOnCheckedChangeListener((compoundButton, b) -> {
-			if (compoundButton.isPressed()) {
-				if (isDMSupportProfile()) {
-					SystemProfileUtil.setUserIntentByDomain(systemEnhancedVentilationEnable, b ? 1 : 0);
-				} else {
-					SystemProfileUtil.setUserIntentBackground("enhanced and ventilation and enabled", b ? 1 : 0);
-				}
-
-			}
-		});
 		getActivity().registerReceiver(occupancyReceiver, new IntentFilter(ACTION_STATUS_CHANGE));
 		configWatermark();
 		refreshData();
+		initViewModel();
 		CcuLog.i("UI_PROFILING", "SystemFragment.onViewCreated Done");
 	}
 
@@ -1031,143 +792,23 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				|| L.ccu().systemProfile instanceof VavStagedRtuWithVfd
 				|| L.ccu().systemProfile instanceof VavFullyModulatingRtu);
 	}
-
-
-
-	private void setUpDRModeActivationLayout() {
-		CCUHsApi ccuHsApi = CCUHsApi.getInstance();
-		// added the null check to avoid the CCU crash
-		if(drActivationLayout == null || switchActivation == null) {
-			return;
-		}
-		if (DemandResponseMode.isDREnrollmentSelected()) {
-			drActivationLayout.setVisibility(View.VISIBLE);
-			switchActivation.setChecked(DemandResponseMode.isDRModeActivated());
-		} else {
-			drActivationLayout.setVisibility(View.GONE);
-		}
-		switchActivation.setOnCheckedChangeListener((buttonView, isChecked) -> {
-			if(buttonView.isPressed()) {
-				if (isChecked) {
-					CcuLog.i(L.TAG_CCU_DR_MODE, "Demand response Activation enabled");
-					DemandResponseMode.setDRModeActivationStatus(true);
-				} else {
-					CcuLog.i(L.TAG_CCU_DR_MODE, "Demand response Activation disabled");
-					DemandResponseMode.setDRModeActivationStatus(false);
-				}
-			}
-		});
-	}
-
 	private void checkForOao() {
 		if (L.ccu().oaoProfile != null ||  isOaoPairedInConnectModule()) {
 			oaoArc.setVisibility(View.VISIBLE);
-			purgeLayout.setVisibility(View.VISIBLE);
-			if (isDMSupportProfile()) {
-				tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemPrePurgeEnable+"\"") > 0);
-				tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemPostPurgeEnable+"\"") > 0);
-				tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemEnhancedVentilationEnable+"\"") > 0);
-			} else {
-				tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
-				tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
-				tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation") > 0);
-			}
-			ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and oao and not hyperstatsplit");
-
-			if (equips != null && !equips.isEmpty() || isOaoPairedInConnectModule()) {
-				double returnAirCO2;
-				double co2Threshold;
-				if (isOaoPairedInConnectModule()) {
-					returnAirCO2 = getConnectEquip().getReturnAirCo2().readHisVal();
-					co2Threshold = getConnectEquip().getCo2Threshold().readDefaultVal();
-					oaoArc.disableHeartBeat();
-					lastUpdatedStatusOao.setVisibility(View.GONE);
-				} else {
-					ArrayList<OAOEquip> equipList = new ArrayList<>();
-					for (HashMap m : equips) {
-						String nodeAddress = m.get("group").toString();
-						equipList.add(new OAOEquip(m.get("id").toString()));
-						updatedTimeOao.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
-						oaoArc.updateStatus(HeartBeatUtil.isModuleAlive(nodeAddress));
-					}
-					returnAirCO2 = equipList.get(0).getReturnAirCo2().readHisVal();
-					co2Threshold = equipList.get(0).getCo2Threshold().readDefaultVal();
-				}
-
-				int angel = (int)co2Threshold / 20;
-				if (angel < 0){
-					angel = 0;
-				} else if (angel > 2000){
-					angel = 2000;
-				}
-
-				int progress = (int) returnAirCO2 / 20;
-				if (progress < 0){
-					progress = 0;
-				} else if (progress > 2000){
-					progress = 2000;
-				}
-
-				oaoArc.setProgress(progress);
-				oaoArc.setData(angel,(int)returnAirCO2);
-				oaoArc.setContentDescription(String.valueOf(returnAirCO2));
-			}
 		} else {
 			RelativeLayout.LayoutParams layoutParams =(RelativeLayout.LayoutParams)systemModePicker.getLayoutParams();
 			layoutParams.setMargins(0,300,0,0);
 			systemModePicker.setLayoutParams(layoutParams);
 			oaoArc.setVisibility(View.GONE);
-			purgeLayout.setVisibility(View.GONE);
 		}
 	}
-
-	public void fetchPoints()
-	{
-		Context context = getContext();
-		if(getActivity() != null && L.ccu().systemProfile != null && context != null) {
+	public void fetchPoints() {
+		if (getActivity() != null && L.ccu().systemProfile != null) {
 			getActivity().runOnUiThread(() -> {
-				String colorHex = CCUUiUtil.getColorCode(context);
-				String status;
-				String cnStatus;
-				if (isDMSupportProfile()) {
-					if (isAdvanceAhuV2Profile() && isConnectModuleExist()) {
-						textViewCM.setText("CM Status:");
-						status = getAdvancedAhuSystemEquip().getEquipStatusMessage().readDefaultStrVal();
-						cnStatus = getConnectEquip().getEquipStatusMessage().readDefaultStrVal();
-						EquipStatusForCn1.setText(StringUtil.isBlank(cnStatus)? Html.fromHtml("<font color='"+colorHex+"'> System OFF</font>") : Html.fromHtml(cnStatus.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
-					} else {
-						textViewCn1.setVisibility(View.GONE);
-						linearLayoutCn.setVisibility(View.GONE);
-						status = CCUHsApi.getInstance().readDefaultStrVal("system  and domainName == \"" + DomainName.equipStatusMessage + "\"");
-					}
-
-				} else {
-					status = CCUHsApi.getInstance().readDefaultStrVal("system and status and message");
-				}
-
-				//If the system status is not updated yet (within a minute of registering the device), generate a
-				//default message.
-				if (StringUtils.isEmpty(status)) {
-					status = L.ccu().systemProfile.getStatusMessage();
-				}
-
 				if (L.ccu().systemProfile instanceof DefaultSystem) {
-					equipmentStatus.setText(StringUtil.isBlank(status) ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='"+colorHex+"'>ON</font>")));
-					occupancyStatus.setText(ScheduleManager.getInstance().getSystemStatusString());
 					tbCompHumidity.setChecked(false);
-					tbDemandResponse.setChecked(false);
-					tbSmartPrePurge.setChecked(false);
-					tbSmartPostPurge.setChecked(false);
-					tbEnhancedVentilation.setChecked(false);
 					sbComfortValue.setProgress(0);
 					sbComfortValue.setContentDescription("0");
-					targetMaxInsideHumidity.setSelection(humidityAdapter
-							.getPosition(0.0), false);
-					targetMinInsideHumidity.setSelection(humidityAdapter
-							.getPosition(0.0), false);
-					setPointConfig.setVisibility(View.GONE);
-					textViewCn1.setVisibility(View.GONE);
-					linearLayoutCn.setVisibility(View.GONE);
 
 				} else {
 					if (isDMSupportProfile()) {
@@ -1175,240 +816,18 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					} else {
 						systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("conditioning and mode"));
 					}
-					equipmentStatus.setText(StringUtil.isBlank(status)? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
-					if (isCelsiusTunerAvailableStatus()) {
-						occupancyStatus.setText(StatusCelsiusVal(ScheduleManager.getInstance()
-								.getSystemStatusString(), TemperatureMode.DUAL.ordinal()));
-					} else {
-						occupancyStatus.setText(ScheduleManager.getInstance().getSystemStatusString());
-					}
 					tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
-					tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
-					if (isDMSupportProfile()) {
-						tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemPrePurgeEnable+"\"") > 0);
-						tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemPostPurgeEnable+"\"") > 0);
-						tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemEnhancedVentilationEnable+"\"") > 0);
-					} else {
-						tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
-						tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
-						tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation") > 0);
-					}
+
 					sbComfortValue.setProgress(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci"));
 					sbComfortValue.setContentDescription(String.valueOf(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci")));
-
-					if (isDMSupportProfile()) {
-						targetMaxInsideHumidity.setSelection(humidityAdapter
-								.getPosition(TunerUtil.readSystemUserIntentVal("domainName == \"" + DomainName.systemtargetMaxInsideHumidity + "\"")), false);
-						targetMinInsideHumidity.setSelection(humidityAdapter
-								.getPosition(TunerUtil.readSystemUserIntentVal("domainName == \"" + DomainName.systemtargetMinInsideHumidity + "\"")), false);
-					} else {
-						targetMaxInsideHumidity.setSelection(humidityAdapter
-								.getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);
-						targetMinInsideHumidity.setSelection(humidityAdapter
-								.getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
-					}
-
-					if(L.ccu().systemProfile instanceof VavIERtu) {
-						IEGatewayDetail.setVisibility(View.VISIBLE);
-						IEGatewayOccupancyStatus.setText(getOccStatus());
-						GUIDDetails.setText(CCUHsApi.getInstance().getSiteIdRef().toString());
-					} else {
-						configureExternalAhu();
-					}
-				}
-				switchActivation.setChecked(DemandResponseMode.isDRModeActivated());
-				if (L.ccu().systemProfile != null) {
-					profileTitle.setText(L.ccu().systemProfile.getProfileName());
 				}
 			});
-		}
-		
-	}
-
-	private void configureExternalAhu() {
-		if(L.ccu().systemProfile instanceof DabExternalAhu ||
-				L.ccu().systemProfile instanceof VavExternalAhu) {
-			if (L.ccu().systemProfile instanceof DabExternalAhu) {
-				setCurrentAndSetPoints (
-						getSetPoint(supplyAirflowTemperatureSetpoint),
-						getSetPoint(ductStaticPressureSetpoint),
-						getModbusPointValue(DISCHARGE_AIR_TEMP),
-						getModbusPointValue(DUCT_STATIC_PRESSURE_SENSOR),
-						getConfigValue(dcvDamperControlEnable, ModelNames.DAB_EXTERNAL_AHU_CONTROLLER),
-						getSetPoint(dcvDamperCalculatedSetpoint),
-						getConfigValue(dualSetpointControlEnable,ModelNames.DAB_EXTERNAL_AHU_CONTROLLER),
-						getSetPoint(airTempCoolingSp),
-						getSetPoint(airTempHeatingSp),
-						getOperatingMode(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
-				);
-			} else {
-				setCurrentAndSetPoints (
-						getSetPoint(supplyAirflowTemperatureSetpoint),
-						getSetPoint(ductStaticPressureSetpoint),
-						getModbusPointValue(DISCHARGE_AIR_TEMP),
-						getModbusPointValue(DUCT_STATIC_PRESSURE_SENSOR),
-						getConfigValue(dcvDamperControlEnable,ModelNames.VAV_EXTERNAL_AHU_CONTROLLER),
-						getSetPoint(dcvDamperCalculatedSetpoint),
-						getConfigValue(dualSetpointControlEnable,ModelNames.VAV_EXTERNAL_AHU_CONTROLLER),
-						getSetPoint(airTempCoolingSp),
-						getSetPoint(airTempHeatingSp),
-						getOperatingMode(ModelNames.VAV_EXTERNAL_AHU_CONTROLLER)
-				);
-			}
-		} else if (L.ccu().systemProfile instanceof DabAdvancedAhu) {
-			DabAdvancedAhu profile = (DabAdvancedAhu) L.ccu().systemProfile;
-			setAdvancedAhuConfiguration(
-					profile.getUserIntentConfig(),
-					profile.getUnit(ductStaticPressureSetpoint),
-					profile.getSatUnit(),
-					profile.systemEquip.getCmEquip().getAirTempHeatingSp().readHisVal(),
-					profile.systemEquip.getCmEquip().getAirTempCoolingSp().readHisVal(),
-					profile.getSatControlPoint(),
-					profile.getOperatingMode(),
-					profile.systemEquip.getCmEquip().getDuctStaticPressureSetpoint().readHisVal(),
-					profile.getStaticPressureControlPoint(),
-					profile.systemEquip.getCmEquip().getCo2BasedDamperControl().readHisVal()
-			);
-		} else if (L.ccu().systemProfile instanceof VavAdvancedAhu) {
-			VavAdvancedAhu profile = (VavAdvancedAhu) L.ccu().systemProfile;
-			setAdvancedAhuConfiguration(
-					profile.getUserIntentConfig(),
-					profile.getUnit(ductStaticPressureSetpoint),
-					profile.getSatUnit(),
-					profile.systemEquip.getCmEquip().getAirTempHeatingSp().readHisVal() ,
-					profile.systemEquip.getCmEquip().getAirTempCoolingSp().readHisVal(),
-					profile.getSatControlPoint(),
-					profile.getOperatingMode(),
-					profile.systemEquip.getCmEquip().getDuctStaticPressureSetpoint().readHisVal(),
-					profile.getStaticPressureControlPoint(),
-					profile.systemEquip.getCmEquip().getCo2BasedDamperControl().readHisVal()
-			);
-		}
-		else {
-			setPointConfig.setVisibility(View.GONE);
-		}
-	}
-
-	@SuppressLint({"SetTextI18n", "DefaultLocale"})
-	private void setAdvancedAhuConfiguration(
-			UserIntentConfig userIntentConfig,
-			String dspUnit, String satUnit, double heatingSpVal,
-			double CoolingSpVal, double dualSatCurrentVal, String opModeVal,
-			double dspSetPointVal, double dspCurrentVal, double damperVal
-	) {
-		boolean isCelsiusEnabled = UnitUtils.isCelsiusTunerAvailableStatus();
-		setPointConfig.setVisibility(View.VISIBLE);
-		if (userIntentConfig.isSatHeatingAvailable()) { // heating is available
-			if (isCelsiusEnabled) {
-				heatingSp.setText(" "+ fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(heatingSpVal))) + " °C");
-				dualSatCurrent.setText(" " +  fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(dualSatCurrentVal))) + " °C");
-			} else {
-				heatingSp.setText(" " + heatingSpVal +" "+ satUnit);
-				dualSatCurrent.setText(" " + dualSatCurrentVal+" "+ satUnit);
-			}
-		} else {
-			heatConfig.setVisibility(View.INVISIBLE);
-		}
-		if (userIntentConfig.isSatCoolingAvailable()) { // Cooling is available
-			if (isCelsiusEnabled) {
-				coolingSp.setText(" "+ fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(CoolingSpVal)))+ " °C");
-				dualSatCurrent.setText(" " +  fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(dualSatCurrentVal)))  + " °C");
-			}else {
-				coolingSp.setText(" " + CoolingSpVal + " " + satUnit);
-				dualSatCurrent.setText(" " + dualSatCurrentVal + " " + satUnit);
-			}
-		} else {
-			coolConfig.setVisibility(View.INVISIBLE);
-		}
-		if ((userIntentConfig.component1() || userIntentConfig.component2())) {
-			dualSatConfig.setVisibility(View.VISIBLE);
-			opMode.setText(" " + opModeVal);
-		} else {
-			dualSatConfig.setVisibility(View.GONE);
-		}
-
-		if (userIntentConfig.isPressureControlAvailable()) { // Static Pressure control is available
-			DecimalFormat df = new DecimalFormat("0.00");
-			dspSetPoint.setText(" " + df.format(dspSetPointVal) +" "+ dspUnit);
-			dspCurrent.setText(" " + String.format("%.2f", dspCurrentVal)+" "+ dspUnit);
-		} else {
-			dspSetPoint.setVisibility(View.GONE);
-			dspCurrent.setVisibility(View.GONE);
-			dspConfig.setVisibility(View.GONE);
-		}
-		dual_config.setVisibility((userIntentConfig.isSatHeatingAvailable() || userIntentConfig.isSatCoolingAvailable())? View.VISIBLE : View.GONE);
-		singleSatConfig.setVisibility(View.GONE);
-
-		if (userIntentConfig.isCo2DamperControlAvailable()) {
-			external_damper.setText(" " +damperVal+" %");
-			dcv_config.setVisibility(View.VISIBLE);
-		} else {
-			dcv_config.setVisibility(View.GONE);
-		}
-	}
-	private void setCurrentAndSetPoints(
-			String satSp, String dspSp,String satCur, String dspCur, boolean dcvEnabled,
-			String dcvSp, boolean dualEnabled, String coolingSpVal, String heatingSpVal,
-			String operationMode
-	) {
-		setPointConfig.setVisibility(View.VISIBLE);
-		satSetPoint.setText(satSp);
-		dspSetPoint.setText(dspSp);
-		satCurrent.setText(satCur);
-		dualSatCurrent.setText(satCur);
-		dspCurrent.setText(dspCur);
-		coolingSp.setText(coolingSpVal);
-		heatingSp.setText(heatingSpVal);
-		opMode.setText(operationMode);
-
-		if (dcvEnabled) {
-			external_damper.setText(dcvSp);
-			dcv_config.setVisibility(View.VISIBLE);
-		} else {
-			dcv_config.setVisibility(View.GONE);
-		}
-
-		if (dualEnabled) {
-			dual_config.setVisibility(View.VISIBLE);
-			dualSatConfig.setVisibility(View.VISIBLE);
-			singleSatConfig.setVisibility(View.GONE);
-		} else {
-			dual_config.setVisibility(View.GONE);
-			dualSatConfig.setVisibility(View.GONE);
-			singleSatConfig.setVisibility(View.VISIBLE);
 		}
 	}
 
 	@Override
 	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
-	                           long arg3)
-	{
-		double val = Double.parseDouble(arg0.getSelectedItem().toString());
-		
-		switch (arg0.getId())
-		{
-			case R.id.targetMaxInsideHumidity:
-				if (maxHumiditySpinnerReady)
-				{
-					maxHumiditySpinnerReady = false;
-					if (isDMSupportProfile()) {
-						SystemProfileUtil.setUserIntentBackground("domainName == \"" + DomainName.systemtargetMaxInsideHumidity + "\"", val);
-					} else {
-						SystemProfileUtil.setUserIntentBackground("target and max and inside and humidity", val);
-					}
-				}
-				break;
-			case R.id.targetMinInsideHumidity:
-				if (minHumiditySpinnerReady) {
-					minHumiditySpinnerReady = false;
-					if (isDMSupportProfile()) {
-						SystemProfileUtil.setUserIntentBackground("domainName == \"" + DomainName.systemtargetMinInsideHumidity + "\"", val);
-					} else {
-						SystemProfileUtil.setUserIntentBackground("target and min and inside and humidity", val);
-					}
-				}
-				break;
-		}
+							   long arg3) {
 	}
 	@Override
 	public void onNothingSelected(AdapterView<?> arg0) {
@@ -1427,6 +846,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		}catch (Exception e){
 			CcuLog.e(L.TAG_CCU_UI, "onDestroyView: ", e);
 		}
+		systemViewModel.stopObservingEquipHealth();
 		super.onDestroyView();
 	}
 
@@ -1449,278 +869,19 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		}
 	};
-	private void configEnergyMeterDetails(View view){
-		EquipmentDevice emDevice = getModbusEquip("emr");
-		if (emDevice != null) {
-			energyMeterParams.setVisibility(View.VISIBLE);
-			energyMeterModelDetails.setVisibility(View.VISIBLE);
-			moduleStatusEmr.setVisibility(View.VISIBLE);
-			lastUpdatedEmr.setVisibility(View.VISIBLE);
-			List<Parameter> parameterList = new ArrayList<>();
-
-			energyMeterParams.setVisibility(View.VISIBLE);
-			energyMeterModelDetails.setVisibility(View.VISIBLE);
-			moduleStatusEmr.setVisibility(View.VISIBLE);
-			lastUpdatedEmr.setVisibility(View.VISIBLE);
-			List<Parameter> allParamList = UtilSourceKt.getParametersList(emDevice);
-			allParamList.forEach(parameter -> {
-				if (parameter.isDisplayInUI())
-					parameterList.add(parameter);
-			});
-			List<Parameter> sortedparamterList = parameterList.stream()
-					.sorted(Comparator.comparing(param -> {
-						Integer pointNum = param.getLogicalPointTags().stream()
-								.filter(tag -> "pointNum".equals(tag.getTagName()))
-								.map(tag -> (Integer.parseInt(tag.getTagValue())))
-								.findFirst()
-								.orElse(Integer.MAX_VALUE);
-						return pointNum;
-					}))
-					.collect(Collectors.toList());
-			String nodeAddress = String.valueOf(emDevice.getSlaveId());
-			int displayIndex = emDevice.getName().lastIndexOf('-') + 1;
-			String displayName = emDevice.getName().substring(displayIndex);
-			if(!emDevice.getEquipType().contains(displayName))
-				energyMeterModelDetails.setText(displayName + "(" + nodeAddress + ")");
-			else
-				energyMeterModelDetails.setText(emDevice.getName() + "(" + emDevice.getEquipType().toUpperCase() + nodeAddress + ")");
-			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
-			energyMeterParams.setLayoutManager(gridLayoutManager);
-			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
-					new ZoneRecyclerModbusParamAdapter(getContext(), emDevice.getDeviceEquipRef(), sortedparamterList);
-			energyMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
-			TextView emrUpdatedTime = view.findViewById(R.id.last_updated_statusEM);
-			emrUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
-			TextView textViewModule = view.findViewById(R.id.module_status_emr);
-			HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
-		}
-
-	}
-
-	private EquipmentDevice getModbusEquip(String filter){
-		HashMap<Object, Object> equipListMap = CCUHsApi.getInstance().readEntity("equip and modbus and not equipRef and "+filter+" and system");
-		if (equipListMap.isEmpty())
-			return null;
-		return buildModbusModelByEquipRef(Objects.requireNonNull(equipListMap.get("id")).toString());
-	}
-	private void configBTUMeterDetails(View view){
-
-		EquipmentDevice btuDevice = getModbusEquip("btu");
-		if(btuDevice != null) {
-			btuMeterParams.setVisibility(View.VISIBLE);
-			btuMeterModelDetails.setVisibility(View.VISIBLE);
-			moduleStatusBtu.setVisibility(View.VISIBLE);
-			lastUpdatedBtu.setVisibility(View.VISIBLE);
-			List<Parameter> parameterList = new ArrayList<>();
-
-			List<Parameter> allParamList = UtilSourceKt.getParametersList(btuDevice);
-			allParamList.forEach(parameter -> {
-				if (parameter.isDisplayInUI())
-					parameterList.add(parameter);
-			});
-			List<Parameter> sortedparamterList = parameterList.stream()
-					.sorted(Comparator.comparing(param -> {
-						Integer pointNum = param.getLogicalPointTags().stream()
-								.filter(tag -> "pointNum".equals(tag.getTagName()))
-								.map(tag -> (Integer.parseInt(tag.getTagValue())))
-								.findFirst()
-								.orElse(Integer.MAX_VALUE);
-						return pointNum;
-					}))
-					.collect(Collectors.toList());
-			String nodeAddress = String.valueOf(btuDevice.getSlaveId());
-			int displayIndex = btuDevice.getName().lastIndexOf('-') + 1;
-			String displayName = btuDevice.getName().substring(displayIndex);
-			if(!btuDevice.getEquipType().contains(displayName))
-				btuMeterModelDetails.setText(displayName + "(" + nodeAddress + ")");
-			else
-				btuMeterModelDetails.setText(btuDevice.getName() + "(" + btuDevice.getEquipType().toUpperCase() + nodeAddress + ")");
-			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
-			btuMeterParams.setLayoutManager(gridLayoutManager);
-			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
-					new ZoneRecyclerModbusParamAdapter(getContext(), btuDevice.getDeviceEquipRef(), sortedparamterList);
-			btuMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
-			TextView btuUpdatedTime = view.findViewById(R.id.last_updated_statusBTU);
-			btuUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
-			TextView textViewModule = view.findViewById(R.id.module_status_btu);
-			HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
-		}
-
-	}
 
 	private void configWatermark(){
 		if(!CCUUiUtil.isCarrierThemeEnabled(requireContext()) && !CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
 			mainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
 		}
 	}
-	private String getOccStatus(){
-		HashMap point = CCUHsApi.getInstance().read("point and " +
-				"system and ie and occStatus");
-		if (!point.isEmpty()) {
-			double occStatus = CCUHsApi.getInstance().readHisValById(point.get("id").toString());
-			if (occStatus == 0) {
-				return "Occupied";
-			} else if (occStatus == 1) {
-				return "Unoccupied";
-			} else {
-				return "Tenant Override";
-			}
-		}
-		return "Unoccupied";
-	}
 
 	public static void setIntrinsicScheduleListener(IntrinsicScheduleListener listener) {
 		intrinsicScheduleListener = listener;
 	}
 	@Override
-	public void refreshData() {
-		cloudConnectivityUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(Tags.CLOUD));
-	}
-	private void showExternalModbusDevice() {
-		if (L.ccu().systemProfile instanceof DabExternalAhu || L.ccu().systemProfile instanceof VavExternalAhu) {
-			HashMap<Object, Object>  modbusEquip = CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu");
-			if (!modbusEquip.isEmpty()) {
-				externalModbusParams.setVisibility(View.VISIBLE);
-				externalModbusModelDetails.setVisibility(View.VISIBLE);
-				externalModbusStatus.setVisibility(View.VISIBLE);
-				externalModbusLastUpdated.setVisibility(View.VISIBLE);
-				external_last_updated.setVisibility(View.VISIBLE);
+	public void refreshData() {}
 
-				EquipmentDevice externalModbusEquip = buildModbusModelByEquipRef(Objects.requireNonNull(modbusEquip.get("id")).toString());
-				List<Parameter> parameterList = new ArrayList<>();
-
-				List<Parameter> allParamList = UtilSourceKt.getParametersList(externalModbusEquip);
-				allParamList.forEach(parameter -> {
-					if (parameter.isDisplayInUI())
-						parameterList.add(parameter);
-				});
-				List<Parameter> sortedparamterList = parameterList.stream()
-						.sorted(Comparator.comparing(param -> {
-							Integer pointNum = param.getLogicalPointTags().stream()
-									.filter(tag -> "pointNum".equals(tag.getTagName()))
-									.map(tag -> (Integer.parseInt(tag.getTagValue())))
-									.findFirst()
-									.orElse(Integer.MAX_VALUE);
-							return pointNum;
-						}))
-						.collect(Collectors.toList());
-				String nodeAddress = String.valueOf(externalModbusEquip.getSlaveId());
-				int displayIndex = externalModbusEquip.getName().lastIndexOf('-') + 1;
-				String displayName = externalModbusEquip.getName().substring(displayIndex);
-				if(!externalModbusEquip.getEquipType().contains(displayName))
-					externalModbusModelDetails.setText(displayName + "(" + nodeAddress + ")");
-				else
-					externalModbusModelDetails.setText(externalModbusEquip.getName()+ "("+externalModbusEquip.getEquipType().toUpperCase() + nodeAddress + ")");
-				GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
-				externalModbusParams.setLayoutManager(gridLayoutManager);
-				ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
-						new ZoneRecyclerModbusParamAdapter(getContext(), externalModbusEquip.getDeviceEquipRef(), sortedparamterList);
-				externalModbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
-				externalModbusLastUpdated.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
-				HeartBeatUtil.moduleStatus(externalModbusStatus, nodeAddress);
-			}
-
-			if(PreferenceUtil.getSelectedProfileWithAhu().equalsIgnoreCase("bacnet")){
-				CcuLog.d(TAG_BACNET, "--bacnet profile found attached with external ahu---system fragment");
-				HashMap<Object, Object>  bacnetEquip =
-						CCUHsApi.getInstance().readEntity("system and equip and bacnet and not emr and not btu");
-				if(bacnetEquip != null){
-					showBacnetUi(bacnetEquip);
-				}
-			}
-		}
-	}
-
-	private List<BacnetZoneViewItem> bacNetPointsList = new ArrayList<>();
-	private ZoneRecyclerBacnetParamAdapter zoneRecyclerBacnetParamAdapter;
-
-	private RecyclerView bacnetRecyclerView;
-
-	private void showBacnetUi(HashMap<Object, Object> bacnetEquip){
-
-		if(bacnetEquip == null || bacnetEquip.get("id") == null){
-			CcuLog.d(TAG_BACNET, "--can not populate ui as bacnet equip is null");
-			return;
-		}
-
-		String bacnetEquipId = bacnetEquip.get("id").toString();
-		String heartBeatPointId = CCUHsApi.getInstance().readEntity("point and heartbeat and equipRef==\"" + bacnetEquipId + "\"").get("id").toString();
-		Double hisValue = CCUHsApi.getInstance().readHisValById(heartBeatPointId);
-		HisItem heartBeatHisItem = CCUHsApi.getInstance().curRead(heartBeatPointId);
-		String lastUpdatedTime = "--";
-		if(heartBeatHisItem != null) {
-			Date updatedTime = heartBeatHisItem.getDate();
-			lastUpdatedTime = HeartBeatUtil.getLastUpdatedTimeBacnetSystem(updatedTime);
-
-			Date currTime = new Date();
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(updatedTime);
-			calendar.add(Calendar.MINUTE, 15);
-			Date currTimePlus15 = calendar.getTime();
-
-			CcuLog.d(TAG_BACNET_HEART_BEAT, "--heart beat point his value-->" + hisValue + "<--heartBeatHisItem time-->" + heartBeatHisItem.getDate() + "<----currTimePlus15-->" + currTimePlus15 + "<currTime>" + currTime);
-
-			if (currTime.after(currTimePlus15)) {
-				CcuLog.d(TAG_BACNET_HEART_BEAT, "givenTime is more than 15 minutes ahead of current time.");
-				externalModbusStatus.setBackgroundResource(R.drawable.module_dead);
-			} else {
-				CcuLog.d(TAG_BACNET_HEART_BEAT, "givenTime is not more than 15 minutes ahead.");
-				externalModbusStatus.setBackgroundResource(R.drawable.module_alive);
-			}
-		} else {
-			CcuLog.d(TAG_BACNET_HEART_BEAT, "givenTime not found");
-			externalModbusStatus.setBackgroundResource(R.drawable.module_dead);
-		}
-
-
-
-		List<BacnetModelDetailResponse> list = buildBacnetModelSystem(bacnetEquip);
-
-		externalModbusStatus.setVisibility(View.VISIBLE);
-		externalModbusLastUpdated.setVisibility(View.VISIBLE);
-		externalModbusLastUpdated.setText(lastUpdatedTime);
-		external_last_updated.setVisibility(View.VISIBLE);
-		if (bacnetEquip.containsKey(Tags.BACNET_CUR)) {
-			external_device_type_text.setText(R.string.bacnetIpDevice);
-		} else {
-			external_device_type_text.setText(R.string.bacnetMstpDevice);
-		}
-		external_device_type_text.setVisibility(View.VISIBLE);
-		externalModbusModelDetails.setVisibility(View.VISIBLE);
-		Map<String, String> bacnetConfig = EntityKVStringParserUtilKt.getConfig(
-				bacnetEquip.getOrDefault(
-						"bacnetConfig",
-						HStr.make("")).toString());
-		String macAddr = bacnetConfig.get("macAddress");
-		if (macAddr == null || macAddr.isEmpty()) {
-			macAddr = "NA";
-		}
-		String bacnetDeviceId = bacnetConfig.get("deviceId");
-		if (bacnetDeviceId == null || bacnetDeviceId.isEmpty()) {
-			bacnetDeviceId = "NA";
-		}
-		String disName = " ( Device ID: " + bacnetDeviceId + " | MAC Addr: " + macAddr + " )";
-		externalModbusModelDetails.setText(Objects.requireNonNull(bacnetEquip.get("dis")) + disName);
-
-		for (BacnetModelDetailResponse item : list){
-			List<BacnetPoint> bacnetPoints = item.getPoints();
-			bacNetPointsList = fetchZoneDataForBacnet(bacnetPoints, bacnetEquip.get("bacnetConfig").toString());
-		}
-
-		int spanCount = 2;
-		int spacingInDp = 60;
-		int spacing = GridSpacingItemDecoration.dpToPx(spacingInDp, getContext());
-
-
-		GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),spanCount);
-		bacnetRecyclerView.setLayoutManager(gridLayoutManager);
-		bacnetRecyclerView.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing));
-		zoneRecyclerBacnetParamAdapter =
-				new ZoneRecyclerBacnetParamAdapter(getContext(),
-						bacNetPointsList, remotePointUpdateInterface);
-		bacnetRecyclerView.setAdapter(zoneRecyclerBacnetParamAdapter);
-		bacnetRecyclerView.invalidate();
-	}
 
 	private RemotePointUpdateInterface remotePointUpdateInterface = (message, id, value) -> {
 		//CcuLog.d(LOG_TAG, "--updateMessage::>> " + message);
@@ -1733,74 +894,16 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		CCUHsApi.getInstance().writeDefaultValById(id, Double.parseDouble(value));
 		CCUHsApi.getInstance().writeHisValById(id, Double.parseDouble(value));
 	};
-
-	private List<BacnetZoneViewItem> fetchZoneDataForBacnet(List<BacnetPoint> bacnetPoints, String bacnetConfig){
-		List<BacnetZoneViewItem> listBacnetZoneViewItems = new ArrayList<>();
-		List<String> parameterList = new ArrayList<>();
-		for (BacnetPoint bacnetPoint : bacnetPoints){
-			CcuLog.d(BACNET, "bacnet tags: " + bacnetPoint.getEquipTagNames());
-			boolean isWritable = false;
-			String objectTypeFromProtocolData = bacnetPoint.getProtocolData().getBacnet().getObjectType();
-			String objectType = BacNetConstants.ObjectType.OBJECT_ANALOG_VALUE.getKey();
-			List<Pair<String,Integer>> spinnerValues = new ArrayList<>();
-			if(bacnetPoint.getEquipTagNames().contains("writable")){
-				isWritable = true;
-				PresentationData presentationData = bacnetPoint.getPresentationData();
-				ValueConstraint valueConstraint = bacnetPoint.getValueConstraint();
-				if(objectTypeFromProtocolData.equalsIgnoreCase("MultiStateValue")){
-					objectType = BacNetConstants.ObjectType.OBJECT_MULTI_STATE_VALUE.getKey();
-				}else if(objectTypeFromProtocolData.equalsIgnoreCase("BinaryValue")){
-					objectType = BacNetConstants.ObjectType.OBJECT_BINARY_VALUE.getKey();
-				}else{
-					objectType = BacNetConstants.ObjectType.OBJECT_ANALOG_VALUE.getKey();
-				}
-
-				if(presentationData != null && valueConstraint != null){
-					if(valueConstraint.getMinValue() != null && valueConstraint.getMinValue() != null){
-						int minValue = valueConstraint.getMinValue().intValue();
-						int maxValue = valueConstraint.getMaxValue().intValue();
-						//float step = Float.parseFloat(presentationData.getTagValueIncrement(
-						double step = Double.parseDouble(presentationData.getTagValueIncrement());
-						spinnerValues = generateValuesForSpinner(minValue, maxValue, step);
-						CcuLog.d(BACNET, "For point id--> " + bacnetPoint.getId() + " MinValue: " + minValue + " MaxValue: " + maxValue + " Increment Value: " + step);
-					}else {
-						CcuLog.d(BACNET, "For point id--> " + bacnetPoint.getId() + " there is no min max value checking multi state");
-						List<Pair<String,Integer>> finalSpinnerValues = spinnerValues;
-						valueConstraint.getAllowedValues().forEach(allowedValue -> {
-							CcuLog.d(BACNET, "For point id--> " + bacnetPoint.getId() + " Allowed Value: " + allowedValue);
-							finalSpinnerValues.add(new Pair<>(allowedValue.getValue(), allowedValue.getIndex()));
-						});
-					}
-				}
-			}
-
-			if(bacnetPoint.getProtocolData().getBacnet().getDisplayInUIDefault()){
-				String pointName = bacnetPoint.getDisName();
-				String pointId = bacnetPoint.getId();
-				String value = CCUHsApi.getInstance().readDefaultStrVal("id=="+pointId);
-				String hisValue = String.valueOf(CCUHsApi.getInstance().readHisValById(pointId));
-				String defaultValById = String.valueOf(CCUHsApi.getInstance().readDefaultValById(pointId));
-				CcuLog.d(BACNET, "pointName: " + pointName + "pointId: " + pointId + "value: " + value
-						+ "hisValue: " + hisValue + "defaultValById: " + defaultValById);
-				String curretValue = "";
-				parameterList.add(pointName + " : " + hisValue);
-				curretValue = hisValue;
-
-				BacnetZoneViewItem bacnetZoneViewItem = new BacnetZoneViewItem(pointName, curretValue,
-						bacnetConfig, true, bacnetPoint, isWritable, spinnerValues, objectType);
-				listBacnetZoneViewItems.add(bacnetZoneViewItem);
-			}
-		}
-		return listBacnetZoneViewItems;
+	private void initViewModel() {
+		systemViewModel = new ViewModelProvider(requireActivity()).get(SystemViewModel.class);
 	}
 
-	public List<Pair<String,Integer>> generateValuesForSpinner(double minValue, double maxValue, double step) {
-		List<Pair<String,Integer>> arrayList = new ArrayList<>();
-		DecimalFormat df = new DecimalFormat("#.##");
-		for (double value = minValue; value <= maxValue; value += step) {
-			String formattedValue = df.format(value);
-			arrayList.add(new Pair<>(formattedValue,Integer.valueOf(0)));
-		}
-		return arrayList;
+	private void loadViewModel() {
+		if(systemViewModel == null)
+			systemViewModel = new ViewModelProvider(requireActivity()).get(SystemViewModel.class);
+		systemViewModel.initializeProfileStates();
+		systemViewModel.setOaoArc(oaoArc);
+		systemViewModel.loadViews(headerComposeView, profilePointsComposeView, epidemicModeComposeView, remotePointUpdateInterface);
 	}
+
 }

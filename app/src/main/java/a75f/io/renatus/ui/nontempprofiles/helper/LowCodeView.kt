@@ -3,10 +3,12 @@ package a75f.io.renatus.ui.nontempprofiles.helper
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.renatus.R
-import a75f.io.renatus.ui.nontempprofiles.utilities.externalEquipsLayoutSetup
-import a75f.io.renatus.ui.nontempprofiles.utilities.getPointScheduleHeaderViewItem
-import a75f.io.renatus.ui.nontempprofiles.utilities.showExternalEquipPointsUI
-import a75f.io.renatus.ui.nontempprofiles.viewmodel.NonTempProfileViewModel
+import a75f.io.renatus.ui.zonescreen.nontempprofiles.helper.getModbusDetailedViewPoints
+import a75f.io.renatus.ui.zonescreen.nontempprofiles.helper.preparePoints
+import a75f.io.renatus.ui.zonescreen.nontempprofiles.utilities.externalEquipsLayoutSetup
+import a75f.io.renatus.ui.zonescreen.nontempprofiles.utilities.getPointScheduleHeaderViewItem
+import a75f.io.renatus.ui.zonescreen.nontempprofiles.utilities.showExternalEquipPointsUI
+import a75f.io.renatus.ui.zonescreen.nontempprofiles.viewmodel.NonTempProfileViewModel
 import android.view.View
 import android.widget.LinearLayout
 import androidx.compose.ui.platform.ComposeView

@@ -8,12 +8,8 @@ import static a75f.io.logic.util.bacnet.BacnetUtilKt.isValidMstpMacAddress;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
-import android.os.Handler;
-import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Pair;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,8 +22,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.tooltip.Tooltip;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.json.JSONException;
@@ -335,20 +329,6 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
     public double readHisVal(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         return hayStack.readHisValById(id);
-    }
-
-    public void showToolTip(String text, View v) {
-        Tooltip intrinsicScheduleToolTip = new Tooltip.Builder(v)
-                .setBackgroundColor(Color.BLACK)
-                .setTextColor(Color.WHITE)
-                .setCancelable(true)
-                .setDismissOnClick(true)
-                .setGravity(Gravity.TOP)
-                .setText(text)
-                .setTextSize(20.0f)
-                .setPadding(10f)
-                .show();
-        new Handler(Looper.getMainLooper()).postDelayed(intrinsicScheduleToolTip::dismiss, 3000);
     }
 
     private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {

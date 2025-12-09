@@ -23,6 +23,7 @@ import static a75f.io.logic.bo.building.schedules.ScheduleUtil.isCurrentMinuteUn
 import android.content.Intent;
 
 import org.joda.time.DateTime;
+import org.projecthaystack.HStr;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,6 +43,7 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.observer.PointWriteObservable;
 import a75f.io.api.haystack.util.TimeUtil;
 import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
@@ -253,6 +255,7 @@ public class ScheduleManager {
                 occupancyHandler.writeOccupancyMode(occupancyData.occupancy);
             }
         }
+        PointWriteObservable.INSTANCE.notifyWritableChange("systemSchedule", HStr.make(""));
     }
     public void processSchedules() {
         try {

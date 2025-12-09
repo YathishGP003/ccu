@@ -23,8 +23,8 @@ import a75f.io.logic.schedule.SpecialSchedule
 import a75f.io.logic.util.CommonTimeSlotFinder
 import a75f.io.logic.util.isOfflineMode
 import a75f.io.renatus.R
-import a75f.io.renatus.ui.tempprofiles.refreshSchedules
-import a75f.io.renatus.ui.tempprofiles.viewmodel.TempProfileViewModel
+import a75f.io.renatus.ui.zonescreen.tempprofiles.refreshSchedules
+import a75f.io.renatus.ui.zonescreen.tempprofiles.viewmodel.TempProfileViewModel
 import a75f.io.renatus.util.FontManager
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.views.AlertDialogAdapter

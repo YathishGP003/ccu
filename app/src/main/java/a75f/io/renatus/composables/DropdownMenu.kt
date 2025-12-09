@@ -12,9 +12,10 @@ import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.secondaryColor
 import a75f.io.renatus.compose.HeaderTextView
 import a75f.io.renatus.compose.LabelTextView
-import a75f.io.renatus.ui.model.DetailedViewItem
-import a75f.io.renatus.ui.model.HeaderViewItem
-import a75f.io.renatus.ui.nontempprofiles.model.ExternalPointItem
+import a75f.io.renatus.util.CCUUiUtil
+import a75f.io.renatus.ui.zonescreen.model.DetailedViewItem
+import a75f.io.renatus.ui.zonescreen.model.HeaderViewItem
+import a75f.io.renatus.ui.zonescreen.nontempprofiles.model.ExternalPointItem
 import a75f.io.renatus.views.userintent.UserIntentDialog
 import a75f.io.renatus.views.userintent.UserIntentDialog.Companion.isDialogAlreadyVisible
 import a75f.io.renatus.views.userintent.UserIntentDialogListener
@@ -66,11 +67,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -431,8 +435,11 @@ fun DetailedViewDropDown(
                 Divider(color = greyDropDownUnderlineColor)
             }
 
-            val customHeight =
-                getDropdownCustomHeight(list, noOfItemsDisplayInDropDown, dropDownHeight)
+            val customHeight = a75f.io.renatus.compose.getDropdownCustomHeight(
+                list,
+                noOfItemsDisplayInDropDown,
+                dropDownHeight
+            )
 
             Spacer(modifier = Modifier.height(5.dp))
 
@@ -850,5 +857,38 @@ fun TemperatureProfileDetailedViewDropDown(
             }
         }
     }
+}
+
+
+@Composable
+fun StyledLabelView(label: String, onLabelClick: (label: String) -> Unit) {
+
+    val annotatedText = buildAnnotatedString {
+        label.split(" ").forEach { word ->
+            when (word.uppercase()) {
+                "ON", "OFF" -> withStyle(SpanStyle(color = primaryColor, fontWeight = FontWeight.Bold)) {
+                    append("$word ")
+                }
+                else -> append("$word ")
+            }
+        }
+    }
+
+    Text(
+        modifier = Modifier.padding(start = 4.dp)
+            .clickable {
+                onLabelClick(label)
+            }
+            .fillMaxWidth(),
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontStyle = FontStyle.Normal,
+            fontSize = 22.sp,
+            lineHeight = 26.sp,
+            color = Color.Black,
+        ),
+        text = annotatedText,
+    )
 }
 

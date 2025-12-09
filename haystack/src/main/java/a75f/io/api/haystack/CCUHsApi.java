@@ -1022,6 +1022,7 @@ public class CCUHsApi
     public void writePoint(String id, Double val)
     {
         pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HNum.make(val), HNum.make(0));
+        PointWriteObservable.INSTANCE.notifyWritableChange(id, HNum.make(val));
     }
 
     /**
@@ -1029,14 +1030,17 @@ public class CCUHsApi
      */
     public void writePointLocal(String id, int level, String who, Double val, int duration) {
         hsClient.pointWrite(HRef.copy(id), level, who, HNum.make(val), HNum.make(duration), HDateTime.make(System.currentTimeMillis()));
+        PointWriteObservable.INSTANCE.notifyWritableChange(id, HNum.make(val));
     }
     public void writePointLocal(String id, int level, String who, Double val, double duration) {
         hsClient.pointWrite(HRef.copy(id), level, who, HNum.make(val), HNum.make(duration), HDateTime.make(System.currentTimeMillis()));
+        PointWriteObservable.INSTANCE.notifyWritableChange(id, HNum.make(val));
     }
 
     public void writePointStrValLocal(String id, int level, String who, String val, int duration) {
         hsClient.pointWrite(HRef.copy(id), level, who, HStr.make(val), HNum.make(duration),
                 HDateTime.make(System.currentTimeMillis()));
+        PointWriteObservable.INSTANCE.notifyWritableChange(id, HStr.make(val));
     }
 
     /**

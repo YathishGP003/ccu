@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import a75f.io.logger.CcuLog;
 import a75f.io.renatus.schedules.ScheduleGroupFragment;
+import a75f.io.renatus.ui.alerts.AlertsFragment;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.

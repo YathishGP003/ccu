@@ -1,19 +1,24 @@
 package a75f.io.renatus.ENGG;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import org.projecthaystack.HDict;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRow;
 
@@ -136,6 +141,40 @@ public class HaystackExplorer extends Fragment
         });
     
         setupLongClick();
+
+        EditText searchBar = view.findViewById(R.id.searchBar);
+        ImageButton searchButton = view.findViewById(R.id.searchButton);
+        searchBar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String query = searchBar.getText().toString().trim();
+                if(query.isEmpty()) {
+                    updateAllData();
+                    expandableListAdapter = new EquipTempExpandableListAdapter(HaystackExplorer.this, expandableListTitle, expandableListDetail, tunerMap, getActivity());
+                    expandableListView.setAdapter(expandableListAdapter);
+                    expandableListAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+
+        searchButton.setOnClickListener(v -> {
+            String query = searchBar.getText().toString().trim();
+            if(query.isEmpty()) {
+                updateAllData();
+                expandableListAdapter = new EquipTempExpandableListAdapter(HaystackExplorer.this, expandableListTitle, expandableListDetail, tunerMap, getActivity());
+                expandableListView.setAdapter(expandableListAdapter);
+                expandableListAdapter.notifyDataSetChanged();
+            } else {
+                filterAllData(query);
+            }
+        });
+
     }
     
     private void showPassCodeScren() {
@@ -241,8 +280,154 @@ public class HaystackExplorer extends Fragment
 
         );
     }
-    
+    private void filterAllData(String query) {
+        Log.i("CCU_DEV", "updateAllData: ");
+        query = query.toLowerCase();
+
+        tunerMap.clear();
+        expandableListDetail.clear();
+        equipMap.clear();
+        scheduleMap.clear();
+
+        HashMap<String, List<String>> filteredListDetail = new HashMap<>();
+        List<String> filteredListTitle = new ArrayList<>();
+
+        // Filter building schedules
+        List<String> buildingSchedules = new ArrayList<>();
+        for (String scheduleName : scheduleMap.keySet()) {
+            if (scheduleName.toLowerCase().contains(query)) {
+                buildingSchedules.add(scheduleName);
+            }
+        }
+        if (!buildingSchedules.isEmpty()) {
+            filteredListDetail.put("Building Schedule", buildingSchedules);
+            filteredListTitle.add("Building Schedule");
+        }
+
+        // Filter equips
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
+        for (Map m : equips) {
+            ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and equipRef == \"" + m.get("id") + "\"");
+            List<String> tunerList = new ArrayList<>();
+
+            // Check each point's name and also all keys/values
+            for (Map t : points) {
+                String name = t.get("domainName") != null ? t.get("domainName").toString() + ":" + t.get("id")
+                        : t.get("dis").toString() + ":dis";
+
+                boolean matches = name.toLowerCase().contains(query);
+
+                // Check all keys and values in point map
+                if (!matches) {
+                    for (Object key : t.keySet()) {
+                        if (key.toString().toLowerCase().contains(query)) {
+                            matches = true;
+                            break;
+                        }
+                        Object val = t.get(key);
+                        if (val != null && val.toString().toLowerCase().contains(query)) {
+                            matches = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (matches) {
+                    tunerList.add(name);
+                }
+            }
+
+            // Also check all keys/values of equip map for group match
+            boolean groupMatches = m.get("dis").toString().toLowerCase().contains(query);
+            if (!groupMatches) {
+                for (Object key : m.keySet()) {
+                    if (key.toString().toLowerCase().contains(query)) {
+                        groupMatches = true;
+                        break;
+                    }
+                    Object val = m.get(key);
+                    if (val != null && val.toString().toLowerCase().contains(query)) {
+                        groupMatches = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!tunerList.isEmpty() || groupMatches) {
+                String groupName = m.get("dis").toString() + " : " + m;
+                filteredListDetail.put(groupName, tunerList);
+                filteredListTitle.add(groupName);
+            }
+        }
+
+        // Filter devices
+        ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device");
+        for (Map m : devices) {
+            ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and deviceRef == \"" + m.get("id") + "\"");
+            List<String> tunerList = new ArrayList<>();
+
+            for (Map t : tuners) {
+                String name = t.get("domainName") != null ? t.get("domainName").toString() + ":" + t.get("id")
+                        : t.get("dis").toString() + ":dis";
+
+                boolean matches = name.toLowerCase().contains(query);
+
+                // Check all keys/values of the point map
+                if (!matches) {
+                    for (Object key : t.keySet()) {
+                        if (key.toString().toLowerCase().contains(query)) {
+                            matches = true;
+                            break;
+                        }
+                        Object val = t.get(key);
+                        if (val != null && val.toString().toLowerCase().contains(query)) {
+                            matches = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (matches) {
+                    tunerList.add(name);
+                }
+            }
+
+            // Check all keys/values in device map for group match
+            boolean groupMatches = m.get("dis").toString().toLowerCase().contains(query);
+            if (!groupMatches) {
+                for (Object key : m.keySet()) {
+                    if (key.toString().toLowerCase().contains(query)) {
+                        groupMatches = true;
+                        break;
+                    }
+                    Object val = m.get(key);
+                    if (val != null && val.toString().toLowerCase().contains(query)) {
+                        groupMatches = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!tunerList.isEmpty() || groupMatches) {
+                String groupName;
+                if (m.containsKey("sourceModelVersion")) {
+                    groupName = m.get("dis").toString() + " : " + m;
+                } else {
+                    groupName = m.get("dis").toString();
+                }
+                filteredListDetail.put(groupName, tunerList);
+                filteredListTitle.add(groupName);
+            }
+            expandableListAdapter = new EquipTempExpandableListAdapter(
+                    HaystackExplorer.this, filteredListTitle, filteredListDetail, tunerMap, getActivity());
+            expandableListView.setAdapter(expandableListAdapter);
+            expandableListAdapter.notifyDataSetChanged();
+        }
+
+    }
+
     private void updateAllData() {
+        Log.i("CCU_DEV", "updateAllData: ");
         tunerMap.clear();
         expandableListDetail.clear();
         equipMap.clear();

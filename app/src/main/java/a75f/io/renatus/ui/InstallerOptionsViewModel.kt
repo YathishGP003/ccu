@@ -188,11 +188,6 @@ class InstallerOptionsViewModel: ViewModel() , PointSubscriber {
             }
         }
 
-        CcuLog.d("kumar_debug", "viewmodel cooling spinnerOptions size: ${spinnerOptions.size} " +
-                ""+spinnerOptions)
-        CcuLog.d("kumar_debug", "viewmodel cooling index " +
-                ""+spinnerOptions.indexOf(convertedVal.toString()))
-
         coolingLockoutDropdown.value = DetailedViewItem(
             id = coolingLockoutEntity["id"].toString(),
             usesDropdown = true,

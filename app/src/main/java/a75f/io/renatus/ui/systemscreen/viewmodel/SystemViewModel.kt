@@ -42,6 +42,7 @@ import a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus
 import a75f.io.logic.tuners.TunerUtil
 import a75f.io.logic.util.bacnet.buildBacnetModelSystem
 import a75f.io.messaging.handler.isAdvanceAhuV2Profile
+import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.isOaoPairedInConnectModule
 import a75f.io.renatus.ui.systemscreen.helper.getMaxInsideHumidityView
 import a75f.io.renatus.ui.systemscreen.helper.getMinInsideHumidityView
@@ -67,6 +68,7 @@ import a75f.io.renatus.util.HeartBeatUtil
 import a75f.io.renatus.util.HeartBeatUtil.isModuleAlive
 import a75f.io.renatus.views.OaoArc
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.runtime.mutableStateListOf
@@ -178,10 +180,12 @@ class SystemViewModel : ViewModel(), PointSubscriber {
         headerComposeView: ComposeView,
         profilePointComposeView: ComposeView,
         epidemicModeComposeView: ComposeView,
-        remotePointUpdateInterface: RemotePointUpdateInterface
+        remotePointUpdateInterface: RemotePointUpdateInterface,
+        context: Context
     ) {
         showHeaderView(headerComposeView, this)
-        showProfilePointsView(profilePointComposeView, this, remotePointUpdateInterface)
+        val bacnetType = getBacnetTypeString(context)
+        showProfilePointsView(profilePointComposeView, this,   bacnetType, remotePointUpdateInterface)
         showEpidemicModeView(epidemicModeComposeView, this)
         loadOccupancyStatusAndEquipStatus()
         loadHumidifierAndDehumidifierViews()
@@ -192,6 +196,24 @@ class SystemViewModel : ViewModel(), PointSubscriber {
         loadAdvancedAHUViews()
         loadBTUorEnergyMeter()
         this.remotePointUpdateInterface = remotePointUpdateInterface
+    }
+
+    private fun getBacnetTypeString(context: Context): String {
+        var bacnetType = ""
+        if (isExternalAhuPaired) {
+            val bacnetEquip =
+                CCUHsApi.getInstance()
+                    .readEntity("system and equip and bacnet and not emr and not btu")
+
+            if (bacnetEquip.isNotEmpty()) {
+                if (bacnetEquip.contains(Tags.BACNET_MSTP)) {
+                    bacnetType = context.getString(R.string.bacnetMstpDevice)
+                } else {
+                    bacnetType = context.getString(R.string.bacnetIpDevice)
+                }
+            }
+        }
+        return bacnetType
     }
 
     private fun loadOaoViews() {
@@ -320,9 +342,10 @@ class SystemViewModel : ViewModel(), PointSubscriber {
     private fun showProfilePointsView(
         composeView: ComposeView,
         systemViewModel: SystemViewModel,
+        bacnetEquipTypeString: String = "",
         remotePointUpdateInterface: RemotePointUpdateInterface
     ) {
-        composeView.showProfileComposeView(systemViewModel) {
+        composeView.showProfileComposeView(systemViewModel, bacnetEquipTypeString) {
             selectedIndex: Int, point: Any ->
             backgroundExecutor.execute {
                 val externalPointItem = point as ExternalPointItem

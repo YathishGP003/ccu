@@ -33,20 +33,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -95,10 +103,11 @@ fun HeaderView() {
 
 fun ComposeView.showProfileComposeView(
     systemViewModel: SystemViewModel,
+    bacnetEquipTypeString: String = "",
     onValueChange: (selectedIndex: Int, point: ExternalPointItem) -> Unit
 ) {
     setContent {
-        ShowMiddleView(systemViewModel, onValueChange)
+        ShowMiddleView(systemViewModel, bacnetEquipTypeString, onValueChange)
     }
 }
 
@@ -132,6 +141,7 @@ fun PlainTextComposeView(text: String) {
 @Composable
 fun ShowMiddleView(
     systemViewModel: SystemViewModel,
+    bacnetEquipTypeString: String = "",
     onValueChange: (selectedIndex: Int, point: ExternalPointItem) -> Unit
 ) {
      systemViewModel.occupancyStatus.value
@@ -469,35 +479,29 @@ fun ShowMiddleView(
             (systemViewModel.isModbusExists || systemViewModel.isBacnetExists)
         ) {
             Spacer(modifier = Modifier.height(4.dp))
-
-            // heartbeat and equip name
             Row(
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(
+                EquipNameWithHeartbeat(
                     text = systemViewModel.externalEquipName.value.currentValue.toString(),
-                    color = Color.Black,
-                    fontSize = 24.sp,
-                    lineHeight = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 4.dp)
+                    isActive = systemViewModel.externalEquipHeartBeat.value
                 )
-                Spacer(modifier = Modifier.width(4.dp))
-
-                Box(modifier = Modifier.wrapContentSize()) {
-                    HeartBeatCompose(
-                        isActive = systemViewModel.externalEquipHeartBeat.value,
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                    )
-                }
             }
             // last updated
             Row {
-                Box(modifier = Modifier.padding(bottom = 8.dp)) {
-                    HeaderRow(
-                        systemViewModel.externalEquipLastUpdated.value,
-                        onValueChange = { _, _ -> }
+                HeaderRow(
+                    systemViewModel.externalEquipLastUpdated.value,
+                    onValueChange = { _, _ -> }
+                )
+            }
+            if(systemViewModel.isBacnetExists) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = bacnetEquipTypeString,
+                        color = Color.DarkGray,
+                        fontSize = 18.sp,
                     )
                 }
             }
@@ -809,4 +813,43 @@ fun EMRComposable(systemViewModel: SystemViewModel, onValueChange: (selectedInde
         }
     }
 }
+
+@Composable
+fun EquipNameWithHeartbeat(
+    text: String,
+    isActive: Boolean
+) {
+    val annotated = buildAnnotatedString {
+        append(text)
+        append(" ")
+        appendInlineContent("heartbeat")
+    }
+
+    val inlineContent = mapOf(
+        "heartbeat" to InlineTextContent(
+            Placeholder(
+                width = 10.sp,
+                height = 10.sp,
+                placeholderVerticalAlign = PlaceholderVerticalAlign.TextTop
+            )
+        ) {
+            HeartBeatCompose(
+                isActive = isActive,
+                modifier = Modifier
+                    .size(10.dp)
+                    .clip(CircleShape)
+            )
+        }
+    )
+
+    Text(
+        text = annotated,
+        inlineContent = inlineContent,
+        fontSize = 24.sp,
+        lineHeight = 42.sp,
+        fontWeight = FontWeight.Bold,
+        color = Color.Black
+    )
+}
+
 

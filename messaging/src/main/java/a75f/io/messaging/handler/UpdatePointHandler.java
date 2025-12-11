@@ -36,6 +36,7 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.bacnet.parser.BacnetRequestProcessor;
+import a75f.io.api.haystack.observer.HisWriteObservable;
 import a75f.io.api.haystack.observer.PointWriteObservable;
 import a75f.io.api.haystack.sync.PointWriteCache;
 import a75f.io.logger.CcuLog;
@@ -553,6 +554,8 @@ public class UpdatePointHandler implements MessageHandler
         //When a level is deleted, it currently generates a message with empty value.
         hayStack.clearPointArrayLevel(id, level, true);
         hayStack.writeHisValById(id, HSUtil.getPriorityVal(id));
+        PointWriteObservable.INSTANCE.notifyWritableChange(id, HNum.make(HSUtil.getPriorityVal(id)));
+        HisWriteObservable.INSTANCE.notifyChange(id, HSUtil.getPriorityVal(id));
         CcuLog.d(L.TAG_CCU_PUBNUB, "clearPointArrayLevel - id: " + id + " level: " + level);
     }
 }

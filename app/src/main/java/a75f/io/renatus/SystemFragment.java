@@ -903,7 +903,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			systemViewModel = new ViewModelProvider(requireActivity()).get(SystemViewModel.class);
 		systemViewModel.initializeProfileStates();
 		systemViewModel.setOaoArc(oaoArc);
-		systemViewModel.loadViews(headerComposeView, profilePointsComposeView, epidemicModeComposeView, remotePointUpdateInterface);
+		systemViewModel.loadViews(headerComposeView, profilePointsComposeView, epidemicModeComposeView, remotePointUpdateInterface, requireContext());
 	}
 
 }

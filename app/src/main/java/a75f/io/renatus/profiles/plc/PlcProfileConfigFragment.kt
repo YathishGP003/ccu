@@ -182,7 +182,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             viewModel.viewState.nativeSensorType
                         ) {
                             DropDownWithLabel(
-                                label = stringResource(R.string.analogin_1_input_sensor),
+                                label = if(viewModel.nodeType.equals(NodeType.SMART_NODE)) stringResource(id = R.string.pi_ui1_ai_1) else stringResource(id = R.string.analogin_1_input_sensor),
                                 list = viewModel.analog1InputType,
                                 previewWidth = 195,
                                 expandedWidth = 195,
@@ -249,7 +249,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             viewModel.viewState.nativeSensorType
                         ) {
                             DropDownWithLabel(
-                                label = stringResource(id=R.string.label_thin1),
+                                label = if(viewModel.nodeType.equals(NodeType.SMART_NODE)) stringResource(id = R.string.pi_ai_3_th_1) else stringResource(id = R.string.label_thin1),
                                 list = viewModel.thermistor1InputType,
                                 previewWidth = 195,
                                 expandedWidth = 195,
@@ -274,7 +274,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                     }
                                 },
                                 defaultSelection = viewModel.viewState.thermistor1InputType.toInt(),
-                                spacerLimit = 130,
+                                spacerLimit = if(viewModel.nodeType.equals(NodeType.SMART_NODE)) 70 else 130,
                                 heightValue = 268
                             )
                         }
@@ -370,8 +370,9 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     Spacer(modifier = Modifier.height(30.dp))
                     Row {
                         Spacer(modifier = Modifier.width(50.dp))
-                        HeaderTextView(text = stringResource(R.string.label_useanalogin2), padding = 10)
-                        Spacer(modifier = Modifier.width(55.dp))
+                        HeaderTextView(text = if (viewModel.nodeType.equals(NodeType.SMART_NODE)) stringResource(R.string.pi_ui_2_ai_2) else stringResource(R.string.label_useanalogin2), padding = 10)
+                        if(viewModel.nodeType.equals(NodeType.SMART_NODE)) Spacer(modifier = Modifier.width(80.dp))
+                        else Spacer(modifier = Modifier.width(55.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.useAnalogIn2ForSetpoint,
                             onEnabled = { viewModel.viewState.useAnalogIn2ForSetpoint = it }
@@ -386,7 +387,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     ) {
                         Spacer(modifier = Modifier.width(50.dp))
                         DropDownWithLabel(
-                            label = stringResource(R.string.label_analogin2),
+                            label = if(viewModel.nodeType.equals(NodeType.SMART_NODE)) stringResource(R.string.pi_ui_2_ai_2_input_sensor) else stringResource(R.string.label_analogin2),
                             list = viewModel.analog2InputType,
                             previewWidth = 195,
                             expandedWidth = 195,

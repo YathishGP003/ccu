@@ -188,10 +188,10 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                 Spacer(modifier = Modifier.width(20.dp))
                                 Row {
                                     HeaderTextView(
-                                        text = stringResource(id= R.string.th1_airflow_temp_sensor),
+                                        text = if (viewModel.nodeType.equals(NodeType.SMART_NODE)) stringResource(id = R.string.ui3_th1_sse) else stringResource(id = R.string.th1_airflow_temp_sensor),
                                         padding = 10
                                     )
-                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Spacer(modifier = Modifier.width(15.dp))
                                     ToggleButtonStateful(
                                         defaultSelection = viewModel.viewState.th1State.value,
                                         onEnabled = {
@@ -199,10 +199,10 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                         }
                                     )
                                 }
-                                Spacer(modifier = Modifier.width(60.dp))
+                                Spacer(modifier = Modifier.width(30.dp))
                                 Row {
                                     HeaderTextView(
-                                        text = stringResource(id=R.string.th2_use_external_10k_temp_sensor),
+                                        text = if (viewModel.nodeType.equals(NodeType.SMART_NODE)) stringResource(id=R.string.ui4_th2_sse)  else stringResource(id=R.string.th2_use_external_10k_temp_sensor),
                                         padding = 10
                                     )
                                     Spacer(modifier = Modifier.width(10.dp))
@@ -245,7 +245,7 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             ) {
                                 Spacer(modifier = Modifier.width(20.dp))
                                 AnalogIn1(
-                                    relayText = stringResource(id= R.string.analog_in1),
+                                    relayText = if (viewModel.nodeType.equals(NodeType.SMART_NODE)) stringResource(id = R.string.sse_analog_in_1) else stringResource(R.string.analog_in1),
                                     relayState = viewModel.viewState.analog1InState.value,
                                     onRelayEnabled = {
                                         viewModel.viewState.analog1InState.value = it
@@ -254,7 +254,7 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                     mapping = viewModel.analogIn1AssociationList,
                                     onMappingChanged = {
                                         viewModel.viewState.analog1InAssociationIndex.value = it
-                                    }
+                                    },
                                 )
                             }
 

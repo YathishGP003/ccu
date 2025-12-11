@@ -1167,6 +1167,21 @@
     <string name="label_threshold_relay2_off">Turn OFF Relay 2</string>
     <string name="cfm_unit">cfm</string>
 
+    <!--SN Abbreviated Strings-->
+
+    <string name="vav_thermistor_1_abbreviated"> UI3/TH1</string>
+    <string name="vav_thermistor_2_abbreviated">UI4/TH2  </string>
+    <string name="sse_analog_in_1"> UI1/AI1 </string>
+    <string name="pi_ui1_ai_1"> UI-1/AI-1 Input Sensor </string>
+    <string name="pi_ai_3_th_1"> UI-3/TH-1 Input Sensor </string>
+    <string name="pi_ui_2_ai_2"> Use UI2/AI-2 for dynamic setpoint </string>
+    <string name="pi_ui_2_ai_2_input_sensor"> UI2/AI-2 Input sensor </string>
+    <string name="ui3_th1_sse">UI3/TH1 Airflow Temperature Sensor</string>
+    <string name="ui4_th2_sse">UI4/TH2 Use external 10k Temperature Sensor</string>
+
+
+
+
     <!--ENERGY METER SCREEN-->
     <string name="label_eminstruction">This profile allows monitoring and graphing of energy usage via Modbus energy meter\nconnected to the Smart Node|Helio Node. Please wire up the meter as shown below.</string>
 

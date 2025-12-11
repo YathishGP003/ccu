@@ -237,14 +237,16 @@ class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     ) {
                         Spacer(modifier = Modifier.width(78.dp))
                         Row {
-                            HeaderTextView(text = stringResource(R.string.vav_label_thermistor1), padding = 0)
-                            Spacer(modifier = Modifier.width(160.dp))
+                            HeaderTextView(text = if (viewModel.nodeType.equals(NodeType.SMART_NODE)) stringResource(R.string.vav_thermistor_1_abbreviated) else stringResource(R.string.vav_label_thermistor1), padding = 0)
+                            if(viewModel.nodeType.equals(NodeType.SMART_NODE)) Spacer(modifier = Modifier.width(210.dp))
+                            else Spacer(modifier = Modifier.width(160.dp))
                             LabelTextView(text = stringResource(R.string.vav_label_thermistor1_val))
                         }
                         Spacer(modifier = Modifier.width(63.dp))
                         Row {
-                            HeaderTextView(text = stringResource(R.string.vav_label_thermistor2), padding = 0)
-                            Spacer(modifier = Modifier.width(115.dp))
+                            HeaderTextView(text = if(viewModel.nodeType.equals(NodeType.SMART_NODE)) stringResource(R.string.vav_thermistor_2_abbreviated) else stringResource(R.string.vav_label_thermistor2), padding = 0)
+                            if(viewModel.nodeType.equals(NodeType.SMART_NODE)) Spacer(modifier = Modifier.width(155.dp))
+                            else Spacer(modifier = Modifier.width(115.dp))
                             LabelTextView(text = stringResource(R.string.vav_label_thermistor2_val))
                         }
                     }

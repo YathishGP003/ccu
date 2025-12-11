@@ -7,6 +7,7 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
+import a75f.io.renatus.R
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.Picker
 import a75f.io.renatus.composables.rememberPickerState
@@ -46,6 +47,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -241,8 +243,9 @@ class AcbProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     ) {
                         Spacer(modifier = Modifier.width(78.dp))
                         Row {
-                            HeaderTextView(text = "Thermistor-1", padding = 0)
-                            Spacer(modifier = Modifier.width(160.dp))
+                            HeaderTextView(text = if(viewModel.nodeType.equals(NodeType.SMART_NODE)) stringResource(R.string.vav_thermistor_1_abbreviated) else stringResource(R.string.vav_label_thermistor1) , padding = 0)
+                            if(viewModel.nodeType.equals(NodeType.SMART_NODE)) Spacer(modifier =   Modifier.width(210.dp))
+                            else Spacer(modifier =   Modifier.width(160.dp))
                             LabelTextView(text = "Discharge Airflow Temperature")
                         }
                         Spacer(modifier = Modifier.width(56.dp))
@@ -271,7 +274,7 @@ class AcbProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     ) {
                         Spacer(modifier = Modifier.width(78.dp))
                         DropDownWithLabel(
-                            label = "Thermistor-2",
+                            label = if(viewModel.nodeType.equals(NodeType.SMART_NODE)) stringResource(R.string.vav_thermistor_2_abbreviated) else stringResource(R.string.vav_label_thermistor2),
                             list = viewModel.condensateSensorTypesList,
                             previewWidth = 160,
                             expandedWidth = 310,
@@ -279,7 +282,7 @@ class AcbProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                 viewModel.viewState.condensateSensorType = selectedIndex > 0
                             },
                             defaultSelection = if (viewModel.viewState.condensateSensorType) 1 else 0,
-                            spacerLimit = 175,
+                            spacerLimit =if(viewModel.nodeType.equals(NodeType.SMART_NODE))  230 else 175 ,
                             paddingLimit = 10,
                             heightValue = 125
                         )

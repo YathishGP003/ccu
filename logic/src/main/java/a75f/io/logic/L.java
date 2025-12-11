@@ -437,6 +437,10 @@ public class L
            ConnectNodeUtil.Companion.removeConnectNodeEquips(node.toString(), hsApi);
         }
 
+        if (!PCNUtil.Companion.getPcnByNodeAddress(node.toString(), hsApi).isEmpty()) {
+            PCNUtil.Companion.removePcnDeviceAndEquips(node.toString(), hsApi);
+        }
+
         HashMap<Object, Object> device = hsApi.readEntity("device and addr == \""+node+"\" and roomRef == \""+roomRef+"\"");
         if (device.get("id") != null)
         {

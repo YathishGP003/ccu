@@ -71,6 +71,7 @@ import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwareMetadataMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwarePacketMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwarePcnMetadataMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbPcnFirmwareEraseMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbPcnFirmwarePacketMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbPcnSequenceMetaMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSequenceMetadataMessage_t;
@@ -1843,7 +1844,7 @@ public class OTAUpdateService extends IntentService {
     }
 
     public void sendPcnPacketEraseSequence(int lwMeshAddress) {
-        CcuToCmOverUsbPcnFirmwarePacketMessage_t message = new CcuToCmOverUsbPcnFirmwarePacketMessage_t();
+        CcuToCmOverUsbPcnFirmwareEraseMessage_t message = new CcuToCmOverUsbPcnFirmwareEraseMessage_t();
         message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SEQUENCE_ERASE);
         CcuLog.d(TAG, "[UPDATE] Erase sequence request to address " + lwMeshAddress);
         message.lwMeshAddress.set(lwMeshAddress);

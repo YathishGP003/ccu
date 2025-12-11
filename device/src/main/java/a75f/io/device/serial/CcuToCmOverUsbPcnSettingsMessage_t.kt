@@ -1,5 +1,11 @@
 package a75f.io.device.serial
 
+import a75f.io.device.serial.MessageType.CCU_TO_CM_MODBUS_SERVER_REGULAR_UPDATE_REGISTER_TYPE_SETTINGS
+import a75f.io.device.serial.MessageType.CCU_TO_CM_MODBUS_SERVER_REGULAR_UPDATE_SETTINGS
+import a75f.io.device.serial.MessageType.CCU_TO_CM_MODBUS_SERVER_WRITE_REGISTER_SETTINGS
+import a75f.io.device.serial.MessageType.CCU_TO_CM_MODBUS_SERVER_WRITE_REGISTER_TYPE_SETTINGS
+import a75f.io.device.serial.MessageType.CCU_TO_CM_OVER_USB_MODBUS_SERVER_WRITE_REGISTER
+import a75f.io.device.util.calculateModbusCrc
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.max
@@ -18,6 +24,7 @@ data class SlaveConfig(
 ) {
     var registers: MutableList<UShort> = MutableList(numRegs) { 0u }
     var pointId: MutableList<String> = MutableList(numRegs) { "" }
+    var registerType: MutableList<UShort> = MutableList(numRegs) { 0u }
     lateinit var deviceType: PCNDeviceTypes
 
     init {
@@ -37,6 +44,11 @@ data class SlaveConfig(
     fun setRegisterValue(index: Int, value: Int) {
         require(index in 0 until numRegs) { "Index $index out of bounds (size=$numRegs)" }
         registers[index] = value.toUShort()
+    }
+
+    fun setRegisterType(index: Int, value: Int) {
+        require(index in 0 until numRegs) { "Index $index out of bounds (size=$numRegs)" }
+        registerType[index] = value.toUShort()
     }
 
     fun getRegisterValue(index: Int): Int {
@@ -64,6 +76,8 @@ class CcuToCmOverUsbPcnSettingsMessage_t {
     var messageType:Int = 0
     var nodeAddress: Int = 0
     var intervalInSecs: Int = 0
+    var crcLo: Byte = 0
+    var crcHi: Byte = 0
     val slaveConfigs = mutableListOf<SlaveConfig>()
 
     fun addSlaveConfig(slaveId: Int, numRegs: Int): SlaveConfig {
@@ -92,6 +106,10 @@ class CcuToCmOverUsbPcnSettingsMessage_t {
                 Triple(cfg.deviceType, cfg.pointId[index], reg)
             }
         }
+    }
+
+    fun getCrc(): Int {
+        return ((crcHi.toInt() and 0xFF) shl 8) or (crcLo.toInt() and 0xFF)
     }
 
     fun clearConfigs() {
@@ -127,11 +145,42 @@ class CcuToCmOverUsbPcnSettingsMessage_t {
                 buf.putShort((reg.toInt() and 0xFFFF).toShort()) // 2 bytes each
             }
         }
+        val slicedBuf = buf.duplicate().apply {
+            position(3) // Skip messageType byte and node address
+        }
+        calculateModbusCrc(slicedBuf).let { crc ->
+            crcHi = (((crc ushr 8) and 0xFF).toByte()) // CRC high byte
+            crcLo = ((crc and 0xFF).toByte())         // CRC low byte
+        }
         return buf.array()
     }
 
+    fun regTypeByteArray(): ByteArray {
+        val totalSize = 1 + 2 + slaveConfigs.sumOf { it.numRegs } + 2 // 1 byte messageType + 2 byte node address + reg types + 2 bytes CRC
+        val buf = ByteBuffer.allocate(totalSize).order(ByteOrder.LITTLE_ENDIAN)
+        // messageType -> 1 byte
+        if(messageType == CCU_TO_CM_MODBUS_SERVER_REGULAR_UPDATE_SETTINGS.ordinal){
+            buf.put((CCU_TO_CM_MODBUS_SERVER_REGULAR_UPDATE_REGISTER_TYPE_SETTINGS.ordinal and 0xFF).toByte())
+        } else if(messageType == CCU_TO_CM_MODBUS_SERVER_WRITE_REGISTER_SETTINGS.ordinal){
+            buf.put((CCU_TO_CM_MODBUS_SERVER_WRITE_REGISTER_TYPE_SETTINGS.ordinal and 0xFF).toByte())
+        } else {
+            buf.put(0.toByte())
+        }
+
+        // 2 byte node address
+        buf.putShort((nodeAddress and 0xFFFF).toShort()) // nodeAddress -> 2 bytes
+
+        for (cfg in slaveConfigs) {
+            for (regType in cfg.registerType) {
+                buf.put((regType.toInt() and 0xFF).toByte()) // 1 byte each
+            }
+        }
+        buf.put(crcHi)          // CRC high byte
+        buf.put(crcLo)         // CRC low byte
+
+        return buf.array()
+    }
 
     override fun toString(): String =
         "CcuToCmOverUsbPcnSettingsMessage_t(intervalInSecs=$intervalInSecs, slaveConfigs=$slaveConfigs)"
 }
-

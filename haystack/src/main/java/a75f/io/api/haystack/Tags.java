@@ -30,6 +30,7 @@ public class Tags
     public static final String CCU = "ccu";
     public static final String SITEREF = "siteRef";
     public static final String PARAMETER_DEFINITION_TYPE = "parameterDefinitionType";
+    public static final String REGISTER_TYPE = "registerType";
 
     public static final String WRITABLE = "writable";
     public static final String HIS = "his";
@@ -297,4 +298,7 @@ public class Tags
     public static final String VACATION_SCHEDULE_KEY = "vacationSchedule";
     public static final String CREATED_BY_APPLICATION = "createdByApplication";
     public static final String SITE_MANAGER = "SITE_MANAGER";
+    public static final String INPUT_REGISTER = "inputRegister";
+    public static final String COIL = "coil";
+    public static final String DISCRETE_INPUT = "discreteInput";
 }

@@ -94,7 +94,7 @@ class LPcn {
 
             writeMessageBytesToUsb(
                 address.toInt(),
-                MessageType.CCU_TO_CM_PCN_SETTINGS_PROTO,
+                MessageType.CM_TO_DEVICE_OVER_AIR_PCN_SETTINGS,
                 settingsMessage.toByteArray()
             )
         }
@@ -294,11 +294,14 @@ class LPcn {
                     val addr = writablePoint[Tags.REG_NUM].toString().toInt()
                     settingsMessage1.getSlaveConfig(0).setRegisterValue(curRegIndex, addr)
                     settingsMessage1.getSlaveConfig(0).pointId[curRegIndex] = writablePoints[index][Tags.ID].toString()
+                    // Update the register type first, then update the register value
+                    updateRegisterType(writablePoint, settingsMessage1,0,  curRegIndex)
                     curRegIndex++
                     if(writablePoint.get(Tags.PARAMETER_DEFINITION_TYPE).toString() == "float") {
                         // Each float occupies 2 registers
                         settingsMessage1.getSlaveConfig(0).setRegisterValue(curRegIndex, addr+1)
                         settingsMessage1.getSlaveConfig(0).pointId[curRegIndex] = writablePoints[index][Tags.ID].toString()
+                        updateRegisterType(writablePoint, settingsMessage1,0,  curRegIndex)
                         curRegIndex++
                     }
                 }
@@ -322,16 +325,19 @@ class LPcn {
                         settingsMessage1.addSlaveConfig(slaveId, writablePointsSize)
                         settingsMessage1.getSlaveConfig(modifiedIndex - 1).deviceType = PCNDeviceTypes.PCN_CONNECT_MODULE // PCN device
                     }
-                    // Step 2.a : Get the connect module address
+                    // Step 2 : Update register values for connect module
                     writablePoints.forEachIndexed{ innerIndex, writablePoint->
                         val addr = writablePoint[Tags.REG_NUM].toString().toInt()
                         settingsMessage1.getSlaveConfig(modifiedIndex - 1).setRegisterValue(curRegIndex, addr)
                         settingsMessage1.getSlaveConfig(modifiedIndex - 1).pointId[curRegIndex] = writablePoints[innerIndex][Tags.ID].toString()
+                        // Update the register type first, then update the register value
+                        updateRegisterType(writablePoint, settingsMessage1, modifiedIndex - 1, curRegIndex)
                         curRegIndex++
                         if(writablePoint.get(Tags.PARAMETER_DEFINITION_TYPE).toString() == "float") {
                             // Each float occupies 2 registers
                             settingsMessage1.getSlaveConfig(modifiedIndex - 1).setRegisterValue(curRegIndex, addr+1)
                             settingsMessage1.getSlaveConfig(modifiedIndex - 1).pointId[curRegIndex] = writablePoints[index][Tags.ID].toString()
+                            updateRegisterType(writablePoint, settingsMessage1, modifiedIndex - 1, curRegIndex)
                             curRegIndex++
                         }
                     }
@@ -359,11 +365,14 @@ class LPcn {
                         val addr = writablePoint[Tags.REG_NUM].toString().toInt()
                         settingsMessage1.getSlaveConfig(modifiedIndex - 1).setRegisterValue(curRegIndex, addr)
                         settingsMessage1.getSlaveConfig(modifiedIndex - 1).pointId[curRegIndex] = writablePoints[innerIndex][Tags.ID].toString()
+                        // Update the register type first, then update the register value
+                        updateRegisterType(writablePoint, settingsMessage1, modifiedIndex - 1, curRegIndex)
                         curRegIndex++
                         if(writablePoint.get(Tags.PARAMETER_DEFINITION_TYPE).toString() == "float") {
                             // Each float occupies 2 registers
                             settingsMessage1.getSlaveConfig(modifiedIndex - 1).setRegisterValue(curRegIndex, addr+1)
                             settingsMessage1.getSlaveConfig(modifiedIndex - 1).pointId[curRegIndex] = writablePoints[index][Tags.ID].toString()
+                            updateRegisterType(writablePoint, settingsMessage1, modifiedIndex - 1, curRegIndex)
                             curRegIndex++
                         }
                     }
@@ -503,10 +512,13 @@ class LPcn {
                 writablePoints.forEachIndexed{ index, writablePoint->
                     val addr = writablePoint[Tags.REG_NUM].toString().toInt()
                     settingsMessage2.getSlaveConfig(0).setRegisterValue(curRegIndex, addr)
+                    // Update the register type first, then update the register value
+                    updateRegisterType(writablePoint, settingsMessage2, 0, curRegIndex)
                     curRegIndex++
                     if(writablePoint.get(Tags.PARAMETER_DEFINITION_TYPE).toString() == "float") {
                         // Each float occupies 2 registers
                         settingsMessage2.getSlaveConfig(0).setRegisterValue(curRegIndex, addr+1)
+                        updateRegisterType(writablePoint, settingsMessage2, 0, curRegIndex)
                         curRegIndex++
                     }
                 }
@@ -533,10 +545,13 @@ class LPcn {
                     writablePoints.forEachIndexed{ innerIndex, writablePoint->
                         val addr = writablePoint[Tags.REG_NUM].toString().toInt()
                         settingsMessage2.getSlaveConfig(modifiedIndex - 1).setRegisterValue(curRegIndex, addr)
+                        // Update the register type first, then update the register value
+                        updateRegisterType(writablePoint, settingsMessage2, modifiedIndex - 1, curRegIndex)
                         curRegIndex++
                         if(writablePoint.get(Tags.PARAMETER_DEFINITION_TYPE).toString() == "float") {
                             // Each float occupies 2 registers
                             settingsMessage2.getSlaveConfig(modifiedIndex - 1).setRegisterValue(curRegIndex, addr+1)
+                            updateRegisterType(writablePoint, settingsMessage2, modifiedIndex - 1, curRegIndex)
                             curRegIndex++
                         }
                     }
@@ -563,10 +578,13 @@ class LPcn {
                     writablePoints.forEachIndexed{ innerIndex, writablePoint->
                         val addr = writablePoint[Tags.REG_NUM].toString().toInt()
                         settingsMessage2.getSlaveConfig(modifiedIndex - 1).setRegisterValue(curRegIndex, addr)
+                        // Update the register type first, then update the register value
+                        updateRegisterType(writablePoint, settingsMessage2, modifiedIndex - 1, curRegIndex)
                         curRegIndex++
                         if(writablePoint.get(Tags.PARAMETER_DEFINITION_TYPE).toString() == "float") {
                             // Each float occupies 2 registers
                             settingsMessage2.getSlaveConfig(modifiedIndex - 1).setRegisterValue(curRegIndex, addr+1)
+                            updateRegisterType(writablePoint, settingsMessage2, modifiedIndex - 1, curRegIndex)
                             curRegIndex++
                         }
                     }
@@ -577,15 +595,44 @@ class LPcn {
             return settingsMessage2[address]
         }
 
+        private fun updateRegisterType(
+            writablePoint: HashMap<Any, Any>,
+            settingsMessage: CcuToCmOverUsbPcnSettingsMessage_t,
+            slaveConfigIndex: Int,
+            registerIndex: Int
+        ) {
+            val type = writablePoint[Tags.REGISTER_TYPE]?.toString()
+
+            // Map registerType string to an integer code
+            val registerTypeCode = when (type) {
+                Tags.INPUT_REGISTER  -> 0  // 0 for inputRegister
+                Tags.COIL            -> 2  // 2 for coil register
+                Tags.DISCRETE_INPUT  -> 3  // 3 for discreteInput register
+                else                 -> 1  // 1 for holding/default
+            }
+
+            settingsMessage
+                .getSlaveConfig(slaveConfigIndex)
+                .setRegisterType(registerIndex, registerTypeCode)
+        }
+
         @JvmStatic
         fun handlePcnRegularUpdateSettings(data: ByteArray) {
             val tempData: ByteArray = data.copyOfRange(3, data.size) // Skip message type and node address
+            val deviceCrcBytes = data.copyOfRange( data.size -2, data.size)
             var i = 0
 
             // Get the PCN device address from data and update heartbeat points of PCN device and connect node devices connected to it
             val myData = data.copyOfRange(1, 3);
             val address = ByteBuffer.wrap(myData).order(ByteOrder.LITTLE_ENDIAN).short
             val registersTriple = settingsMessage1[address]?.getAllRegInfo()
+            // If the deviceCRC for regular update settings1 mismatch, then log and return(to avoid incorrect portal updates)
+            val ccuSettingsCrc = settingsMessage1[address]?.getCrc()
+            val deviceCrc = ByteBuffer.wrap(deviceCrcBytes).order(ByteOrder.BIG_ENDIAN).short.toInt() and 0xFFFF
+            if(ccuSettingsCrc != deviceCrc) {
+                CcuLog.e(L.TAG_CCU_SERIAL_CONNECT, "PCN Regular update CRC mismatch: CCU Device CRC $ccuSettingsCrc , Device CRC $deviceCrc")
+                return
+            }
             val pcnNodeDevice = getPcnNodeDevice(address.toInt())
             pcnNodeDevice.heartBeat.writeHisValueByIdWithoutCOV(1.0)
             val connectNodeDevices = CCUHsApi.getInstance().readAllEntities("device and connectModule and deviceRef==\"${pcnNodeDevice.getId()}\"")

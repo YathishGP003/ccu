@@ -2446,6 +2446,11 @@ public class CCUHsApi
 
     public double getExternalTemp() {
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        if (readDefaultValByDomainName("offlineMode") > 0.0) {
+            mCurrentTemperature = 0;
+            return mCurrentTemperature;
+        }
+
         if (tempWeatherRef == null)
         {
             HDict navIdDict = new HDictBuilder().add(HayStackConstants.ID, getSiteIdRef()).toDict();
@@ -2496,6 +2501,10 @@ public class CCUHsApi
     }
 
     public double getExternalHumidity() {
+        if (readDefaultValByDomainName("offlineMode") > 0.0) {
+            mCurrentHumidity = 0;
+            return mCurrentHumidity;
+        }
 
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         if (humidityWeatherRef == null)

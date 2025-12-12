@@ -72,9 +72,10 @@ abstract class HyperStatProfile(val logTag: String) : ZoneProfile() {
     var isAuxStage1Active = false
     var isAuxStage2Active = false
 
+    var isDoorOpenFromTitle24 = false
     var doorWindowSensorOpenStatus = false
+
     var runFanLowDuringDoorWindow = false
-    private var isDoorOpenFromTitle24 = false
 
     var fanEnabledStatus = false
     var lowestStageFanLow = false

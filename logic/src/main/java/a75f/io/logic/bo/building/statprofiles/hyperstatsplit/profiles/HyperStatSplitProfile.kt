@@ -153,23 +153,6 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
     abstract fun resetAllLogicalPointValues()
     abstract fun resetRelayLogicalPoints()
     abstract fun resetAnalogOutLogicalPoints()
-    fun runLowestFanSpeedDuringDoorOpen(hssEquip: HyperStatSplitEquip) {
-        mutableMapOf(
-            hssEquip.fanLowSpeedVentilation to Stage.FAN_1.displayName,
-            hssEquip.fanLowSpeed to Stage.FAN_1.displayName,
-            hssEquip.fanMediumSpeed to Stage.FAN_2.displayName,
-            hssEquip.fanHighSpeed to Stage.FAN_3.displayName,
-            hssEquip.fanEnable to StatusMsgKeys.FAN_ENABLED.name,
-            hssEquip.occupiedEnable to StatusMsgKeys.EQUIP_ON.name
-        ).forEach {
-            if (it.key.pointExists()) {
-                it.key.writeHisVal(1.0)
-                hssEquip.relayStages[it.value] = 1
-                logIt( "Lowest Fan Speed is running due to Title 24 Door Open open state: ${it.key.domainName}")
-                return
-            }
-        }
-    }
 
     fun resetLoops(hssEquip : HyperStatSplitEquip) {
         hssEquip.apply {

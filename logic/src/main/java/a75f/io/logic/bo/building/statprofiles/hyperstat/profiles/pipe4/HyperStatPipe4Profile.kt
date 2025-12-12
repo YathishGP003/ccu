@@ -45,6 +45,7 @@ import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.keyCardIsInSlot
 import a75f.io.logic.bo.building.statprofiles.util.logResults
+import a75f.io.logic.bo.building.statprofiles.util.runLowestFanSpeedDuringDoorOpen
 import a75f.io.logic.bo.building.statprofiles.util.updateLoopOutputs
 import a75f.io.logic.bo.building.statprofiles.util.updateOccupancyDetection
 import a75f.io.logic.bo.building.statprofiles.util.updateOperatingMode
@@ -152,7 +153,7 @@ class HyperStatPipe4Profile: HyperStatProfile(L.TAG_CCU_HSPIPE4) {
         heatingLoopOutput = equip.heatingLoopOutput.readHisVal().toInt()
         fanLoopOutput = equip.fanLoopOutput.readHisVal().toInt()
         dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
-        if (canWeDoConditioning(basicSettings) && canWeRunFan(basicSettings)) {
+        if (canWeRunFan(basicSettings) && (doorWindowSensorOpenStatus.not())) {
             operateRelays(config as HsPipe4Configuration, basicSettings, equip, controllerFactory)
             operateAnalogOutputs(config, equip, equip.analogOutStages, basicSettings)
             val analogFanType = operateAuxBasedFan(equip, basicSettings)
@@ -164,6 +165,9 @@ class HyperStatPipe4Profile: HyperStatProfile(L.TAG_CCU_HSPIPE4) {
             )
         } else {
             resetLogicalPoints(equip)
+            if (isDoorOpenFromTitle24) {
+                runLowestFanSpeedDuringDoorOpen(equip, L.TAG_CCU_HSPIPE4)
+            }
         }
         equip.equipStatus.writeHisVal(curState.ordinal.toDouble())
         var temperatureState = ZoneTempState.NONE

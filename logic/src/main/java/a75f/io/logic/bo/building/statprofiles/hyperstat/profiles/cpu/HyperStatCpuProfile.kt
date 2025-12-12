@@ -32,6 +32,7 @@ import a75f.io.logic.bo.building.statprofiles.util.UserIntents
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoConditioning
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoCooling
 import a75f.io.logic.bo.building.statprofiles.util.canWeDoHeating
+import a75f.io.logic.bo.building.statprofiles.util.canWeRunFan
 import a75f.io.logic.bo.building.statprofiles.util.fetchBasicSettings
 import a75f.io.logic.bo.building.statprofiles.util.fetchHyperStatTuners
 import a75f.io.logic.bo.building.statprofiles.util.fetchUserIntents
@@ -43,6 +44,7 @@ import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.keyCardIsInSlot
 import a75f.io.logic.bo.building.statprofiles.util.logResults
+import a75f.io.logic.bo.building.statprofiles.util.runLowestFanSpeedDuringDoorOpen
 import a75f.io.logic.bo.building.statprofiles.util.updateLoopOutputs
 import a75f.io.logic.bo.building.statprofiles.util.updateOccupancyDetection
 import a75f.io.logic.bo.building.statprofiles.util.updateOperatingMode
@@ -350,11 +352,14 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
 
         updateTitle24LoopCounter(hyperStatTuners, basicSettings)
 
-        if (basicSettings.fanMode != StandaloneFanStage.OFF) {
+        if (canWeRunFan(basicSettings) && (doorWindowSensorOpenStatus.not())) {
             operateRelays(config as CpuConfiguration, basicSettings, equip, controllerFactory)
             operateAnalogOutputs(config, equip, basicSettings)
         } else {
             resetLogicalPoints(equip)
+            if (isDoorOpenFromTitle24) {
+                runLowestFanSpeedDuringDoorOpen(equip, L.TAG_CCU_HSCPU)
+            }
         }
 
         equip.equipStatus.writeHisVal(curState.ordinal.toDouble())

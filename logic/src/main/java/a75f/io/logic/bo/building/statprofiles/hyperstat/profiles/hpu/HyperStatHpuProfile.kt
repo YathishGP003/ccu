@@ -42,6 +42,7 @@ import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.keyCardIsInSlot
 import a75f.io.logic.bo.building.statprofiles.util.logResults
+import a75f.io.logic.bo.building.statprofiles.util.runLowestFanSpeedDuringDoorOpen
 import a75f.io.logic.bo.building.statprofiles.util.updateLoopOutputs
 import a75f.io.logic.bo.building.statprofiles.util.updateOccupancyDetection
 import a75f.io.logic.bo.building.statprofiles.util.updateOperatingMode
@@ -139,13 +140,16 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
         dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
         compressorLoopOutput = equip.compressorLoopOutput.readHisVal().toInt()
 
-        if (canWeDoConditioning(basicSettings) && canWeRunFan(basicSettings)) {
+        if (canWeRunFan(basicSettings) && (doorWindowSensorOpenStatus.not())) {
             operateRelays(config as HpuConfiguration, basicSettings, equip, controllerFactory)
             operateAnalogOutputs(config, equip, basicSettings, relayOutputPoints)
             val analogFanType = operateAuxBasedFan(equip, basicSettings)
             runSpecifiedAnalogFanSpeed(equip, analogFanType, config.getAnalogOutsConfigurationMapping(),config.getFanConfiguration())
         } else {
             resetLogicalPoints(equip)
+            if (isDoorOpenFromTitle24) {
+                runLowestFanSpeedDuringDoorOpen(equip, L.TAG_CCU_HSHPU)
+            }
         }
 
         updateOperatingMode(

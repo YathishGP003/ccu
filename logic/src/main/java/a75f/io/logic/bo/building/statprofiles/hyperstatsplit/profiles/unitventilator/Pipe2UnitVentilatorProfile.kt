@@ -40,6 +40,7 @@ import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.keyCardIsInSlot
 import a75f.io.logic.bo.building.statprofiles.util.isSupplyOppositeToConditioning
 import a75f.io.logic.bo.building.statprofiles.util.milliToMin
+import a75f.io.logic.bo.building.statprofiles.util.runLowestFanSpeedDuringDoorOpen
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.handlers.doAnalogOperation
 import a75f.io.logic.controlcomponents.util.ControllerNames
@@ -143,7 +144,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         }
 
         if (isEmergencyShutoffActive(hssEquip).not() && (isDoorOpen.not()) && isCondensateTripped.not()) {
-            if (canWeDoConditioning(basicSettings) && canWeRunFan(basicSettings)) {
+            if (canWeRunFan(basicSettings)) {
                 runRelayOperations(config, basicSettings, pipe2Tuners)
                 runAnalogOutOperations(config, basicSettings, pipe2Tuners, hssEquip.analogOutStages)
                 runAlgorithm(hssEquip, basicSettings, config)
@@ -158,7 +159,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         } else {
             resetAllLogicalPointValues()
             if (isDoorOpenFromTitle24) {
-                runLowestFanSpeedDuringDoorOpen(hssEquip)
+                runLowestFanSpeedDuringDoorOpen(hssEquip, tag)
             }
         }
         setOperatingMode(currentTemp, averageDesiredTemp, basicSettings, hssEquip)

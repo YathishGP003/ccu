@@ -11,9 +11,12 @@ import a75f.io.domain.util.CalibratedPoint
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZoneState
+import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
+import a75f.io.logic.bo.building.hvac.StatusMsgKeys
 import a75f.io.logic.bo.util.CCUUtils
+import android.util.Log
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -129,6 +132,24 @@ fun getAirEnthalpy(temp: Double, humidity: Double): Double {
     val h = a * 0.01 * humidity + b
     CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "temperature $temp humidity $humidity Enthalpy: $h")
     return CCUUtils.roundToTwoDecimal(h)
+}
+
+fun runLowestFanSpeedDuringDoorOpen(equip: StandAloneEquip, tag: String) {
+    mutableMapOf(
+        equip.fanLowSpeedVentilation to Stage.FAN_1.displayName,
+        equip.fanLowSpeed to Stage.FAN_1.displayName,
+        equip.fanMediumSpeed to Stage.FAN_2.displayName,
+        equip.fanHighSpeed to Stage.FAN_3.displayName,
+        equip.fanEnable to StatusMsgKeys.FAN_ENABLED.name,
+        equip.occupiedEnable to StatusMsgKeys.EQUIP_ON.name
+    ).forEach {
+        if (it.key.pointExists()) {
+            it.key.writeHisVal(1.0)
+            equip.relayStages[it.value] = 1
+            Log.i(tag, "Lowest Fan Speed is running due to Title 24 Door Open open state: ${it.key.domainName}")
+            return
+        }
+    }
 }
 
 fun doorWindowIsOpen(equip: StandAloneEquip): Pair<Boolean, Boolean> {

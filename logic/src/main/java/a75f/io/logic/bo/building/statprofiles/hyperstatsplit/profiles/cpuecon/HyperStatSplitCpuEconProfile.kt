@@ -32,6 +32,7 @@ import a75f.io.logic.bo.building.statprofiles.util.isHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMediumUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.keyCardIsInSlot
+import a75f.io.logic.bo.building.statprofiles.util.runLowestFanSpeedDuringDoorOpen
 import a75f.io.logic.controlcomponents.controls.Controller
 import a75f.io.logic.controlcomponents.handlers.doAnalogOperation
 import a75f.io.logic.controlcomponents.util.ControllerNames
@@ -117,7 +118,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         }
         updateTitle24LoopCounter(hyperStatSplitTuners, basicSettings)
         if (isEmergencyShutoffActive(hssEquip).not() && isDoorOpen.not() && isCondensateTripped.not()) {
-            if (canWeDoConditioning(basicSettings) && canWeRunFan(basicSettings)) {
+            if (canWeRunFan(basicSettings)) {
                 runRelayOperations(config, basicSettings)
                 runAnalogOutOperations(config, basicSettings, hssEquip.analogOutStages)
             } else {
@@ -126,7 +127,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         } else {
             resetAllLogicalPointValues()
             if (isDoorOpenFromTitle24) {
-                runLowestFanSpeedDuringDoorOpen(hssEquip)
+                runLowestFanSpeedDuringDoorOpen(hssEquip, tag)
             }
 
         }

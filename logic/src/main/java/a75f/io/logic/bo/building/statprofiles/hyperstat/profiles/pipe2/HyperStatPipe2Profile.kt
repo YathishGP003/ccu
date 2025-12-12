@@ -49,6 +49,7 @@ import a75f.io.logic.bo.building.statprofiles.util.isSupplyOppositeToConditionin
 import a75f.io.logic.bo.building.statprofiles.util.keyCardIsInSlot
 import a75f.io.logic.bo.building.statprofiles.util.logResults
 import a75f.io.logic.bo.building.statprofiles.util.milliToMin
+import a75f.io.logic.bo.building.statprofiles.util.runLowestFanSpeedDuringDoorOpen
 import a75f.io.logic.bo.building.statprofiles.util.updateLoopOutputs
 import a75f.io.logic.bo.building.statprofiles.util.updateOccupancyDetection
 import a75f.io.logic.bo.building.statprofiles.util.updateOperatingMode
@@ -170,11 +171,18 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
         heatingLoopOutput = equip.heatingLoopOutput.readHisVal().toInt()
         fanLoopOutput = equip.fanLoopOutput.readHisVal().toInt()
         dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
+        if (canWeRunFan(basicSettings) && (doorWindowSensorOpenStatus.not())) {
+            operateRelays(config as Pipe2Configuration, basicSettings, equip, userIntents, controllerFactory)
+            operateAnalogOutputs(config, equip, basicSettings, equip.analogOutStages)
+            processForWaterSampling(equip, hyperStatTuners, config, equip.relayStages, basicSettings)
+            runAlgorithm(equip, basicSettings, equip.relayStages, equip.analogOutStages, config)
+        } else {
+            resetLogicalPoints(equip)
+            if (isDoorOpenFromTitle24) {
+                runLowestFanSpeedDuringDoorOpen(equip, L.TAG_CCU_HSHPU)
+            }
+        }
 
-        operateRelays(config as Pipe2Configuration, basicSettings, equip, userIntents, controllerFactory)
-        operateAnalogOutputs(config, equip, basicSettings, equip.analogOutStages)
-        processForWaterSampling(equip, hyperStatTuners, config, equip.relayStages, basicSettings)
-        runAlgorithm(equip, basicSettings, equip.relayStages, equip.analogOutStages, config)
         equip.equipStatus.writeHisVal(curState.ordinal.toDouble())
         var temperatureState = ZoneTempState.NONE
         if (buildingLimitMinBreached() || buildingLimitMaxBreached()) temperatureState =

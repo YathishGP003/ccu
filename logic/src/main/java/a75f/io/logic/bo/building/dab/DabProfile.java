@@ -7,6 +7,7 @@ import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_COOLING_DESIRED;
 import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_HEATING_DESIRED;
+import static a75f.io.logic.controlcomponents.util.ControllerUtilsKt.isSoftOccupied;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,7 +19,6 @@ import a75.io.algos.GenericPIController;
 import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.domain.equips.DabEquip;
@@ -34,7 +34,6 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
-import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
@@ -309,8 +308,7 @@ public class DabProfile extends ZoneProfile
     }
     private void updateDamperIAQCompensation() {
         boolean  enabledCO2Control = dabEquip.getEnableCo2Control().readDefaultVal() > 0 ;
-        String zoneId = HSUtil.getZoneIdFromEquipId(dabEquip.getId());
-        boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.OCCUPIED);
+        boolean occupied = isSoftOccupied(dabEquip.getOccupancyMode());
 
         if (enabledCO2Control) { CcuLog.e(L.TAG_CCU_ZONE, "DCV Tuners: co2Target " + co2Loop.getCo2Target() + ", co2Threshold " + co2Loop.getCo2Threshold()); }
 

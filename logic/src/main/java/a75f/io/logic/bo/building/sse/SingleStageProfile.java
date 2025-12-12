@@ -8,11 +8,14 @@ import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_COOLING_DESIRED;
 import static a75f.io.logic.bo.util.CCUUtils.DEFAULT_HEATING_DESIRED;
+import static a75f.io.logic.controlcomponents.util.ControllerUtilsKt.isSoftOccupied;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
@@ -29,9 +32,7 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.SSERelay2;
 import a75f.io.logic.bo.building.hvac.SSEStage;
-import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
-import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
 
 /**
@@ -112,12 +113,7 @@ public class SingleStageProfile extends ZoneProfile
         sseEquip = (SseEquip) Domain.INSTANCE.getDomainEquip(equip.getId());
         String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
 
-        boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.OCCUPIED);
-        boolean drOccupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.DEMAND_RESPONSE_OCCUPIED);
-        boolean autoAway = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.AUTOAWAY);
-        boolean keyCardAutoAway = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.KEYCARD_AUTOAWAY);
-        boolean isOccupied =  isOccupied(occupied, autoAway, drOccupied, keyCardAutoAway);
-
+        boolean isOccupied =  isSoftOccupied(sseEquip.getOccupancyMode());
         if (isRFDead()) {
             handleRFDead();
             return;
@@ -163,8 +159,7 @@ public class SingleStageProfile extends ZoneProfile
         String stageStatus = "";
         CcuLog.d(TAG_CCU_ZONE, "hysteresis =" + hysteresis + ", relay1config = " + relay1config + "," +
                 " relay2config = " + relay2config + ", relay2Association = " + relay2Association
-                + ", occupied = " + occupied + ", drOccupied = " + drOccupied + ", autoAway = " + autoAway + ", keyCardAutoAway = " + keyCardAutoAway
-                + ", setTempCooling = " + setTempCooling + ", setTempHeating = " + setTempHeating + ", sseStage = " + sseStage.name()
+                + ", occupied = " + isOccupied + ", setTempCooling = " + setTempCooling + ", setTempHeating = " + setTempHeating + ", sseStage = " + sseStage.name()
                 + ", node = " + this.nodeAddr + ", occuStatus = " + occuStatus + ", avgSetTemp = " + avgSetTemp + "," +
                 " roomTemp = " + roomTemp + ", setTempCooling = " + setTempCooling + ", setTempHeating = " + setTempHeating);
         if ((roomTemp > 0) && (sseStage == SSEStage.COOLING)) {

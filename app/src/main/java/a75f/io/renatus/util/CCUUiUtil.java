@@ -136,6 +136,17 @@ public class CCUUiUtil {
 
     }
 
+    public static void showMstpDisabledDialog(Context context) {
+        AlertDialog dialog = new AlertDialog.Builder(context)
+                .setTitle("Bacnet MSTP was Disabled")
+                .setMessage("Bacnet MSTP was disabled since adapter disconnected.\n" +
+                        "It may be enabled again from USB Manager")
+                .setPositiveButton(android.R.string.ok, null)
+                .create();
+        dialog.show();
+
+    }
+
     public static String getCurrentCCUVersion(){
         String currentCCUVersion = BuildConfig.VERSION_NAME.replaceAll("[a-zA-Z]", "");
         return currentCCUVersion.replaceAll("_","");

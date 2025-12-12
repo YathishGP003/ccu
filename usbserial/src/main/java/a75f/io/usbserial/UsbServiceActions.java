@@ -10,5 +10,8 @@ public class UsbServiceActions {
     
     public static final  String  ACTION_USB_REQUIRES_TABLET_REBOOT =
                                         "a75f.io.renatus.ACTION_USB_REQUIRES_TABLET_REBOOT";
+
+    public static final  String  ACTION_USB_MSTP_WAS_DISABLED =
+                                             "a75f.io.renatus.ACTION_USB_MSTP_WAS_DISABLED";
     
 }

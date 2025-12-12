@@ -365,6 +365,7 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT);
+        filter.addAction(UsbServiceActions.ACTION_USB_MSTP_WAS_DISABLED);
         registerReceiver(mUsbEventReceiver, filter);
         CcuLog.e(L.TAG_CCU, "LifeCycleEvent LandingActivity Created");
         populateBACnetConfiguration();
@@ -1032,6 +1033,9 @@ RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleI
                 CcuLog.i("CCU_SERIAL", " SHOW REBOOT DIALOG");
                 CCUUiUtil.showRebootDialog(RenatusLandingActivity.this);
                 Toast.makeText(context, getString(R.string.usb_devices_not_connected), Toast.LENGTH_LONG).show();
+            } else if (intent.getAction().equals(UsbServiceActions.ACTION_USB_MSTP_WAS_DISABLED)) {
+                CcuLog.i("CCU_SERIAL", " SHOW MSTP DISABLED TOAST");
+                CCUUiUtil.showMstpDisabledDialog(RenatusLandingActivity.this);
             }
         }
     };

@@ -156,4 +156,14 @@ public class UsbPrefHelper {
 
         return connectedModbusPorts;
     }
+
+    public static  UsbDeviceItem getMstpDeviceConfig(Context context) {
+        List<UsbDeviceItem> deviceItems = getUsbDeviceList(context);
+        for (UsbDeviceItem item : deviceItems) {
+            if ("BACnet MSTP".equalsIgnoreCase(item.getProtocol())) {
+                return item;
+            }
+        }
+        return null;
+    }
 }

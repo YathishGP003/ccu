@@ -8,6 +8,14 @@
         android:supportsRtl="true">
 
 
+        <receiver android:name=".UsbDisconnectReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

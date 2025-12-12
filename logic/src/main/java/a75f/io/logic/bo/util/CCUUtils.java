@@ -151,13 +151,7 @@ public class CCUUtils
     }
 
     public static Date getLastReceivedTimeForCloudConnectivity(){
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        Map<Object, Object> cloudConnectivityPoint = hayStack.readEntityByDomainName(DomainName.ccuHeartbeat);
-        if(cloudConnectivityPoint.isEmpty()) {
-            return null;
-        }
-        HisItem heartBeatHisItem = hayStack.curRead(cloudConnectivityPoint.get("id").toString());
-        return (heartBeatHisItem == null) ? null : heartBeatHisItem.getDate();
+        return new Date(PreferenceUtil.getLastCCUUpdatedTime());
     }
 
     public static void writeFirmwareVersion(String firmwareVersion, short address, boolean isCMReboot){

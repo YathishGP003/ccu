@@ -69,8 +69,8 @@ abstract class MyStatConfiguration(
         } else {
             val association = this.universal1InAssociation.associationVal
             unit = when (UniversalMapping.values()[association]) {
-                UniversalMapping.AN_KEY_CARD_SENSOR -> "mV"
-                UniversalMapping.AN_DOOR_WINDOW_SENSOR_TITLE24 -> "mV"
+                UniversalMapping.UIN_AN_KEYCARD -> "mV"
+                UniversalMapping.UIN_AN_DOOR_WINDOW -> "mV"
                 else -> "kΩ"
             }
         }
@@ -228,25 +228,27 @@ abstract class MyStatConfiguration(
     }
 
     enum class UniversalMapping {
-        TH_SUPPLY_AIR_TEMPERATURE,
-        TH_GENERIC_ALARM_NOO,
-        TH_GENERIC_ALARM_NC,
-        AN_KEY_CARD_SENSOR,
-        TH_DOOR_WINDOW_SENSOR_NC_TITLE24,
-        AN_DOOR_WINDOW_SENSOR_TITLE24,
-        TH_FAN_RUN_SENSOR_NO,
-        TH_FAN_RUN_SENSOR_NC,
-        TH_DOOR_WINDOW_SENSOR_NC,
-        TH_DOOR_WINDOW_SENSOR_NO,
-        TH_KEY_CARD_SENSOR_NO,
-        TH_KEY_CARD_SENSOR_NC,
-        TH_CHILLED_WATER_SUPPLY_TEMP,
-        TH_HOT_WATER_SUPPLY_TEMP,
-        AI_CURRENT_TX_10,
-        AI_CURRENT_TX_20,
-        AI_CURRENT_TX_50,
-        AI_GENERIC_VOLTAGE_INPUT,
-        AI_GENERIC_THERMISTOR_INPUT
+        UIN_NONE,
+        UIN_TH_AIR_TEMP,
+        UIN_TH_GENERIC_ALARM_NO,
+        UIN_TH_GENERIC_ALARM_NC,
+        UIN_AN_KEYCARD,
+        UIN_TH_DOOR_WINDOW_NC_TITLE24,
+        UIN_AN_DOOR_WINDOW,
+        UIN_TH_FAN_RUN_SENSOR_NO,
+        UIN_TH_FAN_RUN_SENSOR_NC,
+        UIN_TH_DOOR_WINDOW_NO_TITLE24,
+        UIN_TH_DOOR_WINDOW_SENSOR_NC,
+        UIN_TH_DOOR_WINDOW_SENSOR_NO,
+        UIN_TH_KEY_CARD_SENSOR_NO,
+        UIN_TH_KEY_CARD_SENSOR_NC,
+        UIN_TH_CHILLED_WATER_SUPPLY_TEMP,
+        UIN_TH_HOT_WATER_SUPPLY_TEMP,
+        UIN_AI_CURRENT_TX_10,
+        UIN_AI_CURRENT_TX_20,
+        UIN_AI_CURRENT_TX_50,
+        UIN_AI_GENERIC_VOLTAGE_INPUT,
+        UIN_TH_GENERIC_THERMISTOR_INPUT,
     }
 
 

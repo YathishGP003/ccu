@@ -41,7 +41,9 @@ import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe4AnalogOutputPoi
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe4RelayOutputPoints
 import a75f.io.logic.bo.building.statprofiles.util.isMyStatHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMyStatLowUserIntentFanMode
+import a75f.io.logic.bo.building.statprofiles.util.keyCardIsInSlot
 import a75f.io.logic.bo.building.statprofiles.util.logMsResults
+import a75f.io.logic.bo.building.statprofiles.util.runLowestFanSpeedDuringDoorOpen
 import a75f.io.logic.bo.building.statprofiles.util.updateLogicalPoint
 import a75f.io.logic.bo.building.statprofiles.util.updateLoopOutputs
 import a75f.io.logic.bo.building.statprofiles.util.updateOperatingMode
@@ -163,6 +165,7 @@ class MyStatPipe4Profile : MyStatProfile(L.TAG_CCU_MSPIPE4) {
         )
         runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(userIntents)
         if (occupancyStatus == Occupancy.WINDOW_OPEN) resetLoopOutputs()
+        keyCardIsInSlot(equip)
         fanLowVentilationAvailable.data = if (equip.fanLowSpeedVentilation.pointExists()) 1.0 else 0.0
         updateLoopOutputs(
             coolingLoopOutput, equip.coolingLoopOutput,
@@ -175,7 +178,7 @@ class MyStatPipe4Profile : MyStatProfile(L.TAG_CCU_MSPIPE4) {
         heatingLoopOutput = equip.heatingLoopOutput.readHisVal().toInt()
         fanLoopOutput = equip.fanLoopOutput.readHisVal().toInt()
         dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
-        if (canWeRunFan(basicSettings) && canWeDoConditioning(basicSettings)) {
+        if (canWeRunFan(basicSettings) && (doorWindowSensorOpenStatus.not())) {
             operateRelays(
                 config as MyStatPipe4Configuration,
                 basicSettings,
@@ -185,6 +188,9 @@ class MyStatPipe4Profile : MyStatProfile(L.TAG_CCU_MSPIPE4) {
             handleAnalogOutState(config, equip, basicSettings, equip.analogOutStages)
         } else {
             resetLogicalPoints(equip)
+            if (isDoorWindowDueTitle24) {
+                runLowestFanSpeedDuringDoorOpen(equip, L.TAG_CCU_MSPIPE4)
+            }
         }
 
         // Run the title 24 fan operation after the reset of all PI output is done

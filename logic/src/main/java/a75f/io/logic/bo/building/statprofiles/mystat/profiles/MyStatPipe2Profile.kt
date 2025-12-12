@@ -169,14 +169,18 @@ class MyStatPipe2Profile: MyStatProfile(L.TAG_CCU_MSPIPE2) {
         heatingLoopOutput = equip.heatingLoopOutput.readHisVal().toInt()
         fanLoopOutput = equip.fanLoopOutput.readHisVal().toInt()
         dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
+        if (canWeRunFan(basicSettings)) {
+            operateRelays(config as MyStatPipe2Configuration, basicSettings, equip, userIntents, controllerFactory)
+            handleAnalogOutState(config, equip, basicSettings, equip.analogOutStages, userIntents)
+            processForWaterSampling(equip, myStatTuners, config, equip.relayStages, basicSettings)
+            runAlgorithm(equip, basicSettings, equip.relayStages, equip.analogOutStages, config)
+        } else {
+            resetLogicalPoints(equip)
+        }
 
-        operateRelays(config as MyStatPipe2Configuration, basicSettings, equip, userIntents, controllerFactory)
-        handleAnalogOutState(config, equip, basicSettings, equip.analogOutStages, userIntents)
-        processForWaterSampling(equip, myStatTuners, config, equip.relayStages, basicSettings)
-        runAlgorithm(equip, basicSettings, equip.relayStages, equip.analogOutStages, config)
 
         // Run the title 24 fan operation after the reset of all PI output is done
-        doFanOperationTitle24(basicSettings, equip, config)
+        doFanOperationTitle24(basicSettings, equip, config as MyStatPipe2Configuration)
 
         updateOperatingMode(currentTemp, averageDesiredTemp, basicSettings.conditioningMode, equip.operatingMode)
         equip.equipStatus.writeHisVal(curState.ordinal.toDouble())

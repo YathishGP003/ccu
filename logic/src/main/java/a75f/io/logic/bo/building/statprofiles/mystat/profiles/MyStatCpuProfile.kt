@@ -42,6 +42,7 @@ import a75f.io.logic.bo.building.statprofiles.util.isMyStatHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMyStatLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.keyCardIsInSlot
 import a75f.io.logic.bo.building.statprofiles.util.logMsResults
+import a75f.io.logic.bo.building.statprofiles.util.runLowestFanSpeedDuringDoorOpen
 import a75f.io.logic.bo.building.statprofiles.util.updateLogicalPoint
 import a75f.io.logic.bo.building.statprofiles.util.updateLoopOutputs
 import a75f.io.logic.bo.building.statprofiles.util.updateOperatingMode
@@ -135,11 +136,14 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
         dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
 
         updateTitle24LoopCounter(myStatTuners, basicSettings)
-        if (canWeRunFan(basicSettings) && canWeDoConditioning(basicSettings)) {
+        if (canWeRunFan(basicSettings) && (doorWindowSensorOpenStatus.not())) {
             operateRelays(config, basicSettings, equip, controllerFactory)
             operateAnalogOutputs(config, basicSettings, equip.analogOutStages, equip)
         } else {
             resetLogicalPoints(equip)
+            if (isDoorWindowDueTitle24) {
+                runLowestFanSpeedDuringDoorOpen(equip, L.TAG_CCU_MSCPU)
+            }
         }
         equip.equipStatus.writeHisVal(curState.ordinal.toDouble())
         var temperatureState = ZoneTempState.NONE

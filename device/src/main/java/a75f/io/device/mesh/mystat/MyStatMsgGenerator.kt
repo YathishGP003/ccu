@@ -27,6 +27,7 @@ import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.schedules.Occupancy
+import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuAnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuRelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuAnalogOutMapping
@@ -36,6 +37,7 @@ import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2RelayMap
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4AnalogOutMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4RelayMapping
 import a75f.io.logic.bo.building.statprofiles.util.MyStatFanStages
+import a75f.io.logic.bo.building.statprofiles.util.getMyStatDomainDeviceByEquipRef
 import a75f.io.logic.bo.util.TemperatureMode
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.tuners.TunerUtil
@@ -165,7 +167,7 @@ private fun fillMyStatControls(
 fun getMyStatSettings2Message(equipRef: String): MyStat.MyStatSettingsMessage2_t {
     val settings2 = MyStat.MyStatSettingsMessage2_t.newBuilder()
     val myStatEquip = Domain.getDomainEquip(equipRef) as MyStatEquip
-
+    val myStatDevice = getMyStatDomainDeviceByEquipRef(equipRef)
     settings2.apply {
         when (myStatEquip) {
             is MyStatCpuEquip -> settings2.profile = MyStat.MyStatProfiles_t.MYSTAT_PROFILE_CONVENTIONAL_PACKAGE_UNIT
@@ -185,12 +187,39 @@ fun getMyStatSettings2Message(equipRef: String): MyStat.MyStatSettingsMessage2_t
         zoneCO2Threshold = myStatEquip.co2Threshold.readDefaultVal().toInt()
         getRelayConfigs(myStatEquip,this)
         setMyStatAnalogOutConfig(getAnalogOutConfigs(myStatEquip, myStatEquip.universalOut1Enable, myStatEquip.universalOut1Association))
-        mystatUniversalInConfig = if (myStatEquip is MyStatPipe2Equip) {
-            1 // 2 pipe it is always mapped
+
+        if (myStatEquip is MyStatPipe2Equip) {
+            mystatUniversalInConfig = 1 // always map to supply water temp
         } else if (myStatEquip.universalIn1Enable.readDefaultVal() == 1.0) {
-            myStatEquip.universalIn1Association.readDefaultVal().toInt() + 1
+            val logicalSensor = Domain.hayStack.readHDictById(myStatDevice.universal1In.readPoint().pointRef)
+            val logicalDomainName = logicalSensor?.getStr("domainName")
+            if (logicalDomainName != null) {
+                mystatUniversalInConfig = when (logicalDomainName) {
+                    DomainName.dischargeAirTemperature -> MyStatConfiguration.UniversalMapping.UIN_TH_AIR_TEMP.ordinal
+                    DomainName.genericAlarmNO -> MyStatConfiguration.UniversalMapping.UIN_TH_GENERIC_ALARM_NO.ordinal
+                    DomainName.genericAlarmNC -> MyStatConfiguration.UniversalMapping.UIN_TH_GENERIC_ALARM_NC.ordinal
+                    DomainName.keyCardSensor -> MyStatConfiguration.UniversalMapping.UIN_AN_KEYCARD.ordinal
+                    DomainName.doorWindowSensorNCTitle24 -> MyStatConfiguration.UniversalMapping.UIN_TH_DOOR_WINDOW_NC_TITLE24.ordinal
+                    DomainName.doorWindowSensor -> MyStatConfiguration.UniversalMapping.UIN_AN_DOOR_WINDOW.ordinal
+                    DomainName.fanRunSensorNO -> MyStatConfiguration.UniversalMapping.UIN_TH_FAN_RUN_SENSOR_NO.ordinal
+                    DomainName.fanRunSensorNC -> MyStatConfiguration.UniversalMapping.UIN_TH_FAN_RUN_SENSOR_NC.ordinal
+                    DomainName.doorWindowSensorNOTitle24 -> MyStatConfiguration.UniversalMapping.UIN_TH_DOOR_WINDOW_NO_TITLE24.ordinal
+                    DomainName.doorWindowSensorNO -> MyStatConfiguration.UniversalMapping.UIN_TH_DOOR_WINDOW_SENSOR_NC.ordinal
+                    DomainName.doorWindowSensorNC -> MyStatConfiguration.UniversalMapping.UIN_TH_DOOR_WINDOW_SENSOR_NO.ordinal
+                    DomainName.keyCardSensorNO -> MyStatConfiguration.UniversalMapping.UIN_TH_KEY_CARD_SENSOR_NO.ordinal
+                    DomainName.keyCardSensorNC -> MyStatConfiguration.UniversalMapping.UIN_TH_KEY_CARD_SENSOR_NC.ordinal
+                    DomainName.chilledWaterLeavingTempSensor -> MyStatConfiguration.UniversalMapping.UIN_TH_CHILLED_WATER_SUPPLY_TEMP.ordinal
+                    DomainName.hotWaterLeavingTempSensor -> MyStatConfiguration.UniversalMapping.UIN_TH_HOT_WATER_SUPPLY_TEMP.ordinal
+                    DomainName.currentTx10 -> MyStatConfiguration.UniversalMapping.UIN_AI_CURRENT_TX_10.ordinal
+                    DomainName.currentTx20 -> MyStatConfiguration.UniversalMapping.UIN_AI_CURRENT_TX_20.ordinal
+                    DomainName.currentTx50 -> MyStatConfiguration.UniversalMapping.UIN_AI_CURRENT_TX_50.ordinal
+                    DomainName.voltageInput -> MyStatConfiguration.UniversalMapping.UIN_AI_GENERIC_VOLTAGE_INPUT.ordinal
+                    DomainName.thermistorInput -> MyStatConfiguration.UniversalMapping.UIN_TH_GENERIC_THERMISTOR_INPUT.ordinal
+                    else -> 0
+                }
+            }
         } else {
-            0 // NA
+            mystatUniversalInConfig = 0 // Disabled
         }
         genericTuners = getCommonTuners(equipRef)
         when (myStatEquip) {

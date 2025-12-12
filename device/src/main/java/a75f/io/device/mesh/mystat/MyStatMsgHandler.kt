@@ -29,7 +29,6 @@ import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.Zone
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe2Configuration
@@ -154,16 +153,16 @@ private fun updateDesiredTemp(
 
     when (temperatureMode.name) {
         TemperatureMode.COOLING.name -> {
-            coolingDesiredTemp = validatingCoolingDesiredTemp(coolingDesiredTemp,equip.roomRef.toString());
+            coolingDesiredTemp = validatingCoolingDesiredTemp(coolingDesiredTemp,equip.roomRef.toString())
             equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
         }
         TemperatureMode.HEATING.name -> {
-            heatingDesiredTemp = validatingHeatingDesiredTemp(heatingDesiredTemp,equip.roomRef.toString());
+            heatingDesiredTemp = validatingHeatingDesiredTemp(heatingDesiredTemp,equip.roomRef.toString())
             equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
         }
         else -> {
-            heatingDesiredTemp = validatingHeatingDesiredTemp(heatingDesiredTemp,equip.roomRef.toString());
-            coolingDesiredTemp = validatingCoolingDesiredTemp(coolingDesiredTemp,equip.roomRef.toString());
+            heatingDesiredTemp = validatingHeatingDesiredTemp(heatingDesiredTemp,equip.roomRef.toString())
+            coolingDesiredTemp = validatingCoolingDesiredTemp(coolingDesiredTemp,equip.roomRef.toString())
             equip.desiredTempHeating.writePointValue(heatingDesiredTemp)
             equip.desiredTempCooling.writePointValue(coolingDesiredTemp)
         }
@@ -345,15 +344,31 @@ private fun updateUniversalInput(point: PhysicalPoint, value: Int) {
             }
 
             val logicalValue = when (logicalDomainName) {
-                DomainName.leavingWaterTemperature,
-                DomainName.dischargeAirTemperature -> {
+
+                DomainName.leavingWaterTemperature, DomainName.dischargeAirTemperature,
+                DomainName.thermistorInput, DomainName.chilledWaterLeavingTempSensor,
+                DomainName.hotWaterLeavingTempSensor -> {
                     CCUUtils.roundToOneDecimal(ThermistorUtil.getThermistorValueToTemp(rawData * 10))
                 }
-                DomainName.doorWindowSensorNCTitle24,
-                DomainName.genericAlarmNC, DomainName.fanRunSensorNC -> { if ((rawData * 10) >= 10000) 1.0 else 0.0 }
-                DomainName.genericAlarmNO, DomainName.fanRunSensorNO -> { if ((rawData * 10) <= 10000) 1.0 else 0.0 }
-                DomainName.keyCardSensor,
-                DomainName.doorWindowSensorTitle24 -> { deriveValue() }
+
+                DomainName.doorWindowSensorNCTitle24, DomainName.doorWindowSensorNC, DomainName.genericAlarmNC,
+                DomainName.fanRunSensorNC, DomainName.keyCardSensorNC -> {
+                    if ((rawData * 10) >= 10000) 1.0 else 0.0
+                }
+
+                DomainName.genericAlarmNO, DomainName.fanRunSensorNO,DomainName.doorWindowSensorNO,
+                DomainName.doorWindowSensorNOTitle24, DomainName.keyCardSensorNO -> {
+                    if ((rawData * 10) <= 10000) 1.0 else 0.0
+                }
+
+                DomainName.currentTx10, DomainName.currentTx20, DomainName.currentTx50, DomainName.voltageInput -> {
+                    getSensorMappedValue(logicalPoint, rawData)
+                }
+
+                DomainName.keyCardSensor, DomainName.doorWindowSensorTitle24, DomainName.doorWindowSensor -> {
+                    deriveValue()
+                }
+
                 else -> {
                     if (isThermistor) {
                         CCUUtils.roundToOneDecimal(ThermistorUtil.getThermistorValueToTemp(rawData * 10))

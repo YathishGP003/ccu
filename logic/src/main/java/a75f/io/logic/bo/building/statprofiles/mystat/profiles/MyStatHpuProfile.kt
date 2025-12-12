@@ -42,6 +42,7 @@ import a75f.io.logic.bo.building.statprofiles.util.isMyStatHighUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.isMyStatLowUserIntentFanMode
 import a75f.io.logic.bo.building.statprofiles.util.keyCardIsInSlot
 import a75f.io.logic.bo.building.statprofiles.util.logMsResults
+import a75f.io.logic.bo.building.statprofiles.util.runLowestFanSpeedDuringDoorOpen
 import a75f.io.logic.bo.building.statprofiles.util.updateLogicalPoint
 import a75f.io.logic.bo.building.statprofiles.util.updateLoopOutputs
 import a75f.io.logic.bo.building.statprofiles.util.updateOperatingMode
@@ -146,7 +147,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
         dcvLoopOutput = equip.dcvLoopOutput.readHisVal().toInt()
         compressorLoopOutput = equip.compressorLoopOutput.readHisVal().toInt()
 
-        if (canWeRunFan(basicSettings) && canWeDoConditioning(basicSettings)) {
+        if (canWeRunFan(basicSettings) && (doorWindowSensorOpenStatus.not())) {
             operateRelays(config,  basicSettings, equip, controllerFactory)
             operateAnalogOutputs(config, equip, basicSettings, equip.analogOutStages, relayLogicalPoints)
             if (basicSettings.fanMode == MyStatFanStages.AUTO) {
@@ -154,6 +155,9 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
             }
         } else {
             resetLogicalPoints(equip)
+            if (isDoorWindowDueTitle24) {
+                runLowestFanSpeedDuringDoorOpen(equip, L.TAG_CCU_MSHPU)
+            }
         }
 
         equip.equipStatus.writeHisVal(curState.ordinal.toDouble())

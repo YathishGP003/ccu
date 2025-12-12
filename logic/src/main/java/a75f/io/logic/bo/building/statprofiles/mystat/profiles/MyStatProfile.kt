@@ -50,6 +50,8 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
     var occupancyBeforeDoorWindow = Occupancy.NONE
     var doorWindowSensorOpenStatus = false
     var runFanLowDuringDoorWindow = false
+    var isDoorWindowDueTitle24 = false
+
     val derivedFanLoopOutput = CalibratedPoint(DomainName.fanLoopOutput ,"",0.0)
     var zoneOccupancyState = CalibratedPoint(DomainName.zoneOccupancy, "", 0.0)
     val fanLowVentilationAvailable: CalibratedPoint = CalibratedPoint("fanLowVentilation", "", 0.0)
@@ -387,12 +389,12 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
 
     fun checkFanOperationAllowedDoorWindow(userIntents: UserIntents): Boolean {
         return if (currentTemp < userIntents.coolingDesiredTemp && currentTemp > userIntents.heatingDesiredTemp) {
-            doorWindowSensorOpenStatus &&
+            doorWindowSensorOpenStatus && isDoorWindowDueTitle24 &&
                     occupancyBeforeDoorWindow != Occupancy.UNOCCUPIED &&
                     occupancyBeforeDoorWindow != Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
                     occupancyBeforeDoorWindow != Occupancy.VACATION
         } else {
-            doorWindowSensorOpenStatus
+            doorWindowSensorOpenStatus && isDoorWindowDueTitle24
         }
     }
 
@@ -406,14 +408,16 @@ abstract class MyStatProfile(val logTag: String) : ZoneProfile() {
     }
 
     fun runForDoorWindowSensor(equip: MyStatEquip): Boolean {
-        val isDoorOpen = doorWindowIsOpen(equip)
+        val (isDoorOpen, isDoorOpenFromTitle24) = doorWindowIsOpen(equip)
         logIt(" is Door Open ? $isDoorOpen")
-        if (isDoorOpen.first) {
+        if (isDoorOpen) {
             resetLoopOutputs()
             resetLogicalPoints(equip)
             resetEquip(equip)
         }
-        return isDoorOpen.first
+        doorWindowSensorOpenStatus = isDoorOpen
+        isDoorWindowDueTitle24 = isDoorOpenFromTitle24
+        return isDoorOpen
     }
 }
 

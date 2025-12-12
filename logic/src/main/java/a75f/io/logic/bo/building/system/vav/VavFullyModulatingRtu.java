@@ -451,7 +451,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
 
         StringBuilder status = new StringBuilder();
         boolean economizingOn = systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable();
-        status.append((systemFanLoopOp > 0 || Domain.cmBoardDevice.getRelay3().readHisVal() > 0.01 ) ? " Fan ON ": "");
+        status.append((systemFanLoopOp > 0 && Domain.cmBoardDevice.getRelay3().readHisVal() > 0 ) ? " Fan ON ": "");
 
         if(economizingOn) {
             double economizingToMainCoolingLoopMap =  L.ccu().oaoProfile.getOAOEquip().getEconomizingToMainCoolingLoopMap().readPriorityVal();
@@ -623,6 +623,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
     }
 
     private void updateRelays() {
+        Map<a75f.io.domain.api.Point, PhysicalPoint> logicalPhysicalMap = getLogicalPhysicalMap();
         getRelayAssiciationMap().forEach( (relay, association) -> {
             double newState = 0;
             if (relay.readDefaultVal() > 0) {
@@ -630,8 +631,10 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
                 CcuLog.d(L.TAG_CCU_SYSTEM, "Updating relay: " + relay.getDomainName() +
                         ", Association: " + association.getDomainName()+" mappedStage: " + mappedStage);
                 newState = getStageStatus(mappedStage);
-                getLogicalPhysicalMap().get(relay).writePointValue(newState);
+                logicalPhysicalMap.get(relay).writePointValue(newState);
                 CcuLog.i(L.TAG_CCU_SYSTEM, "Relay updated: " + relay.getDomainName() + ", Stage: " + mappedStage + ", State: " + newState);
+            } else {
+                resetRelayIfDisabled(logicalPhysicalMap.get(relay));
             }
         });
     }

@@ -174,7 +174,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();
         boolean economizingOn = systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable();
-        status.append((systemFanLoopOp > 0 || Domain.cmBoardDevice.getRelay3().readPointValue() > 0) ? " Fan ON ": "");
+        status.append((systemFanLoopOp > 0 && Domain.cmBoardDevice.getRelay3().readPointValue() > 0) ? " Fan ON ": "");
         if(economizingOn) {
             double economizingToMainCoolingLoopMap =  L.ccu().oaoProfile.getOAOEquip().getEconomizingToMainCoolingLoopMap().readPriorityVal();
             status.append((systemCoolingLoopOp >= economizingToMainCoolingLoopMap && !isCoolingLockoutActive()) ? " | Cooling ON ":"");
@@ -545,13 +545,17 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
     }
 
     private void updateRelays() {
+        Map<a75f.io.domain.api.Point, PhysicalPoint> logicalPhysicalMap = getLogicalPhysicalMap();
         getRelayAssiciationMap().forEach( (relay, association) -> {
             double newState = 0;
             if (relay.readDefaultVal() > 0) {
                 ModulatingProfileRelayMapping mappedStage = ModulatingProfileRelayMapping.values()[(int) association.readDefaultVal()];
                 newState = getStageStatus(mappedStage);
-                getLogicalPhysicalMap().get(relay).writePointValue(newState);
+                logicalPhysicalMap.get(relay).writePointValue(newState);
                 CcuLog.i(L.TAG_CCU_SYSTEM, "Relay updated: " + relay.getDomainName() + ", Stage: " + mappedStage + ", State: " + newState);
+            }
+            else {
+                resetRelayIfDisabled(logicalPhysicalMap.get(relay));
             }
         });
     }

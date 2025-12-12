@@ -1148,5 +1148,11 @@ public abstract class SystemProfile
             }
         }
     }
+    public void resetRelayIfDisabled(PhysicalPoint point) {
+        if (point.readPointValue() != 0) {
+            point.writePointValue(0);
+            CcuLog.i(L.TAG_CCU_SYSTEM, "Relay updated: " + point.getDomainName() + " State: " + 0);
+        }
+    }
 
 }

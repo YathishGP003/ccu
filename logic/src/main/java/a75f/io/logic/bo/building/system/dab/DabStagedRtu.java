@@ -34,7 +34,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
-import a75f.io.domain.equips.ConditioningStages;
+import a75f.io.domain.api.PhysicalPoint;
 import a75f.io.domain.equips.DabStagedSystemEquip;
 import a75f.io.domain.equips.DabStagedVfdSystemEquip;
 import a75f.io.domain.util.CalibratedPoint;
@@ -53,7 +53,6 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemControllerFactory;
 import a75f.io.logic.bo.building.system.SystemStageHandler;
-import a75f.io.logic.util.SystemProfileUtil;
 
 /**
  * Created by samjithsadasivan on 11/5/18.
@@ -352,13 +351,17 @@ public class DabStagedRtu extends DabSystemProfile
     }
 
     private void updateRelays() {
+        Map<a75f.io.domain.api.Point, PhysicalPoint> logicalPhysicalMap = getLogicalPhysicalMap();
         getRelayAssiciationMap().forEach( (relay, association) -> {
             double newState;
             if (relay.readDefaultVal() > 0) {
                 Stage mappedStage = Stage.values()[(int) association.readDefaultVal()];
                 newState = getStageStatus(mappedStage);
-                getLogicalPhysicalMap().get(relay).writePointValue(newState);
+                logicalPhysicalMap.get(relay).writePointValue(newState);
                 CcuLog.i(L.TAG_CCU_SYSTEM, "Relay: " + relay.getDomainName() + ", Stage: " + mappedStage + ", State: " + newState);
+            }
+            else {
+                resetRelayIfDisabled(logicalPhysicalMap.get(relay));
             }
         });
     }

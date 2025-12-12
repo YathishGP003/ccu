@@ -27,6 +27,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.bacnet.BacnetConfigConstants
 import a75f.io.logic.util.bacnet.TAG_BACNET
+import a75f.io.logic.util.onLoadingCompleteListener
 import a75f.io.renatus.R
 import a75f.io.renatus.UtilityApplication
 import a75f.io.renatus.bacnet.BacnetDeviceSelectionFragment
@@ -101,7 +102,8 @@ import androidx.compose.ui.unit.sp
  * Created by Manjunath K on 06-06-2023.
  */
 
-class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
+class ExternalAhuFragment(var profileType: ProfileType,loadingListener: onLoadingCompleteListener) : Fragment() {
+    private val listener : onLoadingCompleteListener = loadingListener
     private lateinit var viewModel: ExternalAhuViewModel
     //private lateinit var bacnetConfigViewmodel : BacNetConfigViewModel
     private var isBacNetInitialized = false
@@ -120,6 +122,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
         val rootView = ComposeView(requireContext())
         viewModel = ViewModelProvider(this)[ExternalAhuViewModel::class.java]
         rootView.apply {
+            listener.onLoadingComplete()
             setContent {
                 LazyColumn(
                     modifier = Modifier

@@ -2,6 +2,7 @@ package a75f.io.renatus.profiles.system.advancedahu.dab
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logic.bo.building.system.dab.config.DabAdvancedHybridAhuConfig
+import a75f.io.logic.util.onLoadingCompleteListener
 import a75f.io.renatus.composables.DeleteDialog
 import a75f.io.renatus.composables.SaveConfig
 import a75f.io.renatus.compose.ComposeUtil
@@ -26,7 +27,8 @@ import kotlinx.coroutines.withContext
  * Created by Manjunath K on 19-05-2024.
  */
 
-class DabAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
+class DabAdvancedHybridAhuFragment(loadingListener: onLoadingCompleteListener) : AdvancedHybridAhuFragment() {
+    private val listener : onLoadingCompleteListener = loadingListener
     override val viewModel: DabAdvancedHybridAhuViewModel by viewModels()
 
     fun hasUnsavedChanged(): Boolean{
@@ -63,6 +65,7 @@ class DabAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
 
     @Composable
     fun RootView() {
+        listener.onLoadingComplete()
         Column {
             if (viewModel.viewState.value.pendingDeleteConnect) {
                 DeleteDialog(onDismissRequest = { viewModel.viewState.value.pendingDeleteConnect = false }, onConfirmation = {

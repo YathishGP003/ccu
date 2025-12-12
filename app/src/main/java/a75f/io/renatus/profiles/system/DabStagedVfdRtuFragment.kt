@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
+import a75f.io.logic.util.onLoadingCompleteListener
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.AddInputWidget
 import a75f.io.renatus.composables.DropDownWithLabel
@@ -47,7 +48,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.viewModels
@@ -80,7 +80,8 @@ enum class Compressor(val index: Int) {
     COMPRESSOR_STAGE_5(21)
 }
 
-class DabStagedVfdRtuFragment : DStagedRtuFragment() {
+class DabStagedVfdRtuFragment(loadingListener: onLoadingCompleteListener) : DStagedRtuFragment() {
+    private val listener : onLoadingCompleteListener = loadingListener
     private val viewModel : DabStagedVfdRtuViewModel by viewModels()
     var viewState: MutableState<StagedRtuVfdViewState> = mutableStateOf(StagedRtuVfdViewState())
 
@@ -90,9 +91,6 @@ class DabStagedVfdRtuFragment : DStagedRtuFragment() {
 
     companion object {
         val ID: String = DabStagedVfdRtuFragment::class.java.simpleName
-        fun newInstance() : DabStagedVfdRtuFragment {
-            return DabStagedVfdRtuFragment()
-        }
     }
 
     override fun onCreateView(
@@ -173,9 +171,9 @@ class DabStagedVfdRtuFragment : DStagedRtuFragment() {
                 || (viewState.value.relay7Enabled  && viewState.value.relay7Association == associationIndex))
     }
 
-    @Preview
     @Composable
     fun RootView() {
+        listener.onLoadingComplete()
         val viewState = viewModel.viewState.value as StagedRtuVfdViewState
         LazyColumn(modifier = Modifier
             .fillMaxSize()

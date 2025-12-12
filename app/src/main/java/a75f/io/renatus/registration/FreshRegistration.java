@@ -911,7 +911,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         }
         if (position == 15) {
 
-            fragment = new DabModulatingRtuFragment();
+            fragment = new DabModulatingRtuFragment(onLoadingCompleteListener.INSTANCE);
 
             Bundle data = new Bundle();
             data.putBoolean("REGISTRATION_WIZARD", true);
@@ -950,7 +950,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         }
         if (position == 16) {
 
-            fragment = new DabStagedVfdRtuFragment();
+            fragment = new DabStagedVfdRtuFragment(onLoadingCompleteListener.INSTANCE);
 
             Bundle data = new Bundle();
             data.putBoolean("REGISTRATION_WIZARD", true);

@@ -885,7 +885,7 @@
     <string name="actuator_type">ACTUATOR TYPE</string>
     <string name="title_testsignal">TEST SIGNAL</string>
     <string name="title_offset">TEMP OFFSET</string>
-    <string name="temperature_offset">Temperature offset</string>
+    <string name="temperature_offset">Temperature Offset</string>
     <string name="temperature_offset_caps">TEMPERATURE OFFSET</string>
     <string name="temperature_next_line_offset">Temperature\n Offset</string>
     <string name="label_compstage1">Compressor Stage 1</string>

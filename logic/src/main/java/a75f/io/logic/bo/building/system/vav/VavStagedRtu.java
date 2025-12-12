@@ -420,8 +420,6 @@ public class VavStagedRtu extends VavSystemProfile {
         systemHeatingLoopOp = systemEquip.getHeatingLoopOutput().readHisVal();
         systemEquip.getFanLoopOutput().writePointValue(systemFanLoopOp);
         systemFanLoopOp = systemEquip.getFanLoopOutput().readHisVal();
-        systemEquip.getCo2LoopOutput().writePointValue(systemCo2LoopOp);
-        systemCo2LoopOp = systemEquip.getCo2LoopOutput().readHisVal();
         systemEquip.getCompressorLoopOutput().writePointValue(systemCompressorLoop);
         systemCompressorLoop = systemEquip.getCompressorLoopOutput().readHisVal();
 

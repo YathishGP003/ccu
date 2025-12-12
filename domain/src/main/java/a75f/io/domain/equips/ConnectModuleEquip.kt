@@ -2,7 +2,6 @@ package a75f.io.domain.equips
 
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
-import a75f.io.domain.util.CalibratedPoint
 
 class ConnectModuleEquip (equipRef : String) : DomainEquip(equipRef) {
 
@@ -53,7 +52,7 @@ class ConnectModuleEquip (equipRef : String) : DomainEquip(equipRef) {
     val coolingLoopOutput = Point(DomainName.coolingLoopOutput, equipRef)
     val heatingLoopOutput = Point(DomainName.heatingLoopOutput, equipRef)
     val fanLoopOutput = Point(DomainName.fanLoopOutput, equipRef)
-    val co2LoopOutput = Point(DomainName.co2LoopOutput, equipRef)
+    val dcvLoopOutput = Point(DomainName.dcvLoopOutput, equipRef)
 
     val loadBasedCoolingControl = Point(DomainName.loadBasedCoolingControl, equipRef)
     val loadBasedHeatingControl = Point(DomainName.loadBasedHeatingControl, equipRef)

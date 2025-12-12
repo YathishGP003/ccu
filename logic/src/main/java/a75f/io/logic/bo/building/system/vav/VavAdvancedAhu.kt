@@ -352,8 +352,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemEquip.fanLoopOutput.writeDefaultVal(systemFanLoopOp)
             systemFanLoopOp = systemEquip.fanLoopOutput.readHisVal()
 
-            systemEquip.co2LoopOutput.writeDefaultVal(systemCo2LoopOp)
-            systemCo2LoopOp = systemEquip.co2LoopOutput.readHisVal()
 
             systemEquip.cmEquip.satCoolingLoopOutput.writeDefaultVal(systemSatCoolingLoopOp)
             systemSatCoolingLoopOp = systemEquip.cmEquip.satCoolingLoopOutput.readHisVal()
@@ -399,7 +397,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             it.coolingLoopOutput.writePointValue(systemCoolingLoopOp)
             it.heatingLoopOutput.writePointValue(systemHeatingLoopOp)
             it.fanLoopOutput.writePointValue(systemFanLoopOp)
-            it.co2LoopOutput.writePointValue(systemCo2LoopOp)
+            it.dcvLoopOutput.writePointValue(systemCo2LoopOp)
             it.compressorLoopOutput.writePointValue(systemCompressorLoop)
         }
         // Update the connect module related economizer points
@@ -411,8 +409,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
         systemHeatingLoopOp = systemEquip.heatingLoopOutput.readHisVal()
         systemEquip.fanLoopOutput.writePointValue(systemFanLoopOp)
         systemFanLoopOp = systemEquip.fanLoopOutput.readHisVal()
-        systemEquip.co2LoopOutput.writePointValue(systemCo2LoopOp)
-        systemCo2LoopOp = systemEquip.co2LoopOutput.readHisVal()
         systemEquip.cmEquip.satCoolingLoopOutput.writePointValue(systemSatCoolingLoopOp)
         systemSatCoolingLoopOp = systemEquip.cmEquip.satCoolingLoopOutput.readHisVal()
         systemEquip.cmEquip.satHeatingLoopOutput.writePointValue(systemSatHeatingLoopOp)
@@ -1327,7 +1323,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         )
 
         factory.addFanRunCommandController(
-            systemEquip.co2LoopOutput,
+            systemEquip.dcvLoopOutput,
             currentOccupancy,
             systemEquip.cmEquip.conditioningStages.ahuFreshAirFanRunCommand.pointExists()
         )
@@ -1418,7 +1414,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         )
 
         connectfactory.addFanRunCommandController(
-            systemEquip.connectEquip1.co2LoopOutput,
+            systemEquip.connectEquip1.dcvLoopOutput,
             currentOccupancy,
             systemEquip.connectEquip1.conditioningStages.ahuFreshAirFanRunCommand.pointExists()
         )

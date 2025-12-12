@@ -320,9 +320,6 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
         systemCo2LoopOp = Math.min(systemCo2LoopOp, 100);
         systemCo2LoopOp = Math.max(systemCo2LoopOp, 0);
 
-        systemEquip.getCo2LoopOutput().writePointValue(systemCo2LoopOp);
-        systemCo2LoopOp = systemEquip.getCo2LoopOutput().readHisVal();
-
         systemEquip.getDcvLoopOutput().writePointValue(systemCo2LoopOp);
         systemDcvLoopOp = systemEquip.getDcvLoopOutput().readHisVal();
     }

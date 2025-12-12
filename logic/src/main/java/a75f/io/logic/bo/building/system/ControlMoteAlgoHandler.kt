@@ -144,7 +144,7 @@ fun getCmLoopOutput(systemEquip: AdvancedHybridSystemEquip, controlType: Advance
         AdvancedAhuAnalogOutAssociationType.LOAD_COOLING -> systemEquip.coolingLoopOutput.readHisVal()
         AdvancedAhuAnalogOutAssociationType.LOAD_HEATING -> systemEquip.heatingLoopOutput.readHisVal()
         AdvancedAhuAnalogOutAssociationType.LOAD_FAN -> systemEquip.fanLoopOutput.readHisVal()
-        AdvancedAhuAnalogOutAssociationType.CO2_DAMPER -> systemEquip.co2LoopOutput.readHisVal()
+        AdvancedAhuAnalogOutAssociationType.CO2_DAMPER -> systemEquip.dcvLoopOutput.readHisVal()
         AdvancedAhuAnalogOutAssociationType.COMPOSITE_SIGNAL -> {
             val presentMode = SystemController.State.values()[systemEquip.operatingMode.readHisVal().toInt()]
             when (presentMode) {

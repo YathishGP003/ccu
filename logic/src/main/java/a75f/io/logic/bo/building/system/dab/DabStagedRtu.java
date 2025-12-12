@@ -195,9 +195,6 @@ public class DabStagedRtu extends DabSystemProfile
         systemCompressorLoop = systemEquip.getCompressorLoopOutput().readHisVal();
 
         systemCo2LoopOp = getCo2LoopOp();
-        systemEquip.getCo2LoopOutput().writePointValue(systemCo2LoopOp);
-        systemCo2LoopOp = systemEquip.getCo2LoopOutput().readHisVal();
-
         systemDcvLoopOp = systemCo2LoopOp;
         systemEquip.getDcvLoopOutput().writePointValue(systemCo2LoopOp);
         systemDcvLoopOp = systemEquip.getDcvLoopOutput().readHisVal();

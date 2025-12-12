@@ -333,8 +333,6 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
         } else {
             systemCo2LoopOp = 0;
         }
-        systemEquip.getCo2LoopOutput().writePointValue(systemCo2LoopOp);
-        systemCo2LoopOp = systemEquip.getCo2LoopOutput().readHisVal();
 
         systemEquip.getDcvLoopOutput().writePointValue(systemCo2LoopOp);
         systemDcvLoopOp = systemEquip.getDcvLoopOutput().readHisVal();

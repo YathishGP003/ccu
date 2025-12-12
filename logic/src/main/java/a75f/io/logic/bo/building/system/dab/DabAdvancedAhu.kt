@@ -356,8 +356,6 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemEquip.fanLoopOutput.writePointValue(systemFanLoopOp)
             systemFanLoopOp = systemEquip.fanLoopOutput.readHisVal()
 
-            systemEquip.co2LoopOutput.writePointValue(systemCo2LoopOp)
-            systemCo2LoopOp = systemEquip.co2LoopOutput.readHisVal()
 
             systemEquip.cmEquip.satCoolingLoopOutput.writePointValue(systemSatCoolingLoopOp)
             systemSatCoolingLoopOp = systemEquip.cmEquip.satCoolingLoopOutput.readHisVal()
@@ -403,7 +401,7 @@ class DabAdvancedAhu : DabSystemProfile() {
             it.coolingLoopOutput.writePointValue(systemCoolingLoopOp)
             it.heatingLoopOutput.writePointValue(systemHeatingLoopOp)
             it.fanLoopOutput.writePointValue(systemFanLoopOp)
-            it.co2LoopOutput.writePointValue(systemCo2LoopOp)
+            it.dcvLoopOutput.writePointValue(systemCo2LoopOp)
             it.compressorLoopOutput.writePointValue(systemCompressorLoop)
         }
         // Update the connect module related economizer points
@@ -415,8 +413,6 @@ class DabAdvancedAhu : DabSystemProfile() {
         systemHeatingLoopOp = systemEquip.heatingLoopOutput.readHisVal()
         systemEquip.fanLoopOutput.writePointValue(systemFanLoopOp)
         systemFanLoopOp = systemEquip.fanLoopOutput.readHisVal()
-        systemEquip.co2LoopOutput.writePointValue(systemCo2LoopOp)
-        systemCo2LoopOp = systemEquip.co2LoopOutput.readHisVal()
         systemEquip.cmEquip.satCoolingLoopOutput.writePointValue(systemSatCoolingLoopOp)
         systemSatCoolingLoopOp = systemEquip.cmEquip.satCoolingLoopOutput.readHisVal()
         systemEquip.cmEquip.satHeatingLoopOutput.writePointValue(systemSatHeatingLoopOp)
@@ -1278,7 +1274,7 @@ class DabAdvancedAhu : DabSystemProfile() {
         )
 
         factory.addFanRunCommandController(
-            systemEquip.co2LoopOutput,
+            systemEquip.dcvLoopOutput,
             currentOccupancy,
             systemEquip.cmEquip.conditioningStages.ahuFreshAirFanRunCommand.pointExists()
         )
@@ -1367,7 +1363,7 @@ class DabAdvancedAhu : DabSystemProfile() {
         )
 
         connectfactory.addFanRunCommandController(
-            systemEquip.connectEquip1.co2LoopOutput,
+            systemEquip.connectEquip1.dcvLoopOutput,
             currentOccupancy,
             systemEquip.connectEquip1.conditioningStages.ahuFreshAirFanRunCommand.pointExists()
         )

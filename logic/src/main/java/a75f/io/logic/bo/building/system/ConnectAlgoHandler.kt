@@ -180,7 +180,7 @@ fun getConnectLoopOutput(
         AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_COOLING -> connectEquip.coolingLoopOutput.readHisVal()
         AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_HEATING -> connectEquip.heatingLoopOutput.readHisVal()
         AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_FAN -> connectEquip.fanLoopOutput.readHisVal()
-        AdvancedAhuAnalogOutAssociationTypeConnect.CO2_DAMPER -> connectEquip.co2LoopOutput.readHisVal()
+        AdvancedAhuAnalogOutAssociationTypeConnect.CO2_DAMPER -> connectEquip.dcvLoopOutput.readHisVal()
         AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> {
             val presentMode = SystemController.State.values()[ahuSettings.systemEquip.operatingMode.readHisVal().toInt()]
             when (presentMode) {

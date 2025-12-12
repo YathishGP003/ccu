@@ -246,9 +246,9 @@ public class UsbDeviceAdapter extends RecyclerView.Adapter<UsbDeviceAdapter.UsbV
 
         List<String> filtered = new ArrayList<>();
         for (String s : entries) {
-            if (!s.contains("MSTP")) {
+//            if (!s.contains("MSTP")) { //For Testing I have enabled this. After Testing done I will uncomment this
                 filtered.add(s);
-            }
+//            }
         }
         entries = filtered.toArray(new String[0]);
 
@@ -366,12 +366,12 @@ public class UsbDeviceAdapter extends RecyclerView.Adapter<UsbDeviceAdapter.UsbV
         EditText srcAddress, maxMaster, maxFrames, deviceId;
         Spinner baudRateSpinner;
         if (bacnetConfig != null) {
-            baudRateSpinner = addTextViewSpinnerRow(context, parentLayout, "Baud Rate", R.array.mb_config_baudrate_array,
-                    Arrays.asList(context.getResources().getStringArray(R.array.mb_config_baudrate_array)).indexOf(String.valueOf(bacnetConfig.getBaudRate())));
+            baudRateSpinner = addTextViewSpinnerRow(context, parentLayout, "Baud Rate", R.array.mstp_config_baudrate_array,
+                    Arrays.asList(context.getResources().getStringArray(R.array.mstp_config_baudrate_array)).indexOf(String.valueOf(bacnetConfig.getBaudRate())));
             baudRateSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                    device.getBacnetConfig().setBaudRate(Integer.parseInt(context.getResources().getStringArray(R.array.mb_config_baudrate_array)[pos]));
+                    device.getBacnetConfig().setBaudRate(Integer.parseInt(context.getResources().getStringArray(R.array.mstp_config_baudrate_array)[pos]));
                 }
 
                 @Override
@@ -385,11 +385,11 @@ public class UsbDeviceAdapter extends RecyclerView.Adapter<UsbDeviceAdapter.UsbV
             deviceId = addTextViewEditTextRow(context, device, parentLayout, "Device Id", "In the range of 1 to 4194303", bacnetConfig.getDeviceId());
         } else {
             device.setBacnetConfig(new BacnetConfig(device.getSerial(), 0,1,127,1, 1));
-            baudRateSpinner = addTextViewSpinnerRow(context, parentLayout, "Baud Rate", R.array.mb_config_baudrate_array, 0);
+            baudRateSpinner = addTextViewSpinnerRow(context, parentLayout, "Baud Rate", R.array.mstp_config_baudrate_array, 0);
             baudRateSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                    device.getBacnetConfig().setBaudRate(Integer.parseInt(context.getResources().getStringArray(R.array.mb_config_baudrate_array)[pos]));
+                    device.getBacnetConfig().setBaudRate(Integer.parseInt(context.getResources().getStringArray(R.array.mstp_config_baudrate_array)[pos]));
                 }
 
                 @Override

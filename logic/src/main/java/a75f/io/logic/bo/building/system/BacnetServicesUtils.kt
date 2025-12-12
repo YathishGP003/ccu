@@ -19,6 +19,7 @@ import a75f.io.util.BacnetRequestUtil
 import android.preference.PreferenceManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
@@ -94,6 +95,8 @@ class BacnetServicesUtils: BacnetRequestUtil {
       CcuLog.d(TAG, "sendCovSubscription called with request: $subscribeCovRequest")
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                delay(5000)
+                CcuLog.d(TAG, "sendCovSubscription : delayed execution")
                 val response = service.subscribeCovForMstp(subscribeCovRequest)
                 val resp = BaseResponse(response)
                 if (response.isSuccessful) {

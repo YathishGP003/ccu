@@ -303,8 +303,8 @@ class HttpServer {
                                     L.TAG_CCU_BACNET_MSTP,
                                     "BACnet MSTP Stack initialized successfully!!!. Sending COV Subscription...."
                                 )
-                                scheduleJobToResubscribeBacnetMstpCOV()
                                 updateBacnetMstpLinearAndCovSubscription(true)
+                                scheduleJobToResubscribeBacnetMstpCOV()
                             } else {
                                 CcuLog.d(
                                     L.TAG_CCU_BACNET_MSTP,

@@ -2211,4 +2211,5 @@
     <string name="universal_out1_during_economizer">Universal-Out 1 During Economizer</string>
     <string name="universal_out2_during_economizer">Universal-Out 2 During Economizer</string>
     <string name="analog_during_economizer">Analog-Out During Economizer</string>
+    <string name="bacnet_not_initialized_go_to_settings_communication_page_to_initalize"><![CDATA[BACnet not initialized. Go to Settings -> Communication page to initalize]]></string>
 </resources>

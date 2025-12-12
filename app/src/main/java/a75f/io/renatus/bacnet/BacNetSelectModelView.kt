@@ -9,6 +9,7 @@ import a75f.io.logic.util.bacnet.validateInputdata
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
+import a75f.io.renatus.UtilityApplication
 import a75f.io.renatus.bacnet.models.BacnetModel
 import a75f.io.renatus.bacnet.models.BacnetPointState
 import a75f.io.renatus.bacnet.util.BACNET
@@ -23,6 +24,7 @@ import a75f.io.renatus.bacnet.util.MSTP_CONFIGURATION
 import a75f.io.renatus.bacnet.util.SELECT_ADDRESS
 import a75f.io.renatus.bacnet.util.SELECT_MODEL
 import a75f.io.renatus.compose.ButtonListRow
+import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.compose.ComposeUtil.Companion.secondaryColor
 import a75f.io.renatus.compose.ExternalConfigDropdownSelector
 import a75f.io.renatus.compose.FormattedTableWithoutHeader
@@ -102,7 +104,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -163,9 +170,6 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
         viewModel.devicePort = getDataFromSf(requireContext(), BacnetConfigConstants.PORT)
         isBacNetInitialized = isBacNetInitialized(requireContext())
         isBacnetMstpInitialized = isBacnetMstpInitialized(requireContext())
-        if (!isBacNetInitialized) {
-            Toast.makeText(requireContext(), "CCU BacNet Server is not initialized", Toast.LENGTH_SHORT).show()
-        }
     }
 
     @Preview(showSystemUi = true)
@@ -238,23 +242,8 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                     // Show the BACnet Title along with selected model and read only configuration details
                     Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp, top = 40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         BacnetTitleView()
-                    }
-                }
-                item {
-                    // Show the Model and Configuration Mode Selector
-                    Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         ModelAndConfigModeSelector(isEditable = false)
-                    }
-                }
-                item {
-                    // Show the Configuration Details Read Only
-                    Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         ConfigurationDetailsReadOnly(viewModel.configurationType.value)
-                    }
-                }
-                item {
-                    // Show the Bacnet Equip Title
-                    Column(modifier = Modifier.padding(start = 40.dp, end = 40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         BacnetEquipTitle()
                     }
                 }
@@ -450,10 +439,7 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
                                 val rowDataList = mutableListOf<Pair<String, Any>>()
 
                                 // column data for Parameter Name
-                                val imageList = listOf(
-                                                R.drawable.arrow_down
-                                            )
-                                rowDataList.add(Pair("text_with_dropdown", Triple(item.disName, imageList) {}))
+                                rowDataList.add(Pair("text", Pair(item.disName, Alignment.CenterStart)))
 
                                 // column data for Display In UI
                                 rowDataList.add(Pair("toggle", Pair(item.displayInUi.value) { state : Boolean ->
@@ -1180,10 +1166,31 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
     }
 
     @Composable
+    fun ConfigItemLabel(title: String, disabled: Boolean): AnnotatedString {
+        return buildAnnotatedString {
+            append(title)
+
+            if (disabled) {
+                append("  ")  // spacing before italic text
+                withStyle(style = SpanStyle(fontStyle = FontStyle.Italic, color = Color.Gray)) {
+                    append("   Not Initialized")
+                }
+            }
+        }
+    }
+
+
+    @Composable
     private fun ShowDropdownList(expanded: MutableState<Boolean>) {
+
+        val mstpConfigLabelForDropdown =
+            if(!UtilityApplication.isBacnetMstpInitialized()) "MSTP Configuration Not Initialized" else MSTP_CONFIGURATION
+        val ipConfigLabelForDropdown =
+            if(!UtilityApplication.isBACnetIntialized()) "IP Configuration Not Initialized" else IP_CONFIGURATION
+
         val configurationTypes = listOf(
-            //MSTP_CONFIGURATION,
-            IP_CONFIGURATION
+            mstpConfigLabelForDropdown,
+            ipConfigLabelForDropdown
         )
 
         var selectedIndex by remember { mutableStateOf(-1) }
@@ -1191,28 +1198,59 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
             expanded = expanded.value,
             onDismissRequest = { expanded.value = false },
             modifier = Modifier
-                .width(280.dp)
-                .height(60.dp)
+                .width(320.dp)
+                .height(120.dp)
                 .background(Color.White)
                 .border(0.5.dp, Color.LightGray)
                 .shadow(1.dp, shape = RoundedCornerShape(2.dp))
 
         ) {
             LazyColumn(modifier = Modifier
-                .width(280.dp)
-                .height(60.dp)) {
+                .width(320.dp)
+                .height(120.dp)) {
 
                 itemsIndexed(configurationTypes) { index, s ->
-                    DropdownMenuItem(onClick = {
-                        selectedIndex = index
-                        expanded.value = false
-                        viewModel.configurationType.value = s
-                        viewModel.deviceSelectionMode.value = 0
-                    }, text = { Text(text = s, style = TextStyle(fontSize = 22.sp)) },
-                        modifier = Modifier.background(if (index == selectedIndex) secondaryColor else Color.White),
-                        contentPadding = PaddingValues(10.dp),
+
+                    val isMstp = s.contains("MSTP")
+                    val isIp = s.contains("IP")
+
+                    val isDisabled =
+                        (isMstp && !UtilityApplication.isBacnetMstpInitialized()) ||
+                                (isIp && !UtilityApplication.isBACnetIntialized())
+
+                    val label = when {
+                        isMstp -> ConfigItemLabel("MSTP Configuration", !UtilityApplication.isBacnetMstpInitialized())
+                        isIp   -> ConfigItemLabel("IP Configuration", !UtilityApplication.isBACnetIntialized())
+                        else   -> AnnotatedString(s)
+                    }
+
+                    DropdownMenuItem(
+                        onClick = {
+                            if (!isDisabled) {
+                                selectedIndex = index
+                                expanded.value = false
+                                viewModel.configurationType.value =
+                                    if (s.contains("MSTP")) MSTP_CONFIGURATION else IP_CONFIGURATION
+                                viewModel.deviceSelectionMode.value = 0
+                            }
+                        },
+                        enabled = !isDisabled,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                if (index == selectedIndex) ComposeUtil.secondaryColor
+                                else Color.White
+                            ),
+                        text = {
+                            Text(
+                                text = label,
+                                fontSize = 18.sp,
+                                color = if (isDisabled) Color.Gray else Color.Black
+                            )
+                        }
                     )
                 }
+
             }
         }
     }

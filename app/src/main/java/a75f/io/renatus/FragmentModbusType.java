@@ -3,16 +3,20 @@ package a75f.io.renatus;
 import static a75f.io.api.haystack.HSUtil.isZoneContainEquipOrDevice;
 import static a75f.io.logic.L.generateLowCodeAddrSkipZero;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 
@@ -43,7 +47,7 @@ public class FragmentModbusType  extends BaseDialogFragment {
     String       mFloorName;
     Boolean      misPaired;
 
-
+    LinearLayout bacnetWarning;
     @Override
     public String getIdString() {
         return MID;
@@ -61,6 +65,7 @@ public class FragmentModbusType  extends BaseDialogFragment {
         return f;
     }
 
+    @SuppressLint("MissingInflatedId")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -98,6 +103,15 @@ public class FragmentModbusType  extends BaseDialogFragment {
             mNodeAddress = generateLowCodeAddrSkipZero();
             showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.PCN, NodeType.PCN), FragmentBLEInstructionScreen.ID);
         });
+        bacnetWarning = view.findViewById(R.id.ll_bacnet_warning);
+        if (!UtilityApplication.isBACnetIntialized() && !UtilityApplication.isBacnetMstpInitialized()) {
+            bacnetWarning.setVisibility(View.VISIBLE);
+            bacnetEm.setEnabled(false);
+            ((TextView)view.findViewById(R.id.textBacnetEquipment))
+                    .setTextColor(ContextCompat.getColor(getContext(), R.color.grey_select));
+            ((TextView)view.findViewById(R.id.textBacnetEquipmentDes))
+                    .setTextColor(ContextCompat.getColor(getContext(), R.color.grey_select));
+        }
         return view;
     }
 

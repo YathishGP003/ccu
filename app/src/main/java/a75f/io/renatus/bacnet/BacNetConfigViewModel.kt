@@ -675,7 +675,6 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
             try {
                 val response = service.multiread(rpmRequest)
                 val resp = BaseResponse(response)
-                ProgressDialogUtils.hideProgressDialog()
                 if (response.isSuccessful) {
                     val result = resp.data
                     if (result != null) {
@@ -754,7 +753,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         connectedDevices = mutableStateOf(emptyList())
         connectedDevices.value = list
 
-        if (connectedDevices.value.isEmpty() ) {
+        if (list.isEmpty()) {
             ProgressDialogUtils.hideProgressDialog()
             Toast.makeText(context, context.getString(R.string.no_devices_found), Toast.LENGTH_SHORT).show()
         }

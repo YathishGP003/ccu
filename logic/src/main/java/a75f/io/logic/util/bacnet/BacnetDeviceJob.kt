@@ -43,6 +43,7 @@ class BacnetDeviceJob(appContext: Context, workerParams: WorkerParameters) :
                 CcuLog.d(BACNET_DEVICE_JOB, "BacnetDeviceJob task type is BACNET_PERIODIC_RESUBSCRIBE_COV")
                 // Handle periodic resubscribe COV logic here if needed
                 updateBacnetMstpLinearAndCovSubscription(true)
+                scheduleJobToResubscribeBacnetMstpCOV()
             }
             else -> CcuLog.d(BACNET_DEVICE_JOB, "BacnetDeviceJob unknown task type: $taskType")
         }

@@ -87,11 +87,14 @@ import android.os.Build
 import android.preference.PreferenceManager
 import android.text.format.Formatter
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
@@ -534,23 +537,7 @@ fun updateBacnetMstpLinearAndCovSubscription( isInitProcessRequired: Boolean = t
                 } else {
 //                    CcuLog.d(TAG_CCU_BACNET_MSTP, "Point: ${it.id()} with objectId: $objectId and objectType: $objectType")
 
-                    if (isInitProcessRequired) {
-                        // Add to linear list to update the point present value
-                        val objectIdentifier = getDetailsFromObjectLayout(objectType, objectId.toString())
-                        val propertyReference = mutableListOf<PropertyReference>()
-                        propertyReference.add(
-                                PropertyReference(
-                                        BacNetConstants.PropertyType.PROP_PRESENT_VALUE.value,
-                                        -1
-                                )
-                        )
-                        readAccessSpecification.add(
-                                ReadRequestMultiple(
-                                        objectIdentifier,
-                                        propertyReference
-                                )
-                        )
-
+                    if (isInitProcessRequired) { // For Initialization process needs to perform COV subs
                         // if point hisInterpolate is cov then subscribe to COV
                         if (it["hisInterpolate"]?.toString() == Tags.COV) {
                             val objectIdentifier =
@@ -558,7 +545,8 @@ fun updateBacnetMstpLinearAndCovSubscription( isInitProcessRequired: Boolean = t
                             CcuLog.d(TAG_CCU_BACNET_MSTP, "Point ${it.id()} is Cov Enabled. Object Identifier for Cov: $objectIdentifier")
                             objectIdentifierListForCov.add(objectIdentifier)
                         }
-                    } else {
+                    }
+
                         if ( it["hisInterpolate"]?.toString() == Tags.LINEAR ) {
                             val objectIdentifier = getDetailsFromObjectLayout(objectType, objectId.toString())
                             CcuLog.d(TAG_CCU_BACNET_MSTP, "Point ${it.id()} is Linear enabled. Object Identifier for Linear: $objectIdentifier")
@@ -576,11 +564,16 @@ fun updateBacnetMstpLinearAndCovSubscription( isInitProcessRequired: Boolean = t
                                 )
                             )
                         }
-                    }
                 }
             } catch (e: Exception) {
                 CcuLog.e(TAG_CCU_BACNET_MSTP, "Error processing point: ${it.id()} - ${e.message}")
             }
+        }
+
+        if (readAccessSpecification.isNotEmpty()) {
+            CcuLog.d(TAG_CCU_BACNET_MSTP, "Sending RPM for device: $deviceId with mac address: $deviceMacAddress and read access specification: $readAccessSpecification")
+            val rpmRequest = RpmRequest(readAccessSpecification)
+            sendRequestMultipleRead(BacnetReadRequestMultiple(destination, rpmRequest) , deviceId, t1.id().toString())
         }
 
         if (objectIdentifierListForCov.isNotEmpty()) {
@@ -594,17 +587,20 @@ fun updateBacnetMstpLinearAndCovSubscription( isInitProcessRequired: Boolean = t
             CcuLog.d(TAG_CCU_BACNET_MSTP, "No COV enabled points found for device: $deviceId")
         }
 
-        if (readAccessSpecification.isNotEmpty()) {
-            CcuLog.d(TAG_CCU_BACNET_MSTP, "Sending RPM for device: $deviceId with mac address: $deviceMacAddress and read access specification: $readAccessSpecification")
-            val rpmRequest = RpmRequest(readAccessSpecification)
-            sendRequestMultipleRead(BacnetReadRequestMultiple(destination, rpmRequest) , deviceId, t1.id().toString())
-        }
     }
         if (subscribeCovForAllDevices.isEmpty()) {
             CcuLog.d(TAG_CCU_BACNET_MSTP, "No COV subscription found for any device")
         } else {
             CcuLog.d(TAG_CCU_BACNET_MSTP, "Sending COV subscription for all devices: $subscribeCovForAllDevices")
-            serviceUtils.sendCovSubscription(BacnetMstpSubscribeCovForAllDevices(subscribeCovForAllDevices), "")
+            CoroutineScope(Dispatchers.IO).launch {
+                delay(60_000)  // 1 minute = 60000 ms
+
+                serviceUtils.sendCovSubscription(
+                    BacnetMstpSubscribeCovForAllDevices(subscribeCovForAllDevices),
+                    ""
+                )
+            }
+            //serviceUtils.sendCovSubscription(BacnetMstpSubscribeCovForAllDevices(subscribeCovForAllDevices), "")
         }
 
 }
@@ -696,9 +692,9 @@ private fun updatePointPresentValue(readResponse: MultiReadResponse?,deviceId: S
                                   CcuLog.d(TAG_CCU_BACNET_MSTP, "RPM response for point ${item.objectIdentifier.objectInstance} is not found")
                                   return@forEach
                               }
-                              val id = point["id"]?.toString()
+                              val pointDis = point["dis"]?.toString()
                               responseEquipId = point["equipRef"]?.toString() ?: responseEquipId
-                              CcuLog.d(TAG_CCU_BACNET_MSTP, "RPM response for point $id is $value")
+                              CcuLog.d(TAG_CCU_BACNET_MSTP, "RPM response for point $pointDis is $value")
                               // Update the point present value in the database
                               CCUHsApi.getInstance().writePointValue(point,value.toDouble())
                               updateHeartBeatPoint(responseEquipId,true)
@@ -732,16 +728,17 @@ fun cancelScheduleJobToCheckBacnet(reason : String){
 }
 
 fun scheduleJobToResubscribeBacnetMstpCOV() {
-    val workRequest = PeriodicWorkRequestBuilder<BacnetDeviceJob>(1, TimeUnit.HOURS)
+    CcuLog.d(TAG_CCU_BACNET_MSTP, "--scheduleJobToResubscribeBacnetMstpCOV--")
+    val oneTimeRequest = OneTimeWorkRequestBuilder<BacnetDeviceJob>()
+        .setInitialDelay(1, TimeUnit.HOURS)
         .setInputData(workDataOf(BACNET_JOB_TASK_TYPE to BACNET_PERIODIC_RESUBSCRIBE_COV))
         .build()
 
-
     WorkManager.getInstance(Globals.getInstance().applicationContext)
-        .enqueueUniquePeriodicWork(
+        .enqueueUniqueWork(
             BACNET_PERIODIC_RESUBSCRIBE_COV,
-            ExistingPeriodicWorkPolicy.REPLACE,
-            workRequest
+            ExistingWorkPolicy.REPLACE,
+            oneTimeRequest
         )
     CcuLog.d(TAG_CCU_BACNET_MSTP, "--created work request for resubscribing bacnet mstp cov--")
 }

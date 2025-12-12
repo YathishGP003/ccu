@@ -28,6 +28,7 @@ import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.bacnet.BacnetConfigConstants
 import a75f.io.logic.util.bacnet.TAG_BACNET
 import a75f.io.renatus.R
+import a75f.io.renatus.UtilityApplication
 import a75f.io.renatus.bacnet.BacnetDeviceSelectionFragment
 import a75f.io.renatus.bacnet.models.BacnetModel
 import a75f.io.renatus.bacnet.models.BacnetPointState
@@ -88,7 +89,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 
 
@@ -1159,10 +1164,31 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
     }
 
     @Composable
+    fun ConfigItemLabel(title: String, disabled: Boolean): AnnotatedString {
+        return buildAnnotatedString {
+            append(title)
+
+            if (disabled) {
+                append("  ")  // spacing before italic text
+                withStyle(style = SpanStyle(fontStyle = FontStyle.Italic, color = Color.Gray)) {
+                    append("   Not Initialized")
+                }
+            }
+        }
+    }
+
+
+    @Composable
     private fun ShowDropdownList(expanded: MutableState<Boolean>) {
+
+        val mstpConfigLabelForDropdown =
+            if(!UtilityApplication.isBacnetMstpInitialized()) "MSTP Configuration Not Initialized" else MSTP_CONFIGURATION
+        val ipConfigLabelForDropdown =
+            if(!UtilityApplication.isBACnetIntialized()) "IP Configuration Not Initialized" else IP_CONFIGURATION
+
         val configurationTypes = listOf(
-                //MSTP_CONFIGURATION,
-                IP_CONFIGURATION
+            mstpConfigLabelForDropdown,
+            ipConfigLabelForDropdown
         )
 
         var selectedIndex by remember { mutableStateOf(-1) }
@@ -1170,28 +1196,59 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                 expanded = expanded.value,
                 onDismissRequest = { expanded.value = false },
                 modifier = Modifier
-                        .width(280.dp)
-                        .height(60.dp)
+                        .width(320.dp)
+                        .height(120.dp)
                         .background(Color.White)
                         .border(0.5.dp, Color.LightGray)
                         .shadow(1.dp, shape = RoundedCornerShape(2.dp))
 
         ) {
             LazyColumn(modifier = Modifier
-                    .width(280.dp)
-                    .height(60.dp)) {
+                    .width(320.dp)
+                    .height(120.dp)) {
 
                 itemsIndexed(configurationTypes) { index, s ->
-                    DropdownMenuItem(onClick = {
-                        selectedIndex = index
-                        expanded.value = false
-                        viewModel.configurationType.value = s
-                        viewModel.deviceSelectionMode.value = 0
-                    }, text = { Text(text = s, style = TextStyle(fontSize = 22.sp)) },
-                            modifier = Modifier.background(if (index == selectedIndex) ComposeUtil.secondaryColor else Color.White),
-                            contentPadding = PaddingValues(10.dp),
+
+                    val isMstp = s.contains("MSTP")
+                    val isIp = s.contains("IP")
+
+                    val isDisabled =
+                        (isMstp && !UtilityApplication.isBacnetMstpInitialized()) ||
+                                (isIp && !UtilityApplication.isBACnetIntialized())
+
+                    val label = when {
+                        isMstp -> ConfigItemLabel("MSTP Configuration", !UtilityApplication.isBacnetMstpInitialized())
+                        isIp   -> ConfigItemLabel("IP Configuration", !UtilityApplication.isBACnetIntialized())
+                        else   -> AnnotatedString(s)
+                    }
+
+                    DropdownMenuItem(
+                        onClick = {
+                            if (!isDisabled) {
+                                selectedIndex = index
+                                expanded.value = false
+                                viewModel.configurationType.value =
+                                    if (s.contains("MSTP")) MSTP_CONFIGURATION else IP_CONFIGURATION
+                                viewModel.deviceSelectionMode.value = 0
+                            }
+                        },
+                        enabled = !isDisabled,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                if (index == selectedIndex) ComposeUtil.secondaryColor
+                                else Color.White
+                            ),
+                        text = {
+                            Text(
+                                text = label,
+                                fontSize = 18.sp,
+                                color = if (isDisabled) Color.Gray else Color.Black
+                            )
+                        }
                     )
                 }
+
             }
         }
     }

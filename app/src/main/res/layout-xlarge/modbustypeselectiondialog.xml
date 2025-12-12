@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
@@ -75,7 +76,7 @@
                     >
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
@@ -97,8 +98,34 @@
                             android:id="@+id/textBacnetEquipmentDes"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:textAlignment="viewEnd"
                             android:text="@string/description_bacnet_equipment"
                              />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/ll_bacnet_warning"
+                            android:orientation="horizontal"
+                            android:visibility="gone"
+                            android:gravity="end"
+                            tools:ignore="UseCompoundDrawables">
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="4dp"
+                                android:src="@drawable/ic_warning_error"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/bacnet_not_initialized_go_to_settings_communication_page_to_initalize"
+                                android:textColor="@color/warning_red"
+                                android:gravity="end"
+                                android:textAlignment="viewEnd"
+                                android:singleLine="true"
+                                android:textAppearance="@style/text_label_secondary" />
+                        </LinearLayout>
 
                     </LinearLayout>
 

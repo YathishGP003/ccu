@@ -217,11 +217,15 @@ fun ExternalPointsList(
                     Gif75Loader()
                 }
         } else {
+            var customHeight = 800
+            if (pointList.isNotEmpty()) {
+                customHeight = pointList.size * 50
+            }
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 modifier = Modifier
                     .fillMaxSize()
-                    .heightIn(max = 800.dp),
+                    .heightIn(max = customHeight.dp),
                 contentPadding = PaddingValues(bottom = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),

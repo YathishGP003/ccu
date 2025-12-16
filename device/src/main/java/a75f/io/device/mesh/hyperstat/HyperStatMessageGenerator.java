@@ -1,6 +1,7 @@
 package a75f.io.device.mesh.hyperstat;
 
 import static a75f.io.device.mesh.hyperstat.HyperStatControlUtilKt.getHyperStatControlMessage;
+import static a75f.io.device.mesh.hyperstat.HyperStatSettingsUtilKt.configureThermistorMapping;
 import static a75f.io.device.mesh.hyperstat.HyperStatSettingsUtilKt.getHyperStatSettings2Message;
 import static a75f.io.device.mesh.hyperstat.HyperStatSettingsUtilKt.getHyperStatSettings3Message;
 import static a75f.io.device.mesh.hyperstat.HyperStatSettingsUtilKt.getHyperStatSettingsMessage;
@@ -13,6 +14,8 @@ import a75f.io.device.HyperStat;
 import a75f.io.device.HyperStat.HyperStatCcuDatabaseSeedMessage_t;
 import a75f.io.device.HyperStat.HyperStatControlsMessage_t;
 import a75f.io.device.HyperStat.HyperStatSettingsMessage_t;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.equips.hyperstat.HyperStatEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 
@@ -32,8 +35,9 @@ public class HyperStatMessageGenerator {
                 equipRef);
         HyperStatControlsMessage_t hyperStatControlsMessage_t = getControlMessage(address
         ).build();
-        HyperStat.HyperStatSettingsMessage2_t hyperStatSettingsMessage2_t = getHyperStatSettings2Message(equipRef);
-        HyperStat.HyperStatSettingsMessage3_t hyperStatSettingsMessage3_t = getHyperStatSettings3Message(equipRef);
+        HyperStat.HyperStatSettingsMessage2_t.Builder hyperStatSettingsMessage2_t = getHyperStatSettings2Message(equipRef);
+        HyperStat.HyperStatSettingsMessage3_t.Builder hyperStatSettingsMessage3_t = getHyperStatSettings3Message(equipRef);
+        configureThermistorMapping(hyperStatSettingsMessage3_t, hyperStatSettingsMessage2_t, equipRef);
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t"+hyperStatSettingsMessage_t.toByteString().toString());
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t"+hyperStatControlsMessage_t.toString());
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t"+ hyperStatSettingsMessage2_t);
@@ -43,8 +47,8 @@ public class HyperStatMessageGenerator {
                 .setEncryptionKey(ByteString.copyFrom(L.getEncryptionKey()))
                 .setSerializedSettingsData(hyperStatSettingsMessage_t.toByteString())
                 .setSerializedControlsData(hyperStatControlsMessage_t.toByteString())
-                .setSerializedSettings2Data(hyperStatSettingsMessage2_t.toByteString())
-                .setSerializedSettings3Data(hyperStatSettingsMessage3_t.toByteString())
+                .setSerializedSettings2Data(hyperStatSettingsMessage2_t.build().toByteString())
+                .setSerializedSettings3Data(hyperStatSettingsMessage3_t.build().toByteString())
                 .build();
     }
     
@@ -58,11 +62,11 @@ public class HyperStatMessageGenerator {
         return getHyperStatSettingsMessage(equipRef, zone);
     }
     public static HyperStat.HyperStatSettingsMessage2_t getSetting2Message(String equipRef){
-        return getHyperStatSettings2Message(equipRef);
+        return getHyperStatSettings2Message(equipRef).build();
     }
 
     public static HyperStat.HyperStatSettingsMessage3_t getSetting3Message(String equipRef){
-        return getHyperStatSettings3Message(equipRef);
+        return getHyperStatSettings3Message(equipRef).build();
     }
     /**
      * Generate control message for a node from haystack data.

@@ -189,8 +189,10 @@ message HyperStatSettingsMessage3_t {
     HyperStatTunersFcu_t  fcuTuners = 2;
     HyperStatConfigsCpu_t hyperStatConfigsCpu = 3; // When staged fan is enabled in CPU profile these voltages provide the fan speed control
   }
-  optional uint32 stageUpTimer = 4; // min
-  optional uint32 stageDownTimer = 5;  // min
+  uint32 thermistor1mappings = 4;
+  uint32 thermistor2mappings = 5;
+  optional uint32 stageUpTimer = 6; // min
+  optional uint32 stageDownTimer = 7;  // min
 }
 
 

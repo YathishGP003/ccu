@@ -57,6 +57,8 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         }
         CCUHsApi.getInstance().incrementAppAliveCount();
         CcuLog.d(L.TAG_CCU_JOB,"AppAliveMinutes : "+CCUHsApi.getInstance().getAppAliveMinutes());
+        //TODO: Remove this post successful QE
+        CcuLog.d("CCU_BRANCH", "Branch Name: us/aditya/38864/sequencer_on_ccu_to_consume_and_handle_config_point_write_changes\nLast Udpated: 11-11-2025 11:11am");
         if (CCUHsApi.getInstance().getAppAliveMinutes() % 15 == 0) {
             CCUHsApi.getInstance().getHisSyncHandler().setNonCovSyncPending();
         }

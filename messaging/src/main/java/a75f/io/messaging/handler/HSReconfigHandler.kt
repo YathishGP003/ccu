@@ -65,7 +65,7 @@ fun reconfigureHyperstatEquips(msgObject: JsonObject, configPoint: Point) {
             true
         )
         if (configPoint.domainName == DomainName.fanOpMode) {
-            updateFanModeCache(configPoint.equipRef, pointNewValue.asInt)
+            updateFanModeCache(configPoint.equipRef, pointNewValue.asDouble.toInt())
         }
         deviceBuilder.updateDeviceAndPoints(
             config,

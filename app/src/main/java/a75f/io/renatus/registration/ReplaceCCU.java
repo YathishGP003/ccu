@@ -72,6 +72,7 @@ import a75f.io.logic.cloud.ResponseCallback;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.messaging.handler.DashboardHandlerKt;
+import a75f.io.messaging.handler.ProfileConfigurationHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
@@ -535,7 +536,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                 CCUHsApi.getInstance().updateLocalTimeZone();
                 restartSerialServices();
                 RenatusServicesUrls renatusServicesUrls = RenatusServicesEnvironment.getInstance().getUrls();
-                SequenceManager.getInstance(Globals.getInstance().getApplicationContext(), renatusServicesUrls.getSequencerUrl())
+                SequenceManager.getInstance(Globals.getInstance().getApplicationContext(), renatusServicesUrls.getSequencerUrl(), ProfileConfigurationHandler.INSTANCE)
                         .fetchPredefinedSequencesIfEmpty();
             }
         });

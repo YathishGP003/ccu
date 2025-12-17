@@ -74,7 +74,7 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
         updateConfiguration(configPoint.domainName, pointNewValue.asDouble, config)
         equipBuilder.updateEquipAndPoints(config, model , hayStack.getSite()!!.id, mystatEquip["dis"].toString(), true)
         if (configPoint.domainName == DomainName.fanOpMode) {
-            myStatupdateFanMode(configPoint.equipRef, pointNewValue.asInt)
+            myStatupdateFanMode(configPoint.equipRef, pointNewValue.asDouble.toInt())
         }
         deviceBuilder.updateDeviceAndPoints(config, deviceModel, mystatEquip["id"].toString(), hayStack.site!!.id, deviceDis)
         val equip = MyStatEquip(configPoint.equipRef)

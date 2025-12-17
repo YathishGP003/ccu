@@ -1,6 +1,11 @@
 package a75f.io.sitesequencer;
 
 
+import static a75f.io.api.haystack.HayStackConstants.DEFAULT_POINT_LEVEL;
+import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_DURATION;
+import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_LEVEL;
+import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_VAL;
+import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_WHO;
 import static a75f.io.util.query_parser.QueryParserKt.modifyKVPairFromFilter;
 
 import com.eclipsesource.v8.V8;
@@ -9,6 +14,7 @@ import com.eclipsesource.v8.V8Function;
 import com.eclipsesource.v8.V8Object;
 import com.eclipsesource.v8.V8Value;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDateTimeRange;
@@ -34,9 +40,9 @@ import a75f.io.alerts.log.LogLevel;
 import a75f.io.alerts.log.LogOperation;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.sitesequencer.log.SequencerLogsCallback;
 
 public class HaystackService {
@@ -156,24 +162,8 @@ public class HaystackService {
         String message = String.format("writing point with id = %s, level = %d, value = %s", id, level, value);
         sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("POINT_WRITE"), message, MSG_CALCULATING);
         CcuLog.d(TAG, "---pointWrite##--id-"+id + "<--level-->"+level+"<--override-->"+override + "<-value->"+value);
+        performConfigChangesPrePointWrite(id, level, WHO, String.valueOf(value), 0l);
         CCUHsApi.getInstance().pointWrite(HRef.copy(id), level, WHO, HNum.make(value), HNum.make(0), reason);
-
-        //This is not the best place to do it. But PI config change from sequencer requires dependent points to be updated.
-        //There is no clean way to it for now.
-        HashMap<Object, Object> point = CCUHsApi.getInstance().readMapById(id);
-        if (point.containsKey(Tags.PID) && point.containsKey("analog") && point.containsKey("output")) {
-            int address = Integer.parseInt(point.get(Tags.GROUP).toString());
-            String type = "";
-            if (point.containsKey(Tags.MIN)) {
-                int maxVal = CCUHsApi.getInstance().readDefaultVal("domainName == \"analog1MaxOutput\" and group == \""+address+"\"").intValue();
-                type = (int)value+"-"+maxVal+"v";
-            } else {
-                int minVal = CCUHsApi.getInstance().readDefaultVal("domainName == \"analog1MinOutput\" and group == \""+address+"\"").intValue();
-                type = minVal+"-"+(int)value+"v";
-            }
-            CcuLog.d(TAG, "Update Type for PID "+type);
-            SmartNode.updateDomainPhysicalPointType(address, "analog1Out", type);
-        }
     }
 
     public void pointWriteMany(V8Array ids, int level, double value, boolean override, Object contextHelper) {
@@ -614,9 +604,24 @@ public class HaystackService {
             CcuLog.d(TAG, "---clearPointValueMany##--id-"+ids.length() + "<--level-->"+level + "<--pointId-->"+pointId);
             String message = String.format("writing point with, id = %s, level = %d, value = %s", HRef.copy(pointId), level, 0);
             sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("POINT_WRITE"), message, MSG_CALCULATING);
-            CCUHsApi.getInstance().pointWrite(HRef.copy(pointId), level, WHO, null, HNum.make(0), reason);
+            performConfigChangesPrePointWrite(pointId, level, WHO, "", 0l);
+            CCUHsApi.getInstance().clearPointArrayLevel(pointId, level, false);
         }
         ids.close();
         sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("CLEAR_POINT_VALUES"), "clearPointValueMany-->", MSG_SUCCESS);
+    }
+
+    private void performConfigChangesPrePointWrite(String id, int level, String who, String value, long duration) {
+        if(level == DEFAULT_POINT_LEVEL) {
+            HashMap<Object, Object> pointEntity = CCUHsApi.getInstance().readMapById(id);
+            Point localPoint = new Point.Builder().setHashMap(pointEntity).build();
+            JsonObject msgObject = new JsonObject();
+            msgObject.addProperty(Tags.ID, id);
+            msgObject.addProperty(WRITABLE_ARRAY_LEVEL, level);
+            msgObject.addProperty(WRITABLE_ARRAY_WHO, who);
+            msgObject.addProperty(WRITABLE_ARRAY_VAL, "" + value);
+            msgObject.addProperty(WRITABLE_ARRAY_DURATION, duration);
+            SequenceManager.getInstance().profileConfigurationHandler.handleProfileConfigPointUpdate(CCUHsApi.getInstance(), id, msgObject, localPoint);
+        }
     }
 }

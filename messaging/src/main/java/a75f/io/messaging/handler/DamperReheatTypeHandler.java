@@ -35,7 +35,7 @@ public class DamperReheatTypeHandler {
                 "update [" + configPoint + " ]: " + msgObject.toString());
 
         int address = Integer.parseInt(configPoint.getGroup());
-        int typeVal = msgObject.get("val").getAsInt();
+        int typeVal = (int) msgObject.get("val").getAsDouble();
 
         if (configPoint.getMarkers().contains(Tags.DAMPER) && configPoint.getMarkers().contains(Tags.DAB)) {
             HashMap<Object, Object> damperType = hayStack.readMapById(configPoint.getId());

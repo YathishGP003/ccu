@@ -14,6 +14,7 @@ import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.interfaces.ProfileConfigurationHandlerInterface;
 import a75f.io.sitesequencer.cloud.ServiceGenerator;
 import a75f.io.sitesequencer.cloud.SiteSequencerService;
 
@@ -25,6 +26,7 @@ public class SequenceManager
      * there is no bearer token.
      */
     private static SequenceManager mInstance;
+    public static ProfileConfigurationHandlerInterface profileConfigurationHandler;
 
     // Set at creation & whenever base url changes b/c of user setting on local build.
     private String baseUrl;
@@ -66,14 +68,15 @@ public class SequenceManager
      * @param appContext     application context (android)
      * @param sequencerApiBase  the base of the URL for sequencer service, e.g. "http://192.168.0.122:8087"
      */
-    private SequenceManager(Context appContext, String sequencerApiBase) {
+    private SequenceManager(Context appContext, String sequencerApiBase, ProfileConfigurationHandlerInterface profileConfigurationHandler) {
         this.appContext = appContext;
         setSequencerApiBase(sequencerApiBase);
+        this.profileConfigurationHandler = profileConfigurationHandler;
     }
 
-    public static SequenceManager getInstance(Context c, String sequencerApiBase) {
+    public static SequenceManager getInstance(Context c, String sequencerApiBase, ProfileConfigurationHandlerInterface profileConfigurationHandler) {
         if (mInstance == null) {
-            mInstance = new SequenceManager(c, sequencerApiBase);
+            mInstance = new SequenceManager(c, sequencerApiBase, profileConfigurationHandler);
         }
         if (!mInstance.hasService()) {
             mInstance.setSequencerApiBase(sequencerApiBase);

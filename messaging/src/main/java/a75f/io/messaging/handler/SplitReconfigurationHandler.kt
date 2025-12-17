@@ -71,7 +71,7 @@ fun reconfigureHsSplitEquip(msgObject: JsonObject, configPoint: Point) {
         )
 
         if (configPoint.domainName == DomainName.fanOpMode) {
-            uvUpdateFanMode(configPoint.equipRef, pointNewValue.asInt)
+            uvUpdateFanMode(configPoint.equipRef, pointNewValue.asDouble.toInt())
         }
         deviceBuilder.updateDeviceAndPoints(
             config,

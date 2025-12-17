@@ -3,10 +3,6 @@ package a75f.io.messaging.handler;
 import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_VAL;
 import static a75f.io.logic.bo.building.BackfillUtilKt.updateBackfillDuration;
 import static a75f.io.messaging.handler.DataSyncHandler.isCloudEntityHasLatestValue;
-import static a75f.io.messaging.handler.HSReconfigHandlerKt.reconfigureHyperstatEquips;
-import static a75f.io.messaging.handler.MyStatReconfigurationKt.reconfigureMyStat;
-import static a75f.io.messaging.handler.TiReconfigKt.tiReconfiguration;
-import static a75f.io.messaging.handler.SplitReconfigurationHandlerKt.reconfigureHsSplitEquip;
 
 import android.content.Context;
 import android.util.Log;
@@ -23,7 +19,6 @@ import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.HVal;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,14 +31,11 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.bacnet.parser.BacnetRequestProcessor;
-import a75f.io.api.haystack.observer.HisWriteObservable;
-import a75f.io.api.haystack.observer.PointWriteObservable;
 import a75f.io.api.haystack.sync.PointWriteCache;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.bo.util.DemandResponseMode;
-import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.interfaces.IntrinsicScheduleListener;
 import a75f.io.logic.interfaces.MasterControlLimitListener;
 import a75f.io.logic.interfaces.ModbusDataInterface;
@@ -57,7 +49,7 @@ import a75f.io.messaging.exceptions.MessageHandlingFailed;
 public class UpdatePointHandler implements MessageHandler
 {
     public static final String CMD = "updatePoint";
-    private static ZoneDataInterface zoneDataInterface = null;
+    static ZoneDataInterface zoneDataInterface = null;
     private static IntrinsicScheduleListener intrinsicScheduleListener = null;
     private static ModbusDataInterface modbusDataInterface = null;
     private static ModbusWritableDataInterface modbusWritableDataInterface = null;
@@ -120,175 +112,18 @@ public class UpdatePointHandler implements MessageHandler
                 //When a level is deleted, it currently generates a message with empty value.
                 //Handle it here.
                 int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
-                clearPointArrayLevel( localPoint.getId(), level, hayStack);
+                MessageUtil.Companion.clearPointArrayLevel( localPoint.getId(), level, hayStack);
             } else {
-                writePointFromJson(localPoint.getId(), msgObject, hayStack);
+                MessageUtil.Companion.writePointFromJson(localPoint.getId(), msgObject, hayStack);
                 hayStack.writeHisValById(localPoint.getId(),Double.parseDouble( value));
             }
             return;
         }
-        /*
-        Reconfiguration handled for PI profile
-         */
-        if (HSUtil.isPIConfig(pointUid, CCUHsApi.getInstance())) {
-            PlcReconfigHandlerKt.updateConfigPoint(msgObject, localPoint);
-            updatePoints(localPoint);
+
+        if(ProfileConfigurationHandler.INSTANCE.handleProfileConfigPointUpdate(hayStack, pointUid, msgObject, localPoint)) {
             return;
         }
 
-
-        //Handle DCWB specific system config here.
-        if (HSUtil.isDcwbConfig(pointUid, CCUHsApi.getInstance())) {
-            ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
-            updateUI(localPoint);
-            return;
-        }
-
-        if ((HSUtil.isHsCPUEquip(pointUid, CCUHsApi.getInstance())
-                || HSUtil.isHSPipe2Equip(pointUid, CCUHsApi.getInstance())
-                || HSUtil.isHSPipe4Equip(pointUid, CCUHsApi.getInstance())
-                || HSUtil.isHSHpuEquip(pointUid, CCUHsApi.getInstance()))
-                && !isReconfigurationPoint(localPoint)) {
-            reconfigureHyperstatEquips(msgObject, localPoint);
-            updatePoints(localPoint);
-            hayStack.scheduleSync();
-            return;
-        }
-
-        if ((HSUtil.isMyStatCpuEquip(pointUid, CCUHsApi.getInstance())
-        || HSUtil.isMyStatHpuEquip(pointUid, CCUHsApi.getInstance())
-        || HSUtil.isMyStatPipe2Equip(pointUid, CCUHsApi.getInstance())
-        || HSUtil.isMyStatPipe4Equip(pointUid, CCUHsApi.getInstance()))
-        && !isReconfigurationPoint(localPoint)){
-            reconfigureMyStat(msgObject, localPoint);
-            updatePoints(localPoint);
-            hayStack.scheduleSync();
-            return;
-        }
-
-        if (HSUtil.isHyperStatSplitEquip(pointUid, CCUHsApi.getInstance()) &&
-                !isReconfigurationPoint(localPoint)) {
-            reconfigureHsSplitEquip(msgObject, localPoint);
-            updatePoints(localPoint);
-            hayStack.scheduleSync();
-            return;
-        }
-
-        if (HSUtil.isSystemConfigOutputPoint(pointUid, CCUHsApi.getInstance())
-                || HSUtil.isSystemConfigHumidifierType(pointUid, CCUHsApi.getInstance())
-                || HSUtil.isSystemConfigIE(pointUid, CCUHsApi.getInstance())
-                || (HSUtil.skipUserIntentOrTunerForV2(localPoint) && HSUtil.isAdvanceAhuV2(pointUid, CCUHsApi.getInstance()))
-                && HSUtil.skipLoopOutputPointsForV2(localPoint)) {
-            ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
-            updatePoints(localPoint);
-            hayStack.scheduleSync();
-            return;
-        }
-
-        if (HSUtil.isSSEConfig(pointUid, CCUHsApi.getInstance())) {
-            CCUHsApi ccuHsApi = CCUHsApi.getInstance();
-            SSEConfigHandler.updateConfigPoint(msgObject, localPoint, ccuHsApi);
-            updatePoints(localPoint);
-            SSEConfigHandler.updateTemperatureMode(localPoint, ccuHsApi);
-            return;
-        }
-
-        if (HSUtil.isMonitoringConfig(pointUid, CCUHsApi.getInstance())) {
-            HyperStatMonitoringConfigHandler.reconfigureMonitoring(msgObject, localPoint);
-            updatePoints(localPoint);
-            return;
-        }
-
-        if (HSUtil.isHyperStatConfig(pointUid, CCUHsApi.getInstance())
-                && !localPoint.getMarkers().contains(Tags.DESIRED)
-                && !localPoint.getMarkers().contains(Tags.SCHEDULE_TYPE)
-                && !localPoint.getMarkers().contains(Tags.TUNER)) {
-            updatePoints(localPoint);
-            if (localPoint.getMarkers().contains(Tags.USERINTENT) && localPoint.getMarkers().contains(Tags.CONDITIONING)) {
-                DesiredTempDisplayMode.setModeTypeOnUserIntentChange(localPoint.getRoomRef(), CCUHsApi.getInstance());
-            }
-            if (localPoint.getMarkers().contains(Tags.VRV)) {
-                VrvControlMessageCache.getInstance().setControlsPending(Integer.parseInt(localPoint.getGroup()));
-            }
-            return;
-        }
-
-        /* Only the config changes require profile specific handling.
-         * DesiredTemp or Schedule type updates are handled using generic implementation below.
-         */
-        if (HSUtil.isStandaloneConfig(pointUid, CCUHsApi.getInstance())
-                        && !localPoint.getMarkers().contains(Tags.DESIRED)
-                        && !localPoint.getMarkers().contains(Tags.SCHEDULE_TYPE)
-                && !localPoint.getMarkers().contains(Tags.TUNER)) {
-            StandaloneConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
-            updateUI(localPoint);
-            return;
-        }
-    
-        if (HSUtil.isDamperReheatTypeConfig(pointUid, hayStack)) {
-            DamperReheatTypeHandler.updatePoint(msgObject, localPoint, hayStack);
-            hayStack.scheduleSync();
-            return;
-        }
-
-        if(HSUtil.isVAVTrueCFMConfig(pointUid, CCUHsApi.getInstance())){
-            TrueCFMVAVConfigHandler.updateVAVConfigPoint(msgObject, localPoint, hayStack);
-            hayStack.scheduleSync();
-            return;
-        }
-
-        if (HSUtil.isVAVZonePriorityConfig(pointUid, CCUHsApi.getInstance())) {
-            VAVZonePriorityHandler.updateVAVZonePriority(msgObject, localPoint);
-        }
-
-        if(HSUtil.isDABTrueCFMConfig(pointUid, CCUHsApi.getInstance())){
-            TrueCFMDABConfigHandler.updateDABConfigPoint(msgObject, localPoint, hayStack);
-            hayStack.scheduleSync();
-            return;
-        }
-
-        if(HSUtil.isDamperSizeConfigPoint(pointUid, CCUHsApi.getInstance())){
-            TrueCFMDABConfigHandler.updatePointVal(localPoint, msgObject);
-            updatePoints(localPoint);
-            return;
-        }
-
-        if(HSUtil.isMaxCFMCoolingConfigPoint(pointUid, CCUHsApi.getInstance())){
-            TrueCFMVAVConfigHandler.updateMinCoolingConfigPoint(msgObject, localPoint, hayStack);
-            TrueCFMVAVConfigHandler.updateAirflowCFMProportionalRange(msgObject, localPoint, hayStack);
-            hayStack.scheduleSync();
-            return;
-        }
-
-        if(HSUtil.isMaxCFMReheatingConfigPoint(pointUid, CCUHsApi.getInstance())){
-            TrueCFMVAVConfigHandler.updateMinReheatingConfigPoint(msgObject, localPoint, hayStack);
-            hayStack.scheduleSync();
-            return;
-        }
-
-        if (HSUtil.isACBRelay1TypeConfig(pointUid, CCUHsApi.getInstance())) {
-            ACBUpdatePointHandler.Companion.updateACBRelay1Type(msgObject, localPoint, hayStack);
-            hayStack.scheduleSync();
-            return;
-        }
-
-        if (HSUtil.isACBCondensateTypeConfig(pointUid, CCUHsApi.getInstance())) {
-            ACBUpdatePointHandler.Companion.updateACBCondensateType(msgObject, localPoint, hayStack);
-            hayStack.scheduleSync();
-            return;
-        }
-
-        if (HSUtil.isACBValveTypeConfig(pointUid, CCUHsApi.getInstance())) {
-            ACBUpdatePointHandler.Companion.updateACBValveType(msgObject, localPoint, hayStack);
-            hayStack.scheduleSync();
-        }
-
-        if(HSUtil.isTIProfile(pointUid, CCUHsApi.getInstance())){
-            //TIConfigHandlerToBeDelete.Companion.updateTIConfig(msgObject,localPoint,hayStack);
-            tiReconfiguration(msgObject, localPoint);
-            updatePoints(localPoint);
-            return;
-        }
         if(DemandResponseMode.isDemandResponseConfigPoint(pointEntity)){
             DemandResponseMode.handleDRMessageUpdate(pointEntity, hayStack, msgObject, zoneDataInterface);
             return;
@@ -317,23 +152,7 @@ public class UpdatePointHandler implements MessageHandler
             }
         }
 
-        if (CCUHsApi.getInstance().isEntityExisting(pointUid))
-        {
-            writePointFromJson(pointUid, msgObject, hayStack);
-
-            //TODO- Should be removed one pubnub is stable
-            logPointArray(localPoint);
-        
-            try {
-                Thread.sleep(10);
-                updatePoints(localPoint);
-            } catch (InterruptedException e) {
-                CcuLog.e(L.TAG_CCU_MESSAGING, "Error in thread sleep", e);
-            }
-        
-        } else {
-            CcuLog.d(L.TAG_CCU_PUBNUB, "Received for invalid local point : " + pointUid);
-        }
+        MessageUtil.Companion.updateLocalPointWriteChanges(hayStack, pointUid, msgObject, localPoint);
 
         if (HSUtil.isPointUpdateNeedsSystemProfileReset(pointUid, hayStack)
                     && L.ccu().systemProfile != null) {
@@ -341,11 +160,6 @@ public class UpdatePointHandler implements MessageHandler
         }
         if (localPoint.getMarkers().contains(Tags.VRV)) {
             VrvControlMessageCache.getInstance().setControlsPending(Integer.parseInt(localPoint.getGroup()));
-        }
-
-        if (localPoint.getMarkers().contains(Tags.OAO)) {
-            OaoReconfigHandlerKt.updateOaoDevicePoints(msgObject, localPoint);
-            hayStack.scheduleSync();
         }
     }
     
@@ -407,22 +221,8 @@ public class UpdatePointHandler implements MessageHandler
 
     }
 
-    private static void logPointArray(Point localPoint) {
-        ArrayList values = CCUHsApi.getInstance().readPoint(localPoint.getId());
-        if (values != null && !values.isEmpty()) {
-            for (int l = 1; l <= values.size(); l++) {
-                HashMap valMap = ((HashMap) values.get(l - 1));
-                if (valMap.get("val") != null) {
-                    double duration = Double.parseDouble(valMap.get("duration").toString());
-                    CcuLog.d(L.TAG_CCU_PUBNUB, "Updated point " + localPoint.getDisplayName() + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
-                                               + " duration " + (duration > 0 ? duration - System.currentTimeMillis() : duration));
-                }
-            }
-        }
-    }
 
-
-    private static void updatePoints(Point p){
+    static void updatePoints(Point p){
         String luid = p.getId();
         boolean updateZoneUi = false;
         boolean isScheduleType = false;
@@ -460,18 +260,6 @@ public class UpdatePointHandler implements MessageHandler
         }
         if(isScheduleType){
             UpdateScheduleHandler.refreshIntrinsicSchedulesScreen();
-        }
-    }
-    
-    /**
-     * Should separate his write from above method.
-     * There are cases where received his val is not valid and should be ignored.
-     *
-     */
-    private static void updateUI(Point updatedPoint) {
-        if (zoneDataInterface != null) {
-            Log.i("PubNub","Zone Data Received Refresh");
-            zoneDataInterface.refreshScreen(updatedPoint.getId(), true);
         }
     }
 
@@ -526,36 +314,5 @@ public class UpdatePointHandler implements MessageHandler
         String src = jsonObject.get("who").getAsString();
         String pointUid = "@" + jsonObject.get("id").getAsString();
         return canIgnorePointUpdate(src, pointUid, CCUHsApi.getInstance());
-    }
-    private static boolean isReconfigurationPoint(Point localPoint) {
-        return  (localPoint.getMarkers().contains(Tags.DESIRED)
-                || localPoint.getMarkers().contains(Tags.SCHEDULE_TYPE)
-                || localPoint.getMarkers().contains(Tags.TUNER));
-    }
-    private static void writePointFromJson(String id, JsonObject msgObject, CCUHsApi hayStack) {
-        String value = msgObject.get(WRITABLE_ARRAY_VAL).getAsString();
-        if(value.isEmpty()) {
-            //When a level is deleted, it currently generates a message with empty value.
-            //Handle it here.
-            int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
-            clearPointArrayLevel(id, level, hayStack);
-            return;
-        }
-        String who = msgObject.get("who").getAsString();
-        double val = msgObject.get("val").getAsDouble();
-        int level = msgObject.get("level").getAsInt();
-        double durationDiff = MessageUtil.Companion.returnDurationDiff(msgObject);
-        hayStack.writePointLocal(id, level, who, val, durationDiff);
-        CcuLog.d(L.TAG_CCU_PUBNUB, "updatePoint : writePointFromJson - level: " + level + " who: " + who + " val: " + val  + " durationDiff: " + durationDiff);
-        PointWriteObservable.INSTANCE.notifyWritableChange(id, HNum.make(val));
-    }
-
-    private static void clearPointArrayLevel(String id, int level, CCUHsApi hayStack) {
-        //When a level is deleted, it currently generates a message with empty value.
-        hayStack.clearPointArrayLevel(id, level, true);
-        hayStack.writeHisValById(id, HSUtil.getPriorityVal(id));
-        PointWriteObservable.INSTANCE.notifyWritableChange(id, HNum.make(HSUtil.getPriorityVal(id)));
-        HisWriteObservable.INSTANCE.notifyChange(id, HSUtil.getPriorityVal(id));
-        CcuLog.d(L.TAG_CCU_PUBNUB, "clearPointArrayLevel - id: " + id + " level: " + level);
     }
 }

@@ -93,6 +93,7 @@ import a75f.io.messaging.client.MessagingClient;
 import a75f.io.messaging.handler.DashboardHandler;
 import a75f.io.messaging.handler.DashboardHandlerKt;
 import a75f.io.messaging.handler.DataSyncHandler;
+import a75f.io.messaging.handler.ProfileConfigurationHandler;
 import a75f.io.messaging.service.MessageCleanUpWork;
 import a75f.io.messaging.service.MessageRetryHandlerWork;
 import a75f.io.messaging.service.MessagingAckJob;
@@ -186,7 +187,7 @@ public abstract class UtilityApplication extends Application implements Globals.
         EquipsManager.getInstance(this).setApplicationContext(this);
         Globals.getInstance().startTimerTask();
         RenatusServicesUrls renatusServicesUrls = RenatusServicesEnvironment.getInstance().getUrls();
-        SequenceManager.getInstance(context, renatusServicesUrls.getSequencerUrl())
+        SequenceManager.getInstance(context, renatusServicesUrls.getSequencerUrl(), ProfileConfigurationHandler.INSTANCE)
                 .fetchPredefinedSequencesIfEmpty();
         isDataSyncRestartRequired();
         UpdateCCUFragment.abortCCUDownloadProcess();
@@ -247,7 +248,7 @@ public abstract class UtilityApplication extends Application implements Globals.
 
     private void scheduleAlertCleanUpJob() {
         RenatusServicesUrls renatusServicesUrls = RenatusServicesEnvironment.getInstance().getUrls();
-        SequenceManager.getInstance(this, renatusServicesUrls.getSequencerUrl())
+        SequenceManager.getInstance(this, renatusServicesUrls.getSequencerUrl(), ProfileConfigurationHandler.INSTANCE)
                 .fetchPredefinedSequencesIfEmpty();
         SequencerSchedulerUtil.Companion.scheduleDailyCleanupTask(this);
     }

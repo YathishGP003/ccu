@@ -1,7 +1,10 @@
 package a75f.io.messaging.handler;
 
-import com.google.gson.JsonObject;
+import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_VAL;
 
+import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_VAL;
+
+import com.google.gson.JsonObject;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
@@ -34,7 +37,7 @@ public class StandaloneConfigHandler {
                 && configPoint.getMarkers().contains(Tags.FAN)
                 && configPoint.getMarkers().contains(Tags.MODE) ){
             if (msgObject.get("val").getAsString().isEmpty()) return;
-            int configVal = msgObject.get("val").getAsInt();
+            int configVal = (int) msgObject.get(WRITABLE_ARRAY_VAL).getAsDouble();
             FanModeCacheStorage cache = FanModeCacheStorage.Companion.getSmartStatFanModeCache();
             if ((configVal != 0) && (configVal % 3 == 0)) //Save only Fan occupied period mode alone, else no need.
                 cache.saveFanModeInCache(configPoint.getEquipRef(), configVal);

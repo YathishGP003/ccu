@@ -296,6 +296,7 @@ public class Tags
     public static final String DEVICE_REF = "deviceRef";
     public static final String SPECIAL_SCHEDULE_KEY = "specialSchedule";
     public static final String VACATION_SCHEDULE_KEY = "vacationSchedule";
+    public static final String EVENT = "event";
     public static final String CREATED_BY_APPLICATION = "createdByApplication";
     public static final String SITE_MANAGER = "SITE_MANAGER";
     public static final String INPUT_REGISTER = "inputRegister";

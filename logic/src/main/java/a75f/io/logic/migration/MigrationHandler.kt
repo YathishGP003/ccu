@@ -43,7 +43,6 @@ import a75f.io.domain.cutover.getDomainNameForMonitoringProfile
 import a75f.io.domain.devices.MyStatDevice
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.DabEquip
-import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
 import a75f.io.domain.equips.OtnEquip
 import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.TIEquip
@@ -51,13 +50,13 @@ import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.equips.hyperstat.HsCpuEquip
 import a75f.io.domain.equips.hyperstat.HsHpuEquip
-import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.hyperstat.HsPipe2Equip
+import a75f.io.domain.equips.hyperstat.HyperStatEquip
+import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
 import a75f.io.domain.equips.mystat.MyStatCpuEquip
 import a75f.io.domain.equips.mystat.MyStatEquip
 import a75f.io.domain.equips.mystat.MyStatHpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe2Equip
-import a75f.io.domain.equips.hyperstatsplit.HsSplitCpuEquip
 import a75f.io.domain.equips.mystat.MyStatPipe4Equip
 import a75f.io.domain.logic.CCUBaseConfigurationBuilder
 import a75f.io.domain.logic.DeviceBuilder
@@ -195,6 +194,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import org.projecthaystack.HBool
 import org.projecthaystack.HDateTime
 import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
@@ -4619,5 +4619,182 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         hayStack.deletePointArray("@null")
         hayStack.deleteEntityLocally("@null")
         CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Nullable priority data and entity removed")
+    }
+
+    val nonStringKvTags = mapOf(
+//        "ahuRef" to "ref",
+        "analog" to "number",
+        "area" to "number",
+        "auxHeatingStage1Consumption" to "number",
+        "auxHeatingStage2Consumption" to "number",
+        "bacnetId" to "number",
+//        "ccuRef" to "ref",
+        "compressorStage1Consumption" to "number",
+        "compressorStage2Consumption" to "number",
+        "compressorStage3Consumption" to "number",
+        "coolingCapacity" to "number",
+        "coolingStage1Consumption" to "number",
+        "coolingStage2Consumption" to "number",
+        "coolingStage3Consumption" to "number",
+        "coolingStage4Consumption" to "number",
+        "coolingStage5Consumption" to "number",
+        "correctionFactor" to "number",
+//        "deviceRef" to "ref",
+//        "equipRef" to "ref",
+        "fanHighSpeedConsumption" to "number",
+        "fanLowSpeedConsumption" to "number",
+        "fanMediumSpeedConsumption" to "number",
+        "fanStage1Consumption" to "number",
+        "fanStage2Consumption" to "number",
+        "fanStage3Consumption" to "number",
+        "fanStage4Consumption" to "number",
+        "fanStage5Consumption" to "number",
+        "fanWall" to "number",
+        "floorNum" to "number",
+//        "floorRef" to "ref",
+//        "gatewayRef" to "ref",
+        "heatingCapacity" to "number",
+        "heatingStage1Consumption" to "number",
+        "heatingStage2Consumption" to "number",
+        "heatingStage3Consumption" to "number",
+        "heatingStage4Consumption" to "number",
+        "heatingStage5Consumption" to "number",
+        "id" to "ref",
+        "incrementVal" to "number",
+        "maxVal" to "number",
+        "minVal" to "number",
+        "modulatingCoolingConsumption" to "number",
+        "modulatingFanConsumption" to "number",
+        "modulatingHeatingConsumption" to "number",
+        "modulatingReheatConsumption" to "number",
+        "order" to "number",
+//        "pipeRef" to "ref",
+        "plantRef" to "ref",
+//        "pointRef" to "ref",
+        "portEnabled" to "bool",
+        "powerFactor" to "number",
+        "reheatStage1Consumption" to "number",
+        "reheatStage2Consumption" to "number",
+//        "roomRef" to "ref",
+        "scheduleGroup" to "number",
+//        "scheduleRef" to "ref",
+//        "siteRef" to "ref",
+        "spaceRef" to "ref",
+        "stage" to "number",
+        "supplyVoltage" to "number",
+        "universal" to "number",
+        "val" to "number",
+        "yetAnotherBypass" to "number",
+    )
+
+    fun correctKVTagTypesInHDict() {
+        if(!PreferenceUtil.getMigrateKVTagTypeCorrection()) {
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Starting KV tag type correction in HDict")
+            modifyEquipKVTagTypes()
+            modifyPhysicalPointsKVTagTypes()
+            modifyPointKVTagTypes()
+            hayStack.scheduleSync()
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Completed KV tag type correction in HDict")
+            PreferenceUtil.setMigrateKVTagTypeCorrection()
+        }
+    }
+
+    private fun modifyPhysicalPointsKVTagTypes() {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Starting physical Point KV tag type correction")
+        hayStack.readAllHDictByQuery("point and deviceRef").forEach { entityDict ->
+            var isChanged = false
+            val physicalPoint = RawPoint.Builder().setHDict(entityDict).build()
+
+            physicalPoint.tags.entries.forEach { localKvTagNameValue ->
+                val localKvTagName = localKvTagNameValue.key
+                val localKvTagValue = localKvTagNameValue.value
+
+                if(nonStringKvTags.containsKey(localKvTagName) && localKvTagValue is HStr) {
+                    CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Correcting tag: $localKvTagName of type: ${nonStringKvTags[localKvTagName]} for entity id: ${entityDict.id()}")
+                    isChanged = true
+
+                    localKvTagNameValue.setValue(
+                        when(nonStringKvTags[localKvTagName]) {
+                            "number" -> HNum.make(localKvTagValue.toString().toDouble())
+                            "bool" -> HBool.make(localKvTagValue.toString().toBoolean())
+                            "ref" -> HRef.make(localKvTagValue.toString())
+                            else -> localKvTagValue
+                        }
+                    )
+                }
+            }
+
+            if (isChanged) {
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating physical Point entity after KV type correction for id: ${physicalPoint.id}")
+                hayStack.updatePoint(physicalPoint, physicalPoint.id)
+            }
+        }
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Completed physical Point KV tag type correction")
+    }
+
+    private fun modifyPointKVTagTypes() {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Starting generic Point KV tag type correction")
+        hayStack.readAllHDictByQuery("point and not deviceRef and not schedule and not event").forEach { entityDict ->
+            var isChanged = false
+            val point = Point.Builder().setHDict(entityDict).build()
+
+            point.tags.entries.forEach { localKvTagNameValue ->
+                val localKvTagName = localKvTagNameValue.key
+                val localKvTagValue = localKvTagNameValue.value
+
+                if(nonStringKvTags.containsKey(localKvTagName) && localKvTagValue is HStr) {
+                    CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Correcting tag: $localKvTagName of type: ${nonStringKvTags[localKvTagName]} for entity id: ${entityDict.id()}")
+                    isChanged = true
+
+                    localKvTagNameValue.setValue(
+                        when(nonStringKvTags[localKvTagName]) {
+                            "number" -> HNum.make(localKvTagValue.toString().toDouble())
+                            "bool" -> HBool.make(localKvTagValue.toString().toBoolean())
+                            "ref" -> HRef.make(localKvTagValue.toString())
+                            else -> localKvTagValue
+                        }
+                    )
+                }
+            }
+
+            if (isChanged) {
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating generic Point entity after KV type correction for id: ${point.id}")
+                hayStack.updatePoint(point, point.id)
+            }
+        }
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Completed generic Point KV tag type correction")
+    }
+
+    private fun modifyEquipKVTagTypes() {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Starting Equip KV tag type correction")
+        hayStack.readAllHDictByQuery("equip").forEach { entityDict ->
+            var isChanged = false
+            val equipEntity = Equip.Builder().setHDict(entityDict).build()
+
+            equipEntity.tags.entries.forEach { localKvTagNameValue ->
+                val localKvTagName = localKvTagNameValue.key
+                val localKvTagValue = localKvTagNameValue.value
+
+                if(nonStringKvTags.containsKey(localKvTagName) && localKvTagValue is HStr) {
+                    CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Correcting tag: $localKvTagName of type: ${nonStringKvTags[localKvTagName]} for entity id: ${entityDict.id()}")
+                    isChanged = true
+
+                    localKvTagNameValue.setValue(
+                        when(nonStringKvTags[localKvTagName]) {
+                            "number" -> HNum.make(localKvTagValue.toString().toDouble())
+                            "bool" -> HBool.make(localKvTagValue.toString().toBoolean())
+                            "ref" -> HRef.make(localKvTagValue.toString())
+                            else -> localKvTagValue
+                        }
+                    )
+                }
+            }
+
+            if (isChanged) {
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating Equip entity after KV type correction for id: ${equipEntity.id}")
+                hayStack.updateEquip(equipEntity, equipEntity.id)
+            }
+        }
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Completed Equip KV tag type correction")
     }
 }

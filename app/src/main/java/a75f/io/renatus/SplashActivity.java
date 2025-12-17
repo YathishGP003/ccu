@@ -27,6 +27,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.SystemProperties;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.logtasks.UploadLogs;
+import a75f.io.logic.migration.MigrationHandler;
 import a75f.io.logic.preconfig.PreconfigurationManager;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
@@ -317,6 +318,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             launchUI();
             Globals.getInstance().unRegisterOnCcuInitCompletedListener(this);
         });
+        ExecutorTask.executeBackground(() -> new MigrationHandler(CCUHsApi.getInstance()).correctKVTagTypesInHDict());
     }
 
 }

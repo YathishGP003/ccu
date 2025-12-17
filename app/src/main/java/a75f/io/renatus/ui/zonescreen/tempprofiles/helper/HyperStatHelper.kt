@@ -203,8 +203,6 @@ class HyperStatHelper(
             if (equip.dischargeAirTemperature.pointExists()) {
                 val supplyWaterTemp = getSupplyWaterTempView(false)
                 detailViewItems[supplyWaterTemp.id.toString()] = supplyWaterTemp
-                val dischargeAirFlow = getDischargeAirTempView(false)
-                detailViewItems[dischargeAirFlow.id.toString()] = dischargeAirFlow
             } else {
                 val supplyWaterTemp = getSupplyWaterTempView(true)
                 detailViewItems[supplyWaterTemp.id.toString()] = supplyWaterTemp

@@ -172,7 +172,11 @@ class HyperStatSplitHelper(
             detailViewItems[dehumidifierView.id.toString()] = dehumidifierView
         }
 
-        if (equip.dischargeAirTemperature.pointExists()) {
+
+        if (ProfileType.HYPERSTATSPLIT_2PIPE_UV.name == profileType.name) {
+            val supplyWaterTemp = getSupplyWaterTempView()
+            detailViewItems[supplyWaterTemp.id.toString()] = supplyWaterTemp
+        } else if (equip.dischargeAirTemperature.pointExists()) {
             val dischargeAirFlow = getDischargeAirTempView()
             dischargeAirFlow.shouldTakeFullRow = false
             detailViewItems[dischargeAirFlow.id.toString()] = dischargeAirFlow
@@ -318,8 +322,29 @@ class HyperStatSplitHelper(
     }
 
 
-    private fun getSupplyWaterTempView(): DetailedViewItem {
-        return DetailedViewItem()
+    private fun getSupplyWaterTempView(shouldTakeFullRow: Boolean = true): DetailedViewItem {
+        equip as Pipe2UVEquip
+        var supplyTemp = equip.leavingWaterTemperature.readHisVal().toString()
+        if (UnitUtils.isCelsiusTunerAvailableStatus()) {
+            val converted =
+                UnitUtils.fahrenheitToCelsiusTwoDecimal(supplyTemp.toDouble())
+            supplyTemp = "%.2f °C".format(converted)
+        } else {
+            supplyTemp = "$supplyTemp ℉"
+        }
+
+        return DetailedViewItem(
+            id = equip.leavingWaterTemperature.id,
+            disName = SUPPLY_WATER_TEMPERATURE,
+            currentValue = supplyTemp,
+            selectedIndex = 0,
+            dropdownOptions = emptyList(),
+            usesDropdown = false,
+            point = equip.leavingWaterTemperature,
+            configuration = configuration,
+            displayOrder = 5,
+            shouldTakeFullRow = shouldTakeFullRow
+        )
     }
 
 

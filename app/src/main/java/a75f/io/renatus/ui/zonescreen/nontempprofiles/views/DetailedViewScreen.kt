@@ -208,7 +208,17 @@ fun ExternalPointsList(
             )
         }
 
-        if (nonTempProfileViewModel.showLoader.value) {
+        var showMinLoader by remember { mutableStateOf(true) }
+
+        LaunchedEffect(Unit) {
+            delay(1000)
+            showMinLoader = false
+        }
+
+        val showLoader =
+            showMinLoader || (nonTempProfileViewModel.showLoader.value && pointList.isEmpty())
+
+        if (showLoader) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize(),

@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.sse.SingleStageProfile
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration
+import a75f.io.logic.bo.building.system.resetConfigDisabledPorts
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.getSchedule
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
@@ -40,7 +41,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -259,6 +259,11 @@ open class SseProfileViewModel : ViewModel() {
                 hayStack.site!!.id,
                 equipDis,
                 true
+            )
+
+            resetConfigDisabledPorts(
+                profileConfiguration.getRelayLogicalPhysicalMap(equipId),
+                profileConfiguration.getAnalogOutLogicalPhysicalMap(equipId)
             )
             val deviceName = when (nodeType) {
                 NodeType.HELIO_NODE -> "-HN-"

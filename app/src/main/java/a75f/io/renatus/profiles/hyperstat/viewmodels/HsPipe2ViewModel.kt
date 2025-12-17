@@ -20,6 +20,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getHSPipe2FanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
+import a75f.io.logic.bo.building.system.resetConfigDisabledPorts
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.util.modifyConditioningMode
 import a75f.io.logic.util.modifyFanMode
@@ -128,6 +129,11 @@ class HsPipe2ViewModel(application: Application) : HyperStatViewModel(applicatio
             CcuLog.i(Domain.LOG_TAG, "Pipe2 profile added")
         } else {
             equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, getEquipDis(), true)
+
+            resetConfigDisabledPorts(
+                profileConfiguration.getRelayLogicalPhysicalMap(equipRef!!),
+                profileConfiguration.getAnalogOutLogicalPhysicalMap(equipRef!!)
+            )
             val entityMapper = EntityMapper(equipModel)
             val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
             CcuLog.i(Domain.LOG_TAG, " updateDeviceAndPoints")

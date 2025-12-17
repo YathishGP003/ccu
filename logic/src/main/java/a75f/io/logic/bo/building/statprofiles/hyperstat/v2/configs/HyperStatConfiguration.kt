@@ -3,6 +3,11 @@ package a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.RawPoint
 import a75f.io.api.haystack.Tags
+import a75f.io.domain.api.Domain
+import a75f.io.domain.api.PhysicalPoint
+import a75f.io.domain.api.Point
+import a75f.io.domain.devices.HyperStatDevice
+import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -45,6 +50,31 @@ abstract class HyperStatConfiguration(
             if (analogOut2Enabled.enabled) add(Pair(true, analogOut2Association.associationVal))
             if (analogOut3Enabled.enabled) add(Pair(true, analogOut3Association.associationVal))
         }
+    }
+
+    // This method is expected to be called when the equip and device are already present in the Domain
+    fun getRelayLogicalPhysicalMap(equipId: String): Map<Point, PhysicalPoint> {
+        val map: MutableMap<Point, PhysicalPoint> = HashMap()
+        val equip =  Domain.equips[equipId] as HyperStatEquip
+        val device = Domain.devices[equipId] as HyperStatDevice
+        map[equip.relay1OutputEnable] = device.relay1
+        map[equip.relay2OutputEnable] = device.relay2
+        map[equip.relay3OutputEnable] = device.relay3
+        map[equip.relay4OutputEnable] = device.relay4
+        map[equip.relay5OutputEnable] = device.relay5
+        map[equip.relay6OutputEnable] = device.relay6
+        return map
+    }
+
+    // This method is expected to be called when the equip and device are already present in the Domain
+    fun getAnalogOutLogicalPhysicalMap(equipId: String): Map<Point, PhysicalPoint> {
+        val map: MutableMap<Point, PhysicalPoint> = HashMap()
+        val equip = Domain.equips[equipId] as HyperStatEquip
+        val device = Domain.devices[equipId] as HyperStatDevice
+        map[equip.analog1OutputEnable] = device.analog1Out
+        map[equip.analog2OutputEnable] = device.analog2Out
+        map[equip.analog3OutputEnable] = device.analog3Out
+        return map
     }
 
     fun isAnyRelayEnabledAssociated(relays: List<Pair<Boolean, Int>> = emptyList(), association: Int): Boolean {
@@ -141,7 +171,6 @@ abstract class HyperStatConfiguration(
             } else if(portDict.has(Tags.UNUSED)) {
                 port.removeMarkerIfExists(Tags.WRITABLE)
                 port.removeMarkerIfExists(Tags.UNUSED)
-                hayStack.clearAllAvailableLevelsInPoint(port.build().id)
             }
             val buildPoint = port.build()
             hayStack.updatePoint(buildPoint, buildPoint.id)

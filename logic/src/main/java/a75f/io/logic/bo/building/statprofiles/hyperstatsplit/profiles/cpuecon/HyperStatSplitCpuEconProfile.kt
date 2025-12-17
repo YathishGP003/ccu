@@ -110,7 +110,6 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
         evaluateOAOLoop(basicSettings, isCondensateTripped, outsideDamperMinOpen, config, highestCoolingStages, hssEquip.oaoDamper.pointExists(), hssEquip)
 
         updateOccupancyDetection(hssEquip)
-        updateLoopOutputs(hssEquip)
 
         if (equipOccupancyHandler != null) {
             occupancyStatus = equipOccupancyHandler.currentOccupiedMode

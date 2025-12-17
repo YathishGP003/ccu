@@ -24,7 +24,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
-import a75f.io.logic.bo.building.system.getAnalogOutLogicalPhysicalMap
+import a75f.io.logic.bo.building.system.getCMAnalogOutLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.getCMRelayLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.getConnectAnalogOutLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.getConnectRelayLogicalPhysicalMap
@@ -682,7 +682,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         if (isEquipPaired) {
             val systemEquip = getAdvancedAhuSystemEquip()
             val analogName = getAnalogNameForIndex(analogIndex)
-            return getAnalogOutLogicalPhysicalMap(systemEquip).values.find { it.domainName == analogName }
+            return getCMAnalogOutLogicalPhysicalMap(systemEquip).values.find { it.domainName == analogName }
         }
         return null
     }
@@ -726,7 +726,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                 it.value.writePointValue(0.0)
             }
         }
-        getAnalogOutLogicalPhysicalMap(getAdvancedAhuSystemEquip()).forEach {
+        getCMAnalogOutLogicalPhysicalMap(getAdvancedAhuSystemEquip()).forEach {
             if (it.key.readDefaultVal() == 0.0) {
                 it.value.writePointValue(0.0)
             }

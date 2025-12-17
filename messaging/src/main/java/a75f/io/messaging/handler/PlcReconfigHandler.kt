@@ -6,6 +6,7 @@ import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
@@ -77,8 +78,22 @@ fun updateConfigPoint(msgObject: JsonObject, configPoint: Point) {
         DomainName.useAnalogIn2ForSetpoint -> config.useAnalogIn2ForSetpoint.enabled =
             sensorTypeValue > 0
 
-        DomainName.relay1OutputEnable -> config.relay1OutputEnable.enabled = sensorTypeValue > 0
-        DomainName.relay2OutputEnable -> config.relay2OutputEnable.enabled = sensorTypeValue > 0
+        DomainName.relay1OutputEnable -> {
+            val relay1ConfigEnabled = sensorTypeValue > 0
+            config.relay1OutputEnable.enabled = relay1ConfigEnabled
+            if(!relay1ConfigEnabled) {
+                val deviceId = hayStack.readId("device and addr == \"$address\"")
+                (PhysicalPoint(DomainName.relay1, deviceId)).writePointValue(0.0)
+            }
+        }
+        DomainName.relay2OutputEnable -> {
+            val relay2ConfigEnabled = sensorTypeValue > 0
+            config.relay2OutputEnable.enabled = relay2ConfigEnabled
+            if(!relay2ConfigEnabled) {
+                val deviceId = hayStack.readId("device and addr == \"$address\"")
+                (PhysicalPoint(DomainName.relay2, deviceId)).writePointValue(0.0)
+            }
+        }
         else -> {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Not a dependent/associate point : $configPoint")
         }
@@ -178,7 +193,7 @@ private fun writePointFromJson(configPoint: Point, msgObject: JsonObject, haySta
         val who = msgObject[HayStackConstants.WRITABLE_ARRAY_WHO].asString
 
         val `val` = msgObject[HayStackConstants.WRITABLE_ARRAY_VAL].asDouble
-        val durationDiff = returnDurationDiff(msgObject);
+        val durationDiff = returnDurationDiff(msgObject)
         hayStack.writePointLocal(id, level, who, `val`, durationDiff)
         CcuLog.d(
             L.TAG_CCU_PUBNUB,

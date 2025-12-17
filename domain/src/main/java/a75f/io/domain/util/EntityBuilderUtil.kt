@@ -23,7 +23,11 @@ fun extractAndAppendExternalEdits(oldPointDef : ModelPointDef?, newPoint : Point
     }
     val dbPoint = Point.Builder().setHashMap(oldPoint).build()
     getExternallyAddedTags(oldPointDef.tags, oldPoint).forEach {
-        newPoint.tags[it.key] = it.value
+        if(it.value.toString() == "marker") {
+            newPoint.markers.add(it.key)
+        } else {
+            newPoint.tags[it.key] = it.value
+        }
     }
     if (oldPointDef.name != extractDisplayName(dbPoint)) {
         CcuLog.i(Domain.LOG_TAG, "dis override detected ${oldPointDef.name}   db point dis Name:  ${dbPoint.displayName}  -> extracted DomainName: ${extractDisplayName(dbPoint)}")
@@ -44,7 +48,11 @@ fun extractAndAppendExternalEdits(oldPointDef : ModelPointDef?, newPoint : RawPo
     }
     val dbPoint = RawPoint.Builder().setHDict(oldPointDict).build()
     getExternallyAddedTags(oldPointDef.tags, oldPointDict).forEach {
-        newPoint.tags[it.key] = it.value
+        if(it.value.toString() == "marker") {
+            newPoint.markers.add(it.key)
+        } else {
+            newPoint.tags[it.key] = it.value
+        }
     }
     if (oldPointDef.name != dbPoint.displayName) {
         CcuLog.i(Domain.LOG_TAG, "dis override detected ${oldPointDef.name} - ${dbPoint.displayName}")

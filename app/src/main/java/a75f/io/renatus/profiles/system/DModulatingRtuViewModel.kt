@@ -6,6 +6,7 @@ import a75f.io.device.mesh.MeshUtil
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.equips.DabModulatingRtuSystemEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EntityMapper
@@ -20,6 +21,9 @@ import a75f.io.logic.bo.building.hvac.ModulatingProfileAnalogMapping
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
 import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu
+import a75f.io.logic.bo.building.system.getCMAnalogOutLogicalPhysicalMap
+import a75f.io.logic.bo.building.system.getCMRelayLogicalPhysicalMap
+import a75f.io.logic.bo.building.system.resetConfigDisabledPorts
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu
 import a75f.io.logic.bo.building.system.vav.config.DabModulatingRtuProfileConfig
 import a75f.io.logic.bo.haystack.device.ControlMote
@@ -126,6 +130,12 @@ open class DModulatingRtuViewModel : ViewModel() {
             isReconfiguration = true
         )
 
+        (Domain.systemEquip as DabModulatingRtuSystemEquip).apply {
+            resetConfigDisabledPorts(
+                getCMRelayLogicalPhysicalMap(this),
+                getCMAnalogOutLogicalPhysicalMap(this)
+            )
+        }
         deviceBuilder.updateDeviceAndPoints(
             profileConfiguration,
             deviceModel,

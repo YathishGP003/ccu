@@ -1,14 +1,16 @@
 package a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles
 
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.api.Point
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.ValueConfig
+import a75f.io.domain.devices.HyperStatSplitDevice
 import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.statprofiles.StatProfileConfiguration
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
+import a75f.io.logic.bo.building.statprofiles.StatProfileConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuAnalogControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuConfiguration
@@ -297,6 +299,32 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
                 conditioningMode.writePointValue(StandaloneConditioningMode.COOL_ONLY.ordinal.toDouble())
             }
         }
+    }
+
+    fun getRelayLogicalPhysicalMap(equipId: String): Map<Point, PhysicalPoint> {
+        val map: MutableMap<Point, PhysicalPoint> = HashMap()
+        val equip = Domain.equips[equipId] as HyperStatSplitEquip
+        val device = Domain.devices[equipId] as HyperStatSplitDevice
+        map[equip.relay1OutputEnable] = device.relay1
+        map[equip.relay2OutputEnable] = device.relay2
+        map[equip.relay3OutputEnable] = device.relay3
+        map[equip.relay4OutputEnable] = device.relay4
+        map[equip.relay5OutputEnable] = device.relay5
+        map[equip.relay6OutputEnable] = device.relay6
+        map[equip.relay7OutputEnable] = device.relay7
+        map[equip.relay8OutputEnable] = device.relay8
+        return map
+    }
+
+    fun getAnalogOutLogicalPhysicalMap(equipId: String): Map<Point, PhysicalPoint> {
+        val map: MutableMap<Point, PhysicalPoint> = HashMap()
+        val equip = Domain.equips[equipId] as HyperStatSplitEquip
+        val device = Domain.devices[equipId] as HyperStatSplitDevice
+        map[equip.analog1OutputEnable] = device.analog1Out
+        map[equip.analog2OutputEnable] = device.analog2Out
+        map[equip.analog3OutputEnable] = device.analog3Out
+        map[equip.analog4OutputEnable] = device.analog4Out
+        return map
     }
 }
 

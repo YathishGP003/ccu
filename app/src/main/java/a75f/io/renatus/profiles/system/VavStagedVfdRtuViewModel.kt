@@ -3,6 +3,7 @@ package a75f.io.renatus.profiles.system
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
+import a75f.io.domain.equips.VavStagedVfdSystemEquip
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.hasChanges
 import a75f.io.domain.util.CommonQueries
@@ -11,6 +12,9 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.Stage
+import a75f.io.logic.bo.building.system.getCMAnalogOutLogicalPhysicalMap
+import a75f.io.logic.bo.building.system.getCMRelayLogicalPhysicalMap
+import a75f.io.logic.bo.building.system.resetConfigDisabledPorts
 import a75f.io.logic.bo.building.system.setFanTypeToStages
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd
@@ -155,6 +159,13 @@ class VavStagedVfdRtuViewModel : StagedRtuProfileViewModel() {
                 vfdViewState.updateConfigFromViewState(vfdConfig)
                 val equipDis = "${hayStack.siteName}-${model.name}"
                 equipBuilder.updateEquipAndPoints(vfdConfig, model, hayStack.site!!.id, equipDis, isReconfiguration = true)
+
+                (Domain.systemEquip as VavStagedVfdSystemEquip).apply {
+                    resetConfigDisabledPorts(
+                        getCMRelayLogicalPhysicalMap(this),
+                        getCMAnalogOutLogicalPhysicalMap(this)
+                    )
+                }
 
                 deviceBuilder.updateDeviceAndPoints(
                     vfdConfig,

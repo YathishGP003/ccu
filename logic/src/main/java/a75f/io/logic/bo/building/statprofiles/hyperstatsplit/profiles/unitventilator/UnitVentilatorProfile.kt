@@ -51,6 +51,8 @@ abstract class UnitVentilatorProfile(equipRef: String, nodeAddress: Short, tag: 
         } else {
             saTemperingLoopOutput = 0
         }
+
+        updateLoopOutput(hssEquip, DomainName.saTemperingLoopOutput)
     }
 
     /**

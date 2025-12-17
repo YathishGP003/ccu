@@ -56,16 +56,15 @@ private fun fillHyperStatControls(buildr: HyperStatControlsMessage_t.Builder, eq
         if (!Globals.getInstance().isTestMode) {
             if (logicalPointRef == null) {
                 CcuLog.e(L.TAG_CCU_DEVICE, "Logical point ref is missing for ${port.domainName}")
-                port.writePointValue(0.0)
             } else {
                 // For Relay we have Relay N/O and for analog we have 0-10V (configured)
                 if (isRelay.not()) {
-                    val logicalValue = hayStack.readHisValById(logicalPointRef).toInt().toShort()
+                    val logicalValue = hayStack.readPointValue(logicalPointRef).toInt().toShort()
                     val voltage = mapAnalogOut(port.readPoint().type, logicalValue)
                     port.writePointValue(voltage.toDouble())
                 } else {
                     // it is relay
-                    port.writePointValue(hayStack.readHisValById(logicalPointRef))
+                    port.writePointValue(hayStack.readPointValue(logicalPointRef))
                 }
             }
         }

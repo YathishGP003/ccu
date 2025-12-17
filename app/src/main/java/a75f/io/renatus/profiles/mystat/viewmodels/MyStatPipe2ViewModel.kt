@@ -20,6 +20,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getMyStatConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPipe2FanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
+import a75f.io.logic.bo.building.system.resetConfigDisabledPorts
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.util.modifyConditioningMode
 import a75f.io.logic.util.modifyFanMode
@@ -133,6 +134,11 @@ class MyStatPipe2ViewModel(application: Application) : MyStatViewModel(applicati
                 hayStack.site!!.id,
                 getEquipDis(),
                 true
+            )
+
+            resetConfigDisabledPorts(
+                profileConfiguration.getRelayLogicalPhysicalMap(equipRef!!),
+                profileConfiguration.getUniversalOutLogicalPhysicalMap(equipRef!!)
             )
             val entityMapper = EntityMapper(equipModel)
             val deviceBuilder = DeviceBuilder(hayStack, entityMapper)

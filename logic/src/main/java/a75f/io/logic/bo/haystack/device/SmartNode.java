@@ -616,8 +616,6 @@ public class SmartNode
             p.setEnabled(enabled);
             if(enabled && p.getMarkers().contains(Tags.WRITABLE)) {
                 p.getMarkers().remove(Tags.WRITABLE);
-                hayStack.clearAllAvailableLevelsInPoint(p.getId());
-                hayStack.writeHisValById(p.getId(), 0.0);
             }
             hayStack.updatePoint(p,p.getId());
             hayStack.writeHisValById(p.getId(), 0.0);

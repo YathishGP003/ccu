@@ -65,18 +65,20 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
     }
 
     public void handleAnalogOutControl(DabStagedVfdSystemEquip vfdSystemEquip) {
-        int association = (int) vfdSystemEquip.getAnalog2OutputAssociation().readDefaultVal();
-        AnalogMapping mapping = AnalogMapping.values()[association];
-        switch (mapping) {
-            case FAN_SPEED:
-                handleFanSpeed(vfdSystemEquip);
-                break;
-            case COMPRESSOR_SPEED:
-                handleCompressorSpeed(vfdSystemEquip);
-                break;
-            case DCV_MODULATION:
-                handleDcvModulation(vfdSystemEquip);
-                break;
+        if(vfdSystemEquip.getAnalog2OutputEnable().readDefaultVal() > 0) {
+            int association = (int) vfdSystemEquip.getAnalog2OutputAssociation().readDefaultVal();
+            AnalogMapping mapping = AnalogMapping.values()[association];
+            switch (mapping) {
+                case FAN_SPEED:
+                    handleFanSpeed(vfdSystemEquip);
+                    break;
+                case COMPRESSOR_SPEED:
+                    handleCompressorSpeed(vfdSystemEquip);
+                    break;
+                case DCV_MODULATION:
+                    handleDcvModulation(vfdSystemEquip);
+                    break;
+            }
         }
     }
 

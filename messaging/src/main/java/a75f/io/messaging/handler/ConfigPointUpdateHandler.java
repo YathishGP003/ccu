@@ -9,7 +9,6 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
@@ -38,7 +37,6 @@ import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import a75f.io.logic.bo.building.system.vav.config.DabModulatingRtuProfileConfig;
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig;
-import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig;
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
@@ -106,6 +104,8 @@ class ConfigPointUpdateHandler {
         double val = msgObject.get("val").getAsDouble();
 
         CcuLog.e(L.TAG_CCU_PUBNUB, "System profile "+systemProfile.getClass().getSimpleName() + " configType: " + configType + " val: " + val);
+
+        resetDevicePortIfConfigDisabled(configPoint, val);
 
         if (systemProfile instanceof DabFullyModulatingRtu) {
             SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getDabModulatingRtuModelDef();
@@ -253,12 +253,10 @@ class ConfigPointUpdateHandler {
                 ControlMote.getSystemEquipPointsDomainNameWithCmPortsDomainName().get(configPoint.getDomainName()));
         if(cmDevicePort != null  && val == 1 && cmDevicePort.getMarkers().contains(Tags.WRITABLE)){
             CcuLog.d(L.TAG_CCU_PUBNUB,"remove Writable Tag From CMDevicePort "+cmDevicePort.getDisplayName());
-            hayStack.clearAllAvailableLevelsInPoint(cmDevicePort.getId());
             if(cmDevicePort.getMarkers().contains(Tags.UNUSED)) {
                 cmDevicePort.getMarkers().remove(Tags.WRITABLE);
                 cmDevicePort.getMarkers().remove(Tags.UNUSED);
             }
-            hayStack.writeHisValById(cmDevicePort.getId(), 0.0);
             hayStack.updatePoint(cmDevicePort, cmDevicePort.getId());
         }
     }
@@ -506,5 +504,15 @@ class ConfigPointUpdateHandler {
         return null;
     }
 
+    private static void resetDevicePortIfConfigDisabled(Point configPoint, double val) {
+        if (val == 0) {
+            RawPoint cmDevicePort = Domain.cmBoardDevice.getPortsDomainNameWithPhysicalPoint().get(
+                ControlMote.getSystemEquipPointsDomainNameWithCmPortsDomainName().get(configPoint.getDomainName()));
+            if (cmDevicePort != null)  {
+                CcuLog.d(L.TAG_CCU_PUBNUB,"Reset CMDevicePort "+cmDevicePort.getDisplayName()+" as config is disabled");
+                CCUHsApi.getInstance().writePointValue(CCUHsApi.getInstance().readMapById(cmDevicePort.getId()), 0.0);
+            }
+        }
+    }
 }
 

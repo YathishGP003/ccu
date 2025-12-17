@@ -4,6 +4,7 @@ package a75f.io.logic.bo.building.system.vav;
  * Created by samjithsadasivan on 8/14/18.
  */
 
+import static a75f.io.logic.L.TAG_CCU_SYSTEM;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
 import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getAnalogMax;
 import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getAnalogMin;
@@ -170,12 +171,9 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
         SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getVavModulatingRtuModelDef();
         ModulatingRtuProfileConfig config = new ModulatingRtuProfileConfig(model).getActiveConfiguration();
 
-        Domain.cmBoardDevice.getAnalog1Out().writePointValue(getAnalog1Output(config));
-        Domain.cmBoardDevice.getAnalog2Out().writePointValue(getAnalog2Output(config));
-        Domain.cmBoardDevice.getAnalog3Out().writePointValue(getAnalog3Output(config));
-        Domain.cmBoardDevice.getAnalog4Out().writePointValue(getAnalog4Output(config));
+        updateAnalogOuts(config);
 
-        CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp "+systemCoolingLoopOp+ " systemHeatingLoopOp "+ systemHeatingLoopOp
+        CcuLog.d(TAG_CCU_SYSTEM, "systemCoolingLoopOp "+systemCoolingLoopOp+ " systemHeatingLoopOp "+ systemHeatingLoopOp
                                    +" systemFanLoopOp "+systemFanLoopOp+" systemCompressorLoopOp "+systemCompressorLoop
                                    +" systemCo2LoopOp "+systemCo2LoopOp);
 
@@ -188,8 +186,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
         setSystemPoint("operating and mode", VavSystemController.getInstance().systemState.ordinal());
         String systemStatus = getStatusMessage();
         String scheduleStatus = ScheduleManager.getInstance().getSystemStatusString();
-        CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: "+systemStatus);
-        CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " +scheduleStatus);
+        CcuLog.d(TAG_CCU_SYSTEM, "StatusMessage: "+systemStatus);
+        CcuLog.d(TAG_CCU_SYSTEM, "ScheduleStatus: " +scheduleStatus);
         if (!systemEquip.getEquipStatusMessage().readDefaultStrVal().equals(systemStatus)) {
             systemEquip.getEquipStatusMessage().writeDefaultVal(systemStatus);
             Globals.getInstance().getApplicationContext().sendBroadcast(new Intent(ACTION_STATUS_CHANGE));
@@ -206,7 +204,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
                 (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO)) {
             double satSpMax = systemEquip.getSatSPMax().readPriorityVal();
             double satSpMin = systemEquip.getSatSPMin().readPriorityVal();
-            CcuLog.d(L.TAG_CCU_SYSTEM, "satSpMax :" + satSpMax + " satSpMin: " + satSpMin + " SAT: " + getSystemSAT());
+            CcuLog.d(TAG_CCU_SYSTEM, "satSpMax :" + satSpMax + " satSpMin: " + satSpMin + " SAT: " + getSystemSAT());
             /*
                 During Unoccupied Mode, AHU should only run if a sufficient # of zones are generating SAT requests. Once enabled,
                 AHU should run until all zones are satisfied.
@@ -221,14 +219,14 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
                 int systemSATRequests = getSystemSATRequests();
                 double systemSATIgnores = systemEquip.getSatIgnoreRequest().readPriorityVal();
                 if ((!setupModeActive) && systemSATRequests > systemSATIgnores) {
-                    CcuLog.i(L.TAG_CCU_SYSTEM, "# of zone SAT Requests (" + systemSATRequests + ") is above threshold of " + systemSATIgnores + "; system entering setup mode for unoccupied conditioning");
+                    CcuLog.i(TAG_CCU_SYSTEM, "# of zone SAT Requests (" + systemSATRequests + ") is above threshold of " + systemSATIgnores + "; system entering setup mode for unoccupied conditioning");
                     setupModeActive = true;
                 }
                 if (setupModeActive) {
                     systemCoolingLoopOp = (int) ((satSpMax - getSystemSAT())  * 100 / (satSpMax - satSpMin)) ;
                     // Once systemSATRequests has dropped to zero, exit setup mode
                     if (systemSATRequests == 0 && lastSystemSATRequests == 0) {
-                        CcuLog.i(L.TAG_CCU_SYSTEM, "No more zone SAT requests and 0 coolingLoopOutput; system exiting unoccupied Setup Mode");
+                        CcuLog.i(TAG_CCU_SYSTEM, "No more zone SAT requests and 0 coolingLoopOutput; system exiting unoccupied Setup Mode");
                         setupModeActive = false;
                     }
                 } else {
@@ -287,7 +285,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
             double spSpMax = systemEquip.getStaticPressureSPMax().readPriorityVal();
             double spSpMin = systemEquip.getStaticPressureSPMin().readPriorityVal();
 
-            CcuLog.d(L.TAG_CCU_SYSTEM,"spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SP: "+getStaticPressure());
+            CcuLog.d(TAG_CCU_SYSTEM,"spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SP: "+getStaticPressure());
 
             // If schedule is Unoccupied, fan should only run if there is conditioning. In this case, that translates to CoolingLoopOp > 0.
             if (isSystemOccupied() || systemCoolingLoopOp > 0) {
@@ -336,48 +334,18 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
         systemCompressorLoop = systemEquip.getCompressorLoopOutput().readHisVal();
     }
 
-    private double getAnalog1Output(ModulatingRtuProfileConfig config) {
-        double signal = 0;
-        if (config.analog1OutputEnable.getEnabled()) {
-            ModulatingRtuAnalogOutMinMaxConfig minMaxConfig = config.getAnalog1OutMinMaxConfig();
-            int analog1Association = config.analog1OutputAssociation.getAssociationVal();
-            ModulatingProfileAnalogMapping analogMapping = ModulatingProfileAnalogMapping.values()[analog1Association];
-            signal = getAnalogOut(minMaxConfig, analogMapping);
+    private void updateAnalogOutPortValue (
+            PhysicalPoint analogOutPoint,
+            boolean analogOutConfigEnabled,
+            ModulatingRtuAnalogOutMinMaxConfig minMaxConfig,
+            int analogOutAssociation
+    ) {
+        if (analogOutConfigEnabled) {
+            ModulatingProfileAnalogMapping analogMapping = ModulatingProfileAnalogMapping.values()[analogOutAssociation];
+            analogOutPoint.writePointValue(getAnalogOut(minMaxConfig, analogMapping));
+        } else {
+            CcuLog.d(TAG_CCU_SYSTEM, "Not performing writePointVal for disbaled analog outs");
         }
-        return signal;
-    }
-
-    private double getAnalog2Output(ModulatingRtuProfileConfig config) {
-        double signal = 0;
-        if (config.analog2OutputEnable.getEnabled()) {
-            ModulatingRtuAnalogOutMinMaxConfig minMaxConfig = config.getAnalog2OutMinMaxConfig();
-            int analog2Association = config.analog2OutputAssociation.getAssociationVal();
-            ModulatingProfileAnalogMapping analogMapping = ModulatingProfileAnalogMapping.values()[analog2Association];
-            signal = getAnalogOut(minMaxConfig, analogMapping);
-        }
-        return signal;
-    }
-
-    private double getAnalog3Output(ModulatingRtuProfileConfig config) {
-        double signal = 0;
-        if (config.analog3OutputEnable.getEnabled()) {
-            ModulatingRtuAnalogOutMinMaxConfig minMaxConfig = config.getAnalog3OutMinMaxConfig();
-            int analog3Association = config.analog3OutputAssociation.getAssociationVal();
-            ModulatingProfileAnalogMapping analogMapping = ModulatingProfileAnalogMapping.values()[analog3Association];
-            signal = getAnalogOut(minMaxConfig, analogMapping);
-        }
-        return signal;
-    }
-
-    private double getAnalog4Output(ModulatingRtuProfileConfig config) {
-        double signal = 0;
-        if (config.analog4OutputEnable.getEnabled()) {
-            ModulatingRtuAnalogOutMinMaxConfig minMaxConfig = config.getAnalog4OutMinMaxConfig();
-            int analog4Association = config.analog4OutputAssociation.getAssociationVal();
-            ModulatingProfileAnalogMapping analogMapping = ModulatingProfileAnalogMapping.values()[analog4Association];
-            signal = getAnalogOut(minMaxConfig, analogMapping);
-        }
-        return signal;
     }
 
     private double getAnalogOut(ModulatingRtuAnalogOutMinMaxConfig minMaxConfig,
@@ -410,14 +378,14 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
                 signal = systemEquip.getHeatingSignal().readHisVal();
                 break;
         }
-        CcuLog.d(L.TAG_CCU_SYSTEM, "Analog Out Mapping: " + analogMapping + " Signal: " + signal);
+        CcuLog.d(TAG_CCU_SYSTEM, "Analog Out Mapping: " + analogMapping + " Signal: " + signal);
         return signal;
     }
 
     private int getCoolingSignal(ModulatingRtuAnalogOutMinMaxConfig minMaxConfig, ModulatingProfileAnalogMapping analogMapping) {
         double analogMin = getAnalogMin(minMaxConfig, analogMapping);
         double analogMax = getAnalogMax(minMaxConfig, analogMapping);
-        CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" SAT: "+getSystemSAT());
+        CcuLog.d(TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" SAT: "+getSystemSAT());
         if (isCoolingLockoutActive()) {
             return  (int)(analogMin * ANALOG_SCALE);
         } else {
@@ -534,7 +502,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object, Object> configPoint = hayStack.readEntity("point and system and config and "+tags);
         if (configPoint.isEmpty()) {
-            CcuLog.e(L.TAG_CCU_SYSTEM," !!!  System config point does not exist !!! - "+tags);
+            CcuLog.e(TAG_CCU_SYSTEM," !!!  System config point does not exist !!! - "+tags);
             return 0;
         }
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
@@ -545,7 +513,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object, Object> configPoint = hayStack.readEntity("point and system and config and output and enabled and "+config);
         if (configPoint.isEmpty()) {
-            CcuLog.e(L.TAG_CCU_SYSTEM," !!!  System config enable point does not exist !!! - "+config);
+            CcuLog.e(TAG_CCU_SYSTEM," !!!  System config enable point does not exist !!! - "+config);
             return 0;
         }
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
@@ -625,15 +593,42 @@ public class VavFullyModulatingRtu extends VavSystemProfile {
             double newState = 0;
             if (relay.readDefaultVal() > 0) {
                 ModulatingProfileRelayMapping mappedStage = ModulatingProfileRelayMapping.values()[(int) association.readDefaultVal()];
-                CcuLog.d(L.TAG_CCU_SYSTEM, "Updating relay: " + relay.getDomainName() +
+                CcuLog.d(TAG_CCU_SYSTEM, "Updating relay: " + relay.getDomainName() +
                         ", Association: " + association.getDomainName()+" mappedStage: " + mappedStage);
                 newState = getStageStatus(mappedStage);
                 logicalPhysicalMap.get(relay).writePointValue(newState);
-                CcuLog.i(L.TAG_CCU_SYSTEM, "Relay updated: " + relay.getDomainName() + ", Stage: " + mappedStage + ", State: " + newState);
+                CcuLog.i(TAG_CCU_SYSTEM, "Relay updated: " + relay.getDomainName() + ", Stage: " + mappedStage + ", State: " + newState);
             } else {
                 resetRelayIfDisabled(logicalPhysicalMap.get(relay));
             }
         });
+    }
+
+    private void updateAnalogOuts(ModulatingRtuProfileConfig config) {
+        updateAnalogOutPortValue(
+                Domain.cmBoardDevice.getAnalog1Out(),
+                config.analog1OutputEnable.getEnabled(),
+                config.getAnalog1OutMinMaxConfig(),
+                config.analog1OutputAssociation.getAssociationVal()
+        );
+        updateAnalogOutPortValue(
+                Domain.cmBoardDevice.getAnalog2Out(),
+                config.analog2OutputEnable.getEnabled(),
+                config.getAnalog2OutMinMaxConfig(),
+                config.analog2OutputAssociation.getAssociationVal()
+        );
+        updateAnalogOutPortValue(
+                Domain.cmBoardDevice.getAnalog3Out(),
+                config.analog3OutputEnable.getEnabled(),
+                config.getAnalog3OutMinMaxConfig(),
+                config.analog3OutputAssociation.getAssociationVal()
+        );
+        updateAnalogOutPortValue(
+                Domain.cmBoardDevice.getAnalog4Out(),
+                config.analog4OutputEnable.getEnabled(),
+                config.getAnalog4OutMinMaxConfig(),
+                config.analog4OutputAssociation.getAssociationVal()
+        );
     }
 
     private Map<a75f.io.domain.api.Point, a75f.io.domain.api.Point> getRelayAssiciationMap() {

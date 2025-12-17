@@ -996,8 +996,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
                     val domainName = analogOutAssociationToDomainName(association.readDefaultVal().toInt())
                     getDomainPointForName(domainName, systemEquip.cmEquip).writeHisVal(roundOff(logicalValue))
                 }
-            } else {
-                physicalMap?.get(analogOut)?.writePointValue(0.0)
             }
         }
     }
@@ -1026,8 +1024,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 if (relay.readDefaultVal() > 0) {
                     val domainName = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
                     physicalPoint?.writePointValue(getDomainPointForName(domainName, systemEquip.connectEquip1).readHisVal())
-                } else {
-                    physicalPoint?.writePointValue(0.0)
                 }
             }
         } else {
@@ -1037,8 +1033,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 if (relay.readDefaultVal() > 0) {
                     val domainName = relayAssociationToDomainName(association.readDefaultVal().toInt())
                     physicalPointMap[relay]?.writePointValue(getDomainPointForName(domainName, systemEquip.cmEquip).readHisVal())
-                } else {
-                    physicalPointMap[relay]?.writePointValue(0.0)
                 }
             }
         }

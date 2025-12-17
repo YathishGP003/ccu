@@ -8,6 +8,7 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.api.PhysicalPoint;
 import a75f.io.domain.logic.ProfileEquipBuilder;
 import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
@@ -51,9 +52,21 @@ class SSEConfigHandler {
             switch (configPoint.getDomainName()) {
                 case DomainName.relay1OutputEnable:
                     sseConfig.relay1EnabledState.setEnabled(val > 0);
+                    if(val == 0) {
+                        String deviceId = hayStack.readId("device and addr == \"" + address + "\"");
+                        (new PhysicalPoint(DomainName.relay1, deviceId)).writePointValue(0);
+//                        Map<Object, Object> relay1Map = hayStack.readEntity("domainName==\"" + DomainName.relay1 + "\" and deviceRef == \"" + deviceId + "\"");
+//                        hayStack.writePointValue(relay1Map, 0);
+                    }
                     break;
                 case DomainName.relay2OutputEnable:
                     sseConfig.relay2EnabledState.setEnabled(val > 0);
+                    if(val == 0) {
+                        String deviceId = hayStack.readId("device and addr == \"" + address + "\"");
+                        (new PhysicalPoint(DomainName.relay2, deviceId)).writePointValue(0);
+//                        Map<Object, Object> relay1Map = hayStack.readEntity("domainName==\"" + DomainName.relay2 + "\" and deviceRef == \"" + deviceId + "\"");
+//                        hayStack.writePointValue(relay1Map, 0);
+                    }
                     break;
                 case DomainName.analog1InputEnable:
                     sseConfig.analog1InEnabledState.setEnabled(val > 0);

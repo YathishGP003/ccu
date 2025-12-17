@@ -6,6 +6,7 @@ import a75f.io.device.mesh.MeshUtil
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.equips.VavModulatingRtuSystemEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EntityMapper
@@ -19,6 +20,9 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.ModulatingProfileAnalogMapping
 import a75f.io.logic.bo.building.statprofiles.util.PossibleConditioningMode
 import a75f.io.logic.bo.building.system.SystemMode
+import a75f.io.logic.bo.building.system.getCMAnalogOutLogicalPhysicalMap
+import a75f.io.logic.bo.building.system.getCMRelayLogicalPhysicalMap
+import a75f.io.logic.bo.building.system.resetConfigDisabledPorts
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.util.modifyConditioningMode
@@ -130,6 +134,12 @@ open class ModulatingRtuViewModel : ViewModel() {
             isReconfiguration = true
         )
 
+        (Domain.systemEquip as VavModulatingRtuSystemEquip).apply {
+            resetConfigDisabledPorts(
+                getCMRelayLogicalPhysicalMap(this),
+                getCMAnalogOutLogicalPhysicalMap(this)
+            )
+        }
         deviceBuilder.updateDeviceAndPoints(
             profileConfiguration,
             deviceModel,
@@ -223,5 +233,4 @@ open class ModulatingRtuViewModel : ViewModel() {
             Pair(isAnyAnalogMapped(ModulatingProfileAnalogMapping.Cooling.ordinal), isAnyAnalogMapped(ModulatingProfileAnalogMapping.Heating.ordinal))
         }
     }
-
 }

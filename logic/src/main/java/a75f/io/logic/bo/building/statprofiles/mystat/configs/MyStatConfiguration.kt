@@ -5,6 +5,7 @@ import a75f.io.api.haystack.RawPoint
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.api.Point
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.ValueConfig
@@ -154,7 +155,6 @@ abstract class MyStatConfiguration(
             } else if(portDict.has(Tags.UNUSED)) {
                 port.removeMarkerIfExists(Tags.WRITABLE)
                 port.removeMarkerIfExists(Tags.UNUSED)
-                hayStack.clearAllAvailableLevelsInPoint(port.build().id)
             }
             val buildPoint = port.build()
             hayStack.updatePoint(buildPoint, buildPoint.id)
@@ -275,6 +275,25 @@ abstract class MyStatConfiguration(
                 else -> 0
             }
         }
+    }
+
+    fun getRelayLogicalPhysicalMap(equipId: String): Map<Point, PhysicalPoint> {
+        val map: MutableMap<Point, PhysicalPoint> = HashMap()
+        val equip = Domain.equips[equipId] as MyStatEquip
+        val device = Domain.devices[equipId] as MyStatDevice
+        map[equip.relay1OutputEnable] = device.relay1
+        map[equip.relay2OutputEnable] = device.relay2
+        map[equip.relay3OutputEnable] = device.relay3
+        return map
+    }
+
+    fun getUniversalOutLogicalPhysicalMap(equipId: String): Map<Point, PhysicalPoint> {
+        val map: MutableMap<Point, PhysicalPoint> = HashMap()
+        val equip = Domain.equips[equipId] as MyStatEquip
+        val device = Domain.devices[equipId] as MyStatDevice
+        map[equip.universalOut1Enable] = device.universalOut1
+        map[equip.universalOut2Enable] = device.universalOut2
+        return map
     }
 }
 

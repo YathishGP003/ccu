@@ -1,5 +1,7 @@
 package a75f.io.messaging.handler;
 
+import static a75f.io.api.haystack.Tags.UNUSED;
+import static a75f.io.api.haystack.Tags.WRITABLE;
 import static a75f.io.api.haystack.CCUHsApi.INTENT_POINT_DELETED;
 import static a75f.io.api.haystack.CCUTagsDb.BROADCAST_BACNET_POINT_ADDED;
 import static a75f.io.logic.L.TAG_CCU_BACNET;
@@ -155,7 +157,13 @@ public class UpdateEntityHandler implements MessageHandler {
                 Device device = new Device.Builder().setHDict(row).build();
                 CCUHsApi.getInstance().tagsDb.updateDevice(device, entityId);
             } else if (row.has("physical") && row.get("physical") != null) {
-                RawPoint point = new RawPoint.Builder().setHDict((HDict) row).build();
+                RawPoint point = new RawPoint.Builder().setHDict(row).build();
+                CCUHsApi.getInstance().resetDevicePointValueUponWritableTagRemovalOrAddition(
+                        entityId,
+                        point.getMarkers().contains(WRITABLE),
+                        point.getMarkers().contains(UNUSED),
+                        point.getMarkers().contains(Tags.HIS)
+                );
                 CCUHsApi.getInstance().tagsDb.updatePoint(point, entityId);
             } else {
                 Point point = new Point.Builder().setHDict(row).build();
@@ -164,6 +172,11 @@ public class UpdateEntityHandler implements MessageHandler {
                 }
                 updateEquipRefIfRequired(point);
                 updatePointToBacnet(point, entityId);
+                CCUHsApi.getInstance().resetEquipPointValueUponWritableTagRemovalOrAddition(
+                        entityId,
+                        point.getMarkers().contains(Tags.WRITABLE),
+                        point.getMarkers().contains(Tags.HIS)
+                );
                 CCUHsApi.getInstance().tagsDb.updatePoint(point, entityId);
                 CcuLog.d(L.TAG_CCU_MESSAGING, "UpdateEntityHandler: point updated--> "+row);
             }

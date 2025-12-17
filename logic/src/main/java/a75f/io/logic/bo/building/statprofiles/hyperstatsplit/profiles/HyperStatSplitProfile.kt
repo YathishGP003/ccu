@@ -147,7 +147,7 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
 
     fun resetPoint(point: Point) {
         if (point.pointExists()) {
-            point.writeHisVal(0.0)
+            point.writePointValue(0.0)
         }
     }
     abstract fun resetAllLogicalPointValues()
@@ -157,9 +157,8 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
     fun resetLoops(hssEquip : HyperStatSplitEquip) {
         hssEquip.apply {
             listOf(
-                coolingLoopOutput, heatingLoopOutput, compressorLoopOutput,
-                fanLoopOutput, economizingLoopOutput, dcvLoopOutput,
-                outsideAirLoopOutput, outsideAirFinalLoopOutput
+                coolingLoopOutput, heatingLoopOutput, compressorLoopOutput, saTempLoopOutput,
+                fanLoopOutput, economizingLoopOutput, dcvLoopOutput, outsideAirFinalLoopOutput
             ).forEach { resetPoint(it) }
         }
         derivedFanLoopOutput.data = 0.0
@@ -316,27 +315,48 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
         }
     }
 
-    fun updateLoopOutputs(hssEquip: HyperStatSplitEquip) {
-        hssEquip.coolingLoopOutput.writePointValue(coolingLoopOutput.toDouble())
-        hssEquip.heatingLoopOutput.writePointValue(heatingLoopOutput.toDouble())
-        hssEquip.fanLoopOutput.writePointValue(fanLoopOutput.toDouble())
-        hssEquip.compressorLoopOutput.writePointValue(compressorLoopOutput.toDouble())
+    fun updateLoopOutput(hssEquip: HyperStatSplitEquip, tag: String) {
+        when(tag) {
+            DomainName.coolingLoopOutput -> {
+                hssEquip.coolingLoopOutput.writePointValue(coolingLoopOutput.toDouble())
+                coolingLoopOutput = hssEquip.coolingLoopOutput.readHisVal().toInt()
+            }
 
-        hssEquip.economizingLoopOutput.writePointValue(economizingLoopOutput.toDouble())
-        hssEquip.dcvLoopOutput.writePointValue(dcvLoopOutput.toDouble())
-        hssEquip.outsideAirLoopOutput.writePointValue(outsideAirLoopOutput.toDouble())
-        hssEquip.outsideAirFinalLoopOutput.writePointValue(outsideAirFinalLoopOutput.toDouble())
-        hssEquip.saTempLoopOutput.writePointValue(saTemperingLoopOutput.toDouble())
+            DomainName.heatingLoopOutput -> {
+                hssEquip.heatingLoopOutput.writePointValue(heatingLoopOutput.toDouble())
+                heatingLoopOutput = hssEquip.heatingLoopOutput.readHisVal().toInt()
+            }
 
-        coolingLoopOutput = hssEquip.coolingLoopOutput.readHisVal().toInt()
-        heatingLoopOutput = hssEquip.heatingLoopOutput.readHisVal().toInt()
-        fanLoopOutput = hssEquip.fanLoopOutput.readHisVal().toInt()
-        compressorLoopOutput = hssEquip.compressorLoopOutput.readHisVal().toInt()
-        economizingLoopOutput = hssEquip.economizingLoopOutput.readHisVal().toInt()
-        dcvLoopOutput = hssEquip.dcvLoopOutput.readHisVal().toInt()
-        outsideAirLoopOutput = hssEquip.outsideAirLoopOutput.readHisVal().toInt()
-        outsideAirFinalLoopOutput = hssEquip.outsideAirFinalLoopOutput.readHisVal().toInt()
-        saTemperingLoopOutput = hssEquip.saTempLoopOutput.readHisVal().toInt()
+            DomainName.compressorLoopOutput -> {
+                hssEquip.compressorLoopOutput.writePointValue(compressorLoopOutput.toDouble())
+                compressorLoopOutput = hssEquip.compressorLoopOutput.readHisVal().toInt()
+            }
+
+            DomainName.fanLoopOutput -> {
+                hssEquip.fanLoopOutput.writePointValue(fanLoopOutput.toDouble())
+                fanLoopOutput = hssEquip.fanLoopOutput.readHisVal().toInt()
+            }
+
+            DomainName.economizingLoopOutput -> {
+                hssEquip.economizingLoopOutput.writePointValue(economizingLoopOutput.toDouble())
+                economizingLoopOutput = hssEquip.economizingLoopOutput.readHisVal().toInt()
+            }
+
+            DomainName.dcvLoopOutput -> {
+                hssEquip.dcvLoopOutput.writePointValue(dcvLoopOutput.toDouble())
+                dcvLoopOutput = hssEquip.dcvLoopOutput.readHisVal().toInt()
+            }
+
+            DomainName.outsideAirFinalLoopOutput -> {
+                hssEquip.outsideAirFinalLoopOutput.writePointValue(outsideAirFinalLoopOutput.toDouble())
+                outsideAirFinalLoopOutput = hssEquip.outsideAirFinalLoopOutput.readHisVal().toInt()
+            }
+
+            DomainName.saTemperingLoopOutput -> {
+                hssEquip.saTempLoopOutput.writePointValue(saTemperingLoopOutput.toDouble())
+                saTemperingLoopOutput = hssEquip.saTempLoopOutput.readHisVal().toInt()
+            }
+        }
     }
 
     override fun getNodeAddresses() : HashSet<Short> {
@@ -431,6 +451,7 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
                     currentTemp,
                     userIntents.coolingDesiredTemp
                 ).toInt().coerceAtLeast(0)
+                updateLoopOutput(hssEquip, DomainName.coolingLoopOutput)
             }
             //Update heatingLoop when the zone is in heating or it was in heating and no change over happened yet.
             ZoneState.HEATING -> {
@@ -438,6 +459,7 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
                     loopController.calculateHeatingLoopOutput(
                         userIntents.heatingDesiredTemp, currentTemp
                     ).toInt().coerceAtLeast(0)
+                updateLoopOutput(hssEquip, DomainName.heatingLoopOutput)
             }
 
             else -> logIt(" Zone is in deadband")
@@ -460,6 +482,9 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
         if (epidemicState == EpidemicState.PREPURGE) {
             fanLoopOutput = hssEquip.standalonePrePurgeFanSpeedTuner.readPriorityVal().toInt()
         }
+
+        updateLoopOutput(hssEquip, DomainName.fanLoopOutput)
+        updateLoopOutput(hssEquip, DomainName.compressorLoopOutput)
     }
 
     /**
@@ -620,8 +645,7 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
 
         val dcvAvailableNum = if (dcvAvailable) 1.0 else 0.0
         hssEquip.dcvAvailable.writeHisVal(dcvAvailableNum)
-        hssEquip.dcvLoopOutput.writePointValue(dcvLoopOutput.toDouble())
-        dcvLoopOutput = hssEquip.dcvLoopOutput.readHisVal().toInt()
+        updateLoopOutput(hssEquip, DomainName.dcvLoopOutput)
         hssEquip.outsideAirCalculatedMinDamper.writeHisVal(outsideAirCalculatedMinDamper.toDouble())
     }
 
@@ -810,6 +834,8 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
             economizingLoopOutput = 0
         }
 
+        updateLoopOutput(hssEquip, DomainName.economizingLoopOutput)
+
         val economizingAvailableNumber = if (economizingAvailable) 1.0 else 0.0
         hssEquip.economizingAvailable.writeHisVal(economizingAvailableNumber)
 
@@ -866,6 +892,10 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
 
             hssEquip.insideEnthalpy.writeHisVal(insideEnthalpy)
             hssEquip.outsideEnthalpy.writeHisVal(outsideEnthalpy)
+
+            updateLoopOutput(hssEquip, DomainName.dcvLoopOutput)
+            updateLoopOutput(hssEquip, DomainName.economizingLoopOutput)
+            updateLoopOutput(hssEquip, DomainName.outsideAirFinalLoopOutput)
 
         } else {
 
@@ -950,13 +980,13 @@ abstract class HyperStatSplitProfile(equipRef: String, var nodeAddress: Short, v
                 )
             }
 
+            updateLoopOutput(hssEquip, DomainName.outsideAirFinalLoopOutput)
+
             logIt(
                 " economizingLoopOutput " + economizingLoopOutput + " dcvLoopOutput " + dcvLoopOutput
                         + " outsideAirFinalLoopOutput " + outsideAirFinalLoopOutput + " effectiveOutsideDamperMinOpen " + effectiveOutsideDamperMinOpen
             )
 
-            hssEquip.outsideAirFinalLoopOutput.writePointValue(outsideAirFinalLoopOutput.toDouble())
-            outsideAirFinalLoopOutput = hssEquip.outsideAirFinalLoopOutput.readHisVal().toInt()
             hssEquip.oaoDamper.writeHisVal(outsideAirFinalLoopOutput.toDouble())
 
             val matThrottleNumber = if (matThrottle) 1.0 else 0.0

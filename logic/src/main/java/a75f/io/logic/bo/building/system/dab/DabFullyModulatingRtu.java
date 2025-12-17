@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.system.dab;
 
+import static a75f.io.logic.L.TAG_CCU_SYSTEM;
 import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
 import static a75f.io.logic.bo.building.system.ModulatingProfileUtil.getAnalogMax;
@@ -136,10 +137,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
 
         CcuLog.d(L.TAG_CCU_SYSTEM, config.toString());
 
-        Domain.cmBoardDevice.getAnalog1Out().writePointValue(getAnalog1Output(config));
-        Domain.cmBoardDevice.getAnalog2Out().writePointValue(getAnalog2Output(config));
-        Domain.cmBoardDevice.getAnalog3Out().writePointValue(getAnalog3Output(config));
-        Domain.cmBoardDevice.getAnalog4Out().writePointValue(getAnalog4Output(config));
+        updateAnalogOuts(config);
 
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp "+systemCoolingLoopOp+ " systemHeatingLoopOp "+ systemHeatingLoopOp
                 +" systemFanLoopOp "+systemFanLoopOp+" systemCompressorLoopOp "+systemCompressorLoop
@@ -366,48 +364,18 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
         return  (int)(analogMin * ANALOG_SCALE);
     }
 
-    private double getAnalog1Output(ModulatingRtuProfileConfig config) {
-        double signal = 0;
-        if (config.analog1OutputEnable.getEnabled()) {
-            ModulatingRtuAnalogOutMinMaxConfig minMaxConfig = config.getAnalog1OutMinMaxConfig();
-            int analog1Association = config.analog1OutputAssociation.getAssociationVal();
-            ModulatingProfileAnalogMapping analogMapping = ModulatingProfileAnalogMapping.values()[analog1Association];
-            signal = getAnalogOut(minMaxConfig, analogMapping);
+    private void updateAnalogOutPortValue (
+            PhysicalPoint analogOutPoint,
+            boolean analogOutConfigEnabled,
+            ModulatingRtuAnalogOutMinMaxConfig minMaxConfig,
+            int analogOutAssociation
+    ) {
+        if (analogOutConfigEnabled) {
+            ModulatingProfileAnalogMapping analogMapping = ModulatingProfileAnalogMapping.values()[analogOutAssociation];
+            analogOutPoint.writePointValue(getAnalogOut(minMaxConfig, analogMapping));
+        } else {
+            CcuLog.d(TAG_CCU_SYSTEM, "Not performing writePointVal for disbaled analog outs");
         }
-        return signal;
-    }
-
-    private double getAnalog2Output(ModulatingRtuProfileConfig config) {
-        double signal = 0;
-        if (config.analog2OutputEnable.getEnabled()) {
-            ModulatingRtuAnalogOutMinMaxConfig minMaxConfig = config.getAnalog2OutMinMaxConfig();
-            int analog2Association = config.analog2OutputAssociation.getAssociationVal();
-            ModulatingProfileAnalogMapping analogMapping = ModulatingProfileAnalogMapping.values()[analog2Association];
-            signal = getAnalogOut(minMaxConfig, analogMapping);
-        }
-        return signal;
-    }
-
-    private double getAnalog3Output(ModulatingRtuProfileConfig config) {
-        double signal = 0;
-        if (config.analog3OutputEnable.getEnabled()) {
-            ModulatingRtuAnalogOutMinMaxConfig minMaxConfig = config.getAnalog3OutMinMaxConfig();
-            int analog3Association = config.analog3OutputAssociation.getAssociationVal();
-            ModulatingProfileAnalogMapping analogMapping = ModulatingProfileAnalogMapping.values()[analog3Association];
-            signal = getAnalogOut(minMaxConfig, analogMapping);
-        }
-        return signal;
-    }
-
-    private double getAnalog4Output(ModulatingRtuProfileConfig config) {
-        double signal = 0;
-        if (config.analog4OutputEnable.getEnabled()) {
-            ModulatingRtuAnalogOutMinMaxConfig minMaxConfig = config.getAnalog4OutMinMaxConfig();
-            int analog4Association = config.analog4OutputAssociation.getAssociationVal();
-            ModulatingProfileAnalogMapping analogMapping = ModulatingProfileAnalogMapping.values()[analog4Association];
-            signal = getAnalogOut(minMaxConfig, analogMapping);
-        }
-        return signal;
     }
 
     private double getAnalogOut(ModulatingRtuAnalogOutMinMaxConfig minMaxConfig,
@@ -591,5 +559,32 @@ public class DabFullyModulatingRtu extends DabSystemProfile {
         }
         CcuLog.e(L.TAG_CCU_SYSTEM, "No domain point found for stage: " + stage);
         return null;
+    }
+
+    private void updateAnalogOuts(ModulatingRtuProfileConfig config) {
+        updateAnalogOutPortValue(
+                Domain.cmBoardDevice.getAnalog1Out(),
+                config.analog1OutputEnable.getEnabled(),
+                config.getAnalog1OutMinMaxConfig(),
+                config.analog1OutputAssociation.getAssociationVal()
+        );
+        updateAnalogOutPortValue(
+                Domain.cmBoardDevice.getAnalog2Out(),
+                config.analog2OutputEnable.getEnabled(),
+                config.getAnalog2OutMinMaxConfig(),
+                config.analog2OutputAssociation.getAssociationVal()
+        );
+        updateAnalogOutPortValue(
+                Domain.cmBoardDevice.getAnalog3Out(),
+                config.analog3OutputEnable.getEnabled(),
+                config.getAnalog3OutMinMaxConfig(),
+                config.analog3OutputAssociation.getAssociationVal()
+        );
+        updateAnalogOutPortValue(
+                Domain.cmBoardDevice.getAnalog4Out(),
+                config.analog4OutputEnable.getEnabled(),
+                config.getAnalog4OutMinMaxConfig(),
+                config.analog4OutputAssociation.getAssociationVal()
+        );
     }
 }

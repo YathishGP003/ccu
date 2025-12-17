@@ -7,9 +7,9 @@ import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration
-import a75f.io.logic.bo.building.system.vav.config.DabModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.plc.PlcProfileConfig
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration
+import a75f.io.logic.bo.building.system.vav.config.DabModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
@@ -19,12 +19,11 @@ import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.renatus.profiles.acb.AcbProfileViewModel
 import a75f.io.renatus.profiles.dab.DabProfileViewModel
-import a75f.io.renatus.profiles.system.DabModulatingRtuViewModel
 import a75f.io.renatus.profiles.plc.PlcProfileViewModel
+import a75f.io.renatus.profiles.sse.SseProfileViewModel
+import a75f.io.renatus.profiles.system.DabModulatingRtuViewModel
 import a75f.io.renatus.profiles.system.DabStagedRtuViewModel
 import a75f.io.renatus.profiles.system.DabStagedVfdRtuViewModel
-import a75f.io.renatus.profiles.sse.SseProfileViewModel
-import a75f.io.renatus.profiles.oao.OAOViewModel
 import a75f.io.renatus.profiles.system.StagedRtuProfileViewModel
 import a75f.io.renatus.profiles.system.VavModulatingRtuViewModel
 import a75f.io.renatus.profiles.vav.VavProfileViewModel
@@ -32,7 +31,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
-import java.util.*
 import kotlin.system.measureTimeMillis
 
 open class UnusedPortsModel {
@@ -113,11 +111,9 @@ open class UnusedPortsModel {
                                     }
                                     (!unusedPortState && rawPoint.markers.contains(Tags.UNUSED)) -> {
                                         CcuLog.d(L.TAG_CCU_DOMAIN, "Removing writable tag - ${rawPoint.id}")
-                                        hayStack.clearAllAvailableLevelsInPoint(rawPoint.id)
                                         rawPoint.markers.remove(Tags.WRITABLE)
                                         rawPoint.markers.remove(Tags.UNUSED)
                                         hayStack.updatePoint(rawPoint, rawPoint.id)
-                                        hayStack.writeHisValById(rawPoint.id, 0.0)
                                     }
                                 }
                             } catch (e: Exception) {
@@ -166,10 +162,8 @@ open class UnusedPortsModel {
                         devicePort.markers.add(Tags.UNUSED)
                     } else if ((!portValue || devicePort.enabled) && devicePort.markers.contains(
                             Tags.UNUSED)) {
-                        hayStack.clearAllAvailableLevelsInPoint(devicePort.id)
                         devicePort.markers.remove(Tags.WRITABLE)
                         devicePort.markers.remove(Tags.UNUSED)
-                        hayStack.writeHisValById(devicePort.id, 0.0)
                     }
                     hayStack.updatePoint(devicePort, devicePort.id)
                 }

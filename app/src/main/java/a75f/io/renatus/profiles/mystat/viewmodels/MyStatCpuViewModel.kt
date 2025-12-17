@@ -21,17 +21,18 @@ import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMod
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
 import a75f.io.logic.bo.building.statprofiles.util.setConditioningMode
 import a75f.io.logic.bo.building.statprofiles.util.updateConditioningMode
+import a75f.io.logic.bo.building.system.resetConfigDisabledPorts
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.util.modifyConditioningMode
 import a75f.io.logic.util.modifyFanMode
 import a75f.io.renatus.FloorPlanFragment
+import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatCpuViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewStateUtil
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
-import a75f.io.renatus.R
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -129,6 +130,11 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
             CcuLog.i(Domain.LOG_TAG, "MyStatCpu profile added")
         } else {
             equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, getEquipDis(), true)
+
+            resetConfigDisabledPorts(
+                profileConfiguration.getRelayLogicalPhysicalMap(equipRef!!),
+                profileConfiguration.getUniversalOutLogicalPhysicalMap(equipRef!!)
+            )
             val entityMapper = EntityMapper(equipModel)
             val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
             CcuLog.i(Domain.LOG_TAG, " updateDeviceAndPoints")

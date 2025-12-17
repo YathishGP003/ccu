@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getCpuFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
+import a75f.io.logic.bo.building.system.resetConfigDisabledPorts
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.util.modifyConditioningMode
 import a75f.io.logic.util.modifyFanMode
@@ -125,6 +126,11 @@ class CpuViewModel(application: Application) : HyperStatViewModel(application) {
             CcuLog.i(Domain.LOG_TAG, "Cpu profile added")
         } else {
              equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, getEquipDis(), true)
+
+            resetConfigDisabledPorts(
+                profileConfiguration.getRelayLogicalPhysicalMap(equipRef!!),
+                profileConfiguration.getAnalogOutLogicalPhysicalMap(equipRef!!)
+            )
             val entityMapper = EntityMapper(equipModel)
             val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
             deviceBuilder.updateDeviceAndPoints(profileConfiguration, deviceModel, equipId, hayStack.site!!.id, getDeviceDis())
@@ -187,7 +193,13 @@ class CpuViewModel(application: Application) : HyperStatViewModel(application) {
 
     fun isConditioningConfigExist(): Boolean {
         (viewState.value as CpuViewState).apply {
-            return (isAnyRelayMappedToStage(HsCpuRelayMapping.COOLING_STAGE_1) || isAnyRelayMappedToStage(HsCpuRelayMapping.COOLING_STAGE_2) || isAnyRelayMappedToStage(HsCpuRelayMapping.COOLING_STAGE_3) || isAnyRelayMappedToStage(HsCpuRelayMapping.HEATING_STAGE_1) || isAnyRelayMappedToStage(HsCpuRelayMapping.HEATING_STAGE_2) || isAnyRelayMappedToStage(HsCpuRelayMapping.HEATING_STAGE_3))
+            return (isAnyRelayMappedToStage(HsCpuRelayMapping.COOLING_STAGE_1) || isAnyRelayMappedToStage(
+                HsCpuRelayMapping.COOLING_STAGE_2
+            ) || isAnyRelayMappedToStage(HsCpuRelayMapping.COOLING_STAGE_3) || isAnyRelayMappedToStage(
+                HsCpuRelayMapping.HEATING_STAGE_1
+            ) || isAnyRelayMappedToStage(HsCpuRelayMapping.HEATING_STAGE_2) || isAnyRelayMappedToStage(
+                HsCpuRelayMapping.HEATING_STAGE_3
+            ))
         }
     }
 }

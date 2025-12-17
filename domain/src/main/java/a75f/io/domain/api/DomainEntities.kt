@@ -1,6 +1,7 @@
 package a75f.io.domain.api
 
 import a75f.io.api.haystack.RawPoint
+import a75f.io.api.haystack.Tags.POINTREF
 import a75f.io.logger.CcuLog
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef
@@ -359,6 +360,16 @@ open class PhysicalPoint(domainName : String, val deviceRef: String) : Entity (d
             requireId()
             //use Domain.hayStack.readHDictById(id)
             domainName.readPhysicalPoint(deviceRef)["writable"] != null
+        } catch (e: IllegalStateException) {
+            false
+        }
+    }
+
+    fun isUnused(): Boolean {
+        return try {
+            requireId()
+            //use Domain.hayStack.readHDictById(id)
+            domainName.readPhysicalPoint(deviceRef)[POINTREF] == null
         } catch (e: IllegalStateException) {
             false
         }

@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.plc.PlcProfile
 import a75f.io.logic.bo.building.plc.PlcProfileConfig
+import a75f.io.logic.bo.building.system.resetConfigDisabledPorts
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
@@ -390,8 +391,12 @@ class PlcProfileViewModel : ViewModel() {
 
         } else {
             val equipRef = equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis, true)
+
+            resetConfigDisabledPorts(
+                profileConfiguration.getRelayLogicalPhysicalMap(equipRef),
+                profileConfiguration.getAnalogOutLogicalPhysicalMap(equipRef)
+            )
             updateDeviceAndPoints(deviceAddress, profileConfiguration, nodeType, hayStack, model, deviceModel)
-            resetRelays(equipRef)
         }
         updateTypeForAnalog1Out(profileConfiguration)
         profileConfiguration.updatePortConfiguration(
@@ -401,12 +406,6 @@ class PlcProfileViewModel : ViewModel() {
             deviceModel
         )
         profileConfiguration.updateMinMaxValues(profileConfiguration, model)
-    }
-
-    private fun resetRelays(equipRef: String) {
-        val plcEquip = a75f.io.domain.equips.PlcEquip(equipRef)
-        plcEquip.relay1Cmd.writeHisVal(0.0)
-        plcEquip.relay2Cmd.writeHisVal(0.0)
     }
 
 

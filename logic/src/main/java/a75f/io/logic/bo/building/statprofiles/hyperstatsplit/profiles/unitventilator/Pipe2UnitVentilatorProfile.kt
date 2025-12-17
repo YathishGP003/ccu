@@ -136,7 +136,6 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
         )
         updateTitle24LoopCounter(pipe2Tuners, basicSettings)
         updateOccupancyDetection(hssEquip)
-        updateLoopOutputs(hssEquip)
 
         if (equipOccupancyHandler != null) {
             occupancyStatus = equipOccupancyHandler.currentOccupiedMode

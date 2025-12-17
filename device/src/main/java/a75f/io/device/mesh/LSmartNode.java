@@ -759,13 +759,11 @@ public class LSmartNode
                     RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
                     HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
                     if (logicalOpPoint.isEmpty()) {
-                        CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+p.getDisplayName());
-                        //Disabled output port should reset its val
-                        hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
+                        CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+p.getDisplayName() + ", skipping pointWrite and hisWrite");
                         continue;
                     }
 
-                    double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
+                    double logicalVal = hayStack.readPointValue(logicalOpPoint.get("id").toString());
 
                     short mappedVal = 0;
                     if (isEquipType("vav", node))
@@ -869,21 +867,20 @@ public class LSmartNode
                 } else if (opPoint.containsKey(Tags.WRITABLE) ||
                         (opPoint.containsKey(Tags.WRITABLE) && opPoint.containsKey(Tags.UNUSED))) {
                     RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
-                    double rawPointValue = hayStack.readPointPriorityVal(opPoint.get("id").toString());
+                    double physicalPriorityValue = hayStack.readPointPriorityVal(opPoint.get(Tags.ID).toString());
+
                     CcuLog.d(TAG_CCU_DEVICE, " Raw Point: " + p.getDisplayName() +
-                            " is unused port and has value: " +rawPointValue);
+                            " is unused port and has value: " +physicalPriorityValue);
                     Struct.Unsigned8 port = getDevicePort(device, controls_t, p);
-                    CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ LSmartNode @@fillSmartNodeControls: writable id->"+p.getId().toString()+"<rawPointValue:>"+rawPointValue);
-                    CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE LSmartNode @@fillSmartNodeControls: writeHisValById id->"+p.getId()+"<rawPointValue:>"+rawPointValue);
+                    CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ LSmartNode @@fillSmartNodeControls: writable id->"+p.getId().toString()+"<rawPointValue:>"+physicalPriorityValue);
+                    CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE LSmartNode @@fillSmartNodeControls: writeHisValById id->"+p.getId()+"<rawPointValue:>"+physicalPriorityValue);
                     if (port != null) {
-                        port.set((short) rawPointValue);
+                        port.set((short) physicalPriorityValue);
                     }
-                    hayStack.writeHisValById(opPoint.get("id").toString(), rawPointValue);
+                    hayStack.writeHisValById(opPoint.get("id").toString(), physicalPriorityValue);
                 }
                 else {
-                    //Disabled output port should reset its val
-                    CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE LSmartNode && fillSmartNodeControls: writeHisValById id->"+opPoint.get("id")+"<rawPointValue:>"+0);
-                    hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
+                    CcuLog.d(TAG_CCU_DEVICE, " Raw Point: " + opPoint.get("dis") + " is already disabled");
                 }
             }
             controls_t.setTemperature.set((short)(getSetTemp(equipRef) > 0 ? (getSetTemp(equipRef) * 2) : 144));

@@ -3,7 +3,6 @@ package a75f.io.renatus.profiles.hss.unitventilator.viewmodels
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
-import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.equips.hyperstatsplit.Pipe2UVEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
@@ -28,6 +27,7 @@ import a75f.io.logic.bo.building.statprofiles.util.correctSensorBusTempPoints
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.getUvPossibleConditioningMode
 import a75f.io.logic.bo.building.statprofiles.util.mapSensorBusPressureLogicalPoint
+import a75f.io.logic.bo.building.system.resetConfigDisabledPorts
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.util.modifyConditioningMode
 import a75f.io.logic.util.modifyFanMode
@@ -149,7 +149,19 @@ class Pipe2UvViewModel :UnitVentilatorViewModel(){
             updateFanMode(false, equip, getHssProfileFanLevel(equip))
         }
         else {
-            equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, getEquipDis(), true)
+
+            equipId = equipBuilder.updateEquipAndPoints(
+                profileConfiguration,
+                equipModel,
+                hayStack.site!!.id,
+                getEquipDis(),
+                true
+            )
+
+            resetConfigDisabledPorts(
+                profileConfiguration.getRelayLogicalPhysicalMap(equipRef!!),
+                profileConfiguration.getAnalogOutLogicalPhysicalMap(equipRef!!)
+            )
             val entityMapper = EntityMapper(equipModel)
             val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
             CcuLog.i(Domain.LOG_TAG, " updateDeviceAndPoints")

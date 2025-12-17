@@ -2,10 +2,13 @@ package a75f.io.logic.bo.building.sse
 
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.PhysicalPoint
+import a75f.io.domain.api.Point
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
+import a75f.io.domain.devices.HyperStatSplitDevice
 import a75f.io.domain.equips.SseEquip
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.haystack.device.DeviceUtil
@@ -88,7 +91,7 @@ open class SseProfileConfiguration(
         }
         val devicePorts = DeviceUtil.getUnusedPortsForDevice(nodeAddress.toShort(), Domain.hayStack)
         devicePorts?.forEach { disabledPort ->
-            unusedPorts[disabledPort.displayName] = disabledPort.markers.contains(Tags.WRITABLE)
+            unusedPorts[disabledPort.displayName] = disabledPort.markers.contains(a75f.io.api.haystack.Tags.UNUSED)
         }
 
         isDefault = false
@@ -123,5 +126,19 @@ open class SseProfileConfiguration(
             add(autoAwayEnabledState)
             add(analog1InEnabledState)
         }
+    }
+
+    fun getRelayLogicalPhysicalMap(equipId: String): Map<Point, PhysicalPoint> {
+        val map: MutableMap<Point, PhysicalPoint> = HashMap()
+        val equip = SseEquip(equipId)
+        Domain.hayStack.readId("device and equipRef == \"${equipId}\"")?.let { deviceId ->
+            map[equip.relay1OutputState] = PhysicalPoint(DomainName.relay1, deviceId)
+            map[equip.relay2OutputState] = PhysicalPoint(DomainName.relay2, deviceId)
+        }
+        return map
+    }
+
+    fun getAnalogOutLogicalPhysicalMap(equipId: String): Map<Point, PhysicalPoint> {
+        return mutableMapOf()
     }
 }

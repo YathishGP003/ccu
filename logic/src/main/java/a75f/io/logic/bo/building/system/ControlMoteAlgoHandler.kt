@@ -5,6 +5,10 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.AdvancedHybridSystemEquip
+import a75f.io.domain.equips.DabModulatingRtuSystemEquip
+import a75f.io.domain.equips.DabStagedVfdSystemEquip
+import a75f.io.domain.equips.VavModulatingRtuSystemEquip
+import a75f.io.domain.equips.VavStagedVfdSystemEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.util.AhuSettings
@@ -29,7 +33,7 @@ fun getCMRelayLogicalPhysicalMap(systemEquip: AdvancedHybridSystemEquip): Map<Po
     map[systemEquip.relay8OutputEnable] = Domain.cmBoardDevice.relay8
     return map
 }
-fun getAnalogOutLogicalPhysicalMap(systemEquip: AdvancedHybridSystemEquip) : Map<Point, PhysicalPoint> {
+fun getCMAnalogOutLogicalPhysicalMap(systemEquip: AdvancedHybridSystemEquip) : Map<Point, PhysicalPoint> {
     val map: MutableMap<Point, PhysicalPoint> = HashMap()
     map[systemEquip.analog1OutputEnable] = Domain.cmBoardDevice.analog1Out
     map[systemEquip.analog2OutputEnable] = Domain.cmBoardDevice.analog2Out
@@ -38,6 +42,75 @@ fun getAnalogOutLogicalPhysicalMap(systemEquip: AdvancedHybridSystemEquip) : Map
 
     return map
 }
+
+fun getCMRelayLogicalPhysicalMap(systemEquip: VavModulatingRtuSystemEquip) : Map<Point, PhysicalPoint> {
+    val map: MutableMap<Point, PhysicalPoint> = HashMap()
+    map[systemEquip.relay3OutputEnable] = Domain.cmBoardDevice.relay3
+    map[systemEquip.relay7OutputEnable] = Domain.cmBoardDevice.relay7
+    return map
+}
+
+fun getCMAnalogOutLogicalPhysicalMap(systemEquip: VavModulatingRtuSystemEquip) : Map<Point, PhysicalPoint> {
+    val map: MutableMap<Point, PhysicalPoint> = HashMap()
+    map[systemEquip.analog1OutputEnable] = Domain.cmBoardDevice.analog1Out
+    map[systemEquip.analog2OutputEnable] = Domain.cmBoardDevice.analog2Out
+    map[systemEquip.analog3OutputEnable] = Domain.cmBoardDevice.analog3Out
+    map[systemEquip.analog4OutputEnable] = Domain.cmBoardDevice.analog4Out
+    return map
+}
+
+fun getCMRelayLogicalPhysicalMap(systemEquip: DabModulatingRtuSystemEquip) : Map<Point, PhysicalPoint> {
+    val map: MutableMap<Point, PhysicalPoint> = HashMap()
+    map[systemEquip.relay3OutputEnable] = Domain.cmBoardDevice.relay3
+    map[systemEquip.relay7OutputEnable] = Domain.cmBoardDevice.relay7
+    return map
+}
+
+fun getCMAnalogOutLogicalPhysicalMap(systemEquip: DabModulatingRtuSystemEquip) : Map<Point, PhysicalPoint> {
+    val map: MutableMap<Point, PhysicalPoint> = HashMap()
+    map[systemEquip.analog1OutputEnable] = Domain.cmBoardDevice.analog1Out
+    map[systemEquip.analog2OutputEnable] = Domain.cmBoardDevice.analog2Out
+    map[systemEquip.analog3OutputEnable] = Domain.cmBoardDevice.analog3Out
+    map[systemEquip.analog4OutputEnable] = Domain.cmBoardDevice.analog4Out
+    return map
+}
+
+fun getCMRelayLogicalPhysicalMap(systemEquip: VavStagedVfdSystemEquip) : Map<Point, PhysicalPoint> {
+    val map: MutableMap<Point, PhysicalPoint> = HashMap()
+    map[systemEquip.relay1OutputEnable] = Domain.cmBoardDevice.relay1
+    map[systemEquip.relay2OutputEnable] = Domain.cmBoardDevice.relay2
+    map[systemEquip.relay3OutputEnable] = Domain.cmBoardDevice.relay3
+    map[systemEquip.relay4OutputEnable] = Domain.cmBoardDevice.relay4
+    map[systemEquip.relay5OutputEnable] = Domain.cmBoardDevice.relay5
+    map[systemEquip.relay6OutputEnable] = Domain.cmBoardDevice.relay6
+    map[systemEquip.relay7OutputEnable] = Domain.cmBoardDevice.relay7
+    return map
+}
+
+fun getCMAnalogOutLogicalPhysicalMap(systemEquip: VavStagedVfdSystemEquip) : Map<Point, PhysicalPoint> {
+    val map: MutableMap<Point, PhysicalPoint> = HashMap()
+    map[systemEquip.analog2OutputEnable] = Domain.cmBoardDevice.analog2Out
+    return map
+}
+
+fun getCMRelayLogicalPhysicalMap(systemEquip: DabStagedVfdSystemEquip) : Map<Point, PhysicalPoint> {
+    val map: MutableMap<Point, PhysicalPoint> = HashMap()
+    map[systemEquip.relay1OutputEnable] = Domain.cmBoardDevice.relay1
+    map[systemEquip.relay2OutputEnable] = Domain.cmBoardDevice.relay2
+    map[systemEquip.relay3OutputEnable] = Domain.cmBoardDevice.relay3
+    map[systemEquip.relay4OutputEnable] = Domain.cmBoardDevice.relay4
+    map[systemEquip.relay5OutputEnable] = Domain.cmBoardDevice.relay5
+    map[systemEquip.relay6OutputEnable] = Domain.cmBoardDevice.relay6
+    map[systemEquip.relay7OutputEnable] = Domain.cmBoardDevice.relay7
+    return map
+}
+
+fun getCMAnalogOutLogicalPhysicalMap(systemEquip: DabStagedVfdSystemEquip) : Map<Point, PhysicalPoint> {
+    val map: MutableMap<Point, PhysicalPoint> = HashMap()
+    map[systemEquip.analog2OutputEnable] = Domain.cmBoardDevice.analog2Out
+    return map
+}
+
 
 fun getAnalogOutValueForLoopType(
     enable: Point,
@@ -503,6 +576,24 @@ fun getAnalogModulation(
         getModulatedOutputDuringEcon(finalLoop, minMax.first, minMax.second, econToMainCoolingLoopMap).coerceIn(0.0, 10.0) * 10
     } else {
         getModulatedOutput(finalLoop, minMax.first, minMax.second).coerceIn(0.0, 10.0) * 10
+    }
+}
+
+// A one time resetting
+// of this CM ports whose enable config is changed from enabled to disabled.
+// To identify this check if the config enable point's current value is 0 (disabled) and physical point's pointRef is non null before it is reconfigured.
+fun resetConfigDisabledPorts(relayLogicalPhysicalMap: Map<Point, PhysicalPoint>, analogOutLogicalPhysicalMap: Map<Point, PhysicalPoint>) {
+    relayLogicalPhysicalMap.forEach {
+        if (it.key.readDefaultVal() == 0.0 && !it.value.isUnused()) {
+            CcuLog.d("PORT_RESET", "Resetting relay port: ${it.value.domainName} with id: ${it.value.id} to 0.0 as its config is disabled just now and pointRef is non null")
+            it.value.writePointValue(0.0)
+        }
+    }
+    analogOutLogicalPhysicalMap.forEach {
+        if (it.key.readDefaultVal() == 0.0 && !it.value.isUnused()) {
+            CcuLog.d("PORT_RESET", "Resetting analog out port: ${it.value.domainName} with id: ${it.value.id} to 0.0 as its config is disabled just now and pointRef is non null")
+            it.value.writePointValue(0.0)
+        }
     }
 }
 

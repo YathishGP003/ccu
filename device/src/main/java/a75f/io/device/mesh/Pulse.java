@@ -1535,10 +1535,10 @@ public class Pulse
 
 			for(HashMap phyPoint : phyPoints) {
 				if (phyPoint.isEmpty()) continue;
-				hayStack.writeHisValById(phyPoint.get("id").toString(), temp);
 
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
 				if (isDesiredTempPhyPoint(phyPoint)) {//Compare with what was sent out.
+					hayStack.writeHisValById(phyPoint.get("id").toString(), temp);
 					double curValue = LSmartNode.getDesiredTemp(nodeAddr);//hayStack.readHisValById(phyPoint.get("id").toString());
 					double desiredTemp = getDesredTempConversion(temp);
 					CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromDevice : desiredTemp " + desiredTemp + "," + curValue);
@@ -1628,11 +1628,11 @@ public class Pulse
 				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
 					continue;
 				}
-				hayStack.writeHisValById(phyPoint.get("id").toString(), temp);
 
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
 				switch (Port.valueOf(phyPoint.get("port").toString())) {
 					case DESIRED_TEMP:
+						hayStack.writeHisValById(phyPoint.get("id").toString(), temp);
 						double curValue = LSmartStat.getDesiredTemp(nodeAddr);
 						double desiredTemp = getDesredTempConversion(temp);
 

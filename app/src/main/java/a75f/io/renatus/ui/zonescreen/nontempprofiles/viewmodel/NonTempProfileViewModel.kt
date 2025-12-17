@@ -24,6 +24,7 @@ import a75f.io.renatus.ui.zonescreen.nontempprofiles.model.ExternalPointItem
 import a75f.io.renatus.ui.zonescreen.nontempprofiles.utilities.getDropDownPosition
 import a75f.io.renatus.ui.zonescreen.nontempprofiles.utilities.getIndexOf
 import a75f.io.renatus.ui.zonescreen.nontempprofiles.utilities.getLastUpdatedViewItem
+import a75f.io.renatus.ui.zonescreen.nontempprofiles.utilities.heartBeatModbusStatus
 import a75f.io.renatus.ui.zonescreen.nontempprofiles.utilities.heartBeatStatus
 import a75f.io.renatus.util.HeartBeatUtil
 import a75f.io.renatus.util.HeartBeatUtil.getLastUpdatedTimeForCn
@@ -291,7 +292,7 @@ class NonTempProfileViewModel : ViewModel(), PointSubscriber {
 
     fun setupModbusEquipHealth(slaveId : String, equipId: String) {
         this.setLastUpdatedPoint(getLastUpdatedViewItem(slaveId, this, equipRef = equipId))
-        this.externalEquipHeartBeat = heartBeatStatus(slaveId, equipId)
+        this.externalEquipHeartBeat = heartBeatModbusStatus(slaveId, equipId)
     }
 
     fun stopObservingEquipHealth() {

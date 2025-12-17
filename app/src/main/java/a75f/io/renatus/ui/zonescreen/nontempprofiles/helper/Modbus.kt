@@ -53,5 +53,5 @@ fun loadModbusZone(
         }
         viewModel.initializeDetailedViewPoints(points)
     }
-    viewModel.observeExternalEquipHealth(deviceId)
+    viewModel.observeExternalModbusEquipHealth(deviceId, equipId)
 }

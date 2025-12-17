@@ -119,7 +119,7 @@ public class UsbDeviceAdapter extends RecyclerView.Adapter<UsbDeviceAdapter.UsbV
     @Override
     public void onBindViewHolder(@NonNull UsbViewHolder holder, @SuppressLint("RecyclerView") int position) {
         UsbDeviceItem device = devices.get(position);
-
+        CcuLog.i("USB_MANAGER", "Binding device at position "+position+" device "+device);
         String serial = device.getSerial();
         String name = device.getName();
 
@@ -140,15 +140,15 @@ public class UsbDeviceAdapter extends RecyclerView.Adapter<UsbDeviceAdapter.UsbV
             holder.protocol_optionsNA.setVisibility(View.VISIBLE);
             holder.spinner.setVisibility(View.GONE);
         } else {
+            holder.protocol_optionsNA.setVisibility(View.GONE);
+            holder.spinner.setVisibility(View.VISIBLE);
             ArrayAdapter<CharSequence> adapter = getProtocolArrayAdapter(device);
             holder.spinner.setAdapter(adapter);
-
             // Set spinner value
             int spinnerPosition = adapter.getPosition(device.getProtocol());
             if (spinnerPosition >= 0) {
                 holder.spinner.setSelection(spinnerPosition);
             }
-
             holder.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 boolean firstCall = true;
                 @Override

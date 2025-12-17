@@ -688,9 +688,15 @@ fun getLastReceivedTimeForCloudConnectivity(subscriber: NonTempProfileViewModel)
 
 fun heartBeatStatus(
     nodeAddress: String,
-    equipRef: String = ""
 ): Boolean {
     return HeartBeatUtil.isModuleAlive(nodeAddress)
+}
+
+fun heartBeatModbusStatus(
+    nodeAddress: String,
+    equipRef: String
+): Boolean {
+    return HeartBeatUtil.isModbusModuleAlive(nodeAddress, equipRef)
 }
 
 

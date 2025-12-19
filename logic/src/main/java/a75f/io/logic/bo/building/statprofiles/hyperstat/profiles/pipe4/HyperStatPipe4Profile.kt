@@ -165,7 +165,7 @@ class HyperStatPipe4Profile: HyperStatProfile(L.TAG_CCU_HSPIPE4) {
             )
         } else {
             resetLogicalPoints(equip)
-            if (isDoorOpenFromTitle24) {
+            if (isDoorOpenFromTitle24 && canWeRunFan(basicSettings)) {
                 runLowestFanSpeedDuringDoorOpen(equip, L.TAG_CCU_HSPIPE4)
             }
         }
@@ -350,9 +350,9 @@ class HyperStatPipe4Profile: HyperStatProfile(L.TAG_CCU_HSPIPE4) {
         return if (fanLowVentilationAvailable.readHisVal() > 0) true
         else if (isDoorWindowOpen || heatingLoopOutput > 0) {
             // If current direction is heating then check allow only when  heating is available
-            (equip.hotWaterModulatingHeatValve.pointExists() || equip.auxHeatingStage1.pointExists() || equip.auxHeatingStage2.pointExists())
+            (equip.hotWaterModulatingHeatValve.pointExists() || equip.hotWaterHeatValve.pointExists() || equip.auxHeatingStage1.pointExists() || equip.auxHeatingStage2.pointExists())
         } else if (isDoorWindowOpen || coolingLoopOutput > 0) {
-            (equip.chilledWaterModulatingCoolValve.pointExists())
+            (equip.chilledWaterModulatingCoolValve.pointExists() || equip.chilledWaterCoolValve.pointExists())
         } else {
             false
         }

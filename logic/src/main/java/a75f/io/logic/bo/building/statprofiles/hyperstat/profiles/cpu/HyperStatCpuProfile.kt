@@ -357,7 +357,7 @@ class HyperStatCpuProfile : HyperStatProfile(L.TAG_CCU_HSCPU) {
             operateAnalogOutputs(config, equip, basicSettings)
         } else {
             resetLogicalPoints(equip)
-            if (isDoorOpenFromTitle24) {
+            if (isDoorOpenFromTitle24 && canWeRunFan(basicSettings)) {
                 runLowestFanSpeedDuringDoorOpen(equip, L.TAG_CCU_HSCPU)
             }
         }

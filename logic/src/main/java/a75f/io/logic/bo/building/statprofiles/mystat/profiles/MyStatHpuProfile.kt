@@ -155,7 +155,7 @@ class MyStatHpuProfile : MyStatProfile(L.TAG_CCU_MSHPU) {
             }
         } else {
             resetLogicalPoints(equip)
-            if (isDoorWindowDueTitle24) {
+            if (isDoorWindowDueTitle24 && canWeRunFan(basicSettings)) {
                 runLowestFanSpeedDuringDoorOpen(equip, L.TAG_CCU_MSHPU)
             }
         }

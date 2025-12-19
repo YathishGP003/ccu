@@ -147,7 +147,7 @@ class HyperStatHpuProfile : HyperStatProfile(L.TAG_CCU_HSHPU) {
             runSpecifiedAnalogFanSpeed(equip, analogFanType, config.getAnalogOutsConfigurationMapping(),config.getFanConfiguration())
         } else {
             resetLogicalPoints(equip)
-            if (isDoorOpenFromTitle24) {
+            if (isDoorOpenFromTitle24 && canWeRunFan(basicSettings)) {
                 runLowestFanSpeedDuringDoorOpen(equip, L.TAG_CCU_HSHPU)
             }
         }

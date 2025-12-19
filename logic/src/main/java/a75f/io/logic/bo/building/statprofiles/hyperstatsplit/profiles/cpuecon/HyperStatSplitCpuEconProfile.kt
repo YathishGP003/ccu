@@ -125,7 +125,7 @@ class HyperStatSplitCpuEconProfile(private val equipRef: String, nodeAddress: Sh
             }
         } else {
             resetAllLogicalPointValues()
-            if (isDoorOpenFromTitle24) {
+            if (isDoorOpenFromTitle24 && canWeRunFan(basicSettings)) {
                 runLowestFanSpeedDuringDoorOpen(hssEquip, tag)
             }
 

@@ -157,7 +157,7 @@ class Pipe2UnitVentilatorProfile(private val equipRef: String, nodeAddress: Shor
             }
         } else {
             resetAllLogicalPointValues()
-            if (isDoorOpenFromTitle24) {
+            if (isDoorOpenFromTitle24 && canWeRunFan(basicSettings)) {
                 runLowestFanSpeedDuringDoorOpen(hssEquip, tag)
             }
         }

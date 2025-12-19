@@ -178,7 +178,7 @@ class HyperStatPipe2Profile : HyperStatProfile(L.TAG_CCU_HSPIPE2) {
             runAlgorithm(equip, basicSettings, equip.relayStages, equip.analogOutStages, config)
         } else {
             resetLogicalPoints(equip)
-            if (isDoorOpenFromTitle24) {
+            if (isDoorOpenFromTitle24 && canWeRunFan(basicSettings)) {
                 runLowestFanSpeedDuringDoorOpen(equip, L.TAG_CCU_HSHPU)
             }
         }

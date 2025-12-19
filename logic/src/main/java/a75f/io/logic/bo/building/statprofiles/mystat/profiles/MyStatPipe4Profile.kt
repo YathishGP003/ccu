@@ -188,7 +188,7 @@ class MyStatPipe4Profile : MyStatProfile(L.TAG_CCU_MSPIPE4) {
             handleAnalogOutState(config, equip, basicSettings, equip.analogOutStages)
         } else {
             resetLogicalPoints(equip)
-            if (isDoorWindowDueTitle24) {
+            if (isDoorWindowDueTitle24 && canWeRunFan(basicSettings)) {
                 runLowestFanSpeedDuringDoorOpen(equip, L.TAG_CCU_MSPIPE4)
             }
         }

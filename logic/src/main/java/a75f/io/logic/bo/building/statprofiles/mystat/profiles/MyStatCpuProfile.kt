@@ -141,7 +141,7 @@ class MyStatCpuProfile: MyStatProfile(L.TAG_CCU_MSCPU) {
             operateAnalogOutputs(config, basicSettings, equip.analogOutStages, equip)
         } else {
             resetLogicalPoints(equip)
-            if (isDoorWindowDueTitle24) {
+            if (isDoorWindowDueTitle24 && canWeRunFan(basicSettings)) {
                 runLowestFanSpeedDuringDoorOpen(equip, L.TAG_CCU_MSCPU)
             }
         }

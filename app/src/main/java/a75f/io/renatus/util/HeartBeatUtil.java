@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
@@ -199,7 +200,16 @@ public class HeartBeatUtil {
         return true; // Return true if all modules are alive
     }
 
-    public static String getLastUpdatedTimeBacnetSystem(Date updatedTime){
+    public static String getLastUpdatedTimeBacnetSystem(String equipId){
+        Date updatedTime = null;
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap<Object, Object> heartBeatPoint =
+                hayStack.readEntity("point and (heartbeat or heartBeat) and equipRef == \"" + equipId + "\"");
+        if (!heartBeatPoint.isEmpty()) {
+            HisItem heartBeatHisItem = hayStack.curRead(heartBeatPoint.get("id").toString());
+            updatedTime = (heartBeatHisItem == null) ? null : heartBeatHisItem.getDate();
+        }
+
         if(updatedTime == null){
             return "--";
         }

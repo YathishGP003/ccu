@@ -479,13 +479,29 @@ fun ShowMiddleView(
             (systemViewModel.isModbusExists || systemViewModel.isBacnetExists)
         ) {
             Spacer(modifier = Modifier.height(4.dp))
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy((2).dp)
             ) {
-                EquipNameWithHeartbeat(
-                    text = systemViewModel.externalEquipName.value.currentValue.toString(),
-                    isActive = systemViewModel.externalEquipHeartBeat.value
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    EquipNameWithHeartbeat(
+                        text = systemViewModel.externalEquipName.value.currentValue.toString(),
+                        isActive = systemViewModel.externalEquipHeartBeat.value
+                    )
+                }
+                if (systemViewModel.isBacnetExists) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(
+                            text = bacnetEquipTypeString,
+                            color = Color.DarkGray,
+                            fontSize = 18.sp,
+                        )
+                    }
+                }
             }
             // last updated
             Row {
@@ -494,17 +510,7 @@ fun ShowMiddleView(
                     onValueChange = { _, _ -> }
                 )
             }
-            if(systemViewModel.isBacnetExists) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(
-                        text = bacnetEquipTypeString,
-                        color = Color.DarkGray,
-                        fontSize = 18.sp,
-                    )
-                }
-            }
+
             if (systemViewModel.detailedViewPoints.isEmpty()) {
                 Box(
                     modifier = Modifier

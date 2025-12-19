@@ -63,10 +63,12 @@ import a75f.io.renatus.ui.zonescreen.nontempprofiles.utilities.getDropDownPositi
 import a75f.io.renatus.ui.zonescreen.nontempprofiles.utilities.getIndexOf
 import a75f.io.renatus.ui.zonescreen.nontempprofiles.utilities.handleBacnetPoint
 import a75f.io.renatus.ui.zonescreen.nontempprofiles.utilities.handleModbusOrConnectModulePoint
+import a75f.io.renatus.ui.zonescreen.nontempprofiles.utilities.heartBeatModbusStatus
 import a75f.io.renatus.ui.zonescreen.nontempprofiles.utilities.heartBeatStatus
 import a75f.io.renatus.util.HeartBeatUtil
 import a75f.io.renatus.util.HeartBeatUtil.isModuleAlive
 import a75f.io.renatus.views.OaoArc
+import a75f.io.util.getConfig
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
@@ -80,6 +82,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.apache.commons.lang3.StringUtils
+import org.projecthaystack.HStr
 import java.text.DecimalFormat
 import java.util.Locale
 import java.util.Objects
@@ -724,7 +727,8 @@ class SystemViewModel : ViewModel(), PointSubscriber {
             override fun run() {
                 lastUpdatedView()
                 if(isOAOProfilePaired) updateOaoHealth()
-                updateExternalEquipHealth()
+                updateExternalEquipModbusHealth()
+                updateExternalEquipBacnetHealth()
                 updateBTUEquipHealth()
                 updateEMREquipHealth()
                 if (isOAOProfilePaired && !isOaoPairedInConnectModule()) {
@@ -781,16 +785,24 @@ class SystemViewModel : ViewModel(), PointSubscriber {
                 initializeDetailedViewPoints(modbusPoints)
                 externalEquipNodeAddress = nodeAddress
                 externalEquipId = modbusEquip["id"].toString()
-                updateExternalEquipHealth()
+                updateExternalEquipModbusHealth()
             }
         }
     }
 
-    fun updateExternalEquipHealth() {
+    fun updateExternalEquipModbusHealth() {
         externalEquipHeartBeat.value = heartBeatStatus(externalEquipNodeAddress)
         externalEquipLastUpdated.value = HeaderViewItem(
             disName = "Last Updated: ",
             currentValue = HeartBeatUtil.getLastUpdatedTime(externalEquipNodeAddress).toString()
+        )
+    }
+
+    fun updateExternalEquipBacnetHealth() {
+        externalEquipHeartBeat.value = heartBeatModbusStatus(externalEquipNodeAddress, externalEquipId)
+        externalEquipLastUpdated.value = HeaderViewItem(
+            disName = "Last Updated: ",
+            currentValue = HeartBeatUtil.getLastUpdatedTimeBacnetSystem(externalEquipId).toString()
         )
     }
 
@@ -821,8 +833,9 @@ class SystemViewModel : ViewModel(), PointSubscriber {
             isBacnetExists = bacnetEquip.isNotEmpty()
             if (bacnetEquip.isNotEmpty() && bacnetEquip != null) {
                 var bacNetPointsList: List<BacnetZoneViewItem> = ArrayList()
+                val formattedDisName = getBacnetDisName()
                 externalEquipName.value =
-                    HeaderViewItem(currentValue = bacnetEquip["dis"].toString())
+                    HeaderViewItem(currentValue = bacnetEquip["dis"].toString() + formattedDisName)
 
                 val list: List<BacnetModelDetailResponse> = buildBacnetModelSystem(bacnetEquip)
 
@@ -845,7 +858,7 @@ class SystemViewModel : ViewModel(), PointSubscriber {
 
                 externalEquipNodeAddress = bacnetEquip["group"].toString()
                 externalEquipId = bacnetEquip["id"].toString()
-                updateExternalEquipHealth()
+                updateExternalEquipBacnetHealth()
             }
         }
     }
@@ -1407,5 +1420,29 @@ class SystemViewModel : ViewModel(), PointSubscriber {
             )
             HisWriteObservable.subscribe(dcvDamperPos.value.id.toString(), this)
         }
+    }
+
+    private fun getBacnetDisName(): String {
+        val bacnetEquip =
+            CCUHsApi.getInstance()
+                .readHDict("system and equip and bacnet and not emr and not btu")
+        val bacnetEquipObject = a75f.io.api.haystack.Equip.Builder().setHDict(bacnetEquip).build()
+
+        val bacnetConfig = getConfig(
+            bacnetEquipObject.tags.getOrDefault(
+                "bacnetConfig",
+                HStr.make("")
+            ).toString()
+        )
+        var macAddr = bacnetConfig["macAddress"]
+        if (macAddr.isNullOrEmpty()) {
+            macAddr = "NA"
+        }
+        var bacnetDeviceId = bacnetConfig["deviceId"]
+        if (bacnetDeviceId.isNullOrEmpty()) {
+            bacnetDeviceId = "NA"
+        }
+
+        return " ( Device ID: $bacnetDeviceId | MAC Addr: $macAddr )"
     }
 }

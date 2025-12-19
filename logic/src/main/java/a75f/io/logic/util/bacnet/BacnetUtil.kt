@@ -683,9 +683,11 @@ private fun updatePointPresentValue(readResponse: MultiReadResponse?,deviceId: S
                               var updatedObjectType = getBacNetType( ObjectType.values()[item.objectIdentifier.objectType.toInt()].key.replace("OBJECT_", ""))
                               CcuLog.i(TAG_CCU_BACNET_MSTP, "MSTP -> updatedObjectType: $updatedObjectType")
                               CcuLog.i(TAG_CCU_BACNET_MSTP, "MSTP -> objectId: ${item.objectIdentifier.objectInstance}")
-                              val query = if (macAddress.isNullOrEmpty())
-                                  "point and bacnetMstp and bacnetDeviceId == $deviceId and bacnetObjectId==${item.objectIdentifier.objectInstance} and bacnetType==\"$updatedObjectType\""
-                                  else "point and bacnetMstp and bacnetDeviceMacAddr ==\"$macAddress\" and bacnetObjectId==${item.objectIdentifier.objectInstance} and bacnetType==\"$updatedObjectType\""
+                              if (macAddress.isNullOrEmpty()) {
+                                  CcuLog.d(TAG_CCU_BACNET_MSTP, "MSTP -> MAC Address is null or empty for deviceId: $deviceId")
+                                  return@forEach
+                              }
+                              val query = "point and bacnetMstp and bacnetDeviceMacAddr ==\"$macAddress\" and bacnetObjectId==${item.objectIdentifier.objectInstance} and bacnetType==\"$updatedObjectType\""
                               CcuLog.i(TAG_CCU_BACNET_MSTP, "MSTP -> query: $query")
                               val point = CCUHsApi.getInstance().read(query)
                               if (point.isNullOrEmpty()) {

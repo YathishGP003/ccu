@@ -36,6 +36,7 @@ import a75f.io.renatus.registration.CreateNewSite;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.registration.UpdateCCUFragment;
 import a75f.io.renatus.safemode.SafeModeActivity;
+import a75f.io.renatus.schedules.FileBackupService;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.PreferenceConstants;
 import a75f.io.renatus.util.Prefs;
@@ -314,6 +315,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
     @Override
     public void onInitCompleted() {
         CcuLog.i(L.TAG_CCU_INIT,"CCUInit Completed Callback");
+        FileBackupService.scheduleFileBackupServiceJob(Globals.getInstance().getApplicationContext());
         SplashActivity.this.runOnUiThread(() -> {
             launchUI();
             Globals.getInstance().unRegisterOnCcuInitCompletedListener(this);

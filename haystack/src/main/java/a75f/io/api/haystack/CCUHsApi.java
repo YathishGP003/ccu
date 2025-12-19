@@ -760,9 +760,8 @@ public class CCUHsApi
         );
 
         tagsDb.updatePoint(r, id);
-        if (syncStatusService.hasEntitySynced(id)) {
-            syncStatusService.addUpdatedEntity(id);
-        }
+        // hasEntitySynced should not be called for point based updates
+        syncStatusService.addUpdatedEntity(id);
     }
 
     public void updatePoint(Point point, String id)
@@ -786,9 +785,8 @@ public class CCUHsApi
         tagsDb.updatePoint(point, id);
 
         if(!isBuildingTunerPoint(point)){
-            if (syncStatusService.hasEntitySynced(id)) {
-                syncStatusService.addUpdatedEntity(id);
-            }
+            // hasEntitySynced should not be called for point based updates
+            syncStatusService.addUpdatedEntity(id);
         }
     }
 
@@ -802,11 +800,8 @@ public class CCUHsApi
 
         tagsDb.updatePoint(point, id);
         if (syncToServer) {
-            if (syncStatusService.hasEntitySynced(id)) {
-                syncStatusService.addUpdatedEntity(id);
-            } else {
-                syncStatusService.addUnSyncedEntity(id);
-            }
+            // hasEntitySynced should not be called for point based updates
+            syncStatusService.addUpdatedEntity(id);
         }
     }
 
@@ -3540,9 +3535,8 @@ public class CCUHsApi
                 point.getMarkers().contains(Tags.HIS)
         );
 
-        if (syncStatusService.hasEntitySynced(id)) {
-            syncStatusService.addUpdatedEntity(id);
-        }
+        // hasEntitySynced should not be called for point based updates
+        syncStatusService.addUpdatedEntity(id);
     }
     public boolean isBuildingTunerPoint(String id) {
         HashMap<Object, Object> point = readMapById(id);
@@ -3816,12 +3810,12 @@ public class CCUHsApi
         boolean isExistingPointWritable = currentPointMap.containsKey(Tags.WRITABLE);
 
         if(isExistingPointWritable && !isUpdatedPointWritable) {
-            CcuLog.d("TEST_CCUHS", "resetEquipPointValueUponWritableTagRemovalOrAddition: pointId " + pointId + " is changed from writable to non-writable");
+            CcuLog.d(TAG_CCU_HS, "resetEquipPointValueUponWritableTagRemovalOrAddition: pointId " + pointId + " is changed from writable to non-writable");
             // When a point is changed from writable to non-writable, we need to clear all available levels and reset the historized value to 0.
             clearAllAvailableLevelsInPointWriteCache(pointId, isUpdatedPointHistorized);
             deletePointArray(pointId);
         } else if (!isExistingPointWritable && isUpdatedPointWritable && isUpdatedPointHistorized) {
-            CcuLog.d("TEST_CCUHS", "resetEquipPointValueUponWritableTagRemovalOrAddition: pointId " + pointId + " is changed from non-writable to writable");
+            CcuLog.d(TAG_CCU_HS, "resetEquipPointValueUponWritableTagRemovalOrAddition: pointId " + pointId + " is changed from non-writable to writable");
             // When a point is changed from non-writable to writable, we need to reset the historized value to 0.
             writeHisValById(pointId, 0.0);
         }
@@ -3838,18 +3832,18 @@ public class CCUHsApi
         boolean isExistingPointUnused = currentPointMap.containsKey(Tags.UNUSED);
 
         if(!isUpdatedPointWritable && isExistingPointWritable) {
-            CcuLog.d("TEST_CCUHS", "resetEquipPointValueUponWritableTagRemovalOrAddition: pointId " + pointId + " is changed from writable to non-writable");
+            CcuLog.d(TAG_CCU_HS, "resetEquipPointValueUponWritableTagRemovalOrAddition: pointId " + pointId + " is changed from writable to non-writable");
             // When a point is changed from writable to non-writable, we need to clear all available levels and reset the historized value to 0.
             clearAllAvailableLevelsInPointWriteCache(pointId, isUpdatedPointHistorized);
             deletePointArray(pointId);
         } else if (isUpdatedPointWritable && !isExistingPointWritable) {
-            CcuLog.d("TEST_CCUHS", "resetEquipPointValueUponWritableTagRemovalOrAddition: pointId " + pointId + " is changed from non-writable to writable");
+            CcuLog.d(TAG_CCU_HS, "resetEquipPointValueUponWritableTagRemovalOrAddition: pointId " + pointId + " is changed from non-writable to writable");
             // When a point is changed from non-writable to writable, we need to reset the historized value to 0.
             if(isUpdatedPointHistorized) {
                 writeHisValById(pointId, 0.0);
             }
         } else if(isExistingPointWritable && (isUpdatedPointUnused && !isExistingPointUnused)) {
-            CcuLog.d("TEST_CCUHS", "resetEquipPointValueUponWritableTagRemovalOrAddition: pointId " + pointId + " is changed from used to unused while point is already writable");
+            CcuLog.d(TAG_CCU_HS, "resetEquipPointValueUponWritableTagRemovalOrAddition: pointId " + pointId + " is changed from used to unused while point is already writable");
             // When a point is changed from used to unused, we need to clear all available levels and reset the historized value to 0.
             clearAllAvailableLevelsInPointWriteCache(pointId, isUpdatedPointHistorized);
         }

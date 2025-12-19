@@ -1,6 +1,7 @@
 package a75f.io.logic;
 
 
+import static android.content.Context.MODE_PRIVATE;
 import static a75f.io.api.haystack.Tags.BACNET_DEVICE_JOB;
 import static a75f.io.logic.bo.building.bacnet.BacnetEquip.TAG_BACNET;
 import static a75f.io.logic.util.PreferenceUtil.getClearUnSyncedList;
@@ -9,6 +10,7 @@ import static a75f.io.logic.util.PreferenceUtil.setClearUnSyncedList;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
@@ -16,6 +18,7 @@ import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -32,6 +35,7 @@ import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.sync.SyncStatusService;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
@@ -93,7 +97,6 @@ import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.bo.building.vrv.VrvProfile;
-import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.filesystem.FileSystemTools;
@@ -186,7 +189,7 @@ public class Globals {
     }
 
     public boolean isSimulation() {
-        return getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+        return getApplicationContext().getSharedPreferences("ccu_devsetting", MODE_PRIVATE)
                 .getBoolean("biskit_mode", false);
     }
 
@@ -211,22 +214,22 @@ public class Globals {
     }
 
     public boolean isTestMode() {
-        return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+        return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", MODE_PRIVATE)
                 .getBoolean("test_mode", false);
     }
 
     public void setTestMode(boolean isTestMode) {
-        Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+        Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", MODE_PRIVATE)
                 .edit().putBoolean("test_mode", isTestMode).apply();
     }
 
     public boolean isWeatherTest() {
-        return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+        return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", MODE_PRIVATE)
                 .getBoolean("weather_test", false);
     }
 
     public boolean isAckdMessagingEnabled() {
-        return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+        return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", MODE_PRIVATE)
                 .getBoolean("ackd_messaging_enabled", true);
     }
 
@@ -291,6 +294,7 @@ public class Globals {
         ExecutorTask.executeBackground(() -> {
             MigrationHandler migrationHandler = new MigrationHandler(CCUHsApi.getInstance());
             try {
+                transformUpdatedIdListToMap();
                 CcuLog.i(L.TAG_CCU_INIT, "Run Migrations");
                 if(!getClearUnSyncedList()) {
                     CCUHsApi.getInstance().getSyncStatusService().clearSyncStatus();
@@ -324,7 +328,7 @@ public class Globals {
                     migrationHandler.doModulatingProfileNormalization(analogMappings);
                 }
                 // if the previous sync was not done, then we need to do it again
-                boolean tunerSyncStatus = getApplicationContext().getSharedPreferences(getDefaultSharedPreferencesName(), Context.MODE_PRIVATE).getBoolean("Tuner_Sync_Status",true);
+                boolean tunerSyncStatus = getApplicationContext().getSharedPreferences(getDefaultSharedPreferencesName(), MODE_PRIVATE).getBoolean("Tuner_Sync_Status",true);
                 if(!tunerSyncStatus) {
                     TunerEquip.INSTANCE.syncBuildingTuners(CCUHsApi.getInstance());
                 }
@@ -356,7 +360,7 @@ public class Globals {
                     CcuLog.i(L.TAG_CCU_INIT, "Failed to load profiles", e);
                 }
                 isInitCompleted = true;
-                DEFAULT_HEARTBEAT_INTERVAL = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                DEFAULT_HEARTBEAT_INTERVAL = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", MODE_PRIVATE)
                         .getInt("control_loop_frequency", 60);
                 initCompletedListeners.forEach(OnCcuInitCompletedListener::onInitCompleted);
                 mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
@@ -379,7 +383,7 @@ public class Globals {
             if (migrationHandler.isMigrationRequired() && CCUHsApi.getInstance().isCCURegistered()) {
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                 modelSharedPref = Globals.getInstance().mApplicationContext
-                        .getSharedPreferences(DOMAIN_MODEL_SF, Context.MODE_PRIVATE);
+                        .getSharedPreferences(DOMAIN_MODEL_SF, MODE_PRIVATE);
                 diffManger.registerOnMigrationCompletedListener(TunerEquip.INSTANCE);
                 diffManger.processModelMigration(site.get("id").toString(), modelSharedPref, modelsPath);
                 TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
@@ -889,6 +893,25 @@ public class Globals {
         }else{
             CcuLog.d(BACNET_DEVICE_JOB, "--globals bacnet profile not found attached with external ahu---close the job if scheduled");
             BacnetUtilKt.cancelScheduleJobToCheckBacnet("globals didnt find any system bacnet profile");
+        }
+    }
+
+    private void transformUpdatedIdListToMap() {
+        SharedPreferences prefs = mApplicationContext.getSharedPreferences(getDefaultSharedPreferencesName(), MODE_PRIVATE);
+        CcuLog.d(L.TAG_CCU_INIT, "Transforming updatedIdList to updatedIdMap");
+        String updatedIdListString = prefs.getString("updatedIdList", "");
+
+        Map<String, Long> updatedIdMap = new LinkedHashMap<>();
+        if(!updatedIdListString.isEmpty()) {
+            CcuLog.d(L.TAG_CCU_INIT, "Found updatedIdList: " + updatedIdListString);
+
+            long currentTime = System.currentTimeMillis();
+            for (String id : TextUtils.split(updatedIdListString, "‚‗‚")) {
+                updatedIdMap.put(id, currentTime);
+            }
+            SyncStatusService.getInstance(mApplicationContext).addUpdatedIdListToUpdatedTimedMap(updatedIdMap);
+            prefs.edit().remove("updatedIdList").commit();
+            CcuLog.d(L.TAG_CCU_INIT, "Transformed updatedIdList to updatedIdMap: " + updatedIdMap);
         }
     }
 }

@@ -200,7 +200,6 @@ public abstract class UtilityApplication extends Application implements Globals.
                 .getInt("control_loop_frequency",60), 15, TimeUnit.SECONDS);
         Watchdog.getInstance().addMonitor(deviceUpdateJob);
 
-        FileBackupService.scheduleFileBackupServiceJob(context);
         EveryDaySchedulerService.scheduleJobForDay(context);
         if (PreferenceUtil.getIsCcuRebootStarted()) {
             RebootDataCache rebootDataCache = new RebootDataCache();

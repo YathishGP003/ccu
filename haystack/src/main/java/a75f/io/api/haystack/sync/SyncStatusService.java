@@ -1,10 +1,15 @@
 package a75f.io.api.haystack.sync;
 
+import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -17,8 +22,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -29,16 +36,16 @@ import a75f.io.logger.CcuLog;
 public class SyncStatusService {
     
     private static final String PREFS_ID_LIST_UNSYNCED = "unsyncedIdList";
-    private static final String PREFS_ID_LIST_UPDATED  = "updatedIdList";
+    private static final String PREFS_ID_MAP_UPDATED = "updatedIdMap";
     private static final String PREFS_ID_LIST_DELETED  = "deletedIdList";
     
     Context applicationContext;
     private final SharedPreferences preferences;
     
     private List<String> unsyncedIdList;
-    private List<String> updatedIdList;
+    private Map<String, Long> updatedIdMap;
     private List<String> deletedIdList;
-    
+
     private static SyncStatusService instance = null;
     
     public static HashSet<String> refTypes = new HashSet<>();
@@ -78,20 +85,20 @@ public class SyncStatusService {
     
     private void initializeLists() {
         unsyncedIdList = getListString(PREFS_ID_LIST_UNSYNCED);
-        updatedIdList = getListString(PREFS_ID_LIST_UPDATED);
+        updatedIdMap = getTimedMap(PREFS_ID_MAP_UPDATED);
         deletedIdList = getListString(PREFS_ID_LIST_DELETED);
-        CcuLog.i(HayStackConstants.LOG_TAG," unsyncedIdList " + unsyncedIdList.size() + " updatedIdList " + updatedIdList.size()
+        CcuLog.i(HayStackConstants.LOG_TAG," unsyncedIdList " + unsyncedIdList.size() + " updatedIdList " + updatedIdMap.size()
                                     + " deletedIdList " + deletedIdList.size());
     }
     
     public void saveSyncStatus() {
         putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
-        putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
+        putTimedMap(PREFS_ID_MAP_UPDATED, updatedIdMap);
         putListString(PREFS_ID_LIST_DELETED, deletedIdList);
     }
 
     public boolean isSyncNotRequired() {
-        return unsyncedIdList.isEmpty() && updatedIdList.isEmpty() && deletedIdList.isEmpty();
+        return unsyncedIdList.isEmpty() && updatedIdMap.isEmpty() && deletedIdList.isEmpty();
     }
     
     public void addUnSyncedEntity(String id) {
@@ -108,11 +115,8 @@ public class SyncStatusService {
     
     public void addUpdatedEntity(String id) {
         CcuLog.i(HayStackConstants.LOG_TAG," addUpdatedEntity "+id);
-        if(!(updatedIdList.contains(id))) {
-            updatedIdList.add(id);
-            //This is expensive but can avoid sync-data crash due to an app-crash or tablet reboot.
-            putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
-        }
+        updatedIdMap.put(id, System.currentTimeMillis());
+        putTimedMap(PREFS_ID_MAP_UPDATED, updatedIdMap);
     }
     
     public void addDeletedEntity(String id, boolean saveImmediate) {
@@ -123,10 +127,10 @@ public class SyncStatusService {
                 putListString(PREFS_ID_LIST_DELETED, deletedIdList);
             }
         }
-        if (updatedIdList.contains(id)) {
-            updatedIdList.remove(id);
+        if (updatedIdMap.containsKey(id)) {
+            updatedIdMap.remove(id);
             if (saveImmediate) {
-                putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
+                putTimedMap(PREFS_ID_MAP_UPDATED, updatedIdMap);
             }
         }
         if (unsyncedIdList.contains(id)) {
@@ -176,9 +180,9 @@ public class SyncStatusService {
         CcuLog.i(HayStackConstants.LOG_TAG,"setDeletedEntitySynced "+id);
         deletedIdList.remove(id);
         putListString(PREFS_ID_LIST_DELETED, deletedIdList);
-        if (updatedIdList.contains(id)) {
-            updatedIdList.remove(id);
-            putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
+        if (updatedIdMap.containsKey(id)) {
+            updatedIdMap.remove(id);
+            putTimedMap(PREFS_ID_MAP_UPDATED, updatedIdMap);
         }
         if (unsyncedIdList.contains(id)) {
             unsyncedIdList.remove(id);
@@ -194,12 +198,10 @@ public class SyncStatusService {
                 scheduleSyncDataSaveTimer();
             }
         }
-        
-        if (updatedIdList.contains(id)) {
-            updatedIdList.remove(id);
-            putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
+        if (updatedIdMap.containsKey(id)) {
+            updatedIdMap.remove(id);
+            putTimedMap(PREFS_ID_MAP_UPDATED, updatedIdMap);
         }
-        
     }
     
     /**
@@ -214,7 +216,7 @@ public class SyncStatusService {
      *  Both unsynced and updated entities are eligible for sync
      */
     public boolean isEligibleForSync(String id) {
-        return unsyncedIdList.contains(id) || updatedIdList.contains(id);
+        return unsyncedIdList.contains(id) || updatedIdMap.containsKey(id);
     }
     
     public boolean hasUnSyncedData() {
@@ -222,7 +224,7 @@ public class SyncStatusService {
     }
     
     public boolean hasUpdatedData() {
-        return !updatedIdList.isEmpty();
+        return !updatedIdMap.isEmpty();
     }
     
     public boolean hasDeletedData() {
@@ -259,30 +261,32 @@ public class SyncStatusService {
     }
     
     public HGridIterator getUpdatedData() {
-
         ArrayList<HDict> updatedDictList = new ArrayList<>();
-        CcuLog.d("CCU_HS_Sync", " Updated Data : " + updatedIdList.size());
-        ListIterator<String> updatedItr = new ArrayList<>(updatedIdList).listIterator();
+        synchronized (updatedIdMap) {
+            CcuLog.d("CCU_HS_Sync", " Updated Data : " + updatedIdMap.size());
+            ListIterator<String> updatedItr = new ArrayList<>(updatedIdMap.keySet()).listIterator();
 
-        while(updatedItr.hasNext()) {
-            String id = updatedItr.next();
-            HDict entity = CCUHsApi.getInstance().readHDictById(id);
-            if (entity == null || id.equals("null")) {
-                CcuLog.e("CCU_HS_SyncHandler","Invalid updated entity for sync "+id);
-                //Entity might have been deleted.
-                updatedItr.remove();
-                continue;
+            while(updatedItr.hasNext()) {
+                String id = updatedItr.next();
+                HDict entity = CCUHsApi.getInstance().readHDictById(id);
+                if (entity == null || id.equals("null")) {
+                    CcuLog.e("CCU_HS_SyncHandler","Invalid updated entity for sync "+id);
+                    //Entity might have been deleted.
+                    updatedItr.remove();
+                    continue;
+                }
+                HDictBuilder builder = new HDictBuilder();
+                CcuLog.d("CCU_HS_SYNC", "made new HDictBuilder()");
+                builder.add(entity);
+                CcuLog.d("CCU_HS_SYNC", "added entity");
+                updateRefs(entity, builder);
+                CcuLog.d("CCU_HS_SYNC", "updated refs");
+                updateLastModifiedDateTime(entity, builder);
+                updatedDictList.add(builder.toDict());
+                CcuLog.d("CCU_HS_SYNC", "updated dict refs");
             }
-            HDictBuilder builder = new HDictBuilder();
-            CcuLog.d("CCU_HS_SYNC", "made new HDictBuilder()");
-            builder.add(entity);
-            CcuLog.d("CCU_HS_SYNC", "added entity");
-            updateRefs(entity, builder);
-            CcuLog.d("CCU_HS_SYNC", "updated refs");
-            updateLastModifiedDateTime(entity, builder);
-            updatedDictList.add(builder.toDict());
-            CcuLog.d("CCU_HS_SYNC", "updated dict refs");
         }
+
         HGrid updatedGridData = HGridBuilder.dictsToGrid(updatedDictList.toArray(new HDict[0]));
         CcuLog.d("CCU_HS", "updated data : "+HZincWriter.gridToString(updatedGridData));
         return new HGridIterator(updatedGridData);
@@ -292,10 +296,32 @@ public class SyncStatusService {
         CcuLog.d("CCU_HS_Sync", " Deleted Data : " + Arrays.toString(deletedIdList.toArray()));
         return deletedIdList;
     }
-    
+
     private List<String> getListString(String key) {
         return Collections.synchronizedList(new ArrayList<>(
-                        Arrays.asList(TextUtils.split(preferences.getString(key, ""), "‚‗‚"))));
+                Arrays.asList(TextUtils.split(preferences.getString(key, ""), "‚‗‚"))));
+    }
+    
+    private Map<String, Long> getTimedMap(String key) {
+        String jsonString = preferences.getString(key, null);
+        if(jsonString == null) {
+            CcuLog.d(TAG_CCU_HS, "No timed map found in preferences for key "+key);
+            return Collections.synchronizedMap(new LinkedHashMap<>());
+        }
+
+        Map<String, Long> map = new LinkedHashMap<>();
+        try {
+            JSONArray jsonArray = new JSONArray(jsonString);
+            for(int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                String id = jsonObject.keys().next();
+                map.put(id, jsonObject.getLong(id));
+            }
+        } catch (JSONException e) {
+            CcuLog.e(TAG_CCU_HS, "Error parsing timed map from preferences for key "+key, e);
+            e.printStackTrace();
+        }
+        return Collections.synchronizedMap(map);
     }
     
     private void putListString(String key, List<String> stringList) {
@@ -303,6 +329,25 @@ public class SyncStatusService {
         String[] stringArr = stringList.toArray(new String[0]);
         preferences.edit().putString(key, TextUtils.join("‚‗‚", stringArr)).apply();
         CcuLog.i("CCU_PROFILING", "Time to save "+key+" "+(System.currentTimeMillis() - time));
+    }
+
+    private void putTimedMap(String key, Map<String, Long> timedMap) {
+        synchronized (timedMap) {
+            long time = System.currentTimeMillis();
+            try {
+                JSONArray jsonArray = new JSONArray();
+                for (Map.Entry<String, Long> entry : timedMap.entrySet()) {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put(entry.getKey(), entry.getValue());
+                    jsonArray.put(jsonObject);
+                }
+                preferences.edit().putString(key, jsonArray.toString()).apply();
+                CcuLog.i("CCU_PROFILING", "Time to save timed map "+key+" "+(System.currentTimeMillis() - time));
+            } catch (JSONException e) {
+                CcuLog.e(TAG_CCU_HS, "Error saving timed map to preferences for key "+key, e);
+                e.printStackTrace();
+            }
+        }
     }
     
     public void updateRefs(HDict entity, HDictBuilder builder) {
@@ -324,11 +369,31 @@ public class SyncStatusService {
         deletedIdList.removeAll(removedSyncIdList);
         putListString(PREFS_ID_LIST_DELETED, deletedIdList);
 
-        if(updatedIdList.removeAll(removedSyncIdList)) {
-            putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
+        boolean isUpdatedIdMapChanged = false;
+        for(String removedId: removedSyncIdList) {
+            isUpdatedIdMapChanged |= updatedIdMap.remove(removedId) != null;
         }
+        if(isUpdatedIdMapChanged) {
+            putTimedMap(PREFS_ID_MAP_UPDATED, updatedIdMap);
+        }
+
         if(unsyncedIdList.removeAll(removedSyncIdList)) {
             putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
         }
+    }
+
+    public long getLastUpdatedTime(String id) {
+        return updatedIdMap.getOrDefault(id, 0l);
+    }
+
+    // This method is to be used only once while deleting old updatedIdList and migrating to updatedIdMap
+    public void addUpdatedIdListToUpdatedTimedMap(Map<String, Long> idsToUpdateMap) {
+        LinkedHashMap<String, Long> mergedMap = new LinkedHashMap<>(idsToUpdateMap);
+        mergedMap.putAll(updatedIdMap);
+
+        updatedIdMap.clear();
+        updatedIdMap.putAll(mergedMap);
+        CcuLog.d(TAG_CCU_HS, "addUpdatedIdListToUpdatedTimedMap: updatedIdMap size after merge "+updatedIdMap.size());
+        putTimedMap(PREFS_ID_MAP_UPDATED, updatedIdMap);
     }
 }

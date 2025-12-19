@@ -157,10 +157,11 @@ public class SyncWorker extends Worker {
         return isSyncWorkInProgress;
     }
     private static boolean syncUnSyncedEntities(SyncStatusService syncStatusService) {
-        
         if (!syncStatusService.hasUnSyncedData()) {
             return true;
         }
+
+        long syncStartTime = System.currentTimeMillis();
         HGridIterator unsyncedEntities = syncStatusService.getUnSyncedData();
         
         while (unsyncedEntities.hasNext()) {
@@ -169,7 +170,7 @@ public class SyncWorker extends Worker {
                                                    ENDPOINT_ADD_ENTITY, HZincWriter.gridToString(gridData));
             CcuLog.printLongMessage(TAG, "AddEntity Response : "+response);
             if (response != null) {
-                updateSyncStatus(response, true, syncStatusService);
+                updateSyncStatus(response, true, syncStatusService, syncStartTime);
             } else {
                 return false;
             }
@@ -181,10 +182,11 @@ public class SyncWorker extends Worker {
     }
     
     private static boolean syncUpdatedEntities(SyncStatusService syncStatusService) {
-        
         if (!syncStatusService.hasUpdatedData()) {
             return true;
         }
+
+        long syncStartTime = System.currentTimeMillis();
         CcuLog.d(TAG, "has updated data : "+syncStatusService.hasUpdatedData());
         HGridIterator updateEntities = syncStatusService.getUpdatedData();
         while (updateEntities.hasNext()) {
@@ -193,7 +195,10 @@ public class SyncWorker extends Worker {
                                                    ENDPOINT_ADD_ENTITY, HZincWriter.gridToString(gridData));
             CcuLog.printLongMessage(TAG, "UpdateEntity Response : "+response);
             if (response != null) {
-                updateSyncStatus(response, false, syncStatusService);
+                boolean isEntityUpdatedDuringSync = updateSyncStatus(response, false, syncStatusService, syncStartTime);
+                if(isEntityUpdatedDuringSync) {
+                    CCUHsApi.getInstance().scheduleSync();
+                }
             } else {
                 return false;
             }
@@ -239,9 +244,17 @@ public class SyncWorker extends Worker {
     /**
      * First time syncing entities require point arrays to be written to backend.
      */
-    private static void updateSyncStatus(String response, boolean pointWriteRequired, SyncStatusService syncStatusService) {
+    private static boolean updateSyncStatus(String response, boolean pointWriteRequired, SyncStatusService syncStatusService, long syncStartTime) {
         ArrayList<String> syncedIds = retrieveIdsFromResponse(response);
+        boolean isEntityUpdatedMidSync = false;
         for (String id : syncedIds) {
+            CcuLog.d(TAG, "Synced id : " + id + " with startTime : " + syncStartTime + " lastUpdatedTime : " + syncStatusService.getLastUpdatedTime(id));
+            if  (syncStartTime < syncStatusService.getLastUpdatedTime(id)) {
+                CcuLog.d(TAG, "Skipping sync status update for id : " + id + " as it was updated during sync");
+                isEntityUpdatedMidSync = true;
+                continue;
+            }
+
             syncStatusService.setEntitySynced(id);
             //Covers a corner case where are item gets removed from local database while waiting for response from addEntity
             if (CCUHsApi.getInstance().readMapById(id).isEmpty()) {
@@ -253,6 +266,7 @@ public class SyncWorker extends Worker {
         if (pointWriteRequired) {
             PointWriteUtil.sendPointArrayData(syncedIds);
         }
+        return isEntityUpdatedMidSync;
     }
     
     private static void updateDeleteStatus(List<String> entityList, SyncStatusService syncStatusService) {

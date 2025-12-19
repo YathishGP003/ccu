@@ -23,8 +23,6 @@ import a75f.io.domain.equips.hyperstat.HsPipe4Equip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.hyperstat.MonitoringEquip
 import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.HsCpuAnalogOutMapping
-import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Th1InputAssociation
-import a75f.io.logic.bo.building.statprofiles.hyperstat.v2.configs.Th2InputAssociation
 import a75f.io.logic.bo.util.TemperatureMode
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.tuners.TunerUtil
@@ -251,7 +249,7 @@ fun getHyperStatSettingsMessage(equipRef: String, zone: String): HyperStatSettin
 
 }
 
-fun getHyperStatSettings2Message(equipRef: String): HyperStatSettingsMessage2_t.Builder {
+fun getHyperStatSettings2Message(equipRef: String): HyperStatSettingsMessage2_t {
     val settings2 = HyperStatSettingsMessage2_t.newBuilder()
     val hyperStatEquip = Domain.getDomainEquip(equipRef) as HyperStatEquip
 
@@ -260,7 +258,7 @@ fun getHyperStatSettings2Message(equipRef: String): HyperStatSettingsMessage2_t.
     * Because From proto fil we have only 6 values for Analog-in
     * But from CCU configuration we have till 11. */
     if(hyperStatEquip is MonitoringEquip){
-        return settings2
+        return settings2.build()
     }
     settings2.apply {
         enableForceOccupied = hyperStatEquip.autoForceOccupied.readDefaultVal() == 1.0
@@ -284,77 +282,15 @@ fun getHyperStatSettings2Message(equipRef: String): HyperStatSettingsMessage2_t.
         is HsPipe4Equip -> settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_4_PIPE_FANCOIL_UNIT
     }
 
-    return settings2
-}
-
-fun configureThermistorMapping(
-    settings3: HyperStatSettingsMessage3_t.Builder,
-    settings2: HyperStatSettingsMessage2_t.Builder,
-    equipRef: String
-) {
-    val equip = Domain.getDomainEquip(equipRef) as HyperStatEquip
-    if (equip.thermistor1InputEnable.readDefaultVal() == 1.0) {
-        val th1Mapping = equip.thermistor1InputAssociation.readDefaultVal().toInt()
-        settings2.thermistor1Enable = false
-        settings3.thermistor1Mappings = 0
-        settings3.thermistor1Mappings = when (Th1InputAssociation.values()[th1Mapping]) {
-            Th1InputAssociation.DISCHARGE_AIR_TEMPERATURE -> {
-                settings2.thermistor1Enable = true
-                1
-            }
-
-            Th1InputAssociation.GENERIC_ALARM_NC -> 2
-            Th1InputAssociation.GENERIC_ALARM_N0 -> 3
-            Th1InputAssociation.FAN_RUN_STATUS_NO -> 4
-
-            Th1InputAssociation.FAN_RUN_STATUS_NC -> 5
-            Th1InputAssociation.DOOR_WINDOW_SENSOR_NO_TITLE24 -> 6
-            Th1InputAssociation.DOOR_WINDOW_SENSOR_NC_TITLE24 -> 7
-            Th1InputAssociation.DOOR_WINDOW_SENSOR_NO -> 8
-            Th1InputAssociation.DOOR_WINDOW_SENSOR_NC -> 9
-            Th1InputAssociation.KEYCARD_SENSOR_NO -> 10
-            Th1InputAssociation.KEYCARD_SENSOR_NC -> 11
-            Th1InputAssociation.GENERIC_THERMISTOR_INPUT -> 12
-            Th1InputAssociation.CHILLED_WATER_SUPPLY_TEMPERATURE -> 14
-            Th1InputAssociation.HOT_WATER_SUPPLY_TEMPERATURE -> 15
-        }
-    } else {
-        settings2.thermistor1Enable = false
-        settings3.thermistor1Mappings = 0
+    if (hyperStatEquip.thermistor1InputEnable.readDefaultVal() == 1.0) {
+        val th1Mapping = hyperStatEquip.thermistor1InputAssociation.readDefaultVal().toInt()
+        settings2.thermistor1Enable = th1Mapping == Th1InputAssociation.DISCHARGE_AIR_TEMPERATURE.ordinal
     }
-    if (equip is HsPipe2Equip) {
-        settings2.thermistor2Enable = true
-        settings3.thermistor2Mappings = 0
-    } else {
-        if (equip.thermistor2InputEnable.readDefaultVal() == 1.0) {
-            val th2Mapping = equip.thermistor2InputAssociation.readDefaultVal().toInt()
-            settings2.thermistor2Enable = false
-            settings3.thermistor2Mappings = 0
-            settings3.thermistor2Mappings = when (Th2InputAssociation.values()[th2Mapping]) {
-                Th2InputAssociation.DOOR_WINDOW_SENSOR_NC_TITLE24 -> {
-                    settings2.thermistor2Enable = true
-                    1
-                }
-
-                Th2InputAssociation.GENERIC_ALARM_NC -> 2
-                Th2InputAssociation.GENERIC_ALARM_N0 -> 3
-                Th2InputAssociation.FAN_RUN_STATUS_NO -> 4
-                Th2InputAssociation.FAN_RUN_STATUS_NC -> 5
-                Th2InputAssociation.DOOR_WINDOW_SENSOR_NO_TITLE24 -> 6
-                Th2InputAssociation.DISCHARGE_AIR_TEMPERATURE -> 7
-                Th2InputAssociation.DOOR_WINDOW_SENSOR_NO -> 8
-                Th2InputAssociation.DOOR_WINDOW_SENSOR_NC -> 9
-                Th2InputAssociation.KEYCARD_SENSOR_NO -> 10
-                Th2InputAssociation.KEYCARD_SENSOR_NC -> 11
-                Th2InputAssociation.GENERIC_THERMISTOR_INPUT -> 12
-                Th2InputAssociation.CHILLED_WATER_SUPPLY_TEMPERATURE -> 14
-                Th2InputAssociation.HOT_WATER_SUPPLY_TEMPERATURE -> 15
-            }
-        } else {
-            settings2.thermistor2Enable = false
-        }
-
+    if (hyperStatEquip.thermistor2InputEnable.readDefaultVal() == 1.0) {
+        val th2Mapping = hyperStatEquip.thermistor2InputAssociation.readDefaultVal().toInt()
+        settings2.thermistor2Enable = th2Mapping == Th2InputAssociation.DOOR_WINDOW_SENSOR_NC_TITLE24.ordinal
     }
+    return settings2.build()
 }
 
 private fun getStagedFanDetails(equip: HsCpuEquip): HyperStat.HyperStatConfigsCpu_t {
@@ -371,10 +307,8 @@ private fun getStagedFanDetails(equip: HsCpuEquip): HyperStat.HyperStatConfigsCp
     }.build()
 }
 
-fun getHyperStatSettings3Message(equipRef: String): HyperStatSettingsMessage3_t.Builder {
+fun getHyperStatSettings3Message(equipRef: String): HyperStatSettingsMessage3_t {
     val hyperStatEquip = Domain.getDomainEquip(equipRef) as HyperStatEquip
-
-
     val settings3 =  HyperStatSettingsMessage3_t.newBuilder().apply {
         genertiTuners = getCommonTuners(equipRef)
         when (hyperStatEquip) {
@@ -384,8 +318,48 @@ fun getHyperStatSettings3Message(equipRef: String): HyperStatSettingsMessage3_t.
         }
         stageUpTimer = hyperStatEquip.hyperstatStageUpTimerCounter.readPriorityVal().toInt()
         stageDownTimer = hyperStatEquip.hyperstatStageDownTimerCounter.readPriorityVal().toInt()
+
+        if (hyperStatEquip.thermistor1InputEnable.readDefaultVal() == 1.0) {
+            val th1Mapping = hyperStatEquip.thermistor1InputAssociation.readDefaultVal().toInt()
+            thermistor1Mappings = when (Th1InputAssociation.values()[th1Mapping]) {
+                Th1InputAssociation.DISCHARGE_AIR_TEMPERATURE -> FirmwareThermistorMapping.TH1_DISCHARGE_AIR_TEMPERATURE
+                Th1InputAssociation.GENERIC_ALARM_NC -> FirmwareThermistorMapping.GENERIC_ALARM_NC
+                Th1InputAssociation.GENERIC_ALARM_N0 -> FirmwareThermistorMapping.GENERIC_ALARM_N0
+                Th1InputAssociation.FAN_RUN_STATUS_NO -> FirmwareThermistorMapping.FAN_RUN_STATUS_NO
+                Th1InputAssociation.FAN_RUN_STATUS_NC -> FirmwareThermistorMapping.FAN_RUN_STATUS_NC
+                Th1InputAssociation.DOOR_WINDOW_SENSOR_NO_TITLE24 -> FirmwareThermistorMapping.DOOR_WINDOW_SENSOR_NO_TITLE24
+                Th1InputAssociation.DOOR_WINDOW_SENSOR_NC_TITLE24 -> FirmwareThermistorMapping.TH1_DOOR_WINDOW_SENSOR_NC_TITLE24
+                Th1InputAssociation.DOOR_WINDOW_SENSOR_NO -> FirmwareThermistorMapping.DOOR_WINDOW_SENSOR_NO
+                Th1InputAssociation.DOOR_WINDOW_SENSOR_NC -> FirmwareThermistorMapping.DOOR_WINDOW_SENSOR_NC
+                Th1InputAssociation.KEYCARD_SENSOR_NO -> FirmwareThermistorMapping.KEYCARD_SENSOR_NO
+                Th1InputAssociation.KEYCARD_SENSOR_NC -> FirmwareThermistorMapping.KEYCARD_SENSOR_NC
+                Th1InputAssociation.GENERIC_THERMISTOR_INPUT -> FirmwareThermistorMapping.GENERIC_THERMISTOR_INPUT
+                Th1InputAssociation.CHILLED_WATER_SUPPLY_TEMPERATURE -> FirmwareThermistorMapping.CHILLED_WATER_SUPPLY_TEMPERATURE
+                Th1InputAssociation.HOT_WATER_SUPPLY_TEMPERATURE -> FirmwareThermistorMapping.HOT_WATER_SUPPLY_TEMPERATURE
+            }
+        }
+        if (hyperStatEquip.thermistor2InputEnable.readDefaultVal() == 1.0) {
+            val th2Mapping = hyperStatEquip.thermistor2InputAssociation.readDefaultVal().toInt()
+            thermistor2Mappings = when (Th2InputAssociation.values()[th2Mapping]) {
+                Th2InputAssociation.DOOR_WINDOW_SENSOR_NC_TITLE24 -> FirmwareThermistorMapping.TH2_DOOR_WINDOW_SENSOR_NC_TITLE24
+                Th2InputAssociation.GENERIC_ALARM_NC -> FirmwareThermistorMapping.GENERIC_ALARM_NC
+                Th2InputAssociation.GENERIC_ALARM_N0 -> FirmwareThermistorMapping.GENERIC_ALARM_N0
+                Th2InputAssociation.FAN_RUN_STATUS_NO -> FirmwareThermistorMapping.FAN_RUN_STATUS_NO
+                Th2InputAssociation.FAN_RUN_STATUS_NC -> FirmwareThermistorMapping.FAN_RUN_STATUS_NC
+                Th2InputAssociation.DOOR_WINDOW_SENSOR_NO_TITLE24 -> FirmwareThermistorMapping.DOOR_WINDOW_SENSOR_NO_TITLE24
+                Th2InputAssociation.DISCHARGE_AIR_TEMPERATURE -> FirmwareThermistorMapping.TH2_DISCHARGE_AIR_TEMPERATURE
+                Th2InputAssociation.DOOR_WINDOW_SENSOR_NO -> FirmwareThermistorMapping.DOOR_WINDOW_SENSOR_NO
+                Th2InputAssociation.DOOR_WINDOW_SENSOR_NC -> FirmwareThermistorMapping.DOOR_WINDOW_SENSOR_NC
+                Th2InputAssociation.KEYCARD_SENSOR_NO -> FirmwareThermistorMapping.KEYCARD_SENSOR_NO
+                Th2InputAssociation.KEYCARD_SENSOR_NC -> FirmwareThermistorMapping.KEYCARD_SENSOR_NC
+                Th2InputAssociation.GENERIC_THERMISTOR_INPUT -> FirmwareThermistorMapping.GENERIC_THERMISTOR_INPUT
+                Th2InputAssociation.CHILLED_WATER_SUPPLY_TEMPERATURE -> FirmwareThermistorMapping.CHILLED_WATER_SUPPLY_TEMPERATURE
+                Th2InputAssociation.HOT_WATER_SUPPLY_TEMPERATURE -> FirmwareThermistorMapping.HOT_WATER_SUPPLY_TEMPERATURE
+            }
+
+        }
     }
-    return settings3
+    return settings3.build()
 }
 
 

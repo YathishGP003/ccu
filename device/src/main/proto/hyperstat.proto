@@ -169,8 +169,6 @@ message HyperStatSettingsMessage2_t {
   uint32 integralConstant = 13; // default 50 - k constant for Integral in 1/100
   uint32 proportionalTemperatureRange = 14; // default 15 - temp range in 1/10 deg that the proportional control will apply
   uint32 integrationTime = 15; // default 30 - time in  minutes the integration takes to max out
-  uint32 thermistor1Mapping = 16;
-  uint32 thermistor2Mapping = 17;
 }
 
 message HyperStatConfigsCpu_t {

@@ -186,7 +186,8 @@ class UserIntentDialog(val pointId: String, private val spinnerView: View? = nul
                 onSelected = { selectedValue ->
                     viewModel.currentSelectedIndex.intValue = selectedValue
                 },
-                defaultSelection = viewModel.defaultSelectionIndex.intValue
+                defaultSelection = viewModel.defaultSelectionIndex.intValue,
+                reflectChangedItemInUI = true
             )
         }
     }

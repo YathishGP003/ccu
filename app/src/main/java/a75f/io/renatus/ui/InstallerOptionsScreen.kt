@@ -226,7 +226,8 @@ fun BackfillTime(installerOptionsViewModel: InstallerOptionsViewModel) {
                     showActions = true      // SHOW APPLY | CANCEL
                 },
                 defaultSelection = installerOptionsViewModel.backFillTime.value.selectedIndex,
-                extraWidth = 60
+                extraWidth = 60,
+                reflectChangedItemInUI = true
             )
         }
 

@@ -182,12 +182,19 @@ fun DropDownWithLabel(
 fun DropDownWithoutLabel(
     list: List<String>, maxLengthString: String, maxContainerWidth: Dp,
     onSelected: (Int) -> Unit, defaultSelection: Int = 0,
-    isEnabled : Boolean = true, disabledIndices: List<Int> = emptyList(), extraWidth: Int = 0){
+    isEnabled : Boolean = true, disabledIndices: List<Int> = emptyList(), extraWidth: Int = 0,
+    reflectChangedItemInUI: Boolean = false){
 
     Row {
         var expanded by remember { mutableStateOf(false) }
-        //var selectedIndex by remember { mutableIntStateOf(defaultSelection) }
-        var selectedIndex = defaultSelection
+
+        val selectedIndexState = if (reflectChangedItemInUI) {
+            remember { mutableIntStateOf(defaultSelection) }
+        } else {
+            mutableIntStateOf(defaultSelection)
+        }
+        var selectedIndex by selectedIndexState
+
         val lazyListState = rememberLazyListState()
         val noOfItemsDisplayInDropDown = 8  // This is the number of items to be displayed in the dropdown layout
         val dropDownHeight = 435 // This is the default height of the dropdown for 8 items

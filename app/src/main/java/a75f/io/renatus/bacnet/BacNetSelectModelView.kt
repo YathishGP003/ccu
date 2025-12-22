@@ -5,6 +5,10 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.util.bacnet.BacnetConfigConstants
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.MSTP_MASTER_HIGH_LIMIT
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.MSTP_MASTER_LOW_LIMIT
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.MSTP_SLAVE_HIGH_LIMIT
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.MSTP_SLAVE_LOW_LIMIT
 import a75f.io.logic.util.bacnet.validateInputdata
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
@@ -1085,48 +1089,6 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
         ButtonListRow(textActionPairMap = buttonInfoMap)
     }
 
-    private fun isFetchReady() : Boolean {
-        return when (viewModel.configurationType.value) {
-            MSTP_CONFIGURATION -> {
-                viewModel.destinationMacAddress.value.trim().isNotEmpty() &&
-                       if (viewModel.deviceSelectionMode.value == 1)
-                           validateInputdata(1,127, viewModel.destinationMacAddress.value.toInt())
-                       else
-                           validateInputdata(128, 255, viewModel.destinationMacAddress.value.toInt())
-            }
-            IP_CONFIGURATION -> {
-                viewModel.destinationIp.value.isNotEmpty() &&
-                        viewModel.destinationPort.value.isNotEmpty() &&
-                        viewModel.deviceId.value.isNotEmpty()
-            }
-            else -> {
-                false
-            }
-        }
-    }
-
-    private fun getFetchText(): String {
-        return if (viewModel.bacnetPropertiesFetched.value) {
-            RE_FETCH
-        } else {
-            FETCH
-        }
-    }
-
-    private fun getFetchWarningToastMessageIfValid() : Pair<Boolean, String> {
-        var (isValidWarning, warningMessage) = getMinValidationWarningToastMessage()
-        if(!isValidWarning){
-            if(viewModel.configurationType.value == IP_CONFIGURATION && !isBacNetInitialized) {
-                warningMessage = getString(R.string.bacnetIpNotInitializedWarning)
-            } else if(viewModel.configurationType.value == MSTP_CONFIGURATION && !isBacnetMstpInitialized) {
-                warningMessage = getString(R.string.bacnetMstpNotInitializedWarning)
-            } else {
-                return Pair(false, "")
-            }
-        }
-            return Pair(true, warningMessage)
-    }
-
     private fun getMinValidationWarningToastMessage() : Pair<Boolean, String> {
         var warningMessage = ""
 
@@ -1144,10 +1106,18 @@ class BacNetSelectModelView : BaseDialogFragment() , OnPairingCompleteListener {
             if (viewModel.destinationMacAddress.value.isEmpty()) {
                 warningMessage = getString(R.string.macAddressValidation)
             } else {
-                if (L.isBacnetMstpMacAddressExists(viewModel.destinationMacAddress.value.toInt())) {
-                    warningMessage = "${getString(R.string.macAddress)} ${viewModel.destinationMacAddress.value} ${getString(R.string.already_exists_validation)}"
+                warningMessage = if (L.isBacnetMstpMacAddressExists(viewModel.destinationMacAddress.value.toInt())) {
+                    "${getString(R.string.macAddress)} ${viewModel.destinationMacAddress.value} ${getString(R.string.already_exists_validation)}"
                 } else {
-                    return Pair(false, "")
+                    if (viewModel.deviceSelectionMode.value == 1 &&
+                        !validateInputdata(MSTP_MASTER_LOW_LIMIT,MSTP_MASTER_HIGH_LIMIT, viewModel.destinationMacAddress.value.toInt()) ) {
+                        getString(R.string.bacnetMstpMasterMacValidation)
+                    } else if (viewModel.deviceSelectionMode.value == 0 &&
+                        !validateInputdata(MSTP_SLAVE_LOW_LIMIT, MSTP_SLAVE_HIGH_LIMIT, viewModel.destinationMacAddress.value.toInt())) {
+                        getString(R.string.bacnetMstpSlaveMacValidation)
+                    } else {
+                        return Pair(false, "")
+                    }
                 }
             }
         }

@@ -91,6 +91,12 @@ object  BacnetConfigConstants {
     const val VENDOR_ID_VALUE = 1181
     const val VENDOR_NAME_VALUE = "75F"
 
+    const val MSTP_MASTER_LOW_LIMIT = 1
+    const val MSTP_MASTER_HIGH_LIMIT = 127
+    const val MSTP_SLAVE_LOW_LIMIT = 128
+    const val MSTP_SLAVE_HIGH_LIMIT = 255
+
+
     const val BROADCAST_BACNET_APP_GLOBAL_PARAM = "a75f.io.renatus.BROADCAST_BACNET_APP_GLOBAL_PARAM"
     const val BACNET_MSTP_SERIAL_DEVICE = "bacnetMstpSerialDevice"
 

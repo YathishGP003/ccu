@@ -5,6 +5,7 @@ import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.system.SystemController
 import a75f.io.logic.bo.building.system.SystemProfile
 import a75f.io.logic.bo.building.system.dab.DabSystemController
+import a75f.io.logic.util.uiutils.getStagesStatus
 
 /**
  * Author: Manjunath Kundaragi
@@ -72,12 +73,16 @@ fun getSystemStatusMsg(
         fan, "Fan Stages", listOf(Stage.FAN_1, Stage.FAN_2, Stage.FAN_3, Stage.FAN_4, Stage.FAN_5)
     )
 
-    var humidifierStatus: String
-    var dehumidifierStatus: String
+    var humidifierStatus = ""
+    var dehumidifierStatus = ""
     var fanEnable = ""
     conditionStages.apply {
-        humidifierStatus = if (humidifierEnable.readHisVal() > 0) " Humidifier ON " else " Humidifier OFF "
-        dehumidifierStatus = if (dehumidifierEnable.readHisVal() > 0) " Dehumidifier ON " else " Dehumidifier OFF "
+        if(humidifierEnable.pointExists()) {
+            humidifierStatus = if (humidifierEnable.readHisVal() > 0) " Humidifier ON " else " Humidifier OFF "
+        }
+        if(dehumidifierEnable.pointExists()) {
+            dehumidifierStatus = if (dehumidifierEnable.readHisVal() > 0) " Dehumidifier ON " else " Dehumidifier OFF "
+        }
         if (fan.isEmpty()) {
             fanEnable = if (conditionStages.fanEnable.readHisVal() > 0) "Fan ON" else ""
         }

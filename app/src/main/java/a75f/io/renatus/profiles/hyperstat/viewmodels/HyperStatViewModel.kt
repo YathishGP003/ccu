@@ -35,8 +35,8 @@ import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hyperstat.util.HyperStatViewStateUtil
 import a75f.io.renatus.profiles.hyperstat.viewstates.MonitoringViewState
-import a75f.io.renatus.profiles.system.advancedahu.Option
 import a75f.io.renatus.profiles.viewstates.ProfileViewState
+import a75f.io.renatus.util.Option
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
@@ -81,16 +81,8 @@ open class HyperStatViewModel(application: Application) : AndroidViewModel(appli
     lateinit var pairingCompleteListener: OnPairingCompleteListener
     var equipRef: String? = null
     protected var saveJob: Job? = null
-
     open var viewState: MutableState<ProfileViewState> = mutableStateOf(ProfileViewState())
 
-    var minMaxVoltage = List(11) { Option(it, it.toString()) }
-    val testSignalVoltage = (1..100).map {
-        Option((it / 10.0).toInt(), (it / 10.0).toString())
-    }
-    var testVoltage = List(101) { Option(it, it.toString()) }
-
-    var damperOpeningRate = (10..100 step 10).toList().map { Option(it, it.toString()) }
     private val _isDisabled = MutableLiveData(false)
     val isDisabled: LiveData<Boolean> = _isDisabled
     private val _isReloadRequired = MutableLiveData(false)
@@ -224,9 +216,9 @@ open class HyperStatViewModel(application: Application) : AndroidViewModel(appli
         }
         if (analogOut != -1) {
             when (analogOut) {
-                1 -> device.analog1Out.writePointValue(status * 10)
-                2 -> device.analog2Out.writePointValue(status* 10)
-                3 -> device.analog3Out.writePointValue(status* 10)
+                1 -> device.analog1Out.writePointValue(status)
+                2 -> device.analog2Out.writePointValue(status)
+                3 -> device.analog3Out.writePointValue(status)
             }
         }
         val testMessage = HyperStatMessageGenerator.getControlMessage(deviceAddress.toInt())

@@ -19,7 +19,8 @@ import a75f.io.renatus.modbus.util.OnItemSelect
 import a75f.io.renatus.modbus.util.PARAMETER_CAPITALIZED
 import a75f.io.renatus.modbus.util.SCHEDULABLE_CAPITALIZED
 import a75f.io.renatus.modbus.util.SEARCH_SLAVE_ID
-import a75f.io.renatus.profiles.system.advancedahu.Option
+import a75f.io.renatus.util.Option
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -295,6 +296,7 @@ class PCNUIUtil {
             }
         }
 
+        @SuppressLint("UnrememberedMutableState")
         @Composable
         private fun showServerList(serverId: Int, newConfiguration: Boolean, viewModel: PCNConfigViewModel, fragmentManager: FragmentManager) {
             Row(verticalAlignment = Alignment.CenterVertically) {

@@ -947,7 +947,7 @@
 
     <!--MS-->
 
-    <string name="co2_control">Enable CO2 Control</string>
+    <string name="co2_control">CO2 Control</string>
     <string name="universal_in">Universal-In</string>
     <string name="conventional_package_unit_caps">CONVENTIONAL PACKAGE UNIT</string>
     <string name="analog_out_fan_recirculate">Analog-out at\nFan Recirculate</string>

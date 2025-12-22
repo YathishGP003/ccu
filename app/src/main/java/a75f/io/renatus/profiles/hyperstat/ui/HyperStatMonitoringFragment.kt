@@ -18,9 +18,9 @@ import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hyperstat.viewmodels.HyperStatViewModel
 import a75f.io.renatus.profiles.hyperstat.viewmodels.MonitoringModel
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
-import a75f.io.renatus.profiles.system.advancedahu.Option
 import a75f.io.renatus.profiles.system.advancedahu.duplicateError
 import a75f.io.renatus.profiles.viewstates.ConfigState
+import a75f.io.renatus.util.Option
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater

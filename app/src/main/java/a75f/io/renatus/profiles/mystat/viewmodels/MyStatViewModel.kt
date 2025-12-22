@@ -43,7 +43,7 @@ import a75f.io.renatus.profiles.mystat.viewstates.MyStatPipe2ViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatPipe4ViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewStateUtil
-import a75f.io.renatus.profiles.system.advancedahu.Option
+import a75f.io.renatus.util.Option
 import a75f.io.renatus.util.showErrorDialog
 import android.app.Application
 import android.content.Context
@@ -251,8 +251,8 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
             val device = getMyStatDomainDevice("", equipRef!!)
             device.apply {
                 return when(index) {
-                    4 -> (if (isV1()) universalOut2 else universalOut1).readPointValue()
-                    5 -> (if (isV1()) universalOut1 else universalOut2).readPointValue()
+                    4 -> (if (isV1()) universalOut2 else universalOut1).readPointValue() / 10
+                    5 -> (if (isV1()) universalOut1 else universalOut2).readPointValue() / 10
                     else -> 0.0
                 }
             }
@@ -325,7 +325,7 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
 
     fun isValidConfiguration(isDcvMapped: Boolean): Boolean {
         var isValidConfig = true
-        if (viewState.value.co2Control) {
+        if (viewState.value.displayCO2) {
             if (!isDcvMapped) {
                 showErrorDialog(context, Html.fromHtml("<br>CO2 Control toggle is Enabled, but DCV Damper is not mapped.", Html.FROM_HTML_MODE_LEGACY))
                 isValidConfig =  false

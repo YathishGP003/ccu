@@ -8,7 +8,7 @@ import a75f.io.renatus.compose.ComposeUtil.Companion.greySearchIcon
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.secondaryColor
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
-import a75f.io.renatus.profiles.system.advancedahu.Option
+import a75f.io.renatus.util.Option
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
@@ -43,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -173,7 +174,9 @@ fun SpinnerElementOption(
     val selectedItem = remember { mutableStateOf(defaultSelection) }
     val expanded = remember { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
-    var selectedIndex by remember { mutableStateOf(getDefaultSelectionIndex(items, defaultSelection))}
+    var selectedIndex by remember { mutableIntStateOf(getDefaultSelectionIndex(items, defaultSelection)) }
+
+
     Box(
         modifier = Modifier
                 .wrapContentSize()
@@ -485,8 +488,15 @@ fun getDefaultSelectionIndex(items: List<Option>, defaultSelection: String):Int 
     val isDefaultSelectionIsNumber = defaultSelection.toDoubleOrNull() != null
     var selectedItem = defaultSelection
     if (isDefaultSelectionIsNumber && items[0].value.contains('.')) {
-        selectedItem = String.format("%.2f", defaultSelection.toDouble())
+        selectedItem = if (Regex("""\d+\.\d+""").matches(defaultSelection)) {
+            // Already has exactly one decimal place → keep as is
+            defaultSelection
+        } else {
+            // Otherwise format to 2 decimal places
+            String.format("%.2f", defaultSelection.toDouble())
+        }
     }
+
 
     for (i in items.indices) {
         if (items[i].value == selectedItem) {

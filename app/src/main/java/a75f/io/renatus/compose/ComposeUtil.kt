@@ -6,8 +6,8 @@ import a75f.io.renatus.compose.ComposeUtil.Companion.myFontFamily
 import a75f.io.renatus.modbus.util.ALERT
 import a75f.io.renatus.modbus.util.OK
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
-import a75f.io.renatus.profiles.system.advancedahu.Option
 import a75f.io.renatus.util.CCUUiUtil
+import a75f.io.renatus.util.Option
 import android.content.Context
 import android.text.Spanned
 import androidx.appcompat.app.AlertDialog

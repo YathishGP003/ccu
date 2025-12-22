@@ -26,6 +26,7 @@ import a75f.io.renatus.compose.TitleTextView
 import a75f.io.renatus.compose.ToggleButton
 import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.compose.dropDownHeight
+import a75f.io.renatus.compose.getDefaultSelectionIndex
 import a75f.io.renatus.compose.noOfItemsDisplayInDropDown
 import a75f.io.renatus.compose.simpleVerticalScrollbar
 import a75f.io.renatus.modbus.util.CANCEL
@@ -36,6 +37,9 @@ import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.Pipe2UvViewModel
 import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.Pipe4UvViewModel
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe2UvViewState
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe4UvViewState
+import a75f.io.renatus.profiles.mystat.lowMediumHighPercent
+import a75f.io.renatus.profiles.mystat.minMaxVoltage
+import a75f.io.renatus.profiles.mystat.testSignalVoltage
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN1
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN2
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN3
@@ -45,6 +49,7 @@ import a75f.io.renatus.profiles.system.UNIVERSAL_IN6
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN7
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN8
 import a75f.io.renatus.profiles.viewstates.ConfigState
+import a75f.io.renatus.util.Option
 import a75f.io.renatus.util.TestSignalManager
 import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
@@ -442,11 +447,11 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     @Composable
     fun ConfigCompose(
         name: String,
-        defaultSelection: HyperStatSplitViewModel.Option,
-        items: List<HyperStatSplitViewModel.Option>,
+        defaultSelection: Option,
+        items: List<Option>,
         unit: String,
         isEnabled: Boolean,
-        onSelect: (HyperStatSplitViewModel.Option) -> Unit = {}
+        onSelect: (Option) -> Unit = {}
     ) {
         Row(
             modifier = Modifier
@@ -508,9 +513,9 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         val relayEnums =
             viewModel.getAllowedValues(DomainName.relay1OutputAssociation, viewModel.equipModel)
 
-        fun getDisabledIndices(relayConfig: ConfigState): List<HyperStatSplitViewModel.Option> {
+        fun getDisabledIndices(relayConfig: ConfigState): List<Option> {
 
-            val enabledEnums = mutableListOf<HyperStatSplitViewModel.Option>()
+            val enabledEnums = mutableListOf<Option>()
 
             if (viewModel.isCompressorMappedWithAnyRelay()) {
                 if (viewModel.isChangeOverCoolingMapped(relayConfig)) {
@@ -613,12 +618,12 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         relayName: String,
         enabled: Boolean,
         onEnabledChanged: (Boolean) -> Unit,
-        association: HyperStatSplitViewModel.Option,
-        relayEnums: List<HyperStatSplitViewModel.Option>,
-        enabledItems: List<HyperStatSplitViewModel.Option>,
+        association: Option,
+        relayEnums: List<Option>,
+        enabledItems: List<Option>,
         unit: String,
         isEnabled: Boolean,
-        onAssociationChanged: (HyperStatSplitViewModel.Option) -> Unit,
+        onAssociationChanged: (Option) -> Unit,
         onTestActivated: (Boolean) -> Unit,
         testSignalState :Boolean = false
     ) {
@@ -775,7 +780,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         association = analogOutEnums[associationIndex],
                         analogOutEnums = analogOutEnums,
                         enabledEnums = enabledEnums,
-                        testSingles = viewModel.testVoltage,
+                        testSingles = testSignalVoltage,
                         isEnabled = enabled,
                         onAssociationChanged = { association ->
                             when (index) {
@@ -794,7 +799,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         },
                         onTestSignalSelected = { value ->
                             if (viewModel.equipRef != null) {
-                                viewModel.handleTestAnalogOutChanged(index, value)
+                                viewModel.handleTestAnalogOutChanged(index, value * 10)
                             }
                             else {
                                 showToast(
@@ -815,13 +820,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         analogOutName: String,
         enabled: Boolean,
         onEnabledChanged: (Boolean) -> Unit = {},
-        association: HyperStatSplitViewModel.Option,
-        analogOutEnums: List<HyperStatSplitViewModel.Option>,
-        enabledEnums: List<HyperStatSplitViewModel.Option>,
-        testSingles: List<HyperStatSplitViewModel.Option>,
+        association: Option,
+        analogOutEnums: List<Option>,
+        enabledEnums: List<Option>,
+        testSingles: List<Option>,
         unit: String = "",
         isEnabled: Boolean,
-        onAssociationChanged: (HyperStatSplitViewModel.Option) -> Unit = {},
+        onAssociationChanged: (Option) -> Unit = {},
         onTestSignalSelected: (Double) -> Unit = {},
         testSignalValue :String = "0.0"
     ) {
@@ -885,15 +890,17 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     @Composable
     fun SpinnerElementOption(
         defaultSelection: String,
-        items: List<HyperStatSplitViewModel.Option>,
+        items: List<Option>,
         unit: String,
-        itemSelected: (HyperStatSplitViewModel.Option) -> Unit,
+        itemSelected: (Option) -> Unit,
         previewWidth : Int = 130
     ) {
         val selectedItem = remember { mutableStateOf(defaultSelection) }
         val expanded = remember { mutableStateOf(false) }
         val lazyListState = rememberLazyListState()
         var selectedIndex by remember { mutableIntStateOf(getDefaultSelectionIndex(items, defaultSelection)) }
+
+
         Box(
             modifier = Modifier
                 .wrapContentSize()
@@ -1069,27 +1076,6 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         }
     }
 
-    @SuppressLint("DefaultLocale")
-    private fun getDefaultSelectionIndex(items: List<HyperStatSplitViewModel.Option>, defaultSelection: String):Int {
-        var selectedIndex = 0
-        if (items.isEmpty()) {
-            return -1
-        }
-
-        val isDefaultSelectionIsNumber = defaultSelection.toDoubleOrNull() != null
-        var selectedItem = defaultSelection
-        if (isDefaultSelectionIsNumber && items[0].value.contains('.')) {
-            selectedItem = String.format("%.2f", defaultSelection.toDouble())
-        }
-
-        for (i in items.indices) {
-            if (items[i].value == selectedItem) {
-                selectedIndex = i
-                break
-            }
-        }
-        return selectedIndex
-    }
 
     @Composable
     fun UniversalInConfig(viewModel: HyperStatSplitViewModel,modifier: Modifier = Modifier) {
@@ -1198,11 +1184,11 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         name: String,
         default: Boolean,
         onEnabled: (Boolean) -> Unit = {},
-        spinnerDefault: HyperStatSplitViewModel.Option,
-        items: List<HyperStatSplitViewModel.Option>,
+        spinnerDefault: Option,
+        items: List<Option>,
         unit: String = "",
         isEnabled: Boolean,
-        onSelect: (HyperStatSplitViewModel.Option) -> Unit,
+        onSelect: (Option) -> Unit,
         mappingText :String = "",
         isPipe2UvProfile: Boolean = false,
     ) {
@@ -1253,11 +1239,11 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun SearchSpinnerElement(
-        default: HyperStatSplitViewModel.Option,
-        allItems: List<HyperStatSplitViewModel.Option>,
-        enabledItems: List<HyperStatSplitViewModel.Option>,
+        default: Option,
+        allItems: List<Option>,
+        enabledItems: List<Option>,
         unit: String,
-        onSelect: (HyperStatSplitViewModel.Option) -> Unit,
+        onSelect: (Option) -> Unit,
         width: Int,
         expandedWidth: Int = width,
         isEnabled: Boolean = true
@@ -1432,7 +1418,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             MinMaxConfiguration("Analog-out1 at Min \nCompressor Speed",
                 "Analog-out1 at Max \nCompressor Speed",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.compressorMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.compressorMaxVoltage.toString(),
@@ -1453,7 +1439,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             MinMaxConfiguration("Analog-out2 at Min \nCompressor Speed",
                 "Analog-out2 at Max \nCompressor Speed",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.compressorMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.compressorMaxVoltage.toString(),
@@ -1473,7 +1459,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             MinMaxConfiguration("Analog-out3 at Min \nCompressor Speed",
                 "Analog-out3 at Max \nCompressor Speed",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.compressorMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.compressorMaxVoltage.toString(),
@@ -1493,7 +1479,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             MinMaxConfiguration("Analog-out4 at Min \nCompressor Speed",
                 "Analog-out4 at Max \nCompressor Speed",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.compressorMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.compressorMaxVoltage.toString(),
@@ -1526,7 +1512,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             MinMaxConfiguration("Analog-out1 at Min \nDcv Modulation Damper",
                 "Analog-out1 at Max \nDcv Modulation Damper",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.dcvModulationMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.dcvModulationMaxVoltage.toString(),
@@ -1546,7 +1532,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             MinMaxConfiguration("Analog-out2 at Min \nDcv Modulation Damper",
                 "Analog-out2 at Max \nDcv Modulation Damper",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.dcvModulationMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.dcvModulationMaxVoltage.toString(),
@@ -1566,7 +1552,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             MinMaxConfiguration("Analog-out3 at Min \nDcv Modulation Damper",
                 "Analog-out3 at Max \nDcv Modulation Damper",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.dcvModulationMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.dcvModulationMaxVoltage.toString(),
@@ -1586,7 +1572,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             MinMaxConfiguration("Analog-out4 at Min \nDcv Modulation Damper",
                 "Analog-out4 at Max \nDcv Modulation Damper",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.dcvModulationMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.dcvModulationMaxVoltage.toString(),
@@ -1623,7 +1609,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 "Fan Out\nduring Compressor Stage 1",
                 "Fan Out\nduring Compressor Stage 2",
                 "Fan Out\nduring Compressor Stage 3",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 recircDefault = (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.recircVoltage.toString(),
                 economizerDefault = (viewModel.viewState.value as HyperStatSplitCpuState).stagedFanVoltages.economizerVoltage.toString(),
@@ -1692,7 +1678,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             MinMaxConfiguration("Analog-out1 at Min \nOAO Damper",
                 "Analog-out1 at Max \nOAO Damper",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.oaoDamperMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.oaoDamperMaxVoltage.toString(),
@@ -1714,7 +1700,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             MinMaxConfiguration("Analog-out2 at Min \nOAO Damper",
                 "Analog-out2 at Max \nOAO Damper",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.oaoDamperMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.oaoDamperMaxVoltage.toString(),
@@ -1736,7 +1722,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             MinMaxConfiguration("Analog-out3 at Min \nOAO Damper",
                 "Analog-out3 at Max \nOAO Damper",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.oaoDamperMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.oaoDamperMaxVoltage.toString(),
@@ -1758,7 +1744,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             MinMaxConfiguration("Analog-out4 at Min \nOAO Damper",
                 "Analog-out4 at Max \nOAO Damper",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.oaoDamperMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.oaoDamperMaxVoltage.toString(),
@@ -1793,7 +1779,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             MinMaxConfiguration("Analog-out1 at Min \nReturn Damper",
                 "Analog-out1 at Max \nReturn Damper",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.returnDamperMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.returnDamperMaxVoltage.toString(),
@@ -1812,7 +1798,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             MinMaxConfiguration("Analog-out2 at Min \nReturn Damper",
                 "Analog-out2 at Max \nReturn Damper",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.returnDamperMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.returnDamperMaxVoltage.toString(),
@@ -1832,7 +1818,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             MinMaxConfiguration("Analog-out3 at Min \nReturn Damper",
                 "Analog-out3 at Max \nReturn Damper",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.returnDamperMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.returnDamperMaxVoltage.toString(),
@@ -1852,7 +1838,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         ) {
             MinMaxConfiguration("Analog-out4 at Min \nReturn Damper",
                 "Analog-out4 at Max \nReturn Damper",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.returnDamperMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.returnDamperMaxVoltage.toString(),
@@ -1870,12 +1856,12 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     fun MinMaxConfiguration(
         minLabel: String,
         maxLabel: String,
-        itemList: List<HyperStatSplitViewModel.Option>,
+        itemList: List<Option>,
         unit: String,
         minDefault: String,
         maxDefault: String,
-        onMinSelected: (HyperStatSplitViewModel.Option) -> Unit = {},
-        onMaxSelected: (HyperStatSplitViewModel.Option) -> Unit = {},
+        onMinSelected: (Option) -> Unit = {},
+        onMaxSelected: (Option) -> Unit = {},
         modifier: Modifier = Modifier
     ) {
         Row(
@@ -1929,7 +1915,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         compressor1Label: String,
         compressor2Label: String,
         compressor3Label: String,
-        itemList: List<HyperStatSplitViewModel.Option>,
+        itemList: List<Option>,
         unit: String,
         recircDefault: String,
         economizerDefault: String,
@@ -1942,17 +1928,17 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         compressor1Default: String,
         compressor2Default: String,
         compressor3Default: String,
-        onRecircSelected: (HyperStatSplitViewModel.Option) -> Unit = {},
-        onEconomizerSelected: (HyperStatSplitViewModel.Option) -> Unit = {},
-        onHeatStage1Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
-        onHeatStage2Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
-        onHeatStage3Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
-        onCoolStage1Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
-        onCoolStage2Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
-        onCoolStage3Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
-        onCompressor1Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
-        onCompressor2Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
-        onCompressor3Selected: (HyperStatSplitViewModel.Option) -> Unit = {},
+        onRecircSelected: (Option) -> Unit = {},
+        onEconomizerSelected: (Option) -> Unit = {},
+        onHeatStage1Selected: (Option) -> Unit = {},
+        onHeatStage2Selected: (Option) -> Unit = {},
+        onHeatStage3Selected: (Option) -> Unit = {},
+        onCoolStage1Selected: (Option) -> Unit = {},
+        onCoolStage2Selected: (Option) -> Unit = {},
+        onCoolStage3Selected: (Option) -> Unit = {},
+        onCompressor1Selected: (Option) -> Unit = {},
+        onCompressor2Selected: (Option) -> Unit = {},
+        onCompressor3Selected: (Option) -> Unit = {},
         viewModel: HyperStatSplitViewModel
     ) {
         FlowRow(
@@ -2176,7 +2162,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementOption(
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanAtFanLow.toString(),
-                        items = viewModel.testVoltage,
+                        items = lowMediumHighPercent,
                         unit = "%",
                         itemSelected = {
                             (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanAtFanLow =
@@ -2198,7 +2184,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementOption(
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanAtFanMedium.toString(),
-                        items = viewModel.testVoltage,
+                        items = lowMediumHighPercent,
                         unit = "%",
                         itemSelected = {
                             (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanAtFanMedium =
@@ -2220,7 +2206,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementOption(
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanAtFanHigh.toString(),
-                        items = viewModel.testVoltage,
+                        items = lowMediumHighPercent,
                         unit = "%",
                         itemSelected = {
                             (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanAtFanHigh =
@@ -2249,7 +2235,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementOption(
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanAtFanLow.toString(),
-                        items = viewModel.testVoltage,
+                        items = lowMediumHighPercent,
                         unit = "%",
                         itemSelected = {
                             (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanAtFanLow =
@@ -2271,7 +2257,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementOption(
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanAtFanMedium.toString(),
-                        items = viewModel.testVoltage,
+                        items = lowMediumHighPercent,
                         unit = "%",
                         itemSelected = {
                             (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanAtFanMedium =
@@ -2293,7 +2279,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementOption(
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanAtFanHigh.toString(),
-                        items = viewModel.testVoltage,
+                        items = lowMediumHighPercent,
                         unit = "%",
                         itemSelected = {
                             (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanAtFanHigh =
@@ -2321,7 +2307,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementOption(
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanAtFanLow.toString(),
-                        items = viewModel.testVoltage,
+                        items = lowMediumHighPercent,
                         unit = "%",
                         itemSelected = {
                             (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanAtFanLow =
@@ -2343,7 +2329,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementOption(
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanAtFanMedium.toString(),
-                        items = viewModel.testVoltage,
+                        items = lowMediumHighPercent,
                         unit = "%",
                         itemSelected = {
                             (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanAtFanMedium =
@@ -2365,7 +2351,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementOption(
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanAtFanHigh.toString(),
-                        items = viewModel.testVoltage,
+                        items = lowMediumHighPercent,
                         unit = "%",
                         itemSelected = {
                             (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanAtFanHigh =
@@ -2394,7 +2380,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementOption(
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanAtFanLow.toString(),
-                        items = viewModel.testVoltage,
+                        items = lowMediumHighPercent,
                         unit = "%",
                         itemSelected = {
                             (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanAtFanLow =
@@ -2416,7 +2402,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementOption(
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanAtFanMedium.toString(),
-                        items = viewModel.testVoltage,
+                        items = lowMediumHighPercent,
                         unit = "%",
                         itemSelected = {
                             (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanAtFanMedium =
@@ -2438,7 +2424,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                     SpinnerElementOption(
                         defaultSelection = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanAtFanHigh.toString(),
-                        items = viewModel.testVoltage,
+                        items = lowMediumHighPercent,
                         unit = "%",
                         itemSelected = {
                             (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanAtFanHigh =

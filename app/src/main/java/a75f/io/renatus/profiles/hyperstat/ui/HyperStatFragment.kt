@@ -29,6 +29,8 @@ import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hss.HyperStatSplitFragment.Companion.CONDITIONING_ACCESS
 import a75f.io.renatus.profiles.hss.HyperStatSplitFragment.Companion.INSTALLER_ACCESS
 import a75f.io.renatus.profiles.hyperstat.viewmodels.HyperStatViewModel
+import a75f.io.renatus.profiles.mystat.damperOpeningRate
+import a75f.io.renatus.profiles.mystat.testSignalVoltage
 import a75f.io.renatus.profiles.system.ANALOG_IN1
 import a75f.io.renatus.profiles.system.ANALOG_IN2
 import a75f.io.renatus.profiles.system.ENABLE
@@ -36,7 +38,7 @@ import a75f.io.renatus.profiles.system.MAPPING
 import a75f.io.renatus.profiles.system.TEST_SIGNAL
 import a75f.io.renatus.profiles.system.THERMISTOR_1
 import a75f.io.renatus.profiles.system.THERMISTOR_2
-import a75f.io.renatus.profiles.system.advancedahu.Option
+import a75f.io.renatus.util.Option
 import a75f.io.renatus.util.ShowPinDialog
 import android.annotation.SuppressLint
 import android.widget.Toast
@@ -242,7 +244,7 @@ abstract class HyperStatFragment : BaseDialogFragment(), OnPairingCompleteListen
                 },
                 association = analogEnum[associationIndex],
                 analogOutEnums = analogEnum,
-                testSingles = viewModel.testSignalVoltage,
+                testSingles = testSignalVoltage,
                 isEnabled = enabled,
                 onAssociationChanged = { association ->
                     when (index) {
@@ -256,7 +258,7 @@ abstract class HyperStatFragment : BaseDialogFragment(), OnPairingCompleteListen
                     viewModel.sendTestSignal(
                         -1,
                         index + 1,
-                        it
+                        it * 10
                     )
                 },
                 padding = 7
@@ -326,7 +328,7 @@ abstract class HyperStatFragment : BaseDialogFragment(), OnPairingCompleteListen
                         Box(modifier = Modifier
                             .weight(1f)
                             .padding(top = 5.dp)) {
-                            SpinnerElementOption(viewModel.viewState.value.zoneCO2DamperOpeningRate.toString(), viewModel.damperOpeningRate, "%", itemSelected = { viewModel.viewState.value.zoneCO2DamperOpeningRate = it.value.toInt()}, viewModel = null)
+                            SpinnerElementOption(viewModel.viewState.value.zoneCO2DamperOpeningRate.toString(), damperOpeningRate, "%", itemSelected = { viewModel.viewState.value.zoneCO2DamperOpeningRate = it.value.toInt()}, viewModel = null)
                         }
                     }
                 }

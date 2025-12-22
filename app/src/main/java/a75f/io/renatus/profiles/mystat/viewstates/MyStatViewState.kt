@@ -12,7 +12,6 @@ import androidx.compose.runtime.setValue
  */
 
 open class MyStatViewState: ProfileViewState() {
-    var co2Control by mutableStateOf(false)
 
     fun isAnyRelayEnabledAndMapped(mapping: Int): Boolean {
 

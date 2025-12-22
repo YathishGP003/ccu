@@ -18,6 +18,9 @@ import a75f.io.renatus.compose.StyledTextView
 import a75f.io.renatus.compose.Title
 import a75f.io.renatus.profiles.hyperstat.viewmodels.CpuViewModel
 import a75f.io.renatus.profiles.hyperstat.viewstates.CpuViewState
+import a75f.io.renatus.profiles.mystat.lowMediumHighPercent
+import a75f.io.renatus.profiles.mystat.minMaxVoltage
+import a75f.io.renatus.profiles.mystat.testSignalVoltage
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
 import a75f.io.renatus.profiles.viewstates.FanSpeedConfig
 import a75f.io.renatus.profiles.viewstates.MinMaxConfig
@@ -222,7 +225,7 @@ class HyperStatCpuFragment : HyperStatFragment() {
                     2 -> viewModel.viewState.value.analogOut3Enabled = enabledAction
                 }
 
-            }, association = analogEnum[associationIndex], analogOutEnums = analogEnum, testSingles = viewModel.testSignalVoltage, isEnabled = enabled,
+            }, association = analogEnum[associationIndex], analogOutEnums = analogEnum, testSingles = testSignalVoltage, isEnabled = enabled,
                     onAssociationChanged = { association ->
                         when (index) {
                             0 -> viewModel.viewState.value.analogOut1Association = association.index
@@ -235,7 +238,7 @@ class HyperStatCpuFragment : HyperStatFragment() {
                         viewModel.sendTestSignal(
                             -1,
                             index + 1,
-                            it
+                            it * 10
                         )
                         },
                     padding = 7, disabledIndices = disabledIndices)
@@ -273,7 +276,7 @@ class HyperStatCpuFragment : HyperStatFragment() {
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = stagedConfig.stage1.toString(),
-                                items = viewModel.minMaxVoltage,
+                                items = minMaxVoltage,
                                 unit = "V",
                                 itemSelected = { stagedConfig.stage1 = it.value.toInt() }, viewModel = null)
                     }
@@ -284,7 +287,7 @@ class HyperStatCpuFragment : HyperStatFragment() {
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = stagedConfig.stage2.toString(),
-                                items = viewModel.minMaxVoltage,
+                                items = minMaxVoltage,
                                 unit = "V",
                                 itemSelected = { stagedConfig.stage2 = it.value.toInt() }, viewModel = null)
                     }
@@ -295,7 +298,7 @@ class HyperStatCpuFragment : HyperStatFragment() {
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = stagedConfig.stage3.toString(),
-                                items = viewModel.minMaxVoltage,
+                                items = minMaxVoltage,
                                 unit = "V",
                                 itemSelected = { stagedConfig.stage3 = it.value.toInt() }, viewModel = null)
                     }
@@ -318,7 +321,7 @@ class HyperStatCpuFragment : HyperStatFragment() {
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = stagedConfig.stage1.toString(),
-                                items = viewModel.minMaxVoltage,
+                                items = minMaxVoltage,
                                 unit = "V",
                                 itemSelected = { stagedConfig.stage1 = it.value.toInt() }, viewModel = null)
                     }
@@ -329,7 +332,7 @@ class HyperStatCpuFragment : HyperStatFragment() {
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = stagedConfig.stage2.toString(),
-                                items = viewModel.minMaxVoltage,
+                                items = minMaxVoltage,
                                 unit = "V",
                                 itemSelected = { stagedConfig.stage2 = it.value.toInt() }, viewModel = null)
                     }
@@ -340,7 +343,7 @@ class HyperStatCpuFragment : HyperStatFragment() {
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = stagedConfig.stage3.toString(),
-                                items = viewModel.minMaxVoltage,
+                                items = minMaxVoltage,
                                 unit = "V",
                                 itemSelected = { stagedConfig.stage3 = it.value.toInt() }, viewModel = null)
                     }
@@ -371,7 +374,7 @@ class HyperStatCpuFragment : HyperStatFragment() {
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = recirculateFanConfig.analogOut1.toString(),
-                                items = viewModel.minMaxVoltage,
+                                items = minMaxVoltage,
                                 unit = "V",
                                 itemSelected = { recirculateFanConfig.analogOut1 = it.value.toInt() }, viewModel = null)
                     }
@@ -382,7 +385,7 @@ class HyperStatCpuFragment : HyperStatFragment() {
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = recirculateFanConfig.analogOut2.toString(),
-                                items = viewModel.minMaxVoltage,
+                                items = minMaxVoltage,
                                 unit = "V",
                                 itemSelected = { recirculateFanConfig.analogOut2 = it.value.toInt() }, viewModel = null)
                     }
@@ -393,7 +396,7 @@ class HyperStatCpuFragment : HyperStatFragment() {
                     }
                     Box(modifier = rowModifier) {
                         SpinnerElementOption(defaultSelection = recirculateFanConfig.analogOut3.toString(),
-                                items = viewModel.minMaxVoltage,
+                                items = minMaxVoltage,
                                 unit = "V",
                                 itemSelected = { recirculateFanConfig.analogOut3 = it.value.toInt() }, viewModel = null)
                     }
@@ -467,7 +470,7 @@ class HyperStatCpuFragment : HyperStatFragment() {
                         onFirstSelected = { fanConfig.low = it.value.toInt() },
                         onSecondSelected = { fanConfig.medium = it.value.toInt() },
                         onThirdSelected = { fanConfig.high = it.value.toInt() },
-                        itemList = viewModel.testVoltage,
+                        itemList = lowMediumHighPercent,
                         unit = "%"
                 )
             }
@@ -486,7 +489,7 @@ class HyperStatCpuFragment : HyperStatFragment() {
             MinMaxConfiguration(
                     minLabel = "Analog-out$analogIndex at Min \n${mapping.displayName}",
                     maxLabel = "Analog-out$analogIndex at Max \n${mapping.displayName}",
-                    itemList = viewModel.minMaxVoltage,
+                    itemList = minMaxVoltage,
                     unit = "V",
                     minDefault = minMax.min.toString(),
                     maxDefault = minMax.max.toString(),

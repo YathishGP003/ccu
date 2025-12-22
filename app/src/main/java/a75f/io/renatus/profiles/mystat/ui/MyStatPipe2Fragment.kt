@@ -10,7 +10,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.MinMaxConfiguration
 import a75f.io.renatus.compose.Title
-import a75f.io.renatus.profiles.mystat.testVoltage
+import a75f.io.renatus.profiles.mystat.lowMediumHighPercent
 import a75f.io.renatus.profiles.mystat.viewmodels.MyStatPipe2ViewModel
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatPipe2ViewState
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
@@ -217,7 +217,7 @@ class MyStatPipe2Fragment : MyStatFragment() {
                     MinMaxConfiguration(
                         minLabel = getString(R.string.analog_out_fan_low),
                         maxLabel = getString(R.string.analog_out_fan_high),
-                        itemList = testVoltage,
+                        itemList = lowMediumHighPercent,
                         unit = "%",
                         minDefault = analogOut1FanConfig.low.toString(),
                         maxDefault = analogOut1FanConfig.high.toString(),
@@ -227,7 +227,7 @@ class MyStatPipe2Fragment : MyStatFragment() {
                     MinMaxConfiguration(
                         minLabel = getString(R.string.universal_out1_Fan_low),
                         maxLabel = getString(R.string.universal_out1_Fan_high),
-                        itemList = testVoltage,
+                        itemList = lowMediumHighPercent,
                         unit = "%",
                         minDefault = analogOut1FanConfig.low.toString(),
                         maxDefault = analogOut1FanConfig.high.toString(),
@@ -238,7 +238,7 @@ class MyStatPipe2Fragment : MyStatFragment() {
             if (universalOut2.enabled && universalOut2.association == MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
                 MinMaxConfiguration(minLabel = getString(R.string.universal_out2_Fan_low),
                     maxLabel = getString(R.string.universal_out2_Fan_high),
-                    itemList = testVoltage,
+                    itemList = lowMediumHighPercent,
                     unit = "%",
                     minDefault = analogOut2FanConfig.low.toString(),
                     maxDefault = analogOut2FanConfig.high.toString(),

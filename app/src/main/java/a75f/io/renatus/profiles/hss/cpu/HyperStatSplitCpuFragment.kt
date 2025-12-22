@@ -16,6 +16,7 @@ import a75f.io.renatus.composables.NO_MAT_SENSOR
 import a75f.io.renatus.composables.NO_OB_REALLY
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hss.HyperStatSplitFragment
+import a75f.io.renatus.profiles.mystat.minMaxVoltage
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
@@ -198,7 +199,7 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
         ) {
             MinMaxConfiguration("Analog-out1 at Min \nLinear Fan",
                 "Analog-out1 at Max \nLinear Fan",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.linearFanMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value  as HyperStatSplitCpuState).analogOut1MinMax.linearFanMaxVoltage.toString(),
@@ -218,7 +219,7 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
         ) {
             MinMaxConfiguration("Analog-out2 at Min \nLinear Fan",
                 "Analog-out2 at Max \nLinear Fan",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.linearFanMaxVoltage.toString(),
@@ -238,7 +239,7 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
         ) {
             MinMaxConfiguration("Analog-out3 at Min \nLinear Fan",
                 "Analog-out3 at Max \nLinear Fan",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.linearFanMaxVoltage.toString(),
@@ -258,7 +259,7 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
         ) {
             MinMaxConfiguration("Analog-out4 at Min \nLinear Fan",
                 "Analog-out4 at Max \nLinear Fan",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.linearFanMaxVoltage.toString(),
@@ -293,7 +294,7 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
         ) {
             MinMaxConfiguration("Analog-out1 at Min \nCooling",
                 "Analog-out1 at Max \nCooling",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.coolingMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut1MinMax.coolingMaxVoltage.toString(),
@@ -312,7 +313,7 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
         ) {
             MinMaxConfiguration("Analog-out2 at Min \nCooling",
                 "Analog-out2 at Max \nCooling",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState ).analogOut2MinMax.coolingMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.coolingMaxVoltage.toString(),
@@ -332,7 +333,7 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
         ) {
             MinMaxConfiguration("Analog-out3 at Min \nCooling",
                 "Analog-out3 at Max \nCooling",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.coolingMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.coolingMaxVoltage.toString(),
@@ -352,7 +353,7 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
         ) {
             MinMaxConfiguration("Analog-out4 at Min \nCooling",
                 "Analog-out4 at Max \nCooling",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.coolingMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.coolingMaxVoltage.toString(),
@@ -385,7 +386,7 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
         ) {
             MinMaxConfiguration("Analog-out1 at Min \nHeating",
                 "Analog-out1 at Max \nHeating",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value  as HyperStatSplitCpuState ).analogOut1MinMax.heatingMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState ).analogOut1MinMax.heatingMaxVoltage.toString(),
@@ -405,7 +406,7 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
         ) {
             MinMaxConfiguration("Analog-out2 at Min \nHeating",
                 "Analog-out2 at Max \nHeating",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.heatingMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut2MinMax.heatingMaxVoltage.toString(),
@@ -425,7 +426,7 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
         ) {
             MinMaxConfiguration("Analog-out3 at Min \nHeating",
                 "Analog-out3 at Max \nHeating",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.heatingMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut3MinMax.heatingMaxVoltage.toString(),
@@ -445,7 +446,7 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
         ) {
             MinMaxConfiguration("Analog-out4 at Min \nHeating",
                 "Analog-out4 at Max \nHeating",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.heatingMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as HyperStatSplitCpuState).analogOut4MinMax.heatingMaxVoltage.toString(),

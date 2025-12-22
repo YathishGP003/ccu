@@ -11,6 +11,7 @@ import a75f.io.renatus.composables.CancelDialog
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.Pipe2UvViewModel
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe2UvViewState
+import a75f.io.renatus.profiles.mystat.minMaxVoltage
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
@@ -68,7 +69,6 @@ class Pipe2UVFragment : UnitVentilatorFragment(),OnPairingCompleteListener{
 
         rootView.setContent {
             ShowProgressBar()
-            CcuLog.i(Domain.LOG_TAG, "Show Progress")
         }
 
         //reloading the UI once's paste button is clicked
@@ -149,7 +149,7 @@ class Pipe2UVFragment : UnitVentilatorFragment(),OnPairingCompleteListener{
             MinMaxConfiguration(
                 "Analog-out1 at Min \nWater Valve",
                 "Analog-out1 at Max \n Water Valve",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as Pipe2UvViewState).analogOut1MinMax.waterValveMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as Pipe2UvViewState).analogOut1MinMax.waterValveMaxVoltage.toString(),
@@ -172,7 +172,7 @@ class Pipe2UVFragment : UnitVentilatorFragment(),OnPairingCompleteListener{
             MinMaxConfiguration(
                 "Analog-out2 at Min \nWater Valve",
                 "Analog-out2 at Max \n Water Valve",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as Pipe2UvViewState).analogOut2MinMax.waterValveMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as Pipe2UvViewState).analogOut2MinMax.waterValveMaxVoltage.toString(),
@@ -195,7 +195,7 @@ class Pipe2UVFragment : UnitVentilatorFragment(),OnPairingCompleteListener{
             MinMaxConfiguration(
                 "Analog-out3 at Min \nWater Valve",
                 "Analog-out3 at Max \n Water Valve",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as Pipe2UvViewState).analogOut3MinMax.waterValveMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as Pipe2UvViewState).analogOut3MinMax.waterValveMaxVoltage.toString(),
@@ -218,7 +218,7 @@ class Pipe2UVFragment : UnitVentilatorFragment(),OnPairingCompleteListener{
             MinMaxConfiguration(
                 "Analog-out4 at Min \nWater Valve",
                 "Analog-out4 at Max \n Water Valve",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as Pipe2UvViewState).analogOut4MinMax.waterValveMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as Pipe2UvViewState).analogOut4MinMax.waterValveMaxVoltage.toString(),

@@ -11,6 +11,8 @@ import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.Pipe4UvViewModel
 import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.UnitVentilatorViewModel
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe2UvViewState
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe4UvViewState
+import a75f.io.renatus.profiles.mystat.lowMediumHighPercent
+import a75f.io.renatus.profiles.mystat.minMaxVoltage
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -288,7 +290,7 @@ open class UnitVentilatorFragment : HyperStatSplitFragment() {
                         Box(modifier = Modifier.weight(1f)) {
                             SpinnerElementOption(
                                 defaultSelection = default,
-                                items = viewModel.testVoltage,
+                                items = lowMediumHighPercent,
                                 unit = "%",
                                 itemSelected = { setFanSpeed(index, label, it.value.toInt()) },
                                 previewWidth = 70
@@ -646,7 +648,7 @@ open class UnitVentilatorFragment : HyperStatSplitFragment() {
                 MinMaxConfiguration(
                     "Analog-out$index at Min \nFan Speed",
                     "Analog-out$index at Max \nFan Speed",
-                    viewModel.minMaxVoltage,
+                    minMaxVoltage,
                     "V",
                     minDefault = minVal,
                     maxDefault = maxVal,
@@ -754,7 +756,7 @@ open class UnitVentilatorFragment : HyperStatSplitFragment() {
                 MinMaxConfiguration(
                     "Analog-out$index at Min \nFace & Bypass Damper",
                     "Analog-out$index at Max \nFace & Bypass Damper",
-                    viewModel.minMaxVoltage,
+                    minMaxVoltage,
                     "V",
                     minDefault = minVal,
                     maxDefault = maxVal,
@@ -865,7 +867,7 @@ open class UnitVentilatorFragment : HyperStatSplitFragment() {
                 MinMaxConfiguration(
                     "Analog-out$index at Min \nDCV Modulation Damper",
                     "Analog-out$index at Max \nDCV Modulation Damper",
-                    viewModel.minMaxVoltage,
+                    minMaxVoltage,
                     "V",
                     minDefault = minVal,
                     maxDefault = maxVal,
@@ -975,7 +977,7 @@ open class UnitVentilatorFragment : HyperStatSplitFragment() {
                 MinMaxConfiguration(
                     minLabel = "Analog-out$index at Min \nOAO Damper",
                     maxLabel = "Analog-out$index at Max \nOAO Damper",
-                    itemList = viewModel.minMaxVoltage,
+                    itemList = minMaxVoltage,
                     unit = "V",
                     minDefault = minVal,
                     maxDefault = maxVal,

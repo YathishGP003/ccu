@@ -30,7 +30,7 @@ import a75f.io.renatus.profiles.hss.HyperStatSplitFragment.Companion.CONDITIONIN
 import a75f.io.renatus.profiles.hss.HyperStatSplitFragment.Companion.INSTALLER_ACCESS
 import a75f.io.renatus.profiles.mystat.getAllowedValues
 import a75f.io.renatus.profiles.mystat.minMaxVoltage
-import a75f.io.renatus.profiles.mystat.testVoltage
+import a75f.io.renatus.profiles.mystat.testSignalVoltage
 import a75f.io.renatus.profiles.mystat.viewmodels.MyStatHpuViewModel
 import a75f.io.renatus.profiles.mystat.viewmodels.MyStatPipe2ViewModel
 import a75f.io.renatus.profiles.mystat.viewmodels.MyStatViewModel
@@ -312,7 +312,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                             onTestActivated = {
                                 viewModel.sendTestSignal(4, if (it) 1.0 else 0.0)
                             },
-                            testSingles = testVoltage,
+                            testSingles = testSignalVoltage,
                             testVal = viewModel.getAnalogValue(4),
                             padding = 6,
                             onTestSignalSelected = { viewModel.sendTestSignal(4, it) },
@@ -338,7 +338,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                             onTestActivated = {
                                 viewModel.sendTestSignal(5, if (it) 1.0 else 0.0)
                             },
-                            testSingles = testVoltage,
+                            testSingles = testSignalVoltage,
                             testVal = viewModel.getAnalogValue(5),
                             padding = 6,
                             analogStartPosition = viewModel.getAnalogStatIndex(),
@@ -366,7 +366,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                             onTestActivated = {
                                 viewModel.sendTestSignal(4, if (it) 1.0 else 0.0)
                             },
-                            testSingles = testVoltage,
+                            testSingles = testSignalVoltage,
                             testVal = viewModel.getAnalogValue(4),
                             padding = 6,
                             analogStartPosition = viewModel.getAnalogStatIndex(),
@@ -390,7 +390,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
                             onTestActivated = {
                                 viewModel.sendTestSignal(5, if (it) 1.0 else 0.0)
                             },
-                            testSingles = testVoltage,
+                            testSingles = testSignalVoltage,
                             testVal = viewModel.getAnalogValue(5),
                             padding = 6,
                             onTestSignalSelected = { viewModel.sendTestSignal(5, it) },
@@ -514,8 +514,8 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
             Spacer(modifier = Modifier.weight(1f)) // Pushes the toggle to the end
 
             Box(modifier = Modifier.wrapContentWidth()) {
-                ToggleButtonStateful(defaultSelection = viewModel.viewState.value.co2Control) {
-                    viewModel.viewState.value.co2Control = it
+                ToggleButtonStateful(defaultSelection = viewModel.viewState.value.displayCO2) {
+                    viewModel.viewState.value.displayCO2 = it
                 }
             }
         }
@@ -524,7 +524,7 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
 
     @Composable
     fun ThresholdTargetConfig() {
-        if (viewModel.viewState.value.co2Control) {
+        if (viewModel.viewState.value.displayCO2) {
             val co2ThresholdOptions = viewModel.getOptionByDomainName(DomainName.co2Threshold, viewModel.equipModel, true)
             val co2Unit = viewModel.getUnit(DomainName.co2Threshold, viewModel.equipModel)
             Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {

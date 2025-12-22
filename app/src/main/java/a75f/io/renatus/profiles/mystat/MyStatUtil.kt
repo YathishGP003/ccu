@@ -1,6 +1,6 @@
 package a75f.io.renatus.profiles.mystat
 
-import a75f.io.renatus.profiles.system.advancedahu.Option
+import a75f.io.renatus.util.Option
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.Constraint
@@ -18,8 +18,11 @@ const val PIPE4: String = "4 Pipe FCU"
 const val HPU: String = "Heat Pump Unit"
 
 var minMaxVoltage = List(11) { Option(it, it.toString()) }
-var testVoltage = List(101) { Option(it, it.toString()) }
-
+var lowMediumHighPercent = List(101) { Option(it, it.toString()) }
+val testSignalVoltage = (1..100).map {
+    Option((it / 10.0).toInt(), (it / 10.0).toString())
+}
+var damperOpeningRate = (10..100 step 10).toList().map { Option(it, it.toString()) }
 fun getPointByDomainName(
     modelDefinition: SeventyFiveFProfileDirective,
     domainName: String

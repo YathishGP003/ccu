@@ -46,6 +46,7 @@ import a75f.io.renatus.modbus.util.isOaoPairedInConnectModule
 import a75f.io.renatus.util.SystemProfileUtil
 import a75f.io.renatus.util.TestSignalManager
 import a75f.io.logic.util.modifyConditioningMode
+import a75f.io.renatus.util.Option
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
@@ -776,4 +777,3 @@ enum class ConnectControlType {
     LOAD_BASED_COOLING_CONTROL, LOAD_BASED_HEATING_CONTROL, LOAD_BASED_FAN_CONTROL, COMPOSITE, CO2_BASED_DAMPER_CONTROL, OAO_DAMPER, RETURN_DAMPER, COMPRESSOR_SPEED
 }
 //
-data class Option(val index: Int, val value: String, val dis: String? = null)

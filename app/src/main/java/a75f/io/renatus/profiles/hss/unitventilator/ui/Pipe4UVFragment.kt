@@ -12,6 +12,7 @@ import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.Pipe4UvViewModel
 import a75f.io.renatus.profiles.hss.unitventilator.viewmodels.UnitVentilatorViewModel
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe4UvViewState
+import a75f.io.renatus.profiles.mystat.minMaxVoltage
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
@@ -174,7 +175,7 @@ class Pipe4UVFragment : UnitVentilatorFragment(), OnPairingCompleteListener {
         ) {
             MinMaxConfiguration("Analog-out1 at Min \nCooling Modulating Valve",
                 "Analog-out1 at Max \nCooling Modulating Valve",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut1MinMax.coolingWaterValveMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut1MinMax.coolingWaterValveMaxVoltage.toString(),
@@ -193,7 +194,7 @@ class Pipe4UVFragment : UnitVentilatorFragment(), OnPairingCompleteListener {
         ) {
             MinMaxConfiguration("Analog-out2 at Min \nCooling Modulating Valve",
                 "Analog-out2 at Max \nCooling Modulating Valve",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut2MinMax.coolingWaterValveMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut2MinMax.coolingWaterValveMaxVoltage.toString(),
@@ -213,7 +214,7 @@ class Pipe4UVFragment : UnitVentilatorFragment(), OnPairingCompleteListener {
         ) {
             MinMaxConfiguration("Analog-out3 at Min \nCooling Modulating Valve",
                 "Analog-out3 at Max \nCooling Modulating Valve",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut3MinMax.coolingWaterValveMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut3MinMax.coolingWaterValveMaxVoltage.toString(),
@@ -233,7 +234,7 @@ class Pipe4UVFragment : UnitVentilatorFragment(), OnPairingCompleteListener {
         ) {
             MinMaxConfiguration("Analog-out4 at Min \nCooling Modulating Valve",
                 "Analog-out4 at Max \nCooling Modulating Valve",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut4MinMax.coolingWaterValveMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut4MinMax.coolingWaterValveMaxVoltage.toString(),
@@ -271,7 +272,7 @@ class Pipe4UVFragment : UnitVentilatorFragment(), OnPairingCompleteListener {
         ) {
             MinMaxConfiguration("Analog-out1 at Min \nHeating Modulating Valve",
                 "Analog-out1 at Max \nHeating Modulating Valve",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value  as Pipe4UvViewState).analogOut1MinMax.hotWaterValveMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut1MinMax.hotWaterValveMaxVoltage.toString(),
@@ -291,7 +292,7 @@ class Pipe4UVFragment : UnitVentilatorFragment(), OnPairingCompleteListener {
         ) {
             MinMaxConfiguration("Analog-out2 at Min \nHeating Modulating Valve",
                 "Analog-out2 at Max \nHeating Modulating Valve",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut2MinMax.hotWaterValveMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut2MinMax.hotWaterValveMaxVoltage.toString(),
@@ -311,7 +312,7 @@ class Pipe4UVFragment : UnitVentilatorFragment(), OnPairingCompleteListener {
         ) {
             MinMaxConfiguration("Analog-out3 at Min \nHeating Modulating Valve",
                 "Analog-out3 at Max \nHeating Modulating Valve",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut3MinMax.hotWaterValveMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut3MinMax.hotWaterValveMaxVoltage.toString(),
@@ -331,7 +332,7 @@ class Pipe4UVFragment : UnitVentilatorFragment(), OnPairingCompleteListener {
         ) {
             MinMaxConfiguration("Analog-out4 at Min \nHeating Modulating Valve",
                 "Analog-out4 at Max \nHeating Modulating Valve",
-                viewModel.minMaxVoltage,
+                minMaxVoltage,
                 "V",
                 minDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut4MinMax.hotWaterValveMinVoltage.toString(),
                 maxDefault = (viewModel.viewState.value as Pipe4UvViewState).analogOut4MinMax.hotWaterValveMaxVoltage.toString(),

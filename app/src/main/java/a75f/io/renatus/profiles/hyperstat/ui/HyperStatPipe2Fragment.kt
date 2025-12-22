@@ -16,6 +16,8 @@ import a75f.io.renatus.composables.ShowTestSignalBanner
 import a75f.io.renatus.compose.Title
 import a75f.io.renatus.profiles.hyperstat.viewmodels.HsPipe2ViewModel
 import a75f.io.renatus.profiles.hyperstat.viewstates.Pipe2ViewState
+import a75f.io.renatus.profiles.mystat.minMaxVoltage
+import a75f.io.renatus.profiles.mystat.testSignalVoltage
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
 import a75f.io.renatus.profiles.system.SUPPLY_WATER_TEMPERATURE
 import a75f.io.renatus.profiles.system.THERMISTOR_1
@@ -210,7 +212,7 @@ class HyperStatPipe2Fragment : HyperStatFragment() {
                     2 -> viewModel.viewState.value.analogOut3Enabled = enabledAction
                 }
 
-            }, association = analogEnum[associationIndex], analogOutEnums = analogEnum, testSingles = viewModel.testSignalVoltage, isEnabled = enabled,
+            }, association = analogEnum[associationIndex], analogOutEnums = analogEnum, testSingles = testSignalVoltage, isEnabled = enabled,
                 onAssociationChanged = { association ->
                     when (index) {
                         0 -> viewModel.viewState.value.analogOut1Association = association.index
@@ -221,7 +223,7 @@ class HyperStatPipe2Fragment : HyperStatFragment() {
                 }, testVal = viewModel.getAnalogOutValue(index+1) ?: 0.0, onTestSignalSelected = {  viewModel.sendTestSignal(
                     -1,
                     index + 1,
-                    it
+                    it * 10
                 ) }, padding = 7)
         }
     }
@@ -289,7 +291,7 @@ class HyperStatPipe2Fragment : HyperStatFragment() {
                     onFirstSelected = { fanConfig.low = it.value.toInt() },
                     onSecondSelected = { fanConfig.medium = it.value.toInt() },
                     onThirdSelected = { fanConfig.high = it.value.toInt() },
-                    itemList = viewModel.testVoltage,
+                    itemList = testSignalVoltage,
                     unit = "%"
                 )
             }
@@ -320,7 +322,7 @@ class HyperStatPipe2Fragment : HyperStatFragment() {
             MinMaxConfiguration(
                 minLabel = "Analog-out$analogIndex at Min \n${mapping.displayName}",
                 maxLabel = "Analog-out$analogIndex at Max \n${mapping.displayName}",
-                itemList = viewModel.minMaxVoltage,
+                itemList = minMaxVoltage,
                 unit = "V",
                 minDefault = minMax.min.toString(),
                 maxDefault = minMax.max.toString(),

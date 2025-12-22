@@ -22,7 +22,7 @@ import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.compose.showErrorDialog
 import a75f.io.renatus.profiles.oao.updateOaoPoints
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
-import a75f.io.renatus.profiles.system.advancedahu.Option
+import a75f.io.renatus.util.Option
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.TestSignalManager
 import a75f.io.renatus.util.highPriorityDispatcher

@@ -16,6 +16,8 @@ import a75f.io.renatus.composables.ShowTestSignalBanner
 import a75f.io.renatus.compose.Title
 import a75f.io.renatus.profiles.hyperstat.viewmodels.HsHpuViewModel
 import a75f.io.renatus.profiles.hyperstat.viewstates.HpuViewState
+import a75f.io.renatus.profiles.mystat.minMaxVoltage
+import a75f.io.renatus.profiles.mystat.testSignalVoltage
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
 import a75f.io.renatus.profiles.viewstates.ConfigState
 import a75f.io.renatus.profiles.viewstates.FanSpeedConfig
@@ -303,7 +305,7 @@ class HyperStatHpuFragment : HyperStatFragment(){
                     onFirstSelected = { fanConfig.low = it.value.toInt() },
                     onSecondSelected = { fanConfig.medium = it.value.toInt() },
                     onThirdSelected = { fanConfig.high = it.value.toInt() },
-                    itemList = viewModel.testVoltage,
+                    itemList = testSignalVoltage,
                     unit = "%"
                 )
             }
@@ -322,7 +324,7 @@ class HyperStatHpuFragment : HyperStatFragment(){
             MinMaxConfiguration(
                 minLabel = "Analog-out$analogIndex at Min \n${mapping.displayName}",
                 maxLabel = "Analog-out$analogIndex at Max \n${mapping.displayName}",
-                itemList = viewModel.minMaxVoltage,
+                itemList = minMaxVoltage,
                 unit = "V",
                 minDefault = minMax.min.toString(),
                 maxDefault = minMax.max.toString(),

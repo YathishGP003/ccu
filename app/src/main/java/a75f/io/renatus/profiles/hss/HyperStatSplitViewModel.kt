@@ -45,6 +45,7 @@ import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuState
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe2UvViewState
 import a75f.io.renatus.profiles.hss.unitventilator.viewstate.Pipe4UvViewState
 import a75f.io.renatus.profiles.viewstates.ConfigState
+import a75f.io.renatus.util.Option
 import android.content.Context
 import android.os.Bundle
 import androidx.compose.runtime.MutableState
@@ -71,20 +72,20 @@ open class HyperStatSplitViewModel : ViewModel() {
     lateinit var floorRef: String
     lateinit var profileType: ProfileType
     lateinit var nodeType: NodeType
-     var deviceAddress by Delegates.notNull<Short>()
+    var deviceAddress by Delegates.notNull<Short>()
 
-     lateinit var hssProfile: HyperStatSplitProfile
+    lateinit var hssProfile: HyperStatSplitProfile
     lateinit var profileConfiguration: HyperStatSplitConfiguration
 
-    lateinit var equipModel : SeventyFiveFProfileDirective
-    lateinit var deviceModel : SeventyFiveFDeviceDirective
+    lateinit var equipModel: SeventyFiveFProfileDirective
+    lateinit var deviceModel: SeventyFiveFDeviceDirective
     open lateinit var viewState: MutableState<HyperStatSplitState>
 
     lateinit var context: Context
     lateinit var hayStack: CCUHsApi
 
     lateinit var pairingCompleteListener: OnPairingCompleteListener
-    protected var saveJob : Job? = null
+    protected var saveJob: Job? = null
     var openCancelDialog by mutableStateOf(false)
 
     lateinit var temperatureOffsetsList: List<String>
@@ -100,8 +101,6 @@ open class HyperStatSplitViewModel : ViewModel() {
     private lateinit var zoneVOCTargetList: List<String>
     lateinit var zonePM2p5TargetList: List<String>
 
-    var minMaxVoltage = List(11) { Option(it, it.toString()) }
-    var testVoltage = List(101) { Option(it, it.toString()) }
     private val _isDisabled = MutableLiveData(false)
     val isDisabled: LiveData<Boolean> = _isDisabled
     private val _isReloadRequired = MutableLiveData(false)
@@ -161,7 +160,6 @@ open class HyperStatSplitViewModel : ViewModel() {
         return modelDefinition.points.find { (it.domainName.contentEquals(domainName)) }
     }
 
-    data class Option(val index: Int, val value: String, val dis: String? = null)
 
     open fun saveConfiguration() {
         // implemented in subclasses
@@ -245,10 +243,10 @@ open class HyperStatSplitViewModel : ViewModel() {
         if(equipRef!=null){
             val equip = getDomainHyperStatSplitDevice(equipRef!!)
             return when (index) {
-                0 -> equip.analog1Out.readPointValue()
-                1 -> equip.analog2Out.readPointValue()
-                2 -> equip.analog3Out.readPointValue()
-                3 -> equip.analog4Out.readPointValue()
+                0 -> equip.analog1Out.readPointValue() / 10
+                1 -> equip.analog2Out.readPointValue() / 10
+                2 -> equip.analog3Out.readPointValue() / 10
+                3 -> equip.analog4Out.readPointValue() / 10
                 else -> 0.0
             }
         }

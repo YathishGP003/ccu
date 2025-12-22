@@ -30,7 +30,7 @@ import a75f.io.renatus.modbus.util.getParametersList
 import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.pcn.PcnCopyPasteUtil.Companion.checkSelectedConfigurationAndCurrentEquipListSame
-import a75f.io.renatus.profiles.system.advancedahu.Option
+import a75f.io.renatus.util.Option
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.app.Application

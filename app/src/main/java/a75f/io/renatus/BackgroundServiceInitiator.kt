@@ -90,16 +90,7 @@ class BackgroundServiceInitiator(val context: Context = UtilityApplication.conte
                 usbConnection,
                 null
             ) // Start UsbService(if it was not started before) and
-            /*if(!UtilityApplication.isBacnetMstpInitialized()){
-                startUsbModbusService(
-                    UsbModbusService::class.java,
-                    usbModbusConnection,
-                    null
-                ) // Start UsbService(if it was not
-                CcuLog.d(TAG_CCU_SERVICE_INIT, "startService for UsbModbusService")
-            }else{
-                CcuLog.d(TAG_CCU_SERVICE_INIT, "--mstp is initialized not starting modbus service--")
-            }*/
+
             CcuLog.d(TAG_CCU_SERVICE_INIT, "startService for UsbModbusService")
             startUsbModbusService(
                 UsbModbusService::class.java,

@@ -13,6 +13,7 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_MAX_FRAM
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_MAX_MASTER;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.PREF_MSTP_SOURCE_ADDRESS;
 import static a75f.io.logic.util.bacnet.BacnetUtilKt.cancelScheduleJobToResubscribeBacnetMstpCOV;
+import static a75f.io.renatus.UtilityApplication.context;
 import static a75f.io.renatus.UtilityApplication.startRestServer;
 import static a75f.io.renatus.UtilityApplication.stopRestServer;
 import static a75f.io.renatus.usbmanager.UsbManagerConstants.BAUD_RATE;
@@ -86,9 +87,11 @@ import a75f.io.usbserial.BacnetConfig;
 import a75f.io.usbserial.ModbusConfig;
 import a75f.io.usbserial.UsbDeviceItem;
 import a75f.io.usbserial.UsbModbusService;
+import a75f.io.usbserial.UsbModbusServiceCom2;
 import a75f.io.usbserial.UsbPortTrigger;
 import a75f.io.usbserial.UsbPrefHelper;
 import a75f.io.usbserial.UsbSerialUtil;
+import a75f.io.usbserial.UsbService;
 import a75f.io.util.DashboardUtilKt;
 import a75f.io.util.ExecutorTask;
 
@@ -838,7 +841,7 @@ public class UsbDeviceAdapter extends RecyclerView.Adapter<UsbDeviceAdapter.UsbV
             BacnetUtilKt.launchBacApp(context, BROADCAST_BACNET_APP_START, "Start BACnet App", "",true);
             CcuLog.d(TAG_CCU_BACNET_MSTP, "MSTP configuration initialized");
             performConfigFileBackup();
-
+            restartSerialServices();
         });
     }
 
@@ -889,6 +892,21 @@ public class UsbDeviceAdapter extends RecyclerView.Adapter<UsbDeviceAdapter.UsbV
             }
         }
         return PROTOCOL_NA;
+    }
+
+    private void restartSerialServices(){
+        Intent intentCm = new Intent(context, UsbService.class);
+        boolean stopStatus = context.stopService(intentCm);
+        CcuLog.i(L.TAG_USB_MANAGER, "Replace Complete : Stop UsbService: "+stopStatus);
+
+        Intent intentModbusCom1 = new Intent(context, UsbModbusService.class);
+        boolean stopStatusCom1 = context.stopService(intentModbusCom1);
+        CcuLog.i(L.TAG_USB_MANAGER, "Replace Complete : Stop UsbModbusService: "+stopStatusCom1);
+        Intent intentCom2 = new Intent(context, UsbModbusServiceCom2.class);
+        boolean stopStatusCom2 = context.stopService(intentCom2);
+        CcuLog.i(L.TAG_USB_MANAGER, "Replace Complete : Stop UsbModbusServiceCom2: "+stopStatusCom2);
+
+        RenatusApp.backgroundServiceInitiator.initServices();
     }
 
 }

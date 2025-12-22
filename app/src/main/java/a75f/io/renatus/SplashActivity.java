@@ -70,7 +70,6 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
         CcuLog.i(TAG, "Splash activity");
         configSplashLogo();
         CcuLog.i(L.TAG_CCU_UI_PROFILING, "SplashActivity.onCreate Done");
-        RenatusApp.backgroundServiceInitiator.initServices();
     }
 
     private void launchUI() {
@@ -321,6 +320,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             Globals.getInstance().unRegisterOnCcuInitCompletedListener(this);
         });
         ExecutorTask.executeBackground(() -> new MigrationHandler(CCUHsApi.getInstance()).correctKVTagTypesInHDict());
+        RenatusApp.backgroundServiceInitiator.initServices();
     }
 
 }

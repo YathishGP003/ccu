@@ -525,6 +525,10 @@ fun parseFloatFromFourBytes(bytes: ByteArray) : Float {
     return ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).getFloat()
 }
 
+fun parseFloatFromFourBytesLittle(bytes: ByteArray) : Float {
+    return ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat()
+}
+
 fun parse12BitPressureValue(bytes: ByteArray) : Int {
     val pVal = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).short.toInt()
     val isNegative = (pVal and 0x0800) > 0
@@ -545,4 +549,14 @@ fun parseFloatFromBytes(bytes: ByteArray) : Double{
         (formattedVal * 100.0).roundToInt() / 100.0
     }
     return formattedVal
+}
+
+fun parseFloatPcn(bytes: ByteArray) : Float{
+    val copyVal = ByteArray(4)
+    copyVal[0] = bytes[1]
+    copyVal[1] = bytes[0]
+    copyVal[2] = bytes[3]
+    copyVal[3] = bytes[2]
+
+    return parseFloatFromFourBytes(copyVal)
 }

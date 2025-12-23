@@ -5,6 +5,8 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.Zone
 import a75f.io.device.connect.parseFloatFromFourBytes
+import a75f.io.device.connect.parseFloatFromFourBytesLittle
+import a75f.io.device.connect.parseFloatPcn
 import a75f.io.device.connect.parseIntFromTwoBytes
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender.writeMessageBytesToUsb
 import a75f.io.device.pcn
@@ -419,8 +421,8 @@ class LPcn {
                     if (paramType == "float") {
                         val floatVal = hayStack.readDefaultValById(pointId).toFloat()
                         val intBits = java.lang.Float.floatToIntBits(floatVal)
-                        buffer.putShort((intBits and 0xFFFF).toShort())           // Lower 2 bytes
                         buffer.putShort(((intBits shr 16) and 0xFFFF).toShort()) // Upper 2 bytes
+                        buffer.putShort((intBits and 0xFFFF).toShort())           // Lower 2 bytes
                     } else {
                         val intVal = hayStack.readDefaultValById(pointId).toInt()
                         buffer.putShort((intVal and 0xFFFF).toShort())           // 2 bytes
@@ -632,9 +634,12 @@ class LPcn {
 
         @JvmStatic
         fun handlePcnRegularUpdateSettings(data: ByteArray) {
+            val fullData = data.copyOfRange(0, data.size)
             val tempData: ByteArray = data.copyOfRange(3, data.size) // Skip message type and node address
-            val deviceCrcBytes = data.copyOfRange( data.size -2, data.size)
+            val deviceCrcBytes = data.copyOfRange( data.size -4, data.size -2) // Last 2 bytes are CRC
             var i = 0
+
+            CcuLog.e(L.TAG_CCU_SERIAL_CONNECT, "PCN Regular update data: $fullData")
 
             // Get the PCN device address from data and update heartbeat points of PCN device and connect node devices connected to it
             val myData = data.copyOfRange(1, 3);
@@ -642,7 +647,7 @@ class LPcn {
             val registersTriple = settingsMessage1[address]?.getAllRegInfo()
             // If the deviceCRC for regular update settings1 mismatch, then log and return(to avoid incorrect portal updates)
             val ccuSettingsCrc = settingsMessage1[address]?.getCrc()
-            val deviceCrc = ByteBuffer.wrap(deviceCrcBytes).order(ByteOrder.BIG_ENDIAN).short.toInt() and 0xFFFF
+            val deviceCrc = ByteBuffer.wrap(deviceCrcBytes).order(ByteOrder.LITTLE_ENDIAN).short.toInt() and 0xFFFF
             if(ccuSettingsCrc != deviceCrc) {
                 CcuLog.e(L.TAG_CCU_SERIAL_CONNECT, "PCN Regular update CRC mismatch: CCU Device CRC $ccuSettingsCrc , Device CRC $deviceCrc")
                 return
@@ -670,7 +675,7 @@ class LPcn {
 
                 if (paramType == "float") {
                     // Float -> 4 bytes
-                    val floatVal = parseFloatFromFourBytes(tempData.copyOfRange(i, i + 4))
+                    val floatVal = parseFloatPcn(tempData.copyOfRange(i, i + 4))
                     CcuLog.i(L.TAG_CCU_SERIAL_CONNECT,
                         "  Register $register: $floatVal for PointId $pointId"
                     )

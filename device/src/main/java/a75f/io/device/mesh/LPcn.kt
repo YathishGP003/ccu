@@ -427,8 +427,8 @@ class LPcn {
                     }
                 }
                 // Add CRC byte as well
-                buffer.put((settingsMessage2[address]?.crcHi?.toByte()!!).toByte())
                 buffer.put((settingsMessage2[address]?.crcLo?.toByte()!!).toByte())
+                buffer.put((settingsMessage2[address]?.crcHi?.toByte()!!).toByte())
             }
 
             // Iterate configs and delegate per device type

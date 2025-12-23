@@ -211,8 +211,8 @@ class CcuToCmOverUsbPcnSettingsMessage_t {
                 buf.put((regType.toInt() and 0xFF).toByte()) // 1 byte each
             }
         }
-        buf.put(crcHi)          // CRC high byte
         buf.put(crcLo)         // CRC low byte
+        buf.put(crcHi)          // CRC high byte
 
         return buf.array()
     }

@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getPipe4UvPossibleConditionin
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.getUvPossibleConditioningMode
 import a75f.io.logic.bo.building.statprofiles.util.mapSensorBusPressureLogicalPoint
+import a75f.io.logic.bo.building.statprofiles.util.updateConditioningMode
 import a75f.io.logic.bo.building.system.resetConfigDisabledPorts
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.util.modifyConditioningMode
@@ -203,7 +204,7 @@ class Pipe4UvViewModel : UnitVentilatorViewModel() {
         }
         profileConfiguration.apply {
             val pipe4Equip = Pipe4UVEquip(equipId)
-            profileConfiguration.updateConditioningMode(equipId)
+            updateConditioningMode(pipe4Equip, isCoolingAvailable(), isHeatingAvailable())
             profileConfiguration.apply { setPortConfiguration(profileConfiguration.nodeAddress, getRelayMap(), getAnalogMap())  }
             val possibleConditioningMode = getUvPossibleConditioningMode(profileConfiguration as UnitVentilatorConfiguration)
             val possibleFanMode = getPossibleFanMode(pipe4Equip)

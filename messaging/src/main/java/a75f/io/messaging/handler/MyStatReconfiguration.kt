@@ -25,6 +25,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getMyStatFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatModelByEquipRef
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleConditionMode
 import a75f.io.logic.bo.building.statprofiles.util.getMyStatPossibleFanModeSettings
+import a75f.io.logic.bo.building.statprofiles.util.updateConditioningMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.util.modifyConditioningMode
 import a75f.io.logic.util.modifyFanMode
@@ -85,7 +86,6 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
     }
     writePointFromJson(configPoint, msgObject, hayStack)
     config.apply { setPortConfiguration( nodeAddress, getRelayMap(), getAnalogMap()) }
-    DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance())
 
     /*
     - If we do reconfiguration from portal for fanMode, level 10 updated as ( val = 9)
@@ -109,6 +109,7 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
             val possibleConditioningMode = getMyStatPossibleConditionMode(config)
             val possibleFanMode = getMyStatPossibleFanModeSettings(getMyStatFanLevel(config))
             myStatDomainEquip.let {
+                updateConditioningMode(it, isCoolingAvailable(), isHeatingAvailable())
                 modifyFanMode(possibleFanMode, it.fanOpMode)
                 modifyConditioningMode(
                     possibleConditioningMode.ordinal,
@@ -122,6 +123,7 @@ fun reconfigureMyStat(msgObject: JsonObject, configPoint: Point) {
             )
         }
     }
+    DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance())
     CcuLog.i(TAG_CCU_PUBNUB, "updateConfigPoint for MyStat  Reconfiguration $config")
 
 }

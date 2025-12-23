@@ -25,6 +25,7 @@ import a75f.io.logic.bo.building.statprofiles.util.UvFanStages
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.getSplitConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getSplitDomainEquipByEquipRef
+import a75f.io.logic.bo.building.statprofiles.util.updateConditioningMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.util.modifyConditioningMode
 import a75f.io.logic.util.modifyFanMode
@@ -87,7 +88,6 @@ fun reconfigureHsSplitEquip(msgObject: JsonObject, configPoint: Point) {
     }
     writePointFromJson(configPoint, msgObject, hayStack)
     config!!.apply { setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap()) }
-    DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance())
 
     if ((pointNewValue == null || pointNewValue.asString.isEmpty()) && configPoint.domainName == DomainName.fanOpMode) {
         uvUpdateFanMode(configPoint.equipRef, HSUtil.getPriorityVal(configPoint.id).toInt())
@@ -97,17 +97,21 @@ fun reconfigureHsSplitEquip(msgObject: JsonObject, configPoint: Point) {
     val splitDomainEquip = getSplitDomainEquipByEquipRef(configPoint.equipRef)!!
     if (configPoint.domainName != DomainName.fanOpMode && configPoint.domainName != DomainName.conditioningMode) {
         config.apply {
-            val possibleConditioningMode = getHssProfileConditioningMode(this)
-            val possibleFanMode = getPossibleFanMode(splitDomainEquip)
-            modifyFanMode(possibleFanMode.ordinal, splitDomainEquip.fanOpMode)
-            modifyConditioningMode(
-                possibleConditioningMode.ordinal,
-                splitDomainEquip.conditioningMode,
-                allStandaloneProfileConditions
-            )
-            CcuLog.i(L.TAG_CCU_PUBNUB, "updated ConfigPoint for unit ventilator fan/cond mode")
+            splitDomainEquip?.let {
+                updateConditioningMode(splitDomainEquip, isCoolingAvailable(), isHeatingAvailable())
+            }
+                val possibleConditioningMode = getHssProfileConditioningMode(this)
+                val possibleFanMode = getPossibleFanMode(splitDomainEquip)
+                modifyFanMode(possibleFanMode.ordinal, splitDomainEquip.fanOpMode)
+                modifyConditioningMode(
+                    possibleConditioningMode.ordinal,
+                    splitDomainEquip.conditioningMode,
+                    allStandaloneProfileConditions
+                )
+                CcuLog.i(L.TAG_CCU_PUBNUB, "updated ConfigPoint for unit ventilator fan/cond mode")
         }
     }
+    DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance())
     CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for Unit ventilator Reconfiguration $config")
 }
 

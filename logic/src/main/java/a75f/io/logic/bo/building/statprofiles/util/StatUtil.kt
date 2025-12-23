@@ -290,6 +290,18 @@ fun fetchUserIntents(equip: StandAloneEquip): UserIntents {
     }
 }
 
+fun updateConditioningMode(equip: StandAloneEquip, isCoolingAvailable: Boolean, isHeatingAvailable: Boolean) {
+    equip.apply {
+        if (!isCoolingAvailable && !isHeatingAvailable) {
+            conditioningMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
+        } else if (!isCoolingAvailable) {
+            conditioningMode.writePointValue(StandaloneConditioningMode.HEAT_ONLY.ordinal.toDouble())
+        } else if (!isHeatingAvailable) {
+            conditioningMode.writePointValue(StandaloneConditioningMode.COOL_ONLY.ordinal.toDouble())
+        }
+    }
+}
+
 enum class MyStatDeviceType {
     MYSTAT_V1,
     MYSTAT_V2

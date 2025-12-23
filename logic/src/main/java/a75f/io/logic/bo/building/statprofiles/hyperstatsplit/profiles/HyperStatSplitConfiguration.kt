@@ -9,7 +9,6 @@ import a75f.io.domain.devices.HyperStatSplitDevice
 import a75f.io.domain.equips.hyperstatsplit.HyperStatSplitEquip
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.statprofiles.StatProfileConfiguration
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuAnalogControlType
 import a75f.io.logic.bo.building.statprofiles.hyperstatsplit.profiles.cpuecon.CpuRelayType
@@ -282,21 +281,6 @@ abstract class HyperStatSplitConfiguration (nodeAddress: Int, nodeType: String, 
             is Pipe2UVConfiguration -> Pipe2UVRelayControls.valueOf(enumName).ordinal
             else -> {
                 HyperStatSplitControlType.valueOf(enumName).ordinal
-            }
-        }
-    }
-
-    fun updateConditioningMode(equipId: String) {
-        val equip = HyperStatSplitEquip(equipId)
-        val isCoolingAvailable = isCoolingAvailable()
-        val isHeatingAvailable = isHeatingAvailable()
-        equip.apply {
-            if (!isCoolingAvailable && !isHeatingAvailable) {
-                conditioningMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
-            } else if (!isCoolingAvailable) {
-                conditioningMode.writePointValue(StandaloneConditioningMode.HEAT_ONLY.ordinal.toDouble())
-            } else if (!isHeatingAvailable) {
-                conditioningMode.writePointValue(StandaloneConditioningMode.COOL_ONLY.ordinal.toDouble())
             }
         }
     }

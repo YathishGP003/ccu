@@ -25,6 +25,7 @@ import a75f.io.logic.bo.building.statprofiles.util.correctSensorBusTempPoints
 import a75f.io.logic.bo.building.statprofiles.util.getCpuPossibleConditioningModeSettings
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleFanMode
 import a75f.io.logic.bo.building.statprofiles.util.mapSensorBusPressureLogicalPoint
+import a75f.io.logic.bo.building.statprofiles.util.updateConditioningMode
 import a75f.io.logic.bo.building.system.resetConfigDisabledPorts
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.util.modifyConditioningMode
@@ -292,8 +293,10 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
             }
         }
         val hssEquip = HsSplitCpuEquip(equipId)
-        profileConfiguration.updateConditioningMode(equipId)
-        profileConfiguration.apply { setPortConfiguration(profileConfiguration.nodeAddress, getRelayMap(), getAnalogMap())  }
+        profileConfiguration.apply {
+            updateConditioningMode(hssEquip, isCoolingAvailable(), isHeatingAvailable())
+            setPortConfiguration(profileConfiguration.nodeAddress, getRelayMap(), getAnalogMap())
+        }
         val possibleConditioningMode = getCpuPossibleConditioningModeSettings(profileConfiguration as HyperStatSplitCpuConfiguration)
         val possibleFanMode = getPossibleFanMode(hssEquip)
         modifyFanMode(possibleFanMode.ordinal,hssEquip.fanOpMode)

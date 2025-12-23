@@ -21,6 +21,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getHSPipe4FanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
+import a75f.io.logic.bo.building.statprofiles.util.updateConditioningMode
 import a75f.io.logic.bo.building.system.resetConfigDisabledPorts
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.util.modifyConditioningMode
@@ -146,6 +147,7 @@ class HsPipe4ViewModel(application: Application) : HyperStatViewModel(applicatio
             val possibleConditioningMode = getPossibleConditionMode(profileConfiguration)
             val possibleFanMode = getHsPossibleFanModeSettings(getHSPipe4FanLevel(profileConfiguration as HsPipe4Configuration))
             val equip = HsPipe4Equip(equipId)
+            updateConditioningMode(equip, isCoolingAvailable(), isHeatingAvailable())
             modifyFanMode(possibleFanMode.ordinal, equip.fanOpMode)
             modifyConditioningMode(possibleConditioningMode.ordinal, equip.conditioningMode, allStandaloneProfileConditions)
             setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap())

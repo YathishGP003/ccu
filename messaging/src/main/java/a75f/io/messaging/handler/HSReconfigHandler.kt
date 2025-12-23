@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.statprofiles.util.getHsConfiguration
 import a75f.io.logic.bo.building.statprofiles.util.getHsFanLevel
 import a75f.io.logic.bo.building.statprofiles.util.getHsPossibleFanModeSettings
 import a75f.io.logic.bo.building.statprofiles.util.getPossibleConditionMode
+import a75f.io.logic.bo.building.statprofiles.util.updateConditioningMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.util.modifyConditioningMode
 import a75f.io.logic.util.modifyFanMode
@@ -81,7 +82,6 @@ fun reconfigureHyperstatEquips(msgObject: JsonObject, configPoint: Point) {
     }
     writePointFromJson(configPoint, msgObject, hayStack)
     config.apply { setPortConfiguration( nodeAddress, getRelayMap(), getAnalogMap()) }
-    DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance())
     if (configPoint.domainName != DomainName.fanOpMode) {
         updateFanMode(configPoint.equipRef, config)
     }
@@ -101,6 +101,7 @@ fun reconfigureHyperstatEquips(msgObject: JsonObject, configPoint: Point) {
         val hsDomainEquip = getHSDomainEquipByEquipRef(configPoint.equipRef)
         hsDomainEquip?.let { equip ->
             config.apply {
+                updateConditioningMode(equip, isCoolingAvailable(), isHeatingAvailable())
                 val possibleConditioningMode = getPossibleConditionMode(this)
                 val possibleFanMode = getHsPossibleFanModeSettings(getHsFanLevel(config))
                 modifyFanMode(possibleFanMode.ordinal, equip.fanOpMode)
@@ -109,11 +110,11 @@ fun reconfigureHyperstatEquips(msgObject: JsonObject, configPoint: Point) {
                     equip.conditioningMode,
                     allStandaloneProfileConditions
                 )
-
                 CcuLog.i(L.TAG_CCU_PUBNUB, "updated ConfigPoint for HS fan/cond mode")
             }
         }
     }
+    DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance())
     CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for CPU Reconfiguration $config")
 
 }

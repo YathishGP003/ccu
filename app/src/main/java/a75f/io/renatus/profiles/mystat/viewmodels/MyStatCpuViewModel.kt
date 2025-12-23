@@ -153,6 +153,7 @@ class MyStatCpuViewModel(application: Application) : MyStatViewModel(application
             val possibleConditioningMode = getMyStatPossibleConditionMode(profileConfiguration)
             val possibleFanMode = getMyStatPossibleFanModeSettings(getMyStatCpuFanLevel(profileConfiguration as MyStatCpuConfiguration))
             val equip = MyStatCpuEquip(equipId)
+            updateConditioningMode(equip, this.isCoolingAvailable(), this.isHeatingAvailable())
             modifyFanMode(possibleFanMode, equip.fanOpMode)
             modifyConditioningMode(possibleConditioningMode.ordinal, equip.conditioningMode, allStandaloneProfileConditions)
             setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap())

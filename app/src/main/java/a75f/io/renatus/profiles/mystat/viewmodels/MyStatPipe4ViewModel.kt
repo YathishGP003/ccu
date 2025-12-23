@@ -15,7 +15,6 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatConfiguration
-import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4Configuration
 import a75f.io.logic.bo.building.statprofiles.mystat.configs.MyStatPipe4RelayMapping
 import a75f.io.logic.bo.building.statprofiles.mystat.profiles.MyStatPipe4Profile
@@ -158,6 +157,7 @@ class MyStatPipe4ViewModel(application: Application) : MyStatViewModel(applicati
             val possibleFanMode =
                 getMyStatPossibleFanModeSettings(getMyStatPipe4FanLevel(profileConfiguration as MyStatPipe4Configuration))
             val equip = MyStatPipe4Equip(equipId)
+            updateConditioningMode(equip, this.isCoolingAvailable(), this.isHeatingAvailable())
             modifyFanMode(possibleFanMode, equip.fanOpMode)
             modifyConditioningMode(
                 possibleConditioningMode.ordinal,

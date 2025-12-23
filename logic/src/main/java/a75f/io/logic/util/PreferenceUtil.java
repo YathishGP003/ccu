@@ -143,7 +143,7 @@ public class PreferenceUtil {
     private static final String MIGRATE_SYSTEM_TUNER_SYNC = "migrateMissingSystemTunerValues";
     private static final String MIGRATE_MODBUS_EQUIP_COM = "migrateModbusEquipComPort";
 
-    private static final String MIGRATE_BILLING_EMAIL_ADDRESS_STATUS = "migrateBillingEmailAddressStatus";
+    private static final String MIGRATE_BILLING_EMAIL_ADDRESS_STATUS = "migrateBillingEmailAddressStatusNew";
     private static final String MIGRATE_AO_RELAY_MS_STATUS = "migrateAO&RelayEnumMS";
     private static final String MIGRATE_MONITOR_CO2_MAPPING = "MIGRATE_MONITOR_CO2_MAPPING";
 

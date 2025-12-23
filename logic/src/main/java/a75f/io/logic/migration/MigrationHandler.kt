@@ -4454,23 +4454,40 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             CcuLog.d(TAG_CCU_MIGRATION_UTIL, "start updateBillingAdminEmail")
             try {
                 val site: HashMap<Any, Any> = hayStack.readEntity("site")
+                val remoteSiteEntity = hayStack.getRemoteSiteEntity(site["id"].toString().replace("@",""))
                 CcuLog.d(TAG_CCU_MIGRATION_UTIL, "site $site")
-                if (site.isEmpty()) {
+                if (site.isEmpty()|| remoteSiteEntity == null) {
                     CcuLog.d(
                         TAG_CCU_MIGRATION_UTIL,
                         "site is empty no site update updated for billing admin email."
                     )
                     return@launch
                 }
-                val updatedSite =
-                    Site.Builder().setHashMap(site).setBillingAdminEmail(site["fmEmail"].toString())
-                        .build()
+                val (isFcManagerEmailUpdateRequired,fcMangerEmail) = validateBillingAdminEmailId(site,remoteSiteEntity)
+                CcuLog.d(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "isFcManagerEmailUpdateRequired : $isFcManagerEmailUpdateRequired , fcMangerEmail : $fcMangerEmail"
+                )
+                val updatedSite = Site.Builder().setHashMap(site).apply {
+                    if(isFcManagerEmailUpdateRequired) {
+                        this.setFcManager(fcMangerEmail)
+                    }
+                    this.setBillingAdminEmail(fcMangerEmail)
+                }.build()
+
+                CCUHsApi.getInstance().updateSite(updatedSite, updatedSite.id)
+
                 CCUHsApi.getInstance().updateSite(updatedSite, updatedSite.id)
                 val deviceHDict = CCUHsApi.getInstance().readHDict("ccu and device")
 
 
                 val device = Device.Builder().setHDict(deviceHDict).build()
-                device.tags["billingAdminEmail"] = HStr.make(updatedSite.billingAdminEmail.toString())
+                val facManagerEmail = HStr.make(updatedSite.billingAdminEmail.toString())
+
+                device.tags["billingAdminEmail"] = facManagerEmail
+                if (isFcManagerEmailUpdateRequired) {
+                    device.tags["fmEmail"] = facManagerEmail
+                }
 
                 CcuLog.d(TAG_CCU_MIGRATION_UTIL, "device ${device.tags}")
                 if (device != null) {
@@ -4483,6 +4500,41 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
         }
     }
+
+    private fun validateBillingAdminEmailId(
+        site: HashMap<Any, Any>,
+        remoteSiteEntity: Site
+    ): Pair<Boolean, String> {
+
+        val localLastModifiedDT = site["lastModifiedDateTime"] as? HDateTime
+        val remoteLastModifiedDT = remoteSiteEntity.lastModifiedDateTime
+        CcuLog.d(
+            TAG_CCU_MIGRATION_UTIL, """
+           localLastModifiedDT : $localLastModifiedDT
+            remoteLastModifiedDT : $remoteLastModifiedDT
+             validation >  : ${localLastModifiedDT != null && localLastModifiedDT > remoteLastModifiedDT}
+             validation == : ${localLastModifiedDT == remoteLastModifiedDT}
+               """.trimIndent()
+        )
+
+
+        return when {
+            localLastModifiedDT == null ->
+                Pair(true, remoteSiteEntity.fcManagerEmail.toString())
+
+            localLastModifiedDT > remoteLastModifiedDT ->
+                Pair(true, site["fmEmail"].toString())
+
+            localLastModifiedDT == remoteLastModifiedDT ->
+                Pair(false, site["fmEmail"].toString())
+
+            else ->
+                Pair(true, remoteSiteEntity.fcManagerEmail.toString())
+        }
+    }
+
+
+
     private fun updateEnumAOAndRelayForMsV1Device() {
 
         fun getAnalogThreshold(equip: MyStatEquip): Int = when (equip) {

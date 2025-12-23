@@ -312,9 +312,9 @@ public class MeshNetwork extends DeviceNetwork
 
                                     // Step 4.a: PCN specific MODBUS_SERVER_WRITE_REGISTER_SETTINGS_1 message
                                     CcuToCmOverUsbPcnSettingsMessage_t pcnSettingsMessage3 = LPcn.getPcnSettings2Message(zone, Short.parseShort(d.getAddr()));
-                                    sendByteToNodes(Short.parseShort(d.getAddr()), pcnSettingsMessage3.toByteArray());
-                                    CcuLog.d(L.TAG_CCU_SERIAL, java.util.Arrays.toString(pcnSettingsMessage3.toByteArray()));
-                                    sendByteToCM(pcnSettingsMessage3.toByteArray());
+                                    sendByteToNodes(Short.parseShort(d.getAddr()), pcnSettingsMessage3.toByteArray2());
+                                    CcuLog.d(L.TAG_CCU_SERIAL, java.util.Arrays.toString(pcnSettingsMessage3.toByteArray2()));
+                                    sendByteToCM(pcnSettingsMessage3.toByteArray2());
                                     // Step 4.b: PCN specific MODBUS_SERVER_WRITE_REGISTER_TYPE_SETTINGS message
                                     sendByteToNodes(Short.parseShort(d.getAddr()), pcnSettingsMessage3.regTypeByteArray());
                                     CcuLog.d(L.TAG_CCU_SERIAL, java.util.Arrays.toString(pcnSettingsMessage3.regTypeByteArray()));
@@ -342,9 +342,9 @@ public class MeshNetwork extends DeviceNetwork
 
                                     // Step 3.a: PCN specific MODBUS_SERVER_WRITE_REGISTER_SETTINGS_1 message
                                     CcuToCmOverUsbPcnSettingsMessage_t pcnSettingsMessage3 = LPcn.getPcnSettings2Message(zone, Short.parseShort(d.getAddr()));
-                                    sendByteToNodes(Short.parseShort(d.getAddr()), pcnSettingsMessage3.toByteArray());
-                                    CcuLog.d(L.TAG_CCU_SERIAL, java.util.Arrays.toString(pcnSettingsMessage3.toByteArray()));
-                                    sendByteToCM(pcnSettingsMessage3.toByteArray());
+                                    sendByteToNodes(Short.parseShort(d.getAddr()), pcnSettingsMessage3.toByteArray2());
+                                    CcuLog.d(L.TAG_CCU_SERIAL, java.util.Arrays.toString(pcnSettingsMessage3.toByteArray2()));
+                                    sendByteToCM(pcnSettingsMessage3.toByteArray2());
                                     // Step 3.b: PCN specific MODBUS_SERVER_WRITE_REGISTER_TYPE_SETTINGS message
                                     sendByteToNodes(Short.parseShort(d.getAddr()), pcnSettingsMessage3.regTypeByteArray());
                                     CcuLog.d(L.TAG_CCU_SERIAL, java.util.Arrays.toString(pcnSettingsMessage3.regTypeByteArray()));

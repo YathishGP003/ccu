@@ -155,6 +155,42 @@ class CcuToCmOverUsbPcnSettingsMessage_t {
         return buf.array()
     }
 
+    /**
+     * Serialize the message to bytes MODBUS_SERVER_WRITE_REGISTER_SETTINGS_1 (Little Endian):
+     * Format:
+     * [ intervalInSecs (1) ]
+     * for each slave:
+     *   [ slaveId (1) ][ numRegs (1) ][ registers... (numRegs * 2) ]
+     */
+    fun toByteArray2(): ByteArray {
+        // compute total size: No interval needed here. Message type + Node address + slaves
+        val totalSize = 1 + 2 + slaveConfigs.sumOf { 1 + 1 + it.numRegs * 2 }
+        val buf = ByteBuffer.allocate(totalSize).order(ByteOrder.LITTLE_ENDIAN)
+
+        // messageType -> 1 byte
+        buf.put((messageType and 0xFF).toByte())
+
+        // 2 byte node address
+        buf.putShort((nodeAddress and 0xFFFF).toShort()) // nodeAddress -> 2 bytes
+
+        // each slave
+        for (cfg in slaveConfigs) {
+            buf.put((cfg.slaveId and 0xFF).toByte())     // 1 byte
+            buf.put((cfg.numRegs and 0xFF).toByte())     // 1 byte
+            for (reg in cfg.registers) {
+                buf.putShort((reg.toInt() and 0xFFFF).toShort()) // 2 bytes each
+            }
+        }
+        val slicedBuf = buf.duplicate().apply {
+            position(3) // Skip messageType byte and node address
+        }
+        calculateModbusCrc(slicedBuf).let { crc ->
+            crcHi = (((crc ushr 8) and 0xFF).toByte()) // CRC high byte
+            crcLo = ((crc and 0xFF).toByte())         // CRC low byte
+        }
+        return buf.array()
+    }
+
     fun regTypeByteArray(): ByteArray {
         val totalSize = 1 + 2 + slaveConfigs.sumOf { it.numRegs } + 2 // 1 byte messageType + 2 byte node address + reg types + 2 bytes CRC
         val buf = ByteBuffer.allocate(totalSize).order(ByteOrder.LITTLE_ENDIAN)

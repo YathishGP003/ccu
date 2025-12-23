@@ -16,6 +16,7 @@ public class CcuToCmOverUsbDatabaseSeedPcnMessage_t extends Struct
 	public final Unsigned16 smartNodeAddress = new Unsigned16();
 	public final Unsigned8[] encryptionKey = array(new Unsigned8[MessageConstants.MESH_ENCRYPTION_KEY_LENGTH]);
 	public final SmartNodeSettings_t settings = inner(new SmartNodeSettings_t());
+	public final SmartNodeSettings2_t settings2 = inner(new SmartNodeSettings2_t());
 
 	@Override
 	public ByteOrder byteOrder()

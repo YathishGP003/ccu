@@ -879,23 +879,19 @@ public class OTAUpdateService extends IntentService {
             // Send metadata only if the erase sequence is not requested
 
             if(!eraseSequence) {
-                // Overwrite the currentOtaRequest in case of sequence because we use NODE_ADDRESS as the unique identifier for sequence requests
-                currentOtaRequest = intent.getStringExtra(NODE_ADDRESS);
                 extractFileSequenceMeta(mSequenceMetaFileName, mCurrentLwMeshAddress,
                         Integer.parseInt(Objects.requireNonNull(intent.getStringExtra(SEQ_VERSION))));
                 mSequenceSeqFileName = intent.getStringExtra(FIRMWARE_NAME);
                 extractFileSequenceOta(mSequenceSeqFileName);
                 mSequenceEmptyRequest = false;
             } else {
-                // Overwrite the currentOtaRequest in case of sequence because we use NODE_ADDRESS as the unique identifier for sequence requests
-                currentOtaRequest = intent.getStringExtra(NODE_ADDRESS);
                 SeqCache cache = new SeqCache();
                 cache.removeRequest(currentOtaRequest);
                 otaRequestsQueue.removeIf(intent1 -> Objects.equals(intent1.getStringExtra(MESSAGE_ID), currentOtaRequest));
                 mSequenceEmptyRequest = true;
             }
 
-            startSequenceUpdate(id, currentOtaRequest, eraseSequence);
+            startSequenceUpdate(id, String.valueOf(mCurrentLwMeshAddress), eraseSequence);
             return;
         }
 

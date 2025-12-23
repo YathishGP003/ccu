@@ -13,6 +13,8 @@ import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedPcnMessage_t
 import a75f.io.device.serial.CcuToCmOverUsbPcnSettingsMessage_t
 import a75f.io.device.serial.MessageType
 import a75f.io.device.serial.PCNDeviceTypes
+import a75f.io.device.serial.ProfileMap_t
+import a75f.io.device.serial.SmartNodeSettings2_t
 import a75f.io.device.serial.SmartNodeSettings_t
 import a75f.io.device.util.DeviceConfigurationUtil.Companion.getUserConfiguration
 import a75f.io.domain.api.Domain.hayStack
@@ -80,6 +82,7 @@ class LPcn {
                 e.printStackTrace()
             }
             fillSmartNodeSettings(seedMessage.settings, zone, address, equipId)
+            fillSmartNodeSettings2(seedMessage.settings2, zone, address, equipId)
             return seedMessage
         }
 
@@ -97,6 +100,14 @@ class LPcn {
                 MessageType.CM_TO_DEVICE_OVER_AIR_PCN_SETTINGS,
                 settingsMessage.toByteArray()
             )
+        }
+
+        fun fillSmartNodeSettings2(settings2: SmartNodeSettings2_t, zone: Zone?, address: Short, equipId: String?) {
+            try {
+                settings2.profileMap2.set(ProfileMap_t.PROFILE_MAP_VAV_NO_FAN)
+            } catch (e: java.lang.Exception) {
+                CcuLog.d(L.TAG_CCU_SERIAL, "Error in setting profile map 2: ${e.message}")
+            }
         }
 
         /**
@@ -390,7 +401,7 @@ class LPcn {
             CcuLog.i(L.TAG_CCU_SERIAL, "Send MODBUS_SERVER_WRITE_REGISTER_1 for slave $address ")
 
             // Compute buffer size: message type + node address + all registers (2 bytes each)
-            val totalSize = 1 + 2 + settingsMessage2[address]?.slaveConfigs?.sumOf { it.numRegs * 2 }!!
+            val totalSize = 1 + 2 + 2 + settingsMessage2[address]?.slaveConfigs?.sumOf { it.numRegs * 2 }!!
             val buf = ByteBuffer.allocate(totalSize).order(ByteOrder.LITTLE_ENDIAN)
 
             // Write message type
@@ -415,6 +426,9 @@ class LPcn {
                         buffer.putShort((intVal and 0xFFFF).toShort())           // 2 bytes
                     }
                 }
+                // Add CRC byte as well
+                buffer.put((settingsMessage2[address]?.crcHi?.toByte()!!).toByte())
+                buffer.put((settingsMessage2[address]?.crcLo?.toByte()!!).toByte())
             }
 
             // Iterate configs and delegate per device type

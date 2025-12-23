@@ -345,6 +345,7 @@ public class Globals {
                 migrationHandler.initAddressBand();
                 migrationHandler.doStagedVfdMigration();
                 migrationHandler.updateAhuRefDiagEquip();
+                migrationHandler.removeUnwantedCO2SensorPoints();
             } catch (Exception e) {
                 //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
                 //Init would retried during next app restart.

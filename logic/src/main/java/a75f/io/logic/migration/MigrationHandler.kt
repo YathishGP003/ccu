@@ -4849,4 +4849,40 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
         CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Completed Equip KV tag type correction")
     }
+
+    fun removeUnwantedCO2SensorPoints() {
+        if (PreferenceUtil.isMigrateUnwantedCO2SensorPoints()) {
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Removing unwanted CO2 Sensor Points already done")
+            return
+        }
+
+        val snDevices =
+            hayStack.readAllEntities(
+                "device and domainName==\"${DomainName.smartnodeDevice}\" or" +
+                        " domainName==\"${DomainName.helionodeDevice}\""
+            )
+        snDevices.forEach { device ->
+            val co2Sensor =
+                hayStack.readEntity("domainName==\"${DomainName.co2Sensor}\" and deviceRef==\"${device[Tags.ID]}\"")
+            if (co2Sensor.isNotEmpty() &&
+                hayStack.readHisValById(co2Sensor[Tags.ID].toString()) == 0.0 &&
+                co2Sensor.containsKey(Tags.POINTREF) &&
+                (hayStack.readMapById(device[Tags.EQUIPREF].toString())[Tags.DOMAIN_NAME].toString() == DomainName.smartnodeDAB ||
+                        hayStack.readMapById(device[Tags.EQUIPREF].toString())[Tags.DOMAIN_NAME].toString() == DomainName.helionodeDAB)
+            ) {
+                val modifiedCo2Point = RawPoint.Builder()
+                    .setHDict(hayStack.readHDictById(co2Sensor[Tags.ID].toString()))
+                    .setPointRef(null)
+                    .build()
+                hayStack.updatePoint(modifiedCo2Point, modifiedCo2Point.id)
+                hayStack.deleteEntity(co2Sensor[Tags.POINTREF].toString())
+                CcuLog.d(
+                    TAG_CCU_MIGRATION_UTIL,
+                    "Removed unwanted CO2 Sensor Point for device: ${device[Tags.ID]}"
+                )
+            }
+        }
+
+        PreferenceUtil.setMigrateUnwantedCO2SensorPoints()
+    }
 }

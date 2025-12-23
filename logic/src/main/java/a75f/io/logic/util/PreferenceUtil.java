@@ -148,6 +148,7 @@ public class PreferenceUtil {
     private static final String MIGRATE_MONITOR_CO2_MAPPING = "MIGRATE_MONITOR_CO2_MAPPING";
 
     private static final String MIGRATION_CLEAR_INVALID_WRITABLE_DATA = "migrationClearInvalidPriorityData";
+    private static final String CO2_SENSOR_POINT_MIGRATION = "co2SensorPointMigration";
     private static final String MIGRATE_KV_TAG_TYPE_CORRECTION = "migrateKVTagTypeCorrection";
 
     public static void setContext(Context c) {
@@ -1132,5 +1133,13 @@ public class PreferenceUtil {
 
     public static void setMigrateKVTagTypeCorrection() {
         setBooleanPreference(MIGRATE_KV_TAG_TYPE_CORRECTION, true);
+    }
+
+    public static boolean isMigrateUnwantedCO2SensorPoints() {
+        return getBooleanPreference(CO2_SENSOR_POINT_MIGRATION);
+    }
+
+    public static void setMigrateUnwantedCO2SensorPoints() {
+        setBooleanPreference(CO2_SENSOR_POINT_MIGRATION, true);
     }
 }
